@@ -1,6 +1,5 @@
 # Local data (do not commit)
 data/
-*.csv
 
 # Environment files (never commit secrets)
 .env

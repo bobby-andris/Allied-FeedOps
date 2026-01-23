@@ -85,7 +85,7 @@ PYTHONPATH=./src .venv/bin/python -m feedops.cli.main list-skus
 
 ## Understanding the Output
 
-After running an optimization, you get two files:
+After running an optimization, you get a report and platform-specific patches:
 
 ### Report (`reports/sku-{SKU}-*.md`)
 
@@ -95,13 +95,19 @@ A markdown report showing:
 - Claim verification results
 - Approval status (APPROVED/REVISE/REJECTED)
 
-### JSON Patch (`exports/merchant-center-patch-{SKU}.json`)
+### JSON Patches
 
-A JSON file ready for uploading to Google Merchant Center:
+Platform-specific patches are written to:
+- `exports/google-patch-{SKU}.json`
+- `exports/bing-patch-{SKU}.json`
+- `exports/shopify-patch-{SKU}.json`
+
+Example (Google):
 ```json
 {
   "offerId": "shopify_US_123_456",
-  "title": "Allied Brass 24-Inch Towel Bar | Solid Brass | Polished Chrome",
+  "title": "24-Inch Wall Mount Towel Bar Solid Brass | Polished Chrome | Allied Brass",
+  "short_title": "24-Inch Towel Bar",
   "description": "Your optimized description here...",
   "channel": "online"
 }
@@ -186,8 +192,8 @@ All 48 tests should pass.
 ### LLM Providers
 
 FeedOps supports two LLM providers:
-- **OpenAI GPT-4o** (default, recommended)
-- **Google Gemini 2.0 Flash** (fallback)
+- **OpenAI GPT-5.2** (default, recommended)
+- **Google Gemini 3 Flash Preview** (fallback)
 
 Configure both in `.env` for automatic failover.
 

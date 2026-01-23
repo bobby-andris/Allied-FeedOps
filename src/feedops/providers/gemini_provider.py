@@ -7,7 +7,7 @@ from typing import Any
 from google import genai
 from google.genai import types
 
-from feedops.providers.base import LLMProvider, LLMError
+from feedops.providers.base import ImageInput, LLMProvider, LLMError
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class GeminiProvider(LLMProvider):
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-2.0-flash",
+        model: str = "gemini-3-flash-preview",
         max_retries: int = 3,
     ):
         self.client = genai.Client(api_key=api_key)
@@ -52,11 +52,17 @@ class GeminiProvider(LLMProvider):
             logger.warning(f"Gemini health check failed: {e}")
             return False
 
-    async def _call_api(self, prompt: str) -> str:
+    async def _call_api(self, prompt: str, image: ImageInput | None = None) -> str:
         """Make async call to Gemini API."""
+        contents: str | list[Any] = prompt
+        if image:
+            contents = [
+                prompt,
+                types.Part.from_bytes(data=image.data, mime_type=image.mime_type),
+            ]
         response = await self.client.aio.models.generate_content(
             model=self.model_name,
-            contents=prompt,
+            contents=contents,
             config=types.GenerateContentConfig(
                 temperature=0.7,
             ),
@@ -77,7 +83,12 @@ class GeminiProvider(LLMProvider):
 
         return text.strip()
 
-    async def generate(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
+    async def generate(
+        self,
+        prompt: str,
+        schema: dict[str, Any],
+        image: ImageInput | None = None,
+    ) -> dict[str, Any]:
         """Generate structured JSON response.
 
         Args:
@@ -95,7 +106,7 @@ class GeminiProvider(LLMProvider):
 
         for attempt in range(self.max_retries):
             try:
-                response_text = await self._call_api(current_prompt)
+                response_text = await self._call_api(current_prompt, image=image)
                 json_text = self._extract_json(response_text)
                 result = json.loads(json_text)
                 return result

@@ -58,6 +58,22 @@ def verify_claim(claim: Claim, parent_sku: ParentSKU) -> Claim:
     claimed = claim.source_value.strip().lower()
     actual = actual_value.strip().lower()
 
+    if claim.source_field == "material":
+        if claimed == actual:
+            return Claim(
+                claim=claim.claim,
+                source_field=claim.source_field,
+                source_value=claim.source_value,
+                verified=True,
+            )
+        return Claim(
+            claim=claim.claim,
+            source_field=claim.source_field,
+            source_value=claim.source_value,
+            verified=False,
+            rejection_reason=f"Claimed '{claim.source_value}' but actual value is '{actual_value}'",
+        )
+
     if claimed == actual or claimed in actual or actual in claimed:
         return Claim(
             claim=claim.claim,
@@ -111,8 +127,13 @@ def verify_claims(candidate: Candidate, parent_sku: ParentSKU) -> tuple[Candidat
     )
 
     verified_candidate = Candidate(
-        title=candidate.title,
-        description=candidate.description,
+        google_title=candidate.google_title,
+        google_short_title=candidate.google_short_title,
+        google_description=candidate.google_description,
+        bing_title=candidate.bing_title,
+        bing_description=candidate.bing_description,
+        shopify_title=candidate.shopify_title,
+        shopify_description=candidate.shopify_description,
         claims=verified_claims,
         self_score=candidate.self_score,
         verified_score=verified_score,

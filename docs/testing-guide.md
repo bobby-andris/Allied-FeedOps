@@ -72,7 +72,10 @@ PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize \
 
 This generates:
 1. **Report**: `reports/sku-101-YYYYMMDD-HHMMSS.md`
-2. **Patch preview**: `exports/merchant-center-patch-101.json`
+2. **Patch previews**:
+   - `exports/google-patch-101.json`
+   - `exports/bing-patch-101.json`
+   - `exports/shopify-patch-101.json`
 
 ### Testing with Sample Data
 
@@ -139,12 +142,13 @@ Each report (in `reports/sku-{SKU}-*.md`) contains:
 
 ### JSON Patch Preview
 
-The `exports/merchant-center-patch-{SKU}.json` file contains:
+The `exports/google-patch-{SKU}.json` file contains:
 
 ```json
 {
   "offerId": "shopify_US_...",
   "title": "Optimized title here",
+  "short_title": "Optimized short title",
   "description": "Optimized description here",
   "channel": "online",
   "contentLanguage": "en",

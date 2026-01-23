@@ -94,7 +94,7 @@ def log_optimization(
     Args:
         db_path: Path to database file.
         master_sku: The MasterSKU that was optimized.
-        llm_provider: Provider name (e.g., 'openai/gpt-4o').
+        llm_provider: Provider name (e.g., 'openai/gpt-5.2').
         quality_score: Composite quality score (0-100).
         factual_accuracy: Factual accuracy score (0-10).
         approval_status: 'approved', 'revise', or 'rejected'.

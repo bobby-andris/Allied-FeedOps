@@ -7,11 +7,11 @@ from pathlib import Path
 def test_package_installable():
     """Verify feedops package can be installed."""
     result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-e", ".", "--dry-run"],
+        ["uv", "pip", "install", "-e", ".", "--dry-run"],
         capture_output=True,
-        text=True
+        text=True,
     )
-    assert result.returncode == 0, f"pip install failed: {result.stderr}"
+    assert result.returncode == 0, f"uv pip install failed: {result.stderr}"
 
 
 def test_feedops_importable():
@@ -33,9 +33,9 @@ def test_env_example_exists():
 def test_pytest_configured():
     """Verify pytest can discover and run tests."""
     result = subprocess.run(
-        ["pytest", "--collect-only", "-q"],
+        [sys.executable, "-m", "pytest", "--collect-only", "-q"],
         capture_output=True,
-        text=True
+        text=True,
     )
     assert result.returncode == 0
     assert "test_" in result.stdout

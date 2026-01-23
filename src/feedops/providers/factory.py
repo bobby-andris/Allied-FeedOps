@@ -2,7 +2,7 @@
 import os
 import logging
 
-from feedops.providers.base import LLMProvider
+from feedops.providers.base import ImageInput, LLMProvider
 from feedops.providers.openai_provider import OpenAIProvider
 from feedops.providers.gemini_provider import GeminiProvider
 
@@ -69,10 +69,15 @@ class FallbackProvider(LLMProvider):
             return True
         return await self.fallback.health_check()
 
-    async def generate(self, prompt: str, schema: dict) -> dict:
+    async def generate(
+        self,
+        prompt: str,
+        schema: dict,
+        image: ImageInput | None = None,
+    ) -> dict:
         """Try primary, fall back to secondary on failure."""
         try:
-            return await self.primary.generate(prompt, schema)
+            return await self.primary.generate(prompt, schema, image=image)
         except Exception as e:
             logger.warning(f"Primary provider failed: {e}, trying fallback")
-            return await self.fallback.generate(prompt, schema)
+            return await self.fallback.generate(prompt, schema, image=image)

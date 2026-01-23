@@ -16,8 +16,10 @@ Allied-FeedOps/
 │   └── sample-catalog.csv         # 5-10 row anonymized sample
 ├── reports/                       # Gitignored - generated reports
 │   └── sku-<MasterSKU>.md
-└── exports/                       # Gitignored - Merchant Center patches
-    └── merchant-center-patch-<SKU>.json
+└── exports/                       # Gitignored - platform patches
+    ├── google-patch-<SKU>.json
+    ├── bing-patch-<SKU>.json
+    └── shopify-patch-<SKU>.json
 ```
 
 ---
@@ -149,7 +151,10 @@ This will:
 3. Generate optimized candidates using LLM
 4. Verify all claims against source data
 5. Output report to `reports/sku-AB-TOWEL-24.md`
-6. Output preview patch to `exports/merchant-center-patch-AB-TOWEL-24.json`
+6. Output preview patches to:
+   - `exports/google-patch-AB-TOWEL-24.json`
+   - `exports/bing-patch-AB-TOWEL-24.json`
+   - `exports/shopify-patch-AB-TOWEL-24.json`
 
 **No data is pushed** in dry-run mode.
 
