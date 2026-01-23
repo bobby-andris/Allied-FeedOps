@@ -25,7 +25,7 @@ todos:
     status: completed
   - id: final-verify
     content: Final Verification - Full test suite, type checks, linter, end-to-end CLI test (Task 8.1)
-    status: in_progress
+    status: completed
 isProject: false
 ---
 

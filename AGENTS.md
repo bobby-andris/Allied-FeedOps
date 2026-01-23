@@ -93,9 +93,18 @@ ADA-Compliant 18-Inch Grab Bar 500lb Capacity | Solid Brass Satin Nickel | Allie
 Oval Tilt Vanity Mirror Solid Brass Frame | Antique Pewter | Allied Brass Waverly Place
 ```
 
-### 80/20 Rule for Optimization Effort
+### Title and Description Work Together
 
-Per industry research: **Spend 80% of your effort on titles, 20% on descriptions.** Titles are the #2 ranking factor after price.
+**Titles and descriptions are complementary outputs from unified research.**
+
+The research phase (gathering evidence, analyzing the product, identifying keywords, understanding customer intent) is done ONCE. Both title and description are generated from that same research to maximize revenue:
+
+| Output | Purpose | Success Metric |
+|--------|---------|----------------|
+| **Title** | Capture attention, match search queries | Click-through rate (CTR) |
+| **Description** | Build trust, provide details, address objections | Conversion rate (CVR) |
+
+**Do NOT deprioritize descriptions.** A great title that drives clicks to a weak description wastes ad spend. Both must be excellent.
 
 ---
 

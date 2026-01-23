@@ -141,12 +141,19 @@ The video emphasizes using actual **search term data** from Google Ads:
 - Use Google Ads MCP to pull high-performing search terms
 - Bake those exact terms into titles
 
-#### E. 80/20 Rule for Descriptions (lines 431-460)
+#### E. Unified Research → Complementary Outputs
 
-**Descriptions are LOWER priority than titles:**
-- Spend 80% effort on titles
-- Descriptions: Include secondary keywords naturally
-- Don't over-optimize descriptions
+**Note**: The video's "80/20 rule" applies to humans manually optimizing feeds with limited time. For an AI system, this doesn't apply.
+
+**Our approach**: Research is done ONCE, then applied to BOTH title and description:
+
+| Phase | What Happens |
+|-------|--------------|
+| **Research** | Gather evidence, analyze product, identify keywords, analyze images |
+| **Title Output** | Apply research to capture attention, match search queries (drives CTR) |
+| **Description Output** | Apply research to build trust, provide details, address objections (drives CVR) |
+
+Both outputs must be excellent. A great title driving clicks to a weak description wastes ad spend.
 
 #### F. GTIN Importance (lines 213-234)
 
@@ -279,13 +286,13 @@ Create `src/feedops/integrations/` directory with optional MCP integrations:
 
 Replace the content in `src/feedops/pipeline/prompts.py` with a prompt that incorporates:
 
-1. Image analysis instructions
-2. Brand placement logic based on recognition
-3. 30-70 character priority zone
-4. Platform-specific output requirements
-5. Explicit prohibition of source citations in output
+1. Image analysis instructions (verify visual characteristics)
+2. Brand placement logic based on recognition (Allied Brass = benefits first)
+3. 30-70 character priority zone for titles
+4. Platform-specific output requirements (Google, Bing, Shopify)
+5. Explicit prohibition of source citations in output text
 6. Search term integration (if available from Google Ads MCP)
-7. 80/20 guidance on description effort
+7. Unified research approach: both title AND description are critical outputs
 
 ---
 
