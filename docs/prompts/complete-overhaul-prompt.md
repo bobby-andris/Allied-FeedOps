@@ -35,28 +35,29 @@ Review the existing implementation:
 
 **OpenAI** (`src/feedops/providers/openai_provider.py`):
 - Current: `gpt-4o` (outdated)
-- **Update to: `gpt-4.1`** (released April 2025)
-  - 1M token context window
+- **Update to: `gpt-5.2`** (current flagship)
+  - "The best model for coding and agentic tasks across industries"
   - Native vision/multimodal support
-  - 54.6% on SWE-bench, 72.0% on Video-MME
-- Alternative: `gpt-4.1-mini` for cost savings
+  - Pricing: $1.75/1M input, $14/1M output
+- Alternative: `gpt-5-mini` for cost savings ($0.25/1M input, $2/1M output)
 
 **Gemini** (`src/feedops/providers/gemini_provider.py`):
 - Current: `gemini-2.0-flash` (outdated)
-- **Update to: `gemini-3-pro`** (latest flagship, November 2025)
-  - "Best model for multimodal understanding"
-  - 1M token context, 65K output tokens
+- **Update to: `gemini-3-flash-preview`** (latest flagship)
+  - "Most intelligent model built for speed, combining frontier intelligence with superior search and grounding"
+  - Has FREE tier for development/testing
+  - Paid: $0.50/1M input (text/image/video), $3/1M output
   - Supports `media_resolution` parameter for image quality control
-  - New `thinking_level` parameter for reasoning depth
-- Alternative: `gemini-3-flash` for speed/cost balance
+  - Supports `thinking_level` parameter for reasoning depth
+- Alternative: `gemini-3-pro-preview` for maximum quality (no free tier, $2/1M input)
 
 **Implementation notes:**
 ```python
-# OpenAI - gpt-4.1 with vision
-model = "gpt-4.1"
+# OpenAI - gpt-5.2 with vision
+model = "gpt-5.2"
 
-# Gemini - gemini-3-pro with multimodal
-model = "gemini-3-pro"
+# Gemini - gemini-3-flash-preview with multimodal
+model = "gemini-3-flash-preview"
 ```
 
 ---
