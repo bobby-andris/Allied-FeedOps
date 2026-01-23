@@ -1,0 +1,1 @@
+"""FeedOps CLI package."""

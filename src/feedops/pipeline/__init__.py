@@ -4,6 +4,7 @@ from feedops.pipeline.verifier import verify_claims
 from feedops.pipeline.generator import build_prompt, generate_candidate
 from feedops.pipeline.prompts import CANDIDATE_SCHEMA
 from feedops.pipeline.reporter import generate_report, generate_patch_preview
+from feedops.pipeline.optimize import optimize_parent_sku, OptimizationResult
 
 __all__ = [
     "build_evidence_table",
@@ -14,4 +15,6 @@ __all__ = [
     "CANDIDATE_SCHEMA",
     "generate_report",
     "generate_patch_preview",
+    "optimize_parent_sku",
+    "OptimizationResult",
 ]
