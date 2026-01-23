@@ -1,0 +1,5 @@
+
+# Local data (do not commit)
+data/
+*.csv
+.env
