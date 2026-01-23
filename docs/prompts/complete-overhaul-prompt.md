@@ -31,17 +31,33 @@ Review the existing implementation:
 
 ### Issue 1: Update Model Versions
 
-**Use Context7 MCP** to verify the latest models, then update:
+**VERIFIED January 2026** - Use these specific models:
 
 **OpenAI** (`src/feedops/providers/openai_provider.py`):
-- Current: `gpt-4o`
-- Update to latest stable version (e.g., `gpt-4o-2024-11-20` or newer)
-- Enable vision capability for image input
+- Current: `gpt-4o` (outdated)
+- **Update to: `gpt-4.1`** (released April 2025)
+  - 1M token context window
+  - Native vision/multimodal support
+  - 54.6% on SWE-bench, 72.0% on Video-MME
+- Alternative: `gpt-4.1-mini` for cost savings
 
 **Gemini** (`src/feedops/providers/gemini_provider.py`):
-- Current: `gemini-2.0-flash`
-- Verify this is the latest, update if needed
-- Enable multimodal input for images
+- Current: `gemini-2.0-flash` (outdated)
+- **Update to: `gemini-3-pro`** (latest flagship, November 2025)
+  - "Best model for multimodal understanding"
+  - 1M token context, 65K output tokens
+  - Supports `media_resolution` parameter for image quality control
+  - New `thinking_level` parameter for reasoning depth
+- Alternative: `gemini-3-flash` for speed/cost balance
+
+**Implementation notes:**
+```python
+# OpenAI - gpt-4.1 with vision
+model = "gpt-4.1"
+
+# Gemini - gemini-3-pro with multimodal
+model = "gemini-3-pro"
+```
 
 ---
 
