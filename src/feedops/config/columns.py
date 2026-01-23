@@ -1,0 +1,137 @@
+"""CSV column mapping configuration.
+
+The Product Catalog CSV has 56 columns with duplicate names:
+- Length, Height, Width, Weight appear twice (product and shipping dimensions)
+
+We use positional mapping to disambiguate duplicates.
+"""
+
+# Column name -> model field name (for unique columns)
+CSV_COLUMNS: dict[str, str] = {
+    "MasterSKU": "master_sku",
+    "OPTION SKU": "option_sku",
+    "CoreSKU": "core_sku",
+    "UPC": "upc",
+    "GTIN": "gtin",
+    "GMCID": "gmc_id",
+    "Amazon ASIN": "amazon_asin",
+    "Finish": "finish",
+    "Finish Code": "finish_code",
+    "Position": "position",
+    "Category": "category",
+    "Collection": "collection",
+    "Title": "current_title",
+    "List": "list_price",
+    "Wholesale": "wholesale_price",
+    "Map": "map_price",
+    "Narraive Copy": "current_description",  # typo in source
+    "Bullet 1": "bullet_1",
+    "Bullet 2": "bullet_2",
+    "Bullet 3": "bullet_3",
+    "Bullet 4": "bullet_4",
+    "Bullet 5": "bullet_5",
+    "Bullet 6": "bullet_6",
+    "Projection": "projection",
+    "Installation": "installation_url",
+    "Specification": "specification_url",
+    "Main": "main_image",
+    "Main URL": "main_image_url",
+    "sn": "alt_image_1",
+    "Alternative 2": "alt_image_2",
+    "Alternative 3": "alt_image_3",
+    "Alternative 4": "alt_image_4",
+    "Center to center": "center_to_center",
+    "Diameter": "diameter",
+    "Screw size": "screw_size",
+    "Mirror Height": "mirror_height",
+    "Mirror width": "mirror_width",
+    "Thickness": "thickness",
+    "Weight capacity": "weight_capacity",
+    "Material": "material",
+    "Style": "style",
+    "Shape": "shape",
+    "Orientation": "orientation",
+    "Tilting": "tilting",
+    "Mounting type": "mounting_type",
+    "Assembly required": "assembly_required",
+    "Item number": "item_number",
+    "Included": "included_items",
+}
+
+# Position (0-indexed) -> field name for duplicate columns
+POSITIONAL_RENAMES: dict[int, str] = {
+    # Product dimensions (first occurrence)
+    23: "product_length",
+    24: "product_height",
+    25: "product_width",
+    27: "product_weight",
+    # Shipping dimensions (second occurrence)
+    28: "shipping_length",
+    29: "shipping_height",
+    30: "shipping_width",
+    31: "shipping_weight",
+}
+
+# Fields that belong to ParentSKU (shared across variants)
+PARENT_SKU_FIELDS: set[str] = {
+    "master_sku",
+    "core_sku",
+    "category",
+    "collection",
+    "current_title",
+    "current_description",
+    "bullet_1",
+    "bullet_2",
+    "bullet_3",
+    "bullet_4",
+    "bullet_5",
+    "bullet_6",
+    "material",
+    "style",
+    "shape",
+    "orientation",
+    "tilting",
+    "mounting_type",
+    "assembly_required",
+    "center_to_center",
+    "diameter",
+    "screw_size",
+    "mirror_height",
+    "mirror_width",
+    "thickness",
+    "weight_capacity",
+    "installation_url",
+    "specification_url",
+    "included_items",
+    "item_number",
+}
+
+# Fields that belong to Variant (per-finish)
+VARIANT_FIELDS: set[str] = {
+    "option_sku",
+    "finish",
+    "finish_code",
+    "gmc_id",
+    "upc",
+    "gtin",
+    "amazon_asin",
+    "position",
+    "list_price",
+    "wholesale_price",
+    "map_price",
+    "product_length",
+    "product_height",
+    "product_width",
+    "projection",
+    "product_weight",
+    "shipping_length",
+    "shipping_height",
+    "shipping_width",
+    "shipping_weight",
+    "main_image",
+    "main_image_url",
+    "alt_image_1",
+    "alt_image_2",
+    "alt_image_3",
+    "alt_image_4",
+}

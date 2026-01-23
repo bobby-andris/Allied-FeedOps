@@ -1,0 +1,4 @@
+"""FeedOps configuration."""
+from feedops.config.columns import CSV_COLUMNS, POSITIONAL_RENAMES, PARENT_SKU_FIELDS, VARIANT_FIELDS
+
+__all__ = ["CSV_COLUMNS", "POSITIONAL_RENAMES", "PARENT_SKU_FIELDS", "VARIANT_FIELDS"]
