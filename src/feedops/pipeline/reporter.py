@@ -82,7 +82,7 @@ def generate_report(
         for claim in candidate.verified_claims:
             report += f"- {claim.claim} (source: {claim.source_field}={claim.source_value})\n"
 
-    report += f"""
+    report += """
 ---
 
 ## Recommendation

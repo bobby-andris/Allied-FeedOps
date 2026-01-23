@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from feedops.models import ParentSKU, Candidate
+from feedops.models import Candidate
 from feedops.loaders import load_catalog, get_parent_sku
 from feedops.providers import get_provider
 from feedops.pipeline.generator import generate_candidate
