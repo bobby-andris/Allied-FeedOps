@@ -1,6 +1,7 @@
 """Evidence table builder for LLM prompts."""
 from dataclasses import dataclass
 from feedops.models import ParentSKU
+from feedops.integrations.google_ads import fetch_high_performing_keywords
 
 
 @dataclass
@@ -78,6 +79,9 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
             ("product_width", "Width"),
             ("projection", "Projection"),
             ("product_weight", "Weight"),
+            ("gtin", "GTIN"),
+            ("upc", "UPC"),
+            ("main_image_url", "Main Image URL"),
         ]
         for field_name, display_name in variant_fields:
             value = getattr(first_variant, field_name, None)
@@ -87,6 +91,15 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
                     value=str(value),
                     source=field_name,  # Use attribute name for verifier compatibility
                 ))
+
+    # Optional: add high-performing keywords from Google Ads MCP (if available)
+    keywords = fetch_high_performing_keywords(parent_sku.category)
+    if keywords:
+        evidence.append(Evidence(
+            field="high_performing_keywords",
+            value=", ".join(keywords),
+            source="google_ads_mcp",
+        ))
 
     return evidence
 
@@ -110,9 +123,6 @@ def format_evidence_markdown(evidence: list[Evidence]) -> str:
     for e in evidence:
         # Escape pipe characters in values
         value = str(e.value).replace("|", "\\|")
-        # Truncate long values
-        if len(value) > 80:
-            value = value[:77] + "..."
         lines.append(f"| {e.field} | {value} | {e.source} |")
 
     return "\n".join(lines)

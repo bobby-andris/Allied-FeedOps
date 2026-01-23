@@ -26,12 +26,12 @@ def test_load_catalog_returns_dataframe(sample_catalog_path):
 def test_get_parent_sku_extracts_variants(sample_catalog_path):
     """get_parent_sku returns ParentSKU with all variants."""
     df = load_catalog(sample_catalog_path)
-    parent = get_parent_sku(df, "SAMPLE-101")
+    parent = get_parent_sku(df, "101")
     assert parent is not None
-    assert parent.master_sku == "SAMPLE-101"
+    assert parent.master_sku == "101"
     assert len(parent.variants) == 2
-    assert parent.variants[0].finish_code == "PC"
-    assert parent.variants[1].finish_code == "ORB"
+    assert parent.variants[0].finish_code == "ABR"
+    assert parent.variants[1].finish_code == "ABZ"
 
 
 def test_get_parent_sku_returns_none_for_missing(sample_catalog_path):
@@ -44,7 +44,7 @@ def test_get_parent_sku_returns_none_for_missing(sample_catalog_path):
 def test_get_parent_sku_parses_gmcid(sample_catalog_path):
     """Variants have Shopify IDs extracted from GMCID."""
     df = load_catalog(sample_catalog_path)
-    parent = get_parent_sku(df, "SAMPLE-101")
+    parent = get_parent_sku(df, "101")
     variant = parent.variants[0]
-    assert variant.shopify_product_id == "1000000001"
-    assert variant.shopify_variant_id == "2000000001"
+    assert variant.shopify_product_id == "4542872518788"
+    assert variant.shopify_variant_id == "32118222192772"

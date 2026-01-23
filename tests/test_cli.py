@@ -45,14 +45,19 @@ def test_healthcheck_checks_catalog(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_optimize_pipeline_integration():
+async def test_optimize_pipeline_integration(tmp_path):
     """Test full optimization pipeline with mocked LLM."""
     from feedops.pipeline.optimize import optimize_parent_sku
 
     # Mock LLM response
     mock_response = {
-        "title": "Test Optimized Title",
-        "description": "Test optimized description " * 30,
+        "google_title": "Test Optimized Title",
+        "google_short_title": "Test Short Title",
+        "google_description": "Test optimized description " * 30,
+        "bing_title": "Test Bing Title",
+        "bing_description": "Test optimized description " * 30,
+        "shopify_title": "Test Shopify Title",
+        "shopify_description": "<p>Test optimized description</p>",
         "claims": [
             {"claim": "solid brass", "source_field": "material", "source_value": "Brass"}
         ],
@@ -73,10 +78,15 @@ async def test_optimize_pipeline_integration():
         mock_get_provider.return_value = mock_provider
 
         result = await optimize_parent_sku(
-            master_sku="SAMPLE-TB-24",
+            master_sku="101",
             catalog_path=Path("samples/sample-catalog.csv"),
             dry_run=True,
+            output_dir=tmp_path,
         )
 
         assert result is not None
-        assert result.candidate.title == "Test Optimized Title"
+        assert result.candidate.google_title == "Test Optimized Title"
+        assert "google" in result.patch_previews
+        assert "bing" in result.patch_previews
+        assert "shopify" in result.patch_previews
+        assert result.patch_previews["google"]["title"] == "Test Optimized Title"

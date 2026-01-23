@@ -1,6 +1,16 @@
 """Base provider interfaces."""
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any
+
+
+@dataclass(frozen=True)
+class ImageInput:
+    """Image payload for multimodal provider requests."""
+
+    data: bytes
+    mime_type: str
+    source_url: str
 
 
 class LLMProvider(ABC):
@@ -11,12 +21,18 @@ class LLMProvider(ABC):
     """
 
     @abstractmethod
-    async def generate(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
+    async def generate(
+        self,
+        prompt: str,
+        schema: dict[str, Any],
+        image: ImageInput | None = None,
+    ) -> dict[str, Any]:
         """Generate structured JSON response from prompt.
 
         Args:
             prompt: The full prompt including evidence table and constraints.
             schema: JSON schema the response must conform to.
+            image: Optional image payload for multimodal models.
 
         Returns:
             Parsed JSON dict matching the schema.

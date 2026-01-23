@@ -120,8 +120,12 @@ def optimize(
         score = result.candidate.final_score
         console.print(f"[bold]Quality Score: {score.composite}%[/bold]")
         console.print(f"Status: {score.approval_status.upper()}")
-        console.print(f"\nReport saved to: {output_dir}/sku-{parent_sku.replace('/', '-')}-*.md")
-        console.print(f"Patch preview: exports/merchant-center-patch-{parent_sku.replace('/', '-')}.json")
+        safe_sku = parent_sku.replace("/", "-")
+        console.print(f"\nReport saved to: {output_dir}/sku-{safe_sku}-*.md")
+        console.print("Patch previews:")
+        console.print(f"  Google:  exports/google-patch-{safe_sku}.json")
+        console.print(f"  Bing:    exports/bing-patch-{safe_sku}.json")
+        console.print(f"  Shopify: exports/shopify-patch-{safe_sku}.json")
 
         if score.approval_status == "approved":
             console.print("\n[bold green]Content approved for publication![/bold green]")

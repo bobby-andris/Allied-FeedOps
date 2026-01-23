@@ -163,7 +163,7 @@ def test_score_approval_status_revise():
 
 # Task 2.5: Candidate Model Tests
 def test_candidate_model_structure():
-    """Candidate contains title, description, claims, and scores."""
+    """Candidate contains platform-specific fields, claims, and scores."""
     claims = [
         Claim(claim="18-inch length", source_field="product_length", source_value="18.0"),
         Claim(claim="solid brass", source_field="material", source_value="Brass"),
@@ -173,22 +173,71 @@ def test_candidate_model_structure():
         format_adherence=10, brand_voice=8, factual_accuracy=9,
     )
     candidate = Candidate(
-        title="Allied Brass 18-Inch Towel Bar | Solid Brass | Antique Brass",
-        description="Crafted from solid brass that will never corrode...",
+        google_title="ADA-Compliant 18-Inch Grab Bar 500lb Capacity | Solid Brass | Allied Brass",
+        google_short_title="18-Inch Grab Bar",
+        google_description="Crafted from solid brass that will never corrode..." * 10,
+        bing_title="ADA-Compliant 18-Inch Grab Bar (Safety Handle) | Solid Brass | Allied Brass",
+        bing_description="Crafted from solid brass that will never corrode..." * 10,
+        shopify_title="18-Inch Grab Bar | Allied Brass",
+        shopify_description="<p>Crafted from solid brass...</p>",
         claims=claims,
         self_score=self_score,
     )
-    assert len(candidate.title) < 150
+    assert len(candidate.google_title) < 150
+    assert len(candidate.google_short_title) < 70
     assert len(candidate.claims) == 2
     assert candidate.self_score.composite == 85.0
 
 
-def test_candidate_title_max_length():
-    """Title must be <= 150 characters."""
-    with pytest.raises(ValueError, match="Title must be <= 150 characters"):
+def test_candidate_google_title_max_length():
+    """Google title must be <= 150 characters."""
+    with pytest.raises(ValueError, match="Google title must be <= 150 characters"):
         Candidate(
-            title="A" * 151,
-            description="Valid description " * 50,
+            google_title="A" * 151,
+            google_short_title="Short title",
+            google_description="Valid description " * 50,
+            bing_title="Valid bing title",
+            bing_description="Valid description " * 50,
+            shopify_title="Valid shopify title",
+            shopify_description="<p>Valid description</p>",
+            claims=[],
+            self_score=Score(
+                specificity=5, benefit_coverage=5, keyword_inclusion=5,
+                format_adherence=5, brand_voice=5, factual_accuracy=5,
+            ),
+        )
+
+
+def test_candidate_shopify_title_max_length():
+    """Shopify title must be <= 255 characters."""
+    with pytest.raises(ValueError, match="Shopify title must be <= 255 characters"):
+        Candidate(
+            google_title="Valid google title",
+            google_short_title="Short title",
+            google_description="Valid description " * 50,
+            bing_title="Valid bing title",
+            bing_description="Valid description " * 50,
+            shopify_title="B" * 256,
+            shopify_description="<p>Valid description</p>",
+            claims=[],
+            self_score=Score(
+                specificity=5, benefit_coverage=5, keyword_inclusion=5,
+                format_adherence=5, brand_voice=5, factual_accuracy=5,
+            ),
+        )
+
+
+def test_candidate_google_short_title_max_length():
+    """Google short title must be <= 70 characters."""
+    with pytest.raises(ValueError, match="Google short title must be <= 70 characters"):
+        Candidate(
+            google_title="Valid google title",
+            google_short_title="C" * 71,
+            google_description="Valid description " * 50,
+            bing_title="Valid bing title",
+            bing_description="Valid description " * 50,
+            shopify_title="Valid shopify title",
+            shopify_description="<p>Valid description</p>",
             claims=[],
             self_score=Score(
                 specificity=5, benefit_coverage=5, keyword_inclusion=5,

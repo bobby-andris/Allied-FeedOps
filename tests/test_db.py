@@ -32,7 +32,7 @@ def test_log_optimization_records_run(tmp_path):
     run_id = log_optimization(
         db_path=db_path,
         master_sku="1031/18",
-        llm_provider="openai/gpt-4o",
+        llm_provider="openai/gpt-5.2",
         quality_score=85.0,
         factual_accuracy=9,
         approval_status="approved",

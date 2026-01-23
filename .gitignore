@@ -1,6 +1,5 @@
 # Local data (do not commit)
 data/
-*.csv
 
 # Environment files (never commit secrets)
 .env
@@ -24,6 +23,7 @@ service-account*.json
 # Reports and exports (generated, potentially contain PII)
 reports/
 exports/
+.worktrees/
 
 # Node/TypeScript
 node_modules/

@@ -1,22 +1,35 @@
-"""Candidate model for optimized title/description."""
+"""Candidate model for platform-specific optimized content."""
 from pydantic import BaseModel, field_validator
 from feedops.models.claim import Claim
 from feedops.models.score import Score
 
 
 class Candidate(BaseModel):
-    """An optimized title/description candidate.
+    """An optimized candidate with platform-specific outputs."""
 
-    Constraints:
-    - title: max 150 characters
-    - description: min 500 characters recommended
-    """
+    # Google Shopping
+    google_title: str
+    """Google Shopping title (max 150 chars)."""
 
-    title: str
-    """Optimized product title (max 150 chars)."""
+    google_short_title: str
+    """Google short title for overlays (max 70 chars)."""
 
-    description: str
-    """Optimized product description (min 500 chars recommended)."""
+    google_description: str
+    """Google Shopping description (min 500 chars recommended)."""
+
+    # Bing/Microsoft Shopping
+    bing_title: str
+    """Bing Shopping title (max 150 chars)."""
+
+    bing_description: str
+    """Bing Shopping description (min 500 chars recommended)."""
+
+    # Shopify
+    shopify_title: str
+    """Shopify product title (max 255 chars)."""
+
+    shopify_description: str
+    """Shopify HTML description."""
 
     claims: list[Claim]
     """List of factual claims with source attribution."""
@@ -27,12 +40,36 @@ class Candidate(BaseModel):
     verified_score: Score | None = None
     """Score after claim verification (may differ from self_score)."""
 
-    @field_validator('title')
+    @field_validator("google_title")
     @classmethod
-    def validate_title_length(cls, v: str) -> str:
-        """Title must be <= 150 characters."""
+    def validate_google_title_length(cls, v: str) -> str:
+        """Google title must be <= 150 characters."""
         if len(v) > 150:
-            raise ValueError(f"Title must be <= 150 characters, got {len(v)}")
+            raise ValueError("Google title must be <= 150 characters")
+        return v
+
+    @field_validator("bing_title")
+    @classmethod
+    def validate_bing_title_length(cls, v: str) -> str:
+        """Bing title must be <= 150 characters."""
+        if len(v) > 150:
+            raise ValueError("Bing title must be <= 150 characters")
+        return v
+
+    @field_validator("google_short_title")
+    @classmethod
+    def validate_google_short_title_length(cls, v: str) -> str:
+        """Google short title must be <= 70 characters."""
+        if len(v) > 70:
+            raise ValueError("Google short title must be <= 70 characters")
+        return v
+
+    @field_validator("shopify_title")
+    @classmethod
+    def validate_shopify_title_length(cls, v: str) -> str:
+        """Shopify title must be <= 255 characters."""
+        if len(v) > 255:
+            raise ValueError("Shopify title must be <= 255 characters")
         return v
 
     @property

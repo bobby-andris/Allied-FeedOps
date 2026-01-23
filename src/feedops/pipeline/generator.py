@@ -3,6 +3,7 @@ import json
 from feedops.models import ParentSKU, Candidate, Claim, Score
 from feedops.providers.base import LLMProvider
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.images import fetch_image
 from feedops.pipeline.prompts import SYSTEM_PROMPT, OPTIMIZATION_TEMPLATE, CANDIDATE_SCHEMA
 
 
@@ -55,8 +56,13 @@ def parse_candidate_response(response: dict) -> Candidate:
     )
 
     return Candidate(
-        title=response["title"],
-        description=response["description"],
+        google_title=response["google_title"],
+        google_short_title=response["google_short_title"],
+        google_description=response["google_description"],
+        bing_title=response["bing_title"],
+        bing_description=response["bing_description"],
+        shopify_title=response["shopify_title"],
+        shopify_description=response["shopify_description"],
         claims=claims,
         self_score=self_score,
     )
@@ -76,5 +82,10 @@ async def generate_candidate(
         Generated Candidate (unverified).
     """
     prompt = build_prompt(parent_sku)
-    response = await llm.generate(prompt, CANDIDATE_SCHEMA)
+    image = None
+    if parent_sku.variants:
+        main_image_url = parent_sku.variants[0].main_image_url
+        if main_image_url:
+            image = await fetch_image(main_image_url)
+    response = await llm.generate(prompt, CANDIDATE_SCHEMA, image=image)
     return parse_candidate_response(response)

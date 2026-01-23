@@ -32,7 +32,11 @@ Run the feedops healthcheck command. Document which checks passed, which failed,
 
 ### Step 4: Dry-Run with Sample Data
 
-Run feedops optimize with parent-sku SAMPLE-101 in dry-run mode. Check that outputs exist at reports/sku-SAMPLE-101.md and exports/merchant-center-patch-SAMPLE-101.json. Review the report content for quality.
+Run feedops optimize with parent-sku SAMPLE-101 in dry-run mode. Check that outputs exist at reports/sku-SAMPLE-101.md and:
+- exports/google-patch-SAMPLE-101.json
+- exports/bing-patch-SAMPLE-101.json
+- exports/shopify-patch-SAMPLE-101.json
+Review the report content for quality.
 
 ### Step 5: Dry-Run with Real Data (3 SKUs)
 
