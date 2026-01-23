@@ -1,5 +1,43 @@
-
 # Local data (do not commit)
 data/
 *.csv
+
+# Environment files (never commit secrets)
 .env
+.env.*
+!.env.example
+.env.local
+.env.development
+.env.production
+
+# Samples directory may contain anonymized examples (allowed)
+# But raw data exports should stay gitignored
+!samples/
+
+# API credentials and tokens
+*.pem
+*.key
+credentials.json
+token.json
+service-account*.json
+
+# Reports and exports (generated, potentially contain PII)
+reports/
+exports/
+
+# Node/TypeScript
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.vscode/
+*.swp
+*.swo
+.DS_Store
