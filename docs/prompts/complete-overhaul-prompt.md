@@ -1,14 +1,20 @@
 # Task: FeedOps Complete Implementation Overhaul
 
+## Execution Mode
+
+**This task is designed for autonomous execution.** Do NOT ask clarifying questions - instead:
+- Document any assumptions you make
+- Proceed with the most reasonable interpretation
+- Flag uncertainties in commit messages or comments
+
 ## Required Skills - READ FIRST
 
-**Before doing anything else**, read these skills and follow them throughout:
+Read these skills and follow them throughout:
 
-1. Read: `/Users/bobby/.cursor/projects/Users-bobby-Documents-GitHub-Allied-FeedOps/skills/superpowers/skills/brainstorming/SKILL.md`
-2. Read: `/Users/bobby/.cursor/projects/Users-bobby-Documents-GitHub-Allied-FeedOps/skills/superpowers/skills/writing-plans/SKILL.md`  
-3. Read: `/Users/bobby/.cursor/projects/Users-bobby-Documents-GitHub-Allied-FeedOps/skills/superpowers/skills/verification-before-completion/SKILL.md`
+1. Read: `/Users/bobby/.cursor/projects/Users-bobby-Documents-GitHub-Allied-FeedOps/skills/superpowers/skills/writing-plans/SKILL.md` - For structured planning
+2. Read: `/Users/bobby/.cursor/projects/Users-bobby-Documents-GitHub-Allied-FeedOps/skills/superpowers/skills/verification-before-completion/SKILL.md` - CRITICAL: Verify before claiming done
 
-Announce: "I'm using the superpowers skills to ensure proper planning and verification."
+**Note**: Skip the brainstorming skill - this task has pre-defined requirements, no clarification needed.
 
 ## Required Rules - READ SECOND
 
@@ -16,14 +22,31 @@ Read these Cursor rules:
 1. `.cursor/rules/python-environment.mdc` - Critical for running any Python code
 2. `.cursor/rules/context7-docs.mdc` - Use Context7 for library documentation
 
-## Context
+## Context Documents to Review
 
-Review the existing implementation:
+Review these files to understand the existing implementation:
 - Implementation plan: `.cursor/plans/feedops_mvp_implementation_f7d9387f.plan.md`
 - Platform guidelines: `docs/04-platform-guidelines.md`
 - YouTube video insights: `docs/Youtube-video-transcript.md`
 - Current prompts: `src/feedops/pipeline/prompts.py`
 - Agent rules: `AGENTS.md`
+
+## Pre-Answered Context (No Questions Needed)
+
+**Q: What is Allied Brass?**
+A: A bathroom hardware manufacturer (towel bars, grab bars, mirrors, etc.) - NOT a household brand name like Nike.
+
+**Q: What is the primary goal?**
+A: Optimize product titles and descriptions for Google Shopping, Bing, and Shopify to maximize CTR and CVR.
+
+**Q: Should I use the free or paid tier for Gemini?**
+A: Start with free tier for development/testing, code should support both.
+
+**Q: How should I handle missing product images?**
+A: Make image input optional - proceed without image if unavailable, but log a warning.
+
+**Q: What if MCP servers are unavailable?**
+A: All MCP integrations should be optional with graceful degradation - log and continue.
 
 ---
 
