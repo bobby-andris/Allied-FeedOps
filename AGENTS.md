@@ -11,6 +11,15 @@
 3. **Verify every feature mentioned exists in source data**
 4. **Cross-reference all measurements/specifications exactly**
 5. **Never add marketing claims that cannot be verified**
+6. **Use product images to verify visual characteristics** - if available, analyze the product image to confirm materials, colors, and features
+
+### Output Formatting Rules
+
+**CRITICAL**: Customer-facing content (titles and descriptions) must be CLEAN:
+- ❌ **NEVER include source citations** like `(catalog_csv.Material)` in output text
+- ❌ **NEVER include field references** or attribution in titles/descriptions
+- ✅ Source attribution belongs ONLY in the claims/verification array
+- ✅ Titles and descriptions should read naturally to customers
 
 ---
 
@@ -20,23 +29,33 @@
 
 | Zone | Characters | Purpose | Priority |
 |------|-----------|---------|----------|
-| **Critical** | 1-70 | User-visible on mobile/desktop | Highest - determines clicks |
+| **Most Critical** | 1-30 | Mobile visibility cutoff | Highest - keyword anchor |
+| **Critical** | 31-70 | Desktop visibility | Very High - determines clicks |
 | **Extended** | 71-150 | Algorithm matching coverage | High - expands query eligibility |
 
-### Title Structure Formula
+**Note**: Google can dynamically reorder keywords in your title based on the search query. Front-load your highest-converting keywords to ensure they're always visible.
 
+### Title Structure Formula (Brand Recognition Based)
+
+**For Well-Known Brands** (Nike, Apple, Samsung):
 ```
-[Brand] + [Product Type] + [Key Dimension] + [Material/Finish] + [Functional Modifier]
+[Brand] + [Product Type] + [Key Attributes] + [Size/Color]
 ```
 
-**Example**: `Allied Brass 24-Inch Towel Bar | Solid Brass | Polished Chrome | Wall Mount`
+**For Lesser-Known Brands** (like Allied Brass):
+```
+[Key Benefit/Use Case] + [Product Type] + [Key Dimension] + [Material] + [Brand]
+```
+
+**Why?** People don't search for "Allied Brass towel bar" - they search for "bathroom towel bar wall mount 24 inch". Put what they search for FIRST.
 
 ### Title Rules
 
-1. **Front-load critical attributes** - First 70 characters must contain:
-   - Brand name (if brand is commonly searched)
+1. **Front-load highest-converting keywords** - First 30-70 characters must contain:
+   - The terms people actually search for
    - Product type (what it IS)
    - Primary dimension (size that matters for purchase decision)
+   - Key benefit or use case (for functional products)
 
 2. **Use natural query language** - Match how customers actually search:
    - ✅ "24-Inch Towel Bar" (matches user search)
@@ -52,26 +71,31 @@
    - ❌ No internal SKU codes
    - ❌ No filler words ("high-quality", "premium" without specifics)
 
-5. **Brand placement logic**:
-   - IF brand is well-known/searched → Brand FIRST
-   - IF brand is unknown → Lead with product type
+5. **Brand placement logic** (UPDATED per industry research):
+   - IF brand is household name (Nike, Apple) → Brand FIRST
+   - IF brand is niche/unknown (Allied Brass) → Benefits/Keywords FIRST, Brand at END
+   - **Allied Brass is NOT a household name** - consider benefit-first for most products
 
 ### Title Examples by Category
 
-**Towel Bar (Commodity)**:
+**Grab Bar (Safety-Focused, Benefit-First)**:
 ```
-Allied Brass 24-Inch Towel Bar | Solid Brass | Oil Rubbed Bronze | Wall Mount
+ADA-Compliant 18-Inch Grab Bar 500lb Capacity | Solid Brass Satin Nickel | Allied Brass
 ```
 
-**Grab Bar (Safety-Focused)**:
+**Towel Bar (Commodity, Benefit-First)**:
 ```
-ADA Grab Bar 18-Inch | 500lb Capacity | Solid Brass Satin Nickel | Concealed Mount
+24-Inch Wall Mount Towel Bar Solid Brass | Oil Rubbed Bronze | Allied Brass
 ```
 
 **Mirror (Design-Focused)**:
 ```
-Allied Brass Waverly Place Oval Tilt Mirror | Solid Brass Frame | Antique Pewter
+Oval Tilt Vanity Mirror Solid Brass Frame | Antique Pewter | Allied Brass Waverly Place
 ```
+
+### 80/20 Rule for Optimization Effort
+
+Per industry research: **Spend 80% of your effort on titles, 20% on descriptions.** Titles are the #2 ranking factor after price.
 
 ---
 

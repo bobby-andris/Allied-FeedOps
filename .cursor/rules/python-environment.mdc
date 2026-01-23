@@ -1,0 +1,59 @@
+---
+description: Python environment setup using UV package manager
+alwaysApply: true
+---
+
+# Python Environment Setup
+
+This project uses **UV** (not poetry) for package management with a src layout.
+
+## Environment Setup Commands
+
+```bash
+# Create/activate virtual environment (if not exists)
+uv venv
+
+# Install package in development mode
+uv pip install -e ".[dev]"
+
+# The virtual environment is at .venv/
+```
+
+## Running Python Code
+
+**CRITICAL**: Always use this pattern to run Python code:
+
+```bash
+# For CLI commands
+PYTHONPATH=./src .venv/bin/python -m feedops.cli.main <command>
+
+# For running Python scripts
+PYTHONPATH=./src .venv/bin/python -c "your code here"
+
+# For pytest
+PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
+```
+
+## Why PYTHONPATH is Required
+
+The editable install `.pth` file doesn't process correctly in some UV/Python configurations. Setting `PYTHONPATH=./src` ensures the `feedops` package is importable.
+
+## Common Errors and Fixes
+
+| Error | Fix |
+|-------|-----|
+| `ModuleNotFoundError: No module named 'feedops'` | Add `PYTHONPATH=./src` prefix |
+| `command not found: pip` | Use `uv pip` instead of `pip` |
+| `No .venv found` | Run `uv venv` first |
+
+## Environment Variables
+
+The `.env` file is auto-loaded by the CLI. Required keys:
+- `OPENAI_API_KEY`
+- `GEMINI_API_KEY`
+
+## Never Do
+
+- Do NOT use `pip` directly (use `uv pip`)
+- Do NOT use `poetry` (this project uses hatchling + uv)
+- Do NOT run `python` without PYTHONPATH or venv activation
