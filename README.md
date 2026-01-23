@@ -1,129 +1,207 @@
 # Allied FeedOps
 
-AI-powered product feed optimization system for Allied Brass, designed to maximize revenue and ad efficiency through research-backed title and description optimization.
+FeedOps is an AI-powered system that automatically improves product titles and descriptions for e-commerce feeds. It takes product data from a CSV catalog and generates optimized content for Google Shopping, Microsoft Shopping, and Shopify.
+
+## What It Does
+
+When you sell products online, the quality of your product titles and descriptions directly affects:
+- How often your products appear in search results
+- Whether customers click on your listings
+- How much you pay for ads (better content = lower cost per click)
+
+FeedOps reads your product catalog, analyzes each product's data, and generates improved titles and descriptions that follow best practices for each platform. Every claim in the generated content is verified against your actual product data to prevent errors.
+
+## How It Works
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Product CSV    │ ──► │  FeedOps        │ ──► │  Optimized      │
+│  (your data)    │     │  (AI + rules)   │     │  Content        │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                              │
+                              ▼
+                        ┌─────────────────┐
+                        │  Quality Report │
+                        │  (with scores)  │
+                        └─────────────────┘
+```
+
+1. **Input**: Your product catalog CSV with SKUs, titles, descriptions, specifications
+2. **Processing**: AI generates optimized content following platform-specific rules
+3. **Verification**: Every claim is checked against your source data
+4. **Output**: New title/description + quality report + JSON patch for your feed
 
 ## Quick Start
 
+### 1. Install
+
 ```bash
-# Optimize a single product
-/optimize-parent-sku AB-TOWEL-24
+# Clone the repository
+git clone https://github.com/your-org/Allied-FeedOps.git
+cd Allied-FeedOps
 
-# Evaluate content quality
-/evaluate-output
-Title: Your title here
-Description: Your description here
-
-# Generate feed audit report
-/generate-docs feed-audit
+# Create virtual environment and install
+uv venv
+uv pip install -e ".[dev]"
 ```
 
-## Overview
+### 2. Configure
 
-FeedOps optimizes product content for:
-- **Google Shopping / Performance Max** - Better query matching, lower CPC
-- **Microsoft/Bing Shopping** - Copilot visibility, literal keyword matching
-- **Shopify** - On-site conversion and organic SEO
+Create a `.env` file with your API keys:
 
-### Key Research Findings
+```bash
+# Required: At least one LLM provider
+OPENAI_API_KEY=sk-your-key-here
+GEMINI_API_KEY=your-gemini-key-here
 
-| Finding | Impact |
-|---------|--------|
-| First 70 chars determine visibility | Front-load brand + product + dimension |
-| Brand-modified queries convert 3.6x higher | Include brand in titles |
-| Functional modifiers drive 2-10x CVR | Add "ADA", "wall-mount", etc. |
-| 500+ char descriptions: +1.4pp CVR | Expand with structured content |
-| First 150 chars are previewed | Benefit-first opening hooks |
+# Optional: Shopify and Google Merchant Center
+SHOPIFY_STORE_URL=yourstore.myshopify.com
+SHOPIFY_ACCESS_TOKEN=shpat_xxx
+GMC_MERCHANT_ID=123456789
+GMC_API_KEY=your-gmc-key
+```
+
+### 3. Add Your Catalog
+
+Place your product catalog CSV at:
+```
+data/catalog/Product Catalog.csv
+```
+
+Or specify a custom path when running commands.
+
+### 4. Run
+
+```bash
+# Check everything is configured
+PYTHONPATH=./src .venv/bin/python -m feedops.cli.main healthcheck
+
+# Optimize a product
+PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize --parent-sku "101" --dry-run
+
+# List available SKUs
+PYTHONPATH=./src .venv/bin/python -m feedops.cli.main list-skus
+```
+
+## Understanding the Output
+
+After running an optimization, you get two files:
+
+### Report (`reports/sku-{SKU}-*.md`)
+
+A markdown report showing:
+- Original vs optimized content
+- Quality scores (0-100%)
+- Claim verification results
+- Approval status (APPROVED/REVISE/REJECTED)
+
+### JSON Patch (`exports/merchant-center-patch-{SKU}.json`)
+
+A JSON file ready for uploading to Google Merchant Center:
+```json
+{
+  "offerId": "shopify_US_123_456",
+  "title": "Allied Brass 24-Inch Towel Bar | Solid Brass | Polished Chrome",
+  "description": "Your optimized description here...",
+  "channel": "online"
+}
+```
+
+## Quality Scoring
+
+Every piece of generated content is scored on 6 dimensions:
+
+| Dimension | What It Measures |
+|-----------|------------------|
+| Specificity | Concrete specs vs vague claims |
+| Benefit Coverage | Customer benefits in first 150 chars |
+| Keyword Inclusion | Brand + product type + size placement |
+| Format Adherence | Character limits and structure |
+| Brand Voice | Premium tone without hype |
+| Factual Accuracy | All claims verified against source data |
+
+**Thresholds:**
+- 80%+ = Approved for publication
+- 70-79% = Needs minor revision
+- <70% = Requires major revision
 
 ## Project Structure
 
 ```
 Allied-FeedOps/
-├── AGENTS.md                    # Core optimization rules and scoring rubric
-├── .cursor/
-│   ├── agents/
-│   │   ├── data-analyst.md      # Feed analysis and performance tracking
-│   │   ├── feed-copywriter.md   # Content generation (no hallucination)
-│   │   └── verifier.md          # Quality validation and compliance
-│   └── commands/
-│       ├── optimize-parent-sku.md   # End-to-end product optimization
-│       ├── evaluate-output.md       # Quality scoring against rubric
-│       ├── add-mcp.md               # MCP server configuration
-│       └── generate-docs.md         # Reports and exports
-├── docs/
-│   ├── 00-overview.md           # System introduction
-│   ├── 01-workflow.md           # Step-by-step processes
-│   ├── 02-mcp-plan.md           # Integration architecture
-│   ├── 03-quality-rubric.md     # Scoring methodology
-│   ├── 04-platform-guidelines.md # Google/Bing/Shopify specifics
-│   └── [research documents]     # Source research
-└── README.md
+├── src/feedops/           # Main application code
+│   ├── cli/               # Command-line interface
+│   ├── models/            # Data models (Pydantic)
+│   ├── pipeline/          # Optimization pipeline
+│   ├── providers/         # LLM providers (OpenAI, Gemini)
+│   └── loaders/           # CSV catalog loading
+├── tests/                 # Test suite (48 tests)
+├── docs/                  # Documentation
+│   └── testing-guide.md   # How to test with real SKUs
+├── samples/               # Sample data for testing
+├── reports/               # Generated reports (gitignored)
+├── exports/               # JSON patches (gitignored)
+├── data/                  # Product catalog (gitignored)
+├── AGENTS.md              # Optimization rules and scoring rubric
+├── pyproject.toml         # Python dependencies
+└── .env                   # API keys (gitignored, never commit!)
 ```
 
-## Core Principles
+## Key Files
 
-### 1. No Hallucination
-Every claim must trace to actual product data. Never invent specifications.
-
-### 2. Quality Scoring
-All content scored on 6 dimensions:
-- Specificity (specific vs vague claims)
-- Benefit Coverage (first 150 chars)
-- Keyword Inclusion (proper placement)
-- Format Adherence (character limits, structure)
-- Brand Voice (premium, understated)
-- Factual Accuracy (verified against source)
-
-**Threshold**: ≥80% approved, 70-79% revise, <70% reject
-
-### 3. Title Structure Formula
-```
-[Brand] + [Product Type] + [Key Dimension] + [Material] + [Finish] + [Functional Modifier]
-```
-
-Example: `Allied Brass 24-Inch Towel Bar | Solid Brass | Polished Chrome | Wall Mount`
-
-### 4. Description Structure
-```
-1. Opening Hook (benefit + key spec) - first 150 chars
-2. Bullet Highlights (3-5 benefit + feature combos)
-3. Specifications (dimensions, materials, included items)
-4. Trust Elements (warranty, installation, certifications)
-```
+| File | Purpose |
+|------|---------|
+| `AGENTS.md` | The core rules for title/description optimization |
+| `pyproject.toml` | Dependencies and package configuration |
+| `.env.example` | Template for required environment variables |
+| `docs/testing-guide.md` | Detailed guide for testing with real SKUs |
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/optimize-parent-sku` | Full optimization workflow for a product and variants |
-| `/evaluate-output` | Score content against quality rubric |
-| `/add-mcp` | Configure MCP server connections |
-| `/generate-docs` | Create reports, audits, and exports |
+| `healthcheck` | Verify configuration and connectivity |
+| `optimize --parent-sku SKU` | Generate optimized content for a product |
+| `list-skus` | Show available SKUs in your catalog |
 
-## Agents
+All commands support `--help` for more options.
 
-| Agent | Role |
-|-------|------|
-| **Data Analyst** | Audit feeds, analyze performance, identify opportunities |
-| **Feed Copywriter** | Generate optimized titles/descriptions from product data |
-| **Verifier** | Validate content accuracy, score quality, check compliance |
+## Development
+
+### Running Tests
+
+```bash
+PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
+```
+
+All 48 tests should pass.
+
+### Adding New Features
+
+1. Write tests first in `tests/`
+2. Implement in `src/feedops/`
+3. Update documentation if needed
+4. Run full test suite before committing
+
+### LLM Providers
+
+FeedOps supports two LLM providers:
+- **OpenAI GPT-4o** (default, recommended)
+- **Google Gemini 2.0 Flash** (fallback)
+
+Configure both in `.env` for automatic failover.
 
 ## Documentation
 
-- [Overview](docs/00-overview.md) - System introduction and architecture
-- [Workflow Guide](docs/01-workflow.md) - Step-by-step optimization processes
-- [MCP Plan](docs/02-mcp-plan.md) - Integration architecture and roadmap
+- [Testing Guide](docs/testing-guide.md) - How to test with real SKUs
 - [Quality Rubric](docs/03-quality-rubric.md) - Detailed scoring methodology
 - [Platform Guidelines](docs/04-platform-guidelines.md) - Google/Bing/Shopify specifics
 
-## Research Foundation
+## Security Notes
 
-This system is built on synthesis of:
-- Google Merchant Center documentation and feed specifications
-- Behavioral economics and eye-tracking studies (Baymard, Nielsen Norman)
-- A/B testing case studies from e-commerce
-- Platform-specific algorithmic analysis
-
-See `/docs` for full research documents.
+- Never commit `.env` files or API keys
+- The `data/` folder is gitignored (may contain PII)
+- Reports may contain product data - review before sharing
 
 ## License
 
