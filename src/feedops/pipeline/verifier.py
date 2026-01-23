@@ -12,6 +12,10 @@ def get_source_value(parent_sku: ParentSKU, field_name: str) -> str | None:
     Returns:
         String value or None if field doesn't exist.
     """
+    # Handle computed fields
+    if field_name == "available_finishes" and parent_sku.variants:
+        return ", ".join(v.finish for v in parent_sku.variants)
+
     # Try ParentSKU first
     if hasattr(parent_sku, field_name):
         value = getattr(parent_sku, field_name)

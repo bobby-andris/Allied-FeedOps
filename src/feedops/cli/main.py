@@ -4,6 +4,11 @@ import asyncio
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
+# Load .env file before any other imports that depend on env vars
+load_dotenv()
+
 import typer
 from rich.console import Console
 

@@ -58,7 +58,7 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
             evidence.append(Evidence(
                 field=field_name,
                 value=str(value),
-                source=f"catalog_csv.{display_name}",
+                source=field_name,  # Use attribute name for verifier compatibility
             ))
 
     # Add finish options from variants
@@ -67,7 +67,7 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
         evidence.append(Evidence(
             field="available_finishes",
             value=finishes,
-            source="catalog_csv.Finish (variants)",
+            source="available_finishes",  # Use attribute name for verifier compatibility
         ))
 
         # Add first variant dimensions as representative
@@ -85,7 +85,7 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
                 evidence.append(Evidence(
                     field=field_name,
                     value=str(value),
-                    source=f"catalog_csv.{display_name}",
+                    source=field_name,  # Use attribute name for verifier compatibility
                 ))
 
     return evidence
