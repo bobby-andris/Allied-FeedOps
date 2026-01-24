@@ -1,6 +1,7 @@
 """FeedOps CLI entry point."""
 import os
 import asyncio
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -165,6 +166,62 @@ def list_skus(
     except FileNotFoundError as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)
+
+
+@app.command(name="evaluate-exports")
+def evaluate_exports(
+    exports_dir: str = typer.Option("exports", "--exports-dir", help="Directory of export patches"),
+    output: Optional[str] = typer.Option(
+        None, "--output", "-o", help="Write markdown report to this path (default: reports/)"
+    ),
+):
+    """Evaluate existing export patch JSON files with heuristic scoring."""
+    from feedops.quality import evaluate_exports_dir
+    from feedops.quality.evaluator import render_markdown
+
+    results = evaluate_exports_dir(Path(exports_dir))
+    report = render_markdown(results)
+
+    if output is None:
+        output = f"reports/quality-eval-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
+
+    output_path = Path(output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(report)
+    console.print(f"\n[bold]Quality evaluation saved to:[/bold] {output_path}")
+
+
+@app.command(name="compare-runs")
+def compare_runs(
+    baseline_exports_dir: str = typer.Option(..., "--baseline-exports-dir", help="Baseline exports dir"),
+    candidate_exports_dir: str = typer.Option(..., "--candidate-exports-dir", help="Candidate exports dir"),
+    baseline_reports_dir: Optional[str] = typer.Option(
+        None, "--baseline-reports-dir", help="Baseline reports dir (for prompts/evidence)"
+    ),
+    candidate_reports_dir: Optional[str] = typer.Option(
+        None, "--candidate-reports-dir", help="Candidate reports dir (for prompts/evidence)"
+    ),
+    output: Optional[str] = typer.Option(
+        None, "--output", "-o", help="Write HTML report to this path (default: reports/)"
+    ),
+):
+    """Generate an HTML dashboard comparing two runs."""
+    from feedops.quality.dashboard import compare_runs_to_html
+
+    html_report = compare_runs_to_html(
+        baseline_exports_dir=Path(baseline_exports_dir),
+        candidate_exports_dir=Path(candidate_exports_dir),
+        baseline_reports_dir=Path(baseline_reports_dir) if baseline_reports_dir else None,
+        candidate_reports_dir=Path(candidate_reports_dir) if candidate_reports_dir else None,
+    )
+
+    if output is None:
+        output = f"reports/compare-runs-{datetime.now().strftime('%Y%m%d-%H%M%S')}.html"
+
+    output_path = Path(output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html_report)
+    console.print(f"\n[bold]Comparison dashboard saved to:[/bold] {output_path}")
 
 
 if __name__ == "__main__":

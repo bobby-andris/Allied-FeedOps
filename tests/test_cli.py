@@ -28,6 +28,140 @@ def test_cli_version_shows_version():
     assert "0.1.0" in result.stdout
 
 
+def test_compare_runs_help_available():
+    """compare-runs command is registered and documented."""
+    result = subprocess.run(
+        [sys.executable, "-m", "feedops.cli.main", "compare-runs", "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "--baseline-exports-dir" in result.stdout
+    assert "--candidate-exports-dir" in result.stdout
+
+
+def test_compare_runs_writes_html(tmp_path):
+    """compare-runs generates a self-contained HTML report."""
+    baseline_dir = tmp_path / "baseline"
+    candidate_dir = tmp_path / "candidate"
+    baseline_dir.mkdir()
+    candidate_dir.mkdir()
+    (baseline_dir / "google-patch-ABC.json").write_text(
+        """{
+  "offerId": "x",
+  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+  "short_title": "18-Inch Towel Bar",
+  "description": "Upgrade your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
+}"""
+    )
+    (candidate_dir / "google-patch-ABC.json").write_text(
+        """{
+  "offerId": "x",
+  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+  "short_title": "18-Inch Towel Bar",
+  "description": "Refresh your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
+}"""
+    )
+    output_path = tmp_path / "compare.html"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "feedops.cli.main",
+            "compare-runs",
+            "--baseline-exports-dir",
+            str(baseline_dir),
+            "--candidate-exports-dir",
+            str(candidate_dir),
+            "--output",
+            str(output_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert output_path.exists()
+    content = output_path.read_text()
+    assert "Baseline" in content
+    assert "Candidate" in content
+    assert "ABC" in content
+
+
+def test_compare_runs_creates_output_parent(tmp_path):
+    """compare-runs creates output directory when needed."""
+    baseline_dir = tmp_path / "baseline"
+    candidate_dir = tmp_path / "candidate"
+    baseline_dir.mkdir()
+    candidate_dir.mkdir()
+    (baseline_dir / "google-patch-ABC.json").write_text(
+        """{
+  "offerId": "x",
+  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+  "short_title": "18-Inch Towel Bar",
+  "description": "Upgrade your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
+}"""
+    )
+    (candidate_dir / "google-patch-ABC.json").write_text(
+        """{
+  "offerId": "x",
+  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+  "short_title": "18-Inch Towel Bar",
+  "description": "Refresh your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
+}"""
+    )
+    output_path = tmp_path / "nested" / "compare.html"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "feedops.cli.main",
+            "compare-runs",
+            "--baseline-exports-dir",
+            str(baseline_dir),
+            "--candidate-exports-dir",
+            str(candidate_dir),
+            "--output",
+            str(output_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert output_path.exists()
+
+
+def test_evaluate_exports_creates_output_parent(tmp_path):
+    """evaluate-exports creates output directory when needed."""
+    exports_dir = tmp_path / "exports"
+    exports_dir.mkdir()
+    (exports_dir / "google-patch-ABC.json").write_text(
+        """{
+  "offerId": "x",
+  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+  "short_title": "18-Inch Towel Bar",
+  "description": "Upgrade your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
+}"""
+    )
+
+    output_path = tmp_path / "nested" / "report.md"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "feedops.cli.main",
+            "evaluate-exports",
+            "--exports-dir",
+            str(exports_dir),
+            "--output",
+            str(output_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert output_path.exists()
+
+
 def test_healthcheck_checks_catalog(tmp_path):
     """Healthcheck verifies catalog file exists."""
     # Create a temp catalog
