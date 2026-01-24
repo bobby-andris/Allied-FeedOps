@@ -216,6 +216,7 @@ async def test_optimize_pipeline_integration(tmp_path):
             catalog_path=Path("samples/sample-catalog.csv"),
             dry_run=True,
             output_dir=tmp_path,
+            exports_dir=tmp_path,
         )
 
         assert result is not None

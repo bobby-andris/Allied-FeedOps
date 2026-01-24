@@ -89,6 +89,20 @@ def test_build_evidence_table_includes_high_performing_keywords(sample_parent_sk
     assert "high_performing_keywords" in fields
 
 
+def test_build_evidence_table_includes_external_keywords(sample_parent_sku, monkeypatch):
+    """Evidence table includes external keyword bank phrases when available."""
+    from feedops.pipeline import evidence as evidence_module
+
+    monkeypatch.setattr(
+        evidence_module,
+        "get_external_keywords",
+        lambda category: ["bath towel rack", "towel rail"],
+    )
+    evidence = evidence_module.build_evidence_table(sample_parent_sku)
+    fields = {e.field for e in evidence}
+    assert "external_keywords" in fields
+
+
 # Task 5.2: Claim Verifier Tests
 def test_verify_claims_marks_valid_claims(sample_parent_sku):
     """Valid claims are marked as verified."""
@@ -162,6 +176,43 @@ def test_verify_claims_requires_exact_material_match(sample_parent_sku):
     assert errors
 
 
+def test_verify_claims_accepts_numeric_units_and_trailing_decimals(sample_parent_sku):
+    """Numeric claims should verify even if source_value adds units or drops trailing .0."""
+    parent = ParentSKU(
+        master_sku=sample_parent_sku.master_sku,
+        category=sample_parent_sku.category,
+        collection=sample_parent_sku.collection,
+        current_title=sample_parent_sku.current_title,
+        current_description=sample_parent_sku.current_description,
+        material=sample_parent_sku.material,
+        mounting_type=sample_parent_sku.mounting_type,
+        center_to_center=18.0,
+        weight_capacity=10.0,
+        variants=sample_parent_sku.variants,
+    )
+    candidate = Candidate(
+        google_title="Test Google Title",
+        google_short_title="Test Short Title",
+        google_description="Test description " * 30,
+        bing_title="Test Bing Title",
+        bing_description="Test description " * 30,
+        shopify_title="Test Shopify Title",
+        shopify_description="<p>Test description</p>",
+        claims=[
+            Claim(claim="18-inch center-to-center", source_field="center_to_center", source_value="18 in"),
+            Claim(claim="Weight capacity is 10 lb", source_field="weight_capacity", source_value="10 lb"),
+        ],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    verified, errors = verify_claims(candidate, parent)
+    assert verified.claims[0].verified is True
+    assert verified.claims[1].verified is True
+    assert errors == []
+
+
 # Task 5.2b: Candidate Content Validation Tests
 def test_validate_candidate_content_rejects_catalog_csv_references():
     """Candidate content with catalog_csv references is rejected."""
@@ -211,6 +262,11 @@ def test_build_prompt_includes_prompt_overhaul_rules(sample_parent_sku):
     assert "confirm material, finish, color, and visible features" in prompt
     assert "Allied Brass is a niche brand" in prompt
     assert "brand at the end" in prompt
+    assert "Brand must be last" in prompt
+    assert "No internal SKU codes" in prompt
+    assert "natural query language" in prompt
+    assert "external_keywords" in prompt
+    assert "keyword phrases only" in prompt.lower()
     assert "Title zones" in prompt
     assert "1-30" in prompt
     assert "31-70" in prompt
@@ -221,8 +277,9 @@ def test_build_prompt_includes_prompt_overhaul_rules(sample_parent_sku):
     assert "Copilot confidence" in prompt
     assert "Shopify (On-Site)" in prompt
     assert "Output fields (must map to schema)" in prompt
-    assert "google_title" in prompt
     assert "google_short_title" in prompt
+    assert "omit brand" in prompt.lower()
+    assert "google_title" in prompt
     assert "google_description" in prompt
     assert "bing_title" in prompt
     assert "bing_description" in prompt

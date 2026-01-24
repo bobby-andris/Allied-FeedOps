@@ -99,6 +99,7 @@ def optimize(
     parent_sku: str = typer.Option(..., "--parent-sku", "-p", help="MasterSKU to optimize"),
     dry_run: bool = typer.Option(True, "--dry-run/--no-dry-run", help="Preview only, no updates"),
     output_dir: str = typer.Option("reports", "--output-dir", "-o", help="Output directory"),
+    exports_dir: str = typer.Option("exports", "--exports-dir", help="Export directory for patch JSON"),
     catalog: Optional[str] = typer.Option(None, "--catalog", "-c", help="Path to catalog CSV"),
 ):
     """Optimize title and description for a parent SKU."""
@@ -116,6 +117,7 @@ def optimize(
             catalog_path=catalog_path,
             dry_run=dry_run,
             output_dir=output_dir,
+            exports_dir=exports_dir,
         ))
 
         score = result.candidate.final_score
@@ -124,9 +126,9 @@ def optimize(
         safe_sku = parent_sku.replace("/", "-")
         console.print(f"\nReport saved to: {output_dir}/sku-{safe_sku}-*.md")
         console.print("Patch previews:")
-        console.print(f"  Google:  exports/google-patch-{safe_sku}.json")
-        console.print(f"  Bing:    exports/bing-patch-{safe_sku}.json")
-        console.print(f"  Shopify: exports/shopify-patch-{safe_sku}.json")
+        console.print(f"  Google:  {exports_dir}/google-patch-{safe_sku}.json")
+        console.print(f"  Bing:    {exports_dir}/bing-patch-{safe_sku}.json")
+        console.print(f"  Shopify: {exports_dir}/shopify-patch-{safe_sku}.json")
 
         if score.approval_status == "approved":
             console.print("\n[bold green]Content approved for publication![/bold green]")

@@ -1,4 +1,6 @@
 """Claim verification against source data."""
+import re
+
 from feedops.models import ParentSKU, Candidate, Claim, Score
 
 
@@ -73,6 +75,38 @@ def verify_claim(claim: Claim, parent_sku: ParentSKU) -> Claim:
             verified=False,
             rejection_reason=f"Claimed '{claim.source_value}' but actual value is '{actual_value}'",
         )
+
+    numeric_fields = {
+        "center_to_center",
+        "diameter",
+        "mirror_height",
+        "mirror_width",
+        "thickness",
+        "weight_capacity",
+        "product_length",
+        "product_height",
+        "product_width",
+        "projection",
+        "product_weight",
+    }
+
+    if claim.source_field in numeric_fields:
+        num_re = re.compile(r"\d+(?:\.\d+)?")
+        claimed_m = num_re.search(claimed)
+        actual_m = num_re.search(actual)
+        if claimed_m and actual_m:
+            try:
+                claimed_num = float(claimed_m.group(0))
+                actual_num = float(actual_m.group(0))
+                if abs(claimed_num - actual_num) < 1e-6:
+                    return Claim(
+                        claim=claim.claim,
+                        source_field=claim.source_field,
+                        source_value=claim.source_value,
+                        verified=True,
+                    )
+            except ValueError:
+                pass
 
     if claimed == actual or claimed in actual or actual in claimed:
         return Claim(

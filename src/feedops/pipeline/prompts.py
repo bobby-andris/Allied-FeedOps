@@ -93,15 +93,20 @@ CRITICAL RULES:
 - If an image is provided, confirm material, finish, color, and visible features against it.
   Do not describe features that are not visible in the image and not present in data.
 - Allied Brass is a niche brand: lead with benefits/keywords and place the brand at the end.
+- Brand must be last in titles (no words after \"Allied Brass\").
+- No internal SKU codes (MasterSKU, Option SKU, item numbers) in titles/descriptions.
+- Use natural query language for dimensions (e.g., "18-Inch" not "18in").
+- If the evidence table includes external_keywords, treat them as keyword phrases only (not product facts).
 - Title zones: 1-30 characters (mobile) and 31-70 characters (desktop) are most critical. Front-load
   product type, primary dimension, and key benefit.
 - No promotional language, ALL CAPS, URLs, pricing, or shipping text.
+- Brand voice: use premium, specific phrasing (e.g., "crafted", "enduring") when supported by evidence; avoid vague superlatives.
 
 Platform-specific guidance:
 Google Shopping / Performance Max:
 - Semantic matching allows synonyms, but front-loaded keywords still matter.
 - Feed is a seed prompt for PMax asset generation; content must work across Search, Display, and YouTube.
-- Provide a clean google_short_title for overlays.
+- Provide a clean google_short_title for overlays: omit brand/collection unless needed, and prefer product type + key dimension.
 - Keep descriptions plain text (avoid HTML).
 
 Microsoft / Bing Shopping:
@@ -112,7 +117,7 @@ Microsoft / Bing Shopping:
 Shopify (On-Site):
 - Title becomes H1; prioritize clarity and SEO.
 - First ~155 characters may appear as the meta snippet.
-- Description should be HTML with a <p> hook, <ul><li> highlights, and specs/warranty detail."""
+- Description should be HTML with a <p> hook that starts with a benefit verb (e.g., Upgrade/Add/Refresh/Protect/Keep/Organize/Maximize), <ul><li> highlights, and specs/warranty detail."""
 
 OPTIMIZATION_TEMPLATE = """
 {system_prompt}
@@ -134,11 +139,11 @@ Output fields (must map to schema):
 Google Shopping (feed):
 - google_title: max 150 characters, benefit/keyword first, brand at end
 - google_short_title: max 70 characters, clean overlay-friendly wording
-- google_description: plain text, benefit-first opening, no HTML
+- google_description: plain text with a benefit-first opening and scannable sections (Highlights bullets + Specs); no HTML
 
 Bing Shopping (feed):
 - bing_title: max 150 characters, include brand, add extra keywords after 70 chars
-- bing_description: plain text with explicit synonyms included naturally
+- bing_description: plain text with explicit synonyms included naturally and scannable sections (Highlights bullets + Specs)
 
 Shopify (On-Site):
 - shopify_title: H1-friendly, readable, SEO-aware (<=255 chars)

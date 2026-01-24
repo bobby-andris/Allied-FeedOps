@@ -2,6 +2,45 @@
 from dataclasses import dataclass
 from feedops.models import ParentSKU
 from feedops.integrations.google_ads import fetch_high_performing_keywords
+from feedops.integrations.keyword_bank import get_external_keywords
+
+
+def _format_number(value: object) -> str:
+    """Format numeric values for evidence (avoid 18.0-style noise)."""
+    if isinstance(value, bool):
+        return str(value)
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        if value.is_integer():
+            return str(int(value))
+        return str(value)
+    # Some loader paths may return numeric strings.
+    try:
+        f = float(str(value))
+        if f.is_integer():
+            return str(int(f))
+        return str(f)
+    except Exception:
+        return str(value)
+
+
+_INCH_FIELDS = {
+    "center_to_center",
+    "diameter",
+    "mirror_height",
+    "mirror_width",
+    "thickness",
+    "product_length",
+    "product_height",
+    "product_width",
+    "projection",
+}
+
+_POUND_FIELDS = {
+    "weight_capacity",
+    "product_weight",
+}
 
 
 @dataclass
@@ -56,9 +95,14 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
     for field_name, display_name in parent_fields:
         value = getattr(parent_sku, field_name, None)
         if value is not None and value != "":
+            formatted = str(value)
+            if field_name in _INCH_FIELDS:
+                formatted = f"{_format_number(value)} in"
+            if field_name in _POUND_FIELDS:
+                formatted = f"{_format_number(value)} lb"
             evidence.append(Evidence(
                 field=field_name,
-                value=str(value),
+                value=formatted,
                 source=field_name,  # Use attribute name for verifier compatibility
             ))
 
@@ -86,9 +130,14 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
         for field_name, display_name in variant_fields:
             value = getattr(first_variant, field_name, None)
             if value is not None:
+                formatted = str(value)
+                if field_name in _INCH_FIELDS:
+                    formatted = f"{_format_number(value)} in"
+                if field_name in _POUND_FIELDS:
+                    formatted = f"{_format_number(value)} lb"
                 evidence.append(Evidence(
                     field=field_name,
-                    value=str(value),
+                    value=formatted,
                     source=field_name,  # Use attribute name for verifier compatibility
                 ))
 
@@ -99,6 +148,15 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
             field="high_performing_keywords",
             value=", ".join(keywords),
             source="google_ads_mcp",
+        ))
+
+    # Optional: external keyword bank phrases (e.g., Apify SERP/Shopping research)
+    external_keywords = get_external_keywords(parent_sku.category)
+    if external_keywords:
+        evidence.append(Evidence(
+            field="external_keywords",
+            value=", ".join(external_keywords),
+            source="keyword_bank",
         ))
 
     return evidence

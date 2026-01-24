@@ -61,6 +61,7 @@ async def optimize_parent_sku(
     catalog_path: Path | str,
     dry_run: bool = True,
     output_dir: Path | str = "reports",
+    exports_dir: Path | str = "exports",
 ) -> OptimizationResult:
     """Run full optimization pipeline for a parent SKU.
 
@@ -78,6 +79,7 @@ async def optimize_parent_sku(
         catalog_path: Path to Product Catalog CSV.
         dry_run: If True, preview only (no MC updates).
         output_dir: Directory for output files.
+        exports_dir: Directory for export patch JSON files.
 
     Returns:
         OptimizationResult with candidate, report, and patch.
@@ -85,6 +87,8 @@ async def optimize_parent_sku(
     catalog_path = Path(catalog_path)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    exports_dir = Path(exports_dir)
+    exports_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 1: Load catalog and extract ParentSKU
     df = load_catalog(catalog_path)
@@ -139,8 +143,6 @@ async def optimize_parent_sku(
     report_path = output_dir / f"sku-{safe_sku}-{timestamp}.md"
     report_path.write_text(report)
 
-    exports_dir = Path("exports")
-    exports_dir.mkdir(parents=True, exist_ok=True)
     google_patch_path = exports_dir / f"google-patch-{safe_sku}.json"
     bing_patch_path = exports_dir / f"bing-patch-{safe_sku}.json"
     shopify_patch_path = exports_dir / f"shopify-patch-{safe_sku}.json"
