@@ -143,6 +143,8 @@ OPTIMIZATION_TEMPLATE = """
 
 {evidence_table}
 
+{keyword_placement}
+
 ## Title Structure Formula (niche brand)
 [Key Benefit/Use Case] + [Product Type] + [Key Dimension] + [Material/Finish] + [Brand]
 

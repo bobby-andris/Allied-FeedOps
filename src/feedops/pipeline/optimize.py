@@ -10,6 +10,7 @@ from feedops.loaders import load_catalog, get_parent_sku
 from feedops.providers import get_provider
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.generator import build_prompt, generate_candidates
+from feedops.pipeline.keyword_placement import build_keyword_placement_plan
 from feedops.pipeline.selection import (
     parse_candidate_weights,
     parse_num_candidates,
@@ -120,7 +121,14 @@ async def optimize_parent_sku(
     if not candidates:
         detail = "; ".join(generation_errors) if generation_errors else "No candidates generated"
         raise ValueError(detail)
-    selected_candidate, ranking = select_best_candidate(candidates, candidate_weights)
+
+    evidence = build_evidence_table(parent_sku)
+    keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
+    selected_candidate, ranking = select_best_candidate(
+        candidates,
+        candidate_weights,
+        keyword_plan=keyword_plan,
+    )
     best_rank = ranking[0]
     selected_candidate = selected_candidate.model_copy(
         update={
@@ -161,12 +169,22 @@ async def optimize_parent_sku(
             get_technical_specs,
         )
 
-        # Get product image URL
-        product_image_url = None
-        if parent_sku.variants and parent_sku.variants[0].main_image_url:
-            product_image_url = parent_sku.variants[0].main_image_url
+        # Get product image URLs
+        product_image_urls = []
+        if parent_sku.variants:
+            variant = parent_sku.variants[0]
 
-        if product_image_url:
+            def _append_url(url: str | None) -> None:
+                if url and url not in product_image_urls:
+                    product_image_urls.append(url)
+
+            _append_url(variant.main_image_url)
+            _append_url(variant.alt_image_1)
+            _append_url(variant.alt_image_2)
+            _append_url(variant.alt_image_3)
+            _append_url(variant.alt_image_4)
+
+        if product_image_urls:
             # Initialize generator
             lifestyle_output_dir = Path(os.environ.get("LIFESTYLE_IMAGES_OUTPUT_DIR", "data/lifestyle_images"))
             generator = LifestyleImageGenerator(
@@ -176,19 +194,20 @@ async def optimize_parent_sku(
 
             # Build prompts
             inventory = get_product_inventory(parent_sku.category)
-            # Try to determine style from collection metadata or default to modern
-            style = "modern"  # TODO: Could enhance by reading collection-metadata.json
-            scene = get_scene_context(style)
+            # Try to determine style from metadata or default to modern
+            style = parent_sku.style or "modern"
+            scene = get_scene_context(style=style, category=parent_sku.category)
             technical = get_technical_specs(style)
 
             # Generate variations
             num_variations = int(os.environ.get("LIFESTYLE_IMAGES_NUM_VARIATIONS", "3"))
             lifestyle_results = generator.generate_for_product(
-                product_image_url=product_image_url,
+                product_image_urls=product_image_urls,
                 master_sku=parent_sku.master_sku,
                 inventory=inventory,
                 scene=scene,
                 technical=technical,
+                category=parent_sku.category,
                 num_variations=num_variations
             )
 
@@ -202,7 +221,6 @@ async def optimize_parent_sku(
             print("⚠️  No product image URL found - skipping lifestyle image generation")
 
     # Step 5: Generate outputs
-    evidence = build_evidence_table(parent_sku)
     evidence_table = format_evidence_markdown(evidence)
     prompt = build_prompt(parent_sku)
     image_url = None

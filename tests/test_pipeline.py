@@ -409,6 +409,7 @@ def test_build_prompt_includes_prompt_overhaul_rules(sample_parent_sku):
     assert "Title zones" in prompt
     assert "1-30" in prompt
     assert "31-70" in prompt
+    assert "Keyword Placement Plan" in prompt
     assert "Title and description are equally important outputs" in prompt
     assert "Google Shopping / Performance Max" in prompt
     assert "seed prompt" in prompt

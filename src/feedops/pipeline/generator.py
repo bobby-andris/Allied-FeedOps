@@ -4,6 +4,10 @@ from feedops.models import ParentSKU, Candidate, Claim, Score
 from feedops.providers.base import LLMProvider
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.images import fetch_image
+from feedops.pipeline.keyword_placement import (
+    build_keyword_placement_plan,
+    format_keyword_placement_section,
+)
 from feedops.pipeline.prompts import SYSTEM_PROMPT, OPTIMIZATION_TEMPLATE, CANDIDATE_SCHEMA
 
 
@@ -18,10 +22,13 @@ def build_prompt(parent_sku: ParentSKU) -> str:
     """
     evidence = build_evidence_table(parent_sku)
     evidence_markdown = format_evidence_markdown(evidence)
+    keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
+    keyword_placement = format_keyword_placement_section(keyword_plan)
 
     return OPTIMIZATION_TEMPLATE.format(
         system_prompt=SYSTEM_PROMPT,
         evidence_table=evidence_markdown,
+        keyword_placement=keyword_placement,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )

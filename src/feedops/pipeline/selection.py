@@ -6,6 +6,7 @@ import re
 
 from feedops.models import Candidate
 from feedops.pipeline.validators import CUSTOMER_FIELDS, PARENTHETICAL_CITATION_PATTERN, validate_candidate_content
+from feedops.pipeline.keyword_placement import KeywordPlacementPlan, validate_candidate_keyword_placement
 from feedops.quality.scoring import CandidateHeuristicScore, score_candidate
 
 
@@ -78,11 +79,16 @@ def sanitize_candidate_content(candidate: Candidate) -> Candidate:
 def rank_candidates(
     candidates: list[Candidate],
     weights: dict[str, float],
+    keyword_plan: KeywordPlacementPlan | None = None,
 ) -> list[RankedCandidate]:
     ranked: list[RankedCandidate] = []
     for idx, candidate in enumerate(candidates):
         heuristic = score_candidate(candidate, weights=weights)
         validation_errors = validate_candidate_content(candidate)
+        if keyword_plan:
+            validation_errors.extend(
+                validate_candidate_keyword_placement(candidate, keyword_plan)
+            )
         candidate_index = candidate.candidate_index if candidate.candidate_index is not None else idx
         ranked.append(
             RankedCandidate(
@@ -107,12 +113,13 @@ def _rank_sort_key(entry: RankedCandidate) -> tuple[bool, float, float, int]:
 def select_best_candidate(
     candidates: list[Candidate],
     weights: dict[str, float],
+    keyword_plan: KeywordPlacementPlan | None = None,
 ) -> tuple[Candidate, list[RankedCandidate]]:
     """Select best candidate using validation-first + weighted heuristics."""
     if not candidates:
         raise ValueError("No candidates to select from")
 
-    ranked = rank_candidates(candidates, weights)
+    ranked = rank_candidates(candidates, weights, keyword_plan=keyword_plan)
     ranked_sorted = sorted(ranked, key=_rank_sort_key)
     best = ranked_sorted[0]
     selected = best.candidate
