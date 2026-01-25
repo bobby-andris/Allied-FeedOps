@@ -7,6 +7,7 @@ I've successfully integrated lifestyle image generation into the Allied-FeedOps 
 ## What Was Done
 
 ### 1. Created Lifestyle Images Module
+
 **File:** `src/feedops/pipeline/lifestyle_images.py`
 
 - `LifestyleImageGenerator` class using Google Gemini Imagen API
@@ -15,40 +16,50 @@ I've successfully integrated lifestyle image generation into the Allied-FeedOps 
 - Uses proven "product-first" prompt strategy achieving 90%+ accuracy
 
 ### 2. Extended Data Models
+
 **File:** `src/feedops/models/candidate.py`
 
 Added to `Candidate` model:
+
 - `lifestyle_images: Optional[list[LifestyleImageResult]]` - Generated image variations
 - `selected_lifestyle_image: Optional[int]` - Which variation is selected (1-3)
 
 ### 3. Integrated into Pipeline
+
 **File:** `src/feedops/pipeline/optimize.py`
 
 Added Step 4 (between claim verification and output generation):
+
 - Checks `LIFESTYLE_IMAGES_ENABLED` environment variable
 - Downloads product reference image from main_image_url
 - Generates 3 lifestyle image variations
 - Attaches results to the verified candidate
 
 ### 4. Updated JSON Export Format
+
 **File:** `src/feedops/pipeline/reporter.py`
 
 Modified `generate_patch_preview()` to include:
+
 - `lifestyle_images` array with all variation metadata
 - `selected_lifestyle_image` field for tracking selection
 
 ### 5. Extended Dashboard Data Loader
+
 **File:** `src/feedops/quality/data_loader.py`
 
 Extended `ExportContent` dataclass:
+
 - Added `lifestyle_images` field
 - Added `selected_lifestyle_image` field
 - Modified `load_exports_dir()` to read these fields from JSON
 
 ### 6. Added Streamlit Dashboard Display
+
 **File:** `src/feedops/quality/review_dashboard.py`
 
 Created `render_lifestyle_images_panel()`:
+
 - Displays all 3 generated variations in columns
 - Shows which variation is selected
 - Displays selected image with metadata (timestamp, prompt)
@@ -60,7 +71,7 @@ Add to your `.env` file:
 
 ```bash
 # Existing
-GEMINI_API_KEY=AIzaSyDNm94Xe2-uez9QMqQpqcqQJZngsY9K5uE
+
 
 # NEW - Lifestyle Images
 LIFESTYLE_IMAGES_ENABLED=true
@@ -91,6 +102,7 @@ streamlit run src/feedops/quality/review_dashboard.py -- \
 ```
 
 The dashboard will now show:
+
 1. Product image and basic info
 2. **🖼️ Generated Lifestyle Images** section (NEW)
    - 3 image variations displayed side-by-side
@@ -198,6 +210,7 @@ Mood: Clean, minimal, architectural precision
 ## Next Steps
 
 1. **Run Test Script:**
+
    ```bash
    cd /Users/bobby/Documents/GitHub/Allied-FeedOps
    python test_lifestyle_integration.py
@@ -208,9 +221,11 @@ Mood: Clean, minimal, architectural precision
    - Verify they show accurate product representation
 
 3. **Test Dashboard:**
+
    ```bash
    streamlit run src/feedops/quality/review_dashboard.py
    ```
+
    - Navigate to the optimized SKU
    - Confirm lifestyle images section appears
    - Verify 3 variations display correctly
@@ -222,16 +237,19 @@ Mood: Clean, minimal, architectural precision
 ## Troubleshooting
 
 **Images not generating:**
+
 - Check `GEMINI_API_KEY` is set correctly
 - Verify `LIFESTYLE_IMAGES_ENABLED=true`
 - Check product has `main_image_url` in catalog
 
 **Images not appearing on dashboard:**
+
 - Verify JSON exports contain `lifestyle_images` field
 - Check image paths are accessible
 - Ensure data_loader is reading the field correctly
 
 **Poor image quality:**
+
 - Review the prompt template in lifestyle_images.py
 - Adjust scene context for collection style
 - Try different product inventory descriptions
