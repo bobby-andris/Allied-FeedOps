@@ -4,12 +4,19 @@ from pathlib import Path
 import sys
 
 
-def resolve_dashboard_paths(repo_root: Path | str) -> tuple[Path, Path, Path | None]:
+def resolve_dashboard_paths(repo_root: Path | str) -> tuple[Path, Path, Path | None, Path | None, Path | None]:
     repo_root = Path(repo_root)
     data_root = repo_root / "dashboard_data"
     exports_dir = data_root / "lifestyle-eval"
     catalog_path = data_root / "catalog.csv"
-    return exports_dir, exports_dir, catalog_path if catalog_path.exists() else None
+    reports_dir = data_root / "lifestyle-eval" / "reports"
+    return (
+        exports_dir, 
+        exports_dir, 
+        catalog_path if catalog_path.exists() else None,
+        reports_dir if reports_dir.exists() else None,
+        reports_dir if reports_dir.exists() else None,
+    )
 
 
 def _ensure_src_on_path(repo_root: Path) -> None:
@@ -24,11 +31,13 @@ def main() -> None:
 
     from feedops.quality.review_dashboard import run_dashboard
 
-    baseline, candidate, catalog = resolve_dashboard_paths(repo_root)
+    baseline, candidate, catalog, baseline_reports, candidate_reports = resolve_dashboard_paths(repo_root)
     run_dashboard(
         baseline_exports_dir=baseline,
         candidate_exports_dir=candidate,
         catalog_path=catalog,
+        baseline_reports_dir=baseline_reports,
+        candidate_reports_dir=candidate_reports,
     )
 
 
