@@ -14,7 +14,7 @@ def _extract_sku_from_filename(prefix: str, path: Path) -> str | None:
     name = path.name
     if not name.startswith(prefix) or not name.endswith(".json"):
         return None
-    return name[len(prefix):-len(".json")]
+    return name[len(prefix) : -len(".json")]
 
 
 def evaluate_exports_dir(exports_dir: Path) -> list[dict[str, Any]]:
@@ -103,7 +103,9 @@ def render_markdown(results: list[dict[str, Any]]) -> str:
     lines: list[str] = []
     lines.append("# Export Quality Evaluation (Heuristic)")
     lines.append("")
-    lines.append("Scores are heuristic proxies for CTR/CVR/brand voice (0-100 composite).")
+    lines.append(
+        "Scores are heuristic proxies for CTR/CVR/brand voice (0-100 composite)."
+    )
     lines.append("")
     lines.append("| SKU | Composite | Google | Bing | Shopify |")
     lines.append("|-----|-----------:|------:|-----:|--------:|")
