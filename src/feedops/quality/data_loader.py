@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -392,6 +393,89 @@ def load_all_sku_data(
         ))
     
     return results
+
+
+def sync_lifestyle_images(
+    exports_dir: Path | str,
+    *,
+    images_subdir: str = "images",
+    repo_root: Path | str | None = None,
+) -> dict[str, int]:
+    """Copy lifestyle images into exports dir and rewrite paths.
+
+    Args:
+        exports_dir: Export patch directory to scan (google/bing/shopify patches).
+        images_subdir: Folder under exports_dir to store images.
+        repo_root: Repo root used to resolve relative paths.
+
+    Returns:
+        Dict with counts of scanned/updated files and image copy stats.
+    """
+    exports_dir = Path(exports_dir)
+    repo_root = Path(repo_root) if repo_root is not None else Path.cwd()
+    images_dir = exports_dir / images_subdir
+    images_dir.mkdir(parents=True, exist_ok=True)
+
+    stats = {
+        "files_scanned": 0,
+        "files_updated": 0,
+        "images_copied": 0,
+        "images_missing": 0,
+    }
+
+    prefixes = ("google-patch-", "bing-patch-", "shopify-patch-")
+
+    def _resolve_image_path(image_path: str) -> Path | None:
+        if not image_path:
+            return None
+        raw_path = Path(image_path).expanduser()
+        if raw_path.is_absolute():
+            return raw_path if raw_path.exists() else None
+        for candidate in (repo_root / raw_path, exports_dir / raw_path):
+            if candidate.exists():
+                return candidate
+        return None
+
+    for prefix in prefixes:
+        for patch_path in exports_dir.glob(f"{prefix}*.json"):
+            stats["files_scanned"] += 1
+            try:
+                data = json.loads(patch_path.read_text())
+            except (json.JSONDecodeError, OSError):
+                continue
+
+            lifestyle_images = data.get("lifestyle_images", [])
+            if not lifestyle_images:
+                continue
+
+            updated = False
+            for img in lifestyle_images:
+                if not isinstance(img, dict):
+                    continue
+                src_path = _resolve_image_path(img.get("image_path", ""))
+                if not src_path:
+                    stats["images_missing"] += 1
+                    continue
+
+                target_path = images_dir / src_path.name
+                if not target_path.exists():
+                    shutil.copy2(src_path, target_path)
+                    stats["images_copied"] += 1
+
+                try:
+                    new_path = str(target_path.relative_to(repo_root))
+                except ValueError:
+                    new_path = str(target_path)
+
+                if img.get("image_path") != new_path:
+                    img["image_path"] = new_path
+                    updated = True
+
+            if updated:
+                patch_path.write_text(json.dumps(data, indent=2))
+                stats["files_updated"] += 1
+
+    return stats
 
 
 def get_summary_stats(sku_data: list[SKUData]) -> dict[str, Any]:
