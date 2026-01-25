@@ -10,7 +10,6 @@ import re
 from dataclasses import dataclass
 
 from feedops.models import Candidate
-
 _URL_RE = re.compile(r"https?://", re.IGNORECASE)
 _CITATION_RE = re.compile(r"catalog_csv\.|\(\s*catalog_csv\.[^)]+\)", re.IGNORECASE)
 _ALL_CAPS_WORD_RE = re.compile(r"\b[A-Z]{4,}\b")
@@ -192,26 +191,13 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         notes.append("Description under 300 characters")
 
     opening = text[:160].lower()
-    if any(
-        w in opening
-        for w in [
-            "upgrade",
-            "add",
-            "refresh",
-            "protect",
-            "keep",
-            "organize",
-            "maximize",
-        ]
-    ):
+    if any(w in opening for w in ["upgrade", "add", "refresh", "protect", "keep", "organize", "maximize"]):
         score += 2
     else:
         notes.append("Opening may be feature-first (no clear benefit verb detected)")
 
     # Specs presence: at least 3 numeric/measurement tokens.
-    measurements = len(_INCH_RE.findall(text)) + len(
-        re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I)
-    )
+    measurements = len(_INCH_RE.findall(text)) + len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I))
     if measurements >= 3:
         score += 2
     else:
@@ -273,9 +259,7 @@ def score_brand_voice(text: str) -> tuple[int, list[str]]:
     return _clamp_0_10(score), notes
 
 
-def score_bundle(
-    *, title: str, description: str, html_description: bool = False
-) -> HeuristicScore:
+def score_bundle(*, title: str, description: str, html_description: bool = False) -> HeuristicScore:
     """Convenience scorer combining title+description into a composite."""
     ctr, ctr_notes = score_title(title)
     cvr, cvr_notes = score_description(description, html=html_description)
