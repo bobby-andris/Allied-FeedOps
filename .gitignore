@@ -1,5 +1,6 @@
 # Local data (do not commit)
 data/
+creds/
 
 # Environment files (never commit secrets)
 .env

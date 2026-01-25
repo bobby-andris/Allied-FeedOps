@@ -12,7 +12,11 @@ from feedops.pipeline.evidence import build_evidence_table, format_evidence_mark
 from feedops.pipeline.generator import build_prompt, generate_candidate
 from feedops.pipeline.validators import validate_candidate_content
 from feedops.pipeline.verifier import verify_claims
-from feedops.pipeline.reporter import generate_report, generate_patch_preview
+from feedops.pipeline.reporter import (
+    generate_report,
+    generate_patch_preview,
+    generate_all_variant_patches,
+)
 
 
 @dataclass
@@ -143,6 +147,7 @@ async def optimize_parent_sku(
     report_path = output_dir / f"sku-{safe_sku}-{timestamp}.md"
     report_path.write_text(report)
 
+    # Save MasterSKU-level patches (for backward compatibility)
     google_patch_path = exports_dir / f"google-patch-{safe_sku}.json"
     bing_patch_path = exports_dir / f"bing-patch-{safe_sku}.json"
     shopify_patch_path = exports_dir / f"shopify-patch-{safe_sku}.json"
@@ -150,12 +155,45 @@ async def optimize_parent_sku(
     bing_patch_path.write_text(json.dumps(patch_previews["bing"], indent=2))
     shopify_patch_path.write_text(json.dumps(patch_previews["shopify"], indent=2))
 
+    # Save per-variant patches (finish-specific descriptions)
+    variants_dir = exports_dir / "variants" / safe_sku
+    variants_dir.mkdir(parents=True, exist_ok=True)
+    
+    google_variant_patches = generate_all_variant_patches(parent_sku, verified_candidate, "google")
+    bing_variant_patches = generate_all_variant_patches(parent_sku, verified_candidate, "bing")
+    shopify_variant_patches = generate_all_variant_patches(parent_sku, verified_candidate, "shopify")
+    
+    for patch in google_variant_patches:
+        option_sku = patch.get("_meta", {}).get("option_sku", "unknown")
+        safe_option = option_sku.replace("/", "-")
+        path = variants_dir / f"google-{safe_option}.json"
+        path.write_text(json.dumps(patch, indent=2))
+    
+    for patch in bing_variant_patches:
+        option_sku = patch.get("_meta", {}).get("option_sku", "unknown")
+        safe_option = option_sku.replace("/", "-")
+        path = variants_dir / f"bing-{safe_option}.json"
+        path.write_text(json.dumps(patch, indent=2))
+    
+    for patch in shopify_variant_patches:
+        option_sku = patch.get("_meta", {}).get("option_sku", "unknown")
+        safe_option = option_sku.replace("/", "-")
+        path = variants_dir / f"shopify-{safe_option}.json"
+        path.write_text(json.dumps(patch, indent=2))
+
     # Step 7: Log to database
     db_path = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
-    from feedops.db import init_db, log_optimization
+    from feedops.db import init_db, log_optimization, log_keyword_intent_snapshot
+
+    def _split_keywords(value: str | None) -> list[str] | None:
+        if not value:
+            return None
+        parts = [p.strip() for p in value.split(",")]
+        cleaned = [p for p in parts if p]
+        return cleaned or None
 
     init_db(db_path)
-    log_optimization(
+    run_id = log_optimization(
         db_path=db_path,
         master_sku=master_sku,
         llm_provider=provider.name,
@@ -163,6 +201,17 @@ async def optimize_parent_sku(
         factual_accuracy=verified_candidate.final_score.factual_accuracy,
         approval_status=verified_candidate.final_score.approval_status,
         status="success",
+    )
+    # Store the keyword intent that was used to guide copy (if available).
+    evidence_map = {e.field: e.value for e in evidence}
+    log_keyword_intent_snapshot(
+        db_path=db_path,
+        master_sku=master_sku,
+        item_group_id=parent_sku.item_group_id,
+        item_ids=[v.item_id for v in parent_sku.variants] if parent_sku.variants else None,
+        external_keywords=_split_keywords(evidence_map.get("external_keywords")),
+        keyword_intent_master=_split_keywords(evidence_map.get("keyword_intent_master")),
+        optimization_run_id=run_id,
     )
 
     return OptimizationResult(

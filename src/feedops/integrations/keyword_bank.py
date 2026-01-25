@@ -28,8 +28,11 @@ def load_keyword_bank() -> dict[str, Any]:
     return json.loads(path.read_text())
 
 
-def get_external_keywords(category: str | None) -> list[str]:
-    """Return external keyword phrases for a category.
+def get_external_keywords(
+    category: str | None = None,
+    master_sku: str | None = None,
+) -> list[str]:
+    """Return external keyword phrases for a MasterSKU (preferred) or category fallback.
 
     Expected file format (data/keyword-bank.json):
     {
@@ -38,9 +41,21 @@ def get_external_keywords(category: str | None) -> list[str]:
       }
     }
     """
+    bank = load_keyword_bank()
+    if not isinstance(bank, dict):
+        return []
+
+    # Preferred: MasterSKU-specific keywords (allows intent tuning beyond category-level lists).
+    if master_sku:
+        master_obj = bank.get(master_sku)
+        if isinstance(master_obj, dict):
+            keywords = master_obj.get("external_keywords")
+            if isinstance(keywords, list):
+                return [str(k).strip() for k in keywords if str(k).strip()]
+
+    # Fallback: category-level keywords (original behavior).
     if not category:
         return []
-    bank = load_keyword_bank()
     category_obj = bank.get(category)
     if not isinstance(category_obj, dict):
         return []

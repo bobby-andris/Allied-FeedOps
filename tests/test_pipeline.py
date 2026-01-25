@@ -76,17 +76,17 @@ def test_build_evidence_table_includes_image_url(sample_parent_sku):
 
 
 def test_build_evidence_table_includes_high_performing_keywords(sample_parent_sku, monkeypatch):
-    """Evidence table includes high-performing keywords when available."""
+    """Evidence table includes MasterSKU-level keyword intent when available."""
     from feedops.pipeline import evidence as evidence_module
 
     monkeypatch.setattr(
         evidence_module,
-        "fetch_high_performing_keywords",
-        lambda category: ["wall mount towel bar", "bath towel holder"],
+        "fetch_master_sku_keywords",
+        lambda item_group_id, item_ids, category=None: ["wall mount towel bar", "bath towel holder"],
     )
     evidence = evidence_module.build_evidence_table(sample_parent_sku)
     fields = {e.field for e in evidence}
-    assert "high_performing_keywords" in fields
+    assert "keyword_intent_master" in fields
 
 
 def test_build_evidence_table_includes_external_keywords(sample_parent_sku, monkeypatch):
@@ -96,11 +96,48 @@ def test_build_evidence_table_includes_external_keywords(sample_parent_sku, monk
     monkeypatch.setattr(
         evidence_module,
         "get_external_keywords",
-        lambda category: ["bath towel rack", "towel rail"],
+        lambda category=None, master_sku=None: ["bath towel rack", "towel rail"],
     )
     evidence = evidence_module.build_evidence_table(sample_parent_sku)
     fields = {e.field for e in evidence}
     assert "external_keywords" in fields
+
+
+def test_build_evidence_table_excludes_finish_specific_keywords(sample_parent_sku, monkeypatch):
+    """Finish-specific keywords are excluded from MasterSKU-level keyword intent."""
+    from feedops.pipeline import evidence as evidence_module
+
+    # Ensure the ParentSKU represents multiple finish variants (MasterSKU-level group).
+    sample_parent_sku.variants.append(
+        Variant(
+            option_sku="1031/18-SN",
+            finish="Satin Nickel",
+            finish_code="SN",
+            gmc_id="shopify_US_4542872518788_99999999999999",
+            position=2,
+        )
+    )
+
+    # Sample has finishes including "Antique Brass" and "Satin Nickel", and material "Brass".
+    monkeypatch.setattr(
+        evidence_module,
+        "fetch_master_sku_keywords",
+        lambda item_group_id, item_ids, category=None: [
+            "wall mount towel bar",
+            "antique brass towel bar",
+            "satin nickel towel bar",
+            "brass towel bar",  # material-level, should remain
+        ],
+    )
+    # No external keywords for this test; keep focus on finish filtering.
+    monkeypatch.setattr(evidence_module, "get_external_keywords", lambda category=None, master_sku=None: [])
+
+    evidence = evidence_module.build_evidence_table(sample_parent_sku)
+    kw_row = next(e for e in evidence if e.field == "keyword_intent_master")
+    assert "wall mount towel bar" in kw_row.value
+    assert "brass towel bar" in kw_row.value
+    assert "antique brass" not in kw_row.value.lower()
+    assert "satin nickel" not in kw_row.value.lower()
 
 
 # Task 5.2: Claim Verifier Tests
@@ -267,6 +304,7 @@ def test_build_prompt_includes_prompt_overhaul_rules(sample_parent_sku):
     assert "natural query language" in prompt
     assert "external_keywords" in prompt
     assert "keyword phrases only" in prompt.lower()
+    assert "keyword_intent_master" in prompt
     assert "Title zones" in prompt
     assert "1-30" in prompt
     assert "31-70" in prompt

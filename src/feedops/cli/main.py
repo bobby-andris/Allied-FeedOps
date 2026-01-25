@@ -226,5 +226,88 @@ def compare_runs(
     console.print(f"\n[bold]Comparison dashboard saved to:[/bold] {output_path}")
 
 
+@app.command(name="review-dashboard")
+def review_dashboard(
+    baseline_exports_dir: str = typer.Option(
+        "exports", "--baseline", "-b", help="Baseline exports directory"
+    ),
+    candidate_exports_dir: str = typer.Option(
+        "exports/enriched-v2", "--candidate", "-c", help="Candidate exports directory"
+    ),
+    catalog: Optional[str] = typer.Option(
+        None, "--catalog", help="Path to Product Catalog.csv"
+    ),
+    baseline_reports_dir: Optional[str] = typer.Option(
+        None, "--baseline-reports", help="Baseline reports directory"
+    ),
+    candidate_reports_dir: Optional[str] = typer.Option(
+        None, "--candidate-reports", help="Candidate reports directory"
+    ),
+    port: int = typer.Option(8501, "--port", "-p", help="Port for Streamlit server"),
+):
+    """Launch the interactive Streamlit review dashboard.
+    
+    This opens a browser-based dashboard for reviewing and comparing
+    optimized product titles and descriptions, with:
+    
+    - Three-way comparison (Original / Baseline / Candidate)
+    - Product images
+    - Keyword and enrichment reasoning inputs
+    - Quality score visualization
+    - Filtering by category, collection, and score changes
+    """
+    import subprocess
+    import sys
+    
+    # Build the streamlit command
+    dashboard_module = "feedops.quality.review_dashboard"
+    
+    # Prepare environment variables for the dashboard
+    env = os.environ.copy()
+    env["FEEDOPS_BASELINE_DIR"] = baseline_exports_dir
+    env["FEEDOPS_CANDIDATE_DIR"] = candidate_exports_dir
+    if catalog:
+        env["FEEDOPS_CATALOG_PATH"] = catalog
+    if baseline_reports_dir:
+        env["FEEDOPS_BASELINE_REPORTS"] = baseline_reports_dir
+    if candidate_reports_dir:
+        env["FEEDOPS_CANDIDATE_REPORTS"] = candidate_reports_dir
+    
+    # Get the path to the dashboard module
+    from feedops.quality import review_dashboard as dashboard_mod
+    dashboard_path = Path(dashboard_mod.__file__)
+    
+    console.print(f"\n[bold]Launching Review Dashboard[/bold]")
+    console.print(f"Baseline: {baseline_exports_dir}")
+    console.print(f"Candidate: {candidate_exports_dir}")
+    console.print(f"Port: {port}\n")
+    
+    # Launch streamlit
+    cmd = [
+        sys.executable, "-m", "streamlit", "run",
+        str(dashboard_path),
+        "--server.port", str(port),
+        "--server.headless", "false",
+        "--",
+        "--baseline", baseline_exports_dir,
+        "--candidate", candidate_exports_dir,
+    ]
+    
+    if catalog:
+        cmd.extend(["--catalog", catalog])
+    if baseline_reports_dir:
+        cmd.extend(["--baseline-reports", baseline_reports_dir])
+    if candidate_reports_dir:
+        cmd.extend(["--candidate-reports", candidate_reports_dir])
+    
+    try:
+        subprocess.run(cmd, env=env, check=True)
+    except subprocess.CalledProcessError as e:
+        console.print(f"[red]Error launching dashboard: {e}[/red]")
+        raise typer.Exit(1)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Dashboard stopped.[/yellow]")
+
+
 if __name__ == "__main__":
     app()

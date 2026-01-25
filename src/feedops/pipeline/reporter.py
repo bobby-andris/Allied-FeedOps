@@ -1,6 +1,11 @@
 """Report generation for SKU optimization results."""
 from datetime import datetime
-from feedops.models import ParentSKU, Candidate
+from feedops.models import ParentSKU, Candidate, Variant
+from feedops.pipeline.finish_injection import (
+    generate_variant_description,
+    generate_variant_title,
+)
+from feedops.pipeline.enrichment import detect_collection
 
 
 def generate_report(
@@ -198,3 +203,143 @@ def generate_patch_preview(
         }
 
     raise ValueError(f"Unsupported platform: {platform}")
+
+
+def generate_variant_patch_preview(
+    parent_sku: ParentSKU,
+    variant: Variant,
+    candidate: Candidate,
+    platform: str = "google",
+) -> dict:
+    """Generate platform-specific patch preview JSON for a specific variant.
+    
+    This generates variant-specific content with finish-specific descriptions.
+    
+    Args:
+        parent_sku: The parent SKU.
+        variant: The specific variant to generate patch for.
+        candidate: The optimized candidate (base content).
+        platform: One of "google", "bing", or "shopify".
+        
+    Returns:
+        Dict in platform-specific patch format with finish-specific content.
+    """
+    # Get collection context for finish-collection alignment
+    collection_context = detect_collection(parent_sku)
+    collection_name = collection_context.name if collection_context else parent_sku.collection
+    collection_group = collection_context.group if collection_context else None
+    collection_subgroup = collection_context.subgroup if collection_context else None
+    
+    # Get finish name
+    finish_name = variant.finish
+    
+    # Generate variant-specific title
+    if platform == "google":
+        base_title = candidate.google_title
+        base_description = candidate.google_description
+    elif platform == "bing":
+        base_title = candidate.bing_title
+        base_description = candidate.bing_description
+    elif platform == "shopify":
+        base_title = candidate.shopify_title
+        base_description = candidate.shopify_description
+    else:
+        raise ValueError(f"Unsupported platform: {platform}")
+    
+    # Generate variant-specific content
+    variant_title = generate_variant_title(base_title, finish_name)
+    variant_description = generate_variant_description(
+        base_description=base_description,
+        finish_name=finish_name,
+        collection_name=collection_name,
+        collection_group=collection_group,
+        collection_subgroup=collection_subgroup,
+        platform=platform,
+    )
+    
+    # Build meta
+    meta = {
+        "master_sku": parent_sku.master_sku,
+        "option_sku": variant.option_sku,
+        "finish": finish_name,
+        "generated_at": datetime.now().isoformat(),
+        "quality_score": candidate.final_score.composite,
+        "approval_status": candidate.final_score.approval_status,
+    }
+    previous = {
+        "title": parent_sku.current_title,
+        "description": parent_sku.current_description,
+    }
+    
+    if platform == "google":
+        # Also generate variant-specific short title
+        short_title = candidate.google_short_title
+        if finish_name.lower() not in short_title.lower():
+            # Append finish to short title if not present
+            if len(short_title) + len(finish_name) + 3 <= 70:
+                short_title = f"{short_title}, {finish_name}"
+        
+        return {
+            "offerId": variant.gmc_id,
+            "title": variant_title,
+            "short_title": short_title,
+            "description": variant_description,
+            "channel": "online",
+            "contentLanguage": "en",
+            "targetCountry": "US",
+            "_meta": meta,
+            "_previous": previous,
+        }
+    
+    if platform == "bing":
+        return {
+            "sku": variant.gmc_id,
+            "title": variant_title,
+            "description": variant_description,
+            "_meta": meta,
+            "_previous": previous,
+        }
+    
+    if platform == "shopify":
+        return {
+            "productId": parent_sku.item_group_id or variant.gmc_id,
+            "variantId": variant.shopify_variant_id,
+            "title": variant_title,
+            "body_html": variant_description,
+            "_meta": meta,
+            "_previous": previous,
+        }
+    
+    raise ValueError(f"Unsupported platform: {platform}")
+
+
+def generate_all_variant_patches(
+    parent_sku: ParentSKU,
+    candidate: Candidate,
+    platform: str = "google",
+) -> list[dict]:
+    """Generate patch previews for all variants of a parent SKU.
+    
+    Args:
+        parent_sku: The parent SKU with all variants.
+        candidate: The optimized candidate (base content).
+        platform: One of "google", "bing", or "shopify".
+        
+    Returns:
+        List of patch dicts, one per variant.
+    """
+    if not parent_sku.variants:
+        # Fall back to single patch if no variants
+        return [generate_patch_preview(parent_sku, candidate, platform)]
+    
+    patches = []
+    for variant in parent_sku.variants:
+        patch = generate_variant_patch_preview(
+            parent_sku=parent_sku,
+            variant=variant,
+            candidate=candidate,
+            platform=platform,
+        )
+        patches.append(patch)
+    
+    return patches

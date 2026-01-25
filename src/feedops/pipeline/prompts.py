@@ -97,10 +97,29 @@ CRITICAL RULES:
 - No internal SKU codes (MasterSKU, Option SKU, item numbers) in titles/descriptions.
 - Use natural query language for dimensions (e.g., "18-Inch" not "18in").
 - If the evidence table includes external_keywords, treat them as keyword phrases only (not product facts).
+- If the evidence table includes keyword_intent_master, treat them as MasterSKU-level query intent aggregated across all variants.
+  These are keywords to prioritize (especially in the first 70 characters), but they are NOT product facts.
 - Title zones: 1-30 characters (mobile) and 31-70 characters (desktop) are most critical. Front-load
   product type, primary dimension, and key benefit.
 - No promotional language, ALL CAPS, URLs, pricing, or shipping text.
 - Brand voice: use premium, specific phrasing (e.g., "crafted", "enduring") when supported by evidence; avoid vague superlatives.
+
+DESIGN CONTEXT (from enrichment):
+- If collection_context is provided, the product belongs to a named design collection. Mention the
+  collection name in descriptions to help buyers coordinate matching pieces.
+- If design_style is provided, match the tone guidance (e.g., "modern, crisp" vs "elegant, timeless").
+- If feature_title_keywords is provided (e.g., "Reeded Grip", "ADA Compliant", "Tilting"), include
+  the most relevant ONE in the title after the dimension. These are search terms people use.
+- If feature_benefits is provided, use these value propositions in the DESCRIPTION only, not in titles.
+- If competitive_edge is provided, use this as the primary value proposition in descriptions.
+- If statement_finishes is provided, mention availability of distinctive color options in descriptions.
+
+TITLE STRUCTURE RULES (CRITICAL):
+- DO NOT start titles with generic benefit words like "Easy-Clean", "Secure", "Durable", "Quality"
+- DO start titles with [Product Type] or [Feature Modifier + Product Type]
+- Good title openers: "Reeded Grip 16-Inch Grab Bar", "Tilting Oval Mirror", "ADA Compliant Grab Bar"
+- Bad title openers: "Easy-Clean Grab Bar", "Secure Wall Mount Towel Bar", "Durable Brass Mirror"
+- The first 30 characters should match what customers actually search for
 
 Platform-specific guidance:
 Google Shopping / Performance Max:

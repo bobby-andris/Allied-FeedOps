@@ -1,8 +1,79 @@
 """Evidence table builder for LLM prompts."""
-from dataclasses import dataclass
+import re
 from feedops.models import ParentSKU
-from feedops.integrations.google_ads import fetch_high_performing_keywords
 from feedops.integrations.keyword_bank import get_external_keywords
+from feedops.integrations.google_ads import fetch_master_sku_keywords
+# Import Evidence from enrichment to avoid duplication
+from feedops.pipeline.enrichment import Evidence, enrich_product
+
+
+_WORD_RE = re.compile(r"[a-z0-9]+")
+_FINISH_MODIFIERS = {
+    # Common finish adjectives/modifiers (not finish identifiers on their own).
+    "antique",
+    "brushed",
+    "matte",
+    "oil",
+    "polished",
+    "rubbed",
+    "satin",
+    "shaded",
+    "spanish",
+    "unlacquered",
+    "venetian",
+}
+
+
+def _tokenize(text: str) -> list[str]:
+    return _WORD_RE.findall((text or "").lower())
+
+
+def _normalize_phrase(text: str) -> str:
+    return " ".join(_tokenize(text))
+
+
+def _dedupe_phrases(phrases: list[str]) -> list[str]:
+    """Dedupe phrases by normalized form, preserving order."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in phrases:
+        p = str(p).strip()
+        if not p:
+            continue
+        key = _normalize_phrase(p)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out
+
+
+def _build_finish_filters(parent_sku: ParentSKU) -> tuple[set[str], set[str]]:
+    """Return (finish_phrases, finish_tokens) used to exclude finish-specific keywords."""
+    finishes = [v.finish for v in parent_sku.variants if v.finish]
+    finish_phrases = {_normalize_phrase(f) for f in finishes if _normalize_phrase(f)}
+
+    material_tokens = set(_tokenize(parent_sku.material or ""))
+    finish_tokens: set[str] = set()
+    for f in finishes:
+        tokens = [t for t in _tokenize(f) if t and t not in _FINISH_MODIFIERS]
+        finish_tokens.update(tokens)
+
+    # Don't treat material as "finish-specific" (e.g., keep "brass towel bar").
+    finish_tokens.difference_update(material_tokens)
+    return finish_phrases, finish_tokens
+
+
+def _is_finish_specific_keyword(
+    keyword: str,
+    finish_phrases: set[str],
+    finish_tokens: set[str],
+) -> bool:
+    normalized = _normalize_phrase(keyword)
+    if normalized and any(fp in normalized for fp in finish_phrases):
+        return True
+    tokens = set(_tokenize(keyword))
+    return bool(tokens & finish_tokens)
 
 
 def _format_number(value: object) -> str:
@@ -43,12 +114,7 @@ _POUND_FIELDS = {
 }
 
 
-@dataclass
-class Evidence:
-    """A single evidence row for the LLM prompt."""
-    field: str
-    value: str
-    source: str
+# Evidence class is now imported from enrichment.py
 
 
 def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
@@ -142,22 +208,43 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
                 ))
 
     # Optional: add high-performing keywords from Google Ads MCP (if available)
-    keywords = fetch_high_performing_keywords(parent_sku.category)
-    if keywords:
-        evidence.append(Evidence(
-            field="high_performing_keywords",
-            value=", ".join(keywords),
-            source="google_ads_mcp",
-        ))
+    item_ids = [v.item_id for v in parent_sku.variants] if parent_sku.variants else []
+    ads_keywords = fetch_master_sku_keywords(
+        parent_sku.item_group_id,
+        item_ids=item_ids,
+        category=parent_sku.category,
+    )
 
     # Optional: external keyword bank phrases (e.g., Apify SERP/Shopping research)
-    external_keywords = get_external_keywords(parent_sku.category)
+    external_keywords = get_external_keywords(
+        category=parent_sku.category,
+        master_sku=parent_sku.master_sku,
+    )
     if external_keywords:
         evidence.append(Evidence(
             field="external_keywords",
             value=", ".join(external_keywords),
             source="keyword_bank",
         ))
+
+    # MasterSKU-level keyword intent: aggregate across all variants and exclude finish-specific terms.
+    keyword_candidates = _dedupe_phrases(list(ads_keywords or []) + list(external_keywords or []))
+    if keyword_candidates:
+        finish_phrases, finish_tokens = _build_finish_filters(parent_sku)
+        filtered = [
+            k for k in keyword_candidates
+            if not _is_finish_specific_keyword(k, finish_phrases, finish_tokens)
+        ]
+        if filtered:
+            evidence.append(Evidence(
+                field="keyword_intent_master",
+                value=", ".join(filtered),
+                source="keyword_intent_master",
+            ))
+
+    # On-the-fly enrichment: design context, functional features, competitive positioning
+    enrichment = enrich_product(parent_sku)
+    evidence.extend(enrichment.to_evidence_rows())
 
     return evidence
 
