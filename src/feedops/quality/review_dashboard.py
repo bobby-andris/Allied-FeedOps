@@ -443,6 +443,10 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
         baseline_content = sku_data.baseline.get(plat_key)
         candidate_content = sku_data.candidate.get(plat_key)
         
+        # Determine what content is available
+        has_baseline = baseline_content is not None
+        has_candidate = candidate_content is not None
+        
         baseline_title = baseline_content.title if baseline_content else ""
         baseline_desc = baseline_content.description if baseline_content else ""
         
@@ -454,15 +458,19 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
         c_score = sku_data.candidate_scores.get(plat_key, {}).get("composite", 0)
         score_delta = c_score - b_score
         
-        if score_delta > 0.5:
-            delta_display = f"🟢 +{score_delta:.1f}%"
-        elif score_delta < -0.5:
-            delta_display = f"🔴 {score_delta:.1f}%"
+        # Build expander label based on available content
+        if not has_baseline and not has_candidate:
+            # No baseline or candidate - show only Original
+            expander_label = f"{info['icon']} **{info['name']}** — Original content only"
         else:
-            delta_display = f"⚪ {score_delta:+.1f}%"
-        
-        # Main platform is expanded, others are collapsed
-        expander_label = f"{info['icon']} **{info['name']}** — Score: {c_score:.1f}% ({delta_display})"
+            # Show score and delta when we have comparison content
+            if score_delta > 0.5:
+                delta_display = f"🟢 +{score_delta:.1f}%"
+            elif score_delta < -0.5:
+                delta_display = f"🔴 {score_delta:.1f}%"
+            else:
+                delta_display = f"⚪ {score_delta:+.1f}%"
+            expander_label = f"{info['icon']} **{info['name']}** — Score: {c_score:.1f}% ({delta_display})"
         
         with st.expander(expander_label, expanded=is_main):
             # Platform info box
@@ -473,12 +481,11 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                 for goal in info["optimization"]:
                     st.markdown(f"• {goal}")
             
-            # Three columns for comparison
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
+            # Conditional column rendering based on available content
+            if not has_baseline and not has_candidate:
+                # Only Original column (full width)
                 st.markdown("##### Original (Live)")
-                st.markdown(f"<div class='version-label'>Current on website</div>", unsafe_allow_html=True)
+                st.markdown("<div class='version-label'>Current on website</div>", unsafe_allow_html=True)
                 
                 st.markdown("**Title:**")
                 st.markdown(f"<div class='content-box'>{html.escape(original_title) if original_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
@@ -489,31 +496,86 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                 else:
                     st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(original_desc) if original_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
             
-            with col2:
-                st.markdown("##### Baseline (Previous)")
-                st.markdown(f"<div class='version-label'>Score: {b_score:.1f}%</div>", unsafe_allow_html=True)
+            elif has_baseline and has_candidate:
+                # Three columns for full comparison
+                col1, col2, col3 = st.columns(3)
                 
-                st.markdown("**Title:**")
-                st.markdown(f"<div class='content-box'>{html.escape(baseline_title) if baseline_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                with col1:
+                    st.markdown("##### Original (Live)")
+                    st.markdown("<div class='version-label'>Current on website</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Title:**")
+                    st.markdown(f"<div class='content-box'>{html.escape(original_title) if original_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Description:**")
+                    if plat_key == "shopify" and original_desc:
+                        st.markdown(f"<div class='content-box'>{original_desc}</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(original_desc) if original_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
                 
-                st.markdown("**Description:**")
-                if plat_key == "shopify" and baseline_desc:
-                    st.markdown(f"<div class='content-box'>{baseline_desc}</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(baseline_desc) if baseline_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                with col2:
+                    st.markdown("##### Baseline (Previous)")
+                    st.markdown(f"<div class='version-label'>Score: {b_score:.1f}%</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Title:**")
+                    st.markdown(f"<div class='content-box'>{html.escape(baseline_title) if baseline_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Description:**")
+                    if plat_key == "shopify" and baseline_desc:
+                        st.markdown(f"<div class='content-box'>{baseline_desc}</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(baseline_desc) if baseline_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                
+                with col3:
+                    st.markdown("##### Candidate (Current)")
+                    st.markdown(f"<div class='version-label'>Score: {c_score:.1f}%</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Title:**")
+                    st.markdown(f"<div class='content-box'>{html.escape(candidate_title) if candidate_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Description:**")
+                    if plat_key == "shopify" and candidate_desc:
+                        st.markdown(f"<div class='content-box'>{candidate_desc}</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(candidate_desc) if candidate_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
             
-            with col3:
-                st.markdown("##### Candidate (Current)")
-                st.markdown(f"<div class='version-label'>Score: {c_score:.1f}%</div>", unsafe_allow_html=True)
+            else:
+                # Two columns: Original + whichever exists (baseline or candidate)
+                col1, col2 = st.columns(2)
                 
-                st.markdown("**Title:**")
-                st.markdown(f"<div class='content-box'>{html.escape(candidate_title) if candidate_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                with col1:
+                    st.markdown("##### Original (Live)")
+                    st.markdown("<div class='version-label'>Current on website</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Title:**")
+                    st.markdown(f"<div class='content-box'>{html.escape(original_title) if original_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Description:**")
+                    if plat_key == "shopify" and original_desc:
+                        st.markdown(f"<div class='content-box'>{original_desc}</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(original_desc) if original_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
                 
-                st.markdown("**Description:**")
-                if plat_key == "shopify" and candidate_desc:
-                    st.markdown(f"<div class='content-box'>{candidate_desc}</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(candidate_desc) if candidate_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                with col2:
+                    if has_baseline:
+                        st.markdown("##### Baseline (Previous)")
+                        st.markdown(f"<div class='version-label'>Score: {b_score:.1f}%</div>", unsafe_allow_html=True)
+                        display_title = baseline_title
+                        display_desc = baseline_desc
+                    else:
+                        st.markdown("##### Candidate (Current)")
+                        st.markdown(f"<div class='version-label'>Score: {c_score:.1f}%</div>", unsafe_allow_html=True)
+                        display_title = candidate_title
+                        display_desc = candidate_desc
+                    
+                    st.markdown("**Title:**")
+                    st.markdown(f"<div class='content-box'>{html.escape(display_title) if display_title else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("**Description:**")
+                    if plat_key == "shopify" and display_desc:
+                        st.markdown(f"<div class='content-box'>{display_desc}</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(display_desc) if display_desc else '<em>Not available</em>'}</div>", unsafe_allow_html=True)
 
 
 def render_reasoning_panel(sku_data: SKUData) -> None:

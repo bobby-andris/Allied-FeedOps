@@ -1,17 +1,102 @@
 [
-  {"master_sku": "WP-2TB/16-GAL", "category": "Glass Shelves"},
-  {"master_sku": "WP-2/16-GAL", "category": "Glass Shelves"},
-  {"master_sku": "WP-1TB/16", "category": "Glass Shelves"},
-  {"master_sku": "CL-55", "category": "Paper Towel Holders"},
-  {"master_sku": "PR-25EC", "category": "Paper Towel Holders"},
-  {"master_sku": "1052", "category": "Paper Towel Holders"},
-  {"master_sku": "FR-23", "category": "Retractable Hooks and Garment Rods"},
-  {"master_sku": "TD-23", "category": "Retractable Hooks and Garment Rods"},
-  {"master_sku": "MD-22", "category": "Retractable Hooks and Garment Rods"},
-  {"master_sku": "ES-24E", "category": "Toilet Paper Holders"},
-  {"master_sku": "CL-24C", "category": "Toilet Paper Holders"},
-  {"master_sku": "WP-GLT-24", "category": "Toilet Paper Holders"},
-  {"master_sku": "ES-HTB-1", "category": "Towel Bars"},
-  {"master_sku": "MB-41-18", "category": "Towel Bars"},
-  {"master_sku": "MA-21/24", "category": "Towel Bars"}
+  {
+    "master_sku": "CL-55",
+    "category": "Paper Towel Holders",
+    "conversions": 45.11
+  },
+  {
+    "master_sku": "PR-25EC",
+    "category": "Paper Towel Holders",
+    "conversions": 5.15
+  },
+  {
+    "master_sku": "1052",
+    "category": "Paper Towel Holders",
+    "conversions": 4.7
+  },
+  {
+    "master_sku": "1051",
+    "category": "Paper Towel Holders",
+    "conversions": 3.97
+  },
+  {
+    "master_sku": "RW-24U/12",
+    "category": "Paper Towel Holders",
+    "conversions": 3.5
+  },
+  {
+    "master_sku": "WP-2TB/16-GAL",
+    "category": "Glass Shelves",
+    "conversions": 14.07
+  },
+  {
+    "master_sku": "WP-2/16-GAL",
+    "category": "Glass Shelves",
+    "conversions": 12.76
+  },
+  {
+    "master_sku": "WP-1TB/16",
+    "category": "Glass Shelves",
+    "conversions": 10.94
+  },
+  {
+    "master_sku": "FT-6",
+    "category": "Glass Shelves",
+    "conversions": 6.5
+  },
+  {
+    "master_sku": "RC-5/16TB",
+    "category": "Glass Shelves",
+    "conversions": 3.49
+  },
+  {
+    "master_sku": "FR-23",
+    "category": "Retractable Hooks and Garment Rods",
+    "conversions": 22.48
+  },
+  {
+    "master_sku": "TD-23",
+    "category": "Retractable Hooks and Garment Rods",
+    "conversions": 18.99
+  },
+  {
+    "master_sku": "MD-22",
+    "category": "Retractable Hooks and Garment Rods",
+    "conversions": 9.37
+  },
+  {
+    "master_sku": "CL-22",
+    "category": "Retractable Hooks and Garment Rods",
+    "conversions": 4.79
+  },
+  {
+    "master_sku": "TD-22",
+    "category": "Retractable Hooks and Garment Rods",
+    "conversions": 1.67
+  },
+  {
+    "master_sku": "ES-HTB-1",
+    "category": "Towel Bars",
+    "conversions": 9.33
+  },
+  {
+    "master_sku": "MA-21/24",
+    "category": "Towel Bars",
+    "conversions": 4.0
+  },
+  {
+    "master_sku": "CL-41-30",
+    "category": "Towel Bars",
+    "conversions": 3.03
+  },
+  {
+    "master_sku": "MB-41-18",
+    "category": "Towel Bars",
+    "conversions": 2.83
+  },
+  {
+    "master_sku": "CL-28-30",
+    "category": "Towel Bars",
+    "conversions": 2.49
+  }
 ]
