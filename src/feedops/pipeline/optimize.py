@@ -130,7 +130,13 @@ async def optimize_parent_sku(
                 "bing": best_rank.heuristic.bing.composite,
                 "shopify": best_rank.heuristic.shopify.composite,
             },
+            "selection_score_adjusted": best_rank.heuristic.adjusted_weighted_composite,
             "selection_weights": candidate_weights,
+            "soft_gate_penalty": best_rank.heuristic.soft_gate_penalty,
+            "soft_gate_warnings": list(best_rank.heuristic.soft_gate_warnings)
+            if best_rank.heuristic.soft_gate_warnings
+            else None,
+            "soft_gate_miss_counts": best_rank.heuristic.soft_gate_miss_counts,
             "candidate_index": selected_candidate.candidate_index,
             "num_candidates": selected_candidate.num_candidates,
         }

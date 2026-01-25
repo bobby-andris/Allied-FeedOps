@@ -8,6 +8,8 @@ from feedops.pipeline.validators import validate_candidate_content
 from feedops.pipeline.generator import build_prompt, generate_candidate, generate_candidates
 from feedops.pipeline.prompts import CANDIDATE_SCHEMA
 from feedops.pipeline.reporter import generate_report, generate_patch_preview
+from feedops.pipeline.selection import RankedCandidate
+from feedops.quality.scoring import CandidateHeuristicScore, HeuristicScore
 from feedops.providers.base import LLMProvider, ImageInput
 from feedops.pipeline.optimize import estimate_llm_cost
 
@@ -609,6 +611,43 @@ def test_generate_report_includes_llm_input_details(sample_parent_sku):
     assert "Prompt tokens: 1200" in report
     assert "Completion tokens: 300" in report
     assert "Estimated Cost" in report
+
+
+def test_generate_report_includes_soft_gate_warnings(sample_parent_sku):
+    candidate = Candidate(
+        google_title="Allied Brass 18-Inch Towel Bar | Solid Brass | Antique Brass",
+        google_short_title="18-Inch Towel Bar",
+        google_description="Crafted from solid brass " * 20,
+        bing_title="Allied Brass 18-Inch Towel Bar (Towel Holder) | Solid Brass",
+        bing_description="Crafted from solid brass " * 20,
+        shopify_title="18-Inch Towel Bar | Allied Brass",
+        shopify_description="<p>Crafted from solid brass</p>",
+        claims=[
+            Claim(claim="solid brass", source_field="material", source_value="Brass", verified=True),
+        ],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    base_platform = HeuristicScore(ctr_proxy=5, cvr_proxy=5, brand_voice=5)
+    heuristic = CandidateHeuristicScore(
+        google=base_platform,
+        bing=base_platform,
+        shopify=base_platform,
+        weighted_composite=75.0,
+        soft_gate_penalty=2.0,
+        adjusted_weighted_composite=73.0,
+        soft_gate_warnings=("Google: Title missing primary dimension in first 70 chars",),
+        soft_gate_miss_counts={"google": 1, "bing": 0, "shopify": 0},
+        notes=(),
+    )
+    ranking = [RankedCandidate(candidate=candidate, heuristic=heuristic, validation_errors=[], index=0)]
+
+    report = generate_report(sample_parent_sku, candidate, [], selection_ranking=ranking)
+
+    assert "Soft-Gate Warnings" in report
+    assert "Google:" in report
 
 
 def test_estimate_llm_cost_ignores_non_dict_usage():

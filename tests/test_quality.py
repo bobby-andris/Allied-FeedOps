@@ -2,7 +2,14 @@ from pathlib import Path
 
 from feedops.models import Candidate, Score
 from feedops.quality.evaluator import evaluate_exports_dir, render_markdown
-from feedops.quality.scoring import score_brand_voice, score_bundle, score_candidate, score_description, score_title
+from feedops.quality.scoring import (
+    assess_soft_gates,
+    score_brand_voice,
+    score_bundle,
+    score_candidate,
+    score_description,
+    score_title,
+)
 
 
 def test_score_title_rewards_product_type_and_dimension():
@@ -54,6 +61,38 @@ def test_score_description_plain_text_accepts_specs_and_details_label():
     assert score >= 9
 
 
+def test_assess_soft_gates_warns_on_missing_dimension():
+    assessment = assess_soft_gates(
+        title="Wall Mount Towel Bar Solid Brass | Allied Brass",
+        description=(
+            "Upgrade your bathroom with solid brass storage built to last.\n\n"
+            "- Solid brass construction\n"
+            "- Concealed mounting hardware\n"
+            "- Wall mount installation\n\n"
+            "Specs:\n"
+            "- Center-to-center: 18 in\n"
+            "- Overall length: 20 in\n"
+            "- Projection: 2.5 in\n"
+        ),
+        html_description=False,
+    )
+
+    assert assessment.miss_count == 1
+    assert any("dimension" in warning.lower() for warning in assessment.warnings)
+
+
+def test_assess_soft_gates_warns_on_missing_bullets_and_specs():
+    assessment = assess_soft_gates(
+        title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        description="Upgrade your bathroom with a solid brass towel bar.",
+        html_description=False,
+    )
+
+    assert assessment.miss_count == 2
+    assert any("bullets" in warning.lower() for warning in assessment.warnings)
+    assert any("spec" in warning.lower() for warning in assessment.warnings)
+
+
 def test_score_brand_voice_penalizes_promotional_language():
     score, notes = score_brand_voice("BEST amazing product!!!")
     assert score <= 4
@@ -68,9 +107,19 @@ def test_score_candidate_weighted_composite_matches_platform_scores():
         "Highlights:\n- 18-inch center-to-center\n- Solid brass construction\n- Concealed mounting hardware\n"
         "Specs:\n- Overall length: 20 in\n- Projection: 2.5 in\n- Warranty: Limited Lifetime Warranty\n",
         bing_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-        bing_description="Organize towels with a wall mounted towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty.",
+        bing_description=(
+            "Organize towels with a wall mounted towel bar crafted from solid brass.\n"
+            "- 18-inch center-to-center\n"
+            "- Solid brass construction\n"
+            "- Concealed mounting hardware\n"
+            "Specs:\n- Overall length: 20 in\n- Projection: 2.5 in\n- Warranty: Limited Lifetime Warranty\n"
+        ),
         shopify_title="18-Inch Solid Brass Towel Bar | Allied Brass",
-        shopify_description="<p>Upgrade your bathroom with a solid brass towel bar.</p><ul><li>Solid brass</li><li>Wall mount</li><li>Hardware included</li></ul><p>Center-to-center: 18 in</p>",
+        shopify_description=(
+            "<p>Upgrade your bathroom with a solid brass towel bar built for daily use.</p>"
+            "<ul><li>Solid brass construction</li><li>Wall mount</li><li>Hardware included</li></ul>"
+            "<p>Center-to-center: 18 in. Overall length: 20 in. Projection: 2.5 in.</p>"
+        ),
         claims=[],
         self_score=Score(
             specificity=5,
@@ -111,6 +160,8 @@ def test_score_candidate_weighted_composite_matches_platform_scores():
     assert result.bing.composite == bing_score.composite
     assert result.shopify.composite == shopify_score.composite
     assert result.weighted_composite == expected
+    assert result.soft_gate_penalty == 0.0
+    assert result.adjusted_weighted_composite == expected
 
 
 def test_evaluate_exports_dir_scores_temp_exports(tmp_path: Path):

@@ -98,7 +98,7 @@ def rank_candidates(
 def _rank_sort_key(entry: RankedCandidate) -> tuple[bool, float, float, int]:
     return (
         bool(entry.validation_errors),
-        -entry.heuristic.weighted_composite,
+        -entry.heuristic.adjusted_weighted_composite,
         -entry.heuristic.google.composite,
         entry.index,
     )

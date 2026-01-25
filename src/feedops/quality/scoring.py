@@ -71,6 +71,16 @@ _PREMIUM_CUES = [
     "limited lifetime warranty",
 ]
 
+_BENEFIT_VERBS = [
+    "upgrade",
+    "add",
+    "refresh",
+    "protect",
+    "keep",
+    "organize",
+    "maximize",
+]
+
 _BANNED_MARKETING = [
     "best",
     "amazing",
@@ -93,6 +103,13 @@ class HeuristicScore:
     @property
     def composite(self) -> float:
         return round((self.ctr_proxy + self.cvr_proxy + self.brand_voice) / 30 * 100, 2)
+
+
+@dataclass(frozen=True)
+class SoftGateAssessment:
+    miss_count: int
+    warnings: tuple[str, ...]
+    passes: dict[str, bool]
 
 
 def _clamp_0_10(value: int) -> int:
@@ -193,7 +210,7 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         notes.append("Description under 300 characters")
 
     opening = text[:160].lower()
-    if any(w in opening for w in ["upgrade", "add", "refresh", "protect", "keep", "organize", "maximize"]):
+    if any(w in opening for w in _BENEFIT_VERBS):
         score += 2
     else:
         notes.append("Opening may be feature-first (no clear benefit verb detected)")
@@ -239,6 +256,66 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
     return _clamp_0_10(score), notes
 
 
+def assess_soft_gates(
+    *,
+    title: str,
+    description: str,
+    html_description: bool = False,
+) -> SoftGateAssessment:
+    """Evaluate structure signals without hard-failing."""
+    warnings: list[str] = []
+
+    has_dimension = bool(_INCH_RE.search(title[:70]))
+    if not has_dimension:
+        warnings.append("Title missing primary dimension in first 70 chars")
+
+    text = description
+    if html_description:
+        text = re.sub(r"<[^>]+>", " ", description)
+        text = re.sub(r"\s+", " ", text).strip()
+
+    opening = text[:160].lower()
+    has_benefit_verb = any(w in opening for w in _BENEFIT_VERBS)
+    if not has_benefit_verb:
+        warnings.append("Opening lacks benefit verb")
+
+    if html_description:
+        lower_html = description.lower()
+        has_bullets = "<ul" in lower_html and "<li" in lower_html
+    else:
+        bullet_lines = [
+            line.strip()
+            for line in description.splitlines()
+            if line.strip().startswith(("-", "•"))
+        ]
+        has_bullets = len(bullet_lines) >= 3
+    if not has_bullets:
+        warnings.append("Missing structured bullets")
+
+    lower_text = text.lower()
+    measurements = len(_INCH_RE.findall(text)) + len(
+        re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I)
+    )
+    has_specs_header = bool(re.search(r"\b(specs?|specifications)\b", lower_text))
+    has_specs = measurements >= 3 or (has_specs_header and measurements >= 1)
+    if not has_specs:
+        warnings.append("Few measurable specs detected")
+
+    passes = {
+        "dimension_in_first_70": has_dimension,
+        "benefit_verb_opening": has_benefit_verb,
+        "has_bullets": has_bullets,
+        "has_specs": has_specs,
+    }
+
+    miss_count = sum(1 for passed in passes.values() if not passed)
+    return SoftGateAssessment(
+        miss_count=miss_count,
+        warnings=tuple(warnings),
+        passes=passes,
+    )
+
+
 def score_brand_voice(text: str) -> tuple[int, list[str]]:
     """Brand voice proxy score (0-10)."""
     notes: list[str] = []
@@ -276,6 +353,10 @@ class CandidateHeuristicScore:
     bing: HeuristicScore
     shopify: HeuristicScore
     weighted_composite: float
+    soft_gate_penalty: float
+    adjusted_weighted_composite: float
+    soft_gate_warnings: tuple[str, ...] = ()
+    soft_gate_miss_counts: dict[str, int] | None = None
     notes: tuple[str, ...] = ()
 
 
@@ -295,8 +376,25 @@ def score_candidate(candidate: Candidate, *, weights: dict[str, float]) -> Candi
         html_description=True,
     )
 
+    soft_gates = {
+        "google": assess_soft_gates(
+            title=candidate.google_title,
+            description=candidate.google_description,
+        ),
+        "bing": assess_soft_gates(
+            title=candidate.bing_title,
+            description=candidate.bing_description,
+        ),
+        "shopify": assess_soft_gates(
+            title=candidate.shopify_title,
+            description=candidate.shopify_description,
+            html_description=True,
+        ),
+    }
+
     weighted_total = 0.0
     weight_sum = 0.0
+    weighted_misses = 0.0
     per_platform = {
         "google": google_score,
         "bing": bing_score,
@@ -307,11 +405,13 @@ def score_candidate(candidate: Candidate, *, weights: dict[str, float]) -> Candi
         if weight <= 0:
             continue
         weighted_total += weight * score.composite
+        weighted_misses += weight * soft_gates[platform].miss_count
         weight_sum += weight
 
     if weight_sum <= 0:
         weighted_total = sum(score.composite for score in per_platform.values())
         weight_sum = len(per_platform)
+        weighted_misses = sum(gate.miss_count for gate in soft_gates.values()) / len(per_platform)
 
     notes = tuple(
         dict.fromkeys(
@@ -319,10 +419,24 @@ def score_candidate(candidate: Candidate, *, weights: dict[str, float]) -> Candi
         )
     )
 
+    soft_gate_warnings: list[str] = []
+    platform_labels = {"google": "Google", "bing": "Bing", "shopify": "Shopify"}
+    for platform, assessment in soft_gates.items():
+        for warning in assessment.warnings:
+            soft_gate_warnings.append(f"{platform_labels[platform]}: {warning}")
+
+    weighted_composite = round(weighted_total / weight_sum, 2)
+    soft_gate_penalty = round(weighted_misses * 2.0, 2)
+    adjusted_weighted = max(0.0, round(weighted_composite - soft_gate_penalty, 2))
+
     return CandidateHeuristicScore(
         google=google_score,
         bing=bing_score,
         shopify=shopify_score,
-        weighted_composite=round(weighted_total / weight_sum, 2),
+        weighted_composite=weighted_composite,
+        soft_gate_penalty=soft_gate_penalty,
+        adjusted_weighted_composite=adjusted_weighted,
+        soft_gate_warnings=tuple(dict.fromkeys(soft_gate_warnings)),
+        soft_gate_miss_counts={k: v.miss_count for k, v in soft_gates.items()},
         notes=notes,
     )

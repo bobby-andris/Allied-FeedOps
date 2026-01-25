@@ -1,5 +1,7 @@
 from feedops.models import Candidate, Score
 from feedops.pipeline.selection import select_best_candidate
+from feedops.quality.scoring import CandidateHeuristicScore, HeuristicScore
+import feedops.pipeline.selection as selection_module
 
 
 def _make_candidate(
@@ -81,3 +83,49 @@ def test_select_best_candidate_sanitizes_when_all_leak():
 
     assert "catalog_csv." not in selected.google_title
     assert "catalog_csv." not in selected.google_description
+
+
+def test_select_best_candidate_uses_adjusted_score(monkeypatch):
+    weights = {"google": 1.0, "bing": 0.0, "shopify": 0.0}
+    candidate_a = _make_candidate(
+        google_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        google_description="Upgrade your bathroom with solid brass storage.",
+    )
+    candidate_b = _make_candidate(
+        google_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        google_description="Upgrade your bathroom with solid brass storage.",
+    )
+
+    base_platform = HeuristicScore(ctr_proxy=5, cvr_proxy=5, brand_voice=5)
+
+    score_a = CandidateHeuristicScore(
+        google=base_platform,
+        bing=base_platform,
+        shopify=base_platform,
+        weighted_composite=90.0,
+        soft_gate_penalty=4.0,
+        adjusted_weighted_composite=86.0,
+        soft_gate_warnings=("Google: Missing structured bullets",),
+        soft_gate_miss_counts={"google": 2, "bing": 0, "shopify": 0},
+        notes=(),
+    )
+    score_b = CandidateHeuristicScore(
+        google=base_platform,
+        bing=base_platform,
+        shopify=base_platform,
+        weighted_composite=89.5,
+        soft_gate_penalty=0.0,
+        adjusted_weighted_composite=89.5,
+        soft_gate_warnings=(),
+        soft_gate_miss_counts={"google": 0, "bing": 0, "shopify": 0},
+        notes=(),
+    )
+
+    def fake_score_candidate(candidate, *, weights):
+        return score_a if candidate is candidate_a else score_b
+
+    monkeypatch.setattr(selection_module, "score_candidate", fake_score_candidate)
+
+    selected, _ranking = select_best_candidate([candidate_a, candidate_b], weights)
+
+    assert selected is candidate_b

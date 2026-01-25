@@ -46,8 +46,20 @@ class Candidate(BaseModel):
     heuristic_score_breakdown: dict[str, float] | None = None
     """Per-platform heuristic composite scores."""
 
+    selection_score_adjusted: float | None = None
+    """Adjusted selection score after soft-gate penalties."""
+
     selection_weights: dict[str, float] | None = None
     """Weights used when selecting the candidate."""
+
+    soft_gate_penalty: float | None = None
+    """Soft-gate penalty applied during selection."""
+
+    soft_gate_warnings: list[str] | None = None
+    """Soft-gate warning messages for structural misses."""
+
+    soft_gate_miss_counts: dict[str, int] | None = None
+    """Per-platform soft-gate miss counts."""
 
     candidate_index: int | None = None
     """Index of this candidate in the generation batch."""

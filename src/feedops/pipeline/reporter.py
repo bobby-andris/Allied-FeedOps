@@ -170,6 +170,15 @@ def generate_report(
                 f" {entry.heuristic.shopify.composite:0.2f}% | {errors} |\n"
             )
 
+        selected_entry = selection_ranking[0]
+        if selected_entry.heuristic.soft_gate_warnings:
+            report += "\n### Soft-Gate Warnings (selected candidate)\n\n"
+            for warning in selected_entry.heuristic.soft_gate_warnings:
+                report += f"- {warning}\n"
+            report += (
+                f"\nSoft-gate penalty: {selected_entry.heuristic.soft_gate_penalty:0.2f}\n"
+            )
+
         if generation_errors:
             report += "\n### Generation Errors\n\n"
             for error in generation_errors[:3]:
@@ -196,10 +205,18 @@ def _selection_meta(candidate: Candidate) -> dict:
     meta: dict = {}
     if candidate.heuristic_score is not None:
         meta["heuristic_score"] = candidate.heuristic_score
+    if candidate.selection_score_adjusted is not None:
+        meta["selection_score_adjusted"] = candidate.selection_score_adjusted
     if candidate.heuristic_score_breakdown:
         meta["heuristic_score_breakdown"] = candidate.heuristic_score_breakdown
     if candidate.selection_weights:
         meta["selection_weights"] = candidate.selection_weights
+    if candidate.soft_gate_penalty is not None:
+        meta["soft_gate_penalty"] = candidate.soft_gate_penalty
+    if candidate.soft_gate_warnings:
+        meta["soft_gate_warnings"] = candidate.soft_gate_warnings
+    if candidate.soft_gate_miss_counts:
+        meta["soft_gate_miss_counts"] = candidate.soft_gate_miss_counts
     if candidate.candidate_index is not None:
         meta["candidate_index"] = candidate.candidate_index
     if candidate.num_candidates is not None:
