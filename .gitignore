@@ -25,6 +25,8 @@ service-account*.json
 # Reports and exports (generated, potentially contain PII)
 reports/
 exports/
+# But allow dashboard_data reports (curated for demo)
+!dashboard_data/lifestyle-eval/reports/
 .worktrees/
 
 # Node/TypeScript
