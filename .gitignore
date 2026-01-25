@@ -2,6 +2,7 @@
 data/
 creds/
 .playwright/
+.playwright-mcp/
 
 # Environment files (never commit secrets)
 .env
