@@ -145,6 +145,62 @@ async def optimize_parent_sku(
     # Step 3: Verify claims
     verified_candidate, errors = verify_claims(selected_candidate, parent_sku)
 
+    # Step 4: Generate lifestyle images (if enabled)
+    lifestyle_images_enabled = os.environ.get("LIFESTYLE_IMAGES_ENABLED", "false").lower() == "true"
+    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+
+    if lifestyle_images_enabled and gemini_api_key:
+        print(f"\n{'='*70}")
+        print("Step 4: Generating lifestyle images...")
+        print(f"{'='*70}")
+
+        from feedops.pipeline.lifestyle_images import (
+            LifestyleImageGenerator,
+            get_product_inventory,
+            get_scene_context,
+            get_technical_specs,
+        )
+
+        # Get product image URL
+        product_image_url = None
+        if parent_sku.variants and parent_sku.variants[0].main_image_url:
+            product_image_url = parent_sku.variants[0].main_image_url
+
+        if product_image_url:
+            # Initialize generator
+            lifestyle_output_dir = Path(os.environ.get("LIFESTYLE_IMAGES_OUTPUT_DIR", "data/lifestyle_images"))
+            generator = LifestyleImageGenerator(
+                api_key=gemini_api_key,
+                output_dir=lifestyle_output_dir
+            )
+
+            # Build prompts
+            inventory = get_product_inventory(parent_sku.category)
+            # Try to determine style from collection metadata or default to modern
+            style = "modern"  # TODO: Could enhance by reading collection-metadata.json
+            scene = get_scene_context(style)
+            technical = get_technical_specs(style)
+
+            # Generate variations
+            num_variations = int(os.environ.get("LIFESTYLE_IMAGES_NUM_VARIATIONS", "3"))
+            lifestyle_results = generator.generate_for_product(
+                product_image_url=product_image_url,
+                master_sku=parent_sku.master_sku,
+                inventory=inventory,
+                scene=scene,
+                technical=technical,
+                num_variations=num_variations
+            )
+
+            # Attach to candidate
+            verified_candidate = verified_candidate.model_copy(
+                update={"lifestyle_images": lifestyle_results}
+            )
+
+            print(f"✅ Lifestyle images attached to candidate")
+        else:
+            print("⚠️  No product image URL found - skipping lifestyle image generation")
+
     # Step 5: Generate outputs
     evidence = build_evidence_table(parent_sku)
     evidence_table = format_evidence_markdown(evidence)

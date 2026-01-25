@@ -30,7 +30,7 @@ class OriginalContent:
 @dataclass
 class ExportContent:
     """Content from an export patch file."""
-    
+
     title: str
     description: str
     short_title: str = ""
@@ -38,6 +38,8 @@ class ExportContent:
     approval_status: str = ""
     generated_at: str = ""
     image_url: str = ""
+    lifestyle_images: list[dict[str, Any]] = field(default_factory=list)
+    selected_lifestyle_image: int | None = None
 
 
 @dataclass
@@ -164,7 +166,11 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
             
             # Get metadata
             meta = data.get("_meta", {})
-            
+
+            # Get lifestyle images if available
+            lifestyle_images = data.get("lifestyle_images", [])
+            selected_lifestyle_image = data.get("selected_lifestyle_image")
+
             content = ExportContent(
                 title=title,
                 description=description,
@@ -172,13 +178,15 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
                 quality_score=meta.get("quality_score", 0.0),
                 approval_status=meta.get("approval_status", ""),
                 generated_at=meta.get("generated_at", ""),
+                lifestyle_images=lifestyle_images,
+                selected_lifestyle_image=selected_lifestyle_image,
             )
-            
+
             # Store _previous for original content reference
             previous = data.get("_previous", {})
             if previous:
                 content.image_url = previous.get("image_url", "")
-            
+
             exports.setdefault(sku, {})[platform] = content
     
     return exports

@@ -268,23 +268,26 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
             if sku_data.original:
                 st.markdown(f"**Category:** {sku_data.original.category}")
                 st.markdown(f"**Collection:** {sku_data.original.collection}")
-            
+
             # Approval status
             status = sku_data.candidate_scores.get("approval_status", "")
             if not status and sku_data.candidate_report:
                 status = sku_data.candidate_report.status
-            
+
             if status:
                 status_colors = {
                     "approved": "🟢",
-                    "revise": "🟡", 
+                    "revise": "🟡",
                     "rejected": "🔴",
                 }
                 status_emoji = status_colors.get(status.lower(), "⚪")
                 st.markdown(f"**Status:** {status_emoji} {status.upper()}")
-        
+
         st.divider()
-        
+
+        # Lifestyle images (if available)
+        render_lifestyle_images_panel(sku_data)
+
         # Three-way content comparison
         render_content_comparison(sku_data, platform)
         
@@ -297,6 +300,88 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
         
         # Quality scores
         render_score_panel(sku_data)
+
+
+def render_lifestyle_images_panel(sku_data: SKUData) -> None:
+    """Render lifestyle images if available."""
+    # Get candidate content from any platform (all platforms have same lifestyle images)
+    candidate_content = sku_data.candidate.get("google") or sku_data.candidate.get("bing") or sku_data.candidate.get("shopify")
+    if not candidate_content:
+        return
+
+    # Check if lifestyle images exist
+    lifestyle_images = candidate_content.lifestyle_images
+    if not lifestyle_images:
+        return
+
+    st.subheader("🖼️ Generated Lifestyle Images")
+
+    # Filter successful generations
+    successful = [img for img in lifestyle_images if img.get("generation_success", False)]
+
+    if not successful:
+        st.warning("Lifestyle image generation failed for this product")
+        for img in lifestyle_images:
+            if img.get("error_message"):
+                st.caption(f"Error: {img['error_message']}")
+        return
+
+    st.info(f"✅ {len(successful)} variations generated")
+
+    # Display variations in columns
+    cols = st.columns(len(successful))
+
+    selected_variation = candidate_content.selected_lifestyle_image
+
+    for i, img in enumerate(successful):
+        with cols[i]:
+            # Display image
+            image_path = img.get("image_path", "")
+            variation_num = img.get("variation_num", i + 1)
+
+            if image_path and Path(image_path).exists():
+                st.image(
+                    image_path,
+                    caption=f"Variation {variation_num}",
+                    use_container_width=True
+                )
+
+                # Selection indicator
+                if selected_variation == variation_num:
+                    st.success("✓ Selected")
+                else:
+                    st.caption(f"Variation {variation_num}")
+            else:
+                st.warning(f"Image not found: {image_path}")
+
+    # Show selected image details if available
+    if selected_variation:
+        st.divider()
+        st.markdown("**Selected Image Details**")
+
+        selected = next(
+            (img for img in successful if img.get("variation_num") == selected_variation),
+            None
+        )
+
+        if selected:
+            col1, col2 = st.columns([2, 1])
+
+            with col1:
+                image_path = selected.get("image_path", "")
+                if image_path and Path(image_path).exists():
+                    st.image(image_path, use_container_width=True)
+
+            with col2:
+                st.metric("Variation", f"#{selected.get('variation_num', 'N/A')}")
+                st.metric("Generated", selected.get("timestamp", "N/A"))
+
+                prompt_used = selected.get("prompt_used", "")
+                if prompt_used:
+                    with st.expander("View Prompt"):
+                        st.code(prompt_used, language="text")
+
+    st.divider()
 
 
 def render_content_comparison(sku_data: SKUData, platform: str) -> None:

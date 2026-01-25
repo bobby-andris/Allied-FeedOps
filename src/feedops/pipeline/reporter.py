@@ -254,8 +254,21 @@ def generate_patch_preview(
         "description": parent_sku.current_description,
     }
 
+    # Prepare lifestyle images data if available
+    lifestyle_images_data = []
+    if candidate.lifestyle_images:
+        for img in candidate.lifestyle_images:
+            lifestyle_images_data.append({
+                "image_path": img.image_path,
+                "variation_num": img.variation_num,
+                "generation_success": img.generation_success,
+                "prompt_used": img.prompt_used,
+                "timestamp": img.timestamp,
+                "error_message": img.error_message,
+            })
+
     if platform == "google":
-        return {
+        patch = {
             "offerId": offer_id,
             "title": candidate.google_title,
             "short_title": candidate.google_short_title,
@@ -266,24 +279,36 @@ def generate_patch_preview(
             "_meta": meta,
             "_previous": previous,
         }
+        if lifestyle_images_data:
+            patch["lifestyle_images"] = lifestyle_images_data
+            patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
+        return patch
 
     if platform == "bing":
-        return {
+        patch = {
             "sku": offer_id,
             "title": candidate.bing_title,
             "description": candidate.bing_description,
             "_meta": meta,
             "_previous": previous,
         }
+        if lifestyle_images_data:
+            patch["lifestyle_images"] = lifestyle_images_data
+            patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
+        return patch
 
     if platform == "shopify":
-        return {
+        patch = {
             "productId": product_id or offer_id,
             "title": candidate.shopify_title,
             "body_html": candidate.shopify_description,
             "_meta": meta,
             "_previous": previous,
         }
+        if lifestyle_images_data:
+            patch["lifestyle_images"] = lifestyle_images_data
+            patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
+        return patch
 
     raise ValueError(f"Unsupported platform: {platform}")
 

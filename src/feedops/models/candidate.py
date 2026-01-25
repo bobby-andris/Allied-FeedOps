@@ -2,6 +2,17 @@
 from pydantic import BaseModel, field_validator
 from feedops.models.claim import Claim
 from feedops.models.score import Score
+from typing import Optional
+
+
+class LifestyleImageResult(BaseModel):
+    """Result of lifestyle image generation"""
+    image_path: str
+    variation_num: int
+    generation_success: bool
+    prompt_used: str
+    timestamp: str
+    error_message: Optional[str] = None
 
 
 class Candidate(BaseModel):
@@ -66,6 +77,12 @@ class Candidate(BaseModel):
 
     num_candidates: int | None = None
     """Total number of candidates generated for selection."""
+
+    lifestyle_images: Optional[list[LifestyleImageResult]] = None
+    """Generated lifestyle image variations."""
+
+    selected_lifestyle_image: Optional[int] = None
+    """Which variation number is selected (1-3)."""
 
     @field_validator("google_title")
     @classmethod
