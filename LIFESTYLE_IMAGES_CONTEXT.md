@@ -207,7 +207,7 @@ Constraints: Product must remain exact replica of reference
 
 ```bash
 # Required
-GEMINI_API_KEY=AIzaSyDNm94Xe2-uez9QMqQpqcqQJZngsY9K5uE
+GEMINI_API_KEY=your-gemini-key-here
 LIFESTYLE_IMAGES_ENABLED=true
 
 # Optional

@@ -1,6 +1,7 @@
 # Local data (do not commit)
 data/
 creds/
+.playwright/
 
 # Environment files (never commit secrets)
 .env
@@ -45,3 +46,4 @@ venv/
 RUN_EVAL_BATCH_INSTRUCTIONS.md
 CURSOR_PROMPT_IMAGE_IMPROVEMENTS.md
 CODE_REVIEW_RESULTS.md
+LIFESTYLE_IMAGES_CONTEXT.md
