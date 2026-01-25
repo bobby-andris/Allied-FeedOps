@@ -81,11 +81,39 @@ async def generate_candidate(
     Returns:
         Generated Candidate (unverified).
     """
+    candidates, errors = await generate_candidates(parent_sku, llm, 1)
+    if not candidates:
+        detail = errors[0] if errors else "No candidates generated"
+        raise ValueError(detail)
+    return candidates[0]
+
+
+async def generate_candidates(
+    parent_sku: ParentSKU,
+    llm: LLMProvider,
+    n: int,
+) -> tuple[list[Candidate], list[str]]:
+    """Generate multiple optimized candidates for a ParentSKU."""
+    count = max(1, n)
     prompt = build_prompt(parent_sku)
     image = None
     if parent_sku.variants:
         main_image_url = parent_sku.variants[0].main_image_url
         if main_image_url:
             image = await fetch_image(main_image_url)
-    response = await llm.generate(prompt, CANDIDATE_SCHEMA, image=image)
-    return parse_candidate_response(response)
+
+    candidates: list[Candidate] = []
+    errors: list[str] = []
+    for idx in range(count):
+        try:
+            response = await llm.generate(prompt, CANDIDATE_SCHEMA, image=image)
+            candidate = parse_candidate_response(response)
+            candidates.append(
+                candidate.model_copy(
+                    update={"candidate_index": idx, "num_candidates": count}
+                )
+            )
+        except Exception as exc:
+            errors.append(f"Candidate {idx}: {exc}")
+
+    return candidates, errors

@@ -59,6 +59,10 @@ SHOPIFY_STORE_URL=yourstore.myshopify.com
 SHOPIFY_ACCESS_TOKEN=shpat_xxx
 GMC_MERCHANT_ID=123456789
 GMC_API_KEY=your-gmc-key
+
+# Optional: candidate selection tuning
+FEEDOPS_NUM_CANDIDATES=3
+FEEDOPS_CANDIDATE_WEIGHTS=google=0.7,bing=0.15,shopify=0.15
 ```
 
 ### 3. Add Your Catalog
@@ -77,7 +81,8 @@ Or specify a custom path when running commands.
 PYTHONPATH=./src .venv/bin/python -m feedops.cli.main healthcheck
 
 # Optimize a product
-PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize --parent-sku "101" --dry-run
+PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize --parent-sku "101" --dry-run \
+  --candidates 3 --candidate-weights "google=0.7,bing=0.15,shopify=0.15"
 
 # List available SKUs
 PYTHONPATH=./src .venv/bin/python -m feedops.cli.main list-skus
@@ -180,7 +185,7 @@ All commands support `--help` for more options.
 PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 ```
 
-All 48 tests should pass.
+All tests should pass.
 
 ### Adding New Features
 

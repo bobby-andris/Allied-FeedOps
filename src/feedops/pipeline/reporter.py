@@ -1,4 +1,6 @@
 """Report generation for SKU optimization results."""
+from __future__ import annotations
+
 from datetime import datetime
 from feedops.models import ParentSKU, Candidate, Variant
 from feedops.pipeline.finish_injection import (
@@ -6,6 +8,7 @@ from feedops.pipeline.finish_injection import (
     generate_variant_title,
 )
 from feedops.pipeline.enrichment import detect_collection
+from feedops.pipeline.selection import RankedCandidate
 
 
 def generate_report(
@@ -18,6 +21,8 @@ def generate_report(
     provider_name: str | None = None,
     token_usage: dict[str, int] | None = None,
     estimated_cost: float | None = None,
+    selection_ranking: list[RankedCandidate] | None = None,
+    generation_errors: list[str] | None = None,
 ) -> str:
     """Generate markdown report for SKU optimization.
 
@@ -125,6 +130,51 @@ def generate_report(
         for claim in candidate.verified_claims:
             report += f"- {claim.claim} (source: {claim.source_field}={claim.source_value})\n"
 
+    if selection_ranking:
+        weights = candidate.selection_weights or {}
+        weight_label = ", ".join(
+            f"{key}={value:.2f}" for key, value in weights.items()
+        ) or "Not available"
+        selected_index = (
+            candidate.candidate_index
+            if candidate.candidate_index is not None
+            else "Not available"
+        )
+        total_candidates = candidate.num_candidates or len(selection_ranking)
+        report += f"""
+
+---
+
+## Candidate Selection
+
+**Candidates Generated:** {total_candidates}
+**Selected Index:** {selected_index}
+**Weights:** {weight_label}
+
+### Top Candidates (heuristic)
+
+| Rank | Candidate | Weighted | Google | Bing | Shopify | Validation Errors |
+|------|----------:|---------:|-------:|-----:|--------:|-------------------|
+"""
+        for idx, entry in enumerate(selection_ranking[:3], start=1):
+            candidate_index = (
+                entry.candidate.candidate_index
+                if entry.candidate.candidate_index is not None
+                else entry.index
+            )
+            errors = "; ".join(entry.validation_errors) if entry.validation_errors else ""
+            report += (
+                f"| {idx} | {candidate_index} | {entry.heuristic.weighted_composite:0.2f}% |"
+                f" {entry.heuristic.google.composite:0.2f}% |"
+                f" {entry.heuristic.bing.composite:0.2f}% |"
+                f" {entry.heuristic.shopify.composite:0.2f}% | {errors} |\n"
+            )
+
+        if generation_errors:
+            report += "\n### Generation Errors\n\n"
+            for error in generation_errors[:3]:
+                report += f"- {error}\n"
+
     report += """
 ---
 
@@ -140,6 +190,21 @@ def generate_report(
         report += "**REJECTED**. Major revisions or human review required.\n"
 
     return report
+
+
+def _selection_meta(candidate: Candidate) -> dict:
+    meta: dict = {}
+    if candidate.heuristic_score is not None:
+        meta["heuristic_score"] = candidate.heuristic_score
+    if candidate.heuristic_score_breakdown:
+        meta["heuristic_score_breakdown"] = candidate.heuristic_score_breakdown
+    if candidate.selection_weights:
+        meta["selection_weights"] = candidate.selection_weights
+    if candidate.candidate_index is not None:
+        meta["candidate_index"] = candidate.candidate_index
+    if candidate.num_candidates is not None:
+        meta["num_candidates"] = candidate.num_candidates
+    return meta
 
 
 def generate_patch_preview(
@@ -166,6 +231,7 @@ def generate_patch_preview(
         "quality_score": candidate.final_score.composite,
         "approval_status": candidate.final_score.approval_status,
     }
+    meta.update(_selection_meta(candidate))
     previous = {
         "title": parent_sku.current_title,
         "description": parent_sku.current_description,
@@ -266,6 +332,7 @@ def generate_variant_patch_preview(
         "quality_score": candidate.final_score.composite,
         "approval_status": candidate.final_score.approval_status,
     }
+    meta.update(_selection_meta(candidate))
     previous = {
         "title": parent_sku.current_title,
         "description": parent_sku.current_description,

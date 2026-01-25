@@ -189,6 +189,33 @@ def test_candidate_model_structure():
     assert candidate.self_score.composite == 85.0
 
 
+def test_candidate_selection_metadata_defaults_to_none():
+    """Selection metadata defaults to None when unset."""
+    candidate = Candidate(
+        google_title="Valid google title",
+        google_short_title="Short title",
+        google_description="Valid description " * 50,
+        bing_title="Valid bing title",
+        bing_description="Valid description " * 50,
+        shopify_title="Valid shopify title",
+        shopify_description="<p>Valid description</p>",
+        claims=[],
+        self_score=Score(
+            specificity=5,
+            benefit_coverage=5,
+            keyword_inclusion=5,
+            format_adherence=5,
+            brand_voice=5,
+            factual_accuracy=5,
+        ),
+    )
+    assert candidate.heuristic_score is None
+    assert candidate.heuristic_score_breakdown is None
+    assert candidate.selection_weights is None
+    assert candidate.candidate_index is None
+    assert candidate.num_candidates is None
+
+
 def test_candidate_google_title_max_length():
     """Google title must be <= 150 characters."""
     with pytest.raises(ValueError, match="Google title must be <= 150 characters"):

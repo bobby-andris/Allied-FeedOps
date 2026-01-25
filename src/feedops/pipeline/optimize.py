@@ -9,8 +9,12 @@ from feedops.models import Candidate
 from feedops.loaders import load_catalog, get_parent_sku
 from feedops.providers import get_provider
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
-from feedops.pipeline.generator import build_prompt, generate_candidate
-from feedops.pipeline.validators import validate_candidate_content
+from feedops.pipeline.generator import build_prompt, generate_candidates
+from feedops.pipeline.selection import (
+    parse_candidate_weights,
+    parse_num_candidates,
+    select_best_candidate,
+)
 from feedops.pipeline.verifier import verify_claims
 from feedops.pipeline.reporter import (
     generate_report,
@@ -66,6 +70,8 @@ async def optimize_parent_sku(
     dry_run: bool = True,
     output_dir: Path | str = "reports",
     exports_dir: Path | str = "exports",
+    num_candidates: int | None = None,
+    candidate_weights: dict[str, float] | None = None,
 ) -> OptimizationResult:
     """Run full optimization pipeline for a parent SKU.
 
@@ -100,19 +106,38 @@ async def optimize_parent_sku(
     if parent_sku is None:
         raise ValueError(f"MasterSKU not found: {master_sku}")
 
-    # Step 2: Generate candidate
+    # Step 2: Generate candidates and select best
     provider = get_provider()
-    candidate = await generate_candidate(parent_sku, provider)
-
-    # Step 3: Validate customer-facing content
-    content_errors = validate_candidate_content(candidate)
-    if content_errors:
-        raise ValueError(
-            "Candidate content validation failed: " + "; ".join(content_errors)
+    if num_candidates is None:
+        num_candidates = parse_num_candidates(os.environ.get("FEEDOPS_NUM_CANDIDATES"))
+    if candidate_weights is None:
+        candidate_weights = parse_candidate_weights(
+            os.environ.get("FEEDOPS_CANDIDATE_WEIGHTS")
         )
+    candidates, generation_errors = await generate_candidates(
+        parent_sku, provider, num_candidates
+    )
+    if not candidates:
+        detail = "; ".join(generation_errors) if generation_errors else "No candidates generated"
+        raise ValueError(detail)
+    selected_candidate, ranking = select_best_candidate(candidates, candidate_weights)
+    best_rank = ranking[0]
+    selected_candidate = selected_candidate.model_copy(
+        update={
+            "heuristic_score": best_rank.heuristic.weighted_composite,
+            "heuristic_score_breakdown": {
+                "google": best_rank.heuristic.google.composite,
+                "bing": best_rank.heuristic.bing.composite,
+                "shopify": best_rank.heuristic.shopify.composite,
+            },
+            "selection_weights": candidate_weights,
+            "candidate_index": selected_candidate.candidate_index,
+            "num_candidates": selected_candidate.num_candidates,
+        }
+    )
 
-    # Step 4: Verify claims
-    verified_candidate, errors = verify_claims(candidate, parent_sku)
+    # Step 3: Verify claims
+    verified_candidate, errors = verify_claims(selected_candidate, parent_sku)
 
     # Step 5: Generate outputs
     evidence = build_evidence_table(parent_sku)
@@ -133,6 +158,8 @@ async def optimize_parent_sku(
         provider_name=provider.name,
         token_usage=token_usage,
         estimated_cost=estimated_cost,
+        selection_ranking=ranking,
+        generation_errors=generation_errors,
     )
     patch_previews = {
         "google": generate_patch_preview(parent_sku, verified_candidate, platform="google"),

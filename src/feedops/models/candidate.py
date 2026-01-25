@@ -40,6 +40,21 @@ class Candidate(BaseModel):
     verified_score: Score | None = None
     """Score after claim verification (may differ from self_score)."""
 
+    heuristic_score: float | None = None
+    """Heuristic selection score (weighted composite)."""
+
+    heuristic_score_breakdown: dict[str, float] | None = None
+    """Per-platform heuristic composite scores."""
+
+    selection_weights: dict[str, float] | None = None
+    """Weights used when selecting the candidate."""
+
+    candidate_index: int | None = None
+    """Index of this candidate in the generation batch."""
+
+    num_candidates: int | None = None
+    """Total number of candidates generated for selection."""
+
     @field_validator("google_title")
     @classmethod
     def validate_google_title_length(cls, v: str) -> str:

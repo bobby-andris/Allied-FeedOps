@@ -5,7 +5,7 @@ from feedops.models import ParentSKU, Variant, Candidate, Claim, Score
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.verifier import verify_claims
 from feedops.pipeline.validators import validate_candidate_content
-from feedops.pipeline.generator import build_prompt, generate_candidate
+from feedops.pipeline.generator import build_prompt, generate_candidate, generate_candidates
 from feedops.pipeline.prompts import CANDIDATE_SCHEMA
 from feedops.pipeline.reporter import generate_report, generate_patch_preview
 from feedops.providers.base import LLMProvider, ImageInput
@@ -406,6 +406,134 @@ async def test_generate_candidate_skips_image_when_missing(sample_parent_sku):
         assert candidate.google_title == "Test Google Title"
         _, kwargs = llm.generate.call_args
         assert kwargs.get("image") is None
+
+
+@pytest.mark.asyncio
+async def test_generate_candidates_fetches_image_once_and_generates_n(sample_parent_sku):
+    """generate_candidates fetches image once and returns all candidates."""
+    sample_parent_sku.variants[0].main_image_url = "https://example.com/image.png"
+    image_input = ImageInput(
+        data=b"image-bytes",
+        mime_type="image/png",
+        source_url="https://example.com/image.png",
+    )
+    llm = AsyncMock(spec=LLMProvider)
+    llm.generate.side_effect = [
+        {
+            "google_title": "Test Google Title 1",
+            "google_short_title": "Test Short Title 1",
+            "google_description": "Test description " * 30,
+            "bing_title": "Test Bing Title 1",
+            "bing_description": "Test description " * 30,
+            "shopify_title": "Test Shopify Title 1",
+            "shopify_description": "<p>Test description</p>",
+            "claims": [],
+            "self_score": {
+                "specificity": 5,
+                "benefit_coverage": 5,
+                "keyword_inclusion": 5,
+                "format_adherence": 5,
+                "brand_voice": 5,
+                "factual_accuracy": 5,
+            },
+        },
+        {
+            "google_title": "Test Google Title 2",
+            "google_short_title": "Test Short Title 2",
+            "google_description": "Test description " * 30,
+            "bing_title": "Test Bing Title 2",
+            "bing_description": "Test description " * 30,
+            "shopify_title": "Test Shopify Title 2",
+            "shopify_description": "<p>Test description</p>",
+            "claims": [],
+            "self_score": {
+                "specificity": 5,
+                "benefit_coverage": 5,
+                "keyword_inclusion": 5,
+                "format_adherence": 5,
+                "brand_voice": 5,
+                "factual_accuracy": 5,
+            },
+        },
+        {
+            "google_title": "Test Google Title 3",
+            "google_short_title": "Test Short Title 3",
+            "google_description": "Test description " * 30,
+            "bing_title": "Test Bing Title 3",
+            "bing_description": "Test description " * 30,
+            "shopify_title": "Test Shopify Title 3",
+            "shopify_description": "<p>Test description</p>",
+            "claims": [],
+            "self_score": {
+                "specificity": 5,
+                "benefit_coverage": 5,
+                "keyword_inclusion": 5,
+                "format_adherence": 5,
+                "brand_voice": 5,
+                "factual_accuracy": 5,
+            },
+        },
+    ]
+
+    with patch("feedops.pipeline.generator.fetch_image", new_callable=AsyncMock) as mock_fetch:
+        mock_fetch.return_value = image_input
+        candidates, errors = await generate_candidates(sample_parent_sku, llm, 3)
+
+    mock_fetch.assert_awaited_once_with("https://example.com/image.png")
+    assert llm.generate.call_count == 3
+    assert errors == []
+    assert [c.candidate_index for c in candidates] == [0, 1, 2]
+    assert all(c.num_candidates == 3 for c in candidates)
+
+
+@pytest.mark.asyncio
+async def test_generate_candidates_skips_failed_attempts(sample_parent_sku):
+    """generate_candidates skips invalid responses and continues."""
+    sample_parent_sku.variants[0].main_image_url = None
+    llm = AsyncMock(spec=LLMProvider)
+    llm.generate.side_effect = [
+        {
+            "google_short_title": "Test Short Title",
+            "google_description": "Test description " * 30,
+            "bing_title": "Test Bing Title",
+            "bing_description": "Test description " * 30,
+            "shopify_title": "Test Shopify Title",
+            "shopify_description": "<p>Test description</p>",
+            "claims": [],
+            "self_score": {
+                "specificity": 5,
+                "benefit_coverage": 5,
+                "keyword_inclusion": 5,
+                "format_adherence": 5,
+                "brand_voice": 5,
+                "factual_accuracy": 5,
+            },
+        },
+        {
+            "google_title": "Test Google Title 2",
+            "google_short_title": "Test Short Title 2",
+            "google_description": "Test description " * 30,
+            "bing_title": "Test Bing Title 2",
+            "bing_description": "Test description " * 30,
+            "shopify_title": "Test Shopify Title 2",
+            "shopify_description": "<p>Test description</p>",
+            "claims": [],
+            "self_score": {
+                "specificity": 5,
+                "benefit_coverage": 5,
+                "keyword_inclusion": 5,
+                "format_adherence": 5,
+                "brand_voice": 5,
+                "factual_accuracy": 5,
+            },
+        },
+    ]
+
+    candidates, errors = await generate_candidates(sample_parent_sku, llm, 2)
+
+    assert len(candidates) == 1
+    assert candidates[0].google_title == "Test Google Title 2"
+    assert len(errors) == 1
 
 
 # Task 5.4: Report Generator Tests

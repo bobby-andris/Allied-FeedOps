@@ -1,7 +1,8 @@
 from pathlib import Path
 
+from feedops.models import Candidate, Score
 from feedops.quality.evaluator import evaluate_exports_dir, render_markdown
-from feedops.quality.scoring import score_brand_voice, score_description, score_title
+from feedops.quality.scoring import score_brand_voice, score_bundle, score_candidate, score_description, score_title
 
 
 def test_score_title_rewards_product_type_and_dimension():
@@ -57,6 +58,59 @@ def test_score_brand_voice_penalizes_promotional_language():
     score, notes = score_brand_voice("BEST amazing product!!!")
     assert score <= 4
     assert any("Promotional" in n or "Exclamation" in n for n in notes)
+
+
+def test_score_candidate_weighted_composite_matches_platform_scores():
+    candidate = Candidate(
+        google_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        google_short_title="18-Inch Towel Bar",
+        google_description="Add space-saving towel storage with this 18-inch wall mount towel bar crafted from solid brass. "
+        "Highlights:\n- 18-inch center-to-center\n- Solid brass construction\n- Concealed mounting hardware\n"
+        "Specs:\n- Overall length: 20 in\n- Projection: 2.5 in\n- Warranty: Limited Lifetime Warranty\n",
+        bing_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        bing_description="Organize towels with a wall mounted towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty.",
+        shopify_title="18-Inch Solid Brass Towel Bar | Allied Brass",
+        shopify_description="<p>Upgrade your bathroom with a solid brass towel bar.</p><ul><li>Solid brass</li><li>Wall mount</li><li>Hardware included</li></ul><p>Center-to-center: 18 in</p>",
+        claims=[],
+        self_score=Score(
+            specificity=5,
+            benefit_coverage=5,
+            keyword_inclusion=5,
+            format_adherence=5,
+            brand_voice=5,
+            factual_accuracy=5,
+        ),
+    )
+    weights = {"google": 0.7, "bing": 0.15, "shopify": 0.15}
+    result = score_candidate(candidate, weights=weights)
+
+    google_score = score_bundle(
+        title=candidate.google_title,
+        description=candidate.google_description,
+    )
+    bing_score = score_bundle(
+        title=candidate.bing_title,
+        description=candidate.bing_description,
+    )
+    shopify_score = score_bundle(
+        title=candidate.shopify_title,
+        description=candidate.shopify_description,
+        html_description=True,
+    )
+    expected = round(
+        (
+            google_score.composite * weights["google"]
+            + bing_score.composite * weights["bing"]
+            + shopify_score.composite * weights["shopify"]
+        )
+        / sum(weights.values()),
+        2,
+    )
+
+    assert result.google.composite == google_score.composite
+    assert result.bing.composite == bing_score.composite
+    assert result.shopify.composite == shopify_score.composite
+    assert result.weighted_composite == expected
 
 
 def test_evaluate_exports_dir_scores_temp_exports(tmp_path: Path):

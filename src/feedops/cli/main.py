@@ -101,11 +101,25 @@ def optimize(
     output_dir: str = typer.Option("reports", "--output-dir", "-o", help="Output directory"),
     exports_dir: str = typer.Option("exports", "--exports-dir", help="Export directory for patch JSON"),
     catalog: Optional[str] = typer.Option(None, "--catalog", "-c", help="Path to catalog CSV"),
+    candidates: Optional[int] = typer.Option(
+        None, "--candidates", "-n", help="Number of candidates to generate"
+    ),
+    candidate_weights: Optional[str] = typer.Option(
+        None,
+        "--candidate-weights",
+        help="Weights for selection scoring, e.g. google=0.7,bing=0.15,shopify=0.15",
+    ),
 ):
     """Optimize title and description for a parent SKU."""
     from feedops.pipeline.optimize import optimize_parent_sku
+    from feedops.pipeline.selection import parse_candidate_weights
 
     catalog_path = catalog or os.environ.get("CATALOG_PATH", "data/catalog/Product Catalog.csv")
+    weights = (
+        parse_candidate_weights(candidate_weights)
+        if candidate_weights is not None
+        else None
+    )
 
     console.print(f"\n[bold]Optimizing: {parent_sku}[/bold]")
     console.print(f"Catalog: {catalog_path}")
@@ -118,6 +132,8 @@ def optimize(
             dry_run=dry_run,
             output_dir=output_dir,
             exports_dir=exports_dir,
+            num_candidates=candidates,
+            candidate_weights=weights,
         ))
 
         score = result.candidate.final_score

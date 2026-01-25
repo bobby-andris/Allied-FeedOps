@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from feedops.models import Candidate
 
 _URL_RE = re.compile(r"https?://", re.IGNORECASE)
 _CITATION_RE = re.compile(r"catalog_csv\.|\(\s*catalog_csv\.[^)]+\)", re.IGNORECASE)
@@ -191,13 +192,26 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         notes.append("Description under 300 characters")
 
     opening = text[:160].lower()
-    if any(w in opening for w in ["upgrade", "add", "refresh", "protect", "keep", "organize", "maximize"]):
+    if any(
+        w in opening
+        for w in [
+            "upgrade",
+            "add",
+            "refresh",
+            "protect",
+            "keep",
+            "organize",
+            "maximize",
+        ]
+    ):
         score += 2
     else:
         notes.append("Opening may be feature-first (no clear benefit verb detected)")
 
     # Specs presence: at least 3 numeric/measurement tokens.
-    measurements = len(_INCH_RE.findall(text)) + len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I))
+    measurements = len(_INCH_RE.findall(text)) + len(
+        re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I)
+    )
     if measurements >= 3:
         score += 2
     else:
@@ -259,10 +273,70 @@ def score_brand_voice(text: str) -> tuple[int, list[str]]:
     return _clamp_0_10(score), notes
 
 
-def score_bundle(*, title: str, description: str, html_description: bool = False) -> HeuristicScore:
+def score_bundle(
+    *, title: str, description: str, html_description: bool = False
+) -> HeuristicScore:
     """Convenience scorer combining title+description into a composite."""
     ctr, ctr_notes = score_title(title)
     cvr, cvr_notes = score_description(description, html=html_description)
     voice, voice_notes = score_brand_voice(title + "\n" + description)
     notes = tuple(dict.fromkeys([*ctr_notes, *cvr_notes, *voice_notes]))
     return HeuristicScore(ctr_proxy=ctr, cvr_proxy=cvr, brand_voice=voice, notes=notes)
+
+
+@dataclass(frozen=True)
+class CandidateHeuristicScore:
+    google: HeuristicScore
+    bing: HeuristicScore
+    shopify: HeuristicScore
+    weighted_composite: float
+    notes: tuple[str, ...] = ()
+
+
+def score_candidate(candidate: Candidate, *, weights: dict[str, float]) -> CandidateHeuristicScore:
+    """Score a candidate across platforms using weighted composites."""
+    google_score = score_bundle(
+        title=candidate.google_title,
+        description=candidate.google_description,
+    )
+    bing_score = score_bundle(
+        title=candidate.bing_title,
+        description=candidate.bing_description,
+    )
+    shopify_score = score_bundle(
+        title=candidate.shopify_title,
+        description=candidate.shopify_description,
+        html_description=True,
+    )
+
+    weighted_total = 0.0
+    weight_sum = 0.0
+    per_platform = {
+        "google": google_score,
+        "bing": bing_score,
+        "shopify": shopify_score,
+    }
+    for platform, score in per_platform.items():
+        weight = weights.get(platform, 0.0)
+        if weight <= 0:
+            continue
+        weighted_total += weight * score.composite
+        weight_sum += weight
+
+    if weight_sum <= 0:
+        weighted_total = sum(score.composite for score in per_platform.values())
+        weight_sum = len(per_platform)
+
+    notes = tuple(
+        dict.fromkeys(
+            [*google_score.notes, *bing_score.notes, *shopify_score.notes]
+        )
+    )
+
+    return CandidateHeuristicScore(
+        google=google_score,
+        bing=bing_score,
+        shopify=shopify_score,
+        weighted_composite=round(weighted_total / weight_sum, 2),
+        notes=notes,
+    )

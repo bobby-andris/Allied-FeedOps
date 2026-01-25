@@ -40,6 +40,18 @@ def test_compare_runs_help_available():
     assert "--candidate-exports-dir" in result.stdout
 
 
+def test_optimize_help_includes_candidate_flags():
+    """optimize command documents candidate selection flags."""
+    result = subprocess.run(
+        [sys.executable, "-m", "feedops.cli.main", "optimize", "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "--candidates" in result.stdout
+    assert "--candidate-weights" in result.stdout
+
+
 def test_compare_runs_writes_html(tmp_path):
     """compare-runs generates a self-contained HTML report."""
     baseline_dir = tmp_path / "baseline"
@@ -183,18 +195,35 @@ async def test_optimize_pipeline_integration(tmp_path):
     """Test full optimization pipeline with mocked LLM."""
     from feedops.pipeline.optimize import optimize_parent_sku
 
-    # Mock LLM response
-    mock_response = {
-        "google_title": "Test Optimized Title",
-        "google_short_title": "Test Short Title",
-        "google_description": "Test optimized description " * 30,
-        "bing_title": "Test Bing Title",
-        "bing_description": "Test optimized description " * 30,
-        "shopify_title": "Test Shopify Title",
-        "shopify_description": "<p>Test optimized description</p>",
-        "claims": [
-            {"claim": "solid brass", "source_field": "material", "source_value": "Brass"}
-        ],
+    weak_response = {
+        "google_title": "Nice Towel Bar",
+        "google_short_title": "Nice",
+        "google_description": "Towel bar.",
+        "bing_title": "Nice Towel Bar",
+        "bing_description": "Towel bar.",
+        "shopify_title": "Nice Towel Bar",
+        "shopify_description": "<p>Towel bar.</p>",
+        "claims": [],
+        "self_score": {
+            "specificity": 5,
+            "benefit_coverage": 5,
+            "keyword_inclusion": 5,
+            "format_adherence": 5,
+            "brand_voice": 5,
+            "factual_accuracy": 8,
+        },
+    }
+    strong_response = {
+        "google_title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        "google_short_title": "18-Inch Towel Bar",
+        "google_description": "Add space-saving towel storage with this 18-inch wall mount towel bar crafted from solid brass. "
+        "Highlights:\n- 18-inch center-to-center towel bar\n- Solid brass construction\n- Concealed mounting hardware\n"
+        "Specs:\n- Overall length: 20 in\n- Projection: 2.5 in\n- Warranty: Limited Lifetime Warranty\n",
+        "bing_title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        "bing_description": "Organize towels with a wall mounted towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty.",
+        "shopify_title": "18-Inch Solid Brass Towel Bar | Allied Brass",
+        "shopify_description": "<p>Upgrade your bathroom with a solid brass towel bar.</p><ul><li>Solid brass</li><li>Wall mount</li><li>Hardware included</li></ul><p>Center-to-center: 18 in</p>",
+        "claims": [],
         "self_score": {
             "specificity": 8,
             "benefit_coverage": 8,
@@ -202,26 +231,50 @@ async def test_optimize_pipeline_integration(tmp_path):
             "format_adherence": 8,
             "brand_voice": 8,
             "factual_accuracy": 8,
-        }
+        },
+    }
+    leaky_response = {
+        "google_title": "18-Inch Wall Mount Towel Bar (catalog_csv.Material)",
+        "google_short_title": "18-Inch Towel Bar",
+        "google_description": "Solid brass build catalog_csv.Material",
+        "bing_title": "18-Inch Wall Mount Towel Bar (catalog_csv.Material)",
+        "bing_description": "Solid brass build catalog_csv.Material",
+        "shopify_title": "18-Inch Wall Mount Towel Bar (catalog_csv.Material)",
+        "shopify_description": "<p>Solid brass build catalog_csv.Material</p>",
+        "claims": [],
+        "self_score": {
+            "specificity": 8,
+            "benefit_coverage": 8,
+            "keyword_inclusion": 8,
+            "format_adherence": 8,
+            "brand_voice": 8,
+            "factual_accuracy": 8,
+        },
     }
 
     with patch('feedops.pipeline.optimize.get_provider') as mock_get_provider:
         mock_provider = AsyncMock()
-        mock_provider.generate.return_value = mock_response
+        mock_provider.generate.side_effect = [
+            weak_response,
+            strong_response,
+            leaky_response,
+        ]
         mock_provider.name = "mock/test"
         mock_get_provider.return_value = mock_provider
-
-        result = await optimize_parent_sku(
-            master_sku="101",
-            catalog_path=Path("samples/sample-catalog.csv"),
-            dry_run=True,
-            output_dir=tmp_path,
-            exports_dir=tmp_path,
-        )
+        with patch("feedops.pipeline.generator.fetch_image", new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = None
+            result = await optimize_parent_sku(
+                master_sku="101",
+                catalog_path=Path("samples/sample-catalog.csv"),
+                dry_run=True,
+                output_dir=tmp_path,
+                exports_dir=tmp_path,
+                num_candidates=3,
+            )
 
         assert result is not None
-        assert result.candidate.google_title == "Test Optimized Title"
+        assert result.candidate.google_title == strong_response["google_title"]
         assert "google" in result.patch_previews
         assert "bing" in result.patch_previews
         assert "shopify" in result.patch_previews
-        assert result.patch_previews["google"]["title"] == "Test Optimized Title"
+        assert result.patch_previews["google"]["title"] == strong_response["google_title"]
