@@ -10,6 +10,8 @@ import re
 from dataclasses import dataclass
 
 from feedops.models import Candidate
+
+
 _URL_RE = re.compile(r"https?://", re.IGNORECASE)
 _CITATION_RE = re.compile(r"catalog_csv\.|\(\s*catalog_csv\.[^)]+\)", re.IGNORECASE)
 _ALL_CAPS_WORD_RE = re.compile(r"\b[A-Z]{4,}\b")
