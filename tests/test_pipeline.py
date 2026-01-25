@@ -252,6 +252,105 @@ def test_verify_claims_accepts_numeric_units_and_trailing_decimals(sample_parent
     assert errors == []
 
 
+# Task 5.2a: Auto-extracted claim verification tests
+def test_verify_claims_auto_extracts_finish_capacity_dimension(sample_parent_sku):
+    """Auto-extraction should detect finish, capacity, and dimensions from text."""
+    parent = ParentSKU(
+        master_sku=sample_parent_sku.master_sku,
+        category=sample_parent_sku.category,
+        collection=sample_parent_sku.collection,
+        current_title=sample_parent_sku.current_title,
+        current_description=sample_parent_sku.current_description,
+        material=sample_parent_sku.material,
+        mounting_type=sample_parent_sku.mounting_type,
+        center_to_center=18.0,
+        weight_capacity=10.0,
+        variants=sample_parent_sku.variants,
+    )
+    candidate = Candidate(
+        google_title="18-inch center-to-center towel bar in Antique Brass supports up to 10 lb",
+        google_short_title="18-inch towel bar",
+        google_description="Test description.",
+        bing_title="Test Bing Title",
+        bing_description="Test description.",
+        shopify_title="Test Shopify Title",
+        shopify_description="<p>Test description</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    verified, errors = verify_claims(candidate, parent)
+    fields = {c.source_field for c in verified.claims}
+    assert "available_finishes" in fields
+    assert "center_to_center" in fields
+    assert "weight_capacity" in fields
+    assert errors == []
+
+
+def test_verify_claims_auto_extracts_material_literal_mismatch(sample_parent_sku):
+    """Auto-extracted material claims must be verified exactly."""
+    parent = ParentSKU(
+        master_sku=sample_parent_sku.master_sku,
+        category=sample_parent_sku.category,
+        collection=sample_parent_sku.collection,
+        current_title=sample_parent_sku.current_title,
+        current_description=sample_parent_sku.current_description,
+        material="Brass",
+        variants=sample_parent_sku.variants,
+    )
+    candidate = Candidate(
+        google_title="Test Google Title",
+        google_short_title="Test Short Title",
+        google_description="Solid brass construction for lasting durability.",
+        bing_title="Test Bing Title",
+        bing_description="Test description.",
+        shopify_title="Test Shopify Title",
+        shopify_description="<p>Test description</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    verified, errors = verify_claims(candidate, parent)
+    material_claims = [c for c in verified.claims if c.source_field == "material"]
+    assert material_claims
+    assert any(not c.verified for c in material_claims)
+    assert errors
+
+
+def test_verify_claims_dedupes_auto_extracted_dimensions(sample_parent_sku):
+    """Duplicate dimension mentions should collapse into a single claim."""
+    parent = ParentSKU(
+        master_sku=sample_parent_sku.master_sku,
+        category=sample_parent_sku.category,
+        collection=sample_parent_sku.collection,
+        current_title=sample_parent_sku.current_title,
+        current_description=sample_parent_sku.current_description,
+        center_to_center=18.0,
+        variants=sample_parent_sku.variants,
+    )
+    candidate = Candidate(
+        google_title="18-inch center-to-center towel bar",
+        google_short_title="18-inch towel bar",
+        google_description="Test description.",
+        bing_title="18-inch center-to-center towel bar",
+        bing_description="Test description.",
+        shopify_title="Test Shopify Title",
+        shopify_description="<p>Test description</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    verified, _ = verify_claims(candidate, parent)
+    dimension_claims = [c for c in verified.claims if c.source_field == "center_to_center"]
+    assert len(dimension_claims) == 1
+
+
 # Task 5.2b: Candidate Content Validation Tests
 def test_validate_candidate_content_rejects_catalog_csv_references():
     """Candidate content with catalog_csv references is rejected."""

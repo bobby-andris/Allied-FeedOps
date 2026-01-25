@@ -2,6 +2,7 @@
 import re
 
 from feedops.models import ParentSKU, Candidate, Claim, Score
+from feedops.pipeline.claim_extraction import extract_claims, dedupe_claims
 
 
 def get_source_value(parent_sku: ParentSKU, field_name: str) -> str | None:
@@ -138,7 +139,10 @@ def verify_claims(candidate: Candidate, parent_sku: ParentSKU) -> tuple[Candidat
     verified_claims = []
     errors = []
 
-    for claim in candidate.claims:
+    extracted_claims = extract_claims(candidate, parent_sku)
+    merged_claims = dedupe_claims(list(candidate.claims) + extracted_claims)
+
+    for claim in merged_claims:
         verified = verify_claim(claim, parent_sku)
         verified_claims.append(verified)
         if not verified.verified:
