@@ -6,6 +6,7 @@ from feedops.models import ParentSKU, Candidate, Variant
 from feedops.pipeline.finish_injection import (
     generate_variant_description,
     generate_variant_title,
+    generate_variant_keywords,
 )
 from feedops.pipeline.enrichment import detect_collection
 from feedops.pipeline.selection import RankedCandidate
@@ -365,11 +366,18 @@ def generate_variant_patch_preview(
         platform=platform,
     )
     
+    # Generate finish-specific keywords for this variant
+    variant_keywords = generate_variant_keywords(
+        finish_name=finish_name,
+        category=parent_sku.category,
+    )
+    
     # Build meta
     meta = {
         "master_sku": parent_sku.master_sku,
         "option_sku": variant.option_sku,
         "finish": finish_name,
+        "finish_keywords": variant_keywords,
         "generated_at": datetime.now().isoformat(),
         "quality_score": candidate.final_score.composite,
         "approval_status": candidate.final_score.approval_status,

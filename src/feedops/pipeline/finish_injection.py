@@ -288,3 +288,54 @@ def generate_variant_title(
     else:
         # Append finish at end
         return f"{base_title} | {finish_name}"
+
+
+def generate_variant_keywords(
+    finish_name: str,
+    category: str | None = None,
+) -> list[str]:
+    """Generate finish-specific keywords for a variant.
+
+    These keywords are used for variant-level targeting, NOT at the parent SKU level.
+
+    Args:
+        finish_name: The variant's finish (e.g., "Fire Engine Red", "Polished Chrome")
+        category: The product category for more specific keywords (e.g., "Towel Bars")
+
+    Returns:
+        List of finish-specific keywords for search targeting
+    """
+    keywords = []
+    finish_lower = finish_name.lower()
+
+    # Base finish + product type keywords
+    keywords.append(f"{finish_lower} bathroom hardware")
+    keywords.append(f"{finish_lower} bath accessories")
+
+    # Category-specific keywords if provided
+    if category:
+        category_lower = category.lower()
+        keywords.append(f"{finish_lower} {category_lower}")
+
+    # Check finish metadata for additional keyword opportunities
+    meta = get_finish_metadata(finish_name)
+    if meta:
+        description_type = meta.get("description_type", "coordination")
+        category_type = meta.get("category", "")
+
+        # Statement finishes get additional bold/unique keywords
+        if description_type == "statement":
+            keywords.append(f"{finish_lower} statement finish")
+            keywords.append(f"{finish_lower} designer hardware")
+
+        # Living finish gets patina keywords
+        if category_type == "living_finish":
+            keywords.append(f"{finish_lower} living finish")
+            keywords.append(f"{finish_lower} patina")
+
+        # Statement colors get color-specific keywords
+        if category_type == "statement_color":
+            keywords.append(f"{finish_lower} colored hardware")
+            keywords.append(f"{finish_lower} color bathroom")
+
+    return keywords

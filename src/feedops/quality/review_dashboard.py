@@ -14,6 +14,24 @@ from feedops.quality.data_loader import (
     get_summary_stats,
     load_all_sku_data,
 )
+from feedops.pipeline.finish_injection import (
+    generate_variant_title,
+    generate_variant_description,
+    generate_variant_keywords,
+)
+
+
+def load_available_finishes() -> list[str]:
+    """Load available finish names from finishes.txt."""
+    finishes_path = Path(__file__).parent.parent.parent.parent / "data" / "finishes.txt"
+    if not finishes_path.exists():
+        return []
+    finishes = []
+    for line in finishes_path.read_text().strip().split("\n"):
+        if ":" in line:
+            finish_name = line.split(":")[0]
+            finishes.append(finish_name)
+    return sorted(finishes)
 
 
 def run_dashboard(
@@ -290,6 +308,9 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
 
         # Three-way content comparison
         render_content_comparison(sku_data, platform)
+
+        # Variant preview section
+        render_variant_preview(sku_data)
         
         st.divider()
         
@@ -714,6 +735,92 @@ def render_score_panel(sku_data: SKUData) -> None:
         st.bar_chart(df)
     else:
         st.info("No score data available for chart")
+
+
+def render_variant_preview(sku_data: SKUData) -> None:
+    """Render variant preview section with finish selector."""
+    st.divider()
+    st.subheader("Variant Preview")
+    st.caption(
+        "Preview how content will appear for specific finish variants. "
+        "Lifestyle images above apply to all variants."
+    )
+
+    # Load available finishes
+    available_finishes = load_available_finishes()
+    if not available_finishes:
+        st.info("Finish data not available. Ensure data/finishes.txt exists.")
+        return
+
+    # Get base content from candidate (prefer Google, fall back to others)
+    candidate_content = (
+        sku_data.candidate.get("google")
+        or sku_data.candidate.get("bing")
+        or sku_data.candidate.get("shopify")
+    )
+
+    if not candidate_content:
+        st.info("No candidate content available for variant preview.")
+        return
+
+    base_title = candidate_content.title
+    base_description = candidate_content.description
+
+    # Get collection info from original data
+    collection_name = None
+    category = None
+    if sku_data.original:
+        collection_name = sku_data.original.collection
+        category = sku_data.original.category
+
+    # Finish selector dropdown
+    selected_finish = st.selectbox(
+        "Select Finish to Preview",
+        options=available_finishes,
+        key=f"finish_select_{sku_data.sku}",
+    )
+
+    if selected_finish:
+        # Generate variant-specific content
+        variant_title = generate_variant_title(base_title, selected_finish)
+        variant_description = generate_variant_description(
+            base_description,
+            selected_finish,
+            collection_name=collection_name,
+            platform="google",
+        )
+        variant_keywords = generate_variant_keywords(selected_finish, category)
+
+        # Display variant preview in two columns
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("##### Variant Title")
+            st.markdown(
+                f"<div class='content-box'>{html.escape(variant_title)}</div>",
+                unsafe_allow_html=True,
+            )
+
+            st.markdown("##### Variant Keywords")
+            if variant_keywords:
+                chips_html = "".join(
+                    f"<span class='keyword-chip'>{html.escape(kw)}</span>"
+                    for kw in variant_keywords
+                )
+                st.markdown(chips_html, unsafe_allow_html=True)
+            else:
+                st.caption("No keywords generated")
+
+        with col2:
+            st.markdown("##### Variant Description")
+            # Truncate long descriptions for preview
+            preview_desc = variant_description
+            if len(preview_desc) > 500:
+                preview_desc = preview_desc[:500] + "..."
+            st.markdown(
+                f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(preview_desc)}</div>",
+                unsafe_allow_html=True,
+            )
 
 
 def parse_args():

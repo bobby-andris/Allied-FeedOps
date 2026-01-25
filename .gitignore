@@ -1,5 +1,8 @@
-# Local data (do not commit)
-data/
+# Local data (do not commit most data files)
+data/*
+# But allow finish metadata files (needed for Streamlit Cloud)
+!data/finishes.txt
+!data/finish-metadata.json
 creds/
 .playwright/
 .playwright-mcp/

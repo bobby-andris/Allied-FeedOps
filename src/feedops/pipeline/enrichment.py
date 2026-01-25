@@ -160,15 +160,7 @@ class ProductEnrichment:
         if self.finish_variety.variety_message:
             rows.append(Evidence(
                 field="finish_variety",
-                value=self.finish_variety.variety_message,
-                source="enrichment_finishes",
-            ))
-        
-        if self.finish_variety.has_statement_finishes:
-            statement_list = list(self.finish_variety.statement_finishes.keys())[:5]
-            rows.append(Evidence(
-                field="statement_finishes",
-                value=", ".join(statement_list),
+                value="Multiple designer finish options available",
                 source="enrichment_finishes",
             ))
         
@@ -571,10 +563,9 @@ def analyze_finish_variety(parent_sku: ParentSKU) -> FinishVarietyContext:
         variety_level = "standard"
         variety_message = None
     
-    # Generate finish-specific keywords
+    # NOTE: finish_keywords intentionally left empty at parent level
+    # Each variant should have keywords for its specific finish only
     finish_keywords = []
-    for finish in statement:
-        finish_keywords.append(f"{finish} bathroom hardware")
     
     return FinishVarietyContext(
         total_count=count,
@@ -610,10 +601,6 @@ def detect_competitive_positioning(
         unique_differentiators.append(
             f"{finish_variety.total_count} finish options including statement colors"
         )
-    
-    # Statement finishes
-    if finish_variety.has_statement_finishes:
-        competitor_gap_keywords.extend(finish_variety.finish_keywords[:3])
     
     # Functional innovations
     for feature in features:
@@ -695,10 +682,7 @@ def enrich_product(parent_sku: ParentSKU) -> ProductEnrichment:
     for f in features:
         design_intent_keywords.extend(f.keywords)
     
-    # 4. Finish-specific keywords
-    design_intent_keywords.extend(finish_variety.finish_keywords)
-    
-    # 5. Competitor gap keywords
+    # 4. Competitor gap keywords (finish keywords excluded - variant-specific)
     design_intent_keywords.extend(competitive.competitor_gap_keywords)
     
     # Dedupe while preserving order
