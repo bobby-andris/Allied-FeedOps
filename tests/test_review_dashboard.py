@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from feedops.quality.review_dashboard import format_variant_description
+
 
 @dataclass
 class MockContent:
@@ -229,3 +231,15 @@ class TestExpanderLabelLogic:
         assert "Score: 92.0%" in expander_label
         assert "🟢 +7.0%" in expander_label
         assert "Original content only" not in expander_label
+
+
+class TestVariantDescriptionFormatting:
+    """Tests for variant description preview formatting."""
+
+    def test_returns_full_text_when_no_limit(self):
+        text = "x" * 800
+        assert format_variant_description(text, None) == text
+
+    def test_truncates_when_limit_is_set(self):
+        text = "x" * 600
+        assert format_variant_description(text, 100) == ("x" * 100) + "..."

@@ -737,6 +737,15 @@ def render_score_panel(sku_data: SKUData) -> None:
         st.info("No score data available for chart")
 
 
+def format_variant_description(description: str, max_chars: int | None = None) -> str:
+    """Format variant description for preview display."""
+    if max_chars is None or max_chars <= 0:
+        return description
+    if len(description) <= max_chars:
+        return description
+    return description[:max_chars] + "..."
+
+
 def render_variant_preview(sku_data: SKUData) -> None:
     """Render variant preview section with finish selector."""
     st.divider()
@@ -813,10 +822,7 @@ def render_variant_preview(sku_data: SKUData) -> None:
 
         with col2:
             st.markdown("##### Variant Description")
-            # Truncate long descriptions for preview
-            preview_desc = variant_description
-            if len(preview_desc) > 500:
-                preview_desc = preview_desc[:500] + "..."
+            preview_desc = format_variant_description(variant_description)
             st.markdown(
                 f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(preview_desc)}</div>",
                 unsafe_allow_html=True,
