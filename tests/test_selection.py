@@ -1,12 +1,12 @@
+import feedops.pipeline.selection as selection_module
 from feedops.models import Candidate, Score
 from feedops.pipeline.selection import (
-    select_best_candidate,
-    sanitize_candidate_content,
     _dedupe_product_types,
     _enforce_canonical_product_type,
+    sanitize_candidate_content,
+    select_best_candidate,
 )
 from feedops.quality.scoring import CandidateHeuristicScore, HeuristicScore
-import feedops.pipeline.selection as selection_module
 
 
 def _make_candidate(
@@ -198,4 +198,25 @@ def test_sanitize_candidate_content_with_category():
     sanitized = sanitize_candidate_content(candidate, category="Towel Bars")
     # Check that synonym was replaced with canonical form in title
     assert "Towel Bar" in sanitized.google_title
+
+
+def test_sanitize_candidate_content_strips_keyword_spam():
+    candidate = _make_candidate(
+        google_title="18-Inch Towel Bar Solid Brass Allied Brass",
+        google_description=(
+            "Search terms shoppers use: matte black towel bar, towel rack\n"
+            "Highlights:\n- Solid brass construction\n"
+        ),
+    )
+    sanitized = sanitize_candidate_content(candidate, category="Towel Bars")
+    assert "Search terms shoppers use" not in sanitized.google_description
+
+
+def test_sanitize_candidate_content_formats_brand_with_pipe():
+    candidate = _make_candidate(
+        google_title="18-Inch Towel Bar Solid Brass Allied Brass",
+        google_description="Add storage with solid brass.",
+    )
+    sanitized = sanitize_candidate_content(candidate, category="Towel Bars")
+    assert sanitized.google_title.endswith("| Allied Brass")
     assert "towel holder" not in sanitized.google_title.lower()

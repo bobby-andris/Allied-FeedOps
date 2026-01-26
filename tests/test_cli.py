@@ -1,9 +1,10 @@
 # tests/test_cli.py
 import subprocess
 import sys
-import pytest
 from pathlib import Path
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 
 def test_cli_help_shows_commands():
@@ -28,16 +29,15 @@ def test_cli_version_shows_version():
     assert "0.1.0" in result.stdout
 
 
-def test_compare_runs_help_available():
-    """compare-runs command is registered and documented."""
+def test_compare_runs_command_removed():
+    """compare-runs command should no longer be available."""
     result = subprocess.run(
-        [sys.executable, "-m", "feedops.cli.main", "compare-runs", "--help"],
+        [sys.executable, "-m", "feedops.cli.main", "--help"],
         capture_output=True,
         text=True,
     )
     assert result.returncode == 0
-    assert "--baseline-exports-dir" in result.stdout
-    assert "--candidate-exports-dir" in result.stdout
+    assert "compare-runs" not in result.stdout
 
 
 def test_optimize_help_includes_candidate_flags():
@@ -52,94 +52,15 @@ def test_optimize_help_includes_candidate_flags():
     assert "--candidate-weights" in result.stdout
 
 
-def test_compare_runs_writes_html(tmp_path):
-    """compare-runs generates a self-contained HTML report."""
-    baseline_dir = tmp_path / "baseline"
-    candidate_dir = tmp_path / "candidate"
-    baseline_dir.mkdir()
-    candidate_dir.mkdir()
-    (baseline_dir / "google-patch-ABC.json").write_text(
-        """{
-  "offerId": "x",
-  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-  "short_title": "18-Inch Towel Bar",
-  "description": "Upgrade your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
-}"""
-    )
-    (candidate_dir / "google-patch-ABC.json").write_text(
-        """{
-  "offerId": "x",
-  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-  "short_title": "18-Inch Towel Bar",
-  "description": "Refresh your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
-}"""
-    )
-    output_path = tmp_path / "compare.html"
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "feedops.cli.main",
-            "compare-runs",
-            "--baseline-exports-dir",
-            str(baseline_dir),
-            "--candidate-exports-dir",
-            str(candidate_dir),
-            "--output",
-            str(output_path),
-        ],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert output_path.exists()
-    content = output_path.read_text()
-    assert "Baseline" in content
-    assert "Candidate" in content
-    assert "ABC" in content
+def test_default_output_dirs_point_to_dashboard_data():
+    from feedops.cli import defaults
 
-
-def test_compare_runs_creates_output_parent(tmp_path):
-    """compare-runs creates output directory when needed."""
-    baseline_dir = tmp_path / "baseline"
-    candidate_dir = tmp_path / "candidate"
-    baseline_dir.mkdir()
-    candidate_dir.mkdir()
-    (baseline_dir / "google-patch-ABC.json").write_text(
-        """{
-  "offerId": "x",
-  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-  "short_title": "18-Inch Towel Bar",
-  "description": "Upgrade your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
-}"""
+    assert str(defaults.CANDIDATE_EXPORTS_DIR).endswith(
+        "dashboard_data/lifestyle-eval-candidate"
     )
-    (candidate_dir / "google-patch-ABC.json").write_text(
-        """{
-  "offerId": "x",
-  "title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-  "short_title": "18-Inch Towel Bar",
-  "description": "Refresh your bath with a solid brass towel bar. Center-to-center: 18 in. Projection: 2.5 in. Warranty: Limited Lifetime Warranty."
-}"""
+    assert str(defaults.CANDIDATE_REPORTS_DIR).endswith(
+        "dashboard_data/lifestyle-eval-candidate/reports"
     )
-    output_path = tmp_path / "nested" / "compare.html"
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "feedops.cli.main",
-            "compare-runs",
-            "--baseline-exports-dir",
-            str(baseline_dir),
-            "--candidate-exports-dir",
-            str(candidate_dir),
-            "--output",
-            str(output_path),
-        ],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert output_path.exists()
 
 
 def test_evaluate_exports_creates_output_parent(tmp_path):
@@ -180,7 +101,7 @@ def test_healthcheck_checks_catalog(tmp_path):
     catalog = tmp_path / "catalog.csv"
     catalog.write_text("MasterSKU,OPTION SKU\nTEST,TEST-PC\n")
 
-    with patch.dict('os.environ', {'CATALOG_PATH': str(catalog)}):
+    with patch.dict("os.environ", {"CATALOG_PATH": str(catalog)}):
         result = subprocess.run(
             [sys.executable, "-m", "feedops.cli.main", "healthcheck"],
             capture_output=True,
@@ -252,7 +173,7 @@ async def test_optimize_pipeline_integration(tmp_path):
         },
     }
 
-    with patch('feedops.pipeline.optimize.get_provider') as mock_get_provider:
+    with patch("feedops.pipeline.optimize.get_provider") as mock_get_provider:
         mock_provider = AsyncMock()
         mock_provider.generate.side_effect = [
             weak_response,
@@ -261,7 +182,9 @@ async def test_optimize_pipeline_integration(tmp_path):
         ]
         mock_provider.name = "mock/test"
         mock_get_provider.return_value = mock_provider
-        with patch("feedops.pipeline.generator.fetch_image", new_callable=AsyncMock) as mock_fetch:
+        with patch(
+            "feedops.pipeline.generator.fetch_image", new_callable=AsyncMock
+        ) as mock_fetch:
             mock_fetch.return_value = None
             result = await optimize_parent_sku(
                 master_sku="101",
@@ -277,4 +200,65 @@ async def test_optimize_pipeline_integration(tmp_path):
         assert "google" in result.patch_previews
         assert "bing" in result.patch_previews
         assert "shopify" in result.patch_previews
-        assert result.patch_previews["google"]["title"] == strong_response["google_title"]
+        assert (
+            result.patch_previews["google"]["title"] == strong_response["google_title"]
+        )
+
+
+@pytest.mark.asyncio
+async def test_optimize_triggers_sync_for_dashboard_exports(tmp_path, monkeypatch):
+    """Ensure dashboard exports trigger lifestyle image path sync."""
+    from feedops.pipeline.optimize import optimize_parent_sku
+
+    response = {
+        "google_title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        "google_short_title": "18-Inch Towel Bar",
+        "google_description": "Add storage with solid brass.\nHighlights:\n- Solid brass\nSpecs:\n- 18 in\n",
+        "bing_title": "18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
+        "bing_description": "Add storage with solid brass.",
+        "shopify_title": "18-Inch Solid Brass Towel Bar | Allied Brass",
+        "shopify_description": "<p>Upgrade your bath.</p><ul><li>Solid brass</li></ul>",
+        "claims": [],
+        "self_score": {
+            "specificity": 8,
+            "benefit_coverage": 8,
+            "keyword_inclusion": 8,
+            "format_adherence": 8,
+            "brand_voice": 8,
+            "factual_accuracy": 8,
+        },
+    }
+
+    sync_calls = {}
+
+    def fake_sync_lifestyle_images(exports_dir, **_kwargs):
+        sync_calls["exports_dir"] = Path(exports_dir)
+        return {"files_scanned": 0}
+
+    monkeypatch.setattr(
+        "feedops.quality.data_loader.sync_lifestyle_images",
+        fake_sync_lifestyle_images,
+    )
+
+    with patch("feedops.pipeline.optimize.get_provider") as mock_get_provider:
+        mock_provider = AsyncMock()
+        mock_provider.generate.side_effect = [response, response, response]
+        mock_provider.name = "mock/test"
+        mock_get_provider.return_value = mock_provider
+        with patch(
+            "feedops.pipeline.generator.fetch_image", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = None
+            exports_dir = tmp_path / "dashboard_data" / "lifestyle-eval-candidate"
+            output_dir = exports_dir / "reports"
+            await optimize_parent_sku(
+                master_sku="101",
+                catalog_path=Path("samples/sample-catalog.csv"),
+                dry_run=True,
+                output_dir=output_dir,
+                exports_dir=exports_dir,
+                num_candidates=3,
+            )
+
+    assert sync_calls["exports_dir"] == exports_dir
+    assert sync_calls["exports_dir"] == exports_dir

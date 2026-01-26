@@ -363,6 +363,9 @@ def generate_variant_patch_preview(
         collection_name=collection_name,
         collection_group=collection_group,
         collection_subgroup=collection_subgroup,
+        category=parent_sku.category,
+        material=parent_sku.material,
+        finish_count=len(parent_sku.variants) if parent_sku.variants else None,
         platform=platform,
     )
     

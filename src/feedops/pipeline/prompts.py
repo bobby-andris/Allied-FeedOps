@@ -110,6 +110,16 @@ CRITICAL RULES:
   finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
   These hollow marketing words damage trust. Use specific, verifiable language instead.
 
+FINISH STRATEGY:
+- MasterSKU descriptions must be finish-neutral (do not describe a specific finish).
+- Finish-forward variant phrasing is applied downstream by finish injection.
+- If asked to write variant-level content, include the finish name in the first sentence without burying the problem-solution hook.
+
+COMPETITIVE POSITIONING (EVIDENCE-GATED):
+- If material evidence supports it, emphasize solid brass construction as a differentiator.
+- If a verified finish count is available, mention finish variety in descriptions.
+- Competitor patterns: titles lead with product type + size + finish; material is called out early; finish variety is mentioned when available.
+
 DESIGN CONTEXT (from enrichment):
 - If collection_context is provided, the product belongs to a named design collection. Mention the
   collection name in descriptions to help buyers coordinate matching pieces.

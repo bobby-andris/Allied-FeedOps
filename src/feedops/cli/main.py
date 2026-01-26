@@ -1,6 +1,7 @@
 """FeedOps CLI entry point."""
-import os
+
 import asyncio
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -14,6 +15,12 @@ import typer
 from rich.console import Console
 
 import feedops
+from feedops.cli.defaults import (
+    BASELINE_EXPORTS_DIR,
+    BASELINE_REPORTS_DIR,
+    CANDIDATE_EXPORTS_DIR,
+    CANDIDATE_REPORTS_DIR,
+)
 
 app = typer.Typer(
     name="feedops",
@@ -78,29 +85,44 @@ def healthcheck():
         all_ok = False
 
     # Check 3: Output directories
-    for dir_name in ["reports", "exports"]:
-        dir_path = Path(dir_name)
+    for dir_path in [CANDIDATE_REPORTS_DIR, CANDIDATE_EXPORTS_DIR]:
         if dir_path.exists():
-            console.print(f"[green]✓[/green] Directory: {dir_name}/")
+            console.print(f"[green]✓[/green] Directory: {dir_path}/")
         else:
-            console.print(f"[yellow]![/yellow] Directory missing: {dir_name}/ (will be created)")
+            console.print(
+                f"[yellow]![/yellow] Directory missing: {dir_path}/ (will be created)"
+            )
 
     # Summary
     console.print()
     if all_ok:
         console.print("[bold green]All critical checks passed![/bold green]")
     else:
-        console.print("[bold red]Some checks failed. Fix issues before running optimize.[/bold red]")
+        console.print(
+            "[bold red]Some checks failed. Fix issues before running optimize.[/bold red]"
+        )
         raise typer.Exit(1)
 
 
 @app.command()
 def optimize(
-    parent_sku: str = typer.Option(..., "--parent-sku", "-p", help="MasterSKU to optimize"),
-    dry_run: bool = typer.Option(True, "--dry-run/--no-dry-run", help="Preview only, no updates"),
-    output_dir: str = typer.Option("reports", "--output-dir", "-o", help="Output directory"),
-    exports_dir: str = typer.Option("exports", "--exports-dir", help="Export directory for patch JSON"),
-    catalog: Optional[str] = typer.Option(None, "--catalog", "-c", help="Path to catalog CSV"),
+    parent_sku: str = typer.Option(
+        ..., "--parent-sku", "-p", help="MasterSKU to optimize"
+    ),
+    dry_run: bool = typer.Option(
+        True, "--dry-run/--no-dry-run", help="Preview only, no updates"
+    ),
+    output_dir: str = typer.Option(
+        str(CANDIDATE_REPORTS_DIR), "--output-dir", "-o", help="Output directory"
+    ),
+    exports_dir: str = typer.Option(
+        str(CANDIDATE_EXPORTS_DIR),
+        "--exports-dir",
+        help="Export directory for patch JSON",
+    ),
+    catalog: Optional[str] = typer.Option(
+        None, "--catalog", "-c", help="Path to catalog CSV"
+    ),
     candidates: Optional[int] = typer.Option(
         None, "--candidates", "-n", help="Number of candidates to generate"
     ),
@@ -114,7 +136,9 @@ def optimize(
     from feedops.pipeline.optimize import optimize_parent_sku
     from feedops.pipeline.selection import parse_candidate_weights
 
-    catalog_path = catalog or os.environ.get("CATALOG_PATH", "data/catalog/Product Catalog.csv")
+    catalog_path = catalog or os.environ.get(
+        "CATALOG_PATH", "data/catalog/Product Catalog.csv"
+    )
     weights = (
         parse_candidate_weights(candidate_weights)
         if candidate_weights is not None
@@ -126,15 +150,17 @@ def optimize(
     console.print(f"Dry run: {dry_run}\n")
 
     try:
-        result = asyncio.run(optimize_parent_sku(
-            master_sku=parent_sku,
-            catalog_path=catalog_path,
-            dry_run=dry_run,
-            output_dir=output_dir,
-            exports_dir=exports_dir,
-            num_candidates=candidates,
-            candidate_weights=weights,
-        ))
+        result = asyncio.run(
+            optimize_parent_sku(
+                master_sku=parent_sku,
+                catalog_path=catalog_path,
+                dry_run=dry_run,
+                output_dir=output_dir,
+                exports_dir=exports_dir,
+                num_candidates=candidates,
+                candidate_weights=weights,
+            )
+        )
 
         score = result.candidate.final_score
         console.print(f"[bold]Quality Score: {score.composite}%[/bold]")
@@ -147,7 +173,9 @@ def optimize(
         console.print(f"  Shopify: {exports_dir}/shopify-patch-{safe_sku}.json")
 
         if score.approval_status == "approved":
-            console.print("\n[bold green]Content approved for publication![/bold green]")
+            console.print(
+                "\n[bold green]Content approved for publication![/bold green]"
+            )
         elif score.approval_status == "revise":
             console.print("\n[bold yellow]Content needs revision.[/bold yellow]")
         else:
@@ -164,21 +192,25 @@ def optimize(
 @app.command(name="list-skus")
 def list_skus(
     limit: int = typer.Option(10, "--limit", "-n", help="Maximum SKUs to list"),
-    catalog: Optional[str] = typer.Option(None, "--catalog", "-c", help="Path to catalog CSV"),
+    catalog: Optional[str] = typer.Option(
+        None, "--catalog", "-c", help="Path to catalog CSV"
+    ),
 ):
     """List available MasterSKUs in catalog."""
-    from feedops.loaders import load_catalog, list_master_skus
+    from feedops.loaders import list_master_skus, load_catalog
 
-    catalog_path = catalog or os.environ.get("CATALOG_PATH", "data/catalog/Product Catalog.csv")
+    catalog_path = catalog or os.environ.get(
+        "CATALOG_PATH", "data/catalog/Product Catalog.csv"
+    )
 
     try:
         df = load_catalog(catalog_path)
         skus = list_master_skus(df)
-        
+
         console.print(f"\n[bold]MasterSKUs in catalog ({len(skus)} total)[/bold]\n")
         for sku in skus[:limit]:
             console.print(f"  {sku}")
-        
+
         if len(skus) > limit:
             console.print(f"\n  ... and {len(skus) - limit} more")
     except FileNotFoundError as e:
@@ -188,9 +220,14 @@ def list_skus(
 
 @app.command(name="evaluate-exports")
 def evaluate_exports(
-    exports_dir: str = typer.Option("exports", "--exports-dir", help="Directory of export patches"),
+    exports_dir: str = typer.Option(
+        "exports", "--exports-dir", help="Directory of export patches"
+    ),
     output: Optional[str] = typer.Option(
-        None, "--output", "-o", help="Write markdown report to this path (default: reports/)"
+        None,
+        "--output",
+        "-o",
+        help="Write markdown report to this path (default: reports/)",
     ),
 ):
     """Evaluate existing export patch JSON files with heuristic scoring."""
@@ -209,63 +246,37 @@ def evaluate_exports(
     console.print(f"\n[bold]Quality evaluation saved to:[/bold] {output_path}")
 
 
-@app.command(name="compare-runs")
-def compare_runs(
-    baseline_exports_dir: str = typer.Option(..., "--baseline-exports-dir", help="Baseline exports dir"),
-    candidate_exports_dir: str = typer.Option(..., "--candidate-exports-dir", help="Candidate exports dir"),
-    baseline_reports_dir: Optional[str] = typer.Option(
-        None, "--baseline-reports-dir", help="Baseline reports dir (for prompts/evidence)"
-    ),
-    candidate_reports_dir: Optional[str] = typer.Option(
-        None, "--candidate-reports-dir", help="Candidate reports dir (for prompts/evidence)"
-    ),
-    output: Optional[str] = typer.Option(
-        None, "--output", "-o", help="Write HTML report to this path (default: reports/)"
-    ),
-):
-    """Generate an HTML dashboard comparing two runs."""
-    from feedops.quality.dashboard import compare_runs_to_html
-
-    html_report = compare_runs_to_html(
-        baseline_exports_dir=Path(baseline_exports_dir),
-        candidate_exports_dir=Path(candidate_exports_dir),
-        baseline_reports_dir=Path(baseline_reports_dir) if baseline_reports_dir else None,
-        candidate_reports_dir=Path(candidate_reports_dir) if candidate_reports_dir else None,
-    )
-
-    if output is None:
-        output = f"reports/compare-runs-{datetime.now().strftime('%Y%m%d-%H%M%S')}.html"
-
-    output_path = Path(output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(html_report)
-    console.print(f"\n[bold]Comparison dashboard saved to:[/bold] {output_path}")
-
-
 @app.command(name="review-dashboard")
 def review_dashboard(
     baseline_exports_dir: str = typer.Option(
-        "exports", "--baseline", "-b", help="Baseline exports directory"
+        str(BASELINE_EXPORTS_DIR), "--baseline", "-b", help="Baseline exports directory"
     ),
     candidate_exports_dir: str = typer.Option(
-        "exports/enriched-v2", "--candidate", "-c", help="Candidate exports directory"
+        str(CANDIDATE_EXPORTS_DIR),
+        "--candidate",
+        "-c",
+        help="Candidate exports directory",
     ),
     catalog: Optional[str] = typer.Option(
         None, "--catalog", help="Path to Product Catalog.csv"
     ),
     baseline_reports_dir: Optional[str] = typer.Option(
-        None, "--baseline-reports", help="Baseline reports directory"
+        str(BASELINE_REPORTS_DIR),
+        "--baseline-reports",
+        help="Baseline reports directory",
     ),
     candidate_reports_dir: Optional[str] = typer.Option(
-        None, "--candidate-reports", help="Candidate reports directory"
+        str(CANDIDATE_REPORTS_DIR),
+        "--candidate-reports",
+        help="Candidate reports directory",
     ),
     port: int = typer.Option(8501, "--port", "-p", help="Port for Streamlit server"),
 ):
     """Launch the interactive Streamlit review dashboard.
-    
+
     This opens a browser-based dashboard for reviewing and comparing
     optimized product titles and descriptions, with:
-    
+
     - Three-way comparison (Original / Baseline / Candidate)
     - Product images
     - Keyword and enrichment reasoning inputs
@@ -274,10 +285,10 @@ def review_dashboard(
     """
     import subprocess
     import sys
-    
+
     # Build the streamlit command
     dashboard_module = "feedops.quality.review_dashboard"
-    
+
     # Prepare environment variables for the dashboard
     env = os.environ.copy()
     env["FEEDOPS_BASELINE_DIR"] = baseline_exports_dir
@@ -288,34 +299,42 @@ def review_dashboard(
         env["FEEDOPS_BASELINE_REPORTS"] = baseline_reports_dir
     if candidate_reports_dir:
         env["FEEDOPS_CANDIDATE_REPORTS"] = candidate_reports_dir
-    
+
     # Get the path to the dashboard module
     from feedops.quality import review_dashboard as dashboard_mod
+
     dashboard_path = Path(dashboard_mod.__file__)
-    
+
     console.print(f"\n[bold]Launching Review Dashboard[/bold]")
     console.print(f"Baseline: {baseline_exports_dir}")
     console.print(f"Candidate: {candidate_exports_dir}")
     console.print(f"Port: {port}\n")
-    
+
     # Launch streamlit
     cmd = [
-        sys.executable, "-m", "streamlit", "run",
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
         str(dashboard_path),
-        "--server.port", str(port),
-        "--server.headless", "false",
+        "--server.port",
+        str(port),
+        "--server.headless",
+        "false",
         "--",
-        "--baseline", baseline_exports_dir,
-        "--candidate", candidate_exports_dir,
+        "--baseline",
+        baseline_exports_dir,
+        "--candidate",
+        candidate_exports_dir,
     ]
-    
+
     if catalog:
         cmd.extend(["--catalog", catalog])
     if baseline_reports_dir:
         cmd.extend(["--baseline-reports", baseline_reports_dir])
     if candidate_reports_dir:
         cmd.extend(["--candidate-reports", candidate_reports_dir])
-    
+
     try:
         subprocess.run(cmd, env=env, check=True)
     except subprocess.CalledProcessError as e:

@@ -5,6 +5,7 @@ FeedOps is an AI-powered system that automatically improves product titles and d
 ## What It Does
 
 When you sell products online, the quality of your product titles and descriptions directly affects:
+
 - How often your products appear in search results
 - Whether customers click on your listings
 - How much you pay for ads (better content = lower cost per click)
@@ -68,6 +69,7 @@ FEEDOPS_CANDIDATE_WEIGHTS=google=0.7,bing=0.15,shopify=0.15
 ### 3. Add Your Catalog
 
 Place your product catalog CSV at:
+
 ```
 data/catalog/Product Catalog.csv
 ```
@@ -90,11 +92,13 @@ PYTHONPATH=./src .venv/bin/python -m feedops.cli.main list-skus
 
 ## Understanding the Output
 
-After running an optimization, you get a report and platform-specific patches:
+After running an optimization, you get a report and platform-specific patches written to the
+Streamlit dashboard candidate folder by default.
 
-### Report (`reports/sku-{SKU}-*.md`)
+### Report (`dashboard_data/lifestyle-eval-candidate/reports/sku-{SKU}-*.md`)
 
 A markdown report showing:
+
 - Original vs optimized content
 - Quality scores (0-100%)
 - Claim verification results
@@ -103,11 +107,13 @@ A markdown report showing:
 ### JSON Patches
 
 Platform-specific patches are written to:
-- `exports/google-patch-{SKU}.json`
-- `exports/bing-patch-{SKU}.json`
-- `exports/shopify-patch-{SKU}.json`
+
+- `dashboard_data/lifestyle-eval-candidate/google-patch-{SKU}.json`
+- `dashboard_data/lifestyle-eval-candidate/bing-patch-{SKU}.json`
+- `dashboard_data/lifestyle-eval-candidate/shopify-patch-{SKU}.json`
 
 Example (Google):
+
 ```json
 {
   "offerId": "shopify_US_123_456",
@@ -122,16 +128,17 @@ Example (Google):
 
 Every piece of generated content is scored on 6 dimensions:
 
-| Dimension | What It Measures |
-|-----------|------------------|
-| Specificity | Concrete specs vs vague claims |
-| Benefit Coverage | Customer benefits in first 150 chars |
-| Keyword Inclusion | Brand + product type + size placement |
-| Format Adherence | Character limits and structure |
-| Brand Voice | Premium tone without hype |
-| Factual Accuracy | All claims verified against source data |
+| Dimension         | What It Measures                        |
+| ----------------- | --------------------------------------- |
+| Specificity       | Concrete specs vs vague claims          |
+| Benefit Coverage  | Customer benefits in first 150 chars    |
+| Keyword Inclusion | Brand + product type + size placement   |
+| Format Adherence  | Character limits and structure          |
+| Brand Voice       | Premium tone without hype               |
+| Factual Accuracy  | All claims verified against source data |
 
 **Thresholds:**
+
 - 80%+ = Approved for publication
 - 70-79% = Needs minor revision
 - <70% = Requires major revision
@@ -160,20 +167,20 @@ Allied-FeedOps/
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `AGENTS.md` | The core rules for title/description optimization |
-| `pyproject.toml` | Dependencies and package configuration |
-| `.env.example` | Template for required environment variables |
-| `docs/testing-guide.md` | Detailed guide for testing with real SKUs |
+| File                    | Purpose                                           |
+| ----------------------- | ------------------------------------------------- |
+| `AGENTS.md`             | The core rules for title/description optimization |
+| `pyproject.toml`        | Dependencies and package configuration            |
+| `.env.example`          | Template for required environment variables       |
+| `docs/testing-guide.md` | Detailed guide for testing with real SKUs         |
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `healthcheck` | Verify configuration and connectivity |
+| Command                     | Description                              |
+| --------------------------- | ---------------------------------------- |
+| `healthcheck`               | Verify configuration and connectivity    |
 | `optimize --parent-sku SKU` | Generate optimized content for a product |
-| `list-skus` | Show available SKUs in your catalog |
+| `list-skus`                 | Show available SKUs in your catalog      |
 
 All commands support `--help` for more options.
 
@@ -197,6 +204,7 @@ All tests should pass.
 ### LLM Providers
 
 FeedOps supports two LLM providers:
+
 - **OpenAI GPT-5.2** (default, recommended)
 - **Google Gemini 3 Flash Preview** (fallback)
 

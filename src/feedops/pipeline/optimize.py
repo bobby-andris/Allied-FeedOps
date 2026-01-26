@@ -1,32 +1,34 @@
 """Main optimization pipeline orchestrator."""
+
 import json
 import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from feedops.loaders import get_parent_sku, load_catalog
 from feedops.models import Candidate
-from feedops.loaders import load_catalog, get_parent_sku
-from feedops.providers import get_provider
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.generator import build_prompt, generate_candidates
 from feedops.pipeline.keyword_placement import build_keyword_placement_plan
+from feedops.pipeline.reporter import (
+    generate_all_variant_patches,
+    generate_patch_preview,
+    generate_report,
+)
 from feedops.pipeline.selection import (
     parse_candidate_weights,
     parse_num_candidates,
     select_best_candidate,
 )
 from feedops.pipeline.verifier import verify_claims
-from feedops.pipeline.reporter import (
-    generate_report,
-    generate_patch_preview,
-    generate_all_variant_patches,
-)
+from feedops.providers import get_provider
 
 
 @dataclass
 class OptimizationResult:
     """Result of a single SKU optimization."""
+
     master_sku: str
     candidate: Candidate
     verification_errors: list[str]
@@ -59,10 +61,9 @@ def estimate_llm_cost(
     if not rates:
         return None
 
-    return (
-        (prompt_tokens / 1_000_000) * rates["input"]
-        + (completion_tokens / 1_000_000) * rates["output"]
-    )
+    return (prompt_tokens / 1_000_000) * rates["input"] + (
+        completion_tokens / 1_000_000
+    ) * rates["output"]
 
 
 async def optimize_parent_sku(
@@ -119,7 +120,11 @@ async def optimize_parent_sku(
         parent_sku, provider, num_candidates
     )
     if not candidates:
-        detail = "; ".join(generation_errors) if generation_errors else "No candidates generated"
+        detail = (
+            "; ".join(generation_errors)
+            if generation_errors
+            else "No candidates generated"
+        )
         raise ValueError(detail)
 
     evidence = build_evidence_table(parent_sku)
@@ -142,9 +147,11 @@ async def optimize_parent_sku(
             "selection_score_adjusted": best_rank.heuristic.adjusted_weighted_composite,
             "selection_weights": candidate_weights,
             "soft_gate_penalty": best_rank.heuristic.soft_gate_penalty,
-            "soft_gate_warnings": list(best_rank.heuristic.soft_gate_warnings)
-            if best_rank.heuristic.soft_gate_warnings
-            else None,
+            "soft_gate_warnings": (
+                list(best_rank.heuristic.soft_gate_warnings)
+                if best_rank.heuristic.soft_gate_warnings
+                else None
+            ),
             "soft_gate_miss_counts": best_rank.heuristic.soft_gate_miss_counts,
             "candidate_index": selected_candidate.candidate_index,
             "num_candidates": selected_candidate.num_candidates,
@@ -155,7 +162,9 @@ async def optimize_parent_sku(
     verified_candidate, errors = verify_claims(selected_candidate, parent_sku)
 
     # Step 4: Generate lifestyle images (if enabled)
-    lifestyle_images_enabled = os.environ.get("LIFESTYLE_IMAGES_ENABLED", "false").lower() == "true"
+    lifestyle_images_enabled = (
+        os.environ.get("LIFESTYLE_IMAGES_ENABLED", "false").lower() == "true"
+    )
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
 
     if lifestyle_images_enabled and gemini_api_key:
@@ -187,10 +196,11 @@ async def optimize_parent_sku(
 
         if product_image_urls:
             # Initialize generator
-            lifestyle_output_dir = Path(os.environ.get("LIFESTYLE_IMAGES_OUTPUT_DIR", "data/lifestyle_images"))
+            lifestyle_output_dir = Path(
+                os.environ.get("LIFESTYLE_IMAGES_OUTPUT_DIR", "data/lifestyle_images")
+            )
             generator = LifestyleImageGenerator(
-                api_key=gemini_api_key,
-                output_dir=lifestyle_output_dir
+                api_key=gemini_api_key, output_dir=lifestyle_output_dir
             )
 
             # Build prompts
@@ -209,7 +219,7 @@ async def optimize_parent_sku(
                 scene=scene,
                 technical=technical,
                 category=parent_sku.category,
-                num_variations=num_variations
+                num_variations=num_variations,
             )
 
             # Attach to candidate
@@ -243,9 +253,13 @@ async def optimize_parent_sku(
         generation_errors=generation_errors,
     )
     patch_previews = {
-        "google": generate_patch_preview(parent_sku, verified_candidate, platform="google"),
+        "google": generate_patch_preview(
+            parent_sku, verified_candidate, platform="google"
+        ),
         "bing": generate_patch_preview(parent_sku, verified_candidate, platform="bing"),
-        "shopify": generate_patch_preview(parent_sku, verified_candidate, platform="shopify"),
+        "shopify": generate_patch_preview(
+            parent_sku, verified_candidate, platform="shopify"
+        ),
     }
 
     # Step 6: Save outputs
@@ -266,32 +280,55 @@ async def optimize_parent_sku(
     # Save per-variant patches (finish-specific descriptions)
     variants_dir = exports_dir / "variants" / safe_sku
     variants_dir.mkdir(parents=True, exist_ok=True)
-    
-    google_variant_patches = generate_all_variant_patches(parent_sku, verified_candidate, "google")
-    bing_variant_patches = generate_all_variant_patches(parent_sku, verified_candidate, "bing")
-    shopify_variant_patches = generate_all_variant_patches(parent_sku, verified_candidate, "shopify")
-    
+
+    google_variant_patches = generate_all_variant_patches(
+        parent_sku, verified_candidate, "google"
+    )
+    bing_variant_patches = generate_all_variant_patches(
+        parent_sku, verified_candidate, "bing"
+    )
+    shopify_variant_patches = generate_all_variant_patches(
+        parent_sku, verified_candidate, "shopify"
+    )
+
     for patch in google_variant_patches:
         option_sku = patch.get("_meta", {}).get("option_sku", "unknown")
         safe_option = option_sku.replace("/", "-")
         path = variants_dir / f"google-{safe_option}.json"
         path.write_text(json.dumps(patch, indent=2))
-    
+
     for patch in bing_variant_patches:
         option_sku = patch.get("_meta", {}).get("option_sku", "unknown")
         safe_option = option_sku.replace("/", "-")
         path = variants_dir / f"bing-{safe_option}.json"
         path.write_text(json.dumps(patch, indent=2))
-    
+
     for patch in shopify_variant_patches:
         option_sku = patch.get("_meta", {}).get("option_sku", "unknown")
         safe_option = option_sku.replace("/", "-")
         path = variants_dir / f"shopify-{safe_option}.json"
         path.write_text(json.dumps(patch, indent=2))
 
-    # Step 7: Log to database
+    # Step 7: Sync lifestyle images for Streamlit dashboard outputs (if applicable)
+    if (
+        exports_dir.name == "lifestyle-eval-candidate"
+        and exports_dir.parent.name == "dashboard_data"
+    ):
+        try:
+            from feedops.quality.data_loader import sync_lifestyle_images
+
+            repo_root = Path(__file__).resolve().parents[3]
+            sync_lifestyle_images(
+                exports_dir=exports_dir,
+                images_subdir="images",
+                repo_root=repo_root,
+            )
+        except Exception:
+            pass
+
+    # Step 8: Log to database
     db_path = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
-    from feedops.db import init_db, log_optimization, log_keyword_intent_snapshot
+    from feedops.db import init_db, log_keyword_intent_snapshot, log_optimization
 
     def _split_keywords(value: str | None) -> list[str] | None:
         if not value:
@@ -316,9 +353,13 @@ async def optimize_parent_sku(
         db_path=db_path,
         master_sku=master_sku,
         item_group_id=parent_sku.item_group_id,
-        item_ids=[v.item_id for v in parent_sku.variants] if parent_sku.variants else None,
+        item_ids=(
+            [v.item_id for v in parent_sku.variants] if parent_sku.variants else None
+        ),
         external_keywords=_split_keywords(evidence_map.get("external_keywords")),
-        keyword_intent_master=_split_keywords(evidence_map.get("keyword_intent_master")),
+        keyword_intent_master=_split_keywords(
+            evidence_map.get("keyword_intent_master")
+        ),
         optimization_run_id=run_id,
     )
 

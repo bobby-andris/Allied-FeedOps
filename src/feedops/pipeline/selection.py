@@ -1,14 +1,22 @@
 """Candidate selection utilities for multi-generation runs."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 from feedops.models import Candidate
-from feedops.pipeline.validators import CUSTOMER_FIELDS, PARENTHETICAL_CITATION_PATTERN, validate_candidate_content
-from feedops.pipeline.keyword_placement import KeywordPlacementPlan, validate_candidate_keyword_placement, get_canonical_product_type
+from feedops.pipeline.keyword_placement import (
+    KeywordPlacementPlan,
+    get_canonical_product_type,
+    validate_candidate_keyword_placement,
+)
+from feedops.pipeline.validators import (
+    CUSTOMER_FIELDS,
+    PARENTHETICAL_CITATION_PATTERN,
+    validate_candidate_content,
+)
 from feedops.quality.scoring import CandidateHeuristicScore, score_candidate
-
 
 DEFAULT_NUM_CANDIDATES = 3
 DEFAULT_WEIGHTS = {"google": 0.7, "bing": 0.15, "shopify": 0.15}
@@ -34,6 +42,49 @@ _PRODUCT_TYPE_SYNONYMS = {
 }
 
 
+# Patterns for SEO keyword spam to strip from descriptions
+_KEYWORD_SPAM_PATTERNS = [
+    r"Search terms shoppers use:[^\n]*\n?",
+    r"Keywords:[^\n]*\n?",
+    r"Related searches:[^\n]*\n?",
+    r"Popular search terms:[^\n]*\n?",
+]
+
+
+def _strip_keyword_spam(text: str) -> str:
+    """Remove SEO keyword lists from descriptions.
+
+    These patterns sometimes appear when the LLM includes keyword research
+    directly in customer-facing content instead of weaving keywords naturally.
+    """
+    result = text
+    for pattern in _KEYWORD_SPAM_PATTERNS:
+        result = re.sub(pattern, "", result, flags=re.IGNORECASE)
+    return result.strip()
+
+
+def _ensure_brand_format(title: str) -> str:
+    """Ensure Allied Brass has proper pipe separator and is at end.
+
+    Fixes titles like "...Solid Brass Hardware Allied Brass" by ensuring
+    the brand is properly separated with a pipe character.
+    """
+    # Remove any trailing brand first (various formats)
+    brand_patterns = [
+        r"\s*\|\s*Allied Brass\s*$",  # | Allied Brass
+        r"\s+Allied Brass\s*$",  # Allied Brass (no pipe)
+    ]
+    clean_title = title
+    for pattern in brand_patterns:
+        clean_title = re.sub(pattern, "", clean_title)
+
+    # Clean up any trailing pipes or spaces
+    clean_title = clean_title.rstrip(" |")
+
+    # Re-add brand with proper format
+    return f"{clean_title} | Allied Brass"
+
+
 def _smart_title_case(text: str) -> str:
     """Apply title case while preserving known acronyms and handling separators."""
     # Split on pipe separator to preserve structure
@@ -48,10 +99,12 @@ def _smart_title_case(text: str) -> str:
                 titled_words.append(word.upper())
             # Handle hyphenated words (e.g., "16-Inch")
             elif "-" in word:
-                titled_words.append("-".join(
-                    w.upper() if w.upper() in _PRESERVE_UPPERCASE else w.title()
-                    for w in word.split("-")
-                ))
+                titled_words.append(
+                    "-".join(
+                        w.upper() if w.upper() in _PRESERVE_UPPERCASE else w.title()
+                        for w in word.split("-")
+                    )
+                )
             else:
                 titled_words.append(word.title())
         result_parts.append(" ".join(titled_words))
@@ -135,9 +188,18 @@ def parse_candidate_weights(raw: str | None) -> dict[str, float]:
     return {k: v / total for k, v in weights.items()}
 
 
-def sanitize_candidate_content(candidate: Candidate, category: str | None = None) -> Candidate:
+def sanitize_candidate_content(
+    candidate: Candidate, category: str | None = None
+) -> Candidate:
     """Strip catalog_csv citations, normalize title casing, and enforce canonical product types."""
     canonical = get_canonical_product_type(category) if category else None
+
+    # Description fields that need keyword spam stripping
+    description_fields = {
+        "google_description",
+        "bing_description",
+        "shopify_description",
+    }
 
     def _sanitize(value: str) -> str:
         cleaned = PARENTHETICAL_CITATION_PATTERN.sub("", value)
@@ -149,15 +211,20 @@ def sanitize_candidate_content(candidate: Candidate, category: str | None = None
     updates = {}
     for field in CUSTOMER_FIELDS:
         value = _sanitize(getattr(candidate, field))
-        # Apply title case to title fields only
+        # Apply title case and brand formatting to title fields
         if field in TITLE_FIELDS:
             value = _smart_title_case(value)
             # Enforce canonical product type in titles
             if canonical:
                 value = _enforce_canonical_product_type(value, canonical)
+            # Ensure proper brand format with pipe separator
+            value = _ensure_brand_format(value)
         # Dedupe redundant product types in short title
         if field == "google_short_title":
             value = _dedupe_product_types(value)
+        # Strip SEO keyword spam from descriptions
+        if field in description_fields:
+            value = _strip_keyword_spam(value)
         updates[field] = value
     return candidate.model_copy(update=updates)
 
@@ -175,7 +242,9 @@ def rank_candidates(
             validation_errors.extend(
                 validate_candidate_keyword_placement(candidate, keyword_plan)
             )
-        candidate_index = candidate.candidate_index if candidate.candidate_index is not None else idx
+        candidate_index = (
+            candidate.candidate_index if candidate.candidate_index is not None else idx
+        )
         ranked.append(
             RankedCandidate(
                 candidate=candidate,

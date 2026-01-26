@@ -7,10 +7,11 @@ This guide explains how to test the FeedOps optimization system with real produc
 Before testing, ensure:
 
 1. **Environment is set up**
+
    ```bash
    # Install the package
    uv pip install -e ".[dev]"
-   
+
    # Verify .env file exists with required keys
    ls -la .env
    ```
@@ -32,14 +33,15 @@ PYTHONPATH=./src .venv/bin/python -m feedops.cli.main healthcheck
 ```
 
 Expected output:
+
 ```
 FeedOps Health Check
 
 ✓ Catalog: data/catalog/Product Catalog.csv
 ✓ OpenAI API key configured
 ✓ Gemini API key configured
-✓ Directory: reports/
-✓ Directory: exports/
+✓ Directory: dashboard_data/lifestyle-eval-candidate/reports/
+✓ Directory: dashboard_data/lifestyle-eval-candidate/
 
 All critical checks passed!
 ```
@@ -71,11 +73,12 @@ PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize \
 ```
 
 This generates:
-1. **Report**: `reports/sku-101-YYYYMMDD-HHMMSS.md`
+
+1. **Report**: `dashboard_data/lifestyle-eval-candidate/reports/sku-101-YYYYMMDD-HHMMSS.md`
 2. **Patch previews**:
-   - `exports/google-patch-101.json`
-   - `exports/bing-patch-101.json`
-   - `exports/shopify-patch-101.json`
+   - `dashboard_data/lifestyle-eval-candidate/google-patch-101.json`
+   - `dashboard_data/lifestyle-eval-candidate/bing-patch-101.json`
+   - `dashboard_data/lifestyle-eval-candidate/shopify-patch-101.json`
 
 ### Testing with Sample Data
 
@@ -101,13 +104,13 @@ from feedops.pipeline.optimize import optimize_parent_sku
 
 async def test_skus():
     skus = ['101', '1031/18', 'P-700-16-GB']
-    
+
     for sku in skus:
         result = await optimize_parent_sku(
             master_sku=sku,
             catalog_path='data/catalog/Product Catalog.csv',
             dry_run=True,
-            output_dir='reports',
+            output_dir='dashboard_data/lifestyle-eval-candidate/reports',
         )
         print(f"{sku}: {result.candidate.final_score.composite}% - {result.candidate.final_score.approval_status}")
 
@@ -118,7 +121,7 @@ asyncio.run(test_skus())
 
 ### Report Structure
 
-Each report (in `reports/sku-{SKU}-*.md`) contains:
+Each report (in `dashboard_data/lifestyle-eval-candidate/reports/sku-{SKU}-*.md`) contains:
 
 1. **Current Content** - The existing title and description
 2. **Optimized Content** - New title and description with character counts
@@ -134,15 +137,15 @@ Each report (in `reports/sku-{SKU}-*.md`) contains:
 
 ### Understanding Quality Scores
 
-| Composite Score | Status | Action |
-|-----------------|--------|--------|
-| 80%+ | APPROVED | Ready for publication |
-| 70-79% | REVISE | Minor adjustments needed |
-| <70% | REJECTED | Major revision required |
+| Composite Score | Status   | Action                   |
+| --------------- | -------- | ------------------------ |
+| 80%+            | APPROVED | Ready for publication    |
+| 70-79%          | REVISE   | Minor adjustments needed |
+| <70%            | REJECTED | Major revision required  |
 
 ### JSON Patch Preview
 
-The `exports/google-patch-{SKU}.json` file contains:
+The `dashboard_data/lifestyle-eval-candidate/google-patch-{SKU}.json` file contains:
 
 ```json
 {
@@ -170,6 +173,7 @@ The `exports/google-patch-{SKU}.json` file contains:
 ### When to Adjust
 
 Consider manual tweaks when:
+
 - The score is 70-79% (REVISE status)
 - Specific claims need refinement
 - Brand voice doesn't match expectations
@@ -184,13 +188,13 @@ Consider manual tweaks when:
 
 ### Common Issues and Fixes
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Low factual accuracy | LLM made unverifiable claims | Edit to use only source data |
-| Missing bullet points | LLM didn't format properly | Add bullets to description |
-| Title too long | Exceeded 150 chars | Trim functional modifiers |
-| Missing dimension | Key spec not in first 70 chars | Reorder title components |
-| Vague language | Generic claims like "high quality" | Replace with specific specs |
+| Issue                 | Cause                              | Fix                          |
+| --------------------- | ---------------------------------- | ---------------------------- |
+| Low factual accuracy  | LLM made unverifiable claims       | Edit to use only source data |
+| Missing bullet points | LLM didn't format properly         | Add bullets to description   |
+| Title too long        | Exceeded 150 chars                 | Trim functional modifiers    |
+| Missing dimension     | Key spec not in first 70 chars     | Reorder title components     |
+| Vague language        | Generic claims like "high quality" | Replace with specific specs  |
 
 ### Regenerating with Adjustments
 
@@ -207,6 +211,7 @@ PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize \
 ### Recommended Testing Process
 
 1. **Start with sample data**
+
    ```bash
    feedops optimize --parent-sku SAMPLE-101 --catalog samples/sample-catalog.csv --dry-run
    ```
@@ -243,6 +248,7 @@ Before using in production:
 ### "MasterSKU not found" Error
 
 The SKU doesn't exist in your catalog. Check:
+
 ```bash
 feedops list-skus | grep "YOUR-SKU"
 ```
@@ -250,6 +256,7 @@ feedops list-skus | grep "YOUR-SKU"
 ### Low Factual Accuracy Score
 
 The LLM made claims that couldn't be verified against source data. Check:
+
 1. Are the required fields present in your CSV?
 2. Does the CSV have correct column names?
 3. Review the claim verification section of the report
@@ -257,6 +264,7 @@ The LLM made claims that couldn't be verified against source data. Check:
 ### Empty or Short Descriptions
 
 The source data may lack content. Check the CSV for:
+
 - `Narraive Copy` field
 - `Bullet 1` through `Bullet 6` fields
 - Category and Collection fields
@@ -264,6 +272,7 @@ The source data may lack content. Check the CSV for:
 ### API Rate Limits
 
 If you hit rate limits:
+
 - Add delays between SKUs when batch testing
 - Use the Gemini fallback by removing `OPENAI_API_KEY`
 - Reduce batch size

@@ -17,9 +17,9 @@ from feedops.pipeline.optimize import optimize_parent_sku
 async def test_single_product():
     """Test lifestyle image generation for a single product."""
 
-    print("="*80)
+    print("=" * 80)
     print("Testing Lifestyle Image Integration")
-    print("="*80)
+    print("=" * 80)
 
     # Test with a known product (Argo collection, MasterSKU 101)
     master_sku = "101"  # Argo Towel Bar
@@ -43,13 +43,13 @@ async def test_single_product():
             master_sku=master_sku,
             catalog_path=catalog_path,
             dry_run=False,
-            output_dir="reports",
-            exports_dir="exports",
+            output_dir="dashboard_data/lifestyle-eval-candidate/reports",
+            exports_dir="dashboard_data/lifestyle-eval-candidate",
         )
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("✅ Optimization Complete")
-        print("="*80)
+        print("=" * 80)
 
         print(f"\nMasterSKU: {result.master_sku}")
         print(f"Quality Score: {result.candidate.final_score.composite}%")
@@ -57,7 +57,9 @@ async def test_single_product():
 
         # Check lifestyle images
         if result.candidate.lifestyle_images:
-            print(f"\n🖼️  Lifestyle Images: {len(result.candidate.lifestyle_images)} variations")
+            print(
+                f"\n🖼️  Lifestyle Images: {len(result.candidate.lifestyle_images)} variations"
+            )
             for img in result.candidate.lifestyle_images:
                 status = "✅" if img.generation_success else "❌"
                 print(f"  {status} Variation {img.variation_num}: {img.image_path}")
@@ -68,7 +70,7 @@ async def test_single_product():
 
         # Check JSON exports
         print(f"\n📄 JSON Exports:")
-        exports_dir = Path("exports")
+        exports_dir = Path("dashboard_data/lifestyle-eval-candidate")
         safe_sku = master_sku.replace("/", "-")
 
         for platform in ["google", "bing", "shopify"]:
@@ -78,27 +80,32 @@ async def test_single_product():
 
                 # Check if lifestyle_images is in the JSON
                 import json
+
                 data = json.loads(patch_path.read_text())
                 if "lifestyle_images" in data:
-                    print(f"     └─ Contains lifestyle_images: {len(data['lifestyle_images'])} variations")
+                    print(
+                        f"     └─ Contains lifestyle_images: {len(data['lifestyle_images'])} variations"
+                    )
                 else:
                     print(f"     └─ No lifestyle_images field")
             else:
                 print(f"  ❌ {platform}: Not found")
 
-        print(f"\n📊 Report: {exports_dir.parent / 'reports' / f'sku-{safe_sku}-{result.timestamp}.md'}")
+        report_path = exports_dir / "reports" / f"sku-{safe_sku}-{result.timestamp}.md"
+        print(f"\n📊 Report: {report_path}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("Next steps:")
         print("1. Check that images exist in data/lifestyle_images/")
         print("2. Run the Streamlit dashboard to view them:")
-        print("   streamlit run src/feedops/quality/review_dashboard.py")
-        print("="*80)
+        print("   streamlit run streamlit_app.py")
+        print("=" * 80)
 
     except Exception as e:
         print(f"\n❌ Error during optimization:")
         print(f"   {type(e).__name__}: {e}")
         import traceback
+
         traceback.print_exc()
 
 

@@ -1,0 +1,13 @@
+---
+description: Streamlit dashboard is canonical; write outputs to dashboard_data
+alwaysApply: true
+---
+
+# Streamlit-First Output Rules
+
+- The Streamlit dashboard is the canonical review surface.
+- Default outputs must go to:
+  - `dashboard_data/lifestyle-eval-candidate/` (patch JSONs)
+  - `dashboard_data/lifestyle-eval-candidate/reports/` (markdown reports)
+- Do not suggest or use the deprecated HTML `compare-runs` flow.
+- When reviewing outputs, prefer `streamlit run streamlit_app.py` or the `review-dashboard` CLI.
