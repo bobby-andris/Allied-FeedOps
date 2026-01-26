@@ -11,6 +11,10 @@ from feedops.quality.review_dashboard import (
     format_variant_description,
     get_dashboard_debug_info,
 )
+from feedops.quality.data_loader import (
+    load_latest_report,
+    _slugify,
+)
 
 
 @dataclass
@@ -277,3 +281,87 @@ class TestDashboardDebugInfo:
         assert info["candidate_exports_count"] == 1
         assert info["baseline_reports_count"] == 0
         assert info["candidate_reports_count"] == 1
+
+
+class TestLoadLatestReport:
+    """Tests for load_latest_report and SKU slugification."""
+
+    def test_slugify_preserves_alphanumeric_and_dash(self):
+        """Verify _slugify handles SKUs with hyphens correctly."""
+        assert _slugify("CL-22") == "cl-22"
+        assert _slugify("1051") == "1051"
+        assert _slugify("WP-2-16-GAL") == "wp-2-16-gal"
+
+    def test_slugify_replaces_special_chars(self):
+        """Verify _slugify replaces special characters with dashes."""
+        assert _slugify("SKU/123") == "sku-123"
+        assert _slugify("SKU 456") == "sku-456"
+
+    def test_load_latest_report_finds_exact_match(self, tmp_path):
+        """Verify load_latest_report finds reports with exact SKU match."""
+        reports_dir = tmp_path / "reports"
+        reports_dir.mkdir()
+
+        # Create a report file with lowercase slug
+        report_content = """# Report
+**Provider/Model:** gemini-2.0-flash
+**Status:** APPROVED
+"""
+        (reports_dir / "sku-cl-22-20260101-120000.md").write_text(report_content)
+
+        result = load_latest_report(reports_dir, "cl-22")
+        assert result is not None
+        assert result.provider_model == "gemini-2.0-flash"
+        assert result.status == "APPROVED"
+
+    def test_load_latest_report_finds_uppercase_match(self, tmp_path):
+        """Verify load_latest_report finds reports with uppercase SKU in filename."""
+        reports_dir = tmp_path / "reports"
+        reports_dir.mkdir()
+
+        # Create a report file with UPPERCASE SKU (like actual reports)
+        report_content = """# Report
+**Provider/Model:** gemini-2.0-flash
+**Status:** APPROVED
+"""
+        (reports_dir / "sku-CL-22-20260101-120000.md").write_text(report_content)
+
+        # Search with lowercase slugified SKU
+        result = load_latest_report(reports_dir, "cl-22")
+        assert result is not None
+        assert result.provider_model == "gemini-2.0-flash"
+
+    def test_load_latest_report_returns_most_recent(self, tmp_path):
+        """Verify load_latest_report returns the most recent report by mtime."""
+        import time
+
+        reports_dir = tmp_path / "reports"
+        reports_dir.mkdir()
+
+        # Create older report
+        older = reports_dir / "sku-abc-20260101-100000.md"
+        older.write_text("**Provider/Model:** old-model")
+
+        # Small delay to ensure different mtime
+        time.sleep(0.01)
+
+        # Create newer report
+        newer = reports_dir / "sku-abc-20260101-120000.md"
+        newer.write_text("**Provider/Model:** new-model")
+
+        result = load_latest_report(reports_dir, "abc")
+        assert result is not None
+        assert result.provider_model == "new-model"
+
+    def test_load_latest_report_returns_none_when_no_reports(self, tmp_path):
+        """Verify load_latest_report returns None when no matching reports exist."""
+        reports_dir = tmp_path / "reports"
+        reports_dir.mkdir()
+
+        result = load_latest_report(reports_dir, "nonexistent")
+        assert result is None
+
+    def test_load_latest_report_returns_none_when_dir_missing(self, tmp_path):
+        """Verify load_latest_report returns None when reports dir doesn't exist."""
+        result = load_latest_report(tmp_path / "missing", "any-sku")
+        assert result is None

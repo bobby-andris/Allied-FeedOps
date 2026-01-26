@@ -31,6 +31,7 @@ reports/
 exports/
 # But allow dashboard_data reports (curated for demo)
 !dashboard_data/lifestyle-eval/reports/
+!dashboard_data/lifestyle-eval-candidate/reports/
 .worktrees/
 
 # Node/TypeScript
