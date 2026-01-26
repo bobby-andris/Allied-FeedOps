@@ -1,0 +1,42 @@
+{
+  "productId": "4545064730756",
+  "title": "Freestanding Paper Towel Holder, 18-Inch Tall, Solid Brass Weighted Base (Traditional Style) | Allied Brass",
+  "body_html": "<p>Upgrade your countertop with a freestanding paper towel holder crafted from solid brass, featuring an 18-Inch height and a weighted base designed to help prevent tipping.</p>\n<ul>\n  <li><strong>Freestanding convenience:</strong> No wall mounting required\u2014easy to place where you need it (freestanding).</li>\n  <li><strong>Traditional styling:</strong> A refined look that coordinates with traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures-inspired d\u00e9cor.</li>\n  <li><strong>Stable on the counter:</strong> Solid brass weighted base helps reduce tipping.</li>\n  <li><strong>Surface protection:</strong> Felt pad helps prevent scratches on countertops and other surfaces.</li>\n  <li><strong>Finish options:</strong> Available in a wide variety of lifetime designer finishes, including statement colors.</li>\n</ul>\n<p><strong>Specs</strong><br>\nMaterial: Brass<br>\nStyle: Traditional<br>\nMounting type: Freestanding<br>\nDimensions: 5.5-Inch L x 5.5-Inch W x 18-Inch H<br>\nWeight: 4.8 lb<br>\nAssembly required: No<br>\nIncluded: Paper towel holder<br>\nWarranty: Limited Lifetime Warranty</p>",
+  "_meta": {
+    "master_sku": "1052",
+    "generated_at": "2026-01-25T19:18:25.052282",
+    "quality_score": 90.0,
+    "approval_status": "approved"
+  },
+  "_previous": {
+    "title": "Traditional Counter Top Kitchen Paper Towel Holder",
+    "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel holder. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust."
+  },
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1052_var1_20260125_191744.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1052-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_191744",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1052_var2_20260125_191758.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1052-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_191758",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1052_var3_20260125_191811.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1052-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_191811",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": null
+}

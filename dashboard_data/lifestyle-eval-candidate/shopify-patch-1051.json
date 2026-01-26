@@ -1,0 +1,42 @@
+{
+  "productId": "4545063682180",
+  "title": "Freestanding Paper Towel Holder 14-Inch Solid Brass Weighted Base | Allied Brass",
+  "body_html": "<p>Upgrade your countertop with a freestanding paper towel holder crafted from solid brass and stabilized by a weighted base to help prevent tipping\u2014an easy fit for modern bathroom hardware and contemporary bath accessories spaces.</p>\n<ul>\n  <li><strong>Freestanding convenience:</strong> requires no wall mounting</li>\n  <li><strong>Solid brass construction:</strong> crafted from the finest solid brass materials</li>\n  <li><strong>Stable, weighted base:</strong> helps prevent tipping during use</li>\n  <li><strong>Surface protection:</strong> felt pad helps prevent scratching</li>\n  <li><strong>Finish flexibility:</strong> available in a wide variety of lifetime designer finishes, including statement colors</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n  <li>Dimensions: 14-Inch H x 5-Inch W x 5-Inch L</li>\n  <li>Weight: 4.8 lb</li>\n  <li>Material: Brass</li>\n  <li>Mounting type: Freestanding</li>\n  <li>Assembly required: No</li>\n  <li>Included: Paper towel holder</li>\n  <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
+  "_meta": {
+    "master_sku": "1051",
+    "generated_at": "2026-01-25T19:20:53.127123",
+    "quality_score": 90.0,
+    "approval_status": "approved"
+  },
+  "_previous": {
+    "title": "Contemporary Counter Top Kitchen Paper Towel Holder",
+    "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel holder. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust."
+  },
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1051_var1_20260125_192009.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1051-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_192009",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1051_var2_20260125_192024.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1051-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_192024",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1051_var3_20260125_192037.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1051-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_192037",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": null
+}

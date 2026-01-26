@@ -7,15 +7,21 @@ import sys
 def resolve_dashboard_paths(repo_root: Path | str) -> tuple[Path, Path, Path | None, Path | None, Path | None]:
     repo_root = Path(repo_root)
     data_root = repo_root / "dashboard_data"
-    exports_dir = data_root / "lifestyle-eval"
+    baseline_exports = data_root / "lifestyle-eval"
+    candidate_exports = data_root / "lifestyle-eval-candidate"
+    if not candidate_exports.exists():
+        candidate_exports = baseline_exports
+
     catalog_path = data_root / "catalog.csv"
-    reports_dir = data_root / "lifestyle-eval" / "reports"
+    baseline_reports = baseline_exports / "reports"
+    candidate_reports = candidate_exports / "reports"
+
     return (
-        exports_dir, 
-        exports_dir, 
+        baseline_exports,
+        candidate_exports,
         catalog_path if catalog_path.exists() else None,
-        reports_dir if reports_dir.exists() else None,
-        reports_dir if reports_dir.exists() else None,
+        baseline_reports if baseline_reports.exists() else None,
+        candidate_reports if candidate_reports.exists() else None,
     )
 
 

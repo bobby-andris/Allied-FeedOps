@@ -1,0 +1,46 @@
+{
+  "offerId": "shopify_US_4545088553092_32128610697348",
+  "title": "Wall Mount paper towel holder 15-Inch Solid Brass Retro Wave Collection Allied Brass",
+  "short_title": "Wall Mount paper towel holder 15-Inch",
+  "description": "Keep countertops clean and clutter-free with a wall mount paper towel holder crafted from solid brass. Designed as part of the retro wave collection, it brings a refined, traditional look while saving space.\n\nHighlights:\n- Wall-mounted design helps free up counter space\n- Crafted from solid brass for enduring everyday use\n- Concealed screw mounting for a clean, finished look\n- Coordinates with matching retro wave pieces for a cohesive setup\n- Multiple designer finish options available\n\nSpecs:\n- Dimensions: 15 in H x 4 in L x 2.25 in W; 5 in projection\n- Weight capacity: 2 lb\n- Assembly: No assembly required\n- Included: Paper towel holder and all installation hardware\n- Screw size: #8 x 1 1/4 in\n- Warranty: Limited Lifetime Warranty",
+  "channel": "online",
+  "contentLanguage": "en",
+  "targetCountry": "US",
+  "_meta": {
+    "master_sku": "RW-24U/12",
+    "generated_at": "2026-01-25T19:23:16.804349",
+    "quality_score": 90.0,
+    "approval_status": "approved"
+  },
+  "_previous": {
+    "title": "Retro Wave Collection Wall Mounted Paper Towel Holder",
+    "description": "Complete your kitchen d\u00e9cor with this finely crafted paper towel holder. Keep your countertop clean and clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust."
+  },
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/RW-24U-12_var1_20260125_192233.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/RW-24U-12-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_192233",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/RW-24U-12_var2_20260125_192248.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/RW-24U-12-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_192248",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/RW-24U-12_var3_20260125_192302.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/RW-24U-12-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260125_192302",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": null
+}
