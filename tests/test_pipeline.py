@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from feedops.models import ParentSKU, Variant, Candidate, Claim, Score
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.claim_extraction import extract_claims
 from feedops.pipeline.verifier import verify_claims
 from feedops.pipeline.validators import validate_candidate_content
 from feedops.pipeline.generator import build_prompt, generate_candidate, generate_candidates
@@ -349,6 +350,72 @@ def test_verify_claims_dedupes_auto_extracted_dimensions(sample_parent_sku):
     verified, _ = verify_claims(candidate, parent)
     dimension_claims = [c for c in verified.claims if c.source_field == "center_to_center"]
     assert len(dimension_claims) == 1
+
+
+# Fix 2.2: Durability claim extraction tests
+def test_extract_durability_claims_verified_for_brass(sample_parent_sku):
+    """Durability claims are verified when material is brass."""
+    candidate = Candidate(
+        google_title="Corrosion-Resistant Towel Bar | Allied Brass",
+        google_short_title="Towel Bar",
+        google_description="This rust-free and tarnish-resistant towel bar is built to last.",
+        bing_title="Corrosion-Resistant Towel Bar | Allied Brass",
+        bing_description="This rust-free and tarnish-resistant towel bar is built to last.",
+        shopify_title="Corrosion-Resistant Towel Bar | Allied Brass",
+        shopify_description="<p>This rust-free and tarnish-resistant towel bar is built to last.</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    claims = extract_claims(candidate, sample_parent_sku)
+    # Durability claims use source_field like "corrosion_resistance", "rust_resistance", etc.
+    durability_fields = {"corrosion_resistance", "rust_resistance", "tarnish_resistance", "water_resistance"}
+    durability_claims = [c for c in claims if c.source_field in durability_fields]
+    assert len(durability_claims) >= 1
+    # Should not have UNVERIFIED prefix since material is Brass
+    assert not any("UNVERIFIED" in c.claim for c in durability_claims)
+
+
+def test_extract_durability_claims_unverified_for_other_materials():
+    """Durability claims are marked unverified for non-brass/steel materials."""
+    variant = Variant(
+        option_sku="TEST-1",
+        finish="Chrome",
+        finish_code="CH",
+        gmc_id="test_gmc",
+        position=1,
+    )
+    parent = ParentSKU(
+        master_sku="TEST",
+        category="Towel Bars",
+        current_title="Test Towel Bar",
+        current_description="Test description",
+        material="Aluminum",  # Not brass or stainless steel
+        variants=[variant],
+    )
+    candidate = Candidate(
+        google_title="Corrosion-Free Towel Bar",
+        google_short_title="Towel Bar",
+        google_description="This rust-free towel bar is built to last.",
+        bing_title="Corrosion-Free Towel Bar",
+        bing_description="This rust-free towel bar is built to last.",
+        shopify_title="Corrosion-Free Towel Bar",
+        shopify_description="<p>This rust-free towel bar is built to last.</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8, benefit_coverage=8, keyword_inclusion=8,
+            format_adherence=8, brand_voice=8, factual_accuracy=8,
+        ),
+    )
+    claims = extract_claims(candidate, parent)
+    # Durability claims use source_field like "corrosion_resistance", "rust_resistance", etc.
+    durability_fields = {"corrosion_resistance", "rust_resistance", "tarnish_resistance", "water_resistance"}
+    durability_claims = [c for c in claims if c.source_field in durability_fields]
+    assert len(durability_claims) >= 1
+    # Should have UNVERIFIED prefix since material is Aluminum
+    assert any("UNVERIFIED" in c.claim for c in durability_claims)
 
 
 # Task 5.2b: Candidate Content Validation Tests

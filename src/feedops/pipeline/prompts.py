@@ -92,17 +92,23 @@ CRITICAL RULES:
 - Never invent specifications not in the data.
 - If an image is provided, confirm material, finish, color, and visible features against it.
   Do not describe features that are not visible in the image and not present in data.
-- Allied Brass is a niche brand: lead with benefits/keywords and place the brand at the end.
+- Allied Brass is a niche brand: place the brand at the end of titles.
 - Brand must be last in titles (no words after \"Allied Brass\").
 - No internal SKU codes (MasterSKU, Option SKU, item numbers) in titles/descriptions.
 - Use natural query language for dimensions (e.g., "18-Inch" not "18in").
 - If the evidence table includes external_keywords, treat them as keyword phrases only (not product facts).
 - If the evidence table includes keyword_intent_master, treat them as MasterSKU-level query intent aggregated across all variants.
   These are keywords to prioritize (especially in the first 70 characters), but they are NOT product facts.
+- If room_context is provided in the keyword placement plan, use that room's language consistently.
+  Kitchen products: use "kitchen" terminology (never "bathroom", "bath")
+  Bathroom products: use "bathroom" or "bath" terminology (never "kitchen")
 - Title zones: 1-30 characters (mobile) and 31-70 characters (desktop) are most critical. Front-load
   product type, primary dimension, and key benefit.
 - No promotional language, ALL CAPS, URLs, pricing, or shipping text.
 - Brand voice: use premium, specific phrasing (e.g., "crafted", "enduring") when supported by evidence; avoid vague superlatives.
+- BANNED WORDS (never use without explicit evidence in source data):
+  finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
+  These hollow marketing words damage trust. Use specific, verifiable language instead.
 
 DESIGN CONTEXT (from enrichment):
 - If collection_context is provided, the product belongs to a named design collection. Mention the
@@ -115,11 +121,12 @@ DESIGN CONTEXT (from enrichment):
 - If statement_finishes is provided, mention availability of distinctive color options in descriptions.
 
 TITLE STRUCTURE RULES (CRITICAL):
-- DO NOT start titles with generic benefit words like "Easy-Clean", "Secure", "Durable", "Quality"
-- DO start titles with [Product Type] or [Feature Modifier + Product Type]
-- Good title openers: "Reeded Grip 16-Inch Grab Bar", "Tilting Oval Mirror", "ADA Compliant Grab Bar"
-- Bad title openers: "Easy-Clean Grab Bar", "Secure Wall Mount Towel Bar", "Durable Brass Mirror"
-- The first 30 characters should match what customers actually search for
+- ALWAYS start titles with [Product Type] or [Feature Modifier + Product Type]
+- Feature modifiers: Reeded Grip, Tilting, ADA Compliant, L-Shaped, Double, etc.
+- NEVER start titles with adjectives or generic benefit words
+- Good openers: "Reeded Grip 16-Inch Grab Bar", "Tilting Oval Mirror", "Double Towel Bar 24-Inch"
+- Bad openers: "Easy-Clean", "Secure", "Durable", "Quality", "Luxurious", "Premium"
+- The first 30 characters MUST contain the product type
 
 Platform-specific guidance:
 Google Shopping / Performance Max:
@@ -146,7 +153,7 @@ OPTIMIZATION_TEMPLATE = """
 {keyword_placement}
 
 ## Title Structure Formula (niche brand)
-[Key Benefit/Use Case] + [Product Type] + [Key Dimension] + [Material/Finish] + [Brand]
+[Feature Modifier (if any)] + [Product Type] + [Key Dimension] + [Material/Finish] + [Brand]
 
 Example: 24-Inch Wall Mount Towel Bar Solid Brass | Polished Chrome | Allied Brass
 
@@ -158,7 +165,7 @@ Example: 24-Inch Wall Mount Towel Bar Solid Brass | Polished Chrome | Allied Bra
 ## Platform Output Requirements
 Output fields (must map to schema):
 Google Shopping (feed):
-- google_title: max 150 characters, benefit/keyword first, brand at end
+- google_title: max 150 characters, product type first, brand at end
 - google_short_title: max 70 characters, clean overlay-friendly wording
 - google_description: plain text with a benefit-first opening and scannable sections (Highlights bullets + Specs); no HTML
 

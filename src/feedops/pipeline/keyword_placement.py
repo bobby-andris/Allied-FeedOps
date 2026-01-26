@@ -103,6 +103,51 @@ _CATEGORY_MAP: dict[str, dict[str, list[str] | str]] = {
     },
 }
 
+# Canonical product type names for consistent title terminology
+_CANONICAL_PRODUCT_TYPES = {
+    "Towel Bars": "Towel Bar",
+    "Grab Bars": "Grab Bar",
+    "Cabinet Knobs": "Cabinet Knob",
+    "Toilet Paper Holders": "Toilet Paper Holder",
+    "Towel Rings": "Towel Ring",
+    "Robe Hooks": "Robe Hook",
+    "Glass Shelves": "Glass Shelf",
+    "Wall Mirrors": "Wall Mirror",
+    "Make-Up Mirrors": "Makeup Mirror",
+    "Soap Dishes": "Soap Dish",
+}
+
+
+def get_canonical_product_type(category: str) -> str | None:
+    """Return the canonical product type for a category."""
+    return _CANONICAL_PRODUCT_TYPES.get(category)
+
+
+# Room context mapping for kitchen vs bathroom language
+_CATEGORY_ROOM_CONTEXT = {
+    # Kitchen categories
+    "Paper Towel Holders": "kitchen",
+    "Kitchen Towel Bars": "kitchen",
+    "Kitchen Accessories": "kitchen",
+    # Bathroom categories
+    "Towel Bars": "bathroom",
+    "Grab Bars": "bathroom",
+    "Toilet Paper Holders": "bathroom",
+    "Towel Rings": "bathroom",
+    "Robe Hooks": "bathroom",
+    "Glass Shelves": "bathroom",
+    "Wall Mirrors": "bathroom",
+    "Make-Up Mirrors": "bathroom",
+    "Soap Dishes": "bathroom",
+    # Not room-specific
+    "Cabinet Knobs": None,
+}
+
+
+def get_room_context(category: str) -> str | None:
+    """Return room context for a category (kitchen, bathroom, or None)."""
+    return _CATEGORY_ROOM_CONTEXT.get(category, "bathroom")
+
 
 @dataclass(frozen=True)
 class KeywordPlacementPlan:
@@ -115,6 +160,7 @@ class KeywordPlacementPlan:
     description_min_required: int
     description_first_150_required: int
     brand: str = _DEFAULT_BRAND
+    room_context: str | None = None
 
 
 def _normalize(text: str) -> str:
@@ -302,6 +348,7 @@ def build_keyword_placement_plan(
         description_min_required=2,
         description_first_150_required=1,
         brand=_DEFAULT_BRAND,
+        room_context=get_room_context(parent_sku.category),
     )
 
 
@@ -332,6 +379,9 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
             lines.append(f"- {term}")
     lines.append("")
     lines.append(f"Brand rule: titles must end with {plan.brand}")
+    if plan.room_context:
+        lines.append("")
+        lines.append(f"Room context: {plan.room_context} (use appropriate language; never describe as the other room type)")
     return "\n".join(lines)
 
 

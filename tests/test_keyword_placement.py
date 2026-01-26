@@ -6,6 +6,8 @@ from feedops.pipeline.keyword_placement import (
     KeywordPlacementPlan,
     build_keyword_placement_plan,
     validate_candidate_keyword_placement,
+    get_canonical_product_type,
+    get_room_context,
 )
 
 
@@ -113,3 +115,48 @@ def test_validate_candidate_keyword_placement_flags_missing_anchor_and_terms():
     assert any("google_short_title missing title anchor" in e for e in errors)
     assert any("shopify_title must end with Allied Brass" in e for e in errors)
     assert any("google_description missing description term in first 150 chars" in e for e in errors)
+
+
+# Fix 2.1: Canonical product type tests
+def test_get_canonical_product_type_returns_mapping():
+    """get_canonical_product_type returns the canonical form for known categories."""
+    assert get_canonical_product_type("Towel Bars") == "Towel Bar"
+    assert get_canonical_product_type("Grab Bars") == "Grab Bar"
+    assert get_canonical_product_type("Make-Up Mirrors") == "Makeup Mirror"
+    assert get_canonical_product_type("Unknown Category") is None
+
+
+# Fix 2.4: Room context tests
+def test_get_room_context_returns_kitchen_for_paper_towel_holders():
+    """get_room_context returns 'kitchen' for kitchen categories."""
+    assert get_room_context("Paper Towel Holders") == "kitchen"
+    assert get_room_context("Kitchen Towel Bars") == "kitchen"
+    assert get_room_context("Kitchen Accessories") == "kitchen"
+
+
+def test_get_room_context_returns_bathroom_for_bathroom_categories():
+    """get_room_context returns 'bathroom' for bathroom categories."""
+    assert get_room_context("Towel Bars") == "bathroom"
+    assert get_room_context("Grab Bars") == "bathroom"
+    assert get_room_context("Toilet Paper Holders") == "bathroom"
+
+
+def test_get_room_context_returns_none_for_neutral_categories():
+    """get_room_context returns None for room-neutral categories."""
+    assert get_room_context("Cabinet Knobs") is None
+
+
+def test_get_room_context_defaults_to_bathroom_for_unknown():
+    """get_room_context defaults to 'bathroom' for unknown categories."""
+    assert get_room_context("Unknown Category") == "bathroom"
+
+
+def test_build_keyword_placement_plan_includes_room_context():
+    """build_keyword_placement_plan includes room_context in the plan."""
+    parent_sku = _make_parent_sku(category="Towel Bars")
+    plan = build_keyword_placement_plan(parent_sku, [])
+    assert plan.room_context == "bathroom"
+
+    parent_sku_kitchen = _make_parent_sku(category="Paper Towel Holders")
+    plan_kitchen = build_keyword_placement_plan(parent_sku_kitchen, [])
+    assert plan_kitchen.room_context == "kitchen"

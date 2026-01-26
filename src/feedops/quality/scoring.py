@@ -90,6 +90,15 @@ _BANNED_MARKETING = [
     "bargain",
     "free shipping",
     "sale",
+    # Hollow marketing words (added for content quality)
+    "finest",
+    "luxurious",
+    "exclusive",
+    "exceptional",
+    "unparalleled",
+    "superior",
+    "exquisite",
+    "ultimate",
 ]
 
 

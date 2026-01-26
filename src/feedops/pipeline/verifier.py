@@ -4,6 +4,22 @@ import re
 from feedops.models import ParentSKU, Candidate, Claim, Score
 from feedops.pipeline.claim_extraction import extract_claims, dedupe_claims
 
+# Enrichment fields that are computed at runtime and should be trusted.
+# These are injected into the evidence table by ProductEnrichment.to_evidence_rows()
+# but are not attributes of ParentSKU or Variant models.
+_ENRICHMENT_FIELDS = {
+    "finish_variety",
+    "statement_finishes",
+    "collection_context",
+    "collection_subgroup",
+    "competitive_edge",
+    "design_style",
+    "feature_title_keywords",
+    "feature_benefits",
+    "key_differentiators",
+    "design_intent_keywords",
+}
+
 
 def get_source_value(parent_sku: ParentSKU, field_name: str) -> str | None:
     """Get value from ParentSKU or its first variant by field name.
@@ -15,6 +31,10 @@ def get_source_value(parent_sku: ParentSKU, field_name: str) -> str | None:
     Returns:
         String value or None if field doesn't exist.
     """
+    # Handle enrichment fields - these are computed at runtime and trusted
+    if field_name in _ENRICHMENT_FIELDS:
+        return "[enrichment]"
+
     # Handle computed fields
     if field_name == "available_finishes" and parent_sku.variants:
         return ", ".join(v.finish for v in parent_sku.variants)
@@ -46,6 +66,15 @@ def verify_claim(claim: Claim, parent_sku: ParentSKU) -> Claim:
     Returns:
         Updated claim with verified status and rejection reason if applicable.
     """
+    # Trust enrichment fields - these are computed at runtime from valid data
+    if claim.source_field in _ENRICHMENT_FIELDS:
+        return Claim(
+            claim=claim.claim,
+            source_field=claim.source_field,
+            source_value=claim.source_value,
+            verified=True,
+        )
+
     actual_value = get_source_value(parent_sku, claim.source_field)
 
     if actual_value is None:

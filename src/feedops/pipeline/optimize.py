@@ -128,6 +128,7 @@ async def optimize_parent_sku(
         candidates,
         candidate_weights,
         keyword_plan=keyword_plan,
+        category=parent_sku.category,
     )
     best_rank = ranking[0]
     selected_candidate = selected_candidate.model_copy(

@@ -1,5 +1,10 @@
 from feedops.models import Candidate, Score
-from feedops.pipeline.selection import select_best_candidate
+from feedops.pipeline.selection import (
+    select_best_candidate,
+    sanitize_candidate_content,
+    _dedupe_product_types,
+    _enforce_canonical_product_type,
+)
 from feedops.quality.scoring import CandidateHeuristicScore, HeuristicScore
 import feedops.pipeline.selection as selection_module
 
@@ -87,13 +92,14 @@ def test_select_best_candidate_sanitizes_when_all_leak():
 
 def test_select_best_candidate_uses_adjusted_score(monkeypatch):
     weights = {"google": 1.0, "bing": 0.0, "shopify": 0.0}
+    # Use distinct short titles to identify which candidate was selected
     candidate_a = _make_candidate(
         google_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-        google_description="Upgrade your bathroom with solid brass storage.",
+        google_description="Upgrade your bathroom with solid brass storage. Candidate A marker.",
     )
     candidate_b = _make_candidate(
         google_title="18-Inch Wall Mount Towel Bar Solid Brass | Allied Brass",
-        google_description="Upgrade your bathroom with solid brass storage.",
+        google_description="Upgrade your bathroom with solid brass storage. Candidate B marker.",
     )
 
     base_platform = HeuristicScore(ctr_proxy=5, cvr_proxy=5, brand_voice=5)
@@ -122,10 +128,74 @@ def test_select_best_candidate_uses_adjusted_score(monkeypatch):
     )
 
     def fake_score_candidate(candidate, *, weights):
-        return score_a if candidate is candidate_a else score_b
+        # Match by description content since candidates are now sanitized copies
+        if "Candidate A marker" in candidate.google_description:
+            return score_a
+        return score_b
 
     monkeypatch.setattr(selection_module, "score_candidate", fake_score_candidate)
 
     selected, _ranking = select_best_candidate([candidate_a, candidate_b], weights)
 
-    assert selected is candidate_b
+    # Check that candidate_b was selected (has higher adjusted score)
+    assert "Candidate B marker" in selected.google_description
+
+
+# Fix 2.3: Short-title redundancy optimizer tests
+def test_dedupe_product_types_removes_synonyms():
+    """_dedupe_product_types removes redundant synonyms when canonical is present."""
+    # Has both "towel bar" and "towel holder" - should remove "towel holder"
+    title = "18-Inch Towel Bar Bath Towel Holder"
+    result = _dedupe_product_types(title)
+    assert "towel bar" in result.lower()
+    assert "towel holder" not in result.lower()
+
+
+def test_dedupe_product_types_preserves_single_type():
+    """_dedupe_product_types preserves title when only canonical type present."""
+    title = "18-Inch Towel Bar | Allied Brass"
+    result = _dedupe_product_types(title)
+    assert result == title
+
+
+def test_dedupe_product_types_case_insensitive():
+    """_dedupe_product_types works case-insensitively."""
+    title = "18-Inch TOWEL BAR Towel Holder"
+    result = _dedupe_product_types(title)
+    assert "towel bar" in result.lower()
+    assert "towel holder" not in result.lower()
+
+
+# Fix 2.1: Canonical product type enforcement tests
+def test_enforce_canonical_product_type_replaces_synonyms():
+    """_enforce_canonical_product_type replaces synonyms with canonical form."""
+    title = "18-Inch Towel Holder Wall Mount"
+    result = _enforce_canonical_product_type(title, "Towel Bar")
+    assert "Towel Bar" in result
+    assert "Towel Holder" not in result
+
+
+def test_enforce_canonical_product_type_case_insensitive():
+    """_enforce_canonical_product_type is case-insensitive for matching."""
+    title = "18-Inch TOWEL HOLDER Wall Mount"
+    result = _enforce_canonical_product_type(title, "Towel Bar")
+    assert "Towel Bar" in result
+
+
+def test_enforce_canonical_product_type_no_change_when_none():
+    """_enforce_canonical_product_type returns unchanged title when canonical is None."""
+    title = "18-Inch Towel Holder"
+    result = _enforce_canonical_product_type(title, None)
+    assert result == title
+
+
+def test_sanitize_candidate_content_with_category():
+    """sanitize_candidate_content applies canonical enforcement with category."""
+    candidate = _make_candidate(
+        google_title="18-Inch towel holder wall mount | Allied Brass",
+        google_description="A great towel holder for your bath.",
+    )
+    sanitized = sanitize_candidate_content(candidate, category="Towel Bars")
+    # Check that synonym was replaced with canonical form in title
+    assert "Towel Bar" in sanitized.google_title
+    assert "towel holder" not in sanitized.google_title.lower()

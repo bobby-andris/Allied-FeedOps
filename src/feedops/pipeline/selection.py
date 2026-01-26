@@ -6,12 +6,84 @@ import re
 
 from feedops.models import Candidate
 from feedops.pipeline.validators import CUSTOMER_FIELDS, PARENTHETICAL_CITATION_PATTERN, validate_candidate_content
-from feedops.pipeline.keyword_placement import KeywordPlacementPlan, validate_candidate_keyword_placement
+from feedops.pipeline.keyword_placement import KeywordPlacementPlan, validate_candidate_keyword_placement, get_canonical_product_type
 from feedops.quality.scoring import CandidateHeuristicScore, score_candidate
 
 
 DEFAULT_NUM_CANDIDATES = 3
 DEFAULT_WEIGHTS = {"google": 0.7, "bing": 0.15, "shopify": 0.15}
+
+# Title fields that need title case normalization
+TITLE_FIELDS = {"google_title", "bing_title", "shopify_title", "google_short_title"}
+
+# Acronyms to preserve in uppercase during title case conversion
+_PRESERVE_UPPERCASE = {"ADA", "LED", "USA", "UK", "UV"}
+
+# Product type synonyms for canonical enforcement and deduplication
+_PRODUCT_TYPE_SYNONYMS = {
+    "towel bar": ["towel holder", "towel rack", "towel rail", "bath bar"],
+    "grab bar": ["safety bar", "support bar", "assist bar"],
+    "cabinet knob": ["drawer knob", "cabinet pull", "drawer pull"],
+    "toilet paper holder": ["tissue holder", "tp holder", "toilet roll holder"],
+    "towel ring": ["towel loop", "hand towel holder"],
+    "robe hook": ["coat hook", "towel hook"],
+    "glass shelf": ["bath shelf", "bathroom shelf"],
+    "wall mirror": ["bath mirror", "vanity mirror"],
+    "makeup mirror": ["make-up mirror", "cosmetic mirror"],
+    "soap dish": ["soap holder", "soap tray"],
+}
+
+
+def _smart_title_case(text: str) -> str:
+    """Apply title case while preserving known acronyms and handling separators."""
+    # Split on pipe separator to preserve structure
+    parts = text.split("|")
+    result_parts = []
+    for part in parts:
+        words = part.strip().split()
+        titled_words = []
+        for word in words:
+            # Preserve known acronyms
+            if word.upper() in _PRESERVE_UPPERCASE:
+                titled_words.append(word.upper())
+            # Handle hyphenated words (e.g., "16-Inch")
+            elif "-" in word:
+                titled_words.append("-".join(
+                    w.upper() if w.upper() in _PRESERVE_UPPERCASE else w.title()
+                    for w in word.split("-")
+                ))
+            else:
+                titled_words.append(word.title())
+        result_parts.append(" ".join(titled_words))
+    return " | ".join(result_parts)
+
+
+def _enforce_canonical_product_type(title: str, canonical: str | None) -> str:
+    """Replace non-canonical product types with canonical form in title."""
+    if not canonical:
+        return title
+    canonical_lower = canonical.lower()
+    for canon, synonyms in _PRODUCT_TYPE_SYNONYMS.items():
+        if canon == canonical_lower:
+            for syn in synonyms:
+                pattern = re.compile(re.escape(syn), re.IGNORECASE)
+                title = pattern.sub(canonical, title)
+            break
+    return re.sub(r"\s+", " ", title).strip()
+
+
+def _dedupe_product_types(title: str) -> str:
+    """Remove redundant product type synonyms from title."""
+    title_lower = title.lower()
+
+    for canonical, synonyms in _PRODUCT_TYPE_SYNONYMS.items():
+        if canonical in title_lower:
+            for synonym in synonyms:
+                if synonym in title_lower:
+                    pattern = re.compile(re.escape(synonym), re.IGNORECASE)
+                    title = pattern.sub("", title)
+
+    return re.sub(r"\s+", " ", title).strip()
 
 
 @dataclass
@@ -63,8 +135,10 @@ def parse_candidate_weights(raw: str | None) -> dict[str, float]:
     return {k: v / total for k, v in weights.items()}
 
 
-def sanitize_candidate_content(candidate: Candidate) -> Candidate:
-    """Strip catalog_csv citations from customer-facing fields."""
+def sanitize_candidate_content(candidate: Candidate, category: str | None = None) -> Candidate:
+    """Strip catalog_csv citations, normalize title casing, and enforce canonical product types."""
+    canonical = get_canonical_product_type(category) if category else None
+
     def _sanitize(value: str) -> str:
         cleaned = PARENTHETICAL_CITATION_PATTERN.sub("", value)
         cleaned = cleaned.replace("catalog_csv.", "")
@@ -72,7 +146,19 @@ def sanitize_candidate_content(candidate: Candidate) -> Candidate:
         cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
         return cleaned.strip()
 
-    updates = {field: _sanitize(getattr(candidate, field)) for field in CUSTOMER_FIELDS}
+    updates = {}
+    for field in CUSTOMER_FIELDS:
+        value = _sanitize(getattr(candidate, field))
+        # Apply title case to title fields only
+        if field in TITLE_FIELDS:
+            value = _smart_title_case(value)
+            # Enforce canonical product type in titles
+            if canonical:
+                value = _enforce_canonical_product_type(value, canonical)
+        # Dedupe redundant product types in short title
+        if field == "google_short_title":
+            value = _dedupe_product_types(value)
+        updates[field] = value
     return candidate.model_copy(update=updates)
 
 
@@ -114,6 +200,7 @@ def select_best_candidate(
     candidates: list[Candidate],
     weights: dict[str, float],
     keyword_plan: KeywordPlacementPlan | None = None,
+    category: str | None = None,
 ) -> tuple[Candidate, list[RankedCandidate]]:
     """Select best candidate using validation-first + weighted heuristics."""
     if not candidates:
@@ -124,15 +211,19 @@ def select_best_candidate(
     best = ranked_sorted[0]
     selected = best.candidate
 
-    if best.validation_errors:
-        sanitized = sanitize_candidate_content(selected)
-        sanitized_errors = validate_candidate_content(sanitized)
-        ranked_sorted[0] = RankedCandidate(
-            candidate=sanitized,
-            heuristic=best.heuristic,
-            validation_errors=sanitized_errors,
-            index=best.index,
+    # Always sanitize to apply canonical product types and deduplication
+    sanitized = sanitize_candidate_content(selected, category=category)
+    sanitized_errors = validate_candidate_content(sanitized)
+    if keyword_plan:
+        sanitized_errors.extend(
+            validate_candidate_keyword_placement(sanitized, keyword_plan)
         )
-        selected = sanitized
+    ranked_sorted[0] = RankedCandidate(
+        candidate=sanitized,
+        heuristic=best.heuristic,
+        validation_errors=sanitized_errors,
+        index=best.index,
+    )
+    selected = sanitized
 
     return selected, ranked_sorted

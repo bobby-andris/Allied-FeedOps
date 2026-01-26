@@ -61,6 +61,46 @@ _INCH_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Durability claim patterns that require material verification
+_DURABILITY_PATTERNS = [
+    (re.compile(r"corrosion[- ]?(?:free|resistant|proof)", re.IGNORECASE), "corrosion_resistance"),
+    (re.compile(r"rust[- ]?(?:free|resistant|proof)", re.IGNORECASE), "rust_resistance"),
+    (re.compile(r"tarnish[- ]?(?:free|resistant|proof)", re.IGNORECASE), "tarnish_resistance"),
+    (re.compile(r"water[- ]?(?:resistant|proof)", re.IGNORECASE), "water_resistance"),
+]
+
+# Materials that support durability claims
+_DURABILITY_VALID_MATERIALS = {"brass", "solid brass", "stainless steel", "solid stainless steel"}
+
+
+def _extract_durability_claims(texts: list[str], parent_sku: ParentSKU) -> list[Claim]:
+    """Extract durability claims that require material verification."""
+    claims: list[Claim] = []
+    product_material = (parent_sku.material or "").lower()
+    seen_claim_types: set[str] = set()
+
+    for text in texts:
+        for pattern, claim_type in _DURABILITY_PATTERNS:
+            if pattern.search(text):
+                # Dedupe by claim_type within this extraction
+                if claim_type in seen_claim_types:
+                    continue
+                seen_claim_types.add(claim_type)
+
+                if product_material in _DURABILITY_VALID_MATERIALS:
+                    claims.append(Claim(
+                        claim=f"{claim_type} (material: {parent_sku.material})",
+                        source_field=claim_type,  # Use claim_type as source_field for uniqueness
+                        source_value=parent_sku.material or "",
+                    ))
+                else:
+                    claims.append(Claim(
+                        claim=f"UNVERIFIED: {claim_type}",
+                        source_field=claim_type,  # Use claim_type as source_field for uniqueness
+                        source_value=f"requires brass/steel, got: {parent_sku.material}",
+                    ))
+    return claims
+
 
 def extract_claims(candidate: Candidate, parent_sku: ParentSKU) -> list[Claim]:
     """Extract verifiable claims from generated customer-facing text."""
@@ -69,8 +109,9 @@ def extract_claims(candidate: Candidate, parent_sku: ParentSKU) -> list[Claim]:
     material_claims = _extract_material_claims(texts, finish_spans)
     capacity_claims = _extract_capacity_claims(texts)
     dimension_claims = _extract_dimension_claims(texts, parent_sku)
+    durability_claims = _extract_durability_claims(texts, parent_sku)
     return dedupe_claims(
-        finish_claims + material_claims + capacity_claims + dimension_claims
+        finish_claims + material_claims + capacity_claims + dimension_claims + durability_claims
     )
 
 
