@@ -7,7 +7,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from feedops.quality.review_dashboard import format_variant_description
+from feedops.quality.review_dashboard import (
+    format_variant_description,
+    get_dashboard_debug_info,
+)
 
 
 @dataclass
@@ -243,3 +246,34 @@ class TestVariantDescriptionFormatting:
     def test_truncates_when_limit_is_set(self):
         text = "x" * 600
         assert format_variant_description(text, 100) == ("x" * 100) + "..."
+
+
+class TestDashboardDebugInfo:
+    """Tests for dashboard debug info collection."""
+
+    def test_counts_reports_and_exports(self, tmp_path):
+        baseline_exports = tmp_path / "baseline"
+        candidate_exports = tmp_path / "candidate"
+        baseline_reports = tmp_path / "baseline_reports"
+        candidate_reports = tmp_path / "candidate_reports"
+
+        baseline_exports.mkdir()
+        candidate_exports.mkdir()
+        baseline_reports.mkdir()
+        candidate_reports.mkdir()
+
+        (baseline_exports / "google-patch-ABC.json").write_text("{}")
+        (candidate_exports / "google-patch-DEF.json").write_text("{}")
+        (candidate_reports / "sku-DEF-20260101-000000.md").write_text("report")
+
+        info = get_dashboard_debug_info(
+            baseline_exports_dir=baseline_exports,
+            candidate_exports_dir=candidate_exports,
+            baseline_reports_dir=baseline_reports,
+            candidate_reports_dir=candidate_reports,
+        )
+
+        assert info["baseline_exports_count"] == 1
+        assert info["candidate_exports_count"] == 1
+        assert info["baseline_reports_count"] == 0
+        assert info["candidate_reports_count"] == 1

@@ -185,6 +185,32 @@ def run_dashboard(
         cols[0].markdown(f"🟢 **{stats['improved_count']}** improved")
         cols[1].markdown(f"🔴 **{stats['declined_count']}** declined")
         cols[2].markdown(f"⚪ **{stats['unchanged_count']}** unchanged")
+
+        st.divider()
+
+        debug_info = get_dashboard_debug_info(
+            baseline_exports_dir=baseline_exports_dir,
+            candidate_exports_dir=candidate_exports_dir,
+            baseline_reports_dir=baseline_reports_dir,
+            candidate_reports_dir=candidate_reports_dir,
+        )
+        with st.expander("Debug: Data Sources", expanded=False):
+            st.caption("Exports")
+            st.code(
+                f"Baseline: {debug_info['baseline_exports_dir']}\n"
+                f"Candidate: {debug_info['candidate_exports_dir']}\n"
+                f"Baseline patches: {debug_info['baseline_exports_count']}\n"
+                f"Candidate patches: {debug_info['candidate_exports_count']}",
+                language="text",
+            )
+            st.caption("Reports")
+            st.code(
+                f"Baseline: {debug_info['baseline_reports_dir']}\n"
+                f"Candidate: {debug_info['candidate_reports_dir']}\n"
+                f"Baseline reports: {debug_info['baseline_reports_count']}\n"
+                f"Candidate reports: {debug_info['candidate_reports_count']}",
+                language="text",
+            )
     
     # Apply filters
     filtered_data = filter_sku_data(
@@ -735,6 +761,34 @@ def render_score_panel(sku_data: SKUData) -> None:
         st.bar_chart(df)
     else:
         st.info("No score data available for chart")
+
+
+def get_dashboard_debug_info(
+    *,
+    baseline_exports_dir: Path | str | None,
+    candidate_exports_dir: Path | str | None,
+    baseline_reports_dir: Path | str | None,
+    candidate_reports_dir: Path | str | None,
+) -> dict[str, int | str | None]:
+    """Collect filesystem-level debug info for dashboard data sources."""
+    def _count_files(path: Path | str | None, pattern: str) -> int:
+        if not path:
+            return 0
+        path = Path(path)
+        if not path.exists():
+            return 0
+        return sum(1 for _ in path.glob(pattern))
+
+    return {
+        "baseline_exports_dir": str(baseline_exports_dir) if baseline_exports_dir else None,
+        "candidate_exports_dir": str(candidate_exports_dir) if candidate_exports_dir else None,
+        "baseline_reports_dir": str(baseline_reports_dir) if baseline_reports_dir else None,
+        "candidate_reports_dir": str(candidate_reports_dir) if candidate_reports_dir else None,
+        "baseline_exports_count": _count_files(baseline_exports_dir, "*-patch-*.json"),
+        "candidate_exports_count": _count_files(candidate_exports_dir, "*-patch-*.json"),
+        "baseline_reports_count": _count_files(baseline_reports_dir, "sku-*.md"),
+        "candidate_reports_count": _count_files(candidate_reports_dir, "sku-*.md"),
+    }
 
 
 def format_variant_description(description: str, max_chars: int | None = None) -> str:
