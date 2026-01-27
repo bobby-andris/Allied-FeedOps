@@ -48,19 +48,23 @@ def resolve_catalog_path(
     Returns:
         Path to existing catalog CSV.
     """
-    env = env or os.environ
+    env = os.environ if env is None else env
 
     if catalog_arg:
         cli_path = Path(catalog_arg).expanduser()
         if cli_path.exists():
-            return cli_path
+            return cli_path.resolve()
         raise FileNotFoundError(f"Catalog not found: {cli_path}")
 
-    env_catalog = env.get("CATALOG_PATH", str(DEFAULT_CATALOG_RELATIVE))
+    env_catalog = (
+        env.get("CATALOG_PATH", str(DEFAULT_CATALOG_RELATIVE))
+        if env is os.environ
+        else env.get("CATALOG_PATH")
+    )
     if env_catalog:
         env_path = Path(env_catalog).expanduser()
         if env_path.exists():
-            return env_path
+            return env_path.resolve()
 
     base_dir = start_dir or Path.cwd()
     parent_match = _find_in_parents(Path(base_dir), max_depth=max_parent_depth)

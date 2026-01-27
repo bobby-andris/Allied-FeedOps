@@ -77,11 +77,15 @@ def _load_credentials(env: Mapping[str, str]):
         or env.get("FEEDOPS_GOOGLE_ADS_CONFIG")
         or ""
     ).strip()
-    ads_config_path = (
-        Path(ads_config_value).expanduser()
-        if ads_config_value
-        else Path(__file__).resolve().parents[3] / "creds" / "google-ads.yaml"
-    )
+    creds_dir_value = (env.get("FEEDOPS_CREDS_DIR") or "").strip()
+    if ads_config_value:
+        ads_config_path = Path(ads_config_value).expanduser()
+    elif creds_dir_value:
+        ads_config_path = Path(creds_dir_value).expanduser() / "google-ads.yaml"
+    else:
+        ads_config_path = (
+            Path(__file__).resolve().parents[3] / "creds" / "google-ads.yaml"
+        )
     if ads_config_path.exists():
         config = _parse_google_ads_yaml(ads_config_path)
         client_id = config.get("client_id")
@@ -100,7 +104,6 @@ def _load_credentials(env: Mapping[str, str]):
                 "google_ads_config",
             )
 
-    creds_dir_value = (env.get("FEEDOPS_CREDS_DIR") or "").strip()
     if creds_dir_value:
         creds_dir = Path(creds_dir_value).expanduser()
     else:
