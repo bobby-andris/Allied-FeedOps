@@ -179,7 +179,7 @@ async def optimize_parent_sku(
         from feedops.pipeline.lifestyle_images import (
             LifestyleImageGenerator,
             get_product_inventory,
-            get_scene_context,
+            get_customer_focused_scene,
             get_technical_specs,
         )
 
@@ -207,11 +207,16 @@ async def optimize_parent_sku(
                 api_key=gemini_api_key, output_dir=lifestyle_output_dir
             )
 
-            # Build prompts
-            inventory = get_product_inventory(parent_sku.category)
+            # Build prompts with customer-focused context
+            inventory = get_product_inventory(parent_sku.category, parent_sku.current_title)
             # Try to determine style from metadata or default to modern
             style = parent_sku.style or "modern"
-            scene = get_scene_context(style=style, category=parent_sku.category)
+            # Use customer-focused scene generation
+            scene = get_customer_focused_scene(
+                category=parent_sku.category,
+                style=style,
+                product_title=parent_sku.current_title
+            )
             technical = get_technical_specs(style)
 
             # Generate variations

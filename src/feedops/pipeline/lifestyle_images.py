@@ -264,20 +264,91 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
 
 # Template helpers for building prompts
 
-def get_product_inventory(category: str) -> str:
+def get_product_inventory(category: str, product_title: str = "") -> str:
     """
-    Get product component description template based on category
+    Get product component description template based on category and title.
+
+    Now considers product features like tier count, mounting type, and special features
+    to provide more accurate component descriptions.
 
     Args:
         category: Product category (e.g., "Towel Bar", "Cabinet Knob")
+        product_title: Product title (used to detect features)
 
     Returns:
         Product component inventory description
     """
     category_lower = category.lower()
+    title_lower = product_title.lower()
 
-    if "towel bar" in category_lower:
-        return """BACKPLATE (2 total - one at each end):
+    # Paper towel holders
+    if "paper towel" in category_lower or "paper towel" in title_lower:
+        if any(x in title_lower for x in ["under cabinet", "under-cabinet", "wall mount"]):
+            return """UNDER-CABINET PAPER TOWEL HOLDER:
+MOUNTING BRACKET:
+- Metal mounting bracket attaching to underside of cabinet
+- Visible screws or tension mechanism
+- Compact profile maximizing clearance below cabinet
+
+PAPER TOWEL ARM:
+- Horizontal rod holding paper towel roll
+- Spring-loaded or friction-hold mechanism
+- Allows one-handed tearing motion
+
+PAPER TOWEL ROLL:
+- Standard kitchen paper towel roll (11 inches tall)
+- Positioned for easy access from counter
+- Bottom edge at comfortable reach height (24-26 inches from counter)
+
+CONFIGURATION: Under-cabinet mount for space-saving kitchen storage"""
+        else:
+            return """COUNTERTOP PAPER TOWEL HOLDER:
+WEIGHTED BASE:
+- Wide or weighted base for stability
+- Prevents tipping when pulling paper towels
+- Decorative finish matching kitchen hardware
+
+VERTICAL POST:
+- Center post extending 12-14 inches tall
+- Holds paper towel roll vertically
+- Smooth polished finish
+
+TOP FINIAL/CAP:
+- Decorative top piece preventing roll from sliding off
+- May have spring-loaded or friction mechanism for roll security
+
+PAPER TOWEL ROLL:
+- Standard kitchen paper towel roll installed on post
+- Positioned upright for easy one-handed tearing
+
+CONFIGURATION: Freestanding countertop model, easily moved to where needed"""
+
+    # Four-tier towel bars
+    if "towel bar" in category_lower or "towel bar" in title_lower:
+        if any(x in title_lower for x in ["four tier", "4-tier", "4 tier", "ladder", "quad"]):
+            return """FOUR-TIER LADDER TOWEL BAR:
+MOUNTING BRACKETS (2 total - top and bottom):
+- Wall-mount plates securing the ladder structure to wall
+- Decorative finish matching the horizontal bars
+- Vertical mounting for maximum space efficiency
+
+FOUR HORIZONTAL BARS (from top to bottom):
+- Bar 1 (Top): Full-size bath towel hanging space (24-30 inches wide)
+- Bar 2 (Second): Full-size bath towel hanging space
+- Bar 3 (Third): Bath towel or hand towel space
+- Bar 4 (Bottom): Hand towel or washcloth space
+- Each bar independently holds one full towel
+
+VERTICAL SUPPORT RAILS:
+- Two vertical rails connecting all four horizontal bars
+- Ladder-style construction allowing towels to hang without touching
+- Maintains spacing between bars for air circulation
+
+CONFIGURATION: Four independent bars provide organized towel storage for 4+ people
+This is a FAMILY SOLUTION - each person gets their own designated bar"""
+        else:
+            return """SINGLE TOWEL BAR:
+BACKPLATE (2 total - one at each end):
 - Shape: Perfect SQUARE or CIRCLE (depends on design)
 - Surface: Flat with decorative detail or pattern
 - This is a single flat surface - not layered or stepped
@@ -289,8 +360,9 @@ END CAP:
 BAR:
 - Cylindrical round bar connecting the two end caps
 - Smooth, polished finish
+- Holds 1-2 full-size bath towels
 
-CONFIGURATION: Two mounting points (left and right ends)"""
+CONFIGURATION: Two mounting points (left and right ends), standard single-bar design"""
 
     elif "cabinet knob" in category_lower or "knob" in category_lower:
         return """BACKPLATE/ROSETTE:
@@ -305,16 +377,47 @@ KNOB:
 
 MOUNTING: Single center screw through backplate"""
 
-    elif "hook" in category_lower:
-        return """BACKPLATE:
-- Mounting plate (circular or square)
-- Decorative pattern or smooth
-- Secured to wall
+    # Corner shelves
+    if "corner" in title_lower and ("shelf" in category_lower or "shelf" in title_lower):
+        from feedops.pipeline.product_usage_context import extract_tier_count
+        tier_count = extract_tier_count(title_lower)
+        tier_num = {"two": 2, "three": 3, "four": 4, "five": 5}.get(tier_count, 3)
 
-HOOK:
-- Curved or straight projection
+        return f"""CORNER SHELF (MULTI-TIER):
+MOUNTING BRACKETS (per shelf):
+- Corner-specific triangular or L-shaped brackets
+- Secure to both walls meeting at corner
+- Chrome/brass finish visible from front
+- Each shelf has independent mounting hardware
+
+GLASS OR METAL SHELVES ({tier_num} total, from top to bottom):
+- Top Shelf: Positioned 6-8 inches below shower head, holds 3-5 bottles
+- Middle Shelf(ves): Spaced 10-12 inches apart, each holds 3-5 bottles
+- Bottom Shelf: 12-15 inches above tub edge, holds 3-5 bottles
+- Clear tempered glass or metal construction
+- Typical capacity: {tier_num * 3}-{tier_num * 5} full-size shower products total
+
+CORNER GUARDS/RAILS (if present):
+- Small raised edge preventing items from sliding off
+- Wire or metal guard visible at shelf edge
+
+CONFIGURATION: Corner-mounted maximizing unused corner space in shower
+This is a SHOWER STORAGE SOLUTION - designed to organize all shower products off the floor"""
+
+    elif "hook" in category_lower:
+        return """ROBE HOOK:
+BACKPLATE:
+- Mounting plate (circular or square)
+- Decorative pattern or smooth surface
+- Secured to wall with screws
+
+HOOK PROJECTION:
+- Curved or straight projection extending from wall
 - Single or double hook design
-- Smooth polished finish"""
+- Smooth polished finish
+- Designed for hanging robes or towels
+
+CONFIGURATION: Simple hook for quick hang-up of robes and towels"""
 
     # Default generic template
     return """COMPONENTS (as visible in reference image):
@@ -325,9 +428,129 @@ HOOK:
 Study the reference image carefully and replicate exactly."""
 
 
+def get_customer_focused_scene(
+    category: str,
+    style: str,
+    product_title: str,
+) -> str:
+    """
+    Generate customer-focused scene based on actual usage patterns.
+
+    This function creates scenes that demonstrate:
+    - HOW customers use the product
+    - WHERE they use it (correct room)
+    - WHAT capacity it serves (full usage demonstration)
+    - WHY it solves their problem
+
+    Args:
+        category: Product category
+        style: Design style
+        product_title: Product title (used to detect features like tier count)
+
+    Returns:
+        Customer-focused scene description
+    """
+    from feedops.pipeline.product_usage_context import get_product_usage_context
+
+    # Get usage context from database
+    usage_context = get_product_usage_context(category, product_title)
+
+    if not usage_context:
+        # Fallback to current generic scene
+        return get_scene_context(style, category)
+
+    # Build base environment for target room
+    if usage_context.target_room == "kitchen":
+        base_env = get_kitchen_environment(style)
+    elif "guest" in usage_context.target_room:
+        base_env = get_guest_bathroom_environment(style)
+    elif usage_context.target_room == "shower":
+        base_env = get_shower_environment(style)
+    else:
+        base_env = get_bathroom_environment(style)
+
+    # Build item list for display
+    items_list = build_item_list(usage_context.typical_items, usage_context.capacity_min)
+
+    # Build context requirements
+    context_items = build_context_items(usage_context.required_context_items)
+
+    # Build customer-focused scene narrative
+    scene = f"""{base_env}
+
+CUSTOMER USE CASE: {usage_context.primary_use_case}
+The scene demonstrates how a {usage_context.customer_persona} uses this product daily.
+
+PROBLEM SOLVED: {usage_context.customer_problem_solved}
+
+ITEMS TO SHOW ({usage_context.capacity_min}-{usage_context.capacity_max} items):
+{items_list}
+
+CONTEXT REQUIREMENTS:
+{context_items}
+
+VALUE DEMONSTRATION: {usage_context.unique_value}
+The image must clearly show: {usage_context.capacity_description}
+
+SCENE TYPE: {usage_context.scene_type}
+{'Show the product in active use during ' + usage_context.primary_use_case if usage_context.scene_type == 'in-use' else 'Show lifestyle staging that demonstrates practical use'}
+
+This is not just product photography - this shows customers HOW they will use this product and WHY they need it."""
+
+    return scene
+
+
+def get_kitchen_environment(style: str) -> str:
+    """Generate kitchen base environment based on style."""
+    if style.lower() in ["modern", "contemporary"]:
+        return "Modern kitchen with white quartz countertops, stainless steel sink, and subway tile backsplash. Bright natural lighting."
+    elif style.lower() in ["traditional", "classic"]:
+        return "Traditional kitchen with granite countertops, farmhouse sink, and classic cabinetry. Warm ambient lighting."
+    else:
+        return "Kitchen with clean countertops and sink area visible. Natural lighting."
+
+
+def get_guest_bathroom_environment(style: str) -> str:
+    """Generate guest/family bathroom environment."""
+    if style.lower() in ["modern", "contemporary"]:
+        return "Modern guest bathroom with white walls, chrome fixtures, and clean lines. Multiple personal care items visible suggesting family use."
+    else:
+        return "Guest bathroom with neutral walls and organized family items visible. Warm welcoming atmosphere."
+
+
+def get_shower_environment(style: str) -> str:
+    """Generate shower/tub area environment."""
+    return "Shower area with white tile walls, chrome shower head visible, and water droplets suggesting recent use. Glass enclosure partially visible."
+
+
+def get_bathroom_environment(style: str) -> str:
+    """Generate standard bathroom environment."""
+    if style.lower() in ["modern", "contemporary"]:
+        return "Modern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic."
+    elif style.lower() in ["traditional", "classic"]:
+        return "Traditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling."
+    else:
+        return "Bathroom with neutral tiles and clean finishes."
+
+
+def build_item_list(items: list[str], min_items: int) -> str:
+    """Build formatted item list for prompt."""
+    item_descriptions = []
+    for i, item in enumerate(items[:min_items], 1):
+        item_descriptions.append(f"{i}. {item}")
+    return "\n".join(item_descriptions)
+
+
+def build_context_items(context_items: list[str]) -> str:
+    """Build formatted context requirements for prompt."""
+    return "\n".join(f"- {item}" for item in context_items)
+
+
 def get_scene_context(style: str = "modern", category: str = "") -> str:
     """
-    Get scene description based on style and product category
+    Get scene description based on style and product category.
+
+    NOTE: This is the legacy function. New code should use get_customer_focused_scene().
 
     Args:
         style: Design style (modern, traditional, transitional, industrial)
@@ -410,40 +633,71 @@ def get_scene_context(style: str = "modern", category: str = "") -> str:
 
 
 PRODUCT_USAGE_RULES = {
+    "paper towel": {
+        "correct": "Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context",
+        "forbidden": "Bathroom setting (unless specifically bathroom paper towels), empty holder",
+        "critical": "CRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.",
+        "capacity": "Single paper towel roll properly mounted and accessible for one-handed use",
+    },
+    "four tier towel bar": {
+        "correct": "4-5 towels hanging from different bars, showing full multi-person use. Different colors/styles to indicate family members.",
+        "forbidden": "Only 1-2 towels shown, empty bars, towels folded instead of hanging, all same color",
+        "critical": "CRITICAL: Must show at least 4 towels demonstrating FULL FAMILY USE. Each bar should have a towel. This is a MULTI-PERSON storage solution - showing only 1-2 towels completely misrepresents its purpose.",
+        "capacity": "Minimum 4 towels (one per bar), ideally 4-5 in different colors showing family bathroom use",
+    },
+    "corner shelf": {
+        "correct": "8-12 shower products (bottles, soaps, razors, loofahs) distributed across all shelves. Shows active shower storage use.",
+        "forbidden": "Empty shelves, only 1-2 items total, decorative items only, towels on shelves",
+        "critical": "CRITICAL: Must show 8-12 shower/bath products to demonstrate STORAGE CAPACITY. Customers buy this to ORGANIZE shower clutter - empty shelves don't show the value.",
+        "capacity": "Minimum 8 items total (2-4 per shelf), maximum 12 items, showing realistic shower product organization",
+    },
     "glass shelf": {
-        "correct": "toiletries, skincare products, small decorative items stored ON the shelf surface",
-        "forbidden": "towels, robes, or any fabric items draped OVER or hanging FROM the shelf",
-        "critical": "CRITICAL CONSTRAINT: Items must be PLACED ON the shelf, not draped over it. Glass shelves are for storage, not hanging fabric.",
+        "correct": "toiletries, skincare products, small decorative items stored ON the shelf surface, may include rolled hand towels on bottom shelf",
+        "forbidden": "towels draped OVER or hanging FROM the shelf, empty shelves",
+        "critical": "CRITICAL CONSTRAINT: Items must be PLACED ON the shelf, not draped over it. Glass shelves are for elegant storage and display, not hanging fabric.",
+        "capacity": "4-8 items including toiletries and accessories, may include folded/rolled towels ON bottom shelf",
     },
     "towel bar": {
         "correct": "bath towel hanging FROM the horizontal bar, showing natural drape and weight",
-        "forbidden": "towels folded and stacked on top of the bar, multiple towels, towels wrapped around",
-        "critical": "CRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.",
+        "forbidden": "towels folded and stacked on top of the bar, towels wrapped around",
+        "critical": "CRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.",
+        "capacity": "1-2 full-size bath towels hanging naturally",
+    },
+    "heated towel rack": {
+        "correct": "Multiple folded towels positioned for warming, luxurious bathroom context",
+        "forbidden": "Hanging towels (reduces warming efficiency), empty rack, single towel",
+        "critical": "CRITICAL: Show 3-5 folded towels positioned for warming. This is a HEATED product - demonstrate the luxury warming feature with multiple towels.",
+        "capacity": "3-5 folded towels showing full rack utilization and warming capability",
     },
     "toilet paper holder": {
         "correct": "toilet paper roll installed ON the holder, showing the paper ready to use",
         "forbidden": "empty holder with no toilet paper, towels on the holder, decorative items",
         "critical": "CRITICAL CONSTRAINT: Toilet paper must be visible and installed on the holder.",
+        "capacity": "Single toilet paper roll properly installed",
     },
     "paper holder": {
         "correct": "toilet paper roll installed ON the holder, showing the paper ready to use",
         "forbidden": "empty holder with no toilet paper, towels on the holder, decorative items",
         "critical": "CRITICAL CONSTRAINT: Toilet paper must be visible and installed on the holder.",
+        "capacity": "Single toilet paper roll properly installed",
     },
     "robe hook": {
         "correct": "bathrobe or towel hanging FROM the hook, showing natural drape downward",
         "forbidden": "multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook",
         "critical": "CRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.",
+        "capacity": "Single bathrobe or towel hanging naturally",
     },
     "hook": {
         "correct": "bathrobe or towel hanging FROM the hook, showing natural drape downward",
         "forbidden": "multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook",
         "critical": "CRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.",
+        "capacity": "Single item hanging naturally",
     },
     "towel ring": {
         "correct": "hand towel pulled THROUGH the ring and hanging naturally",
         "forbidden": "towel wrapped AROUND the ring multiple times, towel folded on the ring",
         "critical": "CRITICAL CONSTRAINT: Towel passes THROUGH ring once, hangs naturally.",
+        "capacity": "Single hand towel threaded through ring",
     },
 }
 
