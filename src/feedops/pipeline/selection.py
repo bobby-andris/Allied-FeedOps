@@ -139,6 +139,32 @@ def _dedupe_product_types(title: str) -> str:
     return re.sub(r"\s+", " ", title).strip()
 
 
+def _trim_google_short_title(title: str, max_len: int = 70) -> str:
+    """Trim google_short_title to fit overlay constraints."""
+    cleaned = title.strip()
+    if len(cleaned) <= max_len:
+        return cleaned
+
+    brand_index = cleaned.lower().rfind("allied brass")
+    if brand_index != -1:
+        cleaned = cleaned[:brand_index].rstrip()
+        cleaned = cleaned.rstrip(" |-—–")
+
+    if len(cleaned) > max_len:
+        for sep in [" | ", " - ", " — ", " – "]:
+            if sep in cleaned:
+                cleaned = cleaned.split(sep)[0].rstrip()
+                break
+
+    if len(cleaned) > max_len:
+        truncated = cleaned[:max_len].rstrip()
+        if " " in truncated:
+            truncated = truncated.rsplit(" ", 1)[0]
+        cleaned = truncated.rstrip()
+
+    return cleaned or title.strip()[:max_len]
+
+
 @dataclass
 class RankedCandidate:
     candidate: Candidate
@@ -218,10 +244,12 @@ def sanitize_candidate_content(
             if canonical:
                 value = _enforce_canonical_product_type(value, canonical)
             # Ensure proper brand format with pipe separator
-            value = _ensure_brand_format(value)
-        # Dedupe redundant product types in short title
+            if field != "google_short_title":
+                value = _ensure_brand_format(value)
+        # Dedupe and trim redundant product types in short title
         if field == "google_short_title":
             value = _dedupe_product_types(value)
+            value = _trim_google_short_title(value)
         # Strip SEO keyword spam from descriptions
         if field in description_fields:
             value = _strip_keyword_spam(value)

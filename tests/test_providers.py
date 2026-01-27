@@ -1,12 +1,14 @@
 # tests/test_providers.py
 import base64
-import pytest
 from abc import ABC
-from unittest.mock import AsyncMock, patch, MagicMock
-from feedops.providers.base import LLMProvider, ImageInput
-from feedops.providers.openai_provider import OpenAIProvider
-from feedops.providers.gemini_provider import GeminiProvider
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from feedops.providers.base import ImageInput, LLMProvider
 from feedops.providers.factory import get_provider
+from feedops.providers.gemini_provider import GeminiProvider
+from feedops.providers.openai_provider import OpenAIProvider
 
 
 # Task 4.1: Base LLM Provider Tests
@@ -18,6 +20,7 @@ def test_llm_provider_is_abstract():
 
 def test_llm_provider_requires_generate_method():
     """LLMProvider subclass must implement generate."""
+
     class IncompleteProvider(LLMProvider):
         pass
 
@@ -46,11 +49,15 @@ async def test_openai_provider_generate_parses_json():
 
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
-    mock_response.choices[0].message.content = '{"title": "Test Title", "description": "Test"}'
+    mock_response.choices[0].message.content = (
+        '{"title": "Test Title", "description": "Test"}'
+    )
     mock_response.usage.prompt_tokens = 100
     mock_response.usage.completion_tokens = 50
 
-    with patch.object(provider.client.chat.completions, 'create', new_callable=AsyncMock) as mock_create:
+    with patch.object(
+        provider.client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
         mock_create.return_value = mock_response
         result = await provider.generate("Test prompt", {"type": "object"})
         assert result["title"] == "Test Title"
@@ -63,7 +70,7 @@ async def test_openai_provider_retries_on_invalid_json():
 
     invalid_response = MagicMock()
     invalid_response.choices = [MagicMock()]
-    invalid_response.choices[0].message.content = 'not valid json'
+    invalid_response.choices[0].message.content = "not valid json"
     invalid_response.usage.prompt_tokens = 100
     invalid_response.usage.completion_tokens = 50
 
@@ -73,7 +80,9 @@ async def test_openai_provider_retries_on_invalid_json():
     valid_response.usage.prompt_tokens = 100
     valid_response.usage.completion_tokens = 50
 
-    with patch.object(provider.client.chat.completions, 'create', new_callable=AsyncMock) as mock_create:
+    with patch.object(
+        provider.client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
         mock_create.side_effect = [invalid_response, valid_response]
         result = await provider.generate("Test prompt", {"type": "object"})
         assert result["title"] == "Fixed"
@@ -95,7 +104,9 @@ async def test_openai_provider_includes_image_input():
     mock_response.usage.input_tokens = 100
     mock_response.usage.output_tokens = 50
 
-    with patch.object(provider.client.responses, 'create', new_callable=AsyncMock) as mock_create:
+    with patch.object(
+        provider.client.responses, "create", new_callable=AsyncMock
+    ) as mock_create:
         mock_create.return_value = mock_response
         await provider.generate("Test prompt", {"type": "object"}, image=image_input)
 
@@ -109,7 +120,28 @@ async def test_openai_provider_includes_image_input():
         image_url = content[1]["image_url"]
         prefix = f"data:{image_input.mime_type};base64,"
         assert image_url.startswith(prefix)
-        assert base64.b64decode(image_url[len(prefix):]) == image_input.data
+        assert base64.b64decode(image_url[len(prefix) :]) == image_input.data
+
+
+@pytest.mark.asyncio
+async def test_openai_provider_health_check_uses_max_completion_tokens_for_gpt5():
+    """OpenAI health check uses max_completion_tokens for gpt-5 models."""
+    provider = OpenAIProvider(api_key="test-key", model="gpt-5.2")
+
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = "pong"
+
+    with patch.object(
+        provider.client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
+        mock_create.return_value = mock_response
+        ok = await provider.health_check()
+        assert ok is True
+
+        _, kwargs = mock_create.call_args
+        assert "max_completion_tokens" in kwargs
+        assert "max_tokens" not in kwargs
 
 
 # Task 4.3: Gemini Provider Tests
@@ -118,7 +150,7 @@ async def test_gemini_provider_generate_parses_json():
     """Gemini provider parses JSON from response."""
     provider = GeminiProvider(api_key="test-key")
 
-    with patch.object(provider, '_call_api', new_callable=AsyncMock) as mock_api:
+    with patch.object(provider, "_call_api", new_callable=AsyncMock) as mock_api:
         mock_api.return_value = '{"title": "Test Title"}'
         result = await provider.generate("Test prompt", {"type": "object"})
         assert result["title"] == "Test Title"
@@ -137,13 +169,22 @@ async def test_gemini_provider_includes_image_input():
     mock_response.text = '{"title": "Test Title"}'
     image_part = object()
 
-    with patch("feedops.providers.gemini_provider.types.Part.from_bytes", return_value=image_part) as mock_part:
-        with patch.object(provider.client.aio.models, 'generate_content', new_callable=AsyncMock) as mock_generate:
+    with patch(
+        "feedops.providers.gemini_provider.types.Part.from_bytes",
+        return_value=image_part,
+    ) as mock_part:
+        with patch.object(
+            provider.client.aio.models, "generate_content", new_callable=AsyncMock
+        ) as mock_generate:
             mock_generate.return_value = mock_response
-            result = await provider.generate("Test prompt", {"type": "object"}, image=image_input)
+            result = await provider.generate(
+                "Test prompt", {"type": "object"}, image=image_input
+            )
             assert result["title"] == "Test Title"
 
-            mock_part.assert_called_once_with(data=image_input.data, mime_type=image_input.mime_type)
+            mock_part.assert_called_once_with(
+                data=image_input.data, mime_type=image_input.mime_type
+            )
             _, kwargs = mock_generate.call_args
             assert kwargs["contents"] == [
                 "Test prompt\n\nRespond with valid JSON only, no markdown.",
@@ -154,20 +195,32 @@ async def test_gemini_provider_includes_image_input():
 # Task 4.4: Provider Factory Tests
 def test_get_provider_returns_openai_by_default():
     """Factory returns OpenAI provider when configured."""
-    with patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'}):
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
         provider = get_provider()
         assert provider.name.startswith("openai/")
 
 
+def test_get_provider_uses_openai_model_env():
+    """Factory uses model override when configured."""
+    with patch.dict(
+        "os.environ",
+        {"OPENAI_API_KEY": "test-key", "FEEDOPS_OPENAI_MODEL": "gpt-4o"},
+    ):
+        provider = get_provider()
+        assert provider.name == "openai/gpt-4o"
+
+
 def test_get_provider_falls_back_to_gemini():
     """Factory returns Gemini when OpenAI not configured."""
-    with patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'}, clear=True):
+    with patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
         assert provider.name.startswith("gemini/")
 
 
 def test_get_provider_raises_when_none_configured():
     """Factory raises when no provider configured."""
-    with patch.dict('os.environ', {}, clear=True):
+    with patch.dict("os.environ", {}, clear=True):
+        with pytest.raises(ValueError, match="No LLM provider configured"):
+            get_provider()
         with pytest.raises(ValueError, match="No LLM provider configured"):
             get_provider()

@@ -1,11 +1,11 @@
 {
   "sku": "shopify_US_7721205596386_42803121881314",
-  "title": "retractable hooks and garment rod Wall Mount 2-1/2-Inch Hanging Space Solid Brass Allied Brass",
-  "description": "Upgrade storage in tight spaces with this retractable hooks and garment rod solution for wall mount installation. The rod pulls out to provide 2-1/2-Inch of hanging space, then pushes back in when not in use\u2014ideal for modern bathroom hardware and other contemporary bath accessories where a clean look matters.\n\nHighlights:\n- Retractable wall hook / pull-out hanger creates 2-1/2-Inch hanging space, then retracts flush when not needed\n- Wall mount design helps keep items organized without taking up floor space (great for minimalist bathroom fixtures)\n- Solid brass construction\n- Holds up to 15 lb\n- Optional customization: remove the supplied knob tip and replace with a cabinet knob of your choice\n\nSpecs & Installation:\n- Mounting type: Wall mount\n- Material: Brass\n- Dimensions: 3.75 in W x 2 in H x 2 in L; 1 in projection\n- Product weight: 1 lb\n- Hardware included: toggle bolts (6/32 toggles)\n- Wall compatibility: fits standard interior walls\n- Install notes: requires drilling a 3/4 in dia. hole through drywall and 3 small holes around\n- Finish options: multiple designer finishes available, including statement colors",
+  "title": "Wall Mount Retractable Hooks And Garment Rod 2-1/2-Inch Solid Brass For Bathroom | Allied Brass",
+  "description": "Keep essentials within reach while saving space with this wall mount retractable hooks and garment rod. The rod pulls out to provide 2-1/2 inches of hanging space, then retracts when not in use\u2014ideal for modern bathroom hardware and contemporary bath accessories.\n\nHighlights:\n- Retractable design: extends for 2-1/2\" hanging space and pushes back in to reduce visual clutter\n- Solid brass construction\n- Supports up to 15 lb for coats, robes, and towels\n- Swap the included knob tip with your own cabinet knob to coordinate with minimalist bathroom fixtures\n- Wall mount installation saves floor space\n\nSpecs & installation:\n- Fits standard interior walls\n- Mounting hardware included; uses 6/32 toggles\n- Drilling required: 3/4\" diameter hole through drywall plus three small holes around\n- Size: 3.75\" W x 2\" H x 2\" L; projection 1\"\n- Multiple designer finish options available, including statement colors",
   "_meta": {
     "master_sku": "MD-22",
-    "generated_at": "2026-01-25T19:44:33.632203",
-    "quality_score": 88.33,
+    "generated_at": "2026-01-27T13:41:25.254489",
+    "quality_score": 90.0,
     "approval_status": "approved"
   },
   "_previous": {
@@ -14,29 +14,29 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var1_20260125_194349.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var1_20260127_144822.png",
       "variation_num": 1,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MD-22-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth\n- Secured to wall\n\nHOOK:\n- Curved or straight projection\n- Single or double hook design\n- Smooth polished finish\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The robe hook is mounted on the wall near the shower entry.\nA plush white bathrobe or premium hand towel hangs FROM the hook.\nThe fabric shows natural drape and weight from the hook.\nA single item hangs from the hook (not multiple items piled).\nThe wall area around the hook is clean and uncluttered.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_194349",
+      "timestamp": "20260127_144822",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var2_20260125_194404.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var2_20260127_144838.png",
       "variation_num": 2,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MD-22-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth\n- Secured to wall\n\nHOOK:\n- Curved or straight projection\n- Single or double hook design\n- Smooth polished finish\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The robe hook is mounted on the wall near the shower entry.\nA plush white bathrobe or premium hand towel hangs FROM the hook.\nThe fabric shows natural drape and weight from the hook.\nA single item hangs from the hook (not multiple items piled).\nThe wall area around the hook is clean and uncluttered.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_194404",
+      "timestamp": "20260127_144838",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var3_20260125_194419.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var3_20260127_144854.png",
       "variation_num": 3,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MD-22-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth\n- Secured to wall\n\nHOOK:\n- Curved or straight projection\n- Single or double hook design\n- Smooth polished finish\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The robe hook is mounted on the wall near the shower entry.\nA plush white bathrobe or premium hand towel hangs FROM the hook.\nThe fabric shows natural drape and weight from the hook.\nA single item hangs from the hook (not multiple items piled).\nThe wall area around the hook is clean and uncluttered.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_194419",
+      "timestamp": "20260127_144854",
       "error_message": null
     }
   ],
-  "selected_lifestyle_image": null
+  "selected_lifestyle_image": 1
 }

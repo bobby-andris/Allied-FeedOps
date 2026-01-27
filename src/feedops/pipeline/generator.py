@@ -1,14 +1,46 @@
 """Candidate generator using LLM providers."""
+
 import json
-from feedops.models import ParentSKU, Candidate, Claim, Score
-from feedops.providers.base import LLMProvider
+
+from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.images import fetch_image
 from feedops.pipeline.keyword_placement import (
     build_keyword_placement_plan,
     format_keyword_placement_section,
 )
-from feedops.pipeline.prompts import SYSTEM_PROMPT, OPTIMIZATION_TEMPLATE, CANDIDATE_SCHEMA
+from feedops.pipeline.prompts import (
+    CANDIDATE_SCHEMA,
+    OPTIMIZATION_TEMPLATE,
+    SYSTEM_PROMPT,
+)
+from feedops.providers.base import LLMProvider
+
+
+def _trim_google_short_title(title: str, max_len: int = 70) -> str:
+    """Trim google_short_title to fit overlay constraints."""
+    cleaned = title.strip()
+    if len(cleaned) <= max_len:
+        return cleaned
+
+    brand_index = cleaned.lower().rfind("allied brass")
+    if brand_index != -1:
+        cleaned = cleaned[:brand_index].rstrip()
+        cleaned = cleaned.rstrip(" |-—–")
+
+    if len(cleaned) > max_len:
+        for sep in [" | ", " - ", " — ", " – "]:
+            if sep in cleaned:
+                cleaned = cleaned.split(sep)[0].rstrip()
+                break
+
+    if len(cleaned) > max_len:
+        truncated = cleaned[:max_len].rstrip()
+        if " " in truncated:
+            truncated = truncated.rsplit(" ", 1)[0]
+        cleaned = truncated.rstrip()
+
+    return cleaned or title.strip()[:max_len]
 
 
 def build_prompt(parent_sku: ParentSKU) -> str:
@@ -62,9 +94,11 @@ def parse_candidate_response(response: dict) -> Candidate:
         factual_accuracy=score_data.get("factual_accuracy", 5),
     )
 
+    google_short_title = _trim_google_short_title(response["google_short_title"])
+
     return Candidate(
         google_title=response["google_title"],
-        google_short_title=response["google_short_title"],
+        google_short_title=google_short_title,
         google_description=response["google_description"],
         bing_title=response["bing_title"],
         bing_description=response["bing_description"],
@@ -123,4 +157,5 @@ async def generate_candidates(
         except Exception as exc:
             errors.append(f"Candidate {idx}: {exc}")
 
+    return candidates, errors
     return candidates, errors

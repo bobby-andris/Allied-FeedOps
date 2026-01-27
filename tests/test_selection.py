@@ -200,6 +200,34 @@ def test_sanitize_candidate_content_with_category():
     assert "Towel Bar" in sanitized.google_title
 
 
+def test_sanitize_candidate_content_keeps_short_title_brand_free():
+    """sanitize_candidate_content does not force brand into short title."""
+    candidate = _make_candidate(
+        google_title="Assorted Wall Accessories 22.5-Inch Solid Brass | Allied Brass",
+        google_description="A description.",
+    ).model_copy(update={"google_short_title": "Assorted Wall Accessories 22.5-Inch"})
+
+    sanitized = sanitize_candidate_content(candidate, category=None)
+
+    assert "Allied Brass" not in sanitized.google_short_title
+
+
+def test_sanitize_candidate_content_trims_short_title_length():
+    """sanitize_candidate_content trims short titles to <= 70 characters."""
+    long_short_title = (
+        "Assorted Wall Accessories 22.5-Inch Solid Brass with Concealed Mounting"
+    )
+    assert len(long_short_title) > 70
+    candidate = _make_candidate(
+        google_title="Assorted Wall Accessories 22.5-Inch Solid Brass | Allied Brass",
+        google_description="A description.",
+    ).model_copy(update={"google_short_title": long_short_title})
+
+    sanitized = sanitize_candidate_content(candidate, category=None)
+
+    assert len(sanitized.google_short_title) <= 70
+
+
 def test_sanitize_candidate_content_strips_keyword_spam():
     candidate = _make_candidate(
         google_title="18-Inch Towel Bar Solid Brass Allied Brass",

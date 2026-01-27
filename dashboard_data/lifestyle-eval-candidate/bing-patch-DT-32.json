@@ -1,0 +1,42 @@
+{
+  "sku": "shopify_US_4545106477188_32128750059652",
+  "title": "Wall Mount Soap Dish Solid Brass 4.5-Inch Dottingham Collection Bath Accessory | Allied Brass",
+  "description": "Add a wall mount soap dish to keep soap handy while reducing countertop clutter in the bathroom. This Dottingham collection soap holder / soap dish accessory is crafted from solid brass and installs with concealed screw mounting hardware for a clean look.\n\nHighlights:\n- Wall mounted design helps keep the countertop clean and organized\n- Solid brass construction\n- Concealed screw mounting hardware for an uncluttered appearance\n- Installation hardware included; easy to install\n- Coordinates with the Dottingham collection for matching transitional bathroom hardware and versatile bath accessories\n\nSpecs:\n- Dimensions: 4.5 in L x 3.5 in W x 3 in H\n- Projection: 5 in\n- Weight capacity: 2 lb\n- Product weight: 1.6 lb\n- Screw size: #8 x 1 1/4\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty\n- Multiple designer finish options available",
+  "_meta": {
+    "master_sku": "DT-32",
+    "generated_at": "2026-01-27T13:15:43.173305",
+    "quality_score": 90.0,
+    "approval_status": "approved"
+  },
+  "_previous": {
+    "title": "Dottingham Collection Wall Mounted Soap Dish",
+    "description": "Complete your d\u00e9cor with this finely crafted soap dish. Keep your countertop clean and clutter-free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to ensure products will never rust."
+  },
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/DT-32_var1_20260127_145432.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/DT-32-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260127_145432",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/DT-32_var2_20260127_145448.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/DT-32-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260127_145448",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/DT-32_var3_20260127_145504.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/DT-32-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260127_145504",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": 1
+}
