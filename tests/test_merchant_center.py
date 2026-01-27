@@ -145,7 +145,6 @@ def test_load_credentials_falls_back_to_creds_dir(monkeypatch, tmp_path):
 
 def test_load_credentials_uses_google_ads_config(tmp_path):
     from google.oauth2.credentials import Credentials
-
     from feedops.integrations import merchant_center
 
     config_path = tmp_path / "google-ads.yaml"
@@ -164,4 +163,5 @@ def test_load_credentials_uses_google_ads_config(tmp_path):
     )
 
     assert source == "google_ads_config"
+    assert isinstance(creds, Credentials)
     assert isinstance(creds, Credentials)
