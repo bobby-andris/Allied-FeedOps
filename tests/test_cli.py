@@ -40,6 +40,17 @@ def test_compare_runs_command_removed():
     assert "compare-runs" not in result.stdout
 
 
+def test_sync_catalog_command_available():
+    """sync-catalog command should be available."""
+    result = subprocess.run(
+        [sys.executable, "-m", "feedops.cli.main", "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "sync-catalog" in result.stdout
+
+
 def test_optimize_help_includes_candidate_flags():
     """optimize command documents candidate selection flags."""
     result = subprocess.run(

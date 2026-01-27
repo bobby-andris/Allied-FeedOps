@@ -1,8 +1,9 @@
 """SQLite database schema and operations."""
+
 import json
 import sqlite3
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def get_connection(db_path: Path | str) -> sqlite3.Connection:
@@ -30,7 +31,8 @@ def init_db(db_path: Path | str) -> None:
 
     conn = get_connection(db_path)
 
-    conn.execute("""
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS optimization_runs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             master_sku TEXT NOT NULL,
@@ -47,9 +49,11 @@ def init_db(db_path: Path | str) -> None:
             error_message TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS content_versions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             master_sku TEXT NOT NULL,
@@ -60,9 +64,11 @@ def init_db(db_path: Path | str) -> None:
             optimization_run_id INTEGER,
             FOREIGN KEY (optimization_run_id) REFERENCES optimization_runs(id)
         )
-    """)
+    """
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS keyword_intent_snapshots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             master_sku TEXT NOT NULL,
@@ -74,22 +80,46 @@ def init_db(db_path: Path | str) -> None:
             optimization_run_id INTEGER,
             FOREIGN KEY (optimization_run_id) REFERENCES optimization_runs(id)
         )
-    """)
+    """
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS merchant_center_items (
+            offer_id TEXT PRIMARY KEY,
+            payload_json TEXT NOT NULL,
+            fetched_at TEXT NOT NULL
+        )
+    """
+    )
+
+    conn.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_runs_master_sku
         ON optimization_runs(master_sku)
-    """)
+    """
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_versions_master_sku
         ON content_versions(master_sku)
-    """)
+    """
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_keyword_intent_master_sku
         ON keyword_intent_snapshots(master_sku)
-    """)
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_merchant_center_offer
+        ON merchant_center_items(offer_id)
+    """
+    )
 
     conn.commit()
     conn.close()
@@ -197,3 +227,43 @@ def log_keyword_intent_snapshot(
     row_id = cursor.lastrowid
     conn.close()
     return row_id
+
+
+def upsert_merchant_center_items(db_path: Path | str, items: list[dict]) -> None:
+    if not items:
+        return
+    conn = get_connection(db_path)
+    payloads = []
+    for item in items:
+        offer_id = item.get("offerId")
+        if not offer_id:
+            continue
+        fetched_at = item.get("fetched_at") or datetime.now().isoformat()
+        payloads.append((offer_id, json.dumps(item), fetched_at))
+
+    conn.executemany(
+        """
+        INSERT OR REPLACE INTO merchant_center_items (
+            offer_id, payload_json, fetched_at
+        ) VALUES (?, ?, ?)
+        """,
+        payloads,
+    )
+    conn.commit()
+    conn.close()
+
+
+def load_merchant_center_items(db_path: Path | str) -> dict[str, dict]:
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return {}
+    conn = get_connection(db_path)
+    rows = conn.execute(
+        "SELECT offer_id, payload_json FROM merchant_center_items"
+    ).fetchall()
+    conn.close()
+    records: dict[str, dict] = {}
+    for row in rows:
+        payload = json.loads(row["payload_json"])
+        records[row["offer_id"]] = payload
+    return records

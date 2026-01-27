@@ -6,6 +6,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from feedops.integrations.merchant_center import (
+    DEFAULT_MC_METADATA_PATH,
+    load_merchant_center_snapshot,
+)
 from feedops.loaders import get_parent_sku, load_catalog
 from feedops.models import Candidate
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
@@ -239,6 +243,16 @@ async def optimize_parent_sku(
         image_url = parent_sku.variants[0].main_image_url
     token_usage = getattr(provider, "last_usage", {})
     estimated_cost = estimate_llm_cost(provider.name, token_usage)
+    mc_metadata = None
+    mc_path = Path(
+        os.environ.get("FEEDOPS_MC_METADATA_PATH", str(DEFAULT_MC_METADATA_PATH))
+    )
+    if mc_path.exists():
+        try:
+            mc_metadata = load_merchant_center_snapshot(mc_path)
+        except Exception:
+            mc_metadata = None
+
     report = generate_report(
         parent_sku,
         verified_candidate,
@@ -251,6 +265,7 @@ async def optimize_parent_sku(
         estimated_cost=estimated_cost,
         selection_ranking=ranking,
         generation_errors=generation_errors,
+        mc_metadata=mc_metadata,
     )
     patch_previews = {
         "google": generate_patch_preview(

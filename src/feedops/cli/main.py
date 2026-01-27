@@ -21,6 +21,7 @@ from feedops.cli.defaults import (
     CANDIDATE_EXPORTS_DIR,
     CANDIDATE_REPORTS_DIR,
 )
+from feedops.loaders.catalog_resolver import resolve_catalog_path
 
 app = typer.Typer(
     name="feedops",
@@ -59,11 +60,11 @@ def healthcheck():
     all_ok = True
 
     # Check 1: Catalog file
-    catalog_path = os.environ.get("CATALOG_PATH", "data/catalog/Product Catalog.csv")
-    if Path(catalog_path).exists():
+    try:
+        catalog_path = resolve_catalog_path(None)
         console.print(f"[green]✓[/green] Catalog: {catalog_path}")
-    else:
-        console.print(f"[red]✗[/red] Catalog not found: {catalog_path}")
+    except FileNotFoundError as exc:
+        console.print(f"[red]✗[/red] {exc}")
         all_ok = False
 
     # Check 2: LLM API keys
@@ -136,9 +137,7 @@ def optimize(
     from feedops.pipeline.optimize import optimize_parent_sku
     from feedops.pipeline.selection import parse_candidate_weights
 
-    catalog_path = catalog or os.environ.get(
-        "CATALOG_PATH", "data/catalog/Product Catalog.csv"
-    )
+    catalog_path = resolve_catalog_path(catalog)
     weights = (
         parse_candidate_weights(candidate_weights)
         if candidate_weights is not None
@@ -199,9 +198,7 @@ def list_skus(
     """List available MasterSKUs in catalog."""
     from feedops.loaders import list_master_skus, load_catalog
 
-    catalog_path = catalog or os.environ.get(
-        "CATALOG_PATH", "data/catalog/Product Catalog.csv"
-    )
+    catalog_path = resolve_catalog_path(catalog)
 
     try:
         df = load_catalog(catalog_path)
@@ -216,6 +213,54 @@ def list_skus(
     except FileNotFoundError as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)
+
+
+@app.command(name="sync-catalog")
+def sync_catalog_command(
+    source: str = typer.Option(
+        "auto", "--source", help="Which source to refresh: shopify, mapi, auto"
+    ),
+    output_catalog: Optional[str] = typer.Option(
+        None,
+        "--output-catalog",
+        help="Output catalog path (default: CATALOG_PATH or cache)",
+    ),
+    output_mc_metadata: Optional[str] = typer.Option(
+        None,
+        "--output-mc-metadata",
+        help="Output Merchant Center metadata path (default: cache)",
+    ),
+    limit: Optional[int] = typer.Option(
+        None, "--limit", help="Limit number of products fetched"
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Force refresh even if caches are fresh"
+    ),
+    ttl_hours: Optional[float] = typer.Option(
+        None, "--ttl-hours", help="Refresh caches older than this (hours)"
+    ),
+):
+    """Sync Shopify catalog and Merchant Center metadata snapshots."""
+    from feedops.cli.sync import sync_catalog
+
+    try:
+        result = sync_catalog(
+            source=source,
+            output_catalog=output_catalog,
+            output_mc_metadata=output_mc_metadata,
+            limit=limit,
+            force=force,
+            ttl_hours=ttl_hours,
+        )
+    except ValueError as exc:
+        console.print(f"[red]Error: {exc}[/red]")
+        raise typer.Exit(1)
+
+    catalog_status = "refreshed" if result.refreshed_catalog else "cached"
+    mc_status = "refreshed" if result.refreshed_mc_metadata else "cached"
+    console.print(f"\n[bold]Catalog sync complete[/bold]")
+    console.print(f"Shopify catalog: {result.catalog_path} ({catalog_status})")
+    console.print(f"Merchant Center metadata: {result.mc_metadata_path} ({mc_status})")
 
 
 @app.command(name="evaluate-exports")
@@ -293,8 +338,12 @@ def review_dashboard(
     env = os.environ.copy()
     env["FEEDOPS_BASELINE_DIR"] = baseline_exports_dir
     env["FEEDOPS_CANDIDATE_DIR"] = candidate_exports_dir
-    if catalog:
-        env["FEEDOPS_CATALOG_PATH"] = catalog
+    try:
+        resolved_catalog = resolve_catalog_path(catalog)
+        env["FEEDOPS_CATALOG_PATH"] = str(resolved_catalog)
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error: {exc}[/red]")
+        raise typer.Exit(1)
     if baseline_reports_dir:
         env["FEEDOPS_BASELINE_REPORTS"] = baseline_reports_dir
     if candidate_reports_dir:
@@ -328,8 +377,7 @@ def review_dashboard(
         candidate_exports_dir,
     ]
 
-    if catalog:
-        cmd.extend(["--catalog", catalog])
+    cmd.extend(["--catalog", str(resolved_catalog)])
     if baseline_reports_dir:
         cmd.extend(["--baseline-reports", baseline_reports_dir])
     if candidate_reports_dir:

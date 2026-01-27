@@ -1,12 +1,14 @@
 """Product Catalog CSV loader with duplicate column handling."""
-from pathlib import Path
+
 from decimal import Decimal
+from pathlib import Path
+
 import pandas as pd
 
 from feedops.config.columns import (
     CSV_COLUMNS,
-    POSITIONAL_RENAMES,
     PARENT_SKU_FIELDS,
+    POSITIONAL_RENAMES,
     VARIANT_FIELDS,
 )
 from feedops.models import ParentSKU, Variant
@@ -19,6 +21,10 @@ def rename_duplicate_columns(df: pd.DataFrame) -> pd.DataFrame:
     This function renames them based on their position.
     """
     columns = list(df.columns)
+    has_duplicates = len(columns) != len(set(columns))
+    has_mangled = any(col.rsplit(".", 1)[-1].isdigit() for col in columns)
+    if not (has_duplicates or has_mangled):
+        return df
     for pos, new_name in POSITIONAL_RENAMES.items():
         if pos < len(columns):
             columns[pos] = new_name
@@ -81,7 +87,9 @@ def get_parent_sku(df: pd.DataFrame, master_sku: str) -> ParentSKU | None:
                         value = int(value)
                     except (ValueError, TypeError):
                         value = 0
-                elif field.endswith(("_length", "_height", "_width", "_weight", "projection")):
+                elif field.endswith(
+                    ("_length", "_height", "_width", "_weight", "projection")
+                ):
                     try:
                         value = float(value)
                     except (ValueError, TypeError):
@@ -106,7 +114,14 @@ def get_parent_sku(df: pd.DataFrame, master_sku: str) -> ParentSKU | None:
         if field in first_row.index and first_row[field]:
             value = first_row[field]
             # Convert numeric fields
-            if field in ("center_to_center", "diameter", "mirror_height", "mirror_width", "thickness", "weight_capacity"):
+            if field in (
+                "center_to_center",
+                "diameter",
+                "mirror_height",
+                "mirror_width",
+                "thickness",
+                "weight_capacity",
+            ):
                 try:
                     value = float(value)
                 except (ValueError, TypeError):

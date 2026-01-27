@@ -1,18 +1,24 @@
 # tests/test_pipeline.py
-import pytest
 from unittest.mock import AsyncMock, patch
-from feedops.models import ParentSKU, Variant, Candidate, Claim, Score
-from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+
+import pytest
+
+from feedops.models import Candidate, Claim, ParentSKU, Score, Variant
 from feedops.pipeline.claim_extraction import extract_claims
-from feedops.pipeline.verifier import verify_claims
-from feedops.pipeline.validators import validate_candidate_content
-from feedops.pipeline.generator import build_prompt, generate_candidate, generate_candidates
-from feedops.pipeline.prompts import CANDIDATE_SCHEMA
-from feedops.pipeline.reporter import generate_report, generate_patch_preview
-from feedops.pipeline.selection import RankedCandidate
-from feedops.quality.scoring import CandidateHeuristicScore, HeuristicScore
-from feedops.providers.base import LLMProvider, ImageInput
+from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.generator import (
+    build_prompt,
+    generate_candidate,
+    generate_candidates,
+)
 from feedops.pipeline.optimize import estimate_llm_cost
+from feedops.pipeline.prompts import CANDIDATE_SCHEMA
+from feedops.pipeline.reporter import generate_patch_preview, generate_report
+from feedops.pipeline.selection import RankedCandidate
+from feedops.pipeline.validators import validate_candidate_content
+from feedops.pipeline.verifier import verify_claims
+from feedops.providers.base import ImageInput, LLMProvider
+from feedops.quality.scoring import CandidateHeuristicScore, HeuristicScore
 
 
 @pytest.fixture
@@ -78,21 +84,28 @@ def test_build_evidence_table_includes_image_url(sample_parent_sku):
     assert "main_image_url" in fields
 
 
-def test_build_evidence_table_includes_high_performing_keywords(sample_parent_sku, monkeypatch):
+def test_build_evidence_table_includes_high_performing_keywords(
+    sample_parent_sku, monkeypatch
+):
     """Evidence table includes MasterSKU-level keyword intent when available."""
     from feedops.pipeline import evidence as evidence_module
 
     monkeypatch.setattr(
         evidence_module,
         "fetch_master_sku_keywords",
-        lambda item_group_id, item_ids, category=None: ["wall mount towel bar", "bath towel holder"],
+        lambda item_group_id, item_ids, category=None: [
+            "wall mount towel bar",
+            "bath towel holder",
+        ],
     )
     evidence = evidence_module.build_evidence_table(sample_parent_sku)
     fields = {e.field for e in evidence}
     assert "keyword_intent_master" in fields
 
 
-def test_build_evidence_table_includes_external_keywords(sample_parent_sku, monkeypatch):
+def test_build_evidence_table_includes_external_keywords(
+    sample_parent_sku, monkeypatch
+):
     """Evidence table includes external keyword bank phrases when available."""
     from feedops.pipeline import evidence as evidence_module
 
@@ -106,7 +119,9 @@ def test_build_evidence_table_includes_external_keywords(sample_parent_sku, monk
     assert "external_keywords" in fields
 
 
-def test_build_evidence_table_excludes_finish_specific_keywords(sample_parent_sku, monkeypatch):
+def test_build_evidence_table_excludes_finish_specific_keywords(
+    sample_parent_sku, monkeypatch
+):
     """Finish-specific keywords are excluded from MasterSKU-level keyword intent."""
     from feedops.pipeline import evidence as evidence_module
 
@@ -133,7 +148,11 @@ def test_build_evidence_table_excludes_finish_specific_keywords(sample_parent_sk
         ],
     )
     # No external keywords for this test; keep focus on finish filtering.
-    monkeypatch.setattr(evidence_module, "get_external_keywords", lambda category=None, master_sku=None: [])
+    monkeypatch.setattr(
+        evidence_module,
+        "get_external_keywords",
+        lambda category=None, master_sku=None: [],
+    )
 
     evidence = evidence_module.build_evidence_table(sample_parent_sku)
     kw_row = next(e for e in evidence if e.field == "keyword_intent_master")
@@ -156,11 +175,19 @@ def test_verify_claims_marks_valid_claims(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[
             Claim(claim="made of Brass", source_field="material", source_value="Brass"),
-            Claim(claim="wall mounted", source_field="mounting_type", source_value="Wall mount"),
+            Claim(
+                claim="wall mounted",
+                source_field="mounting_type",
+                source_value="Wall mount",
+            ),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, errors = verify_claims(candidate, sample_parent_sku)
@@ -183,8 +210,12 @@ def test_verify_claims_rejects_invalid_claims(sample_parent_sku):
             Claim(claim="made of Steel", source_field="material", source_value="Steel"),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, errors = verify_claims(candidate, sample_parent_sku)
@@ -204,11 +235,19 @@ def test_verify_claims_requires_exact_material_match(sample_parent_sku):
         shopify_title="Test Shopify Title",
         shopify_description="<p>Test description</p>",
         claims=[
-            Claim(claim="solid brass construction", source_field="material", source_value="Solid Brass"),
+            Claim(
+                claim="solid brass construction",
+                source_field="material",
+                source_value="Solid Brass",
+            ),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, errors = verify_claims(candidate, sample_parent_sku)
@@ -239,12 +278,24 @@ def test_verify_claims_accepts_numeric_units_and_trailing_decimals(sample_parent
         shopify_title="Test Shopify Title",
         shopify_description="<p>Test description</p>",
         claims=[
-            Claim(claim="18-inch center-to-center", source_field="center_to_center", source_value="18 in"),
-            Claim(claim="Weight capacity is 10 lb", source_field="weight_capacity", source_value="10 lb"),
+            Claim(
+                claim="18-inch center-to-center",
+                source_field="center_to_center",
+                source_value="18 in",
+            ),
+            Claim(
+                claim="Weight capacity is 10 lb",
+                source_field="weight_capacity",
+                source_value="10 lb",
+            ),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, errors = verify_claims(candidate, parent)
@@ -278,8 +329,12 @@ def test_verify_claims_auto_extracts_finish_capacity_dimension(sample_parent_sku
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, errors = verify_claims(candidate, parent)
@@ -311,8 +366,12 @@ def test_verify_claims_auto_extracts_material_literal_mismatch(sample_parent_sku
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, errors = verify_claims(candidate, parent)
@@ -343,12 +402,18 @@ def test_verify_claims_dedupes_auto_extracted_dimensions(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     verified, _ = verify_claims(candidate, parent)
-    dimension_claims = [c for c in verified.claims if c.source_field == "center_to_center"]
+    dimension_claims = [
+        c for c in verified.claims if c.source_field == "center_to_center"
+    ]
     assert len(dimension_claims) == 1
 
 
@@ -365,13 +430,22 @@ def test_extract_durability_claims_verified_for_brass(sample_parent_sku):
         shopify_description="<p>This rust-free and tarnish-resistant towel bar is built to last.</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     claims = extract_claims(candidate, sample_parent_sku)
     # Durability claims use source_field like "corrosion_resistance", "rust_resistance", etc.
-    durability_fields = {"corrosion_resistance", "rust_resistance", "tarnish_resistance", "water_resistance"}
+    durability_fields = {
+        "corrosion_resistance",
+        "rust_resistance",
+        "tarnish_resistance",
+        "water_resistance",
+    }
     durability_claims = [c for c in claims if c.source_field in durability_fields]
     assert len(durability_claims) >= 1
     # Should not have UNVERIFIED prefix since material is Brass
@@ -405,13 +479,22 @@ def test_extract_durability_claims_unverified_for_other_materials():
         shopify_description="<p>This rust-free towel bar is built to last.</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     claims = extract_claims(candidate, parent)
     # Durability claims use source_field like "corrosion_resistance", "rust_resistance", etc.
-    durability_fields = {"corrosion_resistance", "rust_resistance", "tarnish_resistance", "water_resistance"}
+    durability_fields = {
+        "corrosion_resistance",
+        "rust_resistance",
+        "tarnish_resistance",
+        "water_resistance",
+    }
     durability_claims = [c for c in claims if c.source_field in durability_fields]
     assert len(durability_claims) >= 1
     # Should have UNVERIFIED prefix since material is Aluminum
@@ -431,8 +514,12 @@ def test_validate_candidate_content_rejects_catalog_csv_references():
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     errors = validate_candidate_content(candidate)
@@ -508,7 +595,9 @@ def test_candidate_schema_has_required_fields():
 
 
 @pytest.mark.asyncio
-async def test_generate_candidate_fetches_image_and_passes_to_provider(sample_parent_sku):
+async def test_generate_candidate_fetches_image_and_passes_to_provider(
+    sample_parent_sku,
+):
     """generate_candidate fetches image and passes it to provider."""
     sample_parent_sku.variants[0].main_image_url = "https://example.com/image.png"
     image_input = ImageInput(
@@ -536,7 +625,9 @@ async def test_generate_candidate_fetches_image_and_passes_to_provider(sample_pa
         },
     }
 
-    with patch("feedops.pipeline.generator.fetch_image", new_callable=AsyncMock) as mock_fetch:
+    with patch(
+        "feedops.pipeline.generator.fetch_image", new_callable=AsyncMock
+    ) as mock_fetch:
         mock_fetch.return_value = image_input
         candidate = await generate_candidate(sample_parent_sku, llm)
         mock_fetch.assert_awaited_once_with("https://example.com/image.png")
@@ -569,7 +660,9 @@ async def test_generate_candidate_skips_image_when_missing(sample_parent_sku):
         },
     }
 
-    with patch("feedops.pipeline.generator.fetch_image", new_callable=AsyncMock) as mock_fetch:
+    with patch(
+        "feedops.pipeline.generator.fetch_image", new_callable=AsyncMock
+    ) as mock_fetch:
         candidate = await generate_candidate(sample_parent_sku, llm)
         mock_fetch.assert_not_awaited()
         assert candidate.google_title == "Test Google Title"
@@ -578,7 +671,9 @@ async def test_generate_candidate_skips_image_when_missing(sample_parent_sku):
 
 
 @pytest.mark.asyncio
-async def test_generate_candidates_fetches_image_once_and_generates_n(sample_parent_sku):
+async def test_generate_candidates_fetches_image_once_and_generates_n(
+    sample_parent_sku,
+):
     """generate_candidates fetches image once and returns all candidates."""
     sample_parent_sku.variants[0].main_image_url = "https://example.com/image.png"
     image_input = ImageInput(
@@ -644,7 +739,9 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(sample_par
         },
     ]
 
-    with patch("feedops.pipeline.generator.fetch_image", new_callable=AsyncMock) as mock_fetch:
+    with patch(
+        "feedops.pipeline.generator.fetch_image", new_callable=AsyncMock
+    ) as mock_fetch:
         mock_fetch.return_value = image_input
         candidates, errors = await generate_candidates(sample_parent_sku, llm, 3)
 
@@ -717,11 +814,20 @@ def test_generate_report_includes_scores(sample_parent_sku):
         shopify_title="18-Inch Towel Bar | Allied Brass",
         shopify_description="<p>Crafted from solid brass</p>",
         claims=[
-            Claim(claim="solid brass", source_field="material", source_value="Brass", verified=True),
+            Claim(
+                claim="solid brass",
+                source_field="material",
+                source_value="Brass",
+                verified=True,
+            ),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     report = generate_report(sample_parent_sku, candidate, [])
@@ -740,20 +846,31 @@ def test_generate_report_includes_llm_input_details(sample_parent_sku):
         shopify_title="18-Inch Towel Bar | Allied Brass",
         shopify_description="<p>Crafted from solid brass</p>",
         claims=[
-            Claim(claim="solid brass", source_field="material", source_value="Brass", verified=True),
+            Claim(
+                claim="solid brass",
+                source_field="material",
+                source_value="Brass",
+                verified=True,
+            ),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
-    evidence_table = "\n".join([
-        "## Available Product Data",
-        "",
-        "| Attribute | Value | Source |",
-        "|-----------|-------|--------|",
-        "| material | Brass | material |",
-    ])
+    evidence_table = "\n".join(
+        [
+            "## Available Product Data",
+            "",
+            "| Attribute | Value | Source |",
+            "|-----------|-------|--------|",
+            "| material | Brass | material |",
+        ]
+    )
     prompt = "FULL PROMPT TEXT"
 
     report = generate_report(
@@ -790,11 +907,20 @@ def test_generate_report_includes_soft_gate_warnings(sample_parent_sku):
         shopify_title="18-Inch Towel Bar | Allied Brass",
         shopify_description="<p>Crafted from solid brass</p>",
         claims=[
-            Claim(claim="solid brass", source_field="material", source_value="Brass", verified=True),
+            Claim(
+                claim="solid brass",
+                source_field="material",
+                source_value="Brass",
+                verified=True,
+            ),
         ],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     base_platform = HeuristicScore(ctr_proxy=5, cvr_proxy=5, brand_voice=5)
@@ -805,20 +931,79 @@ def test_generate_report_includes_soft_gate_warnings(sample_parent_sku):
         weighted_composite=75.0,
         soft_gate_penalty=2.0,
         adjusted_weighted_composite=73.0,
-        soft_gate_warnings=("Google: Title missing primary dimension in first 70 chars",),
+        soft_gate_warnings=(
+            "Google: Title missing primary dimension in first 70 chars",
+        ),
         soft_gate_miss_counts={"google": 1, "bing": 0, "shopify": 0},
         notes=(),
     )
-    ranking = [RankedCandidate(candidate=candidate, heuristic=heuristic, validation_errors=[], index=0)]
+    ranking = [
+        RankedCandidate(
+            candidate=candidate, heuristic=heuristic, validation_errors=[], index=0
+        )
+    ]
 
-    report = generate_report(sample_parent_sku, candidate, [], selection_ranking=ranking)
+    report = generate_report(
+        sample_parent_sku, candidate, [], selection_ranking=ranking
+    )
 
     assert "Soft-Gate Warnings" in report
     assert "Google:" in report
 
 
+def test_generate_report_includes_mc_metadata_section(sample_parent_sku):
+    candidate = Candidate(
+        google_title="Allied Brass 18-Inch Towel Bar | Solid Brass | Antique Brass",
+        google_short_title="18-Inch Towel Bar",
+        google_description="Crafted from solid brass " * 20,
+        bing_title="Allied Brass 18-Inch Towel Bar (Towel Holder) | Solid Brass",
+        bing_description="Crafted from solid brass " * 20,
+        shopify_title="18-Inch Towel Bar | Allied Brass",
+        shopify_description="<p>Crafted from solid brass</p>",
+        claims=[
+            Claim(
+                claim="solid brass",
+                source_field="material",
+                source_value="Brass",
+                verified=True,
+            ),
+        ],
+        self_score=Score(
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
+        ),
+    )
+    mc_metadata = {
+        "shopify_US_4542872518788_32118222192772": {
+            "offerId": "shopify_US_4542872518788_32118222192772",
+            "customLabel0": "label0",
+            "googleProductCategory": "Home & Garden",
+            "productTypes": ["Bath"],
+            "destinationStatuses": [{"destination": "Shopping", "status": "approved"}],
+            "itemLevelIssues": [],
+            "fetched_at": "2026-01-01T00:00:00Z",
+        }
+    }
+
+    report = generate_report(
+        sample_parent_sku,
+        candidate,
+        [],
+        mc_metadata=mc_metadata,
+    )
+
+    assert "Merchant Center Metadata (diagnostic)" in report
+    assert "label0" in report
+    assert "Home & Garden" in report
+
+
 def test_estimate_llm_cost_ignores_non_dict_usage():
     """estimate_llm_cost returns None for non-dict token usage."""
+
     class Dummy:
         pass
 
@@ -837,8 +1022,12 @@ def test_generate_google_patch_preview_structure(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     patch = generate_patch_preview(sample_parent_sku, candidate, platform="google")
@@ -859,8 +1048,12 @@ def test_generate_bing_patch_preview_structure(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     patch = generate_patch_preview(sample_parent_sku, candidate, platform="bing")
@@ -881,8 +1074,12 @@ def test_generate_shopify_patch_preview_structure(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8, benefit_coverage=8, keyword_inclusion=8,
-            format_adherence=8, brand_voice=8, factual_accuracy=8,
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
         ),
     )
     patch = generate_patch_preview(sample_parent_sku, candidate, platform="shopify")

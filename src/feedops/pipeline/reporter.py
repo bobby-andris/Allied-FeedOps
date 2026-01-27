@@ -1,14 +1,16 @@
 """Report generation for SKU optimization results."""
+
 from __future__ import annotations
 
 from datetime import datetime
-from feedops.models import ParentSKU, Candidate, Variant
+
+from feedops.models import Candidate, ParentSKU, Variant
+from feedops.pipeline.enrichment import detect_collection
 from feedops.pipeline.finish_injection import (
     generate_variant_description,
-    generate_variant_title,
     generate_variant_keywords,
+    generate_variant_title,
 )
-from feedops.pipeline.enrichment import detect_collection
 from feedops.pipeline.selection import RankedCandidate
 
 
@@ -24,6 +26,7 @@ def generate_report(
     estimated_cost: float | None = None,
     selection_ranking: list[RankedCandidate] | None = None,
     generation_errors: list[str] | None = None,
+    mc_metadata: dict[str, dict] | None = None,
 ) -> str:
     """Generate markdown report for SKU optimization.
 
@@ -41,10 +44,16 @@ def generate_report(
 
     provider_label = provider_name or "Unknown"
     image_label = image_url if image_url else "No image available"
-    if token_usage and "prompt_tokens" in token_usage and "completion_tokens" in token_usage:
+    if (
+        token_usage
+        and "prompt_tokens" in token_usage
+        and "completion_tokens" in token_usage
+    ):
         prompt_tokens = token_usage.get("prompt_tokens", 0)
         completion_tokens = token_usage.get("completion_tokens", 0)
-        token_usage_label = f"Prompt tokens: {prompt_tokens}, Completion tokens: {completion_tokens}"
+        token_usage_label = (
+            f"Prompt tokens: {prompt_tokens}, Completion tokens: {completion_tokens}"
+        )
     else:
         token_usage_label = "Not available"
 
@@ -129,13 +138,90 @@ def generate_report(
     if candidate.verified_claims:
         report += "### Verified Claims\n\n"
         for claim in candidate.verified_claims:
-            report += f"- {claim.claim} (source: {claim.source_field}={claim.source_value})\n"
+            report += (
+                f"- {claim.claim} (source: {claim.source_field}={claim.source_value})\n"
+            )
+
+    if mc_metadata is not None:
+        report += "\n---\n\n## Merchant Center Metadata (diagnostic)\n\n"
+        if not mc_metadata:
+            report += "_No Merchant Center metadata available._\n"
+        else:
+            variants = parent_sku.variants or []
+            matched_any = False
+            for variant in variants:
+                offer_id = variant.gmc_id or variant.option_sku
+                payload = mc_metadata.get(offer_id)
+                if not payload:
+                    continue
+                matched_any = True
+
+                labels = []
+                for idx in range(5):
+                    value = payload.get(f"customLabel{idx}")
+                    if value:
+                        labels.append(f"{idx}:{value}")
+                labels_value = ", ".join(labels) if labels else "None"
+
+                product_types = payload.get("productTypes") or []
+                if isinstance(product_types, list):
+                    product_types_label = (
+                        ", ".join(product_types) if product_types else "None"
+                    )
+                else:
+                    product_types_label = str(product_types)
+
+                destinations = payload.get("destinationStatuses") or []
+                destination_lines = []
+                for status in destinations:
+                    context = (
+                        status.get("reportingContext")
+                        or status.get("destination")
+                        or "unknown"
+                    )
+                    if "status" in status:
+                        destination_lines.append(f"{context}: {status.get('status')}")
+                    else:
+                        approved = ",".join(status.get("approvedCountries", []) or [])
+                        pending = ",".join(status.get("pendingCountries", []) or [])
+                        disapproved = ",".join(
+                            status.get("disapprovedCountries", []) or []
+                        )
+                        destination_lines.append(
+                            f"{context}: approved={approved or '-'} pending={pending or '-'} disapproved={disapproved or '-'}"
+                        )
+                destination_label = (
+                    "; ".join(destination_lines) if destination_lines else "None"
+                )
+
+                issues = payload.get("itemLevelIssues") or []
+                issue_lines = []
+                for issue in issues:
+                    code = issue.get("code") or "unknown"
+                    severity = issue.get("severity")
+                    if severity:
+                        issue_lines.append(f"{code} ({severity})")
+                    else:
+                        issue_lines.append(code)
+                issues_label = ", ".join(issue_lines) if issue_lines else "None"
+
+                report += f"### {variant.option_sku or offer_id}\n\n"
+                report += f"- Offer ID: {payload.get('offerId', offer_id)}\n"
+                report += f"- Custom labels: {labels_value}\n"
+                report += f"- Google product category: {payload.get('googleProductCategory') or 'None'}\n"
+                report += f"- Product types: {product_types_label}\n"
+                report += f"- Destination status: {destination_label}\n"
+                report += f"- Item issues: {issues_label}\n\n"
+
+            if not matched_any:
+                report += "_No Merchant Center metadata matched the SKU variants._\n"
 
     if selection_ranking:
         weights = candidate.selection_weights or {}
-        weight_label = ", ".join(
-            f"{key}={value:.2f}" for key, value in weights.items()
-        ) or "Not available"
+        weight_label = (
+            ", ".join(f"{key}={value:.2f}" for key, value in weights.items())
+            or "Not available"
+        )
         selected_index = (
             candidate.candidate_index
             if candidate.candidate_index is not None
@@ -163,7 +249,9 @@ def generate_report(
                 if entry.candidate.candidate_index is not None
                 else entry.index
             )
-            errors = "; ".join(entry.validation_errors) if entry.validation_errors else ""
+            errors = (
+                "; ".join(entry.validation_errors) if entry.validation_errors else ""
+            )
             report += (
                 f"| {idx} | {candidate_index} | {entry.heuristic.weighted_composite:0.2f}% |"
                 f" {entry.heuristic.google.composite:0.2f}% |"
@@ -176,9 +264,7 @@ def generate_report(
             report += "\n### Soft-Gate Warnings (selected candidate)\n\n"
             for warning in selected_entry.heuristic.soft_gate_warnings:
                 report += f"- {warning}\n"
-            report += (
-                f"\nSoft-gate penalty: {selected_entry.heuristic.soft_gate_penalty:0.2f}\n"
-            )
+            report += f"\nSoft-gate penalty: {selected_entry.heuristic.soft_gate_penalty:0.2f}\n"
 
         if generation_errors:
             report += "\n### Generation Errors\n\n"
@@ -240,7 +326,9 @@ def generate_patch_preview(
     Returns:
         Dict in platform-specific patch format.
     """
-    offer_id = parent_sku.variants[0].gmc_id if parent_sku.variants else parent_sku.master_sku
+    offer_id = (
+        parent_sku.variants[0].gmc_id if parent_sku.variants else parent_sku.master_sku
+    )
     product_id = parent_sku.item_group_id
 
     meta = {
@@ -259,14 +347,16 @@ def generate_patch_preview(
     lifestyle_images_data = []
     if candidate.lifestyle_images:
         for img in candidate.lifestyle_images:
-            lifestyle_images_data.append({
-                "image_path": img.image_path,
-                "variation_num": img.variation_num,
-                "generation_success": img.generation_success,
-                "prompt_used": img.prompt_used,
-                "timestamp": img.timestamp,
-                "error_message": img.error_message,
-            })
+            lifestyle_images_data.append(
+                {
+                    "image_path": img.image_path,
+                    "variation_num": img.variation_num,
+                    "generation_success": img.generation_success,
+                    "prompt_used": img.prompt_used,
+                    "timestamp": img.timestamp,
+                    "error_message": img.error_message,
+                }
+            )
 
     if platform == "google":
         patch = {
@@ -321,27 +411,29 @@ def generate_variant_patch_preview(
     platform: str = "google",
 ) -> dict:
     """Generate platform-specific patch preview JSON for a specific variant.
-    
+
     This generates variant-specific content with finish-specific descriptions.
-    
+
     Args:
         parent_sku: The parent SKU.
         variant: The specific variant to generate patch for.
         candidate: The optimized candidate (base content).
         platform: One of "google", "bing", or "shopify".
-        
+
     Returns:
         Dict in platform-specific patch format with finish-specific content.
     """
     # Get collection context for finish-collection alignment
     collection_context = detect_collection(parent_sku)
-    collection_name = collection_context.name if collection_context else parent_sku.collection
+    collection_name = (
+        collection_context.name if collection_context else parent_sku.collection
+    )
     collection_group = collection_context.group if collection_context else None
     collection_subgroup = collection_context.subgroup if collection_context else None
-    
+
     # Get finish name
     finish_name = variant.finish
-    
+
     # Generate variant-specific title
     if platform == "google":
         base_title = candidate.google_title
@@ -354,7 +446,7 @@ def generate_variant_patch_preview(
         base_description = candidate.shopify_description
     else:
         raise ValueError(f"Unsupported platform: {platform}")
-    
+
     # Generate variant-specific content
     variant_title = generate_variant_title(base_title, finish_name)
     variant_description = generate_variant_description(
@@ -368,13 +460,13 @@ def generate_variant_patch_preview(
         finish_count=len(parent_sku.variants) if parent_sku.variants else None,
         platform=platform,
     )
-    
+
     # Generate finish-specific keywords for this variant
     variant_keywords = generate_variant_keywords(
         finish_name=finish_name,
         category=parent_sku.category,
     )
-    
+
     # Build meta
     meta = {
         "master_sku": parent_sku.master_sku,
@@ -390,7 +482,7 @@ def generate_variant_patch_preview(
         "title": parent_sku.current_title,
         "description": parent_sku.current_description,
     }
-    
+
     if platform == "google":
         # Also generate variant-specific short title
         short_title = candidate.google_short_title
@@ -398,7 +490,7 @@ def generate_variant_patch_preview(
             # Append finish to short title if not present
             if len(short_title) + len(finish_name) + 3 <= 70:
                 short_title = f"{short_title}, {finish_name}"
-        
+
         return {
             "offerId": variant.gmc_id,
             "title": variant_title,
@@ -410,7 +502,7 @@ def generate_variant_patch_preview(
             "_meta": meta,
             "_previous": previous,
         }
-    
+
     if platform == "bing":
         return {
             "sku": variant.gmc_id,
@@ -419,7 +511,7 @@ def generate_variant_patch_preview(
             "_meta": meta,
             "_previous": previous,
         }
-    
+
     if platform == "shopify":
         return {
             "productId": parent_sku.item_group_id or variant.gmc_id,
@@ -429,7 +521,7 @@ def generate_variant_patch_preview(
             "_meta": meta,
             "_previous": previous,
         }
-    
+
     raise ValueError(f"Unsupported platform: {platform}")
 
 
@@ -439,19 +531,19 @@ def generate_all_variant_patches(
     platform: str = "google",
 ) -> list[dict]:
     """Generate patch previews for all variants of a parent SKU.
-    
+
     Args:
         parent_sku: The parent SKU with all variants.
         candidate: The optimized candidate (base content).
         platform: One of "google", "bing", or "shopify".
-        
+
     Returns:
         List of patch dicts, one per variant.
     """
     if not parent_sku.variants:
         # Fall back to single patch if no variants
         return [generate_patch_preview(parent_sku, candidate, platform)]
-    
+
     patches = []
     for variant in parent_sku.variants:
         patch = generate_variant_patch_preview(
@@ -461,5 +553,5 @@ def generate_all_variant_patches(
             platform=platform,
         )
         patches.append(patch)
-    
+
     return patches

@@ -21,6 +21,7 @@ dependencies = [
     "typer>=0.9",
     "rich>=13.0",
     "streamlit>=1.30",
+    "google-auth>=2.48.0",
 ]
 
 [project.optional-dependencies]
