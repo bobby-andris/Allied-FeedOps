@@ -1,4 +1,5 @@
 """OpenAI LLM provider with JSON mode and retry logic."""
+
 import base64
 import json
 import logging
@@ -6,7 +7,7 @@ from typing import Any
 
 from openai import AsyncOpenAI
 
-from feedops.providers.base import ImageInput, LLMProvider, LLMError
+from feedops.providers.base import ImageInput, LLMError, LLMProvider
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,10 @@ class OpenAIProvider(LLMProvider):
         self.max_retries = max_retries
         self._last_usage = {"prompt_tokens": 0, "completion_tokens": 0}
 
+    def _use_max_completion_tokens(self) -> bool:
+        """Return True when model requires max_completion_tokens."""
+        return self.model.startswith("gpt-5")
+
     @property
     def name(self) -> str:
         return f"openai/{self.model}"
@@ -38,11 +43,15 @@ class OpenAIProvider(LLMProvider):
     async def health_check(self) -> bool:
         """Check if OpenAI API is accessible."""
         try:
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "user", "content": "ping"}],
-                max_tokens=5,
-            )
+            params = {
+                "model": self.model,
+                "messages": [{"role": "user", "content": "ping"}],
+            }
+            if self._use_max_completion_tokens():
+                params["max_completion_tokens"] = 5
+            else:
+                params["max_tokens"] = 5
+            response = await self.client.chat.completions.create(**params)
             return response.choices[0].message.content is not None
         except Exception as e:
             logger.warning(f"OpenAI health check failed: {e}")
@@ -77,13 +86,18 @@ class OpenAIProvider(LLMProvider):
                     encoded = base64.b64encode(image.data).decode("utf-8")
                     response = await self.client.responses.create(
                         model=self.model,
-                        input=[{
-                            "role": "user",
-                            "content": [
-                                {"type": "input_text", "text": current_prompt},
-                                {"type": "input_image", "image_url": f"data:{image.mime_type};base64,{encoded}"},
-                            ],
-                        }],
+                        input=[
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"type": "input_text", "text": current_prompt},
+                                    {
+                                        "type": "input_image",
+                                        "image_url": f"data:{image.mime_type};base64,{encoded}",
+                                    },
+                                ],
+                            }
+                        ],
                     )
                     self._last_usage = _extract_usage(response)
                     content = _extract_output_text(response)
@@ -102,7 +116,9 @@ class OpenAIProvider(LLMProvider):
 
             except json.JSONDecodeError as e:
                 last_error = str(e)
-                logger.warning(f"JSON parse error (attempt {attempt + 1}): {last_error}")
+                logger.warning(
+                    f"JSON parse error (attempt {attempt + 1}): {last_error}"
+                )
                 if image:
                     current_prompt = (
                         "Your response was not valid JSON.\n"
@@ -112,20 +128,21 @@ class OpenAIProvider(LLMProvider):
                     )
                 else:
                     # Add repair instruction for next attempt
-                    messages.append({
-                        "role": "assistant",
-                        "content": content
-                    })
-                    messages.append({
-                        "role": "user",
-                        "content": f"Your response was not valid JSON. Error: {last_error}. Please fix and respond with valid JSON only."
-                    })
+                    messages.append({"role": "assistant", "content": content})
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": f"Your response was not valid JSON. Error: {last_error}. Please fix and respond with valid JSON only.",
+                        }
+                    )
 
             except Exception as e:
                 last_error = str(e)
                 logger.error(f"OpenAI API error (attempt {attempt + 1}): {last_error}")
 
-        raise LLMError(f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries)
+        raise LLMError(
+            f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries
+        )
 
 
 def _extract_usage(response: Any) -> dict[str, int]:
@@ -135,7 +152,9 @@ def _extract_usage(response: Any) -> dict[str, int]:
         return {"prompt_tokens": 0, "completion_tokens": 0}
     if isinstance(usage, dict):
         prompt_tokens = usage.get("prompt_tokens") or usage.get("input_tokens") or 0
-        completion_tokens = usage.get("completion_tokens") or usage.get("output_tokens") or 0
+        completion_tokens = (
+            usage.get("completion_tokens") or usage.get("output_tokens") or 0
+        )
         return {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}
 
     prompt_tokens = getattr(usage, "prompt_tokens", None)
@@ -144,7 +163,10 @@ def _extract_usage(response: Any) -> dict[str, int]:
     completion_tokens = getattr(usage, "completion_tokens", None)
     if completion_tokens is None:
         completion_tokens = getattr(usage, "output_tokens", 0)
-    return {"prompt_tokens": prompt_tokens or 0, "completion_tokens": completion_tokens or 0}
+    return {
+        "prompt_tokens": prompt_tokens or 0,
+        "completion_tokens": completion_tokens or 0,
+    }
 
 
 def _extract_output_text(response: Any) -> str:

@@ -10,6 +10,7 @@ from feedops.pipeline.generator import (
     build_prompt,
     generate_candidate,
     generate_candidates,
+    parse_candidate_response,
 )
 from feedops.pipeline.optimize import estimate_llm_cost
 from feedops.pipeline.prompts import CANDIDATE_SCHEMA
@@ -592,6 +593,37 @@ def test_candidate_schema_has_required_fields():
     assert "shopify_description" in str(CANDIDATE_SCHEMA)
     assert "claims" in str(CANDIDATE_SCHEMA)
     assert "self_score" in str(CANDIDATE_SCHEMA)
+
+
+def test_parse_candidate_response_trims_google_short_title():
+    """Long google_short_title is trimmed to pass validation."""
+    long_short_title = (
+        "Assorted Wall Accessories 22.5-Inch Solid Brass with Concealed Mounting | "
+        "Allied Brass"
+    )
+    assert len(long_short_title) > 70
+
+    response = {
+        "google_title": "Wall Accessory 22.5-Inch Solid Brass | Allied Brass",
+        "google_short_title": long_short_title,
+        "google_description": "Test description " * 30,
+        "bing_title": "Wall Accessory 22.5-Inch Solid Brass | Allied Brass",
+        "bing_description": "Test description " * 30,
+        "shopify_title": "Wall Accessory 22.5-Inch Solid Brass | Allied Brass",
+        "shopify_description": "<p>Test description</p>",
+        "claims": [],
+        "self_score": {
+            "specificity": 5,
+            "benefit_coverage": 5,
+            "keyword_inclusion": 5,
+            "format_adherence": 5,
+            "brand_voice": 5,
+            "factual_accuracy": 5,
+        },
+    }
+
+    candidate = parse_candidate_response(response)
+    assert len(candidate.google_short_title) <= 70
 
 
 @pytest.mark.asyncio

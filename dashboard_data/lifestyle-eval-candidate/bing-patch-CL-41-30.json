@@ -1,10 +1,10 @@
 {
   "sku": "shopify_US_4542499979396_32116325056644",
-  "title": "Wall Mount Towel Bar 30-Inch Solid Brass Carolina Collection, Traditional Bath Accessory Allied Brass",
-  "description": "Upgrade your bath with a 30-Inch wall mount towel bar crafted from solid brass, designed to complement traditional bathroom hardware. This Carolina Collection piece makes it easy to build a coordinated set with matching Carolina classic bath accessories and heritage bathroom fixtures.\n\nHighlights:\n- Solid brass towel bar with refined, traditional styling\n- Concealed screw mounting hardware for a clean wall-mounted look\n- Wall mount design is an ideal use of space\n- Mounting plates and all installation hardware included\n- Available in multiple designer finish options\n\nSpecs:\n- Collection: Carolina Collection\n- Shape: straight bar\n- Length: 30 in; Center-to-center: 30 in\n- Bar diameter: 0.75 in\n- Overall dimensions: 30 in L x 3.5 in H x 2 in W; Projection: 2 in\n- Weight capacity: 10 lb\n- Screw size: #8 X 1 1/4\"\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+  "title": "Wall Mount Towel Bar 30-Inch Solid Brass Carolina Collection, Straight Bar | Allied Brass",
+  "description": "Upgrade bathroom organization with this 30-Inch wall mount towel bar from the Carolina Collection. Crafted from solid brass and styled as a straight bar, it keeps bath towels handy while the wall-mounted design helps save space.\n\nHighlights:\n- Solid brass towel bar for reliable daily use\n- Wall mount installation with concealed screw mounting for a clean look\n- Includes mounting plates and all installation hardware\n- Coordinates with Carolina Collection pieces for matching transitional bathroom hardware and versatile bath accessories\n- Multiple designer finish options available\n\nSpecs:\n- Category: Towel Bars\n- Collection: Carolina Collection\n- Style: Traditional\n- Center-to-center: 30 in\n- Diameter: 0.75 in\n- Dimensions: 30 in L x 2 in W x 3.5 in H\n- Projection: 2 in\n- Weight capacity: 10 lb\n- Assembly required: No\n- Screw size: #8 x 1 1/4 in\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "CL-41-30",
-    "generated_at": "2026-01-25T19:58:22.115689",
+    "generated_at": "2026-01-27T12:01:40.194672",
     "quality_score": 90.0,
     "approval_status": "approved"
   },
@@ -14,29 +14,29 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-30_var1_20260125_195736.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-30_var1_20260127_142043.png",
       "variation_num": 1,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-41-30-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n\nCONFIGURATION: Two mounting points (left and right ends)\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The towel bar is mounted on the wall outside a glass shower enclosure.\nA single plush bath towel hangs naturally FROM the bar, showing natural drape.\nThe towel is a neutral color (white, gray, or taupe).\nThe bar is positioned at standard 48-inch height.\nNegative space emphasizes the architectural lines of the fixture.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, multiple towels, towels wrapped around\n\nCRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_195736",
+      "timestamp": "20260127_142043",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-30_var2_20260125_195752.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-30_var2_20260127_142059.png",
       "variation_num": 2,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-41-30-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n\nCONFIGURATION: Two mounting points (left and right ends)\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The towel bar is mounted on the wall outside a glass shower enclosure.\nA single plush bath towel hangs naturally FROM the bar, showing natural drape.\nThe towel is a neutral color (white, gray, or taupe).\nThe bar is positioned at standard 48-inch height.\nNegative space emphasizes the architectural lines of the fixture.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, multiple towels, towels wrapped around\n\nCRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_195752",
+      "timestamp": "20260127_142059",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-30_var3_20260125_195807.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-30_var3_20260127_142114.png",
       "variation_num": 3,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-41-30-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n\nCONFIGURATION: Two mounting points (left and right ends)\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The towel bar is mounted on the wall outside a glass shower enclosure.\nA single plush bath towel hangs naturally FROM the bar, showing natural drape.\nThe towel is a neutral color (white, gray, or taupe).\nThe bar is positioned at standard 48-inch height.\nNegative space emphasizes the architectural lines of the fixture.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, multiple towels, towels wrapped around\n\nCRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_195807",
+      "timestamp": "20260127_142114",
       "error_message": null
     }
   ],
-  "selected_lifestyle_image": null
+  "selected_lifestyle_image": 1
 }

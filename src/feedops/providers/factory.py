@@ -1,10 +1,11 @@
 """LLM provider factory with automatic fallback."""
-import os
+
 import logging
+import os
 
 from feedops.providers.base import ImageInput, LLMProvider
-from feedops.providers.openai_provider import OpenAIProvider
 from feedops.providers.gemini_provider import GeminiProvider
+from feedops.providers.openai_provider import OpenAIProvider
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +29,11 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     """
     openai_key = os.environ.get("OPENAI_API_KEY")
     gemini_key = os.environ.get("GEMINI_API_KEY")
+    openai_model = os.environ.get("FEEDOPS_OPENAI_MODEL")
 
     if preferred == "openai" and openai_key:
+        if openai_model:
+            return OpenAIProvider(api_key=openai_key, model=openai_model)
         return OpenAIProvider(api_key=openai_key)
 
     if preferred == "gemini" and gemini_key:
@@ -37,6 +41,8 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
 
     if openai_key:
         logger.info("Using OpenAI provider")
+        if openai_model:
+            return OpenAIProvider(api_key=openai_key, model=openai_model)
         return OpenAIProvider(api_key=openai_key)
 
     if gemini_key:
