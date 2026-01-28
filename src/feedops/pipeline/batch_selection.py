@@ -252,6 +252,10 @@ def select_batch_by_performance(
         tier_skus = tiers.get(tier_name, [])
         tier_target = int(batch_size * tier_fraction)
 
+        # Skip tier if target is 0 (would cause division by zero)
+        if tier_target <= 0:
+            continue
+
         # Sort tier by efficiency for selection
         tier_sorted = sorted(tier_skus, key=lambda x: x.efficiency_score, reverse=True)
 
@@ -272,6 +276,7 @@ def select_batch_by_performance(
                 if perf.category:
                     category_counts[perf.category] += 1
 
+            # Check if we've filled this tier's allocation
             if len(selected) >= (len(selected) // tier_target + 1) * tier_target:
                 break
 
