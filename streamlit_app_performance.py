@@ -439,7 +439,7 @@ def render_overall_tab(df: pd.DataFrame, stats: dict, platform: str):
         na_rep="N/A",
     )
 
-    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    st.dataframe(styled_df, width="stretch", hide_index=True)
 
     # Charts
     st.header("Performance Trends")
@@ -599,7 +599,7 @@ def render_category_tab(platform: str, min_days: int, environment: str):
         na_rep="N/A",
     )
 
-    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    st.dataframe(styled_df, width="stretch", hide_index=True)
 
     # Charts
     st.subheader("Category Charts")
@@ -710,7 +710,7 @@ def render_batch_tab(platform: str):
         na_rep="N/A",
     )
 
-    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    st.dataframe(styled_df, width="stretch", hide_index=True)
 
     # Charts
     st.subheader("Batch Performance Over Time")

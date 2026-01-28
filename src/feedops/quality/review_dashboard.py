@@ -423,7 +423,7 @@ def _render_compare_panel(
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button(
-            "✅ Approve", key=f"approve_{side}_{sku_data.sku}", use_container_width=True
+            "✅ Approve", key=f"approve_{side}_{sku_data.sku}", width="stretch"
         ):
             save_sku_approval(
                 db_path,
@@ -435,9 +435,7 @@ def _render_compare_panel(
             )
             st.rerun()
     with col2:
-        if st.button(
-            "🔄 Revise", key=f"revise_{side}_{sku_data.sku}", use_container_width=True
-        ):
+        if st.button("🔄 Revise", key=f"revise_{side}_{sku_data.sku}", width="stretch"):
             save_sku_approval(
                 db_path,
                 master_sku=sku_data.sku,
@@ -445,9 +443,7 @@ def _render_compare_panel(
             )
             st.rerun()
     with col3:
-        if st.button(
-            "❌ Reject", key=f"reject_{side}_{sku_data.sku}", use_container_width=True
-        ):
+        if st.button("❌ Reject", key=f"reject_{side}_{sku_data.sku}", width="stretch"):
             save_sku_approval(
                 db_path,
                 master_sku=sku_data.sku,
@@ -536,14 +532,14 @@ def render_split_pane_view(
             0,
         )
         with nav_col1:
-            if st.button("⬆️ Prev", disabled=current_idx == 0, use_container_width=True):
+            if st.button("⬆️ Prev", disabled=current_idx == 0, width="stretch"):
                 st.session_state.selected_sku = filtered_data[current_idx - 1].sku
                 st.rerun()
         with nav_col2:
             if st.button(
                 "⬇️ Next",
                 disabled=current_idx >= len(filtered_data) - 1,
-                use_container_width=True,
+                width="stretch",
             ):
                 st.session_state.selected_sku = filtered_data[current_idx + 1].sku
                 st.rerun()
@@ -582,7 +578,7 @@ def render_split_pane_view(
             if st.button(
                 f"{status_icon} **{sku_data.sku}**\n{c_score:.0f}% ({delta_display})",
                 key=f"sku_btn_{sku_data.sku}",
-                use_container_width=True,
+                width="stretch",
                 type=btn_type,
             ):
                 st.session_state.selected_sku = sku_data.sku
@@ -1511,7 +1507,7 @@ def render_lifestyle_images_panel(sku_data: SKUData) -> None:
                 st.image(
                     image_path,
                     caption=f"Variation {variation_num}",
-                    use_container_width=True,
+                    width="stretch",
                 )
 
                 # Selection indicator
@@ -1542,7 +1538,7 @@ def render_lifestyle_images_panel(sku_data: SKUData) -> None:
             with col1:
                 image_path = selected.get("image_path", "")
                 if image_path and Path(image_path).exists():
-                    st.image(image_path, use_container_width=True)
+                    st.image(image_path, width="stretch")
 
             with col2:
                 st.metric("Variation", f"#{selected.get('variation_num', 'N/A')}")
