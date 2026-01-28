@@ -957,73 +957,18 @@ def render_batch_management_tab(
             max_value=max(max_batch, 1),  # Ensure max_value is at least 1
             key="batch_size",
         )
-    with col3:
-        use_performance_data = st.checkbox(
-            "Use Performance Data",
-            value=True,
-            help="Select SKUs based on performance metrics (efficiency, traffic tiers)",
-            key="use_performance_selection",
-        )
-
-    # Advanced selection options (when using performance data)
-    if use_performance_data:
-        with st.expander("Selection Criteria (Advanced)"):
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                exclude_top_n = st.number_input(
-                    "Exclude Top N Revenue SKUs",
-                    value=5,
-                    min_value=0,
-                    max_value=20,
-                    help="Exclude top revenue SKUs for risk management",
-                    key="exclude_top_n",
-                )
-            with col2:
-                min_impressions = st.number_input(
-                    "Min Impressions",
-                    value=10,
-                    min_value=0,
-                    max_value=1000,
-                    help="Minimum impressions for inclusion",
-                    key="min_impressions",
-                )
-            with col3:
-                max_per_category = st.number_input(
-                    "Max Per Category",
-                    value=0,
-                    min_value=0,
-                    max_value=50,
-                    help="Max SKUs from single category (0 = no limit)",
-                    key="max_per_category",
-                )
+    # Note: Advanced selection criteria removed - SKUs are already pre-approved
+    # in the Review Queue, so batch creation simply takes approved SKUs in order
 
     if approved:
         if st.button("Create Batch from Approved SKUs", type="primary"):
             # Import batch creation logic
             from feedops.db import create_batch
 
-            if use_performance_data:
-                # Use data-driven selection
-                from feedops.pipeline.batch_selection import (
-                    BatchSelectionCriteria,
-                    select_batch_by_performance,
-                )
-
-                criteria = BatchSelectionCriteria(
-                    exclude_top_revenue_count=exclude_top_n,
-                    min_impressions=min_impressions,
-                    max_per_category=max_per_category if max_per_category > 0 else None,
-                )
-
-                selected_skus = select_batch_by_performance(
-                    approved_skus=approved,
-                    batch_size=batch_size,
-                    db_path=db_path,
-                    criteria=criteria,
-                )
-            else:
-                # Simple FIFO selection
-                selected_skus = [a["master_sku"] for a in approved[:batch_size]]
+            # Simple selection: take approved SKUs up to batch_size
+            # Advanced performance-based selection is disabled by default
+            # since SKUs are already pre-approved in the Review Queue
+            selected_skus = [a["master_sku"] for a in approved[:batch_size]]
 
             if selected_skus:
                 batch_id = create_batch(
@@ -1031,14 +976,14 @@ def render_batch_management_tab(
                     batch_label=batch_label if batch_label else None,
                     skus=selected_skus,
                     selection_criteria={
-                        "method": "performance" if use_performance_data else "fifo",
+                        "method": "fifo",
                         "batch_size": batch_size,
                     },
                 )
                 st.success(f"Created **{batch_id}** with {len(selected_skus)} SKUs")
                 st.rerun()
             else:
-                st.error("No SKUs could be selected with the given criteria")
+                st.error("No SKUs could be selected")
     else:
         st.info(
             "No approved SKUs available for batching. Approve SKUs in the Review Queue first."
