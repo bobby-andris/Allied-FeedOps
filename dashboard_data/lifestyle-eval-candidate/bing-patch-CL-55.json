@@ -1,42 +1,15 @@
 {
   "sku": "shopify_US_4545073479812_32128536379524",
-  "title": "Freestanding paper towel holder 14.4-Inch Solid Brass Countertop Stand, Carolina Collection | Allied Brass",
-  "description": "Upgrade your counter with a freestanding paper towel holder that keeps a roll upright and within easy reach. This Carolina Collection countertop paper towel stand is crafted from solid brass and uses a weighted base for added stability when tearing sheets.\n\nHighlights:\n- Freestanding countertop paper towel holder (no wall mounting)\n- Space-saving upright stand design\n- Solid brass construction\n- Felt pad helps protect surfaces from scratches\n- Designer finish supports corrosion-free and rust-free performance\n\nSpecs:\n- Collection/style: Carolina Collection; traditional, classic design for coordinating with traditional bathroom hardware and classic bath accessories\n- Overall size: 6.5-Inch L x 6.5-Inch W x 14.4-Inch H; projection 6.5-Inch\n- Product weight: 4 lb; weight capacity: 5 lb\n- Assembly required: No\n- Included items: Paper towel holder\n- Warranty: Limited Lifetime Warranty\n- Finish options: Multiple designer finish options; ideal for matching Carolina pieces and heritage bathroom fixtures",
+  "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Carolina | Allied Brass",
+  "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets.\n\nHighlights:\n- Stable, one-handed tearing with a weighted base that keeps the stand from shifting\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "CL-55",
-    "generated_at": "2026-01-25T19:13:27.747963",
-    "quality_score": 88.33,
+    "generated_at": "2026-01-27T20:35:10.850753",
+    "quality_score": 86.67,
     "approval_status": "approved"
   },
   "_previous": {
     "title": "Carolina Collection Counter Top Paper Towel Stand",
     "description": "Elegantly hold your paper towel roll on this classic traditional design paper towel stand. Its design is as functional as it is practical. The roll in the stand sits upright on the counter top allowing for space saving. It has a weight in the base to keep the unit stable as you tear off the sheets."
-  },
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var1_20260125_191244.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-55-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_191244",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var2_20260125_191258.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-55-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_191258",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var3_20260125_191312.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-55-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_191312",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": null
+  }
 }
