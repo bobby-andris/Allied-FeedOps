@@ -10,7 +10,7 @@ from feedops.integrations.merchant_center import (
     DEFAULT_MC_METADATA_PATH,
     load_merchant_center_snapshot,
 )
-from feedops.loaders import get_parent_sku, load_catalog
+from feedops.loaders.unified_loader import load_parent_sku_unified_with_status
 from feedops.models import Candidate
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.generator import build_prompt, generate_candidates
@@ -34,6 +34,7 @@ class OptimizationResult:
     """Result of a single SKU optimization."""
 
     master_sku: str
+    data_source: str | None
     candidate: Candidate
     verification_errors: list[str]
     report: str
@@ -78,6 +79,7 @@ async def optimize_parent_sku(
     exports_dir: Path | str = "exports",
     num_candidates: int | None = None,
     candidate_weights: dict[str, float] | None = None,
+    force_refresh: bool = False,
 ) -> OptimizationResult:
     """Run full optimization pipeline for a parent SKU.
 
@@ -96,6 +98,7 @@ async def optimize_parent_sku(
         dry_run: If True, preview only (no MC updates).
         output_dir: Directory for output files.
         exports_dir: Directory for export patch JSON files.
+        force_refresh: If True, bypass cache and refresh API data.
 
     Returns:
         OptimizationResult with candidate, report, and patch.
@@ -106,11 +109,16 @@ async def optimize_parent_sku(
     exports_dir = Path(exports_dir)
     exports_dir.mkdir(parents=True, exist_ok=True)
 
-    # Step 1: Load catalog and extract ParentSKU
-    df = load_catalog(catalog_path)
-    parent_sku = get_parent_sku(df, master_sku)
+    # Step 1: Load ParentSKU with unified loader (cache → API → CSV fallback)
+    parent_sku, load_status = load_parent_sku_unified_with_status(
+        master_sku=master_sku,
+        force_refresh=force_refresh,
+        catalog_path=str(catalog_path),
+    )
     if parent_sku is None:
-        raise ValueError(f"MasterSKU not found: {master_sku}")
+        if load_status.csv_attempted and load_status.csv_error is None:
+            raise ValueError(f"Product not found: {master_sku}")
+        raise ValueError(f"API unavailable for {master_sku}")
 
     # Step 2: Generate candidates and select best
     provider = get_provider()
@@ -178,8 +186,8 @@ async def optimize_parent_sku(
 
         from feedops.pipeline.lifestyle_images import (
             LifestyleImageGenerator,
-            get_product_inventory,
             get_customer_focused_scene,
+            get_product_inventory,
             get_technical_specs,
         )
 
@@ -208,14 +216,16 @@ async def optimize_parent_sku(
             )
 
             # Build prompts with customer-focused context
-            inventory = get_product_inventory(parent_sku.category, parent_sku.current_title)
+            inventory = get_product_inventory(
+                parent_sku.category, parent_sku.current_title
+            )
             # Try to determine style from metadata or default to modern
             style = parent_sku.style or "modern"
             # Use customer-focused scene generation
             scene = get_customer_focused_scene(
                 category=parent_sku.category,
                 style=style,
-                product_title=parent_sku.current_title
+                product_title=parent_sku.current_title,
             )
             technical = get_technical_specs(style)
 
@@ -365,6 +375,7 @@ async def optimize_parent_sku(
         quality_score=verified_candidate.final_score.composite,
         factual_accuracy=verified_candidate.final_score.factual_accuracy,
         approval_status=verified_candidate.final_score.approval_status,
+        data_source=parent_sku.data_source,
         status="success",
     )
     # Store the keyword intent that was used to guide copy (if available).
@@ -385,6 +396,7 @@ async def optimize_parent_sku(
 
     return OptimizationResult(
         master_sku=master_sku,
+        data_source=parent_sku.data_source,
         candidate=verified_candidate,
         verification_errors=errors,
         report=report,

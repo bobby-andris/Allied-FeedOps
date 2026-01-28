@@ -1,13 +1,13 @@
 """Deterministic keyword placement plan builder and validator."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 from feedops.models import Candidate, ParentSKU
-from feedops.pipeline.enrichment import Evidence
 from feedops.pipeline import evidence as evidence_module
-
+from feedops.pipeline.enrichment import Evidence
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 _DEFAULT_BRAND = "Allied Brass"
@@ -62,7 +62,11 @@ _CATEGORY_MAP: dict[str, dict[str, list[str] | str]] = {
         "fallback_description_terms": ["bathroom grab bar", "safety grab bar"],
     },
     "Toilet Paper Holders": {
-        "product_type_tokens": ["toilet paper holder", "tissue holder", "toilet tissue holder"],
+        "product_type_tokens": [
+            "toilet paper holder",
+            "tissue holder",
+            "toilet tissue holder",
+        ],
         "fallback_anchor": "toilet paper holder",
         "fallback_description_terms": ["tissue holder"],
     },
@@ -101,6 +105,115 @@ _CATEGORY_MAP: dict[str, dict[str, list[str] | str]] = {
         "fallback_anchor": "soap dish",
         "fallback_description_terms": ["soap holder"],
     },
+    "Paper Towel Holders": {
+        "product_type_tokens": [
+            "paper towel holder",
+            "paper towel stand",
+            "countertop paper towel holder",
+        ],
+        "fallback_anchor": "paper towel holder",
+        "fallback_description_terms": [
+            "paper towel stand",
+            "kitchen paper towel holder",
+        ],
+    },
+    "Tumbler Toothbrush Holders": {
+        "product_type_tokens": [
+            "tumbler holder",
+            "toothbrush holder",
+            "tumbler toothbrush holder",
+        ],
+        "fallback_anchor": "tumbler toothbrush holder",
+        "fallback_description_terms": ["tumbler holder", "toothbrush holder"],
+    },
+    "Towel Shelves": {
+        "product_type_tokens": ["towel shelf", "towel rack", "hotel towel shelf"],
+        "fallback_anchor": "towel shelf",
+        "fallback_description_terms": ["towel rack", "hotel towel rack"],
+    },
+    "Guest Towel Holders": {
+        "product_type_tokens": [
+            "guest towel holder",
+            "guest towel tray",
+            "towel holder",
+        ],
+        "fallback_anchor": "guest towel holder",
+        "fallback_description_terms": ["guest towel tray"],
+    },
+    "Squeegee": {
+        "product_type_tokens": ["shower squeegee", "squeegee"],
+        "fallback_anchor": "shower squeegee",
+        "fallback_description_terms": ["shower squeegee", "glass squeegee"],
+    },
+    "Multi Hooks": {
+        "product_type_tokens": ["multi hook", "double hook", "robe hook"],
+        "fallback_anchor": "multi hook",
+        "fallback_description_terms": ["robe hook", "bathroom hook"],
+    },
+    "Freestanding Toilet Tissue Stands": {
+        "product_type_tokens": [
+            "toilet tissue stand",
+            "toilet paper stand",
+            "freestanding toilet paper holder",
+        ],
+        "fallback_anchor": "toilet paper stand",
+        "fallback_description_terms": [
+            "freestanding toilet paper holder",
+            "toilet tissue stand",
+        ],
+    },
+    "Shower Door Hardware": {
+        "product_type_tokens": [
+            "shower door handle",
+            "shower door knob",
+            "shower door hardware",
+        ],
+        "fallback_anchor": "shower door handle",
+        "fallback_description_terms": ["shower door knob", "shower door hardware"],
+    },
+    "Shower Curtain Brackets and Rods": {
+        "product_type_tokens": ["shower curtain rod", "shower rod", "curtain rod"],
+        "fallback_anchor": "shower curtain rod",
+        "fallback_description_terms": ["shower rod", "curtain rod"],
+    },
+    "Cabinet Hardware": {
+        "product_type_tokens": [
+            "cabinet pull",
+            "cabinet knob",
+            "drawer pull",
+            "cabinet hardware",
+        ],
+        "fallback_anchor": "cabinet pull",
+        "fallback_description_terms": ["drawer pull", "cabinet hardware"],
+    },
+    "Baskets": {
+        "product_type_tokens": [
+            "basket",
+            "shower basket",
+            "corner basket",
+            "wire basket",
+        ],
+        "fallback_anchor": "shower basket",
+        "fallback_description_terms": ["wire basket", "corner basket"],
+    },
+    "Assorted Wall Accessories": {
+        "product_type_tokens": [],
+        "fallback_anchor": None,
+        "fallback_description_terms": ["bathroom accessories", "wall accessories"],
+    },
+    "Assorted Free Standing Accessories": {
+        "product_type_tokens": [],
+        "fallback_anchor": None,
+        "fallback_description_terms": [
+            "bathroom accessories",
+            "freestanding accessories",
+        ],
+    },
+    "Retractable Hooks and Garment Rods": {
+        "product_type_tokens": ["retractable hook", "garment rod", "wall hook"],
+        "fallback_anchor": None,
+        "fallback_description_terms": ["retractable hook", "garment rod", "wall hook"],
+    },
 }
 
 # Canonical product type names for consistent title terminology
@@ -115,6 +228,17 @@ _CANONICAL_PRODUCT_TYPES = {
     "Wall Mirrors": "Wall Mirror",
     "Make-Up Mirrors": "Makeup Mirror",
     "Soap Dishes": "Soap Dish",
+    "Paper Towel Holders": "Paper Towel Holder",
+    "Tumbler Toothbrush Holders": "Tumbler Toothbrush Holder",
+    "Towel Shelves": "Towel Shelf",
+    "Guest Towel Holders": "Guest Towel Holder",
+    "Squeegee": "Squeegee",
+    "Multi Hooks": "Multi Hook",
+    "Freestanding Toilet Tissue Stands": "Toilet Paper Stand",
+    "Shower Door Hardware": "Shower Door Handle",
+    "Shower Curtain Brackets and Rods": "Shower Curtain Rod",
+    "Cabinet Hardware": "Cabinet Pull",
+    "Baskets": "Basket",
 }
 
 
@@ -139,8 +263,21 @@ _CATEGORY_ROOM_CONTEXT = {
     "Wall Mirrors": "bathroom",
     "Make-Up Mirrors": "bathroom",
     "Soap Dishes": "bathroom",
+    "Tumbler Toothbrush Holders": "bathroom",
+    "Towel Shelves": "bathroom",
+    "Guest Towel Holders": "bathroom",
+    "Squeegee": "bathroom",
+    "Multi Hooks": "bathroom",
+    "Freestanding Toilet Tissue Stands": "bathroom",
+    "Shower Door Hardware": "bathroom",
+    "Shower Curtain Brackets and Rods": "bathroom",
+    "Baskets": "bathroom",
+    "Assorted Wall Accessories": "bathroom",
+    "Assorted Free Standing Accessories": "bathroom",
+    "Retractable Hooks and Garment Rods": "bathroom",
     # Not room-specific
     "Cabinet Knobs": None,
+    "Cabinet Hardware": None,
 }
 
 
@@ -224,7 +361,9 @@ def _filter_terms(
     signal_text = _build_feature_signal_text(parent_sku, evidence_rows)
     out: list[str] = []
     for term in terms:
-        if evidence_module._is_finish_specific_keyword(term, finish_phrases, finish_tokens):
+        if evidence_module._is_finish_specific_keyword(
+            term, finish_phrases, finish_tokens
+        ):
             continue
         if not _material_matches(term, parent_sku.material):
             continue
@@ -234,7 +373,9 @@ def _filter_terms(
     return out
 
 
-def _build_feature_signal_text(parent_sku: ParentSKU, evidence_rows: list[Evidence]) -> str:
+def _build_feature_signal_text(
+    parent_sku: ParentSKU, evidence_rows: list[Evidence]
+) -> str:
     pieces = [
         parent_sku.current_title or "",
         parent_sku.current_description or "",
@@ -256,12 +397,28 @@ def _category_tokens(category: str) -> list[str]:
     return [_singularize(category)]
 
 
-def _fallback_anchor(category: str) -> str:
+def _fallback_anchor(category: str, current_title: str | None = None) -> str:
+    """Return a fallback title anchor for a category.
+
+    Prefers a mapped anchor from ``_CATEGORY_MAP``.  When the map entry
+    has ``fallback_anchor=None`` (e.g. broad categories like "Assorted
+    Wall Accessories" or "Retractable Hooks and Garment Rods"), we fall
+    back to the ``current_title`` because the category name doesn't
+    describe a single product type.  As a last resort, singularize the
+    category name.
+    """
     config = _CATEGORY_MAP.get(category)
     if config:
         anchor = config.get("fallback_anchor")
         if isinstance(anchor, str):
             return anchor
+        # fallback_anchor is None → category is too broad.
+        # Use current_title if available.
+        if current_title:
+            return current_title.strip().lower()
+    # Category not in map at all: try current_title, else singularize.
+    if current_title:
+        return current_title.strip().lower()
     return _singularize(category)
 
 
@@ -307,8 +464,12 @@ def build_keyword_placement_plan(
     design_terms = _collect_keywords(evidence_rows, "design_intent_keywords")
     feature_terms = _collect_keywords(evidence_rows, "feature_title_keywords")
 
-    intent_terms = _filter_terms(intent_terms, parent_sku=parent_sku, evidence_rows=evidence_rows)
-    external_terms = _filter_terms(external_terms, parent_sku=parent_sku, evidence_rows=evidence_rows)
+    intent_terms = _filter_terms(
+        intent_terms, parent_sku=parent_sku, evidence_rows=evidence_rows
+    )
+    external_terms = _filter_terms(
+        external_terms, parent_sku=parent_sku, evidence_rows=evidence_rows
+    )
     secondary_terms = _filter_terms(
         design_terms + feature_terms,
         parent_sku=parent_sku,
@@ -322,7 +483,7 @@ def build_keyword_placement_plan(
     if not anchor:
         anchor = _select_anchor(external_terms, category_tokens)
     if not anchor:
-        anchor = _fallback_anchor(parent_sku.category)
+        anchor = _fallback_anchor(parent_sku.category, parent_sku.current_title)
 
     title_support_terms = [
         term for term in _dedupe_terms(intent_terms + external_terms) if term != anchor
@@ -346,7 +507,7 @@ def build_keyword_placement_plan(
         title_support_terms=title_support_terms,
         description_terms=description_terms[:6],
         description_min_required=2,
-        description_first_150_required=1,
+        description_first_150_required=0,  # Disabled: let model place keywords naturally
         brand=_DEFAULT_BRAND,
         room_context=get_room_context(parent_sku.category),
     )
@@ -359,7 +520,7 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
         "",
         "These phrases represent search intent only; do NOT treat them as product facts or claims.",
         "",
-        f"Title anchor (must appear verbatim in the first 70 characters): {plan.title_anchor}",
+        f"Primary search term (include naturally in the title; adapt wording to accurately describe THIS product): {plan.title_anchor}",
     ]
     if plan.short_title_anchor:
         lines.append(f"Google short title must include: {plan.short_title_anchor}")
@@ -372,8 +533,7 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
         lines.append("")
         lines.append(
             "Description terms (include at least "
-            f"{plan.description_min_required}; at least "
-            f"{plan.description_first_150_required} in first 150 chars):"
+            f"{plan.description_min_required} naturally in the description):"
         )
         for term in plan.description_terms:
             lines.append(f"- {term}")
@@ -381,7 +541,9 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
     lines.append(f"Brand rule: titles must end with {plan.brand}")
     if plan.room_context:
         lines.append("")
-        lines.append(f"Room context: {plan.room_context} (use appropriate language; never describe as the other room type)")
+        lines.append(
+            f"Room context: {plan.room_context} (use appropriate language; never describe as the other room type)"
+        )
     return "\n".join(lines)
 
 
@@ -396,25 +558,51 @@ def _contains_term(text: str, term: str) -> bool:
     return term.lower() in text.lower()
 
 
+def _anchor_overlap(text: str, anchor: str, threshold: float = 0.6) -> bool:
+    """Check if enough anchor tokens appear in text (token overlap, not exact match).
+
+    Returns True if at least ``threshold`` fraction of the anchor's
+    meaningful tokens appear in the text.  This allows the model to
+    adapt "retractable hooks and garment rod" → "retractable wall hook"
+    while still getting credit for including the core product type.
+    """
+    stop_words = {"and", "or", "the", "a", "an", "with", "for", "in", "of", "on"}
+    anchor_tokens = [t for t in _WORD_RE.findall(anchor.lower()) if t not in stop_words]
+    if not anchor_tokens:
+        return True
+    text_lower = text.lower()
+    hits = sum(1 for t in anchor_tokens if t in text_lower)
+    return hits / len(anchor_tokens) >= threshold
+
+
 def validate_candidate_keyword_placement(
     candidate: Candidate,
     plan: KeywordPlacementPlan,
 ) -> list[str]:
     """Validate candidate adheres to keyword placement plan."""
+
     errors: list[str] = []
 
     anchor = plan.title_anchor.strip()
     if anchor:
+        anchor_tokens = [
+            t
+            for t in _WORD_RE.findall(anchor.lower())
+            if t not in {"and", "or", "the", "a", "an", "with", "for", "in", "of", "on"}
+        ]
         for field in ("google_title", "bing_title", "shopify_title"):
             value = getattr(candidate, field, "")
-            if not _contains_term(value[:70], anchor):
+            # Use token overlap: the model may adapt the anchor to better
+            # describe the specific product (e.g. "retractable wall hook"
+            # instead of "retractable hooks and garment rod").
+            if not _anchor_overlap(value[:70], anchor):
                 errors.append(
                     f"{field} missing title anchor in first 70 chars: {plan.title_anchor}"
                 )
 
     if plan.short_title_anchor:
         short_title = candidate.google_short_title or ""
-        if not _contains_term(short_title, plan.short_title_anchor):
+        if not _anchor_overlap(short_title, plan.short_title_anchor):
             errors.append(
                 f"google_short_title missing title anchor: {plan.short_title_anchor}"
             )
@@ -430,16 +618,27 @@ def validate_candidate_keyword_placement(
             raw = getattr(candidate, field, "")
             text = _strip_html(raw)
             lower_text = text.lower()
+            # Token overlap: a term "matches" if its key tokens appear in the text,
+            # not just as an exact substring (allows natural keyword integration).
             matches = [
-                term for term in plan.description_terms if term.lower() in lower_text
+                term
+                for term in plan.description_terms
+                if term.lower() in lower_text or _anchor_overlap(lower_text, term)
             ]
             if plan.description_first_150_required:
+                # 150-char window aligns with snippet visibility requirements.
                 opening = text[:150].lower()
-                if not any(term.lower() in opening for term in plan.description_terms):
+                if not any(
+                    term.lower() in opening or _anchor_overlap(opening, term)
+                    for term in plan.description_terms
+                ):
                     errors.append(
                         f"{field} missing description term in first 150 chars"
                     )
-            if plan.description_min_required and len(matches) < plan.description_min_required:
+            if (
+                plan.description_min_required
+                and len(matches) < plan.description_min_required
+            ):
                 errors.append(
                     f"{field} missing {plan.description_min_required} description term(s); "
                     f"found {len(matches)}"

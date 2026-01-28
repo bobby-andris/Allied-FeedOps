@@ -1,5 +1,7 @@
 """ParentSKU model aggregating variants."""
+
 from pydantic import BaseModel, computed_field
+
 from feedops.models.variant import Variant
 
 
@@ -52,6 +54,12 @@ class ParentSKU(BaseModel):
 
     # Variants
     variants: list[Variant] = []
+
+    # Merchant Center enrichment (optional)
+    merchant_center_items: list[dict] | None = None
+
+    # Data source metadata (cache/API/CSV)
+    data_source: str | None = None
 
     @computed_field
     @property

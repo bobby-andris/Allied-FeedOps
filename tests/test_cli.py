@@ -63,6 +63,29 @@ def test_optimize_help_includes_candidate_flags():
     assert "--candidate-weights" in result.stdout
 
 
+def test_optimize_help_includes_cache_flags():
+    """optimize command documents cache control flags."""
+    result = subprocess.run(
+        [sys.executable, "-m", "feedops.cli.main", "optimize", "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "--force-refresh" in result.stdout
+    assert "--no-sync" in result.stdout
+
+
+def test_refresh_cache_command_available():
+    """refresh-cache command should be available."""
+    result = subprocess.run(
+        [sys.executable, "-m", "feedops.cli.main", "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "refresh-cache" in result.stdout
+
+
 def test_default_output_dirs_point_to_dashboard_data():
     from feedops.cli import defaults
 

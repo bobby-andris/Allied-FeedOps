@@ -22,6 +22,10 @@ from feedops.cli.defaults import (
     CANDIDATE_REPORTS_DIR,
 )
 from feedops.loaders.catalog_resolver import resolve_catalog_path
+from feedops.loaders.unified_loader import (
+    get_cached_shopify_age_hours,
+    load_parent_sku_unified,
+)
 
 app = typer.Typer(
     name="feedops",
@@ -29,6 +33,30 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
+
+
+def _parse_bool_env(name: str, default: bool = True) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _get_cache_ttl_hours() -> float:
+    value = os.environ.get("CACHE_TTL_HOURS", "24")
+    try:
+        return float(value)
+    except ValueError:
+        return 24.0
+
+
+def _should_auto_sync(master_sku: str, ttl_hours: float) -> tuple[bool, float | None]:
+    age_hours = get_cached_shopify_age_hours(master_sku)
+    if age_hours is None:
+        return True, None
+    if ttl_hours <= 0:
+        return True, age_hours
+    return age_hours > ttl_hours, age_hours
 
 
 def version_callback(value: bool):
@@ -124,6 +152,10 @@ def optimize(
     catalog: Optional[str] = typer.Option(
         None, "--catalog", "-c", help="Path to catalog CSV"
     ),
+    force_refresh: bool = typer.Option(
+        False, "--force-refresh", help="Bypass cache and fetch fresh data"
+    ),
+    no_sync: bool = typer.Option(False, "--no-sync", help="Skip automatic sync check"),
     candidates: Optional[int] = typer.Option(
         None, "--candidates", "-n", help="Number of candidates to generate"
     ),
@@ -143,6 +175,22 @@ def optimize(
         if candidate_weights is not None
         else None
     )
+    cache_ttl_hours = _get_cache_ttl_hours()
+    auto_sync_enabled = _parse_bool_env("AUTO_SYNC_ENABLED", True)
+
+    if not no_sync and auto_sync_enabled and not force_refresh:
+        should_sync, age_hours = _should_auto_sync(parent_sku, cache_ttl_hours)
+        if should_sync:
+            if age_hours is None:
+                console.print("Data is missing, syncing...")
+            else:
+                console.print(f"Data is {age_hours:.1f} hours old, syncing...")
+            load_parent_sku_unified(
+                parent_sku,
+                force_refresh=True,
+                catalog_path=str(catalog_path),
+                cache_ttl_hours=cache_ttl_hours,
+            )
 
     console.print(f"\n[bold]Optimizing: {parent_sku}[/bold]")
     console.print(f"Catalog: {catalog_path}")
@@ -158,10 +206,14 @@ def optimize(
                 exports_dir=exports_dir,
                 num_candidates=candidates,
                 candidate_weights=weights,
+                force_refresh=force_refresh,
             )
         )
 
         score = result.candidate.final_score
+        data_source = getattr(result, "data_source", None)
+        if data_source:
+            console.print(f"Data source: {data_source}")
         console.print(f"[bold]Quality Score: {score.composite}%[/bold]")
         console.print(f"Status: {score.approval_status.upper()}")
         safe_sku = parent_sku.replace("/", "-")
@@ -261,6 +313,47 @@ def sync_catalog_command(
     console.print(f"\n[bold]Catalog sync complete[/bold]")
     console.print(f"Shopify catalog: {result.catalog_path} ({catalog_status})")
     console.print(f"Merchant Center metadata: {result.mc_metadata_path} ({mc_status})")
+
+
+@app.command(name="refresh-cache")
+def refresh_cache(
+    sku: str = typer.Option(..., "--sku", help="Master SKU to refresh"),
+    source: str = typer.Option(
+        "both",
+        "--source",
+        help="Which source to refresh: shopify, gmc, both",
+    ),
+):
+    """Manually refresh cached data for a SKU."""
+    from feedops.db import init_db, upsert_merchant_center_items
+    from feedops.integrations.merchant_center import fetch_merchant_center_items
+
+    cache_ttl_hours = _get_cache_ttl_hours()
+    db_path = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
+    source = source.strip().lower()
+    if source not in {"shopify", "gmc", "both"}:
+        console.print("[red]Error:[/red] --source must be one of: shopify, gmc, both")
+        raise typer.Exit(1)
+
+    if source in {"shopify", "both"}:
+        console.print(f"Refreshing Shopify data for {sku}...")
+        parent = load_parent_sku_unified(
+            sku,
+            force_refresh=True,
+            cache_ttl_hours=cache_ttl_hours,
+        )
+        if parent is None:
+            console.print(f"[yellow]No Shopify data found for {sku}[/yellow]")
+
+    if source in {"gmc", "both"}:
+        console.print(f"Refreshing Merchant Center data for {sku}...")
+        init_db(db_path)
+        items = fetch_merchant_center_items(limit=None)
+        if items:
+            upsert_merchant_center_items(db_path, items)
+        console.print(f"Merchant Center items cached: {len(items)}")
+
+    console.print("[green]✅ Cache refreshed[/green]")
 
 
 @app.command(name="evaluate-exports")

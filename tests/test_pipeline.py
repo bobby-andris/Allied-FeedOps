@@ -50,6 +50,75 @@ def sample_parent_sku():
     )
 
 
+@pytest.mark.asyncio
+async def test_optimize_parent_sku_reports_product_not_found(tmp_path):
+    from feedops.pipeline.optimize import optimize_parent_sku
+
+    with pytest.raises(ValueError, match="Product not found"):
+        await optimize_parent_sku(
+            master_sku="MISSING-SKU",
+            catalog_path="samples/sample-catalog.csv",
+            dry_run=True,
+            output_dir=tmp_path,
+            exports_dir=tmp_path,
+            num_candidates=1,
+        )
+
+
+@pytest.mark.asyncio
+async def test_optimize_parent_sku_reports_api_unavailable(tmp_path, monkeypatch):
+    from feedops.loaders import unified_loader
+    from feedops.pipeline.optimize import optimize_parent_sku
+
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "empty.db"))
+
+    def _raise_api(*_args, **_kwargs):
+        raise RuntimeError("API down")
+
+    monkeypatch.setattr(unified_loader, "fetch_shopify_product", _raise_api)
+
+    with pytest.raises(ValueError, match="API unavailable"):
+        await optimize_parent_sku(
+            master_sku="TD-22",
+            catalog_path="does/not/exist.csv",
+            dry_run=True,
+            output_dir=tmp_path,
+            exports_dir=tmp_path,
+            num_candidates=1,
+        )
+
+
+@pytest.mark.asyncio
+async def test_optimize_parent_sku_passes_force_refresh(tmp_path, monkeypatch):
+    from feedops.loaders.unified_loader import UnifiedLoadStatus
+    from feedops.pipeline import optimize as optimize_module
+
+    calls = {}
+
+    def _fake_loader(*_args, **kwargs):
+        calls["force_refresh"] = kwargs.get("force_refresh")
+        return None, UnifiedLoadStatus(csv_attempted=True)
+
+    monkeypatch.setattr(
+        optimize_module,
+        "load_parent_sku_unified_with_status",
+        _fake_loader,
+    )
+
+    with pytest.raises(ValueError, match="Product not found"):
+        await optimize_module.optimize_parent_sku(
+            master_sku="MISSING-SKU",
+            catalog_path="samples/sample-catalog.csv",
+            dry_run=True,
+            output_dir=tmp_path,
+            exports_dir=tmp_path,
+            num_candidates=1,
+            force_refresh=True,
+        )
+
+    assert calls["force_refresh"] is True
+
+
 # Task 5.1: Evidence Table Tests
 def test_build_evidence_table_includes_parent_fields(sample_parent_sku):
     """Evidence table includes ParentSKU fields."""

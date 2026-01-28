@@ -57,13 +57,14 @@ def build_prompt(parent_sku: ParentSKU) -> str:
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
 
-    return OPTIMIZATION_TEMPLATE.format(
+    prompt = OPTIMIZATION_TEMPLATE.format(
         system_prompt=SYSTEM_PROMPT,
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )
+    return prompt
 
 
 def parse_candidate_response(response: dict) -> Candidate:
