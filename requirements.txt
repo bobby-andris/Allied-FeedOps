@@ -10,3 +10,5 @@ python-dotenv>=1.0
 typer>=0.9
 rich>=13.0
 streamlit>=1.30
+scipy>=1.10
+bingads>=14.0

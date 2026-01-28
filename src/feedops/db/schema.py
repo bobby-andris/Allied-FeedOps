@@ -198,6 +198,182 @@ def init_db(db_path: Path | str) -> None:
     """
     )
 
+    # Migration: Add batch and category columns to publish_events
+    for column, col_type in [
+        ("batch_id", "TEXT"),
+        ("product_category", "TEXT"),
+        ("product_collection", "TEXT"),
+    ]:
+        try:
+            conn.execute(f"ALTER TABLE publish_events ADD COLUMN {column} {col_type}")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_publish_batch
+        ON publish_events(batch_id, published_at DESC)
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_publish_category
+        ON publish_events(product_category, published_at DESC)
+    """
+    )
+
+    # Performance snapshots table for tracking metrics over time
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS performance_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            master_sku TEXT NOT NULL,
+            platform TEXT NOT NULL,
+            environment TEXT NOT NULL,
+            snapshot_date TEXT NOT NULL,
+            
+            -- Traffic metrics
+            impressions INTEGER DEFAULT 0,
+            clicks INTEGER DEFAULT 0,
+            ctr REAL DEFAULT 0.0,
+            
+            -- Conversion metrics
+            conversions INTEGER DEFAULT 0,
+            conversion_value REAL DEFAULT 0.0,
+            cvr REAL DEFAULT 0.0,
+            
+            -- Cost metrics
+            cost REAL DEFAULT 0.0,
+            cpc REAL DEFAULT 0.0,
+            roas REAL DEFAULT 0.0,
+            
+            -- Content tracking
+            publish_event_id INTEGER,
+            content_version TEXT,
+            days_since_publish INTEGER,
+            
+            fetched_at TEXT NOT NULL,
+            FOREIGN KEY (publish_event_id) REFERENCES publish_events(id)
+        )
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_snapshots_sku_platform_date
+        ON performance_snapshots(master_sku, platform, snapshot_date DESC)
+    """
+    )
+
+    # Performance baselines table for storing pre-FeedOps metrics
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS performance_baselines (
+            master_sku TEXT NOT NULL,
+            platform TEXT NOT NULL,
+            baseline_start_date TEXT NOT NULL,
+            baseline_end_date TEXT NOT NULL,
+            
+            avg_impressions REAL,
+            avg_clicks REAL,
+            avg_ctr REAL,
+            avg_conversions REAL,
+            avg_conversion_value REAL,
+            avg_cvr REAL,
+            avg_cost REAL,
+            avg_roas REAL,
+            
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (master_sku, platform)
+        )
+    """
+    )
+
+    # SKU approvals table for element-level approval tracking
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sku_approvals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            master_sku TEXT NOT NULL UNIQUE,
+            
+            -- Element-level approvals (NULL = not reviewed, 1 = approved, 0 = rejected)
+            title_approved INTEGER,
+            description_approved INTEGER,
+            image_approved INTEGER,
+            selected_finish TEXT,
+            selected_image_index INTEGER,
+            
+            -- Overall state
+            status TEXT NOT NULL DEFAULT 'pending',
+            revision_notes TEXT,
+            
+            -- Metadata
+            reviewed_by TEXT,
+            reviewed_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_approvals_status
+        ON sku_approvals(status, updated_at DESC)
+    """
+    )
+
+    # Publish batches table for batch/cohort tracking
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS publish_batches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batch_id TEXT NOT NULL UNIQUE,
+            batch_label TEXT,
+            target_date TEXT,
+            status TEXT NOT NULL DEFAULT 'pending',
+            
+            selection_criteria TEXT,
+            
+            created_at TEXT NOT NULL,
+            published_at TEXT,
+            
+            sku_count INTEGER DEFAULT 0,
+            success_count INTEGER DEFAULT 0,
+            failed_count INTEGER DEFAULT 0
+        )
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_batches_status
+        ON publish_batches(status, created_at DESC)
+    """
+    )
+
+    # Batch SKU assignments table
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS batch_sku_assignments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batch_id TEXT NOT NULL,
+            master_sku TEXT NOT NULL,
+            assigned_at TEXT NOT NULL,
+            UNIQUE(batch_id, master_sku),
+            FOREIGN KEY (batch_id) REFERENCES publish_batches(batch_id)
+        )
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_batch_assignments
+        ON batch_sku_assignments(batch_id, master_sku)
+    """
+    )
+
     conn.commit()
     conn.close()
 
@@ -480,6 +656,9 @@ def log_publish_event(
     error_message: str | None = None,
     published_by: str | None = None,
     rollback_id: int | None = None,
+    batch_id: str | None = None,
+    product_category: str | None = None,
+    product_collection: str | None = None,
 ) -> int:
     """Log a publish or rollback event to the database.
 
@@ -496,6 +675,9 @@ def log_publish_event(
         error_message: Optional error message if failed.
         published_by: Optional identifier for who triggered the publish.
         rollback_id: Optional reference to the publish event being rolled back.
+        batch_id: Optional batch ID for batch tracking.
+        product_category: Optional product category for analytics.
+        product_collection: Optional product collection for analytics.
 
     Returns:
         ID of the inserted row.
@@ -508,8 +690,9 @@ def log_publish_event(
         INSERT INTO publish_events (
             master_sku, platform, environment, action, patch_file,
             quality_score, approval_status, status, error_message,
-            published_at, published_by, rollback_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            published_at, published_by, rollback_id,
+            batch_id, product_category, product_collection
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             master_sku,
@@ -524,6 +707,9 @@ def log_publish_event(
             datetime.now(timezone.utc).isoformat(),
             published_by or "cli",
             rollback_id,
+            batch_id,
+            product_category,
+            product_collection,
         ),
     )
     conn.commit()
@@ -576,23 +762,31 @@ def get_publish_history(
 
     results: list[dict] = []
     for row in rows:
-        results.append(
-            {
-                "id": row["id"],
-                "master_sku": row["master_sku"],
-                "platform": row["platform"],
-                "environment": row["environment"],
-                "action": row["action"],
-                "patch_file": row["patch_file"],
-                "quality_score": row["quality_score"],
-                "approval_status": row["approval_status"],
-                "status": row["status"],
-                "error_message": row["error_message"],
-                "published_at": row["published_at"],
-                "published_by": row["published_by"],
-                "rollback_id": row["rollback_id"],
-            }
-        )
+        result_dict = {
+            "id": row["id"],
+            "master_sku": row["master_sku"],
+            "platform": row["platform"],
+            "environment": row["environment"],
+            "action": row["action"],
+            "patch_file": row["patch_file"],
+            "quality_score": row["quality_score"],
+            "approval_status": row["approval_status"],
+            "status": row["status"],
+            "error_message": row["error_message"],
+            "published_at": row["published_at"],
+            "published_by": row["published_by"],
+            "rollback_id": row["rollback_id"],
+        }
+        # Add new columns (may not exist in older databases)
+        try:
+            result_dict["batch_id"] = row["batch_id"]
+            result_dict["product_category"] = row["product_category"]
+            result_dict["product_collection"] = row["product_collection"]
+        except (KeyError, IndexError):
+            result_dict["batch_id"] = None
+            result_dict["product_category"] = None
+            result_dict["product_collection"] = None
+        results.append(result_dict)
     return results
 
 
@@ -616,3 +810,977 @@ def get_last_publish_event(
         db_path, master_sku=master_sku, platform=platform, limit=1
     )
     return history[0] if history else None
+
+
+# Performance tracking functions
+
+
+def save_performance_snapshot(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    platform: str,
+    environment: str,
+    snapshot_date: str,
+    impressions: int = 0,
+    clicks: int = 0,
+    ctr: float = 0.0,
+    conversions: int = 0,
+    conversion_value: float = 0.0,
+    cvr: float = 0.0,
+    cost: float = 0.0,
+    cpc: float = 0.0,
+    roas: float = 0.0,
+    publish_event_id: int | None = None,
+    content_version: str | None = None,
+    days_since_publish: int | None = None,
+) -> int:
+    """Save a performance snapshot to the database.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU.
+        platform: Platform ('google', 'bing', 'shopify').
+        environment: Environment ('staging', 'production').
+        snapshot_date: Date of metrics in YYYY-MM-DD format.
+        impressions: Number of impressions.
+        clicks: Number of clicks.
+        ctr: Click-through rate (0.0 to 1.0).
+        conversions: Number of conversions.
+        conversion_value: Total conversion value.
+        cvr: Conversion rate (0.0 to 1.0).
+        cost: Total ad spend.
+        cpc: Cost per click.
+        roas: Return on ad spend.
+        publish_event_id: Optional link to publish event.
+        content_version: Content version ('original', 'feedops-v1', etc.).
+        days_since_publish: Days since content was published.
+
+    Returns:
+        ID of the inserted row.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+    cursor = conn.execute(
+        """
+        INSERT INTO performance_snapshots (
+            master_sku, platform, environment, snapshot_date,
+            impressions, clicks, ctr, conversions, conversion_value, cvr,
+            cost, cpc, roas, publish_event_id, content_version,
+            days_since_publish, fetched_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            master_sku,
+            platform,
+            environment,
+            snapshot_date,
+            impressions,
+            clicks,
+            ctr,
+            conversions,
+            conversion_value,
+            cvr,
+            cost,
+            cpc,
+            roas,
+            publish_event_id,
+            content_version,
+            days_since_publish,
+            datetime.now(timezone.utc).isoformat(),
+        ),
+    )
+    conn.commit()
+    snapshot_id = cursor.lastrowid
+    conn.close()
+    return snapshot_id
+
+
+def get_performance_snapshots(
+    db_path: Path | str,
+    *,
+    master_sku: str | None = None,
+    platform: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    limit: int = 1000,
+) -> list[dict]:
+    """Retrieve performance snapshots from the database.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: Optional filter by SKU.
+        platform: Optional filter by platform.
+        start_date: Optional start date filter (YYYY-MM-DD).
+        end_date: Optional end date filter (YYYY-MM-DD).
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of snapshot dictionaries, most recent first.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+
+    query = "SELECT * FROM performance_snapshots WHERE 1=1"
+    params: list = []
+
+    if master_sku:
+        query += " AND master_sku = ?"
+        params.append(master_sku)
+
+    if platform:
+        query += " AND platform = ?"
+        params.append(platform)
+
+    if start_date:
+        query += " AND snapshot_date >= ?"
+        params.append(start_date)
+
+    if end_date:
+        query += " AND snapshot_date <= ?"
+        params.append(end_date)
+
+    query += " ORDER BY snapshot_date DESC LIMIT ?"
+    params.append(limit)
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    results: list[dict] = []
+    for row in rows:
+        results.append(
+            {
+                "id": row["id"],
+                "master_sku": row["master_sku"],
+                "platform": row["platform"],
+                "environment": row["environment"],
+                "snapshot_date": row["snapshot_date"],
+                "impressions": row["impressions"],
+                "clicks": row["clicks"],
+                "ctr": row["ctr"],
+                "conversions": row["conversions"],
+                "conversion_value": row["conversion_value"],
+                "cvr": row["cvr"],
+                "cost": row["cost"],
+                "cpc": row["cpc"],
+                "roas": row["roas"],
+                "publish_event_id": row["publish_event_id"],
+                "content_version": row["content_version"],
+                "days_since_publish": row["days_since_publish"],
+                "fetched_at": row["fetched_at"],
+            }
+        )
+    return results
+
+
+def save_performance_baseline(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    platform: str,
+    baseline_start_date: str,
+    baseline_end_date: str,
+    avg_impressions: float | None = None,
+    avg_clicks: float | None = None,
+    avg_ctr: float | None = None,
+    avg_conversions: float | None = None,
+    avg_conversion_value: float | None = None,
+    avg_cvr: float | None = None,
+    avg_cost: float | None = None,
+    avg_roas: float | None = None,
+) -> None:
+    """Save or update a performance baseline.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU.
+        platform: Platform ('google', 'bing', 'shopify').
+        baseline_start_date: Start of baseline period (YYYY-MM-DD).
+        baseline_end_date: End of baseline period (YYYY-MM-DD).
+        avg_impressions: Average daily impressions.
+        avg_clicks: Average daily clicks.
+        avg_ctr: Average CTR.
+        avg_conversions: Average daily conversions.
+        avg_conversion_value: Average daily conversion value.
+        avg_cvr: Average CVR.
+        avg_cost: Average daily cost.
+        avg_roas: Average ROAS.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO performance_baselines (
+            master_sku, platform, baseline_start_date, baseline_end_date,
+            avg_impressions, avg_clicks, avg_ctr, avg_conversions,
+            avg_conversion_value, avg_cvr, avg_cost, avg_roas, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            master_sku,
+            platform,
+            baseline_start_date,
+            baseline_end_date,
+            avg_impressions,
+            avg_clicks,
+            avg_ctr,
+            avg_conversions,
+            avg_conversion_value,
+            avg_cvr,
+            avg_cost,
+            avg_roas,
+            datetime.now(timezone.utc).isoformat(),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_performance_baseline(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    platform: str,
+) -> dict | None:
+    """Retrieve a performance baseline for a SKU/platform combination.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU.
+        platform: Platform ('google', 'bing', 'shopify').
+
+    Returns:
+        Baseline dict or None if not found.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(db_path)
+    row = conn.execute(
+        """
+        SELECT * FROM performance_baselines
+        WHERE master_sku = ? AND platform = ?
+        """,
+        (master_sku, platform),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return {
+        "master_sku": row["master_sku"],
+        "platform": row["platform"],
+        "baseline_start_date": row["baseline_start_date"],
+        "baseline_end_date": row["baseline_end_date"],
+        "avg_impressions": row["avg_impressions"],
+        "avg_clicks": row["avg_clicks"],
+        "avg_ctr": row["avg_ctr"],
+        "avg_conversions": row["avg_conversions"],
+        "avg_conversion_value": row["avg_conversion_value"],
+        "avg_cvr": row["avg_cvr"],
+        "avg_cost": row["avg_cost"],
+        "avg_roas": row["avg_roas"],
+        "created_at": row["created_at"],
+    }
+
+
+def get_published_skus_for_review(
+    db_path: Path | str,
+    *,
+    platform: str,
+    min_days_since_publish: int = 14,
+    environment: str | None = None,
+) -> list[dict]:
+    """Get SKUs that have been published and are ready for performance review.
+
+    Args:
+        db_path: Path to database file.
+        platform: Platform to filter by.
+        min_days_since_publish: Minimum days since publish for statistical significance.
+        environment: Optional environment filter.
+
+    Returns:
+        List of publish event dicts for SKUs ready for review.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+
+    query = """
+        SELECT * FROM publish_events
+        WHERE platform = ?
+          AND action = 'publish'
+          AND status = 'success'
+          AND julianday('now') - julianday(published_at) >= ?
+    """
+    params: list = [platform, min_days_since_publish]
+
+    if environment:
+        query += " AND environment = ?"
+        params.append(environment)
+
+    query += " ORDER BY published_at DESC"
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    results: list[dict] = []
+    for row in rows:
+        result_dict = {
+            "id": row["id"],
+            "master_sku": row["master_sku"],
+            "platform": row["platform"],
+            "environment": row["environment"],
+            "action": row["action"],
+            "patch_file": row["patch_file"],
+            "quality_score": row["quality_score"],
+            "approval_status": row["approval_status"],
+            "status": row["status"],
+            "published_at": row["published_at"],
+            "published_by": row["published_by"],
+        }
+        # Add new columns (may not exist in older databases)
+        try:
+            result_dict["batch_id"] = row["batch_id"]
+            result_dict["product_category"] = row["product_category"]
+            result_dict["product_collection"] = row["product_collection"]
+        except (KeyError, IndexError):
+            result_dict["batch_id"] = None
+            result_dict["product_category"] = None
+            result_dict["product_collection"] = None
+        results.append(result_dict)
+    return results
+
+
+# SKU Approval functions
+
+
+def save_sku_approval(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    title_approved: bool | None = None,
+    description_approved: bool | None = None,
+    image_approved: bool | None = None,
+    selected_finish: str | None = None,
+    selected_image_index: int | None = None,
+    status: str = "pending",
+    revision_notes: str | None = None,
+    reviewed_by: str | None = None,
+) -> int:
+    """Save or update a SKU approval record.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU being reviewed.
+        title_approved: Whether title is approved (None=not reviewed, True/False).
+        description_approved: Whether description is approved.
+        image_approved: Whether lifestyle image is approved.
+        selected_finish: Which finish variant the image was approved for.
+        selected_image_index: Which lifestyle image was selected (0-based).
+        status: Overall status ('pending', 'approved', 'revision', 'rejected').
+        revision_notes: Notes explaining why revision is needed.
+        reviewed_by: Who performed the review.
+
+    Returns:
+        ID of the approval record.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Convert booleans to integers for SQLite
+    title_int = 1 if title_approved else (0 if title_approved is False else None)
+    desc_int = (
+        1 if description_approved else (0 if description_approved is False else None)
+    )
+    image_int = 1 if image_approved else (0 if image_approved is False else None)
+
+    # Check if record exists
+    existing = conn.execute(
+        "SELECT id FROM sku_approvals WHERE master_sku = ?",
+        (master_sku,),
+    ).fetchone()
+
+    if existing:
+        conn.execute(
+            """
+            UPDATE sku_approvals SET
+                title_approved = ?,
+                description_approved = ?,
+                image_approved = ?,
+                selected_finish = ?,
+                selected_image_index = ?,
+                status = ?,
+                revision_notes = ?,
+                reviewed_by = ?,
+                reviewed_at = ?,
+                updated_at = ?
+            WHERE master_sku = ?
+            """,
+            (
+                title_int,
+                desc_int,
+                image_int,
+                selected_finish,
+                selected_image_index,
+                status,
+                revision_notes,
+                reviewed_by,
+                now,
+                now,
+                master_sku,
+            ),
+        )
+        record_id = existing["id"]
+    else:
+        cursor = conn.execute(
+            """
+            INSERT INTO sku_approvals (
+                master_sku, title_approved, description_approved, image_approved,
+                selected_finish, selected_image_index, status, revision_notes,
+                reviewed_by, reviewed_at, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                master_sku,
+                title_int,
+                desc_int,
+                image_int,
+                selected_finish,
+                selected_image_index,
+                status,
+                revision_notes,
+                reviewed_by,
+                now,
+                now,
+                now,
+            ),
+        )
+        record_id = cursor.lastrowid
+
+    conn.commit()
+    conn.close()
+    return record_id
+
+
+def get_sku_approval(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+) -> dict | None:
+    """Get approval state for a SKU.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU to look up.
+
+    Returns:
+        Approval dict or None if not found.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(db_path)
+    row = conn.execute(
+        "SELECT * FROM sku_approvals WHERE master_sku = ?",
+        (master_sku,),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return {
+        "id": row["id"],
+        "master_sku": row["master_sku"],
+        "title_approved": (
+            row["title_approved"] == 1 if row["title_approved"] is not None else None
+        ),
+        "description_approved": (
+            row["description_approved"] == 1
+            if row["description_approved"] is not None
+            else None
+        ),
+        "image_approved": (
+            row["image_approved"] == 1 if row["image_approved"] is not None else None
+        ),
+        "selected_finish": row["selected_finish"],
+        "selected_image_index": row["selected_image_index"],
+        "status": row["status"],
+        "revision_notes": row["revision_notes"],
+        "reviewed_by": row["reviewed_by"],
+        "reviewed_at": row["reviewed_at"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def get_pending_approvals(
+    db_path: Path | str,
+    *,
+    limit: int = 100,
+) -> list[dict]:
+    """Get SKUs awaiting review (pending status).
+
+    Args:
+        db_path: Path to database file.
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of approval dicts with pending status.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+    rows = conn.execute(
+        """
+        SELECT * FROM sku_approvals
+        WHERE status = 'pending'
+        ORDER BY created_at ASC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    conn.close()
+
+    return [_row_to_approval_dict(row) for row in rows]
+
+
+def get_revision_queue(
+    db_path: Path | str,
+    *,
+    limit: int = 100,
+) -> list[dict]:
+    """Get SKUs flagged for revision.
+
+    Args:
+        db_path: Path to database file.
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of approval dicts with revision status.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+    rows = conn.execute(
+        """
+        SELECT * FROM sku_approvals
+        WHERE status = 'revision'
+        ORDER BY updated_at DESC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    conn.close()
+
+    return [_row_to_approval_dict(row) for row in rows]
+
+
+def get_approved_for_batch(
+    db_path: Path | str,
+    *,
+    exclude_batched: bool = True,
+    limit: int = 500,
+) -> list[dict]:
+    """Get approved SKUs ready for batching.
+
+    Args:
+        db_path: Path to database file.
+        exclude_batched: If True, exclude SKUs already assigned to a batch.
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of approval dicts with approved status.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+
+    if exclude_batched:
+        query = """
+            SELECT sa.* FROM sku_approvals sa
+            LEFT JOIN batch_sku_assignments bsa ON sa.master_sku = bsa.master_sku
+            WHERE sa.status = 'approved'
+              AND bsa.id IS NULL
+            ORDER BY sa.updated_at ASC
+            LIMIT ?
+        """
+    else:
+        query = """
+            SELECT * FROM sku_approvals
+            WHERE status = 'approved'
+            ORDER BY updated_at ASC
+            LIMIT ?
+        """
+
+    rows = conn.execute(query, (limit,)).fetchall()
+    conn.close()
+
+    return [_row_to_approval_dict(row) for row in rows]
+
+
+def _row_to_approval_dict(row) -> dict:
+    """Convert a database row to an approval dict."""
+    return {
+        "id": row["id"],
+        "master_sku": row["master_sku"],
+        "title_approved": (
+            row["title_approved"] == 1 if row["title_approved"] is not None else None
+        ),
+        "description_approved": (
+            row["description_approved"] == 1
+            if row["description_approved"] is not None
+            else None
+        ),
+        "image_approved": (
+            row["image_approved"] == 1 if row["image_approved"] is not None else None
+        ),
+        "selected_finish": row["selected_finish"],
+        "selected_image_index": row["selected_image_index"],
+        "status": row["status"],
+        "revision_notes": row["revision_notes"],
+        "reviewed_by": row["reviewed_by"],
+        "reviewed_at": row["reviewed_at"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+# Batch management functions
+
+
+def create_batch(
+    db_path: Path | str,
+    *,
+    batch_label: str | None = None,
+    target_date: str | None = None,
+    selection_criteria: dict | None = None,
+    skus: list[str] | None = None,
+) -> str:
+    """Create a new publish batch.
+
+    Args:
+        db_path: Path to database file.
+        batch_label: Optional custom label for the batch.
+        target_date: Planned publish date (YYYY-MM-DD).
+        selection_criteria: JSON-serializable dict of selection criteria.
+        skus: Optional list of SKUs to immediately assign to this batch.
+
+    Returns:
+        The generated batch_id.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+
+    now = datetime.now(timezone.utc)
+    date_str = now.strftime("%Y-%m-%d")
+
+    # Generate unique batch ID
+    existing = conn.execute(
+        "SELECT COUNT(*) as cnt FROM publish_batches WHERE batch_id LIKE ?",
+        (f"Batch-{date_str}-%",),
+    ).fetchone()
+    seq = (existing["cnt"] or 0) + 1
+    batch_id = f"Batch-{date_str}-{seq:03d}"
+
+    criteria_json = json.dumps(selection_criteria) if selection_criteria else None
+
+    conn.execute(
+        """
+        INSERT INTO publish_batches (
+            batch_id, batch_label, target_date, status,
+            selection_criteria, created_at, sku_count
+        ) VALUES (?, ?, ?, 'pending', ?, ?, ?)
+        """,
+        (
+            batch_id,
+            batch_label,
+            target_date,
+            criteria_json,
+            now.isoformat(),
+            len(skus) if skus else 0,
+        ),
+    )
+
+    # Assign SKUs if provided
+    if skus:
+        for sku in skus:
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO batch_sku_assignments (
+                    batch_id, master_sku, assigned_at
+                ) VALUES (?, ?, ?)
+                """,
+                (batch_id, sku, now.isoformat()),
+            )
+
+    conn.commit()
+    conn.close()
+    return batch_id
+
+
+def get_batch(
+    db_path: Path | str,
+    *,
+    batch_id: str,
+) -> dict | None:
+    """Get batch details by ID.
+
+    Args:
+        db_path: Path to database file.
+        batch_id: The batch ID to look up.
+
+    Returns:
+        Batch dict or None if not found.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(db_path)
+    row = conn.execute(
+        "SELECT * FROM publish_batches WHERE batch_id = ?",
+        (batch_id,),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return {
+        "id": row["id"],
+        "batch_id": row["batch_id"],
+        "batch_label": row["batch_label"],
+        "target_date": row["target_date"],
+        "status": row["status"],
+        "selection_criteria": (
+            json.loads(row["selection_criteria"]) if row["selection_criteria"] else None
+        ),
+        "created_at": row["created_at"],
+        "published_at": row["published_at"],
+        "sku_count": row["sku_count"],
+        "success_count": row["success_count"],
+        "failed_count": row["failed_count"],
+    }
+
+
+def get_all_batches(
+    db_path: Path | str,
+    *,
+    status: str | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """Get all batches, optionally filtered by status.
+
+    Args:
+        db_path: Path to database file.
+        status: Optional status filter.
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of batch dicts.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+
+    if status:
+        rows = conn.execute(
+            """
+            SELECT * FROM publish_batches
+            WHERE status = ?
+            ORDER BY created_at DESC
+            LIMIT ?
+            """,
+            (status, limit),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """
+            SELECT * FROM publish_batches
+            ORDER BY created_at DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
+    conn.close()
+
+    results = []
+    for row in rows:
+        results.append(
+            {
+                "id": row["id"],
+                "batch_id": row["batch_id"],
+                "batch_label": row["batch_label"],
+                "target_date": row["target_date"],
+                "status": row["status"],
+                "selection_criteria": (
+                    json.loads(row["selection_criteria"])
+                    if row["selection_criteria"]
+                    else None
+                ),
+                "created_at": row["created_at"],
+                "published_at": row["published_at"],
+                "sku_count": row["sku_count"],
+                "success_count": row["success_count"],
+                "failed_count": row["failed_count"],
+            }
+        )
+    return results
+
+
+def assign_skus_to_batch(
+    db_path: Path | str,
+    *,
+    batch_id: str,
+    skus: list[str],
+) -> int:
+    """Assign SKUs to a batch.
+
+    Args:
+        db_path: Path to database file.
+        batch_id: The batch to assign to.
+        skus: List of MasterSKUs to assign.
+
+    Returns:
+        Number of SKUs assigned.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+
+    now = datetime.now(timezone.utc).isoformat()
+    assigned = 0
+
+    for sku in skus:
+        try:
+            conn.execute(
+                """
+                INSERT INTO batch_sku_assignments (
+                    batch_id, master_sku, assigned_at
+                ) VALUES (?, ?, ?)
+                """,
+                (batch_id, sku, now),
+            )
+            assigned += 1
+        except sqlite3.IntegrityError:
+            # Already assigned
+            pass
+
+    # Update batch SKU count
+    conn.execute(
+        """
+        UPDATE publish_batches SET sku_count = (
+            SELECT COUNT(*) FROM batch_sku_assignments WHERE batch_id = ?
+        ) WHERE batch_id = ?
+        """,
+        (batch_id, batch_id),
+    )
+
+    conn.commit()
+    conn.close()
+    return assigned
+
+
+def get_batch_skus(
+    db_path: Path | str,
+    *,
+    batch_id: str,
+) -> list[str]:
+    """Get all SKUs assigned to a batch.
+
+    Args:
+        db_path: Path to database file.
+        batch_id: The batch to look up.
+
+    Returns:
+        List of MasterSKUs in the batch.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+    rows = conn.execute(
+        """
+        SELECT master_sku FROM batch_sku_assignments
+        WHERE batch_id = ?
+        ORDER BY assigned_at
+        """,
+        (batch_id,),
+    ).fetchall()
+    conn.close()
+
+    return [row["master_sku"] for row in rows]
+
+
+def update_batch_status(
+    db_path: Path | str,
+    *,
+    batch_id: str,
+    status: str,
+    success_count: int | None = None,
+    failed_count: int | None = None,
+) -> None:
+    """Update batch status and counts.
+
+    Args:
+        db_path: Path to database file.
+        batch_id: The batch to update.
+        status: New status.
+        success_count: Number of successful publishes.
+        failed_count: Number of failed publishes.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return
+
+    conn = get_connection(db_path)
+
+    updates = ["status = ?"]
+    params: list = [status]
+
+    if status == "published":
+        updates.append("published_at = ?")
+        params.append(datetime.now(timezone.utc).isoformat())
+
+    if success_count is not None:
+        updates.append("success_count = ?")
+        params.append(success_count)
+
+    if failed_count is not None:
+        updates.append("failed_count = ?")
+        params.append(failed_count)
+
+    params.append(batch_id)
+
+    conn.execute(
+        f"UPDATE publish_batches SET {', '.join(updates)} WHERE batch_id = ?",
+        params,
+    )
+    conn.commit()
+    conn.close()

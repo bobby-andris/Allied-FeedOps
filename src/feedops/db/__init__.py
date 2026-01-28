@@ -1,16 +1,32 @@
 """FeedOps database package."""
 
 from feedops.db.schema import (
+    assign_skus_to_batch,
     cache_shopify_product,
+    create_batch,
+    get_all_batches,
+    get_approved_for_batch,
+    get_batch,
+    get_batch_skus,
     get_cached_merchant_center_items,
     get_cached_shopify_product,
     get_connection,
     get_last_publish_event,
+    get_pending_approvals,
+    get_performance_baseline,
+    get_performance_snapshots,
     get_publish_history,
+    get_published_skus_for_review,
+    get_revision_queue,
+    get_sku_approval,
     init_db,
     log_keyword_intent_snapshot,
     log_optimization,
     log_publish_event,
+    save_performance_baseline,
+    save_performance_snapshot,
+    save_sku_approval,
+    update_batch_status,
 )
 
 __all__ = [
@@ -24,4 +40,22 @@ __all__ = [
     "log_publish_event",
     "get_publish_history",
     "get_last_publish_event",
+    "save_performance_snapshot",
+    "get_performance_snapshots",
+    "save_performance_baseline",
+    "get_performance_baseline",
+    "get_published_skus_for_review",
+    # SKU approval functions
+    "save_sku_approval",
+    "get_sku_approval",
+    "get_pending_approvals",
+    "get_revision_queue",
+    "get_approved_for_batch",
+    # Batch management functions
+    "create_batch",
+    "get_batch",
+    "get_all_batches",
+    "assign_skus_to_batch",
+    "get_batch_skus",
+    "update_batch_status",
 ]

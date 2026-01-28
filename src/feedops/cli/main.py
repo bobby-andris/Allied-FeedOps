@@ -21,6 +21,7 @@ from feedops.cli.defaults import (
     CANDIDATE_EXPORTS_DIR,
     CANDIDATE_REPORTS_DIR,
 )
+from feedops.cli.performance import performance_app
 from feedops.cli.publish import publish_app
 from feedops.loaders.catalog_resolver import resolve_catalog_path
 from feedops.loaders.unified_loader import (
@@ -37,6 +38,10 @@ console = Console()
 
 # Register publish-related commands
 for command in publish_app.registered_commands:
+    app.registered_commands.append(command)
+
+# Register performance monitoring commands
+for command in performance_app.registered_commands:
     app.registered_commands.append(command)
 
 

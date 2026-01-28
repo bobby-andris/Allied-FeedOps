@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -15,12 +16,24 @@ from feedops.cli.defaults import (
     CANDIDATE_EXPORTS_DIR,
     CANDIDATE_REPORTS_DIR,
 )
+from feedops.db import (
+    get_all_batches,
+    get_approved_for_batch,
+    get_pending_approvals,
+    get_revision_queue,
+    get_sku_approval,
+    init_db,
+    save_sku_approval,
+)
 from feedops.pipeline.finish_injection import (
     generate_variant_description,
     generate_variant_keywords,
     generate_variant_title,
 )
 from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
+
+# Default database path
+DEFAULT_DB_PATH = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
 
 
 def load_available_finishes() -> list[str]:
@@ -108,12 +121,47 @@ def run_dashboard(
         border: 1px solid #e5e7eb !important;
         border-radius: 8px !important;
     }
+    .approval-box {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 16px 0;
+    }
+    .approval-approved {
+        background-color: #f0fdf4;
+        border-color: #86efac;
+    }
+    .approval-revision {
+        background-color: #fffbeb;
+        border-color: #fcd34d;
+    }
+    .approval-rejected {
+        background-color: #fef2f2;
+        border-color: #fca5a5;
+    }
+    .revision-note {
+        background-color: #fef3c7;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-top: 8px;
+    }
     </style>
     """,
         unsafe_allow_html=True,
     )
 
     st.title("FeedOps Content Review Dashboard")
+
+    # Initialize database
+    db_path = DEFAULT_DB_PATH
+    init_db(db_path)
+
+    # Main navigation tabs
+    tab_review, tab_revision, tab_batches = st.tabs(
+        ["📋 Review Queue", "🔄 Revision Queue", "✅ Approved / Batches"]
+    )
 
     # Load data with caching
     @st.cache_data
@@ -138,7 +186,42 @@ def run_dashboard(
     # Calculate summary stats
     stats = get_summary_stats(all_sku_data)
 
-    # Sidebar filters
+    # Render each tab
+    with tab_review:
+        render_review_queue_tab(
+            all_sku_data=all_sku_data,
+            stats=stats,
+            baseline_exports_dir=baseline_exports_dir,
+            candidate_exports_dir=candidate_exports_dir,
+            baseline_reports_dir=baseline_reports_dir,
+            candidate_reports_dir=candidate_reports_dir,
+            db_path=db_path,
+        )
+
+    with tab_revision:
+        render_revision_queue_tab(
+            all_sku_data=all_sku_data,
+            db_path=db_path,
+        )
+
+    with tab_batches:
+        render_batch_management_tab(
+            all_sku_data=all_sku_data,
+            db_path=db_path,
+        )
+
+
+def render_review_queue_tab(
+    all_sku_data: list[SKUData],
+    stats: dict[str, Any],
+    baseline_exports_dir: str | Path,
+    candidate_exports_dir: str | Path,
+    baseline_reports_dir: str | Path | None,
+    candidate_reports_dir: str | Path | None,
+    db_path: Path,
+) -> None:
+    """Render the Review Queue tab with approval controls."""
+    # Sidebar filters (shared across app)
     with st.sidebar:
         st.header("Filters")
 
@@ -230,9 +313,320 @@ def run_dashboard(
     # Main content area
     st.caption(f"Showing {len(filtered_data)} of {len(all_sku_data)} SKUs")
 
-    # Render each SKU
+    # Render each SKU with approval controls
     for sku_data in filtered_data:
-        render_sku_panel(sku_data, platform.lower())
+        render_sku_panel(sku_data, platform.lower(), db_path=db_path)
+
+
+def render_revision_queue_tab(
+    all_sku_data: list[SKUData],
+    db_path: Path,
+) -> None:
+    """Render the Revision Queue tab showing SKUs flagged for revision."""
+    st.header("Revision Queue")
+    st.caption("SKUs that have been flagged for revision and need additional work")
+
+    # Get revision queue from database
+    revisions = get_revision_queue(db_path)
+
+    if not revisions:
+        st.info("No SKUs in the revision queue. Great work!")
+        return
+
+    st.metric("SKUs Needing Work", len(revisions))
+
+    # Create a lookup from all_sku_data for quick access
+    sku_data_map = {sku.sku: sku for sku in all_sku_data}
+
+    for approval in revisions:
+        master_sku = approval["master_sku"]
+        sku_data = sku_data_map.get(master_sku)
+
+        with st.expander(
+            f"**{master_sku}** — Flagged {approval['reviewed_at'][:10] if approval['reviewed_at'] else 'N/A'}",
+            expanded=False,
+        ):
+            # Show revision notes
+            if approval["revision_notes"]:
+                st.markdown(
+                    f"<div class='revision-note'><strong>Revision Notes:</strong> {html.escape(approval['revision_notes'])}</div>",
+                    unsafe_allow_html=True,
+                )
+
+            # Show what was approved/rejected
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                title_status = (
+                    "✅"
+                    if approval["title_approved"]
+                    else "❌" if approval["title_approved"] is False else "⚪"
+                )
+                st.markdown(f"**Title:** {title_status}")
+            with col2:
+                desc_status = (
+                    "✅"
+                    if approval["description_approved"]
+                    else "❌" if approval["description_approved"] is False else "⚪"
+                )
+                st.markdown(f"**Description:** {desc_status}")
+            with col3:
+                image_status = (
+                    "✅"
+                    if approval["image_approved"]
+                    else "❌" if approval["image_approved"] is False else "⚪"
+                )
+                st.markdown(f"**Image:** {image_status}")
+                if approval["selected_finish"]:
+                    st.caption(f"Finish: {approval['selected_finish']}")
+
+            st.divider()
+
+            # Show content preview if available
+            if sku_data:
+                candidate_content = (
+                    sku_data.candidate.get("google")
+                    or sku_data.candidate.get("bing")
+                    or sku_data.candidate.get("shopify")
+                )
+                if candidate_content:
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**Current Title:**")
+                        st.markdown(
+                            f"<div class='content-box'>{html.escape(candidate_content.title) if candidate_content.title else '<em>N/A</em>'}</div>",
+                            unsafe_allow_html=True,
+                        )
+                    with col2:
+                        st.markdown("**Current Description:**")
+                        st.markdown(
+                            f"<div class='content-box' style='max-height: 150px; overflow-y: auto;'>{html.escape(candidate_content.description[:500] if candidate_content.description else '')}</div>",
+                            unsafe_allow_html=True,
+                        )
+
+            # Action buttons
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Mark as Resolved", key=f"resolve_{master_sku}"):
+                    save_sku_approval(
+                        db_path,
+                        master_sku=master_sku,
+                        status="pending",
+                        revision_notes=None,
+                    )
+                    st.success("Moved back to Review Queue")
+                    st.rerun()
+            with col2:
+                if st.button("Reject Permanently", key=f"reject_{master_sku}"):
+                    save_sku_approval(
+                        db_path,
+                        master_sku=master_sku,
+                        status="rejected",
+                    )
+                    st.warning("SKU rejected")
+                    st.rerun()
+
+
+def render_batch_management_tab(
+    all_sku_data: list[SKUData],
+    db_path: Path,
+) -> None:
+    """Render the Batch Management tab for approved SKUs and batch creation."""
+    st.header("Approved SKUs & Batch Management")
+
+    # Get approved SKUs ready for batching
+    approved = get_approved_for_batch(db_path, exclude_batched=True)
+    batches = get_all_batches(db_path)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Approved (Ready to Batch)", len(approved))
+    with col2:
+        st.metric("Total Batches", len(batches))
+
+    st.divider()
+
+    # Batch creation section
+    st.subheader("Create New Batch")
+
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        batch_label = st.text_input(
+            "Batch Label (optional)",
+            placeholder="e.g., 'Q1 2026 Towel Bars'",
+            key="new_batch_label",
+        )
+    with col2:
+        max_batch = min(100, len(approved)) if approved else 100
+        default_batch = min(40, max_batch) if max_batch > 0 else 1
+        batch_size = st.number_input(
+            "Batch Size",
+            value=default_batch,
+            min_value=1,
+            max_value=max(max_batch, 1),  # Ensure max_value is at least 1
+            key="batch_size",
+        )
+    with col3:
+        use_performance_data = st.checkbox(
+            "Use Performance Data",
+            value=True,
+            help="Select SKUs based on performance metrics (efficiency, traffic tiers)",
+            key="use_performance_selection",
+        )
+
+    # Advanced selection options (when using performance data)
+    if use_performance_data:
+        with st.expander("Selection Criteria (Advanced)"):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                exclude_top_n = st.number_input(
+                    "Exclude Top N Revenue SKUs",
+                    value=5,
+                    min_value=0,
+                    max_value=20,
+                    help="Exclude top revenue SKUs for risk management",
+                    key="exclude_top_n",
+                )
+            with col2:
+                min_impressions = st.number_input(
+                    "Min Impressions",
+                    value=10,
+                    min_value=0,
+                    max_value=1000,
+                    help="Minimum impressions for inclusion",
+                    key="min_impressions",
+                )
+            with col3:
+                max_per_category = st.number_input(
+                    "Max Per Category",
+                    value=0,
+                    min_value=0,
+                    max_value=50,
+                    help="Max SKUs from single category (0 = no limit)",
+                    key="max_per_category",
+                )
+
+    if approved:
+        if st.button("Create Batch from Approved SKUs", type="primary"):
+            # Import batch creation logic
+            from feedops.db import create_batch
+
+            if use_performance_data:
+                # Use data-driven selection
+                from feedops.pipeline.batch_selection import (
+                    BatchSelectionCriteria,
+                    select_batch_by_performance,
+                )
+
+                criteria = BatchSelectionCriteria(
+                    exclude_top_revenue_count=exclude_top_n,
+                    min_impressions=min_impressions,
+                    max_per_category=max_per_category if max_per_category > 0 else None,
+                )
+
+                selected_skus = select_batch_by_performance(
+                    approved_skus=approved,
+                    batch_size=batch_size,
+                    db_path=db_path,
+                    criteria=criteria,
+                )
+            else:
+                # Simple FIFO selection
+                selected_skus = [a["master_sku"] for a in approved[:batch_size]]
+
+            if selected_skus:
+                batch_id = create_batch(
+                    db_path,
+                    batch_label=batch_label if batch_label else None,
+                    skus=selected_skus,
+                    selection_criteria={
+                        "method": "performance" if use_performance_data else "fifo",
+                        "batch_size": batch_size,
+                    },
+                )
+                st.success(f"Created **{batch_id}** with {len(selected_skus)} SKUs")
+                st.rerun()
+            else:
+                st.error("No SKUs could be selected with the given criteria")
+    else:
+        st.info(
+            "No approved SKUs available for batching. Approve SKUs in the Review Queue first."
+        )
+
+    st.divider()
+
+    # Show approved SKUs list
+    if approved:
+        st.subheader("Approved SKUs (Ready for Batch)")
+        for approval in approved[:20]:  # Show first 20
+            col1, col2, col3 = st.columns([3, 1, 1])
+            with col1:
+                st.markdown(f"**{approval['master_sku']}**")
+            with col2:
+                elements = []
+                if approval["title_approved"]:
+                    elements.append("Title")
+                if approval["description_approved"]:
+                    elements.append("Desc")
+                if approval["image_approved"]:
+                    elements.append(f"Image ({approval['selected_finish'] or 'N/A'})")
+                st.caption(", ".join(elements) if elements else "No elements")
+            with col3:
+                st.caption(
+                    approval["reviewed_at"][:10] if approval["reviewed_at"] else "N/A"
+                )
+
+        if len(approved) > 20:
+            st.caption(f"... and {len(approved) - 20} more")
+
+    st.divider()
+
+    # Existing batches
+    st.subheader("Existing Batches")
+
+    if not batches:
+        st.info("No batches created yet.")
+    else:
+        for batch in batches:
+            status_emoji = {
+                "pending": "⏳",
+                "publishing": "🔄",
+                "published": "✅",
+                "partial": "⚠️",
+            }.get(batch["status"], "❓")
+
+            with st.expander(
+                f"{status_emoji} **{batch['batch_id']}** — {batch['status'].upper()} ({batch['sku_count']} SKUs)",
+                expanded=False,
+            ):
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("SKU Count", batch["sku_count"])
+                with col2:
+                    st.metric("Success", batch["success_count"])
+                with col3:
+                    st.metric("Failed", batch["failed_count"])
+
+                if batch["batch_label"]:
+                    st.markdown(f"**Label:** {batch['batch_label']}")
+                if batch["target_date"]:
+                    st.markdown(f"**Target Date:** {batch['target_date']}")
+
+                st.caption(
+                    f"Created: {batch['created_at'][:10] if batch['created_at'] else 'N/A'}"
+                )
+                if batch["published_at"]:
+                    st.caption(f"Published: {batch['published_at'][:10]}")
+
+                # Show SKUs in batch
+                from feedops.db import get_batch_skus
+
+                batch_skus = get_batch_skus(db_path, batch_id=batch["batch_id"])
+                if batch_skus:
+                    with st.expander("View SKUs in Batch"):
+                        for sku in batch_skus[:50]:
+                            st.markdown(f"- {sku}")
+                        if len(batch_skus) > 50:
+                            st.caption(f"... and {len(batch_skus) - 50} more")
 
 
 def filter_sku_data(
@@ -270,8 +664,10 @@ def filter_sku_data(
     return filtered
 
 
-def render_sku_panel(sku_data: SKUData, platform: str) -> None:
-    """Render a single SKU review panel."""
+def render_sku_panel(
+    sku_data: SKUData, platform: str, db_path: Path | None = None
+) -> None:
+    """Render a single SKU review panel with approval controls."""
     # Get scores
     b_score = sku_data.baseline_scores.get("composite", 0.0)
     c_score = sku_data.candidate_scores.get("composite", 0.0)
@@ -295,9 +691,24 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
     elif sku_data.candidate_report and sku_data.candidate_report.image_url:
         image_url = sku_data.candidate_report.image_url
 
+    # Get current approval state if db_path provided
+    current_approval = None
+    if db_path:
+        current_approval = get_sku_approval(db_path, master_sku=sku_data.sku)
+
+    # Determine approval indicator for expander title
+    approval_indicator = ""
+    if current_approval:
+        if current_approval["status"] == "approved":
+            approval_indicator = " ✅"
+        elif current_approval["status"] == "revision":
+            approval_indicator = " 🔄"
+        elif current_approval["status"] == "rejected":
+            approval_indicator = " ❌"
+
     # SKU header
     with st.expander(
-        f"**{sku_data.sku}** | {c_score:.1f}% ({delta_display})",
+        f"**{sku_data.sku}**{approval_indicator} | {c_score:.1f}% ({delta_display})",
         expanded=False,
     ):
         # Product image and basic info
@@ -314,7 +725,7 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
                 st.markdown(f"**Category:** {sku_data.original.category}")
                 st.markdown(f"**Collection:** {sku_data.original.collection}")
 
-            # Approval status
+            # Auto-calculated approval status from quality evaluation
             status = sku_data.candidate_scores.get("approval_status", "")
             if not status and sku_data.candidate_report:
                 status = sku_data.candidate_report.status
@@ -326,9 +737,27 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
                     "rejected": "🔴",
                 }
                 status_emoji = status_colors.get(status.lower(), "⚪")
-                st.markdown(f"**Status:** {status_emoji} {status.upper()}")
+                st.markdown(f"**Auto-Status:** {status_emoji} {status.upper()}")
+
+            # Manual approval status
+            if current_approval:
+                manual_status = current_approval["status"]
+                manual_colors = {
+                    "pending": "⏳",
+                    "approved": "✅",
+                    "revision": "🔄",
+                    "rejected": "❌",
+                }
+                st.markdown(
+                    f"**Manual Status:** {manual_colors.get(manual_status, '❓')} {manual_status.upper()}"
+                )
 
         st.divider()
+
+        # Approval Controls Section (only if db_path provided)
+        if db_path:
+            render_approval_controls(sku_data, db_path, current_approval)
+            st.divider()
 
         # Lifestyle images (if available)
         render_lifestyle_images_panel(sku_data)
@@ -348,6 +777,186 @@ def render_sku_panel(sku_data: SKUData, platform: str) -> None:
 
         # Quality scores
         render_score_panel(sku_data)
+
+
+def render_approval_controls(
+    sku_data: SKUData,
+    db_path: Path,
+    current_approval: dict | None,
+) -> None:
+    """Render element-level approval controls for a SKU."""
+    st.subheader("📋 Approval")
+
+    # Determine CSS class based on status
+    status_class = ""
+    if current_approval:
+        if current_approval["status"] == "approved":
+            status_class = "approval-approved"
+        elif current_approval["status"] == "revision":
+            status_class = "approval-revision"
+        elif current_approval["status"] == "rejected":
+            status_class = "approval-rejected"
+
+    # Get available finishes
+    available_finishes = load_available_finishes()
+
+    # Initialize checkbox values from current approval
+    default_title = (
+        current_approval["title_approved"]
+        if current_approval and current_approval["title_approved"] is not None
+        else False
+    )
+    default_desc = (
+        current_approval["description_approved"]
+        if current_approval and current_approval["description_approved"] is not None
+        else False
+    )
+    default_image = (
+        current_approval["image_approved"]
+        if current_approval and current_approval["image_approved"] is not None
+        else False
+    )
+    default_finish = current_approval["selected_finish"] if current_approval else None
+
+    # Element-level approval checkboxes
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        title_approved = st.checkbox(
+            "✅ Title",
+            value=default_title,
+            key=f"title_approve_{sku_data.sku}",
+            help="Approve the optimized title",
+        )
+    with col2:
+        desc_approved = st.checkbox(
+            "✅ Description",
+            value=default_desc,
+            key=f"desc_approve_{sku_data.sku}",
+            help="Approve the optimized description",
+        )
+    with col3:
+        image_approved = st.checkbox(
+            "✅ Lifestyle Image",
+            value=default_image,
+            key=f"image_approve_{sku_data.sku}",
+            help="Approve the generated lifestyle image",
+        )
+
+    # If image approved, show finish selector
+    selected_finish = None
+    selected_image_index = None
+    if image_approved:
+        col1, col2 = st.columns(2)
+        with col1:
+            if available_finishes:
+                finish_index = 0
+                if default_finish and default_finish in available_finishes:
+                    finish_index = available_finishes.index(default_finish)
+                selected_finish = st.selectbox(
+                    "Select Finish for Image",
+                    options=available_finishes,
+                    index=finish_index,
+                    key=f"finish_approve_{sku_data.sku}",
+                )
+            else:
+                st.caption("No finishes available")
+
+        with col2:
+            # Get number of lifestyle images available
+            candidate_content = (
+                sku_data.candidate.get("google")
+                or sku_data.candidate.get("bing")
+                or sku_data.candidate.get("shopify")
+            )
+            if candidate_content and candidate_content.lifestyle_images:
+                successful_images = [
+                    img
+                    for img in candidate_content.lifestyle_images
+                    if img.get("generation_success", False)
+                ]
+                if successful_images:
+                    image_options = [
+                        f"Variation {img.get('variation_num', i+1)}"
+                        for i, img in enumerate(successful_images)
+                    ]
+                    default_idx = (
+                        current_approval.get("selected_image_index", 0)
+                        if current_approval
+                        else 0
+                    )
+                    selected_image_index = st.selectbox(
+                        "Select Image Variation",
+                        options=range(len(successful_images)),
+                        format_func=lambda x: image_options[x],
+                        index=min(default_idx, len(successful_images) - 1),
+                        key=f"image_idx_{sku_data.sku}",
+                    )
+
+    # Revision notes (for flagging)
+    revision_notes = st.text_area(
+        "Revision Notes (optional)",
+        value=current_approval.get("revision_notes", "") if current_approval else "",
+        placeholder="Describe what needs to be changed...",
+        key=f"revision_notes_{sku_data.sku}",
+        height=80,
+    )
+
+    # Action buttons
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("✅ Approve", key=f"approve_btn_{sku_data.sku}", type="primary"):
+            save_sku_approval(
+                db_path,
+                master_sku=sku_data.sku,
+                title_approved=title_approved,
+                description_approved=desc_approved,
+                image_approved=image_approved,
+                selected_finish=selected_finish,
+                selected_image_index=selected_image_index,
+                status="approved",
+                revision_notes=None,
+                reviewed_by="dashboard",
+            )
+            st.success("SKU approved!")
+            st.rerun()
+
+    with col2:
+        if st.button("🔄 Flag for Revision", key=f"revise_btn_{sku_data.sku}"):
+            if not revision_notes:
+                st.warning(
+                    "Please add revision notes explaining what needs to be changed."
+                )
+            else:
+                save_sku_approval(
+                    db_path,
+                    master_sku=sku_data.sku,
+                    title_approved=title_approved,
+                    description_approved=desc_approved,
+                    image_approved=image_approved,
+                    selected_finish=selected_finish,
+                    selected_image_index=selected_image_index,
+                    status="revision",
+                    revision_notes=revision_notes,
+                    reviewed_by="dashboard",
+                )
+                st.warning("SKU flagged for revision")
+                st.rerun()
+
+    with col3:
+        if st.button("❌ Reject", key=f"reject_btn_{sku_data.sku}"):
+            save_sku_approval(
+                db_path,
+                master_sku=sku_data.sku,
+                title_approved=False,
+                description_approved=False,
+                image_approved=False,
+                status="rejected",
+                revision_notes=revision_notes,
+                reviewed_by="dashboard",
+            )
+            st.error("SKU rejected")
+            st.rerun()
 
 
 def render_lifestyle_images_panel(sku_data: SKUData) -> None:
