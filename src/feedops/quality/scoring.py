@@ -2,15 +2,20 @@
 
 This is not a substitute for real performance data. It is intended to help
 compare prompt variants and catch obvious regressions without calling an LLM.
+
+Title Zone Strategy:
+- Mobile Zone (1-30 chars): Most critical - must contain keyword anchor
+- Desktop Zone (31-70 chars): Critical - determines clicks, should have key specs
+- Extended Zone (71-150 chars): High - expands query eligibility
 """
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 from feedops.models import Candidate
-
 
 _URL_RE = re.compile(r"https?://", re.IGNORECASE)
 _CITATION_RE = re.compile(r"catalog_csv\.|\(\s*catalog_csv\.[^)]+\)", re.IGNORECASE)
@@ -21,6 +26,11 @@ _INCH_RE = re.compile(
     r"(\d+\s*-\s*\d+/\d+|\d+/\d+|\d+(?:\.\d+)?)\s*(?:-\s*)?(?:in\b|inch(?:es)?\b|\")",
     re.IGNORECASE,
 )
+
+# Title zone boundaries (based on Google Shopping research)
+MOBILE_ZONE_END = 30  # First 30 chars visible on mobile
+DESKTOP_ZONE_END = 70  # First 70 chars visible on desktop
+MAX_TITLE_LENGTH = 150  # Google Shopping max title length
 
 _PRODUCT_TYPE_PHRASES = [
     "towel bar",
@@ -142,11 +152,156 @@ _BANNED_MARKETING = [
 
 
 @dataclass(frozen=True)
+class TitleZoneAnalysis:
+    """Analysis of title content placement across visibility zones.
+
+    Google Shopping shows different portions of titles based on device:
+    - Mobile: First ~30 characters are most visible
+    - Desktop: First ~70 characters determine clicks
+    - Extended: 71-150 characters help with algorithm matching
+    """
+
+    # Zone content
+    mobile_zone: str  # First 30 chars
+    desktop_zone: str  # Chars 31-70
+    extended_zone: str  # Chars 71+
+
+    # Zone checks
+    has_product_type_in_mobile: bool  # Product type in first 30 chars
+    has_product_type_in_desktop: bool  # Product type in first 70 chars
+    has_dimension_in_mobile: bool  # Dimension in first 30 chars
+    has_dimension_in_desktop: bool  # Dimension in first 70 chars
+    has_material_in_desktop: bool  # Material in first 70 chars
+    has_brand_at_end: bool  # Brand in last segment
+
+    # Score impact
+    zone_score: int  # 0-10 score based on zone optimization
+    zone_notes: tuple[str, ...]  # Notes about zone issues
+
+    @property
+    def is_well_optimized(self) -> bool:
+        """Check if title zones are well-optimized for search."""
+        return (
+            self.has_product_type_in_mobile
+            and self.has_dimension_in_desktop
+            and self.zone_score >= 6
+        )
+
+
+def analyze_title_zones(title: str) -> TitleZoneAnalysis:
+    """Analyze title content placement across visibility zones.
+
+    Google Shopping research shows:
+    - First 30 chars are critical for mobile visibility (highest priority)
+    - First 70 chars determine desktop clicks (very high priority)
+    - 71-150 chars expand query eligibility (high priority)
+
+    Args:
+        title: The product title to analyze
+
+    Returns:
+        TitleZoneAnalysis with zone breakdown and scoring
+    """
+    # Extract zones
+    mobile_zone = title[:MOBILE_ZONE_END]
+    desktop_zone = title[MOBILE_ZONE_END:DESKTOP_ZONE_END]
+    extended_zone = title[DESKTOP_ZONE_END:]
+
+    # Combined zones for easier checking
+    first_70 = title[:DESKTOP_ZONE_END]
+
+    # Check product type presence
+    has_product_type_in_mobile = _contains_any(mobile_zone, _PRODUCT_TYPE_PHRASES)
+    has_product_type_in_desktop = _contains_any(first_70, _PRODUCT_TYPE_PHRASES)
+
+    # Check dimension presence
+    has_dimension_in_mobile = bool(_INCH_RE.search(mobile_zone))
+    has_dimension_in_desktop = bool(_INCH_RE.search(first_70))
+
+    # Check material presence
+    has_material_in_desktop = _contains_any(first_70, _MATERIAL_WORDS)
+
+    # Check brand placement (should be at end for lesser-known brands)
+    lower_title = title.lower()
+    has_brand = "allied brass" in lower_title
+    has_brand_at_end = False
+    if has_brand:
+        # Brand should be in last 20 characters or after last pipe
+        brand_pos = lower_title.rfind("allied brass")
+        has_brand_at_end = (
+            brand_pos >= len(title) - 20 or " | " in title[brand_pos - 5 : brand_pos]
+        )
+
+    # Calculate zone score
+    score = 0
+    notes: list[str] = []
+
+    # Product type in mobile zone (+3 points, critical)
+    if has_product_type_in_mobile:
+        score += 3
+    elif has_product_type_in_desktop:
+        score += 1
+        notes.append("Product type not in mobile zone (first 30 chars)")
+    else:
+        notes.append("Product type missing from first 70 chars")
+
+    # Dimension in desktop zone (+2 points, very important)
+    if has_dimension_in_mobile:
+        score += 2
+    elif has_dimension_in_desktop:
+        score += 1
+        notes.append("Dimension not in mobile zone (first 30 chars)")
+    else:
+        notes.append("No dimension in first 70 chars")
+
+    # Material in desktop zone (+1 point)
+    if has_material_in_desktop:
+        score += 1
+    else:
+        notes.append("Material keyword not in first 70 chars")
+
+    # Functional modifier bonus (+1 point)
+    if _contains_any(first_70, _FUNCTIONAL_MODIFIERS):
+        score += 1
+
+    # Brand placement (+2 points for correct end placement)
+    if has_brand_at_end:
+        score += 2
+    elif has_brand:
+        score += 1
+        notes.append("Brand not at end of title (should be last segment)")
+    else:
+        notes.append("Brand missing from title")
+
+    # Title length penalty
+    if len(title) > MAX_TITLE_LENGTH:
+        score -= 1
+        notes.append(f"Title exceeds {MAX_TITLE_LENGTH} characters")
+    elif len(title) < 50:
+        notes.append("Title under 50 characters - may miss search coverage")
+
+    return TitleZoneAnalysis(
+        mobile_zone=mobile_zone,
+        desktop_zone=desktop_zone,
+        extended_zone=extended_zone,
+        has_product_type_in_mobile=has_product_type_in_mobile,
+        has_product_type_in_desktop=has_product_type_in_desktop,
+        has_dimension_in_mobile=has_dimension_in_mobile,
+        has_dimension_in_desktop=has_dimension_in_desktop,
+        has_material_in_desktop=has_material_in_desktop,
+        has_brand_at_end=has_brand_at_end,
+        zone_score=_clamp_0_10(score),
+        zone_notes=tuple(notes),
+    )
+
+
+@dataclass(frozen=True)
 class HeuristicScore:
     ctr_proxy: int
     cvr_proxy: int
     brand_voice: int
     notes: tuple[str, ...] = ()
+    title_zone_analysis: Optional[TitleZoneAnalysis] = None
 
     @property
     def composite(self) -> float:
@@ -169,51 +324,112 @@ def _contains_any(text: str, phrases: list[str]) -> bool:
     return any(p in t for p in phrases)
 
 
-def score_title(title: str, *, require_brand: bool = True) -> tuple[int, list[str]]:
-    """CTR proxy score for a title (0-10)."""
+def score_title(
+    title: str,
+    *,
+    require_brand: bool = True,
+    include_zone_analysis: bool = True,
+) -> tuple[int, list[str], Optional[TitleZoneAnalysis]]:
+    """CTR proxy score for a title (0-10).
+
+    Scoring considers:
+    - Title zone optimization (mobile, desktop, extended zones)
+    - Product type and dimension placement
+    - Material and functional modifier presence
+    - Brand placement (should be at end for lesser-known brands)
+    - Prohibited content (URLs, citations, ALL CAPS, marketing language)
+
+    Args:
+        title: The title to score
+        require_brand: Whether brand presence is required
+        include_zone_analysis: Whether to include detailed zone analysis
+
+    Returns:
+        Tuple of (score, notes, zone_analysis)
+    """
     notes: list[str] = []
     score = 0
+    zone_analysis = None
 
+    # Hard failures - return immediately
     if _CITATION_RE.search(title):
         notes.append("Citation leakage detected in title")
-        return 0, notes
+        return 0, notes, None
     if _URL_RE.search(title):
         notes.append("URL detected in title")
-        return 0, notes
+        return 0, notes, None
+
+    # Perform zone analysis
+    if include_zone_analysis:
+        zone_analysis = analyze_title_zones(title)
+        # Add zone notes to overall notes
+        notes.extend(zone_analysis.zone_notes)
 
     length = len(title)
-    if length > 150:
-        notes.append("Title exceeds 150 characters")
-    if 50 <= length <= 150:
+    if length > MAX_TITLE_LENGTH:
+        notes.append(f"Title exceeds {MAX_TITLE_LENGTH} characters")
+    if 50 <= length <= MAX_TITLE_LENGTH:
         score += 1
-    if 70 <= length <= 150:
+    if 70 <= length <= MAX_TITLE_LENGTH:
         score += 1
 
-    # Product type + dimension are strong CTR anchors
-    if _contains_any(title, _PRODUCT_TYPE_PHRASES):
-        score += 2
+    # Product type scoring - zone-aware
+    if zone_analysis:
+        if zone_analysis.has_product_type_in_mobile:
+            score += 2  # Best: product type in mobile zone
+        elif zone_analysis.has_product_type_in_desktop:
+            score += 1  # OK: product type in desktop zone
+        else:
+            notes.append("No recognized product-type phrase detected")
     else:
-        notes.append("No recognized product-type phrase detected")
+        if _contains_any(title, _PRODUCT_TYPE_PHRASES):
+            score += 2
+        else:
+            notes.append("No recognized product-type phrase detected")
 
-    if _INCH_RE.search(title[:70]):
-        score += 2
+    # Dimension scoring - zone-aware
+    if zone_analysis:
+        if zone_analysis.has_dimension_in_mobile:
+            score += 2  # Best: dimension in mobile zone
+        elif zone_analysis.has_dimension_in_desktop:
+            score += 1  # OK: dimension in desktop zone
+        else:
+            notes.append("No primary dimension detected in first 70 chars")
     else:
-        notes.append("No primary dimension detected in first 70 chars")
+        if _INCH_RE.search(title[:DESKTOP_ZONE_END]):
+            score += 2
+        else:
+            notes.append("No primary dimension detected in first 70 chars")
 
-    if _contains_any(title, _MATERIAL_WORDS):
-        score += 1
+    # Material scoring
+    if zone_analysis:
+        if zone_analysis.has_material_in_desktop:
+            score += 1
+        else:
+            notes.append("No material keyword detected")
     else:
-        notes.append("No material keyword detected")
+        if _contains_any(title, _MATERIAL_WORDS):
+            score += 1
+        else:
+            notes.append("No material keyword detected")
 
+    # Functional modifier bonus
     if _contains_any(title, _FUNCTIONAL_MODIFIERS):
         score += 1
 
+    # Brand scoring - position matters for lesser-known brands
     if require_brand:
-        if "allied brass" in title.lower():
-            score += 1
+        if zone_analysis and zone_analysis.has_brand_at_end:
+            score += 1  # Brand properly at end
+        elif "allied brass" in title.lower():
+            score += 1  # Brand present but not at end
+            if not (zone_analysis and zone_analysis.has_brand_at_end):
+                # Already noted in zone analysis
+                pass
         else:
             notes.append("Brand missing: Allied Brass")
 
+    # Penalties
     if _ALL_CAPS_WORD_RE.search(title):
         notes.append("ALL CAPS word detected")
         score -= 1
@@ -222,7 +438,7 @@ def score_title(title: str, *, require_brand: bool = True) -> tuple[int, list[st
         notes.append("Promotional/budget language detected")
         score -= 2
 
-    return _clamp_0_10(score), notes
+    return _clamp_0_10(score), notes, zone_analysis
 
 
 def score_description(description: str, *, html: bool = False) -> tuple[int, list[str]]:
@@ -261,10 +477,14 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
     if any(w in opening for w in _OPENING_ENGAGEMENT_CUES):
         score += 2
     else:
-        notes.append("Opening may lack engagement hook (no problem/outcome cue detected)")
+        notes.append(
+            "Opening may lack engagement hook (no problem/outcome cue detected)"
+        )
 
     # Specs presence: at least 3 numeric/measurement tokens.
-    measurements = len(_INCH_RE.findall(text)) + len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I))
+    measurements = len(_INCH_RE.findall(text)) + len(
+        re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I)
+    )
     if measurements >= 3:
         score += 2
     else:
@@ -386,13 +606,24 @@ def score_brand_voice(text: str) -> tuple[int, list[str]]:
     return _clamp_0_10(score), notes
 
 
-def score_bundle(*, title: str, description: str, html_description: bool = False) -> HeuristicScore:
-    """Convenience scorer combining title+description into a composite."""
-    ctr, ctr_notes = score_title(title)
+def score_bundle(
+    *, title: str, description: str, html_description: bool = False
+) -> HeuristicScore:
+    """Convenience scorer combining title+description into a composite.
+
+    Includes detailed title zone analysis for understanding keyword placement.
+    """
+    ctr, ctr_notes, zone_analysis = score_title(title)
     cvr, cvr_notes = score_description(description, html=html_description)
     voice, voice_notes = score_brand_voice(title + "\n" + description)
     notes = tuple(dict.fromkeys([*ctr_notes, *cvr_notes, *voice_notes]))
-    return HeuristicScore(ctr_proxy=ctr, cvr_proxy=cvr, brand_voice=voice, notes=notes)
+    return HeuristicScore(
+        ctr_proxy=ctr,
+        cvr_proxy=cvr,
+        brand_voice=voice,
+        notes=notes,
+        title_zone_analysis=zone_analysis,
+    )
 
 
 @dataclass(frozen=True)
@@ -408,7 +639,9 @@ class CandidateHeuristicScore:
     notes: tuple[str, ...] = ()
 
 
-def score_candidate(candidate: Candidate, *, weights: dict[str, float]) -> CandidateHeuristicScore:
+def score_candidate(
+    candidate: Candidate, *, weights: dict[str, float]
+) -> CandidateHeuristicScore:
     """Score a candidate across platforms using weighted composites."""
     google_score = score_bundle(
         title=candidate.google_title,
@@ -459,12 +692,12 @@ def score_candidate(candidate: Candidate, *, weights: dict[str, float]) -> Candi
     if weight_sum <= 0:
         weighted_total = sum(score.composite for score in per_platform.values())
         weight_sum = len(per_platform)
-        weighted_misses = sum(gate.miss_count for gate in soft_gates.values()) / len(per_platform)
+        weighted_misses = sum(gate.miss_count for gate in soft_gates.values()) / len(
+            per_platform
+        )
 
     notes = tuple(
-        dict.fromkeys(
-            [*google_score.notes, *bing_score.notes, *shopify_score.notes]
-        )
+        dict.fromkeys([*google_score.notes, *bing_score.notes, *shopify_score.notes])
     )
 
     soft_gate_warnings: list[str] = []

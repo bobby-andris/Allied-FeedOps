@@ -13,6 +13,43 @@ from feedops.pipeline.finish_injection import (
 )
 from feedops.pipeline.selection import RankedCandidate
 
+# Google Merchant Center digital source type for AI-generated content
+# Required for compliance with April 2024 product data specification update
+DIGITAL_SOURCE_TYPE_AI = "trained_algorithmic_media"
+
+
+def _build_structured_title(title: str) -> dict:
+    """Build structured_title attribute for AI-generated content.
+
+    Google requires structured_title and structured_description attributes
+    when using AI-generated content in product feeds.
+
+    Args:
+        title: The AI-generated title content
+
+    Returns:
+        Dict with digital_source_type and content fields
+    """
+    return {
+        "digital_source_type": DIGITAL_SOURCE_TYPE_AI,
+        "content": title,
+    }
+
+
+def _build_structured_description(description: str) -> dict:
+    """Build structured_description attribute for AI-generated content.
+
+    Args:
+        description: The AI-generated description content
+
+    Returns:
+        Dict with digital_source_type and content fields
+    """
+    return {
+        "digital_source_type": DIGITAL_SOURCE_TYPE_AI,
+        "content": description,
+    }
+
 
 def generate_report(
     parent_sku: ParentSKU,
@@ -358,12 +395,39 @@ def generate_patch_preview(
                 }
             )
 
+    # Build lifestyle image link from selected image
+    lifestyle_image_link = None
+    if lifestyle_images_data and candidate.selected_lifestyle_image is not None:
+        for img in lifestyle_images_data:
+            if img.get("variation_num") == candidate.selected_lifestyle_image:
+                if img.get("generation_success") and img.get("image_path"):
+                    lifestyle_image_link = img["image_path"]
+                break
+
+    # Generate variant patches if variants exist
+    variants_data = []
+    if parent_sku.variants:
+        for variant in parent_sku.variants:
+            variant_patch = generate_variant_patch_preview(
+                parent_sku=parent_sku,
+                variant=variant,
+                candidate=candidate,
+                platform=platform,
+            )
+            variants_data.append(variant_patch)
+
     if platform == "google":
         patch = {
             "offerId": offer_id,
             "title": candidate.google_title,
             "short_title": candidate.google_short_title,
             "description": candidate.google_description,
+            # Structured attributes for AI-generated content disclosure
+            # Required by Google Merchant Center April 2024 specification update
+            "structured_title": _build_structured_title(candidate.google_title),
+            "structured_description": _build_structured_description(
+                candidate.google_description
+            ),
             "channel": "online",
             "contentLanguage": "en",
             "targetCountry": "US",
@@ -373,6 +437,10 @@ def generate_patch_preview(
         if lifestyle_images_data:
             patch["lifestyle_images"] = lifestyle_images_data
             patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
+        if lifestyle_image_link:
+            patch["lifestyle_image_link"] = lifestyle_image_link
+        if variants_data:
+            patch["variants"] = variants_data
         return patch
 
     if platform == "bing":
@@ -386,6 +454,10 @@ def generate_patch_preview(
         if lifestyle_images_data:
             patch["lifestyle_images"] = lifestyle_images_data
             patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
+        if lifestyle_image_link:
+            patch["lifestyle_image_link"] = lifestyle_image_link
+        if variants_data:
+            patch["variants"] = variants_data
         return patch
 
     if platform == "shopify":
@@ -393,12 +465,17 @@ def generate_patch_preview(
             "productId": product_id or offer_id,
             "title": candidate.shopify_title,
             "body_html": candidate.shopify_description,
+            "meta_description": candidate.shopify_meta_description,
             "_meta": meta,
             "_previous": previous,
         }
         if lifestyle_images_data:
             patch["lifestyle_images"] = lifestyle_images_data
             patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
+        if lifestyle_image_link:
+            patch["lifestyle_image_link"] = lifestyle_image_link
+        if variants_data:
+            patch["variants"] = variants_data
         return patch
 
     raise ValueError(f"Unsupported platform: {platform}")
@@ -496,6 +573,11 @@ def generate_variant_patch_preview(
             "title": variant_title,
             "short_title": short_title,
             "description": variant_description,
+            # Structured attributes for AI-generated content disclosure
+            "structured_title": _build_structured_title(variant_title),
+            "structured_description": _build_structured_description(
+                variant_description
+            ),
             "channel": "online",
             "contentLanguage": "en",
             "targetCountry": "US",
@@ -518,6 +600,7 @@ def generate_variant_patch_preview(
             "variantId": variant.shopify_variant_id,
             "title": variant_title,
             "body_html": variant_description,
+            "meta_description": candidate.shopify_meta_description,
             "_meta": meta,
             "_previous": previous,
         }

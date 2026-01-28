@@ -1,15 +1,90 @@
 {
   "sku": "shopify_US_4543457788036_32123003011204",
-  "title": "Glass Shelf With Towel Bar 16-Inch Solid Brass Wall Mount | Waverly Place | Allied Brass | Bathroom Vanity Shelf Organizer | Allied Brass",
-  "description": "Running out of room at the sink? This wall-mounted glass shelf creates storage above the vanity while the integrated towel bar keeps a hand towel within reach.\n\nHighlights:\n- Clear clutter fast with a 16 x 5 Inch bathroom glass shelf for everyday items\n- Built for confident use with 3/8-Inch thick tempered, beveled-edge glass\n- Add a convenient towel holder under the shelf with the integrated towel bar\n- Choose enduring hardware made from solid brass\n- Coordinate transitional bath accessories with the Waverly Place Collection for matching Waverly Place pieces and a cohesive look\n\nSpecs & Installation:\n- Product type: Wall mount glass shelf / bathroom vanity shelf with towel bar\n- Mounting: Wall mount\n- Glass dimensions: 16 x 5 Inches\n- Overall projection: 5 Inches\n- Glass thickness: 0.38 Inch\n- Weight capacity: 2 lb\n- Included: Glass shelf and all installation hardware (screw size #8 x 1 1/4\")\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty\n- Finish variety: Multiple designer finish options available",
+  "title": "Glass Shelf With Towel Bar 16-Inch Wall-Mounted Solid Brass | Waverly Place | Allied Brass",
+  "description": "Clear counter clutter and add everyday storage with this wall-mounted glass shelf\u2014also a bathroom shelf or wall shelf\u2014with an integrated towel bar (towel rack/towel holder) for towels at the sink. Designed for the Waverly Place collection, it coordinates easily with matching Waverly Place pieces and complements transitional bath accessories and transitional bathroom hardware.\n\nHighlights:\n- Store toiletries where you need them with a tempered, beveled-edge glass shelf\n- Hang a hand towel within reach using the built-in towel bar (towel rail)\n- Depend on solid brass hardware and brass construction for lasting wall-hanging support\n- Save space with a wall mount / wall-mounted installation\n\nSpecs & Installation:\n- Shelf dimensions: 16 x 5 inches\n- Glass thickness: 3/8 inch (0.38 in)\n- Projection from wall: 5 inches\n- Weight capacity: 2 lb\n- Mounting type: wall mount\n- Included: glass shelf and all installation hardware (screw size #8 x 1 1/4)\n- Assembly required: no\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "WP-1TB/16",
-    "generated_at": "2026-01-27T20:45:58.747573",
-    "quality_score": 88.33,
+    "generated_at": "2026-01-28T03:15:12.790574",
+    "quality_score": 86.67,
     "approval_status": "approved"
   },
   "_previous": {
     "title": "Waverly Place 16 Inch Glass Vanity Shelf with Integrated Towel Bar",
     "description": "Add space and organization to your bathroom with this simple, traditional style glass shelf. Featuring tempered, beveled-edged glass and solid brass hardware this shelf is crafted for durability, strength and style. One of the many coordinating accessories in the Allied Brass Waverly Place Collection, this subtle glass shelf is the perfect complement to your bathroom d\u00e9cor."
-  }
+  },
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var1_20260125_193024.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_193024",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var1_20260127_144245.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144245",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var1_20260127_162757.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_162757",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var2_20260125_193040.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_193040",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var2_20260127_144302.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144302",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var2_20260127_162812.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_162812",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var3_20260125_193054.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_193054",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var3_20260127_144317.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144317",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-1TB-16_var3_20260127_162827.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_162827",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": null
 }

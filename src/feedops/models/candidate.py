@@ -1,12 +1,16 @@
 """Candidate model for platform-specific optimized content."""
+
+from typing import Optional
+
 from pydantic import BaseModel, field_validator
+
 from feedops.models.claim import Claim
 from feedops.models.score import Score
-from typing import Optional
 
 
 class LifestyleImageResult(BaseModel):
     """Result of lifestyle image generation"""
+
     image_path: str
     variation_num: int
     generation_success: bool
@@ -41,6 +45,9 @@ class Candidate(BaseModel):
 
     shopify_description: str
     """Shopify HTML description."""
+
+    shopify_meta_description: str = ""
+    """Shopify SEO meta description (max 155 chars for search snippets)."""
 
     claims: list[Claim]
     """List of factual claims with source attribution."""
@@ -114,6 +121,18 @@ class Candidate(BaseModel):
         """Shopify title must be <= 255 characters."""
         if len(v) > 255:
             raise ValueError("Shopify title must be <= 255 characters")
+        return v
+
+    @field_validator("shopify_meta_description")
+    @classmethod
+    def validate_shopify_meta_description_length(cls, v: str) -> str:
+        """Shopify meta description should be <= 155 characters for SEO."""
+        # Allow up to 160 for slight flexibility, but warn in scoring
+        if len(v) > 160:
+            raise ValueError(
+                "Shopify meta description must be <= 160 characters "
+                "(155 recommended for full visibility)"
+            )
         return v
 
     @property

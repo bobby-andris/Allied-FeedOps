@@ -8,7 +8,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Set environment variables for lifestyle images
+# Load .env file FIRST before any other imports
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Enable lifestyle images for this batch run
 os.environ["LIFESTYLE_IMAGES_ENABLED"] = "true"
 os.environ["LIFESTYLE_IMAGES_NUM_VARIATIONS"] = "3"
 os.environ["LIFESTYLE_IMAGES_OUTPUT_DIR"] = "data/lifestyle_images"
@@ -17,12 +22,54 @@ from feedops.pipeline.optimize import optimize_parent_sku
 
 
 async def batch_optimize():
-    """Run optimization for all 30 eval SKUs."""
+    """Run optimization for 40 pilot SKUs from pilot-selection-report-detailed.md."""
 
-    # Load eval SKUs
-    eval_skus_path = Path("samples/eval-skus.json")
-    with open(eval_skus_path) as f:
-        eval_skus = json.load(f)
+    # The 40 pilot SKUs selected for optimization
+    # Source: dashboard_data/lifestyle-eval-candidate/reports/pilot-selection-report-detailed.md
+    pilot_skus = [
+        "920D-6",
+        "CL-41-30",
+        "P-550-WPT",
+        "QN-31/30",
+        "SH-84",
+        "CV-407-8SM",
+        "CL-29",
+        "FT-16",
+        "MB-20",
+        "CL-11",
+        "1051",
+        "WP-GLT-24",
+        "CL-41-18",
+        "HTL-3",
+        "TS-4L",
+        "MA-26",
+        "WP-61",
+        "CS-1",
+        "WP-2TB/16-GAL",
+        "PR-99",
+        "P-730-GB360",
+        "BSK-275LA",
+        "WP-1TB/16",
+        "WP-2/22-GAL",
+        "WP-GTB-2",
+        "CL-22",
+        "A-20",
+        "CL-5-16",
+        "WP-2/16-GAL",
+        "MD-22",
+        "P-200-18-TB",
+        "SQ-20",
+        "RC-5/16TB",
+        "DMF-2/2X",
+        "TS-25",
+        "1066",
+        "CL-24C",
+        "DT-32",
+        "NS-5/16",
+        "TS-28",
+    ]
+
+    eval_skus = [{"master_sku": sku, "category": "Pilot"} for sku in pilot_skus]
 
     catalog_path = Path("data/catalog/Product Catalog.csv")
     exports_dir = "dashboard_data/lifestyle-eval-candidate"

@@ -21,11 +21,59 @@ def _escape_cdata(text: str) -> str:
     return text.replace("]]>", "]]]]><![CDATA[>")
 
 
+def _add_feed_item(
+    channel: ET.Element,
+    offer_id: str,
+    title: str | None,
+    description: str | None,
+    short_title: str | None,
+    lifestyle_image_url: str | None,
+    tracking_label: str,
+) -> None:
+    """Add a single item to the feed channel."""
+    if not offer_id:
+        return
+
+    if not title and not description:
+        return
+
+    item = ET.SubElement(channel, "item")
+
+    # Product ID (required)
+    id_elem = ET.SubElement(item, f"{{{G_NAMESPACE}}}id")
+    id_elem.text = offer_id
+
+    # Title with CDATA
+    if title:
+        title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}title")
+        title_el.text = f"__CDATA__{_escape_cdata(title)}__ENDCDATA__"
+
+    # Short title (optional)
+    if short_title:
+        short_title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}short_title")
+        short_title_el.text = f"__CDATA__{_escape_cdata(short_title)}__ENDCDATA__"
+
+    # Description with CDATA
+    if description:
+        desc_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}description")
+        desc_el.text = f"__CDATA__{_escape_cdata(description)}__ENDCDATA__"
+
+    # Lifestyle image link (for AI-generated lifestyle images)
+    if lifestyle_image_url:
+        lifestyle_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}lifestyle_image_link")
+        lifestyle_el.text = lifestyle_image_url
+
+    # Custom label for tracking
+    label_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}custom_label_4")
+    label_el.text = tracking_label
+
+
 def generate_supplemental_feed(
     patches: list[dict],
     environment: str = "staging",
     *,
     feed_title: str = "Allied Brass FeedOps - Supplemental Feed",
+    include_variants: bool = True,
 ) -> str:
     """Generate Google Merchant Center supplemental feed XML.
 
@@ -33,6 +81,7 @@ def generate_supplemental_feed(
         patches: List of google-patch-*.json dictionaries.
         environment: 'staging' or 'production' - used for custom_label_4.
         feed_title: Title for the RSS channel.
+        include_variants: If True, expand each patch to include variant-level items.
 
     Returns:
         XML string in Google Merchant Center RSS 2.0 format.
@@ -41,6 +90,8 @@ def generate_supplemental_feed(
         - Uses CDATA sections for title/description to preserve formatting
         - Sets custom_label_4 to "feedops-staging" or "feedops-production"
         - Includes only approved patches by default (caller should filter)
+        - Supports lifestyle_image_link for AI-generated images
+        - When include_variants=True, generates items for each variant in the patch
 
     Example output:
         <?xml version="1.0" encoding="UTF-8"?>
@@ -51,6 +102,7 @@ def generate_supplemental_feed(
               <g:id>shopify_US_7721863643362_42804912849122</g:id>
               <g:title><![CDATA[Traditional Retractable Wall Hook...]]></g:title>
               <g:description><![CDATA[Need a place to hang towels...]]></g:description>
+              <g:lifestyle_image_link>https://cdn.shopify.com/...</g:lifestyle_image_link>
               <g:custom_label_4>feedops-staging</g:custom_label_4>
             </item>
           </channel>
@@ -91,34 +143,44 @@ def generate_supplemental_feed(
         description = patch.get("description")
         short_title = patch.get("short_title")
 
+        # Get lifestyle image URL if available
+        lifestyle_image_url = patch.get("lifestyle_image_link")
+
         if not title and not description:
             continue
 
-        item = ET.SubElement(channel, "item")
+        # Add the master/primary item
+        _add_feed_item(
+            channel=channel,
+            offer_id=offer_id,
+            title=title,
+            description=description,
+            short_title=short_title,
+            lifestyle_image_url=lifestyle_image_url,
+            tracking_label=tracking_label,
+        )
 
-        # Product ID (required)
-        id_elem = ET.SubElement(item, f"{{{G_NAMESPACE}}}id")
-        id_elem.text = offer_id
+        # Add variant items if enabled and variants exist
+        if include_variants:
+            variants = patch.get("variants", [])
+            for variant in variants:
+                variant_offer_id = variant.get("offerId") or variant.get("gmc_id")
+                if not variant_offer_id or variant_offer_id == offer_id:
+                    continue
 
-        # Title with CDATA
-        if title:
-            title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}title")
-            # We'll handle CDATA in post-processing since ElementTree doesn't support it directly
-            title_el.text = f"__CDATA__{_escape_cdata(title)}__ENDCDATA__"
+                variant_title = variant.get("title", title)
+                variant_description = variant.get("description", description)
+                variant_short_title = variant.get("short_title", short_title)
 
-        # Short title (optional)
-        if short_title:
-            short_title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}short_title")
-            short_title_el.text = f"__CDATA__{_escape_cdata(short_title)}__ENDCDATA__"
-
-        # Description with CDATA
-        if description:
-            desc_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}description")
-            desc_el.text = f"__CDATA__{_escape_cdata(description)}__ENDCDATA__"
-
-        # Custom label for tracking
-        label_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}custom_label_4")
-        label_el.text = tracking_label
+                _add_feed_item(
+                    channel=channel,
+                    offer_id=variant_offer_id,
+                    title=variant_title,
+                    description=variant_description,
+                    short_title=variant_short_title,
+                    lifestyle_image_url=lifestyle_image_url,  # Same image for all variants
+                    tracking_label=tracking_label,
+                )
 
     # Convert to string
     xml_str = ET.tostring(rss, encoding="unicode", xml_declaration=True)
@@ -187,6 +249,7 @@ def write_supplemental_feed(
     *,
     min_score: float | None = None,
     require_approval: bool = False,
+    include_variants: bool = True,
 ) -> int:
     """Generate and write a supplemental feed file.
 
@@ -196,9 +259,10 @@ def write_supplemental_feed(
         environment: 'staging' or 'production'.
         min_score: Optional minimum quality score filter.
         require_approval: If True, only include approved patches.
+        include_variants: If True, include variant-level items in feed.
 
     Returns:
-        Number of items included in the feed.
+        Number of patches included in the feed (variants may expand this).
     """
     patches = load_google_patches(
         patches_dir,
@@ -209,7 +273,11 @@ def write_supplemental_feed(
     if not patches:
         return 0
 
-    xml_content = generate_supplemental_feed(patches, environment)
+    xml_content = generate_supplemental_feed(
+        patches,
+        environment,
+        include_variants=include_variants,
+    )
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,45 +1,293 @@
 {
   "sku": "shopify_US_4543084265604_32120233033860",
-  "title": "Guest Towel Holder Countertop Stand 16.3-Inch Solid Brass Carolina Collection, Freestanding Towel Stand | Allied Brass",
-  "description": "Add convenient towel storage at the sink with this guest towel holder for the bathroom countertop. This freestanding towel stand features two arms to hold guest towels, hand towels, and washcloths close to the vanity area. Crafted from solid brass, it uses a heavy base to help reduce tipping and includes a felt pad to help protect countertop surfaces.\n\nHighlights:\n- Guest towel holder / towel stand for bathroom counters and vanities\n- Two-arm design keeps towels organized and within easy reach\n- Solid brass construction\n- Heavy base helps prevent tipping\n- Felt pad helps prevent scratching on the counter\n- Part of the carolina collection to coordinate with matching pieces\n\nSpecs:\n- Mounting type: Countertop (freestanding)\n- Dimensions: 16.3-Inch L x 5.5-Inch W x 14-Inch H\n- Weight capacity: 20 lb\n- Product weight: 5.6 lb\n- Assembly required: No\n- Included items: Freestanding towel holder\n- Finish options: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty\n\nA smart fit for transitional bathroom hardware and versatile bath accessories.",
+  "title": "Guest Towel Stand 16.3-Inch Solid Brass | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+  "description": "Keep clean hand towels by the sink without wall mounting. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Fast access at the vanity: Two arms keep guest towels, hand towels, and washcloths within reach of the sink\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\n- Finish options: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "CL-11",
-    "generated_at": "2026-01-27T12:17:22.376135",
-    "quality_score": 90.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-28T02:43:22.004239",
+    "quality_score": 85.0,
+    "approval_status": "rejected"
   },
   "_previous": {
     "title": "Carolina Collection Guest Towel Stand",
-    "description": "This elegantly crafted vanity top guest towel stand will add style and convenience to your bathroom d\u00e9cor. Guest towel stand has two arms to keep your towels within reach of the sink where they are needed. Guest towel stand was designed ideally for hand towels and washcloths. Heavy base will help prevent stand from tipping and felt pad on bottom will protect countertop surfaces."
+    "description": "This elegantly crafted vanity top guest towel stand will add style and convenience to your bathroom d\u00e9cor. Guest towel stand has two arms to keep your towels within reach of the sink where they are needed. Guest towel stand was designed ideally for hand towels and washcloths. Heavy base will help prevent stand from tipping and felt pad on bottom will protect countertop surfaces. Crafted from the finest solid brass materials Felt pad will prevent scratching on any surface Heavy base will help prevent tipping Traditional design with classic design elements Available in a wide variety of lifetime designer finishes Limited Lifetime Warranty Specification & Documentation Product dimensions, in. (LxHxW): 16.3x14x5.5 Box dimensions, in. (LxHxW): 18x8x8 Shipping weight, lbs: 7"
   },
   "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var1_20260127_142708.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142708",
+      "error_message": null
+    },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var1_20260127_160914.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-11-ORB.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Oil Rubbed Bronze\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160914",
-      "error_message": null,
-      "finish": "Oil Rubbed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var2_20260127_142723.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142723",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var2_20260127_160930.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-11-ORB.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Oil Rubbed Bronze\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160930",
-      "error_message": null,
-      "finish": "Oil Rubbed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var3_20260127_142738.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142738",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var3_20260127_160944.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-11-ORB.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Oil Rubbed Bronze\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160944",
-      "error_message": null,
-      "finish": "Oil Rubbed Bronze"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 1
+  "selected_lifestyle_image": 2,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/CL-11_var2_20260127_142723.png",
+  "variants": [
+    {
+      "option_sku": "CL-11-ABR",
+      "finish": "Antique Brass",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Antique Brass | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-ABR"
+    },
+    {
+      "option_sku": "CL-11-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Antique Bronze | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-ABZ"
+    },
+    {
+      "option_sku": "CL-11-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Brushed Bronze | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-BBR"
+    },
+    {
+      "option_sku": "CL-11-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Matte Black | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-BKM"
+    },
+    {
+      "option_sku": "CL-11-CA",
+      "finish": "Antique Copper",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Antique Copper | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-CA"
+    },
+    {
+      "option_sku": "CL-11-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Matte Gray | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Fast access at the vanity: Two arms keep guest towels, hand towels, and washcloths within reach of the sink\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-GYM"
+    },
+    {
+      "option_sku": "CL-11-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Oil Rubbed Bronze | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-ORB"
+    },
+    {
+      "option_sku": "CL-11-PB",
+      "finish": "Polished Brass",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Polished Brass | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-PB"
+    },
+    {
+      "option_sku": "CL-11-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Polished Chrome | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-PC"
+    },
+    {
+      "option_sku": "CL-11-PEW",
+      "finish": "Antique Pewter",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Antique Pewter | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-PEW"
+    },
+    {
+      "option_sku": "CL-11-PNI",
+      "finish": "Polished Nickel",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Polished Nickel | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-PNI"
+    },
+    {
+      "option_sku": "CL-11-SBR",
+      "finish": "Satin Brass",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Satin Brass | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-SBR"
+    },
+    {
+      "option_sku": "CL-11-SCH",
+      "finish": "Satin Chrome",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Satin Chrome | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-SCH"
+    },
+    {
+      "option_sku": "CL-11-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Satin Nickel | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-SN"
+    },
+    {
+      "option_sku": "CL-11-UNL",
+      "finish": "Unlacquered Brass",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Unlacquered Brass | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-UNL"
+    },
+    {
+      "option_sku": "CL-11-VB",
+      "finish": "Venetian Bronze",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Venetian Bronze | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-VB"
+    },
+    {
+      "option_sku": "CL-11-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Matte White | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Fast access at the vanity: Two arms keep guest towels, hand towels, and washcloths within reach of the sink\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-WHM"
+    },
+    {
+      "option_sku": "CL-11-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Spanish Gold | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-SGL"
+    },
+    {
+      "option_sku": "CL-11-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Autumn Sparkle | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-ASP"
+    },
+    {
+      "option_sku": "CL-11-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Glokzin Teal | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-GLT"
+    },
+    {
+      "option_sku": "CL-11-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Shaded Beige | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-SHB"
+    },
+    {
+      "option_sku": "CL-11-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Golden Yellow | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-GLY"
+    },
+    {
+      "option_sku": "CL-11-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Flat Troll Blue | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-FTB"
+    },
+    {
+      "option_sku": "CL-11-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Sea Foam Green | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-SFG"
+    },
+    {
+      "option_sku": "CL-11-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Fire Engine Red | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-FER"
+    },
+    {
+      "option_sku": "CL-11-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Lavender | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-LVN"
+    },
+    {
+      "option_sku": "CL-11-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Mediterranean Blue | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-MBL"
+    },
+    {
+      "option_sku": "CL-11-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Guest Towel Stand 16.3-Inch Solid Brass | Pink | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
+      "description": "Keep clean hand towels by the sink without wall mounting in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Stable on counters: Heavy base helps prevent the towel stand from tipping during daily use\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-11-PNK"
+    }
+  ]
 }

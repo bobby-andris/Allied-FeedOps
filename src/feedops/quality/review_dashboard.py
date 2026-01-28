@@ -147,6 +147,73 @@ def run_dashboard(
         font-size: 14px;
         margin-top: 8px;
     }
+    /* Sticky header for SKU panels */
+    .sticky-sku-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: linear-gradient(180deg, #ffffff 0%, #ffffff 90%, transparent 100%);
+        padding: 8px 0 16px 0;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .sticky-sku-header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .sticky-sku-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .sticky-sku-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    .sticky-sku-score {
+        font-size: 14px;
+        color: #6b7280;
+    }
+    .sticky-quick-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .quick-action-btn {
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        border: 1px solid;
+        transition: all 0.15s ease;
+    }
+    .quick-action-approve {
+        background-color: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+    }
+    .quick-action-approve:hover {
+        background-color: #bbf7d0;
+    }
+    .quick-action-revision {
+        background-color: #fef3c7;
+        border-color: #fcd34d;
+        color: #92400e;
+    }
+    .quick-action-revision:hover {
+        background-color: #fde68a;
+    }
+    .quick-action-reject {
+        background-color: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+    }
+    .quick-action-reject:hover {
+        background-color: #fecaca;
+    }
     </style>
     """,
         unsafe_allow_html=True,
@@ -211,6 +278,425 @@ def run_dashboard(
         )
 
 
+def render_compare_mode(
+    filtered_data: list[SKUData],
+    platform: str,
+    db_path: Path,
+) -> None:
+    """Render side-by-side SKU comparison mode."""
+    st.markdown("### 🔀 Compare Mode")
+    st.caption("Select two SKUs to compare side-by-side")
+
+    if len(filtered_data) < 2:
+        st.warning("Need at least 2 SKUs to compare. Adjust your filters.")
+        return
+
+    # Create SKU options list
+    sku_options = [
+        f"{d.sku} ({d.candidate_scores.get('composite', 0):.1f}%)"
+        for d in filtered_data
+    ]
+    sku_map = {
+        f"{d.sku} ({d.candidate_scores.get('composite', 0):.1f}%)": d
+        for d in filtered_data
+    }
+
+    # Two column layout for selectors
+    col1, col2 = st.columns(2)
+
+    with col1:
+        selected_sku_1 = st.selectbox(
+            "Left SKU",
+            sku_options,
+            index=0,
+            key="compare_sku_1",
+        )
+
+    with col2:
+        # Default to second SKU if available
+        default_idx = 1 if len(sku_options) > 1 else 0
+        selected_sku_2 = st.selectbox(
+            "Right SKU",
+            sku_options,
+            index=default_idx,
+            key="compare_sku_2",
+        )
+
+    # Get selected SKU data
+    sku_data_1 = sku_map.get(selected_sku_1)
+    sku_data_2 = sku_map.get(selected_sku_2)
+
+    if not sku_data_1 or not sku_data_2:
+        return
+
+    st.divider()
+
+    # Side-by-side comparison
+    left_col, right_col = st.columns(2)
+
+    with left_col:
+        _render_compare_panel(sku_data_1, platform, db_path, "left")
+
+    with right_col:
+        _render_compare_panel(sku_data_2, platform, db_path, "right")
+
+
+def _render_compare_panel(
+    sku_data: SKUData,
+    platform: str,
+    db_path: Path,
+    side: str,
+) -> None:
+    """Render a condensed SKU panel for comparison."""
+    # Get scores
+    c_score = sku_data.candidate_scores.get("composite", 0.0)
+    delta = sku_data.composite_delta
+
+    # Format delta
+    if delta > 0.5:
+        delta_display = f"🟢 +{delta:.1f}%"
+    elif delta < -0.5:
+        delta_display = f"🔴 {delta:.1f}%"
+    else:
+        delta_display = f"⚪ {delta:+.1f}%"
+
+    # Get image URL
+    image_url = ""
+    if sku_data.original and sku_data.original.image_url:
+        image_url = sku_data.original.image_url
+    elif sku_data.candidate_report and sku_data.candidate_report.image_url:
+        image_url = sku_data.candidate_report.image_url
+
+    # Get approval status
+    current_approval = (
+        get_sku_approval(db_path, master_sku=sku_data.sku) if db_path else None
+    )
+    status_badge = ""
+    if current_approval:
+        status_badges = {
+            "approved": "✅",
+            "revision": "🔄",
+            "rejected": "❌",
+            "pending": "⏳",
+        }
+        status_badge = status_badges.get(current_approval["status"], "")
+
+    # Header
+    st.markdown(f"### {sku_data.sku} {status_badge}")
+    st.markdown(f"**Score:** {c_score:.1f}% ({delta_display})")
+
+    # Image
+    if image_url:
+        st.image(image_url, width=150)
+
+    # Category/Collection
+    if sku_data.original:
+        st.caption(
+            f"📁 {sku_data.original.category} | 📦 {sku_data.original.collection}"
+        )
+
+    st.divider()
+
+    # Get candidate content for selected platform
+    candidate = sku_data.candidate.get(platform)
+    if candidate:
+        st.markdown("**Title:**")
+        st.markdown(
+            f"<div class='content-box'>{html.escape(candidate.title)}</div>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("**Description:**")
+        # Truncate description for comparison view
+        desc = candidate.description
+        if len(desc) > 500:
+            desc = desc[:500] + "..."
+        st.markdown(
+            f"<div class='content-box' style='max-height: 300px; overflow-y: auto;'>{html.escape(desc)}</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.info("No content for this platform")
+
+    # Quick approval buttons
+    st.divider()
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button(
+            "✅ Approve", key=f"approve_{side}_{sku_data.sku}", use_container_width=True
+        ):
+            save_sku_approval(
+                db_path,
+                master_sku=sku_data.sku,
+                status="approved",
+                title_approved=True,
+                description_approved=True,
+                image_approved=True,
+            )
+            st.rerun()
+    with col2:
+        if st.button(
+            "🔄 Revise", key=f"revise_{side}_{sku_data.sku}", use_container_width=True
+        ):
+            save_sku_approval(
+                db_path,
+                master_sku=sku_data.sku,
+                status="revision",
+            )
+            st.rerun()
+    with col3:
+        if st.button(
+            "❌ Reject", key=f"reject_{side}_{sku_data.sku}", use_container_width=True
+        ):
+            save_sku_approval(
+                db_path,
+                master_sku=sku_data.sku,
+                status="rejected",
+            )
+            st.rerun()
+
+
+def render_split_pane_view(
+    filtered_data: list[SKUData],
+    all_sku_data: list[SKUData],
+    platform: str,
+    db_path: Path,
+) -> None:
+    """Render split-pane view with SKU list on left and details on right."""
+    # Initialize session state for selected SKU
+    if "selected_sku" not in st.session_state:
+        st.session_state.selected_sku = filtered_data[0].sku if filtered_data else None
+
+    # Ensure selected SKU is in filtered data, otherwise select first
+    filtered_skus = {d.sku for d in filtered_data}
+    if st.session_state.selected_sku not in filtered_skus:
+        st.session_state.selected_sku = filtered_data[0].sku if filtered_data else None
+
+    # Create sku_map for quick lookup
+    sku_map = {d.sku: d for d in filtered_data}
+
+    # CSS for split-pane layout
+    st.markdown(
+        """
+        <style>
+        .sku-list-container {
+            max-height: 75vh;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        .sku-list-item {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .sku-list-item:hover {
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+        }
+        .sku-list-item-selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            border-width: 2px;
+        }
+        .sku-list-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+        }
+        .sku-list-score {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .sku-list-status {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Split layout: 25% left (SKU list), 75% right (details)
+    left_col, right_col = st.columns([1, 3])
+
+    with left_col:
+        st.markdown(f"**{len(filtered_data)}** SKUs")
+
+        # Navigation buttons
+        nav_col1, nav_col2 = st.columns(2)
+        current_idx = next(
+            (
+                i
+                for i, d in enumerate(filtered_data)
+                if d.sku == st.session_state.selected_sku
+            ),
+            0,
+        )
+        with nav_col1:
+            if st.button("⬆️ Prev", disabled=current_idx == 0, use_container_width=True):
+                st.session_state.selected_sku = filtered_data[current_idx - 1].sku
+                st.rerun()
+        with nav_col2:
+            if st.button(
+                "⬇️ Next",
+                disabled=current_idx >= len(filtered_data) - 1,
+                use_container_width=True,
+            ):
+                st.session_state.selected_sku = filtered_data[current_idx + 1].sku
+                st.rerun()
+
+        st.divider()
+
+        # SKU list with selection buttons
+        for sku_data in filtered_data:
+            c_score = sku_data.candidate_scores.get("composite", 0.0)
+            delta = sku_data.composite_delta
+
+            # Format delta
+            if delta > 0.5:
+                delta_display = f"🟢 +{delta:.1f}%"
+            elif delta < -0.5:
+                delta_display = f"🔴 {delta:.1f}%"
+            else:
+                delta_display = f"⚪ {delta:+.1f}%"
+
+            # Get approval status
+            current_approval = get_sku_approval(db_path, master_sku=sku_data.sku)
+            status_icon = ""
+            if current_approval:
+                status_icons = {
+                    "approved": "✅",
+                    "revision": "🔄",
+                    "rejected": "❌",
+                    "pending": "⏳",
+                }
+                status_icon = status_icons.get(current_approval["status"], "")
+
+            # Highlight if selected
+            is_selected = sku_data.sku == st.session_state.selected_sku
+            btn_type = "primary" if is_selected else "secondary"
+
+            if st.button(
+                f"{status_icon} **{sku_data.sku}**\n{c_score:.0f}% ({delta_display})",
+                key=f"sku_btn_{sku_data.sku}",
+                use_container_width=True,
+                type=btn_type,
+            ):
+                st.session_state.selected_sku = sku_data.sku
+                st.rerun()
+
+    with right_col:
+        # Show selected SKU details
+        if st.session_state.selected_sku and st.session_state.selected_sku in sku_map:
+            selected_data = sku_map[st.session_state.selected_sku]
+            render_sku_detail_panel(selected_data, platform, db_path)
+        elif filtered_data:
+            st.info("Select a SKU from the list to view details")
+        else:
+            st.warning("No SKUs match the current filters")
+
+
+def render_sku_detail_panel(
+    sku_data: SKUData, platform: str, db_path: Path | None = None
+) -> None:
+    """Render detailed view for a single SKU (used in split-pane mode)."""
+    # Get scores
+    c_score = sku_data.candidate_scores.get("composite", 0.0)
+    delta = sku_data.composite_delta
+
+    # Format delta display
+    if delta > 0.5:
+        delta_display = f"🟢 +{delta:.1f}%"
+    elif delta < -0.5:
+        delta_display = f"🔴 {delta:.1f}%"
+    else:
+        delta_display = f"⚪ {delta:+.1f}%"
+
+    # Get image URL
+    image_url = ""
+    if sku_data.original and sku_data.original.image_url:
+        image_url = sku_data.original.image_url
+    elif sku_data.candidate_report and sku_data.candidate_report.image_url:
+        image_url = sku_data.candidate_report.image_url
+
+    # Get current approval state
+    current_approval = None
+    if db_path:
+        current_approval = get_sku_approval(db_path, master_sku=sku_data.sku)
+
+    # Header with SKU info
+    st.markdown(f"## {sku_data.sku}")
+    st.markdown(f"**Score:** {c_score:.1f}% ({delta_display})")
+
+    # Product image and basic info
+    col_img, col_info = st.columns([1, 3])
+
+    with col_img:
+        if image_url:
+            st.image(image_url, width=200)
+        else:
+            st.caption("No image available")
+
+    with col_info:
+        if sku_data.original:
+            st.markdown(f"**Category:** {sku_data.original.category}")
+            st.markdown(f"**Collection:** {sku_data.original.collection}")
+
+        # Auto-calculated approval status from quality evaluation
+        status = sku_data.candidate_scores.get("approval_status", "")
+        if not status and sku_data.candidate_report:
+            status = sku_data.candidate_report.status
+
+        if status:
+            status_colors = {"approved": "🟢", "revise": "🟡", "rejected": "🔴"}
+            status_emoji = status_colors.get(status.lower(), "⚪")
+            st.markdown(f"**Auto-Status:** {status_emoji} {status.upper()}")
+
+        # Manual approval status
+        if current_approval:
+            manual_status = current_approval["status"]
+            manual_colors = {
+                "pending": "⏳",
+                "approved": "✅",
+                "revision": "🔄",
+                "rejected": "❌",
+            }
+            st.markdown(
+                f"**Manual Status:** {manual_colors.get(manual_status, '❓')} {manual_status.upper()}"
+            )
+
+    st.divider()
+
+    # Approval Controls Section
+    if db_path:
+        render_approval_controls(sku_data, db_path, current_approval)
+        st.divider()
+
+    # Lifestyle images (collapsed by default, only show if images exist)
+    has_lifestyle_images = _sku_has_lifestyle_images(sku_data)
+    if has_lifestyle_images:
+        with st.expander("🖼️ Lifestyle Images", expanded=False):
+            render_lifestyle_images_panel(sku_data)
+
+    # Three-way content comparison (always visible - this is the primary content)
+    render_content_comparison(sku_data, platform)
+
+    # Variant preview section (collapsed by default)
+    with st.expander("🎨 Variant Preview", expanded=False):
+        render_variant_preview(sku_data, show_divider=False)
+
+    # Reasoning inputs (collapsed by default)
+    with st.expander("💡 Reasoning Inputs", expanded=False):
+        render_reasoning_panel(sku_data, show_header=False)
+
+    # Quality scores (collapsed by default)
+    with st.expander("📊 Quality Scores", expanded=False):
+        render_score_panel(sku_data, show_header=False)
+
+
 def render_review_queue_tab(
     all_sku_data: list[SKUData],
     stats: dict[str, Any],
@@ -247,6 +733,15 @@ def render_review_queue_tab(
             ["Google", "Bing", "Shopify"],
             horizontal=True,
             help="All platforms are shown in each SKU panel. This controls which one is expanded by default.",
+        )
+
+        st.divider()
+
+        # Compare mode toggle
+        compare_mode = st.toggle(
+            "🔀 Compare Mode",
+            value=False,
+            help="Enable side-by-side comparison of two SKUs",
         )
 
         st.divider()
@@ -311,11 +806,12 @@ def render_review_queue_tab(
     )
 
     # Main content area
-    st.caption(f"Showing {len(filtered_data)} of {len(all_sku_data)} SKUs")
-
-    # Render each SKU with approval controls
-    for sku_data in filtered_data:
-        render_sku_panel(sku_data, platform.lower(), db_path=db_path)
+    if compare_mode:
+        # Compare mode: side-by-side SKU comparison
+        render_compare_mode(filtered_data, platform.lower(), db_path)
+    else:
+        # Split-pane mode: SKU list on left, details on right
+        render_split_pane_view(filtered_data, all_sku_data, platform.lower(), db_path)
 
 
 def render_revision_queue_tab(
@@ -664,6 +1160,15 @@ def filter_sku_data(
     return filtered
 
 
+def _sku_has_lifestyle_images(sku_data: SKUData) -> bool:
+    """Check if SKU has any lifestyle images."""
+    for platform in ["google", "bing", "shopify"]:
+        content = sku_data.candidate.get(platform)
+        if content and content.lifestyle_images:
+            return True
+    return False
+
+
 def render_sku_panel(
     sku_data: SKUData, platform: str, db_path: Path | None = None
 ) -> None:
@@ -759,24 +1264,26 @@ def render_sku_panel(
             render_approval_controls(sku_data, db_path, current_approval)
             st.divider()
 
-        # Lifestyle images (if available)
-        render_lifestyle_images_panel(sku_data)
+        # Lifestyle images (collapsed by default, only show if images exist)
+        has_lifestyle_images = _sku_has_lifestyle_images(sku_data)
+        if has_lifestyle_images:
+            with st.expander("🖼️ Lifestyle Images", expanded=False):
+                render_lifestyle_images_panel(sku_data)
 
-        # Three-way content comparison
+        # Three-way content comparison (always visible - this is the primary content)
         render_content_comparison(sku_data, platform)
 
-        # Variant preview section
-        render_variant_preview(sku_data)
+        # Variant preview section (collapsed by default)
+        with st.expander("🎨 Variant Preview", expanded=False):
+            render_variant_preview(sku_data, show_divider=False)
 
-        st.divider()
+        # Reasoning inputs (collapsed by default)
+        with st.expander("💡 Reasoning Inputs", expanded=False):
+            render_reasoning_panel(sku_data, show_header=False)
 
-        # Reasoning inputs
-        render_reasoning_panel(sku_data)
-
-        st.divider()
-
-        # Quality scores
-        render_score_panel(sku_data)
+        # Quality scores (collapsed by default)
+        with st.expander("📊 Quality Scores", expanded=False):
+            render_score_panel(sku_data, show_header=False)
 
 
 def render_approval_controls(
@@ -974,8 +1481,6 @@ def render_lifestyle_images_panel(sku_data: SKUData) -> None:
     lifestyle_images = candidate_content.lifestyle_images
     if not lifestyle_images:
         return
-
-    st.subheader("🖼️ Generated Lifestyle Images")
 
     # Filter successful generations
     successful = [
@@ -1322,9 +1827,10 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                         )
 
 
-def render_reasoning_panel(sku_data: SKUData) -> None:
+def render_reasoning_panel(sku_data: SKUData, show_header: bool = True) -> None:
     """Render the reasoning inputs panel."""
-    st.subheader("Reasoning Inputs")
+    if show_header:
+        st.subheader("Reasoning Inputs")
 
     report = sku_data.candidate_report
     if not report:
@@ -1372,9 +1878,10 @@ def render_reasoning_panel(sku_data: SKUData) -> None:
     )
 
 
-def render_score_panel(sku_data: SKUData) -> None:
+def render_score_panel(sku_data: SKUData, show_header: bool = True) -> None:
     """Render quality score visualization."""
-    st.subheader("Quality Scores")
+    if show_header:
+        st.subheader("Quality Scores")
 
     # Actual score dimensions from the evaluator
     dimensions = [
@@ -1516,17 +2023,27 @@ def format_variant_description(description: str, max_chars: int | None = None) -
     return description[:max_chars] + "..."
 
 
-def render_variant_preview(sku_data: SKUData) -> None:
+def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None:
     """Render variant preview section with finish selector."""
-    st.divider()
-    st.subheader("Variant Preview")
+    if show_divider:
+        st.divider()
+        st.subheader("Variant Preview")
     st.caption(
         "Preview how content will appear for specific finish variants. "
         "Lifestyle images above apply to all variants."
     )
 
-    # Load available finishes
-    available_finishes = load_available_finishes()
+    # Use product-specific finishes if available, otherwise fall back to all finishes
+    available_finishes = []
+    if sku_data.original and sku_data.original.available_finishes:
+        available_finishes = sku_data.original.available_finishes
+        st.info(
+            f"Showing {len(available_finishes)} finishes available for this product"
+        )
+    else:
+        available_finishes = load_available_finishes()
+        st.warning("Using all finishes (product-specific finish data not available)")
+
     if not available_finishes:
         st.info("Finish data not available. Ensure data/finishes.txt exists.")
         return

@@ -1,45 +1,293 @@
 {
   "sku": "shopify_US_4545561526404_32131127279748",
-  "title": "Wall Mount Tumbler Toothbrush Holder 5-Inch Projection Solid Brass, Mambo Collection | Allied Brass",
-  "description": "Add space-saving storage at the sink with this wall mount tumbler toothbrush holder, crafted from solid brass. Designed for the Mambo collection, it fits transitional bathroom hardware plans and pairs easily with versatile bath accessories.\n\nHighlights:\n- Wall-mounted tumbler and toothbrush holder helps keep the vanity organized\n- Solid brass construction for sturdy support\n- Concealed screw mounting hardware for a clean look\n- Multiple designer finish options available\n- Installation hardware included\n\nSpecs:\n- Category: Tumbler Toothbrush Holders\n- Mounting type: Wall mount\n- Dimensions: 4.5 in (L) x 3.5 in (W) x 4.7 in (H)\n- Projection: 5 in\n- Weight capacity: 6 lb\n- Product weight: 2.4 lb\n- Screw size: #8 X1 1/4\"\n- Included items: Toothbrush holder and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+  "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Brass Toothbrush Holders | Allied Brass",
+  "description": "Stop losing counter space to loose cups and toothbrushes. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- More room on the vanity\u2014wall mount, wall-mounted, wall hanging installation stores the tumbler/toothbrushes off the countertop\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
   "_meta": {
     "master_sku": "MA-26",
-    "generated_at": "2026-01-27T12:29:03.909264",
-    "quality_score": 90.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-28T02:57:50.025644",
+    "quality_score": 85.0,
+    "approval_status": "rejected"
   },
   "_previous": {
-    "title": "Mambo Collection Tumbler and Toothbrush Holder",
-    "description": "The contemporary motif from this elegant collection has timeless appeal. Wall Mounted Tumbler and Toothbrush Holder is constructed of the finest solid brass materials to provide a sturdy and rust free space. Toothbrush and Tumbler Holder is finished with our designer lifetime finishes to provide unparalleled performance for many years."
+    "title": "Tumbler and Toothbrush Holder",
+    "description": "The contemporary motif from this elegant collection has timeless appeal. Wall Mounted Tumbler and Toothbrush Holder is constructed of the finest solid brass materials to provide a sturdy and rust free space. Toothbrush and Tumbler Holder is finished with our designer lifetime finishes to provide unparalleled performance for many years. Made of the Finest Solid Brass Materials Concealed screw mounting hardware Available in a variety of designer finishes Assembled in the U.S.A. Specification & Documentation Product dimensions, in. (LxHxW): 4.5x4.7x3.5 Box dimensions, in. (LxHxW): 6x6x6 Shipping weight, lbs: 3 Installation Instruction Technical Specification MA26-Installation.PDF MA26-Specification.PDF"
   },
   "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var1_20260127_143259.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_143259",
+      "error_message": null
+    },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var1_20260127_174029.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MA-26-UNL.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Unlacquered Brass\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_174029",
-      "error_message": null,
-      "finish": "Unlacquered Brass"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var2_20260127_143315.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_143315",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var2_20260127_163317.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MA-26-UNL.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Unlacquered Brass\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_163317",
-      "error_message": null,
-      "finish": "Unlacquered Brass"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var3_20260127_143741.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_143741",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var3_20260127_163331.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MA-26-UNL.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Unlacquered Brass\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_163331",
-      "error_message": null,
-      "finish": "Unlacquered Brass"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 2
+  "selected_lifestyle_image": 3,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/MA-26_var3_20260127_143741.png",
+  "variants": [
+    {
+      "option_sku": "MA-26-ABR",
+      "finish": "Antique Brass",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Antique Brass | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-ABR"
+    },
+    {
+      "option_sku": "MA-26-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Antique Bronze | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-ABZ"
+    },
+    {
+      "option_sku": "MA-26-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Brushed Bronze | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-BBR"
+    },
+    {
+      "option_sku": "MA-26-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Matte Black | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-BKM"
+    },
+    {
+      "option_sku": "MA-26-CA",
+      "finish": "Antique Copper",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Antique Copper | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-CA"
+    },
+    {
+      "option_sku": "MA-26-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Matte Gray | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- More room on the vanity\u2014wall mount, wall-mounted, wall hanging installation stores the tumbler/toothbrushes off the countertop\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-GYM"
+    },
+    {
+      "option_sku": "MA-26-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Oil Rubbed Bronze | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-ORB"
+    },
+    {
+      "option_sku": "MA-26-PB",
+      "finish": "Polished Brass",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Polished Brass | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-PB"
+    },
+    {
+      "option_sku": "MA-26-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Polished Chrome | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-PC"
+    },
+    {
+      "option_sku": "MA-26-PEW",
+      "finish": "Antique Pewter",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Antique Pewter | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-PEW"
+    },
+    {
+      "option_sku": "MA-26-PNI",
+      "finish": "Polished Nickel",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Polished Nickel | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-PNI"
+    },
+    {
+      "option_sku": "MA-26-SBR",
+      "finish": "Satin Brass",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Satin Brass | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-SBR"
+    },
+    {
+      "option_sku": "MA-26-SCH",
+      "finish": "Satin Chrome",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Satin Chrome | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-SCH"
+    },
+    {
+      "option_sku": "MA-26-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Satin Nickel | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-SN"
+    },
+    {
+      "option_sku": "MA-26-UNL",
+      "finish": "Unlacquered Brass",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Unlacquered Brass | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-UNL"
+    },
+    {
+      "option_sku": "MA-26-VB",
+      "finish": "Venetian Bronze",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Venetian Bronze | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-VB"
+    },
+    {
+      "option_sku": "MA-26-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Matte White | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- More room on the vanity\u2014wall mount, wall-mounted, wall hanging installation stores the tumbler/toothbrushes off the countertop\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-WHM"
+    },
+    {
+      "option_sku": "MA-26-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Spanish Gold | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-SGL"
+    },
+    {
+      "option_sku": "MA-26-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Autumn Sparkle | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-ASP"
+    },
+    {
+      "option_sku": "MA-26-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Glokzin Teal | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-GLT"
+    },
+    {
+      "option_sku": "MA-26-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Shaded Beige | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-SHB"
+    },
+    {
+      "option_sku": "MA-26-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Golden Yellow | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-GLY"
+    },
+    {
+      "option_sku": "MA-26-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Flat Troll Blue | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-FTB"
+    },
+    {
+      "option_sku": "MA-26-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Sea Foam Green | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-SFG"
+    },
+    {
+      "option_sku": "MA-26-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Fire Engine Red | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-FER"
+    },
+    {
+      "option_sku": "MA-26-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Lavender | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-LVN"
+    },
+    {
+      "option_sku": "MA-26-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Mediterranean Blue | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-MBL"
+    },
+    {
+      "option_sku": "MA-26-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Tumbler Toothbrush Holder Wall Mount Solid Brass 4.5-Inch | Pink | Brass Toothbrush Holders | Allied Brass",
+      "description": "Stop losing counter space to loose cups and toothbrushes in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This wall-mounted tumbler toothbrush holder (also called a toothbrush tumbler holder or wall tumbler holder) keeps daily essentials organized and easy to reach in the bathroom.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Built for long-term bathroom use\u2014solid brass construction (brass construction) provides a sturdy, rust-free accessory\n- Cleaner look on the wall\u2014concealed screw mounting hardware keeps fasteners out of sight\n- Coordinate matching accessories\u2014part of the Brass Toothbrush Holders collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: Wall mounted tumbler and toothbrush holder\n- Material: Solid brass\n- Mounting: Concealed screw wall-mount hardware included\n- Dimensions (L x H x W): 4.5 x 4.7 x 3.5 in.\n- Box dimensions (L x H x W): 6 x 6 x 6 in.\n- Shipping weight: 3 lbs\n- Assembly: Assembled in the U.S.A.\n\nStyle notes: A smart fit for transitional bathroom hardware and other versatile bath accessories.",
+      "sku": "MA-26-PNK"
+    }
+  ]
 }

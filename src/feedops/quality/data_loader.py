@@ -26,6 +26,7 @@ class OriginalContent:
     collection: str = ""
     image_url: str = ""
     bullets: list[str] = field(default_factory=list)
+    available_finishes: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -115,6 +116,12 @@ def load_catalog_originals(catalog_path: Path | str) -> dict[str, OriginalConten
             if bullet_col in first_row and first_row[bullet_col]:
                 bullets.append(first_row[bullet_col])
 
+        # Extract unique finishes from all variant rows for this SKU
+        available_finishes = []
+        if "finish" in group.columns:
+            finishes = group["finish"].dropna().unique().tolist()
+            available_finishes = sorted([f for f in finishes if f and str(f).strip()])
+
         originals[master_sku] = OriginalContent(
             master_sku=master_sku,
             title=first_row.get("current_title", ""),
@@ -123,6 +130,7 @@ def load_catalog_originals(catalog_path: Path | str) -> dict[str, OriginalConten
             collection=first_row.get("collection", ""),
             image_url=first_row.get("main_image_url", ""),
             bullets=bullets,
+            available_finishes=available_finishes,
         )
 
     return originals

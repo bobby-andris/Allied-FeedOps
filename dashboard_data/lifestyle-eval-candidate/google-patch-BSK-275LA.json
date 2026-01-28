@@ -1,49 +1,333 @@
 {
   "offerId": "shopify_US_4531833766020_32063606259844",
-  "title": "Wall Mount Shower Basket 18.75-Inch Solid Brass Wire, Oval Combination | Allied Brass",
-  "short_title": "Wall Mount Shower Basket 18.75-Inch | Allied Brass",
-  "description": "Add organized storage to your shower with this wall mount oval combination shower basket crafted from solid brass and ventilated wire for drainage. Designed for traditional bathroom hardware looks, it helps keep bottles and soap within reach while saving space.\n\nHighlights:\n- Solid brass construction with rust-proof solid brass wires for long-lasting use\n- Wall-mounted installation to keep shower items off ledges and corners\n- Concealed screw mounting hardware for a clean, finished look\n- Available in a wide variety of designer finish options, including statement colors\n- Limited Lifetime Warranty\n\nSpecs:\n- Category: Basket\n- Style: Traditional\n- Mounting: Wall mount\n- Dimensions: 18.75-Inch L x 4.13-Inch W x 2.25-Inch H (Projection: 4.13-Inch)\n- Weight: 4.8 lb\n- Included: Basket and all installation hardware\n- Assembly required: No",
+  "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Baskets Collection | Allied Brass",
+  "short_title": "Shower Basket 18.75-Inch Oval",
+  "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look.\n\nHighlights:\n- Keep shower essentials contained: long oval basket stores shampoo, conditioner, and body wash in one place\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\n- Finish options: multiple designer finish options available\n- Assembled in the U.S.A.",
+  "structured_title": {
+    "digital_source_type": "trained_algorithmic_media",
+    "content": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Baskets Collection | Allied Brass"
+  },
+  "structured_description": {
+    "digital_source_type": "trained_algorithmic_media",
+    "content": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look.\n\nHighlights:\n- Keep shower essentials contained: long oval basket stores shampoo, conditioner, and body wash in one place\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\n- Finish options: multiple designer finish options available\n- Assembled in the U.S.A."
+  },
   "channel": "online",
   "contentLanguage": "en",
   "targetCountry": "US",
   "_meta": {
     "master_sku": "BSK-275LA",
-    "generated_at": "2026-01-27T12:41:53.381201",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-28T03:13:11.345527",
+    "quality_score": 83.33,
+    "approval_status": "rejected"
   },
   "_previous": {
     "title": "Oval Combination Shower Basket",
-    "description": "This decorative basket is made of solid brass to provide a lifetime of superior performance and durability. Ventilated wires are made of heavy guage solid brass material that will never rust. Highest quality designer finishes provide a decorative accessory that would be a great addition to any bath or shower design."
+    "description": "This decorative basket is made of solid brass to provide a lifetime of superior performance and durability. Ventilated wires are made of heavy gauge solid brass material that will never rust. Highest quality designer finishes provide a decorative accessory that would be a great addition to any bath or shower design. Matte Black, a rich black satin-like finish that makes a bold, dramatic statement Concealed Screw Mounting System Designer Finish will provide corrosion free performance Assembled in the U.S. A. Specification & Documentation Product dimensions, in. (LxHxW): 18.75x2.25x4.125 Box dimensions, in. (LxHxW): 24x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification BSK275LA-Installation.PDF BSK275LA-Specification.PDF"
   },
   "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var1_20260127_144159.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144159",
+      "error_message": null
+    },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var1_20260127_161736.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/BSK-275LA-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Antique Brass\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_161736",
-      "error_message": null,
-      "finish": "Antique Brass"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var2_20260127_144215.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144215",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var2_20260127_161751.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/BSK-275LA-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Antique Brass\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_161751",
-      "error_message": null,
-      "finish": "Antique Brass"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var3_20260127_144230.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144230",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var3_20260127_161807.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/BSK-275LA-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Antique Brass\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_161807",
-      "error_message": null,
-      "finish": "Antique Brass"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 1
+  "selected_lifestyle_image": 1,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/BSK-275LA_var1_20260127_144159.png",
+  "variants": [
+    {
+      "option_sku": "BSK-275LA-ABR",
+      "finish": "Antique Brass",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Antique Brass | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606259844",
+      "gmc_id": "shopify_US_4531833766020_32063606259844"
+    },
+    {
+      "option_sku": "BSK-275LA-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Antique Bronze | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606292612",
+      "gmc_id": "shopify_US_4531833766020_32063606292612"
+    },
+    {
+      "option_sku": "BSK-275LA-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Brushed Bronze | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606325380",
+      "gmc_id": "shopify_US_4531833766020_32063606325380"
+    },
+    {
+      "option_sku": "BSK-275LA-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Matte Black | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606358148",
+      "gmc_id": "shopify_US_4531833766020_32063606358148"
+    },
+    {
+      "option_sku": "BSK-275LA-CA",
+      "finish": "Antique Copper",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Antique Copper | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606390916",
+      "gmc_id": "shopify_US_4531833766020_32063606390916"
+    },
+    {
+      "option_sku": "BSK-275LA-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Matte Gray | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials.\n\nHighlights:\n- Keep shower essentials contained: long oval basket stores shampoo, conditioner, and body wash in one place\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606423684",
+      "gmc_id": "shopify_US_4531833766020_32063606423684"
+    },
+    {
+      "option_sku": "BSK-275LA-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Oil Rubbed Bronze | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606456452",
+      "gmc_id": "shopify_US_4531833766020_32063606456452"
+    },
+    {
+      "option_sku": "BSK-275LA-PB",
+      "finish": "Polished Brass",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Polished Brass | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606489220",
+      "gmc_id": "shopify_US_4531833766020_32063606489220"
+    },
+    {
+      "option_sku": "BSK-275LA-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Polished Chrome | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606521988",
+      "gmc_id": "shopify_US_4531833766020_32063606521988"
+    },
+    {
+      "option_sku": "BSK-275LA-PEW",
+      "finish": "Antique Pewter",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Antique Pewter | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606554756",
+      "gmc_id": "shopify_US_4531833766020_32063606554756"
+    },
+    {
+      "option_sku": "BSK-275LA-PNI",
+      "finish": "Polished Nickel",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Polished Nickel | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606587524",
+      "gmc_id": "shopify_US_4531833766020_32063606587524"
+    },
+    {
+      "option_sku": "BSK-275LA-SBR",
+      "finish": "Satin Brass",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Satin Brass | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606620292",
+      "gmc_id": "shopify_US_4531833766020_32063606620292"
+    },
+    {
+      "option_sku": "BSK-275LA-SCH",
+      "finish": "Satin Chrome",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Satin Chrome | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606653060",
+      "gmc_id": "shopify_US_4531833766020_32063606653060"
+    },
+    {
+      "option_sku": "BSK-275LA-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Satin Nickel | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606685828",
+      "gmc_id": "shopify_US_4531833766020_32063606685828"
+    },
+    {
+      "option_sku": "BSK-275LA-UNL",
+      "finish": "Unlacquered Brass",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Unlacquered Brass | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606718596",
+      "gmc_id": "shopify_US_4531833766020_32063606718596"
+    },
+    {
+      "option_sku": "BSK-275LA-VB",
+      "finish": "Venetian Bronze",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Venetian Bronze | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606751364",
+      "gmc_id": "shopify_US_4531833766020_32063606751364"
+    },
+    {
+      "option_sku": "BSK-275LA-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Matte White | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere.\n\nHighlights:\n- Keep shower essentials contained: long oval basket stores shampoo, conditioner, and body wash in one place\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_32063606784132",
+      "gmc_id": "shopify_US_4531833766020_32063606784132"
+    },
+    {
+      "option_sku": "BSK-275LA-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Spanish Gold | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065578210",
+      "gmc_id": "shopify_US_4531833766020_43094065578210"
+    },
+    {
+      "option_sku": "BSK-275LA-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Autumn Sparkle | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065610978",
+      "gmc_id": "shopify_US_4531833766020_43094065610978"
+    },
+    {
+      "option_sku": "BSK-275LA-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Glokzin Teal | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065643746",
+      "gmc_id": "shopify_US_4531833766020_43094065643746"
+    },
+    {
+      "option_sku": "BSK-275LA-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Shaded Beige | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065676514",
+      "gmc_id": "shopify_US_4531833766020_43094065676514"
+    },
+    {
+      "option_sku": "BSK-275LA-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Golden Yellow | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065709282",
+      "gmc_id": "shopify_US_4531833766020_43094065709282"
+    },
+    {
+      "option_sku": "BSK-275LA-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Flat Troll Blue | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065742050",
+      "gmc_id": "shopify_US_4531833766020_43094065742050"
+    },
+    {
+      "option_sku": "BSK-275LA-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Sea Foam Green | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065774818",
+      "gmc_id": "shopify_US_4531833766020_43094065774818"
+    },
+    {
+      "option_sku": "BSK-275LA-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Fire Engine Red | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065807586",
+      "gmc_id": "shopify_US_4531833766020_43094065807586"
+    },
+    {
+      "option_sku": "BSK-275LA-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Lavender | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065840354",
+      "gmc_id": "shopify_US_4531833766020_43094065840354"
+    },
+    {
+      "option_sku": "BSK-275LA-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Mediterranean Blue | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065873122",
+      "gmc_id": "shopify_US_4531833766020_43094065873122"
+    },
+    {
+      "option_sku": "BSK-275LA-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Shower Basket 18.75-Inch Oval Solid Brass Wall Mount | Pink | Baskets Collection | Allied Brass",
+      "description": "Stop bottles and soap from crowding the shower ledge\u2014this shower basket creates organized, easy-to-reach storage with a distinctive, transitional look in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Drain and dry faster: ventilated heavy-gauge wire design lets water flow through\n- Built for humid bathrooms: solid brass construction is designed to never rust\n- Clean, finished installation: concealed screw mounting system hides hardware\n- Coordinate your bath: part of the Baskets collection for a cohesive set of versatile bath accessories\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 18.75 x 2.25 x 4.125 in.\n- Box dimensions (L x H x W): 24 x 8 x 8 in.\n- Shipping weight: 6 lbs\n- Mounting: wall mounted; concealed screw mounting system\n- Material: solid brass\n- Style context: transitional bathroom hardware\nmultiple designer finish options available\n- Assembled in the U.S.A.",
+      "offerId": "shopify_US_4531833766020_43094065905890",
+      "gmc_id": "shopify_US_4531833766020_43094065905890"
+    }
+  ]
 }

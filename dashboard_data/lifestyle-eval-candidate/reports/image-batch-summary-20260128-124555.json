@@ -1,0 +1,288 @@
+{
+  "success": [
+    {
+      "master_sku": "920D-6",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-41-30",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "P-550-WPT",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "QN-31/30",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "SH-84",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CV-407-8SM",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-29",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "FT-16",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "MB-20",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-11",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "1051",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-GLT-24",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-41-18",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "HTL-3",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "TS-4L",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "MA-26",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-61",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CS-1",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-2TB/16-GAL",
+      "success": true,
+      "images": 2,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "PR-99",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "P-730-GB360",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "BSK-275LA",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-1TB/16",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-2/22-GAL",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-GTB-2",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-22",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "A-20",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-5-16",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "WP-2/16-GAL",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "MD-22",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "P-200-18-TB",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "SQ-20",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "RC-5/16TB",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "DMF-2/2X",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "TS-25",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "1066",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "CL-24C",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "DT-32",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "NS-5/16",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    },
+    {
+      "master_sku": "TS-28",
+      "success": true,
+      "images": 3,
+      "total_attempted": 3,
+      "error": null
+    }
+  ],
+  "failed": [],
+  "total_images": 119,
+  "start_time": "2026-01-28T12:02:27.845725",
+  "end_time": "2026-01-28T12:45:55.289284"
+}

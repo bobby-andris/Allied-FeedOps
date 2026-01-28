@@ -258,11 +258,47 @@ def merge_feedops_into_bing_feed(
     return xml_str
 
 
+def _add_bing_feed_item(
+    channel: ET.Element,
+    sku: str,
+    title: str | None,
+    description: str | None,
+    tracking_label: str,
+) -> None:
+    """Add a single item to the Bing feed channel."""
+    if not sku:
+        return
+
+    if not title and not description:
+        return
+
+    item = ET.SubElement(channel, "item")
+
+    # SKU/offer_id (required)
+    id_elem = ET.SubElement(item, f"{{{G_NAMESPACE}}}id")
+    id_elem.text = sku
+
+    # Title with CDATA
+    if title:
+        title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}title")
+        title_el.text = f"__CDATA__{_escape_cdata(title)}__ENDCDATA__"
+
+    # Description with CDATA
+    if description:
+        desc_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}description")
+        desc_el.text = f"__CDATA__{_escape_cdata(description)}__ENDCDATA__"
+
+    # Custom label for tracking
+    label_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}custom_label_4")
+    label_el.text = tracking_label
+
+
 def generate_bing_feed_from_patches(
     patches: list[dict],
     environment: str = "staging",
     *,
     feed_title: str = "Allied Brass FeedOps - Bing Feed",
+    include_variants: bool = True,
 ) -> str:
     """Generate a standalone Bing feed XML from patches (no base feed required).
 
@@ -273,6 +309,7 @@ def generate_bing_feed_from_patches(
         patches: List of bing-patch-*.json dictionaries.
         environment: 'staging' or 'production'.
         feed_title: Title for the RSS channel.
+        include_variants: If True, include variant-level items in feed.
 
     Returns:
         XML string in Bing Merchant Center format.
@@ -312,25 +349,33 @@ def generate_bing_feed_from_patches(
         if not title and not description:
             continue
 
-        item = ET.SubElement(channel, "item")
+        # Add the master/primary item
+        _add_bing_feed_item(
+            channel=channel,
+            sku=sku,
+            title=title,
+            description=description,
+            tracking_label=tracking_label,
+        )
 
-        # SKU/offer_id (required)
-        id_elem = ET.SubElement(item, f"{{{G_NAMESPACE}}}id")
-        id_elem.text = sku
+        # Add variant items if enabled and variants exist
+        if include_variants:
+            variants = patch.get("variants", [])
+            for variant in variants:
+                variant_sku = variant.get("sku") or variant.get("option_sku")
+                if not variant_sku or variant_sku == sku:
+                    continue
 
-        # Title with CDATA
-        if title:
-            title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}title")
-            title_el.text = f"__CDATA__{_escape_cdata(title)}__ENDCDATA__"
+                variant_title = variant.get("title", title)
+                variant_description = variant.get("description", description)
 
-        # Description with CDATA
-        if description:
-            desc_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}description")
-            desc_el.text = f"__CDATA__{_escape_cdata(description)}__ENDCDATA__"
-
-        # Custom label for tracking
-        label_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}custom_label_4")
-        label_el.text = tracking_label
+                _add_bing_feed_item(
+                    channel=channel,
+                    sku=variant_sku,
+                    title=variant_title,
+                    description=variant_description,
+                    tracking_label=tracking_label,
+                )
 
     # Convert to string
     xml_str = ET.tostring(rss, encoding="unicode", xml_declaration=True)
@@ -425,6 +470,7 @@ def write_bing_feed(
     base_feed_path: Path | None = None,
     min_score: float | None = None,
     require_approval: bool = False,
+    include_variants: bool = True,
 ) -> int:
     """Generate and write a Bing feed file.
 
@@ -435,9 +481,10 @@ def write_bing_feed(
         base_feed_path: Optional path to base feed (for merge mode).
         min_score: Optional minimum quality score filter.
         require_approval: If True, only include approved patches.
+        include_variants: If True, include variant-level items in feed.
 
     Returns:
-        Number of items included/updated in the feed.
+        Number of patches included/updated in the feed (variants may expand this).
     """
     patches = load_bing_patches(
         patches_dir,
@@ -453,7 +500,11 @@ def write_bing_feed(
         xml_content = merge_feedops_into_bing_feed(patches, base_feed_path, environment)
     else:
         # Standalone mode: create new feed with only FeedOps items
-        xml_content = generate_bing_feed_from_patches(patches, environment)
+        xml_content = generate_bing_feed_from_patches(
+            patches,
+            environment,
+            include_variants=include_variants,
+        )
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)

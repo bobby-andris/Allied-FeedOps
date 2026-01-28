@@ -14,7 +14,9 @@ from pathlib import Path
 from typing import Optional
 
 # Load finish metadata at module import
-_FINISH_METADATA_PATH = Path(__file__).parent.parent.parent.parent / "data" / "finish-metadata.json"
+_FINISH_METADATA_PATH = (
+    Path(__file__).parent.parent.parent.parent / "data" / "finish-metadata.json"
+)
 _FINISH_METADATA: dict = {}
 _FINISHES: dict = {}
 _STYLE_TO_GROUPS: dict = {}
@@ -74,7 +76,7 @@ def _build_finish_benefit_clause(
     lower = functional_desc.lower()
     finish_lower = finish_name.lower()
     if lower.startswith(finish_lower):
-        rest = functional_desc[len(finish_name):].lstrip()
+        rest = functional_desc[len(finish_name) :].lstrip()
         if not rest:
             return None
         # If the remainder starts with a verb, make it a relative clause.
@@ -97,6 +99,56 @@ def _build_finish_benefit_clause(
     return f"which {functional_desc}"
 
 
+def _update_size_in_description(description: str, size: str) -> str:
+    """Update size references in description for variant-specific content.
+
+    For multi-size products, ensures the description reflects the specific size
+    of this variant rather than generic sizing language.
+
+    Args:
+        description: The base description
+        size: The variant's size (e.g., "18 Inch", "24 Inch")
+
+    Returns:
+        Description with size-specific content
+    """
+    if not description or not size:
+        return description
+
+    # Extract numeric size (e.g., "18" from "18 Inch")
+    size_match = re.search(r"(\d+)", size)
+    if not size_match:
+        return description
+    size_num = size_match.group(1)
+
+    # Pattern to match size references like "18-Inch", "18 Inch", "18-inch", "18 in"
+    # This will replace any existing size with the variant's specific size
+    size_pattern = r"\d+[-\s]?[Ii]nch|\d+[-\s]?in\b"
+
+    # Replace size references in common contexts
+    # "Length: 18 Inch" -> keep as is if already correct, or update
+    desc = description
+
+    # Update "Length: X Inch" or "X-Inch" references
+    def replace_size(match):
+        return f"{size_num}-Inch"
+
+    # Only replace if we find size references that aren't already the correct size
+    current_sizes = re.findall(size_pattern, desc)
+    if current_sizes:
+        # Check if all sizes are already correct
+        correct_pattern = rf"{size_num}[-\s]?[Ii]nch|{size_num}[-\s]?in\b"
+        if not all(re.match(correct_pattern, s, re.IGNORECASE) for s in current_sizes):
+            # Replace with the specific size
+            desc = re.sub(size_pattern, f"{size_num}-Inch", desc, count=1)
+
+    # Add size to specs section if present but doesn't have correct size
+    if "Length:" in desc and f"Length: {size_num}" not in desc:
+        desc = re.sub(r"Length:\s*\d+\s*[Ii]nch", f"Length: {size}", desc)
+
+    return desc
+
+
 def _replace_first_sentence_with_finish(
     description: str,
     finish_name: str,
@@ -110,8 +162,8 @@ def _replace_first_sentence_with_finish(
         base_sentence = description.strip()
         rest = ""
     else:
-        base_sentence = description[:match.start()].strip()
-        rest = description[match.end():]
+        base_sentence = description[: match.start()].strip()
+        rest = description[match.end() :]
     if not base_sentence or finish_name.lower() in base_sentence.lower():
         return description
     base_sentence = base_sentence.rstrip(".")
@@ -172,7 +224,7 @@ def _load_finish_metadata() -> None:
     global _FINISH_METADATA, _FINISHES, _STYLE_TO_GROUPS
     if _FINISH_METADATA:
         return  # Already loaded
-    
+
     try:
         with open(_FINISH_METADATA_PATH) as f:
             _FINISH_METADATA = json.load(f)
@@ -185,17 +237,17 @@ def _load_finish_metadata() -> None:
 def get_finish_metadata(finish_name: str) -> Optional[dict]:
     """Get metadata for a specific finish."""
     _load_finish_metadata()
-    
+
     # Try exact match first
     if finish_name in _FINISHES:
         return _FINISHES[finish_name]
-    
+
     # Try case-insensitive match
     finish_lower = finish_name.lower()
     for name, meta in _FINISHES.items():
         if name.lower() == finish_lower:
             return meta
-    
+
     return None
 
 
@@ -205,34 +257,38 @@ def _check_style_alignment(
     collection_subgroup: Optional[str] = None,
 ) -> bool:
     """Check if finish style affinities align with collection group.
-    
+
     Args:
         finish_affinities: List of style affinities for the finish
         collection_group: The collection's group (e.g., "Transitional", "Contemporary/Modern")
         collection_subgroup: Optional subgroup (e.g., "Industrial Modern", "Coastal Modern")
-        
+
     Returns:
         True if styles align, False otherwise
     """
     _load_finish_metadata()
-    
+
     # Check each finish affinity
     for affinity in finish_affinities:
         matching_groups = _STYLE_TO_GROUPS.get(affinity, [])
-        
+
         # Check if collection group matches
         if collection_group in matching_groups:
             return True
-        
+
         # Check subgroup-specific matching
         if collection_subgroup:
             if collection_subgroup == "Industrial Modern" and affinity == "industrial":
                 return True
             if collection_subgroup == "Coastal Modern" and affinity == "coastal":
                 return True
-            if collection_subgroup == "Designer Statement" and affinity in ("bold", "eclectic", "contemporary"):
+            if collection_subgroup == "Designer Statement" and affinity in (
+                "bold",
+                "eclectic",
+                "contemporary",
+            ):
                 return True
-    
+
     return False
 
 
@@ -243,41 +299,48 @@ def generate_finish_snippet(
     collection_subgroup: Optional[str] = None,
 ) -> Optional[str]:
     """Generate a finish-specific description snippet.
-    
+
     Args:
         finish_name: The finish name (e.g., "Polished Chrome", "Fire Engine Red")
         collection_name: The collection name (e.g., "Dottingham", "Pipeline")
         collection_group: The collection's group (e.g., "Transitional")
         collection_subgroup: Optional subgroup (e.g., "Industrial Modern")
-        
+
     Returns:
         A finish-specific snippet to inject into description, or None if no metadata found
     """
     meta = get_finish_metadata(finish_name)
     if not meta:
         return None
-    
+
     functional_desc = meta.get("functional_description", "")
     description_type = meta.get("description_type", "coordination")
     coordination_note = meta.get("coordination_note")
     style_affinities = meta.get("style_affinities", [])
-    
+
     # Start with functional description
     # Note: functional_desc already starts with the finish name in most cases,
     # so we just use it directly
     snippet = functional_desc
-    
+
     # For coordination finishes, check if we should mention collection
-    if description_type == "coordination" and coordination_note and collection_name and collection_group:
+    if (
+        description_type == "coordination"
+        and coordination_note
+        and collection_name
+        and collection_group
+    ):
         # Check style alignment
-        if _check_style_alignment(style_affinities, collection_group, collection_subgroup):
+        if _check_style_alignment(
+            style_affinities, collection_group, collection_subgroup
+        ):
             # Add collection coordination note
             coord_text = coordination_note.format(collection=collection_name)
             snippet += f" As part of the {collection_name} collection, it {coord_text}."
-    
+
     # Statement finishes don't mention collection - the functional description stands alone
     # (already handled by not having a coordination_note)
-    
+
     return snippet
 
 
@@ -287,48 +350,53 @@ def inject_finish_into_description(
     platform: str = "google",
 ) -> str:
     """Inject finish snippet into base description.
-    
+
     The snippet is inserted before the Specs section (if present) or appended at the end.
-    
+
     Args:
         base_description: The base description (from LLM)
         finish_snippet: The finish-specific snippet
         platform: The target platform (google, bing, shopify)
-        
+
     Returns:
         Description with finish content injected
     """
     if not finish_snippet:
         return base_description
-    
+
     # Find insertion point - before Specs section
     specs_markers = ["Specs:", "Specs\n", "\nSpecs", "Specifications:"]
     insertion_point = None
-    
+
     for marker in specs_markers:
         pos = base_description.find(marker)
         if pos != -1:
             insertion_point = pos
             break
-    
+
     if insertion_point:
         # Insert finish snippet before specs
         before = base_description[:insertion_point].rstrip()
         after = base_description[insertion_point:]
-        
+
         # Add finish section
         if platform == "shopify":
             # HTML format for Shopify
-            finish_section = f"\n\n<p><strong>About This Finish:</strong> {finish_snippet}</p>\n\n"
+            finish_section = (
+                f"\n\n<p><strong>About This Finish:</strong> {finish_snippet}</p>\n\n"
+            )
         else:
             # Plain text for Google/Bing
             finish_section = f"\n\nAbout This Finish: {finish_snippet}\n\n"
-        
+
         return before + finish_section + after
     else:
         # No specs section found - append at end
         if platform == "shopify":
-            return base_description + f"\n\n<p><strong>About This Finish:</strong> {finish_snippet}</p>"
+            return (
+                base_description
+                + f"\n\n<p><strong>About This Finish:</strong> {finish_snippet}</p>"
+            )
         else:
             return base_description + f"\n\nAbout This Finish: {finish_snippet}"
 
@@ -345,17 +413,27 @@ def _get_finish_specific_bullets(
     finish_lower = finish_name.lower()
 
     if finish_category == "statement_color":
-        bullets.append(f"{finish_name} transforms this essential into a conversation piece")
-        bullets.append(f"{finish_name} delivers a bold design statement with personal style")
+        bullets.append(
+            f"{finish_name} transforms this essential into a conversation piece"
+        )
+        bullets.append(
+            f"{finish_name} delivers a bold design statement with personal style"
+        )
     elif finish_category == "living_finish":
-        bullets.append(f"{finish_name} develops a unique, one-of-a-kind patina over time")
+        bullets.append(
+            f"{finish_name} develops a unique, one-of-a-kind patina over time"
+        )
         bullets.append("Each piece evolves to tell its own story")
     elif "chrome" in finish_lower or "nickel" in finish_lower:
-        bullets.append(f"{finish_name} coordinates seamlessly with chrome faucets and fixtures")
+        bullets.append(
+            f"{finish_name} coordinates seamlessly with chrome faucets and fixtures"
+        )
         if "polished" in finish_lower:
             bullets.append(f"{finish_name} adds bright, reflective light to the room")
         elif "satin" in finish_lower or "brushed" in finish_lower:
-            bullets.append(f"{finish_name} hides fingerprints and water spots with a soft sheen")
+            bullets.append(
+                f"{finish_name} hides fingerprints and water spots with a soft sheen"
+            )
     elif "brass" in finish_lower:
         bullets.append(f"{finish_name} brings warm, timeless elegance")
         if "antique" in finish_lower:
@@ -365,7 +443,9 @@ def _get_finish_specific_bullets(
     elif "bronze" in finish_lower:
         bullets.append(f"{finish_name} brings rich depth and character")
         if "oil rubbed" in finish_lower or "venetian" in finish_lower:
-            bullets.append(f"{finish_name} highlights craftsmanship with subtle accents")
+            bullets.append(
+                f"{finish_name} highlights craftsmanship with subtle accents"
+            )
     elif "black" in finish_lower:
         bullets.append(f"{finish_name} makes a bold, modern statement")
         bullets.append(f"{finish_name} pairs cleanly with any color palette")
@@ -397,7 +477,9 @@ def _get_coordination_bullet(
     if not coordination_note:
         return None
     style_affinities = meta.get("style_affinities", [])
-    if not _check_style_alignment(style_affinities, collection_group, collection_subgroup):
+    if not _check_style_alignment(
+        style_affinities, collection_group, collection_subgroup
+    ):
         return None
     bullet = coordination_note.format(collection=collection_name).strip()
     if bullet:
@@ -434,11 +516,12 @@ def generate_variant_description(
     material: Optional[str] = None,
     finish_count: Optional[int] = None,
     platform: str = "google",
+    size: Optional[str] = None,
 ) -> str:
     """Generate a variant-specific description with finish content.
-    
+
     This is the main entry point for generating per-GMCID descriptions.
-    
+
     Args:
         base_description: The base description (from LLM for MasterSKU)
         finish_name: The variant's finish
@@ -450,13 +533,19 @@ def generate_variant_description(
         material: Optional material for competitive bullets
         finish_count: Optional finish count for competitive bullets
         platform: Target platform
-        
+        size: Optional size for multi-size products (e.g., "18 Inch")
+
     Returns:
         Variant-specific description with finish content injected
     """
     # Remove generic "Available in X finishes" text since this is for a specific finish
     desc = base_description
-    
+
+    # For Google/Bing, update size references in description if size is provided
+    # For Shopify, keep description generic (covers all sizes on product page)
+    if size and platform in ("google", "bing"):
+        desc = _update_size_in_description(desc, size)
+
     # Common patterns to remove (generic finish availability text)
     patterns_to_remove = [
         "Available in a wide variety of designer finishes",
@@ -471,23 +560,24 @@ def generate_variant_description(
         "- Finish options: ",
         "Finish options: ",
     ]
-    
+
     for pattern in patterns_to_remove:
         desc = desc.replace(pattern, "").replace(pattern + "\n", "")
-    
+
     # Remove any leftover "Finish options:" lines with partial content
-    desc = re.sub(r'- Finish options:[^\n]*\n?', '', desc)
-    desc = re.sub(r'Finish options:[^\n]*\n?', '', desc)
-    
+    desc = re.sub(r"- Finish options:[^\n]*\n?", "", desc)
+    desc = re.sub(r"Finish options:[^\n]*\n?", "", desc)
+
     # Remove generic "available in X designer finishes" text (case-insensitive)
-    desc = re.sub(r'[Aa]vailable in \d+ designer finishes[^\n]*\n?', '', desc)
-    
+    desc = re.sub(r"[Aa]vailable in \d+ designer finishes[^\n]*\n?", "", desc)
+
     # Clean up any double newlines created by removal
     while "\n\n\n" in desc:
         desc = desc.replace("\n\n\n", "\n\n")
-    
+
     if not room_context and category:
         from feedops.pipeline.keyword_placement import get_room_context
+
         room_context = get_room_context(category)
 
     if not _finish_forward_enabled():
@@ -538,21 +628,35 @@ def generate_variant_description(
 def generate_variant_title(
     base_title: str,
     finish_name: str,
+    size: str | None = None,
+    platform: str = "google",
 ) -> str:
-    """Generate a variant-specific title with finish name.
-    
+    """Generate a variant-specific title with finish name and optional size.
+
     The title should include the specific finish name for this GMCID.
-    
+    For Google/Bing, also includes size if the product has multiple sizes.
+
     Args:
         base_title: The base title (from LLM for MasterSKU)
         finish_name: The variant's finish
-        
+        size: Optional size (e.g., "18 Inch", "24 Inch") for multi-size products
+        platform: Target platform (google, bing, shopify)
+
     Returns:
-        Variant-specific title with finish included
+        Variant-specific title with finish (and size for Google/Bing) included
     """
+    # For Shopify, we don't include size in title since the product page shows all sizes
+    include_size = size and platform in ("google", "bing")
+
     # Check if finish is already in title
-    if finish_name.lower() in base_title.lower():
-        return base_title
+    finish_in_title = finish_name.lower() in base_title.lower()
+
+    # Check if size is already in title (for cases like "18-Inch Towel Bar")
+    size_in_title = False
+    if size:
+        # Normalize size for comparison (e.g., "18 Inch" matches "18-Inch")
+        size_normalized = size.lower().replace(" ", "-").replace("inch", "").strip("-")
+        size_in_title = size_normalized in base_title.lower().replace(" ", "-")
 
     if _finish_forward_enabled():
         segments = [seg.strip() for seg in base_title.split("|") if seg.strip()]
@@ -569,7 +673,23 @@ def generate_variant_title(
         if not segments:
             segments = [finish_name]
         else:
-            segments = [segments[0], finish_name] + segments[1:]
+            # Update size in first segment if needed
+            if include_size and size and not size_in_title:
+                # Try to insert/replace size in the first segment
+                first_seg = segments[0]
+                # Common patterns: "Towel Bar 18-Inch" or "18-Inch Towel Bar"
+                size_pattern = r"\d+-?[Ii]nch"
+                if re.search(size_pattern, first_seg):
+                    # Replace existing size reference
+                    first_seg = re.sub(size_pattern, size.replace(" ", "-"), first_seg)
+                else:
+                    # Insert size after product type if possible
+                    first_seg = f"{first_seg} {size.replace(' ', '-')}"
+                segments[0] = first_seg
+
+            # Insert finish after first segment
+            if not finish_in_title:
+                segments = [segments[0], finish_name] + segments[1:]
         if brand:
             segments.append(brand)
         return " | ".join(segments)
@@ -581,8 +701,15 @@ def generate_variant_title(
         before = base_title[:pos].rstrip()
         if before.endswith("|"):
             before = before[:-1].rstrip()
-        return f"{before} | {finish_name} | Allied Brass"
-    return f"{base_title} | {finish_name}"
+        title = f"{before} | {finish_name} | Allied Brass"
+    else:
+        title = f"{base_title} | {finish_name}"
+
+    # Add size for Google/Bing if not already present
+    if include_size and not size_in_title:
+        title = f"{title} ({size})"
+
+    return title
 
 
 def generate_variant_keywords(

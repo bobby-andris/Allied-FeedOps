@@ -1,21 +1,714 @@
 """
 Lifestyle Image Generation Module
 Generates AI lifestyle images for Allied Brass products using Gemini Imagen API
+
+Includes IPTC/XMP metadata tagging for AI disclosure compliance with Google Merchant Center.
 """
 
-from pathlib import Path
+import shutil
+import subprocess
 from datetime import datetime
+from io import BytesIO
+from pathlib import Path
 from typing import Optional
-from pydantic import BaseModel
+
+import requests
 from google import genai
 from google.genai import types
 from PIL import Image
-import requests
-from io import BytesIO
+from PIL.PngImagePlugin import PngInfo
+from pydantic import BaseModel
+
+# IPTC Digital Source Type URI for AI-generated content
+IPTC_TRAINED_ALGORITHMIC_MEDIA = (
+    "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia"
+)
+
+# AI System identifier for metadata
+AI_SYSTEM_USED = "Google Gemini Imagen"
+AI_SYSTEM_VERSION = "gemini-3-pro-image-preview"
+
+
+def add_ai_metadata_to_image(
+    image_path: Path,
+    prompt: str,
+    ai_system: str = AI_SYSTEM_USED,
+    ai_version: str = AI_SYSTEM_VERSION,
+) -> bool:
+    """
+    Add IPTC/XMP metadata to AI-generated image for Google Merchant Center compliance.
+
+    Google requires trainedAlgorithmicMedia IPTC metadata tag on all AI-generated
+    images used in lifestyle_image_link, image_link, or additional_image_link.
+
+    Args:
+        image_path: Path to the image file
+        prompt: The AI prompt used to generate the image (truncated to 500 chars)
+        ai_system: Name of the AI system used
+        ai_version: Version of the AI model
+
+    Returns:
+        True if metadata was successfully added, False otherwise
+    """
+    image_path = Path(image_path)
+    if not image_path.exists():
+        return False
+
+    # Try exiftool first (most comprehensive IPTC/XMP support)
+    if _add_metadata_with_exiftool(image_path, prompt, ai_system, ai_version):
+        return True
+
+    # Fallback: Re-save PNG with text metadata chunks
+    if image_path.suffix.lower() == ".png":
+        return _add_metadata_to_png(image_path, prompt, ai_system, ai_version)
+
+    return False
+
+
+def _add_metadata_with_exiftool(
+    image_path: Path,
+    prompt: str,
+    ai_system: str,
+    ai_version: str,
+) -> bool:
+    """Add IPTC/XMP metadata using exiftool if available."""
+    exiftool = shutil.which("exiftool")
+    if not exiftool:
+        return False
+
+    # Truncate prompt to 500 chars for IPTC field limits
+    truncated_prompt = prompt[:500] if len(prompt) > 500 else prompt
+
+    try:
+        # Build exiftool command with IPTC and XMP tags
+        # XMP-plus:DigitalSourceType is the standard field for AI disclosure
+        cmd = [
+            exiftool,
+            "-overwrite_original",
+            f"-XMP-plus:DigitalSourceType={IPTC_TRAINED_ALGORITHMIC_MEDIA}",
+            f"-XMP-iptcExt:DigitalSourceType={IPTC_TRAINED_ALGORITHMIC_MEDIA}",
+            f"-XMP:Creator={ai_system}",
+            f"-XMP:CreatorTool={ai_system} {ai_version}",
+            f"-XMP:Description=AI-generated lifestyle image. {truncated_prompt[:200]}",
+            f"-IPTC:Caption-Abstract=AI-generated image using {ai_system}",
+            str(image_path),
+        ]
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        if result.returncode == 0:
+            print(f"    ✓ IPTC metadata added via exiftool")
+            return True
+        else:
+            # Silently fall back to PNG method
+            return False
+
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return False
+
+
+def _add_metadata_to_png(
+    image_path: Path,
+    prompt: str,
+    ai_system: str,
+    ai_version: str,
+) -> bool:
+    """Add metadata to PNG using PIL PngInfo text chunks."""
+    try:
+        # Load the image
+        img = Image.open(image_path)
+
+        # Create metadata
+        metadata = PngInfo()
+
+        # Add AI disclosure metadata as text chunks
+        # These are readable by image viewers and can be extracted programmatically
+        metadata.add_text("DigitalSourceType", IPTC_TRAINED_ALGORITHMIC_MEDIA)
+        metadata.add_text("AISystemUsed", ai_system)
+        metadata.add_text("AISystemVersion", ai_version)
+        metadata.add_text("AIPromptInformation", prompt[:500])
+        metadata.add_text(
+            "GeneratedBy", "Allied FeedOps - AI Lifestyle Image Generator"
+        )
+        metadata.add_text(
+            "AIDisclosure", "This image was generated using trained AI algorithms"
+        )
+
+        # Re-save with metadata
+        img.save(str(image_path), "PNG", pnginfo=metadata)
+        print(f"    ✓ AI metadata added via PNG text chunks")
+        return True
+
+    except Exception as e:
+        print(f"    ⚠️ Failed to add PNG metadata: {e}")
+        return False
+
+
+def validate_ai_metadata(image_path: Path) -> dict:
+    """
+    Validate that AI disclosure metadata is present on an image.
+
+    Args:
+        image_path: Path to the image file
+
+    Returns:
+        Dict with 'valid' boolean and 'fields' dict of found metadata
+    """
+    image_path = Path(image_path)
+    if not image_path.exists():
+        return {"valid": False, "fields": {}, "error": "File not found"}
+
+    fields = {}
+
+    # Try reading PNG text chunks
+    if image_path.suffix.lower() == ".png":
+        try:
+            img = Image.open(image_path)
+            if hasattr(img, "text"):
+                fields = dict(img.text)
+        except Exception:
+            pass
+
+    # Check for required AI disclosure field
+    has_disclosure = (
+        "DigitalSourceType" in fields
+        or "AISystemUsed" in fields
+        or "AIDisclosure" in fields
+    )
+
+    return {
+        "valid": has_disclosure,
+        "fields": fields,
+        "has_digital_source_type": "DigitalSourceType" in fields,
+        "has_ai_system": "AISystemUsed" in fields,
+    }
+
+
+# =============================================================================
+# Lifestyle Image Compliance Validation
+# =============================================================================
+
+# Google Merchant Center supported image formats
+SUPPORTED_IMAGE_FORMATS = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".tif"}
+
+# Maximum file size for Google Merchant Center (16MB)
+MAX_FILE_SIZE_BYTES = 16 * 1024 * 1024
+
+# Minimum image dimensions for quality
+MIN_IMAGE_DIMENSION = 100
+
+# Recommended minimum for lifestyle images
+RECOMMENDED_MIN_DIMENSION = 800
+
+
+class LifestyleImageValidationResult(BaseModel):
+    """Result of lifestyle image compliance validation."""
+
+    valid: bool
+    errors: list[str]
+    warnings: list[str]
+
+    # Technical details
+    file_exists: bool
+    file_format_valid: bool
+    file_size_bytes: Optional[int] = None
+    file_size_valid: bool = False
+
+    # Image properties
+    width: Optional[int] = None
+    height: Optional[int] = None
+    dimensions_valid: bool = False
+
+    # AI metadata compliance
+    has_ai_metadata: bool = False
+    ai_metadata_fields: dict = {}
+
+
+def validate_lifestyle_image(
+    image_path: str | Path,
+    require_ai_metadata: bool = True,
+) -> LifestyleImageValidationResult:
+    """
+    Validate a lifestyle image for Google Merchant Center compliance.
+
+    Checks:
+    - File exists and is accessible
+    - File format is supported (PNG, JPG, JPEG, GIF, BMP, TIFF)
+    - File size is within limits (< 16MB)
+    - Image dimensions meet minimum requirements
+    - AI disclosure metadata is present (for compliance)
+
+    Args:
+        image_path: Path to the image file
+        require_ai_metadata: Whether to require AI metadata (default True)
+
+    Returns:
+        LifestyleImageValidationResult with validation details
+    """
+    import os
+
+    image_path = Path(image_path)
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    # Initialize result
+    result_data = {
+        "valid": True,
+        "errors": [],
+        "warnings": [],
+        "file_exists": False,
+        "file_format_valid": False,
+        "file_size_bytes": None,
+        "file_size_valid": False,
+        "width": None,
+        "height": None,
+        "dimensions_valid": False,
+        "has_ai_metadata": False,
+        "ai_metadata_fields": {},
+    }
+
+    # Check file exists
+    if not image_path.exists():
+        errors.append(f"Image file not found: {image_path}")
+        result_data["errors"] = errors
+        result_data["valid"] = False
+        return LifestyleImageValidationResult(**result_data)
+
+    result_data["file_exists"] = True
+
+    # Check file format
+    suffix = image_path.suffix.lower()
+    if suffix not in SUPPORTED_IMAGE_FORMATS:
+        errors.append(
+            f"Unsupported image format: {suffix}. "
+            f"Supported formats: {', '.join(SUPPORTED_IMAGE_FORMATS)}"
+        )
+        result_data["file_format_valid"] = False
+    else:
+        result_data["file_format_valid"] = True
+
+    # Check file size
+    try:
+        file_size = os.path.getsize(image_path)
+        result_data["file_size_bytes"] = file_size
+
+        if file_size > MAX_FILE_SIZE_BYTES:
+            errors.append(
+                f"Image file too large: {file_size / (1024*1024):.1f}MB. "
+                f"Maximum allowed: {MAX_FILE_SIZE_BYTES / (1024*1024):.0f}MB"
+            )
+            result_data["file_size_valid"] = False
+        else:
+            result_data["file_size_valid"] = True
+
+        # Warn if file is very large (>5MB)
+        if file_size > 5 * 1024 * 1024:
+            warnings.append(
+                f"Large image file ({file_size / (1024*1024):.1f}MB). "
+                "Consider optimizing for faster load times."
+            )
+    except OSError as e:
+        errors.append(f"Cannot read file size: {e}")
+
+    # Check image dimensions
+    try:
+        with Image.open(image_path) as img:
+            width, height = img.size
+            result_data["width"] = width
+            result_data["height"] = height
+
+            if width < MIN_IMAGE_DIMENSION or height < MIN_IMAGE_DIMENSION:
+                errors.append(
+                    f"Image dimensions too small: {width}x{height}. "
+                    f"Minimum: {MIN_IMAGE_DIMENSION}x{MIN_IMAGE_DIMENSION}"
+                )
+                result_data["dimensions_valid"] = False
+            else:
+                result_data["dimensions_valid"] = True
+
+            if width < RECOMMENDED_MIN_DIMENSION or height < RECOMMENDED_MIN_DIMENSION:
+                warnings.append(
+                    f"Image dimensions ({width}x{height}) below recommended "
+                    f"minimum ({RECOMMENDED_MIN_DIMENSION}x{RECOMMENDED_MIN_DIMENSION}) "
+                    "for high-quality lifestyle images."
+                )
+    except Exception as e:
+        errors.append(f"Cannot read image dimensions: {e}")
+
+    # Check AI metadata compliance
+    metadata_result = validate_ai_metadata(image_path)
+    result_data["has_ai_metadata"] = metadata_result.get("valid", False)
+    result_data["ai_metadata_fields"] = metadata_result.get("fields", {})
+
+    if require_ai_metadata and not result_data["has_ai_metadata"]:
+        errors.append(
+            "Missing AI disclosure metadata. "
+            "Google Merchant Center requires trainedAlgorithmicMedia IPTC tag "
+            "for AI-generated images."
+        )
+
+    # Set final validity
+    result_data["errors"] = errors
+    result_data["warnings"] = warnings
+    result_data["valid"] = len(errors) == 0
+
+    return LifestyleImageValidationResult(**result_data)
+
+
+def validate_lifestyle_image_result(
+    result: "LifestyleImageResult",
+    require_ai_metadata: bool = True,
+) -> LifestyleImageValidationResult:
+    """
+    Validate a LifestyleImageResult object for compliance.
+
+    Convenience wrapper that handles failed generations.
+
+    Args:
+        result: LifestyleImageResult from image generation
+        require_ai_metadata: Whether to require AI metadata
+
+    Returns:
+        LifestyleImageValidationResult with validation details
+    """
+    if not result.generation_success:
+        return LifestyleImageValidationResult(
+            valid=False,
+            errors=[
+                f"Image generation failed: {result.error_message or 'Unknown error'}"
+            ],
+            warnings=[],
+            file_exists=False,
+            file_format_valid=False,
+        )
+
+    if not result.image_path:
+        return LifestyleImageValidationResult(
+            valid=False,
+            errors=["No image path in generation result"],
+            warnings=[],
+            file_exists=False,
+            file_format_valid=False,
+        )
+
+    return validate_lifestyle_image(
+        result.image_path,
+        require_ai_metadata=require_ai_metadata,
+    )
+
+
+def validate_all_lifestyle_images(
+    results: list["LifestyleImageResult"],
+    require_ai_metadata: bool = True,
+) -> dict:
+    """
+    Validate all lifestyle images from a generation batch.
+
+    Args:
+        results: List of LifestyleImageResult objects
+        require_ai_metadata: Whether to require AI metadata
+
+    Returns:
+        Dict with summary and per-image validation results
+    """
+    validations = []
+    all_valid = True
+    total_errors = 0
+    total_warnings = 0
+
+    for result in results:
+        validation = validate_lifestyle_image_result(
+            result,
+            require_ai_metadata=require_ai_metadata,
+        )
+        validations.append(
+            {
+                "variation_num": result.variation_num,
+                "image_path": result.image_path,
+                "validation": validation,
+            }
+        )
+
+        if not validation.valid:
+            all_valid = False
+        total_errors += len(validation.errors)
+        total_warnings += len(validation.warnings)
+
+    return {
+        "all_valid": all_valid,
+        "total_images": len(results),
+        "successful_generations": sum(1 for r in results if r.generation_success),
+        "valid_images": sum(1 for v in validations if v["validation"].valid),
+        "total_errors": total_errors,
+        "total_warnings": total_warnings,
+        "validations": validations,
+    }
+
+
+class LifestyleImageScore(BaseModel):
+    """Scores from AI evaluation of a lifestyle image."""
+
+    variation_num: int
+    product_accuracy: int  # 0-100: Does the product match the reference?
+    composition_quality: int  # 0-100: Professional framing and lighting
+    background_appropriateness: int  # 0-100: Correct setting for product type
+    aesthetic_appeal: int  # 0-100: Overall visual appeal
+    composite_score: float  # Weighted average
+    evaluation_notes: str
+    evaluation_success: bool
+    error_message: Optional[str] = None
+
+
+def score_lifestyle_image(
+    image_path: str | Path,
+    reference_image_url: str,
+    category: str,
+    api_key: str,
+) -> LifestyleImageScore:
+    """
+    Score a lifestyle image using Gemini Vision API.
+
+    Evaluates:
+    - Product accuracy (40%): Does the generated product match the reference?
+    - Composition quality (25%): Professional framing, lighting, focus
+    - Background appropriateness (20%): Correct setting for product category
+    - Aesthetic appeal (15%): Overall visual attractiveness
+
+    Args:
+        image_path: Path to the generated lifestyle image
+        reference_image_url: URL of the original product reference image
+        category: Product category (e.g., "Towel Bar", "Glass Shelf")
+        api_key: Gemini API key
+
+    Returns:
+        LifestyleImageScore with detailed scores
+    """
+    image_path = Path(image_path)
+
+    # Extract variation number from filename
+    variation_num = 1
+    filename = image_path.stem
+    if "_var" in filename:
+        try:
+            var_part = filename.split("_var")[1].split("_")[0]
+            variation_num = int(var_part)
+        except (IndexError, ValueError):
+            pass
+
+    if not image_path.exists():
+        return LifestyleImageScore(
+            variation_num=variation_num,
+            product_accuracy=0,
+            composition_quality=0,
+            background_appropriateness=0,
+            aesthetic_appeal=0,
+            composite_score=0.0,
+            evaluation_notes="",
+            evaluation_success=False,
+            error_message=f"Image file not found: {image_path}",
+        )
+
+    try:
+        # Initialize Gemini client
+        client = genai.Client(api_key=api_key)
+
+        # Load the generated image
+        generated_image = Image.open(image_path)
+
+        # Download reference image
+        response = requests.get(reference_image_url, timeout=10)
+        response.raise_for_status()
+        reference_image = Image.open(BytesIO(response.content))
+
+        # Build evaluation prompt
+        eval_prompt = f"""You are an expert product photography evaluator for e-commerce. 
+Evaluate this AI-generated lifestyle image against the reference product image.
+
+PRODUCT CATEGORY: {category}
+
+Score each dimension from 0-100:
+
+1. PRODUCT ACCURACY (most important):
+   - Does the generated product exactly match the reference product?
+   - Are all components, proportions, and details correct?
+   - Is the finish/material accurately represented?
+   Score 90-100: Perfect match, indistinguishable from real product
+   Score 70-89: Minor inaccuracies but clearly the same product
+   Score 50-69: Noticeable differences but recognizable
+   Score 0-49: Significant errors or wrong product
+
+2. COMPOSITION QUALITY:
+   - Professional framing and angles?
+   - Proper lighting without harsh shadows?
+   - Product in sharp focus?
+   Score 90-100: Gallery-quality professional photography
+   Score 70-89: Good commercial quality
+   Score 50-69: Acceptable but could be improved
+   Score 0-49: Poor composition
+
+3. BACKGROUND APPROPRIATENESS:
+   - Is this the correct room/setting for this product category?
+   - For {category}: Is it in a bathroom/kitchen as appropriate?
+   - Does the setting enhance the product presentation?
+   Score 90-100: Perfect contextual setting
+   Score 70-89: Appropriate setting
+   Score 50-69: Acceptable but generic
+   Score 0-49: Wrong setting or distracting
+
+4. AESTHETIC APPEAL:
+   - Overall visual attractiveness
+   - Would this image help sell the product?
+   - Professional, polished appearance?
+   Score 90-100: Stunning, would feature prominently
+   Score 70-89: Attractive, good for product listing
+   Score 50-69: Acceptable
+   Score 0-49: Unappealing
+
+Respond in this EXACT JSON format:
+{{
+  "product_accuracy": <number 0-100>,
+  "composition_quality": <number 0-100>,
+  "background_appropriateness": <number 0-100>,
+  "aesthetic_appeal": <number 0-100>,
+  "notes": "<brief evaluation notes>"
+}}
+
+The first image is the GENERATED lifestyle image to evaluate.
+The second image is the REFERENCE product image to compare against."""
+
+        # Call Gemini Vision API
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[eval_prompt, generated_image, reference_image],
+        )
+
+        # Parse response
+        response_text = response.text.strip()
+
+        # Try to extract JSON from response
+        import json
+        import re
+
+        # Find JSON object in response
+        json_match = re.search(r"\{[^{}]*\}", response_text, re.DOTALL)
+        if json_match:
+            scores = json.loads(json_match.group())
+        else:
+            raise ValueError(f"No JSON found in response: {response_text[:200]}")
+
+        # Extract scores
+        product_accuracy = int(scores.get("product_accuracy", 50))
+        composition_quality = int(scores.get("composition_quality", 50))
+        background_appropriateness = int(scores.get("background_appropriateness", 50))
+        aesthetic_appeal = int(scores.get("aesthetic_appeal", 50))
+        notes = scores.get("notes", "")
+
+        # Calculate weighted composite score
+        # Product accuracy is most important (40%), then composition (25%), background (20%), aesthetic (15%)
+        composite_score = (
+            product_accuracy * 0.40
+            + composition_quality * 0.25
+            + background_appropriateness * 0.20
+            + aesthetic_appeal * 0.15
+        )
+
+        return LifestyleImageScore(
+            variation_num=variation_num,
+            product_accuracy=product_accuracy,
+            composition_quality=composition_quality,
+            background_appropriateness=background_appropriateness,
+            aesthetic_appeal=aesthetic_appeal,
+            composite_score=round(composite_score, 1),
+            evaluation_notes=notes,
+            evaluation_success=True,
+        )
+
+    except Exception as e:
+        return LifestyleImageScore(
+            variation_num=variation_num,
+            product_accuracy=0,
+            composition_quality=0,
+            background_appropriateness=0,
+            aesthetic_appeal=0,
+            composite_score=0.0,
+            evaluation_notes="",
+            evaluation_success=False,
+            error_message=str(e),
+        )
+
+
+def select_best_lifestyle_image(
+    image_results: list["LifestyleImageResult"],
+    reference_image_url: str,
+    category: str,
+    api_key: str,
+) -> tuple[int | None, list[LifestyleImageScore]]:
+    """
+    Score all lifestyle images and select the best one.
+
+    Args:
+        image_results: List of LifestyleImageResult from generation
+        reference_image_url: URL of the original product reference image
+        category: Product category
+        api_key: Gemini API key
+
+    Returns:
+        Tuple of (best_variation_num, list_of_all_scores)
+        Returns (None, []) if no valid images to score
+    """
+    # Filter to only successful generations
+    successful = [r for r in image_results if r.generation_success and r.image_path]
+
+    if not successful:
+        print("No successful images to score")
+        return None, []
+
+    print(f"\nScoring {len(successful)} lifestyle images...")
+
+    scores: list[LifestyleImageScore] = []
+    for result in successful:
+        print(f"  Evaluating variation {result.variation_num}...")
+        score = score_lifestyle_image(
+            image_path=result.image_path,
+            reference_image_url=reference_image_url,
+            category=category,
+            api_key=api_key,
+        )
+        scores.append(score)
+
+        if score.evaluation_success:
+            print(
+                f"    ✅ Composite: {score.composite_score:.1f} "
+                f"(Accuracy: {score.product_accuracy}, "
+                f"Composition: {score.composition_quality}, "
+                f"Background: {score.background_appropriateness}, "
+                f"Aesthetic: {score.aesthetic_appeal})"
+            )
+        else:
+            print(f"    ❌ Evaluation failed: {score.error_message}")
+
+    # Find best scoring image
+    valid_scores = [s for s in scores if s.evaluation_success]
+    if not valid_scores:
+        print("No images could be evaluated")
+        return None, scores
+
+    best = max(valid_scores, key=lambda s: s.composite_score)
+    print(
+        f"\n🏆 Best image: Variation {best.variation_num} (Score: {best.composite_score:.1f})"
+    )
+
+    return best.variation_num, scores
 
 
 class LifestyleImageResult(BaseModel):
     """Result of lifestyle image generation"""
+
     image_path: str
     variation_num: int
     generation_success: bool
@@ -107,7 +800,7 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
         prompt: str,
         ref_images: list[Image.Image],
         master_sku: str,
-        variation_num: int
+        variation_num: int,
     ) -> LifestyleImageResult:
         """
         Generate single lifestyle image variation
@@ -131,19 +824,21 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
                     model="gemini-3-pro-image-preview",
                     contents=[prompt, *ref_images],
                     config=types.GenerateContentConfig(
-                        response_modalities=['TEXT', 'IMAGE']
-                    )
+                        response_modalities=["TEXT", "IMAGE"]
+                    ),
                 )
             except Exception:
                 if len(ref_images) == 1:
                     raise
-                print("  ⚠️  Multi-image input failed, retrying with primary image only.")
+                print(
+                    "  ⚠️  Multi-image input failed, retrying with primary image only."
+                )
                 response = self.client.models.generate_content(
                     model="gemini-3-pro-image-preview",
                     contents=[prompt, ref_images[0]],
                     config=types.GenerateContentConfig(
-                        response_modalities=['TEXT', 'IMAGE']
-                    )
+                        response_modalities=["TEXT", "IMAGE"]
+                    ),
                 )
 
             # Extract and save image
@@ -156,12 +851,21 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
 
                     print(f"  ✅ Saved: {filename}")
 
+                    # Add IPTC/XMP metadata for AI disclosure compliance
+                    # Required by Google Merchant Center for AI-generated images
+                    add_ai_metadata_to_image(
+                        image_path=output_path,
+                        prompt=prompt,
+                        ai_system=AI_SYSTEM_USED,
+                        ai_version=AI_SYSTEM_VERSION,
+                    )
+
                     return LifestyleImageResult(
                         image_path=str(output_path),
                         variation_num=variation_num,
                         generation_success=True,
                         prompt_used=prompt,
-                        timestamp=timestamp
+                        timestamp=timestamp,
                     )
 
             # No image in response
@@ -171,7 +875,7 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
                 generation_success=False,
                 prompt_used=prompt,
                 timestamp=timestamp,
-                error_message="No image in API response"
+                error_message="No image in API response",
             )
 
         except Exception as e:
@@ -182,7 +886,7 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
                 generation_success=False,
                 prompt_used=prompt,
                 timestamp=timestamp,
-                error_message=str(e)
+                error_message=str(e),
             )
 
     def generate_for_product(
@@ -193,7 +897,7 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
         scene: str,
         technical: str,
         category: str,
-        num_variations: int = 3
+        num_variations: int = 3,
     ) -> list[LifestyleImageResult]:
         """
         Generate lifestyle images for a product
@@ -264,6 +968,7 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
 
 # Template helpers for building prompts
 
+
 def get_product_inventory(category: str, product_title: str = "") -> str:
     """
     Get product component description template based on category and title.
@@ -283,7 +988,9 @@ def get_product_inventory(category: str, product_title: str = "") -> str:
 
     # Paper towel holders
     if "paper towel" in category_lower or "paper towel" in title_lower:
-        if any(x in title_lower for x in ["under cabinet", "under-cabinet", "wall mount"]):
+        if any(
+            x in title_lower for x in ["under cabinet", "under-cabinet", "wall mount"]
+        ):
             return """UNDER-CABINET PAPER TOWEL HOLDER:
 MOUNTING BRACKET:
 - Metal mounting bracket attaching to underside of cabinet
@@ -325,7 +1032,10 @@ CONFIGURATION: Freestanding countertop model, easily moved to where needed"""
 
     # Four-tier towel bars
     if "towel bar" in category_lower or "towel bar" in title_lower:
-        if any(x in title_lower for x in ["four tier", "4-tier", "4 tier", "ladder", "quad"]):
+        if any(
+            x in title_lower
+            for x in ["four tier", "4-tier", "4 tier", "ladder", "quad"]
+        ):
             return """FOUR-TIER LADDER TOWEL BAR:
 MOUNTING BRACKETS (2 total - top and bottom):
 - Wall-mount plates securing the ladder structure to wall
@@ -378,8 +1088,11 @@ KNOB:
 MOUNTING: Single center screw through backplate"""
 
     # Corner shelves
-    if "corner" in title_lower and ("shelf" in category_lower or "shelf" in title_lower):
+    if "corner" in title_lower and (
+        "shelf" in category_lower or "shelf" in title_lower
+    ):
         from feedops.pipeline.product_usage_context import extract_tier_count
+
         tier_count = extract_tier_count(title_lower)
         tier_num = {"two": 2, "three": 3, "four": 4, "five": 5}.get(tier_count, 3)
 
@@ -470,7 +1183,9 @@ def get_customer_focused_scene(
         base_env = get_bathroom_environment(style)
 
     # Build item list for display
-    items_list = build_item_list(usage_context.typical_items, usage_context.capacity_min)
+    items_list = build_item_list(
+        usage_context.typical_items, usage_context.capacity_min
+    )
 
     # Build context requirements
     context_items = build_context_items(usage_context.required_context_items)
@@ -563,13 +1278,17 @@ def get_scene_context(style: str = "modern", category: str = "") -> str:
     category_lower = (category or "").lower()
 
     if "contemporary" in style_lower or "modern" in style_lower:
-        base_env = "Modern bathroom with white large-format porcelain tiles, chrome fixtures. "
+        base_env = (
+            "Modern bathroom with white large-format porcelain tiles, chrome fixtures. "
+        )
     elif "traditional" in style_lower or "classic" in style_lower:
         base_env = "Traditional bathroom with cream subway tiles, warm brass fixtures. "
     elif "transitional" in style_lower:
         base_env = "Transitional bathroom with soft gray walls, classic white tile, mixed metal accents. "
     elif "industrial" in style_lower:
-        base_env = "Industrial bathroom with exposed concrete, blackened metal accents. "
+        base_env = (
+            "Industrial bathroom with exposed concrete, blackened metal accents. "
+        )
     else:
         base_env = "Bathroom with neutral tiles and clean finishes. "
 
@@ -604,7 +1323,9 @@ def get_scene_context(style: str = "modern", category: str = "") -> str:
             "A partial view of the toilet edge provides context without distracting."
         )
 
-    if "robe hook" in category_lower or ("hook" in category_lower and "multi hook" not in category_lower):
+    if "robe hook" in category_lower or (
+        "hook" in category_lower and "multi hook" not in category_lower
+    ):
         return (
             f"{base_env}"
             "The robe hook is mounted on the wall near the shower entry.\n"

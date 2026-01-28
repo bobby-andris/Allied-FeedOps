@@ -1,49 +1,252 @@
 {
   "offerId": "shopify_US_4545081081988_32128571179140",
-  "title": "Wall Mount Paper Towel Holder 15.5-Inch Iron Pipeline Collection | Allied Brass",
-  "short_title": "Wall Mount Paper Towel Holder 15.5-Inch | Allied Brass",
-  "description": "Upgrade countertop space with a wall mount paper towel holder built for everyday kitchen use. Part of the Pipeline collection, it brings an industrial pipe-inspired look that suits transitional spaces.\n\nHighlights:\n- Wall-mounted installation helps keep paper towels accessible while saving counter space\n- Iron construction with a highly durable powder coat for a clean, decorative finish\n- Industrial styling that blends with modern and traditional decor\n- Color-coordinated mounting hardware included for a consistent look\n- Limited lifetime warranty\n\nSpecs:\n- Collection: Pipeline\n- Mounting type: Wall mount\n- Material: Iron\n- Overall size: 15.5 in L x 4 in W x 3 in H (projection: 4 in)\n- Weight: 1.3 lb\n- Screw size: #8 x 1 1/4 in\n- Included: Paper towel holder and all installation hardware\n- Assembly required: No\n- Finish options: available in multiple designer finish options",
+  "title": "Paper Towel Holder Wall Mount 15.5-Inch | Brass Paper Towel Holders | Allied Brass",
+  "short_title": "Paper Towel Holder 15.5-Inch",
+  "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Keep towels ready where you use them most\u2014wall-mounted installation saves valuable counter space\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\n- Finish options: Multiple designer finish options available (19 finishes)",
+  "structured_title": {
+    "digital_source_type": "trained_algorithmic_media",
+    "content": "Paper Towel Holder Wall Mount 15.5-Inch | Brass Paper Towel Holders | Allied Brass"
+  },
+  "structured_description": {
+    "digital_source_type": "trained_algorithmic_media",
+    "content": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Keep towels ready where you use them most\u2014wall-mounted installation saves valuable counter space\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\n- Finish options: Multiple designer finish options available (19 finishes)"
+  },
   "channel": "online",
   "contentLanguage": "en",
   "targetCountry": "US",
   "_meta": {
     "master_sku": "P-550-WPT",
-    "generated_at": "2026-01-27T12:03:39.543868",
-    "quality_score": 90.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-28T02:27:58.026646",
+    "quality_score": 85.0,
+    "approval_status": "rejected"
   },
   "_previous": {
     "title": "Pipeline Collection Wall Mounted Paper Towel Holder",
-    "description": "The Pipeline collection is the latest innovation for accessories from the Allied Brass Brand of products. This wall mounted paper towel holder gives the industrial look of pipe fittings while blending aptly with both modern and traditional decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this wall mounted paper towel holder gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Paper Towel holder mounts firmly with color coordinating screws and comes with a limited lifetime warranty."
+    "description": "The Pipeline collection is the latest innovation for accessories from the Allied Brass Brand of products. This wall mounted paper towel holder gives the industrial look of pipe fittings while blending aptly with both modern and traditional decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this wall mounted paper towel holder gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Paper Towel holder mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 15.5x3x4 Box dimensions, in. (LxHxW): 18x6x6 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification P550WPT-Installation.PDF P550WPT-Specification.PDF"
   },
   "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var1_20260127_142129.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142129",
+      "error_message": null
+    },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var1_20260127_162302.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-550-WPT-BBR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Brushed Bronze\nUNDER-CABINET PAPER TOWEL HOLDER:\nMOUNTING BRACKET:\n- Metal mounting bracket attaching to underside of cabinet\n- Visible screws or tension mechanism\n- Compact profile maximizing clearance below cabinet\n\nPAPER TOWEL ARM:\n- Horizontal rod holding paper towel roll\n- Spring-loaded or friction-hold mechanism\n- Allows one-handed tearing motion\n\nPAPER TOWEL ROLL:\n- Standard kitchen paper towel roll (11 inches tall)\n- Positioned for easy access from counter\n- Bottom edge at comfortable reach height (24-26 inches from counter)\n\nCONFIGURATION: Under-cabinet mount for space-saving kitchen storage\n\nSCENE CONTEXT (narrative description):\nKitchen with clean countertops and sink area visible. Natural lighting.\n\nCUSTOMER USE CASE: Kitchen cleanup with space-saving under-cabinet mounting\nThe scene demonstrates how a home cook maximizing kitchen workspace uses this product daily.\n\nPROBLEM SOLVED: Need paper towels accessible but don't want to use counter space\n\nITEMS TO SHOW (1-1 items):\n1. paper towel roll dispensing downward\n\nCONTEXT REQUIREMENTS:\n- kitchen cabinet above\n- counter below with workspace visible\n- sink area or prep zone\n- paper towel at easy reach height (24-26 inches from counter)\n\nVALUE DEMONSTRATION: Saves counter space while keeping paper towels within arm's reach\nThe image must clearly show: Under-cabinet mount saves valuable counter space\n\nSCENE TYPE: in-use\nShow the product in active use during Kitchen cleanup with space-saving under-cabinet mounting\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context\n\u274c FORBIDDEN: Bathroom setting (unless specifically bathroom paper towels), empty holder\n\nCRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_162302",
-      "error_message": null,
-      "finish": "Brushed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var2_20260127_142147.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142147",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var2_20260127_162317.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-550-WPT-BBR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Brushed Bronze\nUNDER-CABINET PAPER TOWEL HOLDER:\nMOUNTING BRACKET:\n- Metal mounting bracket attaching to underside of cabinet\n- Visible screws or tension mechanism\n- Compact profile maximizing clearance below cabinet\n\nPAPER TOWEL ARM:\n- Horizontal rod holding paper towel roll\n- Spring-loaded or friction-hold mechanism\n- Allows one-handed tearing motion\n\nPAPER TOWEL ROLL:\n- Standard kitchen paper towel roll (11 inches tall)\n- Positioned for easy access from counter\n- Bottom edge at comfortable reach height (24-26 inches from counter)\n\nCONFIGURATION: Under-cabinet mount for space-saving kitchen storage\n\nSCENE CONTEXT (narrative description):\nKitchen with clean countertops and sink area visible. Natural lighting.\n\nCUSTOMER USE CASE: Kitchen cleanup with space-saving under-cabinet mounting\nThe scene demonstrates how a home cook maximizing kitchen workspace uses this product daily.\n\nPROBLEM SOLVED: Need paper towels accessible but don't want to use counter space\n\nITEMS TO SHOW (1-1 items):\n1. paper towel roll dispensing downward\n\nCONTEXT REQUIREMENTS:\n- kitchen cabinet above\n- counter below with workspace visible\n- sink area or prep zone\n- paper towel at easy reach height (24-26 inches from counter)\n\nVALUE DEMONSTRATION: Saves counter space while keeping paper towels within arm's reach\nThe image must clearly show: Under-cabinet mount saves valuable counter space\n\nSCENE TYPE: in-use\nShow the product in active use during Kitchen cleanup with space-saving under-cabinet mounting\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context\n\u274c FORBIDDEN: Bathroom setting (unless specifically bathroom paper towels), empty holder\n\nCRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_162317",
-      "error_message": null,
-      "finish": "Brushed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var3_20260127_142203.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142203",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var3_20260127_162334.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-550-WPT-BBR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Brushed Bronze\nUNDER-CABINET PAPER TOWEL HOLDER:\nMOUNTING BRACKET:\n- Metal mounting bracket attaching to underside of cabinet\n- Visible screws or tension mechanism\n- Compact profile maximizing clearance below cabinet\n\nPAPER TOWEL ARM:\n- Horizontal rod holding paper towel roll\n- Spring-loaded or friction-hold mechanism\n- Allows one-handed tearing motion\n\nPAPER TOWEL ROLL:\n- Standard kitchen paper towel roll (11 inches tall)\n- Positioned for easy access from counter\n- Bottom edge at comfortable reach height (24-26 inches from counter)\n\nCONFIGURATION: Under-cabinet mount for space-saving kitchen storage\n\nSCENE CONTEXT (narrative description):\nKitchen with clean countertops and sink area visible. Natural lighting.\n\nCUSTOMER USE CASE: Kitchen cleanup with space-saving under-cabinet mounting\nThe scene demonstrates how a home cook maximizing kitchen workspace uses this product daily.\n\nPROBLEM SOLVED: Need paper towels accessible but don't want to use counter space\n\nITEMS TO SHOW (1-1 items):\n1. paper towel roll dispensing downward\n\nCONTEXT REQUIREMENTS:\n- kitchen cabinet above\n- counter below with workspace visible\n- sink area or prep zone\n- paper towel at easy reach height (24-26 inches from counter)\n\nVALUE DEMONSTRATION: Saves counter space while keeping paper towels within arm's reach\nThe image must clearly show: Under-cabinet mount saves valuable counter space\n\nSCENE TYPE: in-use\nShow the product in active use during Kitchen cleanup with space-saving under-cabinet mounting\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context\n\u274c FORBIDDEN: Bathroom setting (unless specifically bathroom paper towels), empty holder\n\nCRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_162334",
-      "error_message": null,
-      "finish": "Brushed Bronze"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 1
+  "selected_lifestyle_image": 1,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/P-550-WPT_var1_20260127_142129.png",
+  "variants": [
+    {
+      "option_sku": "P-550-WPT-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Antique Bronze | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571179140",
+      "gmc_id": "shopify_US_4545081081988_32128571179140"
+    },
+    {
+      "option_sku": "P-550-WPT-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Brushed Bronze | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571211908",
+      "gmc_id": "shopify_US_4545081081988_32128571211908"
+    },
+    {
+      "option_sku": "P-550-WPT-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Matte Black | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571244676",
+      "gmc_id": "shopify_US_4545081081988_32128571244676"
+    },
+    {
+      "option_sku": "P-550-WPT-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Matte Gray | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Keep towels ready where you use them most\u2014wall-mounted installation saves valuable counter space\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571277444",
+      "gmc_id": "shopify_US_4545081081988_32128571277444"
+    },
+    {
+      "option_sku": "P-550-WPT-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Oil Rubbed Bronze | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571310212",
+      "gmc_id": "shopify_US_4545081081988_32128571310212"
+    },
+    {
+      "option_sku": "P-550-WPT-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Polished Chrome | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_37635068887208",
+      "gmc_id": "shopify_US_4545081081988_37635068887208"
+    },
+    {
+      "option_sku": "P-550-WPT-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Satin Nickel | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571342980",
+      "gmc_id": "shopify_US_4545081081988_32128571342980"
+    },
+    {
+      "option_sku": "P-550-WPT-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Matte White | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Keep towels ready where you use them most\u2014wall-mounted installation saves valuable counter space\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_32128571375748",
+      "gmc_id": "shopify_US_4545081081988_32128571375748"
+    },
+    {
+      "option_sku": "P-550-WPT-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Spanish Gold | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829583074",
+      "gmc_id": "shopify_US_4545081081988_43093829583074"
+    },
+    {
+      "option_sku": "P-550-WPT-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Autumn Sparkle | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829615842",
+      "gmc_id": "shopify_US_4545081081988_43093829615842"
+    },
+    {
+      "option_sku": "P-550-WPT-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Glokzin Teal | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829648610",
+      "gmc_id": "shopify_US_4545081081988_43093829648610"
+    },
+    {
+      "option_sku": "P-550-WPT-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Shaded Beige | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829681378",
+      "gmc_id": "shopify_US_4545081081988_43093829681378"
+    },
+    {
+      "option_sku": "P-550-WPT-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Golden Yellow | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829714146",
+      "gmc_id": "shopify_US_4545081081988_43093829714146"
+    },
+    {
+      "option_sku": "P-550-WPT-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Flat Troll Blue | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829746914",
+      "gmc_id": "shopify_US_4545081081988_43093829746914"
+    },
+    {
+      "option_sku": "P-550-WPT-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Sea Foam Green | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829779682",
+      "gmc_id": "shopify_US_4545081081988_43093829779682"
+    },
+    {
+      "option_sku": "P-550-WPT-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Fire Engine Red | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829812450",
+      "gmc_id": "shopify_US_4545081081988_43093829812450"
+    },
+    {
+      "option_sku": "P-550-WPT-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Lavender | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829845218",
+      "gmc_id": "shopify_US_4545081081988_43093829845218"
+    },
+    {
+      "option_sku": "P-550-WPT-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Mediterranean Blue | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829877986",
+      "gmc_id": "shopify_US_4545081081988_43093829877986"
+    },
+    {
+      "option_sku": "P-550-WPT-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Paper Towel Holder Wall Mount 15.5-Inch | Pink | Brass Paper Towel Holders | Allied Brass",
+      "description": "Free up countertop space and keep paper towels within easy reach at the prep sink or cooking zone in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This wall mount paper towel holder adds an industrial pipe-fitting look that works with transitional kitchens and coordinating versatile accessories.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Add an industrial accent\u2014Pipeline-inspired pipe fitting design blends with modern and traditional decor\n- Enjoy a clean, decorative look\u2014protected with a highly durable powder coat finish\n- Count on lasting performance\u2014materials resist corrosion and rust for continual service\n- Install with a matched look\u2014includes color coordinated mounting hardware\n\nSpecs & Installation:\n- Mounting: Wall mount\n- Dimensions (L x H x W): 15.5 x 3 x 4 in.\n- Shipping weight: 1.3 lbs\n- Hardware: Color coordinating screws included\n- Warranty: Limited lifetime warranty\nMultiple designer finish options available (19 finishes)",
+      "offerId": "shopify_US_4545081081988_43093829910754",
+      "gmc_id": "shopify_US_4545081081988_43093829910754"
+    }
+  ]
 }

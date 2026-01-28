@@ -35,6 +35,11 @@ CANDIDATE_SCHEMA = {
             "type": "string",
             "description": "Shopify product description (HTML allowed)",
         },
+        "shopify_meta_description": {
+            "type": "string",
+            "description": "Shopify SEO meta description for search snippets (max 155 characters). Must be compelling, include primary keyword, and stand alone as a product summary.",
+            "maxLength": 155,
+        },
         "claims": {
             "type": "array",
             "items": {
@@ -81,6 +86,7 @@ CANDIDATE_SCHEMA = {
         "bing_description",
         "shopify_title",
         "shopify_description",
+        "shopify_meta_description",
         "claims",
         "self_score",
     ],
@@ -184,15 +190,29 @@ Google Shopping / Performance Max:
 - Provide a clean google_short_title for overlays: omit brand/collection, prefer product type + key dimension.
 - Keep descriptions plain text (avoid HTML).
 
-Microsoft / Bing Shopping:
-- More literal matching; include explicit synonyms in descriptions.
+Microsoft / Bing Shopping (IMPORTANT - different optimization required):
+- Bing uses MORE LITERAL keyword matching than Google — explicit synonyms are critical.
 - Brand is required in titles; include it even if placed at the end.
 - Copilot confidence improves with complete, specific attributes.
+- SYNONYM STRATEGY for Bing descriptions:
+  * Include product type synonyms naturally: "towel bar" AND "towel rack" AND "towel holder"
+  * Include material variations: "solid brass" AND "brass construction"
+  * Include mounting alternatives: "wall mount" AND "wall-mounted" AND "wall hanging"
+  * Include room context variations: "bathroom" AND "bath" for bathroom products
+- Bing description should be SLIGHTLY LONGER than Google to accommodate synonym coverage.
+- Include explicit specifications in description (Copilot extracts these for answers).
+- Category-specific Bing synonyms to include naturally:
+  * Towel Bars: towel bar, towel rack, towel holder, towel rail, bath towel bar
+  * Grab Bars: grab bar, safety bar, bathroom grab bar, ADA grab bar, support bar
+  * Toilet Paper Holders: toilet paper holder, tissue holder, TP holder, toilet roll holder
+  * Robe Hooks: robe hook, towel hook, bathroom hook, wall hook
+  * Glass Shelves: glass shelf, bathroom shelf, wall shelf, floating shelf
+  * Paper Towel Holders: paper towel holder, paper towel stand, kitchen towel holder
 
 Shopify (On-Site):
 - Title becomes H1; prioritize clarity and SEO.
 - First ~155 characters may appear as the meta snippet — make them compelling.
-- Description should be HTML with a <p> problem-first hook, <ul><li> highlights, and specs/warranty detail."""
+- Description should be HTML with a <p> problem-first hook, <ul><li> outcome-focused highlights, specs/warranty detail."""
 
 OPTIMIZATION_TEMPLATE = """
 {system_prompt}
@@ -224,13 +244,23 @@ Google Shopping (feed):
 - google_short_title: max 70 characters, product type + key dimension only (no brand/collection)
 - google_description: plain text, problem-first opening, Highlights bullets, Specs section; no HTML
 
-Bing Shopping (feed):
-- bing_title: max 150 characters, include brand, add extra keywords after 70 chars
-- bing_description: plain text with explicit synonyms included naturally, Highlights bullets, Specs section
+Bing Shopping (feed) - REQUIRES EXPLICIT SYNONYMS:
+- bing_title: max 150 characters, include brand, add extra keywords/synonyms after 70 chars
+- bing_description: MUST include explicit synonyms for literal matching:
+  * Include 2-3 product type synonyms naturally in opening paragraph
+  * Include material and mounting variations
+  * Longer than Google description to accommodate synonym coverage
+  * Example for towel bar: "This wall-mounted towel bar (also called a towel rack or towel holder)..."
+  * Plain text with explicit synonyms, Highlights bullets, detailed Specs section
 
 Shopify (On-Site):
 - shopify_title: H1-friendly, readable, SEO-aware (<=255 chars), collection name included if available
 - shopify_description: HTML with <p> problem-first hook, <ul><li> outcome-focused highlights, specs
+- shopify_meta_description: SEO meta description (max 155 chars) for search engine snippets. MUST:
+  * Be a compelling, standalone product summary
+  * Include primary keyword naturally
+  * Fit within 155 characters (search engines truncate longer)
+  * NOT be a simple truncation of the description - craft it for search results
 
 ## Scoring Rubric (self-score each 0-10)
 1. Specificity: Specific/verifiable claims vs generic

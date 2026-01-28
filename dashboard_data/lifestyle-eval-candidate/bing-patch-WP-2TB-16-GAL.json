@@ -1,11 +1,11 @@
 {
   "sku": "shopify_US_4543468830852_32123054882948",
-  "title": "Wall Mount Glass Shelf 16-Inch Double With Towel Bar Solid Brass | Allied Brass",
-  "description": "Add organized bathroom storage with this wall mount glass shelf featuring two tiers and an integrated towel bar. From the Waverly Place collection, it combines 3/8-inch thick tempered glass with solid brass hardware, and a gallery rail helps keep toiletries and accessories from sliding.\n\nHighlights:\n- Double glass shelf (2-tier) design for bathroom storage and display\n- 3/8-inch thick tempered glass for safety and strength\n- Solid brass hardware with solid brass gallery rail to help secure items\n- Integrated towel bar for hand towels or washcloths\n- Concealed screw mounting hardware for a clean look\n\nSpecs:\n- Dimensions: 16-inch length x 5-inch width x 12-inch height; 5-inch projection\n- Weight capacity: 4 lb\n- Mounting type: wall mount\n- Assembly required: no\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-inch\n- Warranty: Limited Lifetime Warranty\n\nPairs well with transitional bathroom hardware and versatile bath accessories in the Waverly Place collection.",
+  "title": "Glass Shelf With Towel Bar 16-Inch Solid Brass Wall-Mounted | Waverly Place | Allied Brass",
+  "description": "Clear bathroom clutter with a wall-mounted glass shelf that also adds a dedicated spot for towels. This glass shelf (bathroom shelf / wall shelf) includes an integrated towel bar so you get storage and towel-hanging in one coordinated piece.\n\nHighlights:\n- Keep items from sliding off with a solid brass gallery rail.\n- Count on strength and safety with 3/8-Inch thick tempered glass.\n- Add a convenient towel bar (towel rack / towel holder) for hand towels or washcloths near the sink.\n- Install a clean look with concealed screw mounting hardware.\n- Coordinate with the Waverly Place collection\u2014ideal for matching Waverly Place and other transitional bath accessories and transitional bathroom hardware.\n\nSpecs & Installation:\n- Type: Glass shelf with towel bar; wall mount / wall-mounted / wall hanging installation\n- Dimensions: 16-Inch length x 5-Inch width; projection 5 Inches; height 12 Inches\n- Glass thickness: 0.38 Inches (3/8-Inch)\n- Weight capacity: 4 lb\n- Material: solid brass (brass construction) hardware\n- Included: Glass shelf and all installation hardware; screw size #8 x 1 1/4\"\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty\n- Finish variety: Multiple designer finish options available",
   "_meta": {
     "master_sku": "WP-2TB/16-GAL",
-    "generated_at": "2026-01-27T12:34:57.198653",
-    "quality_score": 90.0,
+    "generated_at": "2026-01-28T03:05:51.969153",
+    "quality_score": 86.67,
     "approval_status": "approved"
   },
   "_previous": {
@@ -14,32 +14,77 @@
   },
   "lifestyle_images": [
     {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var1_20260125_192513.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_192513",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var1_20260127_143930.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_143930",
+      "error_message": null
+    },
+    {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var1_20260127_160425.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/WP-2TB-16-GAL-ORB.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Oil Rubbed Bronze\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160425",
-      "error_message": null,
-      "finish": "Oil Rubbed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var2_20260125_192528.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_192528",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var2_20260127_143947.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_143947",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var2_20260127_160442.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/WP-2TB-16-GAL-ORB.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Oil Rubbed Bronze\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160442",
-      "error_message": null,
-      "finish": "Oil Rubbed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var3_20260125_192543.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_192543",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var3_20260127_144003.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144003",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2TB-16-GAL_var3_20260127_160458.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/WP-2TB-16-GAL-ORB.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Oil Rubbed Bronze\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160458",
-      "error_message": null,
-      "finish": "Oil Rubbed Bronze"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 1
+  "selected_lifestyle_image": null
 }

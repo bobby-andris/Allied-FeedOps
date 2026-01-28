@@ -241,12 +241,57 @@ async def optimize_parent_sku(
                 num_variations=num_variations,
             )
 
-            # Attach to candidate
-            verified_candidate = verified_candidate.model_copy(
-                update={"lifestyle_images": lifestyle_results}
+            # Score images and select the best one (if AI selection enabled)
+            selected_image_num = None
+            ai_select_enabled = (
+                os.environ.get("LIFESTYLE_IMAGE_AI_SELECT", "true").lower() == "true"
             )
 
-            print(f"✅ Lifestyle images attached to candidate")
+            if ai_select_enabled and lifestyle_results:
+                from feedops.pipeline.lifestyle_images import (
+                    select_best_lifestyle_image,
+                )
+
+                print(f"\n{'='*70}")
+                print("Selecting best lifestyle image using AI evaluation...")
+                print(f"{'='*70}")
+
+                selected_image_num, image_scores = select_best_lifestyle_image(
+                    image_results=lifestyle_results,
+                    reference_image_url=product_image_urls[0],
+                    category=parent_sku.category,
+                    api_key=gemini_api_key,
+                )
+
+                if selected_image_num:
+                    print(f"✅ Selected variation {selected_image_num} as best image")
+                else:
+                    # Fallback to first successful image
+                    for result in lifestyle_results:
+                        if result.generation_success:
+                            selected_image_num = result.variation_num
+                            print(
+                                f"⚠️ AI selection failed, using variation {selected_image_num}"
+                            )
+                            break
+            else:
+                # AI selection disabled - use first successful image
+                for result in lifestyle_results:
+                    if result.generation_success:
+                        selected_image_num = result.variation_num
+                        break
+
+            # Attach to candidate
+            verified_candidate = verified_candidate.model_copy(
+                update={
+                    "lifestyle_images": lifestyle_results,
+                    "selected_lifestyle_image": selected_image_num,
+                }
+            )
+
+            print(
+                f"✅ Lifestyle images attached to candidate (selected: variation {selected_image_num})"
+            )
         else:
             print("⚠️  No product image URL found - skipping lifestyle image generation")
 

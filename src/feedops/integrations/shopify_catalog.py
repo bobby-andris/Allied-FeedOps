@@ -800,3 +800,356 @@ def get_shopify_patch_for_sku(
         return patch
     except (json.JSONDecodeError, OSError):
         return None
+
+
+# ============================================================================
+# Shopify Image Upload Functions
+# ============================================================================
+
+SHOPIFY_STAGED_UPLOADS_CREATE = """
+mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
+  stagedUploadsCreate(input: $input) {
+    stagedTargets {
+      url
+      resourceUrl
+      parameters {
+        name
+        value
+      }
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+SHOPIFY_FILE_CREATE = """
+mutation fileCreate($files: [FileCreateInput!]!) {
+  fileCreate(files: $files) {
+    files {
+      id
+      alt
+      ... on MediaImage {
+        image {
+          url
+        }
+      }
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+SHOPIFY_PRODUCT_CREATE_MEDIA = """
+mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
+  productCreateMedia(productId: $productId, media: $media) {
+    media {
+      id
+      alt
+      ... on MediaImage {
+        image {
+          url
+        }
+      }
+    }
+    mediaUserErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+
+def upload_lifestyle_image_to_shopify(
+    image_path: str | Path,
+    product_id: str,
+    alt_text: str = "AI-generated lifestyle image",
+    *,
+    store_url: str | None = None,
+    access_token: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> dict:
+    """
+    Upload a lifestyle image to Shopify and attach it to a product.
+
+    This function:
+    1. Creates a staged upload URL using Shopify's stagedUploadsCreate mutation
+    2. Uploads the image file to the staged URL
+    3. Creates the file in Shopify's file storage
+    4. Attaches the media to the product
+
+    Args:
+        image_path: Local path to the image file
+        product_id: Shopify product ID (numeric or GID format)
+        alt_text: Alt text for the image
+        store_url: Store URL (defaults to SHOPIFY_STORE_URL env var)
+        access_token: API token (defaults to SHOPIFY_ACCESS_TOKEN env var)
+        env: Environment variables mapping
+
+    Returns:
+        Dict with:
+        - success: bool
+        - image_url: CDN URL of uploaded image (if success)
+        - media_id: Shopify media ID (if success)
+        - errors: List of error messages (if any)
+    """
+    import mimetypes
+
+    env = env or os.environ
+    store_url = store_url or env.get("SHOPIFY_STORE_URL")
+    access_token = access_token or env.get("SHOPIFY_ACCESS_TOKEN")
+
+    if not store_url or not access_token:
+        raise ValueError(
+            "Missing Shopify credentials. Set SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN."
+        )
+
+    image_path = Path(image_path)
+    if not image_path.exists():
+        return {
+            "success": False,
+            "errors": [f"Image file not found: {image_path}"],
+        }
+
+    # Determine mime type
+    mime_type, _ = mimetypes.guess_type(str(image_path))
+    if not mime_type:
+        mime_type = "image/png"
+
+    api_version = env.get("SHOPIFY_API_VERSION", SHOPIFY_API_VERSION_DEFAULT)
+    endpoint = f"https://{_normalize_store_host(store_url)}/admin/api/{api_version}/graphql.json"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": access_token,
+    }
+
+    gid = _product_gid(product_id)
+    file_size = image_path.stat().st_size
+
+    # Step 1: Create staged upload
+    staged_input = [
+        {
+            "filename": image_path.name,
+            "mimeType": mime_type,
+            "resource": "IMAGE",
+            "fileSize": str(file_size),
+            "httpMethod": "POST",
+        }
+    ]
+
+    with httpx.Client(timeout=httpx.Timeout(60.0)) as client:
+        response = client.post(
+            endpoint,
+            json={
+                "query": SHOPIFY_STAGED_UPLOADS_CREATE,
+                "variables": {"input": staged_input},
+            },
+            headers=headers,
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+    if payload.get("errors"):
+        return {
+            "success": False,
+            "errors": [str(e) for e in payload["errors"]],
+            "step": "staged_upload_create",
+        }
+
+    staged_data = payload.get("data", {}).get("stagedUploadsCreate", {})
+    user_errors = staged_data.get("userErrors", [])
+    if user_errors:
+        return {
+            "success": False,
+            "errors": [f"{e['field']}: {e['message']}" for e in user_errors],
+            "step": "staged_upload_create",
+        }
+
+    targets = staged_data.get("stagedTargets", [])
+    if not targets:
+        return {
+            "success": False,
+            "errors": ["No staged upload target returned"],
+            "step": "staged_upload_create",
+        }
+
+    target = targets[0]
+    upload_url = target.get("url")
+    resource_url = target.get("resourceUrl")
+    parameters = target.get("parameters", [])
+
+    # Step 2: Upload file to staged URL
+    form_data = {param["name"]: param["value"] for param in parameters}
+
+    with open(image_path, "rb") as f:
+        files = {"file": (image_path.name, f, mime_type)}
+        with httpx.Client(timeout=httpx.Timeout(120.0)) as client:
+            upload_response = client.post(upload_url, data=form_data, files=files)
+
+    if upload_response.status_code not in (200, 201, 204):
+        return {
+            "success": False,
+            "errors": [f"Upload failed with status {upload_response.status_code}"],
+            "step": "file_upload",
+        }
+
+    # Step 3: Attach media to product
+    media_input = [
+        {
+            "originalSource": resource_url,
+            "alt": alt_text,
+            "mediaContentType": "IMAGE",
+        }
+    ]
+
+    with httpx.Client(timeout=httpx.Timeout(60.0)) as client:
+        response = client.post(
+            endpoint,
+            json={
+                "query": SHOPIFY_PRODUCT_CREATE_MEDIA,
+                "variables": {"productId": gid, "media": media_input},
+            },
+            headers=headers,
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+    if payload.get("errors"):
+        return {
+            "success": False,
+            "errors": [str(e) for e in payload["errors"]],
+            "step": "product_create_media",
+        }
+
+    media_data = payload.get("data", {}).get("productCreateMedia", {})
+    media_errors = media_data.get("mediaUserErrors", [])
+    if media_errors:
+        return {
+            "success": False,
+            "errors": [f"{e['field']}: {e['message']}" for e in media_errors],
+            "step": "product_create_media",
+        }
+
+    media_list = media_data.get("media", [])
+    if not media_list:
+        return {
+            "success": False,
+            "errors": ["No media returned after creation"],
+            "step": "product_create_media",
+        }
+
+    media = media_list[0]
+    image_url = ""
+    if "image" in media and media["image"]:
+        image_url = media["image"].get("url", "")
+
+    return {
+        "success": True,
+        "image_url": image_url,
+        "media_id": media.get("id"),
+        "resource_url": resource_url,
+    }
+
+
+def upload_selected_lifestyle_image(
+    patch: dict,
+    images_base_dir: Path | None = None,
+    *,
+    store_url: str | None = None,
+    access_token: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> dict:
+    """
+    Upload the selected lifestyle image from a patch to Shopify.
+
+    Args:
+        patch: Shopify patch dictionary with lifestyle_images and selected_lifestyle_image
+        images_base_dir: Base directory for resolving image paths (optional)
+        store_url: Store URL
+        access_token: API token
+        env: Environment variables mapping
+
+    Returns:
+        Dict with upload result including CDN URL if successful
+    """
+    # Get selected image
+    lifestyle_images = patch.get("lifestyle_images", [])
+    selected_num = patch.get("selected_lifestyle_image")
+
+    if not lifestyle_images:
+        return {
+            "success": False,
+            "errors": ["No lifestyle images in patch"],
+        }
+
+    # Find the selected image
+    selected_image = None
+    for img in lifestyle_images:
+        if not isinstance(img, dict):
+            continue
+        if selected_num is not None and img.get("variation_num") == selected_num:
+            selected_image = img
+            break
+        if selected_image is None and img.get("generation_success"):
+            selected_image = img  # Fallback to first successful
+
+    if not selected_image:
+        return {
+            "success": False,
+            "errors": ["No valid lifestyle image found"],
+        }
+
+    image_path = selected_image.get("image_path")
+    if not image_path:
+        return {
+            "success": False,
+            "errors": ["Selected image has no path"],
+        }
+
+    # Resolve image path
+    resolved_path = Path(image_path)
+    if not resolved_path.is_absolute() and images_base_dir:
+        resolved_path = images_base_dir / image_path
+
+    if not resolved_path.exists():
+        return {
+            "success": False,
+            "errors": [f"Image file not found: {resolved_path}"],
+        }
+
+    # Get product ID from patch
+    # Shopify patches use shopify_id or we need to extract from offer ID
+    offer_id = patch.get("offerId", "")
+    product_id = patch.get("shopify_id")
+
+    if not product_id and offer_id.startswith("shopify_US_"):
+        # Extract product ID from format: shopify_US_{product_id}_{variant_id}
+        parts = offer_id.split("_")
+        if len(parts) >= 3:
+            product_id = parts[2]
+
+    if not product_id:
+        return {
+            "success": False,
+            "errors": ["Cannot determine Shopify product ID from patch"],
+        }
+
+    # Get SKU for alt text
+    meta = patch.get("_meta", {})
+    sku = meta.get("master_sku", "")
+    alt_text = f"Lifestyle image for {sku}" if sku else "AI-generated lifestyle image"
+
+    return upload_lifestyle_image_to_shopify(
+        image_path=resolved_path,
+        product_id=product_id,
+        alt_text=alt_text,
+        store_url=store_url,
+        access_token=access_token,
+        env=env,
+    )

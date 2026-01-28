@@ -1,45 +1,221 @@
 {
   "sku": "shopify_US_8033759002850_43853036454114",
-  "title": "ADA Compliant Grab Bar 63-Inch 3-Post Wall Mount Iron Pipe For Bathroom, Pipeline Collection | Allied Brass",
-  "description": "Add steady support in the bathroom with this ADA compliant grab bar from the Pipeline collection. The extended 63-inch length and 3-post grab bar configuration (with a third center bracket) are designed to help provide stability and balance for everyday use. Its industrial pipe styling complements transitional bathroom hardware and versatile bath accessories.\n\nHighlights:\n- ADA grab bar / ADA compliant grab bar for accessible bathroom use\n- 3-post grab bar design with center bracket for enhanced stability\n- Wall mount grab bar keeps floor space clear\n- Iron pipe construction with a highly durable powder coat finish\n- Designer finish delivers corrosion-free and rust-free performance\n\nSpecs:\n- Overall length: 63 in\n- Height: 3 in\n- Width/Projection: 3.58 in\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Limited lifetime warranty\n- Available in multiple designer finish options",
+  "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+  "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence.\n\nHighlights:\n- Get steady balance across a longer stretch with an extended 60-inch bathroom grab bar\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
   "_meta": {
     "master_sku": "P-730-GB360",
-    "generated_at": "2026-01-27T12:38:57.842091",
+    "generated_at": "2026-01-28T03:11:03.213076",
     "quality_score": 88.33,
     "approval_status": "approved"
   },
   "_previous": {
     "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
-    "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort."
+    "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
   },
   "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var1_20260127_144108.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144108",
+      "error_message": null
+    },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var1_20260127_162441.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-730-GB360-BBR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Brushed Bronze\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nIndustrial bathroom with exposed concrete, blackened metal accents. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_162441",
-      "error_message": null,
-      "finish": "Brushed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var2_20260127_144127.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144127",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var2_20260127_162457.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-730-GB360-BBR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Brushed Bronze\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nIndustrial bathroom with exposed concrete, blackened metal accents. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_162457",
-      "error_message": null,
-      "finish": "Brushed Bronze"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var3_20260127_144141.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144141",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var3_20260127_162514.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-730-GB360-BBR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Brushed Bronze\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nIndustrial bathroom with exposed concrete, blackened metal accents. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_162514",
-      "error_message": null,
-      "finish": "Brushed Bronze"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 1
+  "selected_lifestyle_image": 2,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var2_20260127_144127.png",
+  "variants": [
+    {
+      "option_sku": "P-730-GB360-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Antique Bronze | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-ABZ"
+    },
+    {
+      "option_sku": "P-730-GB360-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Brushed Bronze | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-BBR"
+    },
+    {
+      "option_sku": "P-730-GB360-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Matte Black | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-BKM"
+    },
+    {
+      "option_sku": "P-730-GB360-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Matte Gray | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials.\n\nHighlights:\n- Get steady balance across a longer stretch with an extended 60-inch bathroom grab bar\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-GYM"
+    },
+    {
+      "option_sku": "P-730-GB360-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Oil Rubbed Bronze | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-ORB"
+    },
+    {
+      "option_sku": "P-730-GB360-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Polished Chrome | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-PC"
+    },
+    {
+      "option_sku": "P-730-GB360-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Satin Nickel | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-SN"
+    },
+    {
+      "option_sku": "P-730-GB360-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Matte White | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere.\n\nHighlights:\n- Get steady balance across a longer stretch with an extended 60-inch bathroom grab bar\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-WHM"
+    },
+    {
+      "option_sku": "P-730-GB360-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Spanish Gold | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-SGL"
+    },
+    {
+      "option_sku": "P-730-GB360-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Autumn Sparkle | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-ASP"
+    },
+    {
+      "option_sku": "P-730-GB360-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Glokzin Teal | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-GLT"
+    },
+    {
+      "option_sku": "P-730-GB360-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Shaded Beige | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-SHB"
+    },
+    {
+      "option_sku": "P-730-GB360-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Golden Yellow | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-GLY"
+    },
+    {
+      "option_sku": "P-730-GB360-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Flat Troll Blue | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-FTB"
+    },
+    {
+      "option_sku": "P-730-GB360-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Sea Foam Green | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-SFG"
+    },
+    {
+      "option_sku": "P-730-GB360-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Fire Engine Red | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-FER"
+    },
+    {
+      "option_sku": "P-730-GB360-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Lavender | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-LVN"
+    },
+    {
+      "option_sku": "P-730-GB360-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Mediterranean Blue | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-MBL"
+    },
+    {
+      "option_sku": "P-730-GB360-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Grab Bar 60-Inch Extended 3-Post ADA Compliant | Pink | Pipeline Grab Bars | Allied Brass | Bathroom Safety Bar Support Bar | Allied Brass",
+      "description": "Add dependable support in the bathroom with a wall-mounted grab bar (also called a safety bar or support bar) in an extended 60-inch length\u2014ideal for accessible layouts and everyday confidence in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Count on added rigidity from the 3-post design, featuring a third center bracket for stability\n- Match coordinating pieces from the Pipeline grab bars collection for a cohesive look\n- Works well with transitional bathroom hardware for a balanced, versatile style\n- Choose the look you want with multiple designer finish options available for versatile bath accessories\n\nSpecs & Installation:\n- Product type: Grab bar / bathroom grab bar / safety bar (wall mount, wall-mounted, wall hanging)\n- Design: Extended 3-post with center support bracket\n- Compliance: ADA Compliant\n- Dimensions (overall): 63 in. (L) x 3 in. (H) x 3.58 in. (W)\n- Box dimensions: 64 in. x 6 in. x 8 in.\n- Shipping weight: 6 lbs\n- Warranty: Limited lifetime warranty",
+      "sku": "P-730-GB360-PNK"
+    }
+  ]
 }

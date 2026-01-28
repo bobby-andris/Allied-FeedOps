@@ -1,45 +1,266 @@
 {
   "productId": "7924786331874",
-  "title": "Wall Mount Robe Hook Solid Brass 2.64-Inch Projection | Malibu Collection | Allied Brass",
-  "body_html": "<p>Add a dedicated place to hang robes and towels with this wall mount robe hook, crafted from brass and made to coordinate with the Malibu collection.</p>\n<ul>\n <li><strong>Wall mount</strong> installation helps save bathroom floor space</li>\n <li><strong>Contemporary design</strong> that suits transitional bathroom hardware</li>\n <li><strong>Brass construction</strong> for a sturdy everyday hook</li>\n <li><strong>Color-coordinated mounting hardware</strong> included</li>\n <li><strong>Assembled in the USA</strong></li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Category: Robe Hooks</li>\n <li>Collection: Malibu</li>\n <li>Material: Brass</li>\n <li>Mounting type: Wall mount</li>\n <li>Overall size: 2 in L x 2 in H x 2.64 in W</li>\n <li>Projection: 2.64 in</li>\n <li>Weight capacity: 2 lb</li>\n <li>Product weight: 0.5 lb</li>\n <li>Screw size: 6</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Available in multiple designer finish options to help match other versatile bath accessories in the Malibu collection.</p>",
+  "title": "2-Inch Solid Brass Robe Hook Wall Mount | Malibu Collection | Allied Brass",
+  "body_html": "<p>Stop draping robes and towels over doors and counters. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li><strong>Keep towels and robes organized</strong> with a space-saving wall-mounted hook beside the shower, tub, or vanity</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>",
+  "meta_description": "",
   "_meta": {
     "master_sku": "MB-20",
-    "generated_at": "2026-01-27T12:15:11.256682",
-    "quality_score": 90.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-28T02:41:31.813760",
+    "quality_score": 85.0,
+    "approval_status": "rejected"
   },
   "_previous": {
     "title": "Malibu Robe Hook",
-    "description": "The contemporary minimalist look of the elegant Malibu collection has timeless appeal. The Malibu Robe Hook is constructed of the finest solid brass materials to provide a sturdy hook for your robes and towels. The hook is finished with our designer lifetime finishes to provide unparalleled performance and durability."
+    "description": "The contemporary minimalist look of the elegant Malibu collection has timeless appeal. The Malibu Robe Hook is constructed of the finest solid brass materials to provide a sturdy hook for your robes and towels. The hook is finished with our designer lifetime finishes to provide unparalleled performance and durability. Contemporary design fits modern styles Available in a wide variety of lifetime designer finishes Color coordinated mounting hardware included Priced To Fit Any Budget Assembled in the USA Limited Lifetime Warranty Specification & Documentation Product dimensions, in. (LxHxW): 2x2x2.64 Box dimensions, in. (LxHxW): 4x6x10 Shipping weight, lbs: 1 Installation Instruction Technical Specification MB-20-Installation.pdf MB-20-Specification.pdf"
   },
   "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var1_20260127_142618.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142618",
+      "error_message": null
+    },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var1_20260127_160820.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MB-20-BKM.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Matte Black\nROBE HOOK:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth surface\n- Secured to wall with screws\n\nHOOK PROJECTION:\n- Curved or straight projection extending from wall\n- Single or double hook design\n- Smooth polished finish\n- Designed for hanging robes or towels\n\nCONFIGURATION: Simple hook for quick hang-up of robes and towels\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bathrobe and towel hanging near shower entry\nThe scene demonstrates how a homeowner using bathrobe in morning/evening routine uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang robe before shower and after bath\n\nITEMS TO SHOW (1-1 items):\n1. Plush white bathrobe or large bath towel hanging FROM hook\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near shower entry or door\n- bathrobe hanging naturally showing hook function\n- shower door or enclosure visible in background\n- single item (not multiple items piled on hook)\n\nVALUE DEMONSTRATION: Simple hook design for quick hang-up of robes and towels\nThe image must clearly show: Single bathrobe or oversized towel showing natural drape from hook\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160820",
-      "error_message": null,
-      "finish": "Matte Black"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var2_20260127_142635.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142635",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var2_20260127_160836.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MB-20-BKM.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Matte Black\nROBE HOOK:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth surface\n- Secured to wall with screws\n\nHOOK PROJECTION:\n- Curved or straight projection extending from wall\n- Single or double hook design\n- Smooth polished finish\n- Designed for hanging robes or towels\n\nCONFIGURATION: Simple hook for quick hang-up of robes and towels\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bathrobe and towel hanging near shower entry\nThe scene demonstrates how a homeowner using bathrobe in morning/evening routine uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang robe before shower and after bath\n\nITEMS TO SHOW (1-1 items):\n1. Plush white bathrobe or large bath towel hanging FROM hook\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near shower entry or door\n- bathrobe hanging naturally showing hook function\n- shower door or enclosure visible in background\n- single item (not multiple items piled on hook)\n\nVALUE DEMONSTRATION: Simple hook design for quick hang-up of robes and towels\nThe image must clearly show: Single bathrobe or oversized towel showing natural drape from hook\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160836",
-      "error_message": null,
-      "finish": "Matte Black"
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var3_20260127_142651.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_142651",
+      "error_message": null
     },
     {
       "image_path": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var3_20260127_160900.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MB-20-BKM.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nFINISH: Matte Black\nROBE HOOK:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth surface\n- Secured to wall with screws\n\nHOOK PROJECTION:\n- Curved or straight projection extending from wall\n- Single or double hook design\n- Smooth polished finish\n- Designed for hanging robes or towels\n\nCONFIGURATION: Simple hook for quick hang-up of robes and towels\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bathrobe and towel hanging near shower entry\nThe scene demonstrates how a homeowner using bathrobe in morning/evening routine uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang robe before shower and after bath\n\nITEMS TO SHOW (1-1 items):\n1. Plush white bathrobe or large bath towel hanging FROM hook\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near shower entry or door\n- bathrobe hanging naturally showing hook function\n- shower door or enclosure visible in background\n- single item (not multiple items piled on hook)\n\nVALUE DEMONSTRATION: Simple hook design for quick hang-up of robes and towels\nThe image must clearly show: Single bathrobe or oversized towel showing natural drape from hook\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
       "timestamp": "20260127_160900",
-      "error_message": null,
-      "finish": "Matte Black"
+      "error_message": null
     }
   ],
-  "selected_lifestyle_image": 1
+  "selected_lifestyle_image": 3,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/MB-20_var3_20260127_142651.png",
+  "variants": [
+    {
+      "option_sku": "MB-20-ABR",
+      "finish": "Antique Brass",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Antique Brass | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Antique Brass brings warm, timeless elegance</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Antique Bronze | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Brushed Bronze | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Matte Black | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-CA",
+      "finish": "Antique Copper",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Antique Copper | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Antique Copper creates an inviting, organic feel</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Matte Gray | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li><strong>Keep towels and robes organized</strong> with a space-saving wall-mounted hook beside the shower, tub, or vanity</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Oil Rubbed Bronze | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-PB",
+      "finish": "Polished Brass",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Polished Brass | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Polished Brass brings warm, timeless elegance</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Polished Chrome | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-PEW",
+      "finish": "Antique Pewter",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Antique Pewter | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Antique Pewter blends effortlessly with transitional decor</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-PNI",
+      "finish": "Polished Nickel",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Polished Nickel | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Polished Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-SBR",
+      "finish": "Satin Brass",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Satin Brass | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Satin Brass brings warm, timeless elegance</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-SCH",
+      "finish": "Satin Chrome",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Satin Chrome | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Satin Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Satin Nickel | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-UNL",
+      "finish": "Unlacquered Brass",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Unlacquered Brass | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Unlacquered Brass develops a unique, one-of-a-kind patina over time</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-VB",
+      "finish": "Venetian Bronze",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Venetian Bronze | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Venetian Bronze brings rich depth and character</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Matte White | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li><strong>Keep towels and robes organized</strong> with a space-saving wall-mounted hook beside the shower, tub, or vanity</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Spanish Gold | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Autumn Sparkle | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Glokzin Teal | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Shaded Beige | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Golden Yellow | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Flat Troll Blue | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Sea Foam Green | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Fire Engine Red | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Lavender | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Mediterranean Blue | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    },
+    {
+      "option_sku": "MB-20-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "2-Inch Solid Brass Robe Hook Wall Mount | Pink | Malibu Collection | Allied Brass",
+      "description": "<p>Stop draping robes and towels over doors and counters in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. The Malibu robe hook adds a dedicated, easy-to-reach hanging spot with a compact profile that suits transitional bathrooms.</p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li><strong>Count on sturdy everyday performance</strong> with solid brass construction</li>\n <li><strong>Create a coordinated look</strong> with the Malibu robe hooks collection\u2014designed as transitional bathroom hardware and versatile bath accessories</li>\n <li><strong>Match your bathroom hardware</strong> with multiple designer finish options available</li>\n <li><strong>Install with a clean, finished look</strong> using color-coordinated mounting hardware</li>\n</ul>\n<p><strong>Specs &amp; Details</strong><br>\nDimensions (L x H x W): 2 in. x 2 in. x 2.64 in.<br>\nBox dimensions (L x H x W): 4 in. x 6 in. x 10 in.<br>\nShipping weight: 1 lb.<br>\nAssembly: Assembled in the USA<br>\nWarranty: Limited Lifetime Warranty</p>"
+    }
+  ]
 }

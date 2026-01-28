@@ -97,6 +97,17 @@ def parse_candidate_response(response: dict) -> Candidate:
 
     google_short_title = _trim_google_short_title(response["google_short_title"])
 
+    # Get shopify_meta_description, generate fallback from description if not provided
+    shopify_meta_description = response.get("shopify_meta_description", "")
+    if not shopify_meta_description:
+        # Fallback: extract first 155 chars from shopify_description (strip HTML)
+        import re
+
+        desc = response.get("shopify_description", "")
+        text = re.sub(r"<[^>]+>", " ", desc)
+        text = re.sub(r"\s+", " ", text).strip()
+        shopify_meta_description = text[:155] if text else ""
+
     return Candidate(
         google_title=response["google_title"],
         google_short_title=google_short_title,
@@ -105,6 +116,7 @@ def parse_candidate_response(response: dict) -> Candidate:
         bing_description=response["bing_description"],
         shopify_title=response["shopify_title"],
         shopify_description=response["shopify_description"],
+        shopify_meta_description=shopify_meta_description,
         claims=claims,
         self_score=self_score,
     )
