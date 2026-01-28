@@ -1055,7 +1055,7 @@ def render_batch_management_tab(
                     st.caption(f"Published: {batch['published_at'][:10]}")
 
                 # Show SKUs in batch
-                from feedops.db import get_batch_skus, update_batch
+                from feedops.db import get_batch_skus
 
                 batch_skus = get_batch_skus(db_path, batch_id=batch["batch_id"])
                 if batch_skus:
@@ -1221,12 +1221,11 @@ def _execute_batch_action(
         st.success(f"✅ Batch executed: {success_count} success, {failed_count} failed")
         
         # Update batch status
-        from feedops.db import update_batch
-        update_batch(
+        from feedops.db import update_batch_status
+        update_batch_status(
             db_path,
             batch_id=batch_id,
             status="published" if failed_count == 0 else "partial",
-            published_at=datetime.now(timezone.utc).isoformat(),
             success_count=success_count,
             failed_count=failed_count,
         )
