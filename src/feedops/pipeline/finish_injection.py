@@ -58,6 +58,13 @@ def _build_finish_benefit_clause(
     meta: dict | None,
     room_context: str | None,
 ) -> str | None:
+    """Build a relative clause describing the finish benefit.
+
+    The returned string is joined onto the first sentence as:
+        ``"...in {finish_name}, {clause}."``
+    so it must be grammatically valid after a comma — typically a
+    relative clause starting with "which" or a participial phrase.
+    """
     if not meta:
         return None
     functional_desc = (meta.get("functional_description") or "").strip()
@@ -70,10 +77,24 @@ def _build_finish_benefit_clause(
         rest = functional_desc[len(finish_name):].lstrip()
         if not rest:
             return None
+        # If the remainder starts with a verb, make it a relative clause.
         if rest.lower().startswith(_FINISH_VERB_PREFIXES):
             return f"which {rest}"
-        return rest
-    return functional_desc
+        # Otherwise also wrap with "which" so the join is grammatical.
+        # "in Antique Brass, features a softened..." is broken;
+        # "in Antique Brass, which features a softened..." is correct.
+        if rest[0].islower():
+            return f"which {rest}"
+        # Starts with uppercase — treat as an appositive.
+        first_word = rest.split()[0].rstrip(",").lower()
+        if first_word.startswith(("a ", "an ")):
+            return rest[0].lower() + rest[1:]
+        return f"which {rest[0].lower()}{rest[1:]}"
+    # functional_desc doesn't start with finish name — use as-is,
+    # but ensure it can follow "in {finish}, ..."
+    if functional_desc[0].isupper():
+        return f"which {functional_desc[0].lower()}{functional_desc[1:]}"
+    return f"which {functional_desc}"
 
 
 def _replace_first_sentence_with_finish(

@@ -14,8 +14,8 @@ import httpx
 
 SHOPIFY_API_VERSION_DEFAULT = "2026-01"
 SHOPIFY_GRAPHQL_QUERY = """
-query ProductsForCatalog($first: Int!, $after: String) {
-  products(first: $first, after: $after) {
+query ProductsForCatalog($first: Int!, $after: String, $query: String) {
+  products(first: $first, after: $after, query: $query) {
     nodes {
       id
       legacyResourceId
@@ -187,7 +187,10 @@ def _extract_image_url(nodes: list[dict]) -> str:
 
 
 def fetch_shopify_products(
-    limit: int | None = None, *, env: Mapping[str, str] | None = None
+    limit: int | None = None,
+    *,
+    env: Mapping[str, str] | None = None,
+    query: str | None = None,
 ) -> list[dict]:
     env = env or os.environ
     store_url = env.get("SHOPIFY_STORE_URL")
@@ -214,7 +217,7 @@ def fetch_shopify_products(
             first = page_size
             if remaining is not None:
                 first = min(first, remaining)
-            variables = {"first": first, "after": after}
+            variables = {"first": first, "after": after, "query": query}
             response = client.post(
                 endpoint,
                 json={"query": SHOPIFY_GRAPHQL_QUERY, "variables": variables},
@@ -229,6 +232,7 @@ def fetch_shopify_products(
             result = data.get("products", {})
             nodes = result.get("nodes", [])
             products.extend(nodes)
+            page_info = result.get("pageInfo", {})
 
             if remaining is not None:
                 remaining -= len(nodes)
@@ -241,6 +245,30 @@ def fetch_shopify_products(
             after = page_info.get("endCursor")
 
     return products
+
+
+def fetch_shopify_product(
+    master_sku: str, *, env: Mapping[str, str] | None = None
+) -> dict | None:
+    """Fetch a single Shopify product matching the master SKU."""
+    finish_map = _load_finish_codes()
+    target = (master_sku or "").strip().upper()
+    if not target:
+        return None
+    search_query = f"sku:{target}*"
+    products = fetch_shopify_products(limit=50, env=env, query=search_query)
+    if not products:
+        products = fetch_shopify_products(limit=200, env=env, query=None)
+    for product in products:
+        variants = product.get("variants", {}).get("nodes", []) or []
+        for variant in variants:
+            sku = variant.get("sku") or ""
+            finish = _derive_finish(variant)
+            finish_code = _derive_finish_code(sku, finish, finish_map)
+            derived = _derive_master_sku(sku, finish_code)
+            if derived and derived.strip().upper() == target:
+                return product
+    return None
 
 
 def write_shopify_catalog_csv(output_path: Path, *, limit: int | None = None) -> None:

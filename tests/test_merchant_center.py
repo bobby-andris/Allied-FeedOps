@@ -55,6 +55,42 @@ def test_write_merchant_center_snapshot_jsonl(monkeypatch, tmp_path):
     assert "fetched_at" in payload
 
 
+def test_fetch_merchant_center_items_normalizes(monkeypatch):
+    from feedops.integrations import merchant_center
+
+    products = [
+        {
+            "offerId": "shopify_US_1_2",
+            "productAttributes": {
+                "customLabel0": "label0",
+                "customLabel1": "label1",
+                "googleProductCategory": "Home & Garden",
+                "productTypes": ["Bath"],
+            },
+            "productStatus": {
+                "destinationStatuses": [
+                    {"destination": "Shopping", "status": "approved"}
+                ],
+                "itemLevelIssues": [
+                    {"code": "title_too_long", "severity": "disapproved"}
+                ],
+            },
+        }
+    ]
+
+    monkeypatch.setattr(
+        merchant_center,
+        "fetch_merchant_center_products",
+        lambda *_args, **_kwargs: products,
+    )
+
+    normalized = merchant_center.fetch_merchant_center_items(limit=1)
+    assert len(normalized) == 1
+    assert normalized[0]["offerId"] == "shopify_US_1_2"
+    assert normalized[0]["customLabel0"] == "label0"
+    assert normalized[0]["destinationStatuses"][0]["status"] == "approved"
+
+
 def test_load_merchant_center_snapshot(monkeypatch, tmp_path):
     from feedops.integrations import merchant_center
 
@@ -145,6 +181,7 @@ def test_load_credentials_falls_back_to_creds_dir(monkeypatch, tmp_path):
 
 def test_load_credentials_uses_google_ads_config(tmp_path):
     from google.oauth2.credentials import Credentials
+
     from feedops.integrations import merchant_center
 
     config_path = tmp_path / "google-ads.yaml"

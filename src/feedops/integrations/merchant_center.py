@@ -243,6 +243,20 @@ def fetch_merchant_center_products(
     return products
 
 
+def fetch_merchant_center_items(
+    limit: int | None = None, *, env: Mapping[str, str] | None = None
+) -> list[dict]:
+    """Fetch and normalize Merchant Center products."""
+    products = fetch_merchant_center_products(limit=limit, env=env)
+    fetched_at = datetime.now(timezone.utc).isoformat()
+    normalized = []
+    for product in products:
+        record = _normalize_product(product, fetched_at)
+        if record:
+            normalized.append(record)
+    return normalized
+
+
 def load_merchant_center_snapshot(path: Path) -> dict[str, dict]:
     if not path.exists():
         return {}

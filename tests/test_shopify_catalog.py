@@ -79,3 +79,60 @@ def test_write_shopify_catalog_csv_writes_expected_fields(monkeypatch, tmp_path)
     assert value("Narraive Copy") == "Desc"
     assert value("Material") == "Brass"
     assert value("Main URL") == "https://cdn.example.com/variant.jpg"
+
+
+def test_fetch_shopify_product_matches_master_sku(monkeypatch):
+    from feedops.integrations import shopify_catalog
+
+    products = [
+        {
+            "id": "gid://shopify/Product/999",
+            "legacyResourceId": 999,
+            "title": "Match Me",
+            "variants": {
+                "nodes": [
+                    {
+                        "id": "gid://shopify/ProductVariant/111",
+                        "legacyResourceId": 111,
+                        "sku": "ABC-123-ABR",
+                        "selectedOptions": [
+                            {"name": "Finish", "value": "Antique Brass"}
+                        ],
+                    },
+                    {
+                        "id": "gid://shopify/ProductVariant/222",
+                        "legacyResourceId": 222,
+                        "sku": "ABC-123-ORB",
+                        "selectedOptions": [
+                            {"name": "Finish", "value": "Oil Rubbed Bronze"}
+                        ],
+                    },
+                ]
+            },
+        },
+        {
+            "id": "gid://shopify/Product/555",
+            "legacyResourceId": 555,
+            "title": "Other",
+            "variants": {
+                "nodes": [
+                    {
+                        "id": "gid://shopify/ProductVariant/333",
+                        "legacyResourceId": 333,
+                        "sku": "XYZ-999-ABR",
+                        "selectedOptions": [
+                            {"name": "Finish", "value": "Antique Brass"}
+                        ],
+                    }
+                ]
+            },
+        },
+    ]
+
+    monkeypatch.setattr(
+        shopify_catalog, "fetch_shopify_products", lambda *_a, **_k: products
+    )
+
+    product = shopify_catalog.fetch_shopify_product("ABC-123")
+    assert product is not None
+    assert product["title"] == "Match Me"

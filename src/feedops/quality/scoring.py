@@ -27,16 +27,29 @@ _PRODUCT_TYPE_PHRASES = [
     "cabinet knob",
     "grab bar",
     "toilet paper holder",
+    "toilet tissue",
     "towel ring",
     "robe hook",
     "guest towel",
+    "towel holder",
+    "towel shelf",
     "soap dish",
+    "soap dispenser",
     "glass shelf",
     "wood shelf",
     "wall mirror",
     "make-up mirror",
     "makeup mirror",
     "shower door",
+    "shower curtain",
+    "paper towel",
+    "wall hook",
+    "retractable",
+    "garment rod",
+    "squeegee",
+    "vanity tray",
+    "tissue holder",
+    "basket",
 ]
 
 _MATERIAL_WORDS = [
@@ -71,7 +84,8 @@ _PREMIUM_CUES = [
     "limited lifetime warranty",
 ]
 
-_BENEFIT_VERBS = [
+_OPENING_ENGAGEMENT_CUES = [
+    # Outcome / action verbs (original benefit verbs + broader set)
     "upgrade",
     "add",
     "refresh",
@@ -79,6 +93,31 @@ _BENEFIT_VERBS = [
     "keep",
     "organize",
     "maximize",
+    "transform",
+    "eliminate",
+    "create",
+    "ensure",
+    "simplify",
+    "streamline",
+    "enjoy",
+    "free up",
+    "bring",
+    "make",
+    "turn",
+    "feel",
+    # Problem-first / question cues
+    "need",
+    "tired of",
+    "looking for",
+    "want",
+    "struggling",
+    "no more",
+    "stop",
+    "never",
+    "imagine",
+    "every morning",
+    "when guests",
+    "running out of",
 ]
 
 _BANNED_MARKETING = [
@@ -219,10 +258,10 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         notes.append("Description under 300 characters")
 
     opening = text[:160].lower()
-    if any(w in opening for w in _BENEFIT_VERBS):
+    if any(w in opening for w in _OPENING_ENGAGEMENT_CUES):
         score += 2
     else:
-        notes.append("Opening may be feature-first (no clear benefit verb detected)")
+        notes.append("Opening may lack engagement hook (no problem/outcome cue detected)")
 
     # Specs presence: at least 3 numeric/measurement tokens.
     measurements = len(_INCH_RE.findall(text)) + len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", text, re.I))
@@ -284,9 +323,9 @@ def assess_soft_gates(
         text = re.sub(r"\s+", " ", text).strip()
 
     opening = text[:160].lower()
-    has_benefit_verb = any(w in opening for w in _BENEFIT_VERBS)
+    has_benefit_verb = any(w in opening for w in _OPENING_ENGAGEMENT_CUES)
     if not has_benefit_verb:
-        warnings.append("Opening lacks benefit verb")
+        warnings.append("Opening lacks engagement hook")
 
     if html_description:
         lower_html = description.lower()
