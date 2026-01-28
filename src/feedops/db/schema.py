@@ -169,6 +169,35 @@ def init_db(db_path: Path | str) -> None:
     """
     )
 
+    # Publish events table for tracking content deployments
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS publish_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            master_sku TEXT NOT NULL,
+            platform TEXT NOT NULL,
+            environment TEXT NOT NULL,
+            action TEXT NOT NULL,
+            patch_file TEXT NOT NULL,
+            quality_score REAL,
+            approval_status TEXT,
+            status TEXT NOT NULL,
+            error_message TEXT,
+            published_at TEXT NOT NULL,
+            published_by TEXT,
+            rollback_id INTEGER,
+            FOREIGN KEY (rollback_id) REFERENCES publish_events(id)
+        )
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_publish_sku_platform
+        ON publish_events(master_sku, platform, published_at DESC)
+    """
+    )
+
     conn.commit()
     conn.close()
 
@@ -435,3 +464,155 @@ def get_cached_merchant_center_items(
             continue
         results.append(json.loads(row["payload_json"]))
     return results
+
+
+def log_publish_event(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    platform: str,
+    environment: str,
+    action: str,
+    patch_file: str,
+    status: str,
+    quality_score: float | None = None,
+    approval_status: str | None = None,
+    error_message: str | None = None,
+    published_by: str | None = None,
+    rollback_id: int | None = None,
+) -> int:
+    """Log a publish or rollback event to the database.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU being published.
+        platform: Target platform ('google', 'bing', 'shopify').
+        environment: Deployment environment ('staging', 'production').
+        action: Action type ('publish', 'rollback').
+        patch_file: Path to the patch file used.
+        status: Result status ('success', 'failed', 'pending').
+        quality_score: Optional quality score from patch metadata.
+        approval_status: Optional approval status from patch metadata.
+        error_message: Optional error message if failed.
+        published_by: Optional identifier for who triggered the publish.
+        rollback_id: Optional reference to the publish event being rolled back.
+
+    Returns:
+        ID of the inserted row.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+    cursor = conn.execute(
+        """
+        INSERT INTO publish_events (
+            master_sku, platform, environment, action, patch_file,
+            quality_score, approval_status, status, error_message,
+            published_at, published_by, rollback_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            master_sku,
+            platform,
+            environment,
+            action,
+            patch_file,
+            quality_score,
+            approval_status,
+            status,
+            error_message,
+            datetime.now(timezone.utc).isoformat(),
+            published_by or "cli",
+            rollback_id,
+        ),
+    )
+    conn.commit()
+    event_id = cursor.lastrowid
+    conn.close()
+    return event_id
+
+
+def get_publish_history(
+    db_path: Path | str,
+    *,
+    master_sku: str | None = None,
+    platform: str | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """Retrieve publish event history from the database.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: Optional filter by SKU.
+        platform: Optional filter by platform.
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of publish event dictionaries, most recent first.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+
+    # Build query with optional filters
+    query = "SELECT * FROM publish_events WHERE 1=1"
+    params: list = []
+
+    if master_sku:
+        query += " AND master_sku = ?"
+        params.append(master_sku)
+
+    if platform:
+        query += " AND platform = ?"
+        params.append(platform)
+
+    query += " ORDER BY published_at DESC LIMIT ?"
+    params.append(limit)
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    results: list[dict] = []
+    for row in rows:
+        results.append(
+            {
+                "id": row["id"],
+                "master_sku": row["master_sku"],
+                "platform": row["platform"],
+                "environment": row["environment"],
+                "action": row["action"],
+                "patch_file": row["patch_file"],
+                "quality_score": row["quality_score"],
+                "approval_status": row["approval_status"],
+                "status": row["status"],
+                "error_message": row["error_message"],
+                "published_at": row["published_at"],
+                "published_by": row["published_by"],
+                "rollback_id": row["rollback_id"],
+            }
+        )
+    return results
+
+
+def get_last_publish_event(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    platform: str,
+) -> dict | None:
+    """Get the most recent publish event for a SKU/platform combination.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: SKU to look up.
+        platform: Platform to look up.
+
+    Returns:
+        Most recent publish event dict, or None if not found.
+    """
+    history = get_publish_history(
+        db_path, master_sku=master_sku, platform=platform, limit=1
+    )
+    return history[0] if history else None

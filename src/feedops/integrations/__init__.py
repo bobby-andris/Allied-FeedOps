@@ -1,6 +1,12 @@
 """Optional MCP integrations (stub implementations)."""
 
-from feedops.integrations import merchant_center, shopify_catalog
+from feedops.integrations import (
+    bing_catalog,
+    google_feed_upload,
+    google_supplemental,
+    merchant_center,
+    shopify_catalog,
+)
 from feedops.integrations.analytics import fetch_product_metrics
 from feedops.integrations.apify import fetch_competitor_titles
 from feedops.integrations.google_ads import fetch_high_performing_keywords
@@ -13,4 +19,7 @@ __all__ = [
     "fetch_mapi_requirements",
     "merchant_center",
     "shopify_catalog",
+    "google_supplemental",
+    "google_feed_upload",
+    "bing_catalog",
 ]

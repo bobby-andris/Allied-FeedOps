@@ -344,3 +344,459 @@ def write_shopify_catalog_csv(output_path: Path, *, limit: int | None = None) ->
         writer = csv.writer(handle)
         writer.writerow(header)
         writer.writerows(rows)
+
+
+# ============================================================================
+# Shopify Product Mutations
+# ============================================================================
+
+SHOPIFY_UPDATE_PRODUCT_MUTATION = """
+mutation UpdateProduct($input: ProductInput!) {
+  productUpdate(input: $input) {
+    product {
+      id
+      title
+      descriptionHtml
+      tags
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+SHOPIFY_ADD_TAGS_MUTATION = """
+mutation AddProductTags($id: ID!, $tags: [String!]!) {
+  tagsAdd(id: $id, tags: $tags) {
+    node {
+      ... on Product {
+        id
+        tags
+      }
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+SHOPIFY_REMOVE_TAGS_MUTATION = """
+mutation RemoveProductTags($id: ID!, $tags: [String!]!) {
+  tagsRemove(id: $id, tags: $tags) {
+    node {
+      ... on Product {
+        id
+        tags
+      }
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+
+def _product_gid(product_id: str) -> str:
+    """Ensure product ID is in GID format."""
+    if product_id.startswith("gid://"):
+        return product_id
+    return f"gid://shopify/Product/{product_id}"
+
+
+def update_shopify_product(
+    product_id: str,
+    title: str | None = None,
+    description_html: str | None = None,
+    *,
+    store_url: str | None = None,
+    access_token: str | None = None,
+    env: Mapping[str, str] | None = None,
+    dry_run: bool = False,
+) -> dict:
+    """Update Shopify product title and/or description via Admin API.
+
+    Args:
+        product_id: Shopify product ID (numeric or GID format).
+        title: New product title (optional).
+        description_html: New HTML description (optional).
+        store_url: Store URL (defaults to SHOPIFY_STORE_URL env var).
+        access_token: API token (defaults to SHOPIFY_ACCESS_TOKEN env var).
+        env: Environment variables mapping.
+        dry_run: If True, validate but don't execute.
+
+    Returns:
+        Response dict with:
+        - success: bool
+        - product: Updated product data (if success)
+        - errors: List of error messages (if any)
+        - dry_run: True if this was a dry run
+
+    Raises:
+        ValueError: If credentials are missing.
+        httpx.HTTPStatusError: If the API request fails.
+    """
+    env = env or os.environ
+    store_url = store_url or env.get("SHOPIFY_STORE_URL")
+    access_token = access_token or env.get("SHOPIFY_ACCESS_TOKEN")
+
+    if not store_url or not access_token:
+        raise ValueError(
+            "Missing Shopify credentials. Set SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN."
+        )
+
+    if not title and not description_html:
+        return {
+            "success": False,
+            "errors": ["No title or description provided"],
+            "dry_run": dry_run,
+        }
+
+    gid = _product_gid(product_id)
+    api_version = env.get("SHOPIFY_API_VERSION", SHOPIFY_API_VERSION_DEFAULT)
+
+    if dry_run:
+        return {
+            "success": True,
+            "dry_run": True,
+            "product_id": gid,
+            "title": title,
+            "description_html": description_html,
+            "message": "Dry run - no changes made",
+        }
+
+    endpoint = f"https://{_normalize_store_host(store_url)}/admin/api/{api_version}/graphql.json"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": access_token,
+    }
+
+    # Build mutation input
+    input_data: dict = {"id": gid}
+    if title:
+        input_data["title"] = title
+    if description_html:
+        input_data["descriptionHtml"] = description_html
+
+    variables = {"input": input_data}
+
+    with httpx.Client(timeout=httpx.Timeout(30.0)) as client:
+        response = client.post(
+            endpoint,
+            json={"query": SHOPIFY_UPDATE_PRODUCT_MUTATION, "variables": variables},
+            headers=headers,
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+    # Check for GraphQL errors
+    if payload.get("errors"):
+        return {
+            "success": False,
+            "errors": [str(e) for e in payload["errors"]],
+            "dry_run": False,
+        }
+
+    # Check for user errors from mutation
+    data = payload.get("data", {})
+    result = data.get("productUpdate", {})
+    user_errors = result.get("userErrors", [])
+
+    if user_errors:
+        return {
+            "success": False,
+            "errors": [f"{e['field']}: {e['message']}" for e in user_errors],
+            "dry_run": False,
+        }
+
+    return {
+        "success": True,
+        "product": result.get("product"),
+        "dry_run": False,
+    }
+
+
+def add_product_tags(
+    product_id: str,
+    tags: list[str],
+    *,
+    store_url: str | None = None,
+    access_token: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> dict:
+    """Add tags to a Shopify product.
+
+    Args:
+        product_id: Shopify product ID.
+        tags: List of tags to add.
+        store_url: Store URL.
+        access_token: API token.
+        env: Environment variables mapping.
+
+    Returns:
+        Response dict with success status.
+    """
+    env = env or os.environ
+    store_url = store_url or env.get("SHOPIFY_STORE_URL")
+    access_token = access_token or env.get("SHOPIFY_ACCESS_TOKEN")
+
+    if not store_url or not access_token:
+        raise ValueError(
+            "Missing Shopify credentials. Set SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN."
+        )
+
+    gid = _product_gid(product_id)
+    api_version = env.get("SHOPIFY_API_VERSION", SHOPIFY_API_VERSION_DEFAULT)
+
+    endpoint = f"https://{_normalize_store_host(store_url)}/admin/api/{api_version}/graphql.json"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": access_token,
+    }
+
+    variables = {"id": gid, "tags": tags}
+
+    with httpx.Client(timeout=httpx.Timeout(30.0)) as client:
+        response = client.post(
+            endpoint,
+            json={"query": SHOPIFY_ADD_TAGS_MUTATION, "variables": variables},
+            headers=headers,
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+    if payload.get("errors"):
+        return {"success": False, "errors": [str(e) for e in payload["errors"]]}
+
+    data = payload.get("data", {})
+    result = data.get("tagsAdd", {})
+    user_errors = result.get("userErrors", [])
+
+    if user_errors:
+        return {
+            "success": False,
+            "errors": [f"{e['field']}: {e['message']}" for e in user_errors],
+        }
+
+    return {"success": True, "node": result.get("node")}
+
+
+def remove_product_tags(
+    product_id: str,
+    tags: list[str],
+    *,
+    store_url: str | None = None,
+    access_token: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> dict:
+    """Remove tags from a Shopify product.
+
+    Args:
+        product_id: Shopify product ID.
+        tags: List of tags to remove.
+        store_url: Store URL.
+        access_token: API token.
+        env: Environment variables mapping.
+
+    Returns:
+        Response dict with success status.
+    """
+    env = env or os.environ
+    store_url = store_url or env.get("SHOPIFY_STORE_URL")
+    access_token = access_token or env.get("SHOPIFY_ACCESS_TOKEN")
+
+    if not store_url or not access_token:
+        raise ValueError(
+            "Missing Shopify credentials. Set SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN."
+        )
+
+    gid = _product_gid(product_id)
+    api_version = env.get("SHOPIFY_API_VERSION", SHOPIFY_API_VERSION_DEFAULT)
+
+    endpoint = f"https://{_normalize_store_host(store_url)}/admin/api/{api_version}/graphql.json"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": access_token,
+    }
+
+    variables = {"id": gid, "tags": tags}
+
+    with httpx.Client(timeout=httpx.Timeout(30.0)) as client:
+        response = client.post(
+            endpoint,
+            json={"query": SHOPIFY_REMOVE_TAGS_MUTATION, "variables": variables},
+            headers=headers,
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+    if payload.get("errors"):
+        return {"success": False, "errors": [str(e) for e in payload["errors"]]}
+
+    data = payload.get("data", {})
+    result = data.get("tagsRemove", {})
+    user_errors = result.get("userErrors", [])
+
+    if user_errors:
+        return {
+            "success": False,
+            "errors": [f"{e['field']}: {e['message']}" for e in user_errors],
+        }
+
+    return {"success": True, "node": result.get("node")}
+
+
+def publish_to_shopify(
+    product_id: str,
+    title: str,
+    description_html: str,
+    environment: str = "staging",
+    *,
+    env: Mapping[str, str] | None = None,
+    dry_run: bool = False,
+) -> dict:
+    """Publish optimized content to Shopify with environment tracking.
+
+    This is the main publish function that:
+    1. Adds environment-specific tag (feedops-staging or feedops-production)
+    2. Updates the product title and description
+
+    Args:
+        product_id: Shopify product ID.
+        title: New product title.
+        description_html: New HTML description.
+        environment: 'staging' or 'production'.
+        env: Environment variables mapping.
+        dry_run: If True, validate but don't execute.
+
+    Returns:
+        Response dict with success status and details.
+    """
+    tracking_tag = f"feedops-{environment}"
+
+    if dry_run:
+        return {
+            "success": True,
+            "dry_run": True,
+            "product_id": product_id,
+            "title": title,
+            "description_html": description_html,
+            "tracking_tag": tracking_tag,
+            "message": "Dry run - no changes made",
+        }
+
+    # First, add the tracking tag
+    tag_result = add_product_tags(product_id, [tracking_tag], env=env)
+    if not tag_result.get("success"):
+        return {
+            "success": False,
+            "errors": tag_result.get("errors", ["Failed to add tracking tag"]),
+            "step": "add_tag",
+        }
+
+    # Then update the product
+    update_result = update_shopify_product(
+        product_id,
+        title=title,
+        description_html=description_html,
+        env=env,
+        dry_run=False,
+    )
+
+    if not update_result.get("success"):
+        return {
+            "success": False,
+            "errors": update_result.get("errors", ["Failed to update product"]),
+            "step": "update_product",
+            "tracking_tag": tracking_tag,
+        }
+
+    return {
+        "success": True,
+        "product": update_result.get("product"),
+        "tracking_tag": tracking_tag,
+        "environment": environment,
+    }
+
+
+def load_shopify_patches(
+    patches_dir: Path,
+    *,
+    min_score: float | None = None,
+    require_approval: bool = False,
+) -> list[dict]:
+    """Load Shopify patch files from a directory.
+
+    Args:
+        patches_dir: Directory containing shopify-patch-*.json files.
+        min_score: Optional minimum quality score filter.
+        require_approval: If True, only include approved patches.
+
+    Returns:
+        List of patch dictionaries.
+    """
+    import json
+
+    patches_dir = Path(patches_dir)
+    patches: list[dict] = []
+
+    for patch_file in patches_dir.glob("shopify-patch-*.json"):
+        try:
+            with open(patch_file) as f:
+                patch = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        meta = patch.get("_meta", {})
+
+        # Filter by approval status
+        if require_approval:
+            if meta.get("approval_status") != "approved":
+                continue
+
+        # Filter by minimum score
+        if min_score is not None:
+            score = meta.get("quality_score", 0)
+            if score < min_score:
+                continue
+
+        # Add source file reference
+        patch["_source_file"] = str(patch_file)
+        patches.append(patch)
+
+    return patches
+
+
+def get_shopify_patch_for_sku(
+    patches_dir: Path,
+    sku: str,
+) -> dict | None:
+    """Load a specific Shopify patch file by SKU.
+
+    Args:
+        patches_dir: Directory containing patch files.
+        sku: MasterSKU to look up.
+
+    Returns:
+        Patch dictionary or None if not found.
+    """
+    import json
+
+    safe_sku = sku.replace("/", "-")
+    patch_file = patches_dir / f"shopify-patch-{safe_sku}.json"
+
+    if not patch_file.exists():
+        return None
+
+    try:
+        with open(patch_file) as f:
+            patch = json.load(f)
+        patch["_source_file"] = str(patch_file)
+        return patch
+    except (json.JSONDecodeError, OSError):
+        return None

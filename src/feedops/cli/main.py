@@ -21,6 +21,7 @@ from feedops.cli.defaults import (
     CANDIDATE_EXPORTS_DIR,
     CANDIDATE_REPORTS_DIR,
 )
+from feedops.cli.publish import publish_app
 from feedops.loaders.catalog_resolver import resolve_catalog_path
 from feedops.loaders.unified_loader import (
     get_cached_shopify_age_hours,
@@ -33,6 +34,10 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
+
+# Register publish-related commands
+for command in publish_app.registered_commands:
+    app.registered_commands.append(command)
 
 
 def _parse_bool_env(name: str, default: bool = True) -> bool:
