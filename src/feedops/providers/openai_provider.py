@@ -36,6 +36,10 @@ class OpenAIProvider(LLMProvider):
         """Return True when model requires max_completion_tokens."""
         return self.model.startswith("gpt-5")
 
+    def _default_max_tokens(self) -> int:
+        # JSON outputs can be large (descriptions + claims), so keep this generous.
+        return 2000
+
     @property
     def name(self) -> str:
         return f"openai/{self.model}"
@@ -82,31 +86,43 @@ class OpenAIProvider(LLMProvider):
 
         for attempt in range(self.max_retries):
             try:
+                token_params: dict[str, int] = {}
+                if self._use_max_completion_tokens():
+                    token_params["max_completion_tokens"] = self._default_max_tokens()
+                else:
+                    token_params["max_tokens"] = self._default_max_tokens()
+
                 if image:
                     encoded = base64.b64encode(image.data).decode("utf-8")
-                    response = await self.client.responses.create(
+                    response = await self.client.chat.completions.create(
                         model=self.model,
-                        input=[
+                        messages=[
                             {
                                 "role": "user",
                                 "content": [
-                                    {"type": "input_text", "text": current_prompt},
+                                    {"type": "text", "text": current_prompt},
                                     {
-                                        "type": "input_image",
-                                        "image_url": f"data:{image.mime_type};base64,{encoded}",
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": f"data:{image.mime_type};base64,{encoded}"
+                                        },
                                     },
                                 ],
                             }
                         ],
+                        response_format={"type": "json_object"},
+                        temperature=0.7,
+                        **token_params,
                     )
                     self._last_usage = _extract_usage(response)
-                    content = _extract_output_text(response)
+                    content = response.choices[0].message.content
                 else:
                     response = await self.client.chat.completions.create(
                         model=self.model,
                         messages=messages,
                         response_format={"type": "json_object"},
                         temperature=0.7,
+                        **token_params,
                     )
                     self._last_usage = _extract_usage(response)
                     content = response.choices[0].message.content
@@ -143,6 +159,11 @@ class OpenAIProvider(LLMProvider):
         raise LLMError(
             f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries
         )
+
+    @property
+    def last_usage(self) -> dict[str, int]:
+        """Return token usage from last generation."""
+        return self._last_usage.copy()
 
 
 def _extract_usage(response: Any) -> dict[str, int]:
@@ -184,8 +205,3 @@ def _extract_output_text(response: Any) -> str:
                     if part_text:
                         return part_text
     raise LLMError("OpenAI response missing output text", "openai", 1)
-
-    @property
-    def last_usage(self) -> dict[str, int]:
-        """Return token usage from last generation."""
-        return self._last_usage.copy()

@@ -1,17 +1,13 @@
-"""FeedOps optimization pipeline."""
+"""FeedOps optimization pipeline.
 
-from feedops.pipeline.batch_selection import (
-    BatchSelectionCriteria,
-    SKUPerformance,
-    get_batch_selection_summary,
-    select_batch_by_performance,
-)
-from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
-from feedops.pipeline.generator import build_prompt, generate_candidate
-from feedops.pipeline.optimize import OptimizationResult, optimize_parent_sku
-from feedops.pipeline.prompts import CANDIDATE_SCHEMA
-from feedops.pipeline.reporter import generate_patch_preview, generate_report
-from feedops.pipeline.verifier import verify_claims
+This package exposes a convenience surface for imports, but uses lazy imports to
+avoid circular import hazards (pipeline ↔ loaders ↔ db helpers).
+"""
+
+from __future__ import annotations
+
+from importlib import import_module
+from typing import Any
 
 __all__ = [
     "build_evidence_table",
@@ -30,3 +26,41 @@ __all__ = [
     "SKUPerformance",
     "get_batch_selection_summary",
 ]
+
+
+_LAZY_ATTRS: dict[str, tuple[str, str]] = {
+    # evidence
+    "build_evidence_table": ("feedops.pipeline.evidence", "build_evidence_table"),
+    "format_evidence_markdown": ("feedops.pipeline.evidence", "format_evidence_markdown"),
+    # verifier
+    "verify_claims": ("feedops.pipeline.verifier", "verify_claims"),
+    # generator
+    "build_prompt": ("feedops.pipeline.generator", "build_prompt"),
+    "generate_candidate": ("feedops.pipeline.generator", "generate_candidate"),
+    # prompts
+    "CANDIDATE_SCHEMA": ("feedops.pipeline.prompts", "CANDIDATE_SCHEMA"),
+    # reporter
+    "generate_report": ("feedops.pipeline.reporter", "generate_report"),
+    "generate_patch_preview": ("feedops.pipeline.reporter", "generate_patch_preview"),
+    # optimize
+    "optimize_parent_sku": ("feedops.pipeline.optimize", "optimize_parent_sku"),
+    "OptimizationResult": ("feedops.pipeline.optimize", "OptimizationResult"),
+    # batch selection
+    "select_batch_by_performance": ("feedops.pipeline.batch_selection", "select_batch_by_performance"),
+    "BatchSelectionCriteria": ("feedops.pipeline.batch_selection", "BatchSelectionCriteria"),
+    "SKUPerformance": ("feedops.pipeline.batch_selection", "SKUPerformance"),
+    "get_batch_selection_summary": ("feedops.pipeline.batch_selection", "get_batch_selection_summary"),
+}
+
+
+def __getattr__(name: str) -> Any:  # pragma: no cover
+    target = _LAZY_ATTRS.get(name)
+    if not target:
+        raise AttributeError(name)
+    module_name, attr_name = target
+    module = import_module(module_name)
+    return getattr(module, attr_name)
+
+
+def __dir__() -> list[str]:  # pragma: no cover
+    return sorted(set(__all__) | set(globals().keys()))

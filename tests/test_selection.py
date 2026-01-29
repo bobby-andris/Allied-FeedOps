@@ -58,7 +58,7 @@ def test_select_best_candidate_prefers_higher_heuristic_score():
 
     selected, _ranking = select_best_candidate([weaker, stronger], weights)
 
-    assert selected.google_title == stronger.google_title
+    assert selected.google_title == stronger.google_title.replace(" | ", ", ")
 
 
 def test_select_best_candidate_prefers_citation_free():
@@ -74,7 +74,7 @@ def test_select_best_candidate_prefers_citation_free():
 
     selected, _ranking = select_best_candidate([leaked, clean], weights)
 
-    assert selected.google_title == clean.google_title
+    assert selected.google_title == clean.google_title.replace(" | ", ", ")
 
 
 def test_select_best_candidate_sanitizes_when_all_leak():
@@ -246,5 +246,5 @@ def test_sanitize_candidate_content_formats_brand_with_pipe():
         google_description="Add storage with solid brass.",
     )
     sanitized = sanitize_candidate_content(candidate, category="Towel Bars")
-    assert sanitized.google_title.endswith("| Allied Brass")
+    assert sanitized.google_title.endswith(", Allied Brass")
     assert "towel holder" not in sanitized.google_title.lower()

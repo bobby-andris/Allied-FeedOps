@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from html import escape
+import os
 import re
 
 from feedops.models import Candidate, ParentSKU, Variant
@@ -13,8 +14,14 @@ from feedops.pipeline.finish_injection import (
     generate_variant_keywords,
     generate_variant_title,
 )
+from feedops.pipeline.collection_descriptions import (
+    get_collection_description,
+    is_known_collection_name,
+    sanitize_collection_description,
+)
 from feedops.pipeline.selection import RankedCandidate
 from feedops.pipeline.size_matrix import build_size_matrix, get_variant_size_label
+from feedops.pipeline.validators import validate_variant_title_uniqueness
 
 # Google Merchant Center digital source type for AI-generated content
 # Required for compliance with April 2024 product data specification update
@@ -23,6 +30,118 @@ DIGITAL_SOURCE_TYPE_AI = "trained_algorithmic_media"
 
 _FIRST_P_RE = re.compile(r"<p\b[^>]*>.*?</p>", re.IGNORECASE | re.DOTALL)
 _FIRST_UL_RE = re.compile(r"<ul\b[^>]*>.*?</ul>", re.IGNORECASE | re.DOTALL)
+
+
+_TITLE_PIPE_RE = re.compile(r"\s*\|\s*")
+
+_SKU_KEY_RE = re.compile(r"[^a-z0-9]+", re.IGNORECASE)
+
+
+def _gmc_structured_only_enabled() -> bool:
+    value = os.getenv("FEEDOPS_GMC_STRUCTURED_ONLY")
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes"}
+
+
+def _normalize_sku_key(value: str | None) -> str:
+    """Normalize SKU strings for fuzzy matching (slashes/hyphens/spaces)."""
+    if not value:
+        return ""
+    return _SKU_KEY_RE.sub("", value.strip().lower())
+
+
+def _select_primary_variant(parent_sku: ParentSKU) -> Variant | None:
+    """Pick the variant that best matches the requested MasterSKU.
+
+    When a Shopify product family contains multiple sizes and finishes, the caller
+    may still request a size-specific MasterSKU (e.g., "CL-41-30"). For offer-scoped
+    exports (Google/Bing), the top-level offerId/title/description must align to the
+    intended variant instead of arbitrarily using the first variant.
+    """
+    if not parent_sku.variants:
+        return None
+
+    master_key = _normalize_sku_key(parent_sku.master_sku)
+    if master_key:
+        for variant in parent_sku.variants:
+            if _normalize_sku_key(variant.option_sku).startswith(master_key):
+                return variant
+
+    return parent_sku.variants[0]
+
+
+def _normalize_title_separators(title: str) -> str:
+    """Normalize titles for feed readability (avoid pipe separators in exports).
+
+    Internally, some parts of the pipeline may still use `|` as a segment delimiter.
+    For customer-facing exports (GMC/Bing/Shopify), prefer commas/hyphens to avoid
+    "gimmicky punctuation" and improve scanability.
+    """
+    if not title:
+        return title
+    normalized = _TITLE_PIPE_RE.sub(", ", title.strip())
+    normalized = re.sub(r"\s{2,}", " ", normalized)
+
+    # Remove empty segments and dangling punctuation that can be introduced when optional
+    # segments (e.g., collection descriptors) are missing.
+    parts = []
+    for raw in normalized.split(","):
+        segment = re.sub(r"\s{2,}", " ", raw).strip()
+        if not segment:
+            continue
+        if segment.lower().endswith(" collection"):
+            name = segment[: -len(" collection")].strip()
+            if not is_known_collection_name(name):
+                continue
+            segment = f"{name} Collection"
+        # Drop segments that are effectively just separators.
+        if segment.strip() in {"-", "–", "—"}:
+            continue
+        # Trim trailing hyphens left by upstream templates like ") -"
+        segment = segment.rstrip(" -–—").rstrip()
+        if not segment:
+            continue
+        parts.append(segment)
+
+    normalized = ", ".join(parts)
+    normalized = re.sub(r"\s*,\s*", ", ", normalized).strip()
+    return normalized.strip(" ,|")
+
+
+def _inject_finish_into_short_title(
+    short_title: str,
+    finish_name: str,
+    *,
+    max_len: int = 70,
+) -> str:
+    """Prefer finish-first short titles when it fits within overlay constraints."""
+    base = (short_title or "").strip()
+    finish = (finish_name or "").strip()
+    if not base or not finish:
+        return base
+    if finish.lower() in base.lower():
+        return base
+
+    prefix = f"{finish} {base}".strip()
+    if len(prefix) <= max_len:
+        return prefix
+
+    suffix = f"{base}, {finish}".strip()
+    if len(suffix) <= max_len:
+        return suffix
+
+    # Last resort: drop brand token to make room for finish
+    base_no_brand = re.sub(r"(\s*\|\s*Allied Brass|\s*,\s*Allied Brass)\s*$", "", base, flags=re.IGNORECASE).strip(" |-," )
+    if base_no_brand and base_no_brand != base:
+        prefix2 = f"{finish} {base_no_brand}".strip()
+        if len(prefix2) <= max_len:
+            return prefix2
+        suffix2 = f"{base_no_brand}, {finish}".strip()
+        if len(suffix2) <= max_len:
+            return suffix2
+
+    return base
 
 
 def _build_shopify_size_table(parent_sku: ParentSKU) -> str | None:
@@ -90,7 +209,18 @@ def _build_shopify_body_html(parent_sku: ParentSKU, candidate: Candidate) -> str
         else:
             highlights = ""
 
-    return f"{hook}{highlights}{size_table}"
+    collection_block = ""
+    raw_collection_desc = get_collection_description(parent_sku.collection)
+    if raw_collection_desc:
+        cleaned = sanitize_collection_description(raw_collection_desc)
+        if cleaned:
+            collection_name = escape(str(parent_sku.collection or "").strip())
+            collection_block = (
+                f"<h3>{collection_name} Collection</h3>"
+                f"<p>{escape(cleaned)}</p>"
+            )
+
+    return f"{hook}{highlights}{collection_block}{size_table}"
 
 
 def _build_structured_title(title: str) -> dict:
@@ -438,8 +568,11 @@ def generate_patch_preview(
     Returns:
         Dict in platform-specific patch format.
     """
+    primary_variant = _select_primary_variant(parent_sku)
     offer_id = (
-        parent_sku.variants[0].gmc_id if parent_sku.variants else parent_sku.master_sku
+        (primary_variant.gmc_id if primary_variant else None)
+        or (parent_sku.variants[0].gmc_id if parent_sku.variants else None)
+        or parent_sku.master_sku
     )
     product_id = parent_sku.item_group_id
 
@@ -492,23 +625,38 @@ def generate_patch_preview(
             variants_data.append(variant_patch)
 
     if platform == "google":
-        patch = {
+        structured_only = _gmc_structured_only_enabled()
+        if primary_variant:
+            primary_patch = generate_variant_patch_preview(
+                parent_sku=parent_sku,
+                variant=primary_variant,
+                candidate=candidate,
+                platform="google",
+            )
+            raw_title = primary_patch.get("title") or candidate.google_title
+            title = _normalize_title_separators(raw_title)
+            short_title = primary_patch.get("short_title") or candidate.google_short_title
+            description = primary_patch.get("description") or candidate.google_description
+        else:
+            title = _normalize_title_separators(candidate.google_title)
+            short_title = candidate.google_short_title
+            description = candidate.google_description
+        patch: dict = {
             "offerId": offer_id,
-            "title": candidate.google_title,
-            "short_title": candidate.google_short_title,
-            "description": candidate.google_description,
-            # Structured attributes for AI-generated content disclosure
-            # Required by Google Merchant Center April 2024 specification update
-            "structured_title": _build_structured_title(candidate.google_title),
-            "structured_description": _build_structured_description(
-                candidate.google_description
-            ),
+            "short_title": short_title,
             "channel": "online",
             "contentLanguage": "en",
             "targetCountry": "US",
             "_meta": meta,
             "_previous": previous,
         }
+        if structured_only:
+            # Structured attributes for AI-generated content disclosure.
+            patch["structured_title"] = _build_structured_title(title)
+            patch["structured_description"] = _build_structured_description(description)
+        else:
+            patch["title"] = title
+            patch["description"] = description
         if lifestyle_images_data:
             patch["lifestyle_images"] = lifestyle_images_data
             patch["selected_lifestyle_image"] = candidate.selected_lifestyle_image
@@ -519,10 +667,23 @@ def generate_patch_preview(
         return patch
 
     if platform == "bing":
+        if primary_variant:
+            primary_patch = generate_variant_patch_preview(
+                parent_sku=parent_sku,
+                variant=primary_variant,
+                candidate=candidate,
+                platform="bing",
+            )
+            raw_title = primary_patch.get("title") or candidate.bing_title
+            title = _normalize_title_separators(raw_title)
+            description = primary_patch.get("description") or candidate.bing_description
+        else:
+            title = _normalize_title_separators(candidate.bing_title)
+            description = candidate.bing_description
         patch = {
             "sku": offer_id,
-            "title": candidate.bing_title,
-            "description": candidate.bing_description,
+            "title": title,
+            "description": description,
             "_meta": meta,
             "_previous": previous,
         }
@@ -536,9 +697,10 @@ def generate_patch_preview(
         return patch
 
     if platform == "shopify":
+        title = _normalize_title_separators(candidate.shopify_title)
         patch = {
             "productId": product_id or offer_id,
-            "title": candidate.shopify_title,
+            "title": title,
             "body_html": _build_shopify_body_html(parent_sku, candidate),
             "meta_description": candidate.shopify_meta_description,
             "_meta": meta,
@@ -600,12 +762,22 @@ def generate_variant_patch_preview(
         raise ValueError(f"Unsupported platform: {platform}")
 
     # Generate variant-specific content
-    variant_size = get_variant_size_label(variant)
-    variant_title = generate_variant_title(
-        base_title,
-        finish_name,
-        size=variant_size if platform in ("google", "bing") else None,
-        platform=platform,
+    # Only inject size for multi-size products (avoid misinterpreting series numbers like
+    # "SH-84" as inches, and avoid corrupting decimal dimensions like "2.64-Inch").
+    size_labels = {
+        get_variant_size_label(v)
+        for v in parent_sku.variants
+        if get_variant_size_label(v)
+    }
+    is_multi_size = len(size_labels) > 1
+    variant_size = get_variant_size_label(variant) if is_multi_size else None
+    variant_title = _normalize_title_separators(
+        generate_variant_title(
+            base_title,
+            finish_name,
+            size=variant_size if platform in ("google", "bing") else None,
+            platform=platform,
+        )
     )
     variant_description = generate_variant_description(
         base_description=base_description,
@@ -643,29 +815,31 @@ def generate_variant_patch_preview(
     }
 
     if platform == "google":
+        structured_only = _gmc_structured_only_enabled()
         # Also generate variant-specific short title
-        short_title = candidate.google_short_title
-        if finish_name.lower() not in short_title.lower():
-            # Append finish to short title if not present
-            if len(short_title) + len(finish_name) + 3 <= 70:
-                short_title = f"{short_title}, {finish_name}"
-
-        return {
+        short_title = _inject_finish_into_short_title(
+            candidate.google_short_title,
+            finish_name,
+            max_len=70,
+        )
+        patch: dict = {
             "offerId": variant.gmc_id,
-            "title": variant_title,
             "short_title": short_title,
-            "description": variant_description,
-            # Structured attributes for AI-generated content disclosure
-            "structured_title": _build_structured_title(variant_title),
-            "structured_description": _build_structured_description(
-                variant_description
-            ),
             "channel": "online",
             "contentLanguage": "en",
             "targetCountry": "US",
             "_meta": meta,
             "_previous": previous,
         }
+        if structured_only:
+            patch["structured_title"] = _build_structured_title(variant_title)
+            patch["structured_description"] = _build_structured_description(
+                variant_description
+            )
+        else:
+            patch["title"] = variant_title
+            patch["description"] = variant_description
+        return patch
 
     if platform == "bing":
         return {
@@ -718,5 +892,13 @@ def generate_all_variant_patches(
             platform=platform,
         )
         patches.append(patch)
+
+    titles = [p.get("title", "") for p in patches]
+    warnings = validate_variant_title_uniqueness(titles)
+    if warnings:
+        for patch in patches:
+            meta = patch.get("_meta")
+            if isinstance(meta, dict):
+                meta["variant_title_warnings"] = warnings
 
     return patches

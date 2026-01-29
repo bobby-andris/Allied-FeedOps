@@ -127,6 +127,49 @@ def init_db(db_path: Path | str) -> None:
     """
     )
 
+    # Variant-level index (keyed by GMC offer_id) built from Product Catalog.csv.
+    # This lets us resolve Shopify/GMC IDs even when Shopify cache is missing.
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS variant_index (
+            gmc_id TEXT PRIMARY KEY,
+            master_sku TEXT NOT NULL,
+            master_sku_norm TEXT NOT NULL,
+            option_sku TEXT,
+            option_sku_norm TEXT,
+            core_sku TEXT,
+            shopify_product_id TEXT,
+            shopify_variant_id TEXT,
+
+            -- Dimensions (kept as raw text to preserve units/format)
+            product_length TEXT,
+            product_width TEXT,
+            product_height TEXT,
+            projection TEXT,
+            center_to_center TEXT,
+            diameter TEXT,
+            product_weight TEXT,
+
+            -- Optional descriptive fields from catalog
+            category TEXT,
+            collection TEXT,
+            material TEXT,
+
+            updated_at TEXT NOT NULL
+        )
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS catalog_ingest_state (
+            source_path TEXT PRIMARY KEY,
+            source_mtime REAL NOT NULL,
+            ingested_at TEXT NOT NULL
+        )
+    """
+    )
+
     conn.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_runs_master_sku
@@ -168,6 +211,19 @@ def init_db(db_path: Path | str) -> None:
         """
         CREATE INDEX IF NOT EXISTS idx_shopify_ttl
         ON shopify_products(master_sku, fetched_at, ttl_hours)
+    """
+    )
+
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_variant_index_master_norm
+        ON variant_index(master_sku_norm)
+    """
+    )
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_variant_index_shopify_product
+        ON variant_index(shopify_product_id)
     """
     )
 
@@ -604,22 +660,48 @@ def _derive_gmc_ids(payload: dict) -> list[str]:
     return gmc_ids
 
 
+def _normalize_master_sku(value: str | None) -> str:
+    raw = (value or "").strip().upper()
+    if not raw:
+        return ""
+    raw = "".join(raw.split())
+    raw = raw.replace("/", "-")
+    while "--" in raw:
+        raw = raw.replace("--", "-")
+    return raw.strip("-")
+
+
+def _offer_ids_from_variant_index(db_path: Path, master_sku: str) -> list[str]:
+    norm = _normalize_master_sku(master_sku)
+    if not norm or not db_path.exists():
+        return []
+    conn = get_connection(db_path)
+    try:
+        rows = conn.execute(
+            "SELECT gmc_id FROM variant_index WHERE master_sku_norm = ?",
+            (norm,),
+        ).fetchall()
+    finally:
+        conn.close()
+    return [row["gmc_id"] for row in rows if row and row["gmc_id"]]
+
+
 def get_cached_merchant_center_items(
     master_sku: str, max_age_hours: float = 24.0
 ) -> list[dict]:
     """Retrieve cached Google Merchant Center items for a master SKU."""
+    db_path = _resolve_db_path()
+    offer_ids: list[str] = []
     shopify_payload = get_cached_shopify_product(
         master_sku, max_age_hours=max_age_hours
     )
-    if not shopify_payload:
-        return []
-    offer_ids = _derive_gmc_ids(shopify_payload)
+    if shopify_payload:
+        offer_ids = _derive_gmc_ids(shopify_payload)
     if not offer_ids:
+        offer_ids = _offer_ids_from_variant_index(db_path, master_sku)
+    if not offer_ids or not db_path.exists():
         return []
 
-    db_path = _resolve_db_path()
-    if not db_path.exists():
-        return []
     placeholders = ", ".join("?" for _ in offer_ids)
     conn = get_connection(db_path)
     rows = conn.execute(

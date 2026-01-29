@@ -4,8 +4,11 @@ Validates customer-facing content against Google Merchant Center policies,
 Bing Shopping requirements, and general e-commerce best practices.
 """
 
+import json
 import re
 from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
 from typing import Callable
 
 from feedops.models import Candidate
@@ -292,11 +295,12 @@ def validate_title_structure(title: str, field: str = "title") -> list[str]:
                 "brand should be the last segment for lesser-known brands"
             )
 
-    # Check for pipe separator (recommended structure)
-    if " | " not in title and " - " not in title:
+    # Check for a readable segment separator (recommended structure)
+    # Accept pipes for backwards compatibility, but prefer commas/hyphens in generated titles.
+    if " | " not in title and " - " not in title and "," not in title:
         warnings.append(
-            f"{field} missing segment separator (| or -) - "
-            "consider using pipes to separate title segments"
+            f"{field} missing segment separator (comma, hyphen, or pipe) - "
+            "consider separating major segments for readability"
         )
 
     return warnings
@@ -367,5 +371,94 @@ def validate_description_structure(
             f"{field} opening may lack engagement hook - "
             "consider leading with benefit/problem"
         )
+
+    return warnings
+
+
+_FINISH_METADATA_PATH = (
+    Path(__file__).parent.parent.parent.parent / "data" / "finish-metadata.json"
+)
+
+
+@lru_cache(maxsize=1)
+def _load_finish_names() -> tuple[str, ...]:
+    """Load canonical finish names from finish-metadata.json.
+
+    Used for lightweight validation (e.g., ensuring finish is visible early in
+    variant titles when finish is the primary differentiator).
+    """
+    try:
+        payload = json.loads(_FINISH_METADATA_PATH.read_text())
+    except FileNotFoundError:
+        return ()
+    except json.JSONDecodeError:
+        return ()
+
+    finishes = payload.get("finishes", {})
+    if not isinstance(finishes, dict):
+        return ()
+    return tuple(finishes.keys())
+
+
+def _normalize_title_for_compare(title: str) -> str:
+    title = (title or "").strip().casefold()
+    title = re.sub(r"\s+", " ", title)
+    title = re.sub(r"\s*\|\s*", " | ", title)
+    title = re.sub(r"\s*,\s*", ", ", title)
+    return title.strip(" ,|")
+
+
+def _find_first_finish(title: str, finish_names: tuple[str, ...]) -> tuple[str, int] | None:
+    if not title:
+        return None
+
+    # Prefer longer finish names first to avoid partial matches.
+    for finish in sorted(finish_names, key=len, reverse=True):
+        pattern = re.compile(rf"(?<!\w){re.escape(finish)}(?!\w)", re.IGNORECASE)
+        match = pattern.search(title)
+        if match:
+            return (finish, match.start())
+    return None
+
+
+def validate_variant_title_uniqueness(
+    titles: list[str],
+    *,
+    visible_chars: int = 70,
+) -> list[str]:
+    """Validate variant title differentiation to reduce cannibalization risk.
+
+    This is a guardrail. It does NOT attempt to force variants to be "different";
+    it flags two failure modes that hurt performance and trust:
+      1) Exact duplicate titles across variants.
+      2) Finish only appears after the first `visible_chars` characters, making
+         variants look identical in common UI truncation zones.
+    """
+    warnings: list[str] = []
+    if not titles:
+        return warnings
+
+    normalized = [_normalize_title_for_compare(t) for t in titles]
+    counts: dict[str, int] = {}
+    for key in normalized:
+        counts[key] = counts.get(key, 0) + 1
+
+    dupes = [k for k, c in counts.items() if k and c > 1]
+    for dup in dupes:
+        warnings.append(f"Duplicate variant title detected: '{dup}'")
+
+    finish_names = _load_finish_names()
+    if finish_names:
+        for raw_title in titles:
+            found = _find_first_finish(raw_title, finish_names)
+            if not found:
+                continue
+            finish, pos = found
+            if pos >= visible_chars:
+                warnings.append(
+                    f"Finish '{finish}' appears after the first {visible_chars} characters; "
+                    "consider moving finish earlier for variant differentiation."
+                )
+                break
 
     return warnings

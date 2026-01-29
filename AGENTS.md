@@ -4,6 +4,32 @@
 
 **CRITICAL**: All product content MUST be grounded in actual product data. Never invent features, specifications, or benefits not present in the source data.
 
+## Platform Policy Guardrails (2026)
+
+These rules prevent disapprovals and “AI text” compliance issues. If any rule conflicts with conversion copy, **policy wins**.
+
+- **Google Merchant Center (AI text disclosure)**:
+  - If titles/descriptions are generated using generative AI, submit them via **`structured_title` / `structured_description`** and set **`digital_source_type=trained_algorithmic_media`**.
+  - If both structured and standard fields are present (for example, `structured_title` + `title`), Google will **only use** the standard field and the structured field will be ignored. To guarantee structured-only behavior, omit `title` (and omit `description` when using `structured_description`).
+- **Google Merchant Center (AI image disclosure)**:
+  - If you submit AI-generated images, ensure they include IPTC Photo Metadata `DigitalSourceType` set to **trained algorithmic media** (IPTC controlled vocabulary value: `http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia`).
+  - The metadata must be **preserved** from your source image through any processing pipeline; if you can’t guarantee that, do not rely on AI-generated images as primary images.
+- **Google Merchant Center (images)**: Keep a clean primary image; add lifestyle images as additional images (or `lifestyle_image_link`) to test CTR lift without risking primary-image trust.
+- **Google Merchant Center (consistency)**: Keep feed titles/descriptions consistent with on-site product content and the true product attributes. Large mismatches risk disapprovals and customer trust loss.
+- **Google Merchant Center (short titles)**: `short_title` can be used for certain placements (for example, Demand Gen). Keep it ≤70 characters and make it readable as an overlay.
+- **Avoid gimmicky punctuation** in titles (excess symbols and attention-grabbing formatting). Prefer simple separators like commas or hyphens.
+- **Shopify SEO**: Search snippets have practical limits (SEO title often truncates around ~50–60 chars; meta descriptions often truncate around ~150–160 chars). Shopify’s fields can be longer, but long titles can hurt scanning and conversion.
+
+### Operational Notes (This Repo)
+
+- For Google supplemental feeds, set `FEEDOPS_GMC_STRUCTURED_ONLY=1` when you want GMC to use `structured_title` / `structured_description` and ignore plain `title` / `description` (implemented in `src/feedops/integrations/google_supplemental.py`).
+
+### Policy References (Keep Current)
+
+- Google Merchant Center: “Share information about AI-generated content” (AI text + AI image metadata guidance)
+- Google Merchant Center: Title attribute docs (`structured_title` behavior when `title` is present)
+- Google Shopping API: `DigitalSourceType` enum (for structured attribute `digital_source_type` values)
+
 ### Accuracy Rules
 
 1. **Only include information from provided product data**
@@ -33,7 +59,13 @@
 | **Critical** | 31-70 | Desktop visibility | Very High - determines clicks |
 | **Extended** | 71-150 | Algorithm matching coverage | High - expands query eligibility |
 
-**Note**: Google can dynamically reorder keywords in your title based on the search query. Front-load your highest-converting keywords to ensure they're always visible.
+**Note**: Google may rewrite or reorder product titles in some placements (Product Data Customization). Don’t rely on rewrites; front-load your highest-impact attributes.
+
+### Channel-Specific Title Targets
+
+- **Google Shopping / PMax**: Use up to **150 characters**; optimize **first 70** for human scanning and **71–150** for query matching coverage.
+- **Bing/Microsoft Shopping**: Favor clarity and literal matching; avoid keyword stuffing in titles.
+- **Shopify On-Site**: Optimize for readability and trust first; keep the on-page title concise when possible (SEO title can be shorter than the product title).
 
 ### Title Structure Formula (Brand Recognition Based)
 
@@ -44,7 +76,7 @@
 
 **For Lesser-Known Brands** (like Allied Brass):
 ```
-[Key Benefit/Use Case] + [Product Type] + [Key Dimension] + [Material] + [Brand]
+[Primary Query Phrase] + [Key Dimension] + [Variant Differentiator] + [Brand]
 ```
 
 **Why?** People don't search for "Allied Brass towel bar" - they search for "bathroom towel bar wall mount 24 inch". Put what they search for FIRST.
@@ -55,42 +87,46 @@
    - The terms people actually search for
    - Product type (what it IS)
    - Primary dimension (size that matters for purchase decision)
-   - Key benefit or use case (for functional products)
+   - Primary variant differentiator (finish/size) when applicable
+
+   **Finish-first reality check:** Many high-intent queries lead with finish/material (e.g., “unlacquered brass towel bar”). When finish is a primary query modifier, ensure it’s visible within the first ~70 characters for variant titles.
 
 2. **Use natural query language** - Match how customers actually search:
    - ✅ "24-Inch Towel Bar" (matches user search)
    - ❌ "Towel Bar 24in" (unnatural phrasing)
 
-3. **Include functional modifiers** - These drive 2-10x higher CVR:
+3. **Include functional modifiers (only if verified)**:
    - ADA Compliant, Retractable, Wall-Mount, Concealed Mount
-   - Pivoting, Tilt-Adjustable, Quick-Dry
+   - Pivoting, Tilt-Adjustable
+   - Only include “solid brass” when the material is explicitly solid brass in source data.
 
 4. **Avoid wasted characters**:
    - ❌ No promotional text ("Free Shipping!", "Sale!")
    - ❌ No ALL CAPS words
    - ❌ No internal SKU codes
    - ❌ No filler words ("high-quality", "premium" without specifics)
+   - ❌ Avoid symbol-heavy separators (prefer commas/hyphens over pipes)
 
 5. **Brand placement logic** (UPDATED per industry research):
    - IF brand is household name (Nike, Apple) → Brand FIRST
-   - IF brand is niche/unknown (Allied Brass) → Benefits/Keywords FIRST, Brand at END
-   - **Allied Brass is NOT a household name** - consider benefit-first for most products
+   - IF brand is niche/unknown (Allied Brass for many shoppers) → Benefits/Keywords FIRST, Brand at END
+   - If brand-modified queries are meaningful (for example, “Allied Brass towel bar”), test a brand-forward variant; don’t assume brand-last is always best.
 
 ### Title Examples by Category
 
 **Grab Bar (Safety-Focused, Benefit-First)**:
 ```
-ADA-Compliant 18-Inch Grab Bar 500lb Capacity | Solid Brass Satin Nickel | Allied Brass
+ADA-Compliant 18-Inch Grab Bar, 500 lb Capacity, Solid Brass, Satin Nickel, Allied Brass
 ```
 
 **Towel Bar (Commodity, Benefit-First)**:
 ```
-24-Inch Wall Mount Towel Bar Solid Brass | Oil Rubbed Bronze | Allied Brass
+24-Inch Wall Mount Towel Bar, Solid Brass, Oil Rubbed Bronze, Allied Brass
 ```
 
 **Mirror (Design-Focused)**:
 ```
-Oval Tilt Vanity Mirror Solid Brass Frame | Antique Pewter | Allied Brass Waverly Place
+Oval Tilt Vanity Mirror, Solid Brass Frame, Antique Pewter, Allied Brass Waverly Place
 ```
 
 ### Title and Description Work Together
@@ -116,7 +152,7 @@ The research phase (gathering evidence, analyzing the product, identifying keywo
 |------|-----------|---------|
 | **Hook** | 1-150 | Visible in previews/snippets - MUST contain value proposition |
 | **Body** | 151-500 | Detailed features and benefits |
-| **Extended** | 500+ | Correlates with +1.4pp CVR when properly structured |
+| **Extended** | 500+ | Often improves conversion when properly structured |
 
 ### Description Structure: Benefits → Features → Trust
 
@@ -138,7 +174,7 @@ The research phase (gathering evidence, analyzing the product, identifying keywo
    - Include the key differentiating spec
    - Make it standalone compelling (this may be all users see)
 
-2. **Structure for scanners** (79% of users scan, not read):
+2. **Structure for scanners** (most users scan, not read):
    - Use bullet points for key highlights
    - Use short paragraphs (2-3 sentences max)
    - Bold key terms if format allows
@@ -211,7 +247,7 @@ Rate each output 0-10 on six dimensions. Target: **80%+ composite score** before
 - 5: Keywords present but suboptimal placement
 - 0: Missing critical keywords
 
-**Title**: Brand + Product Type + Size in first 70 chars?
+**Title**: Product Type + Key Dimension + Variant differentiator in first 70 chars?
 **Description**: Primary keyword in first sentence?
 
 ### 4. Format Adherence (0-10)
@@ -230,7 +266,7 @@ Rate each output 0-10 on six dimensions. Target: **80%+ composite score** before
 - 5: Neutral tone, neither premium nor budget
 - 0: Uses superlatives, marketing fluff, or budget language
 
-**Premium indicators**: Crafted, solid brass, precision, enduring, lifetime warranty
+**Premium indicators (only if verifiable)**: solid brass, concealed mounting, precision-fit, corrosion-resistant materials/finishes, warranty terms
 **Avoid**: Amazing, incredible, best-ever, cheap, budget
 
 ### 6. Factual Accuracy (0-10)
@@ -278,7 +314,7 @@ Composite = (Specificity + Benefits + Keywords + Format + Voice + Accuracy) / 6 
 
 ### Why These Rules Work
 
-1. **System 1 vs System 2**: 95% of decisions start with fast, emotional System 1. Benefits trigger emotion; features provide rational backup for System 2.
+1. **System 1 vs System 2**: Many purchases start with fast, intuitive evaluation (benefits) and are confirmed with rational details (specs, installation, warranty).
 
 2. **Cognitive Fluency**: Matching title to search query creates "this is exactly what I want" recognition. Reduces mental effort.
 
@@ -286,9 +322,9 @@ Composite = (Specificity + Benefits + Keywords + Format + Voice + Accuracy) / 6 
 
 4. **Concreteness Effect**: Concrete terms ("solid brass") activate both verbal AND visual processing. Abstract claims ("premium") only activate verbal.
 
-5. **Brand-Modified Queries**: Convert 3.6x higher because brand familiarity provides trust shortcut.
+5. **Brand-Modified Queries**: Often convert higher because familiarity reduces perceived risk and speeds decision-making.
 
-6. **Functional Modifiers**: Drive 2-10x CVR because they signal product-problem fit for high-intent searchers.
+6. **Functional Modifiers**: Often lift CVR because they signal product-problem fit for high-intent shoppers.
 
 ---
 
@@ -297,7 +333,7 @@ Composite = (Specificity + Benefits + Keywords + Format + Voice + Accuracy) / 6 
 ### Title Checklist
 - [ ] ≤150 characters total
 - [ ] Critical info in first 70 characters
-- [ ] Brand + Product Type + Key Dimension upfront
+- [ ] Product Type + Key Dimension + variant differentiator upfront
 - [ ] Functional modifier if applicable
 - [ ] No promotional text or ALL CAPS
 - [ ] Matches natural search language

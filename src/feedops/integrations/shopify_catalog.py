@@ -76,6 +76,63 @@ query ProductsForCatalog($first: Int!, $after: String, $query: String) {
 }
 """
 
+SHOPIFY_PRODUCT_BY_ID_QUERY = """
+query ProductById($id: ID!) {
+  product(id: $id) {
+    id
+    legacyResourceId
+    title
+    descriptionHtml
+    productType
+    vendor
+    tags
+    collections(first: 10) {
+      nodes {
+        title
+      }
+    }
+    featuredMedia {
+      ... on MediaImage {
+        image {
+          url
+        }
+      }
+    }
+    metafields(first: 20) {
+      nodes {
+        namespace
+        key
+        value
+        type
+      }
+    }
+    variants(first: 250) {
+      nodes {
+        id
+        legacyResourceId
+        sku
+        barcode
+        title
+        position
+        selectedOptions {
+          name
+          value
+        }
+        media(first: 1) {
+          nodes {
+            ... on MediaImage {
+              image {
+                url
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
 
 def _normalize_store_host(store_url: str) -> str:
     parsed = urlparse(store_url)
@@ -252,11 +309,30 @@ def fetch_shopify_product(
 ) -> dict | None:
     """Fetch a single Shopify product matching the master SKU."""
     finish_map = _load_finish_codes()
-    target = (master_sku or "").strip().upper()
-    if not target:
+    raw = (master_sku or "").strip()
+    if not raw:
         return None
-    search_query = f"sku:{target}*"
-    products = fetch_shopify_products(limit=50, env=env, query=search_query)
+    target = raw.upper()
+
+    # Master SKUs in our catalog sometimes use "/" as a size separator (e.g., "QN-31/30"),
+    # while Shopify variant SKUs are typically hyphenated (e.g., "QN-31-30-ABR").
+    targets = {target}
+    if "/" in target:
+        targets.add(target.replace("/", "-"))
+        targets.add(target.replace("/", ""))
+
+    # Prefer the hyphenated form for Shopify search queries.
+    query_targets = []
+    if "/" in target:
+        query_targets.append(target.replace("/", "-"))
+    query_targets.append(target)
+
+    products = []
+    for t in query_targets:
+        search_query = f"sku:{t}*"
+        products = fetch_shopify_products(limit=50, env=env, query=search_query)
+        if products:
+            break
     if not products:
         products = fetch_shopify_products(limit=200, env=env, query=None)
     for product in products:
@@ -266,9 +342,47 @@ def fetch_shopify_product(
             finish = _derive_finish(variant)
             finish_code = _derive_finish_code(sku, finish, finish_map)
             derived = _derive_master_sku(sku, finish_code)
-            if derived and derived.strip().upper() == target:
+            if derived and derived.strip().upper() in targets:
                 return product
     return None
+
+
+def fetch_shopify_product_by_id(
+    product_id: str, *, env: Mapping[str, str] | None = None
+) -> dict | None:
+    """Fetch a single Shopify product by numeric product ID."""
+    env = env or os.environ
+    store_url = env.get("SHOPIFY_STORE_URL")
+    access_token = env.get("SHOPIFY_ACCESS_TOKEN")
+    if not store_url or not access_token:
+        raise ValueError(
+            "Missing Shopify credentials. Set SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN."
+        )
+    api_version = env.get("SHOPIFY_API_VERSION", SHOPIFY_API_VERSION_DEFAULT)
+
+    raw_id = (product_id or "").strip()
+    if not raw_id:
+        return None
+    gid = raw_id if raw_id.startswith("gid://") else f"gid://shopify/Product/{raw_id}"
+
+    endpoint = f"https://{_normalize_store_host(store_url)}/admin/api/{api_version}/graphql.json"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": access_token,
+    }
+
+    with httpx.Client(timeout=httpx.Timeout(30.0)) as client:
+        response = client.post(
+            endpoint,
+            json={"query": SHOPIFY_PRODUCT_BY_ID_QUERY, "variables": {"id": gid}},
+            headers=headers,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("errors"):
+            raise ValueError(f"Shopify GraphQL errors: {payload['errors']}")
+        product = payload.get("data", {}).get("product")
+        return product or None
 
 
 def write_shopify_catalog_csv(output_path: Path, *, limit: int | None = None) -> None:

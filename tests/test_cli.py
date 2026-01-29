@@ -230,13 +230,23 @@ async def test_optimize_pipeline_integration(tmp_path):
             )
 
         assert result is not None
-        assert result.candidate.google_title == strong_response["google_title"]
+        expected_google_title = strong_response["google_title"].replace(" | ", ", ")
+        assert result.candidate.google_title == expected_google_title
         assert "google" in result.patch_previews
         assert "bing" in result.patch_previews
         assert "shopify" in result.patch_previews
-        assert (
-            result.patch_previews["google"]["title"] == strong_response["google_title"]
-        )
+        google_patch = result.patch_previews["google"]
+        assert "Allied Brass" in google_patch["title"]
+        assert "|" not in google_patch["title"]
+
+        # Offer-scoped exports should align the top-level title to the selected offerId.
+        matching = [
+            v
+            for v in (google_patch.get("variants") or [])
+            if v.get("offerId") == google_patch.get("offerId")
+        ]
+        assert matching
+        assert matching[0]["title"] == google_patch["title"]
 
 
 @pytest.mark.asyncio

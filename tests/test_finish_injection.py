@@ -25,6 +25,20 @@ def test_generate_variant_title_moves_finish_after_first_segment(monkeypatch: py
     assert result == "Towel Ring 6-Inch | Polished Nickel | Waverly Place | Allied Brass"
 
 
+def test_generate_variant_title_moves_finish_into_first_segment_when_finish_would_be_truncated(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FEEDOPS_FINISH_FORWARD_V2", "true")
+    base_title = (
+        "24-Inch Wall Mount Towel Bar, Solid Brass, Concealed Mount, Waverly Place Collection "
+        "| Allied Brass"
+    )
+    result = generate_variant_title(base_title, "Satin Nickel")
+    assert result.startswith("Satin Nickel ")
+    assert " | Satin Nickel | " not in result
+    assert result.endswith("| Allied Brass")
+
+
 def test_variant_description_finish_in_first_sentence_and_no_finish_block(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

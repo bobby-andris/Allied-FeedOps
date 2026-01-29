@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from feedops.db.variant_index import ensure_variant_index
 from feedops.integrations.merchant_center import (
     DEFAULT_MC_METADATA_PATH,
     load_merchant_center_snapshot,
@@ -108,6 +109,15 @@ async def optimize_parent_sku(
     output_dir.mkdir(parents=True, exist_ok=True)
     exports_dir = Path(exports_dir)
     exports_dir.mkdir(parents=True, exist_ok=True)
+
+    # Preflight: keep the variant index in sync with the catalog file used for this run.
+    # This enables deterministic joins (GMCID ↔ Shopify IDs) even when Shopify cache is missing.
+    try:
+        if catalog_path.exists():
+            db_path = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
+            ensure_variant_index(db_path, catalog_path)
+    except Exception:
+        pass
 
     # Step 1: Load ParentSKU with unified loader (cache → API → CSV fallback)
     parent_sku, load_status = load_parent_sku_unified_with_status(

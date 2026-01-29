@@ -30,15 +30,46 @@ def _add_feed_item(
     title: str | None,
     description: str | None,
     short_title: str | None,
+    structured_title: dict | None,
+    structured_description: dict | None,
     lifestyle_image_url: str | None,
     tracking_label: str,
+    *,
+    structured_only: bool = False,
 ) -> None:
     """Add a single item to the feed channel."""
     if not offer_id:
         return
 
-    if not title and not description:
-        return
+    structured_title = structured_title or {}
+    structured_description = structured_description or {}
+
+    st_content = (
+        structured_title.get("content") if isinstance(structured_title, dict) else None
+    ) or title
+    sd_content = (
+        structured_description.get("content")
+        if isinstance(structured_description, dict)
+        else None
+    ) or description
+
+    st_source_type = (
+        structured_title.get("digital_source_type")
+        if isinstance(structured_title, dict)
+        else None
+    ) or "trained_algorithmic_media"
+    sd_source_type = (
+        structured_description.get("digital_source_type")
+        if isinstance(structured_description, dict)
+        else None
+    ) or "trained_algorithmic_media"
+
+    if structured_only:
+        if not st_content and not sd_content:
+            return
+    else:
+        if not title and not description:
+            return
 
     item = ET.SubElement(channel, "item")
 
@@ -46,20 +77,41 @@ def _add_feed_item(
     id_elem = ET.SubElement(item, f"{{{G_NAMESPACE}}}id")
     id_elem.text = offer_id
 
-    # Title with CDATA
-    if title:
-        title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}title")
-        title_el.text = f"__CDATA__{_escape_cdata(title)}__ENDCDATA__"
+    if structured_only:
+        # Structured title / description (AI text disclosure) - omit plain title/description.
+        if st_content:
+            st_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}structured_title")
+            dst = ET.SubElement(st_el, f"{{{G_NAMESPACE}}}digital_source_type")
+            dst.text = st_source_type
+            content = ET.SubElement(st_el, f"{{{G_NAMESPACE}}}content")
+            content.text = f"__CDATA__{_escape_cdata(st_content)}__ENDCDATA__"
 
-    # Short title (optional)
-    if short_title:
-        short_title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}short_title")
-        short_title_el.text = f"__CDATA__{_escape_cdata(short_title)}__ENDCDATA__"
+        if sd_content:
+            sd_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}structured_description")
+            dst = ET.SubElement(sd_el, f"{{{G_NAMESPACE}}}digital_source_type")
+            dst.text = sd_source_type
+            content = ET.SubElement(sd_el, f"{{{G_NAMESPACE}}}content")
+            content.text = f"__CDATA__{_escape_cdata(sd_content)}__ENDCDATA__"
 
-    # Description with CDATA
-    if description:
-        desc_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}description")
-        desc_el.text = f"__CDATA__{_escape_cdata(description)}__ENDCDATA__"
+        # Short title can still be used in structured-only mode for placements that support it.
+        if short_title:
+            short_title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}short_title")
+            short_title_el.text = f"__CDATA__{_escape_cdata(short_title)}__ENDCDATA__"
+    else:
+        # Title with CDATA
+        if title:
+            title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}title")
+            title_el.text = f"__CDATA__{_escape_cdata(title)}__ENDCDATA__"
+
+        # Short title (optional)
+        if short_title:
+            short_title_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}short_title")
+            short_title_el.text = f"__CDATA__{_escape_cdata(short_title)}__ENDCDATA__"
+
+        # Description with CDATA
+        if description:
+            desc_el = ET.SubElement(item, f"{{{G_NAMESPACE}}}description")
+            desc_el.text = f"__CDATA__{_escape_cdata(description)}__ENDCDATA__"
 
     # Lifestyle image link (for AI-generated lifestyle images)
     if lifestyle_image_url:
@@ -136,6 +188,12 @@ def generate_supplemental_feed(
     # Custom label for tracking
     tracking_label = f"feedops-{environment}"
 
+    structured_only = os.environ.get("FEEDOPS_GMC_STRUCTURED_ONLY", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
     preflight_enabled = os.environ.get("FEEDOPS_OFFERID_PREFLIGHT", "").lower() in (
         "1",
         "true",
@@ -166,12 +224,18 @@ def generate_supplemental_feed(
         title = patch.get("title")
         description = patch.get("description")
         short_title = patch.get("short_title")
+        structured_title = patch.get("structured_title")
+        structured_description = patch.get("structured_description")
 
         # Get lifestyle image URL if available
         lifestyle_image_url = patch.get("lifestyle_image_link")
 
-        if not title and not description:
-            continue
+        if structured_only:
+            if not structured_title and not structured_description and not title and not description:
+                continue
+        else:
+            if not title and not description:
+                continue
 
         # Add the master/primary item
         _add_feed_item(
@@ -180,8 +244,11 @@ def generate_supplemental_feed(
             title=title,
             description=description,
             short_title=short_title,
+            structured_title=structured_title,
+            structured_description=structured_description,
             lifestyle_image_url=lifestyle_image_url,
             tracking_label=tracking_label,
+            structured_only=structured_only,
         )
 
         # Add variant items if enabled and variants exist
@@ -195,6 +262,10 @@ def generate_supplemental_feed(
                 variant_title = variant.get("title", title)
                 variant_description = variant.get("description", description)
                 variant_short_title = variant.get("short_title", short_title)
+                variant_structured_title = variant.get("structured_title", structured_title)
+                variant_structured_description = variant.get(
+                    "structured_description", structured_description
+                )
 
                 _add_feed_item(
                     channel=channel,
@@ -202,8 +273,11 @@ def generate_supplemental_feed(
                     title=variant_title,
                     description=variant_description,
                     short_title=variant_short_title,
+                    structured_title=variant_structured_title,
+                    structured_description=variant_structured_description,
                     lifestyle_image_url=lifestyle_image_url,  # Same image for all variants
                     tracking_label=tracking_label,
+                    structured_only=structured_only,
                 )
 
     # Convert to string

@@ -7,6 +7,9 @@ Includes IPTC/XMP metadata tagging for AI disclosure compliance with Google Merc
 
 import shutil
 import subprocess
+import os
+import random
+import time
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -464,6 +467,11 @@ class LifestyleImageScore(BaseModel):
     error_message: Optional[str] = None
 
 
+def _is_resource_exhausted_error(error: Exception) -> bool:
+    text = str(error).lower()
+    return "resource_exhausted" in text or "code': 429" in text or " 429" in text
+
+
 def score_lifestyle_image(
     image_path: str | Path,
     reference_image_url: str,
@@ -581,11 +589,30 @@ Respond in this EXACT JSON format:
 The first image is the GENERATED lifestyle image to evaluate.
 The second image is the REFERENCE product image to compare against."""
 
-        # Call Gemini Vision API
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[eval_prompt, generated_image, reference_image],
-        )
+        # Call Gemini Vision API with bounded retry/backoff for quota bursts (429/RESOURCE_EXHAUSTED).
+        max_attempts = int(os.environ.get("LIFESTYLE_SCORE_MAX_ATTEMPTS", "4"))
+        base_sleep = float(os.environ.get("LIFESTYLE_SCORE_RETRY_BASE_SECONDS", "1.0"))
+
+        response = None
+        last_error: Exception | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[eval_prompt, generated_image, reference_image],
+                )
+                last_error = None
+                break
+            except Exception as e:
+                last_error = e
+                if attempt >= max_attempts or not _is_resource_exhausted_error(e):
+                    break
+                delay = base_sleep * (2 ** (attempt - 1))
+                delay += random.random() * 0.25 * delay
+                time.sleep(delay)
+
+        if response is None:
+            raise last_error or RuntimeError("Image scoring failed")
 
         # Parse response
         response_text = response.text.strip()

@@ -91,6 +91,7 @@ def copy_to_baseline(
     candidate_dir: Path,
     baseline_dir: Path,
     dry_run: bool = False,
+    overwrite_existing: bool = False,
 ) -> dict[str, Any]:
     """Copy candidate patches to baseline for SKUs missing baseline.
 
@@ -98,6 +99,8 @@ def copy_to_baseline(
         candidate_dir: Path to candidate exports directory.
         baseline_dir: Path to baseline exports directory.
         dry_run: If True, only report what would be copied.
+        overwrite_existing: If True, copy all candidate SKUs to baseline (replacing
+            any existing baseline files).
 
     Returns:
         Summary dict with results.
@@ -117,11 +120,16 @@ def copy_to_baseline(
     print(f"SKUs in candidate: {len(candidate_skus)}")
     print(f"SKUs in baseline: {len(baseline_skus)}")
 
-    # Find missing SKUs
+    # Find SKUs to copy
     missing_skus = candidate_skus - baseline_skus
-    print(f"SKUs missing from baseline: {len(missing_skus)}")
+    if overwrite_existing:
+        skus_to_copy = candidate_skus
+        print(f"Overwrite enabled: copying {len(skus_to_copy)} SKUs to baseline")
+    else:
+        skus_to_copy = missing_skus
+        print(f"SKUs missing from baseline: {len(missing_skus)}")
 
-    if not missing_skus:
+    if not skus_to_copy:
         print("\nNo SKUs need to be copied - baseline is up to date!")
         return {
             "candidate_count": len(candidate_skus),
@@ -132,11 +140,11 @@ def copy_to_baseline(
         }
 
     print(
-        f"\n{'DRY RUN - ' if dry_run else ''}Copying {len(missing_skus)} SKUs to baseline...\n"
+        f"\n{'DRY RUN - ' if dry_run else ''}Copying {len(skus_to_copy)} SKUs to baseline...\n"
     )
 
     copied_skus = []
-    for sku in sorted(missing_skus):
+    for sku in sorted(skus_to_copy):
         if dry_run:
             print(f"  Would copy: {sku}")
             copied_skus.append(sku)
@@ -161,10 +169,11 @@ def copy_to_baseline(
             # Find images for this SKU
             for image_file in candidate_images_dir.glob(f"{sku}_var*.png"):
                 dst = baseline_images_dir / image_file.name
-                if not dst.exists():
-                    if dry_run:
+                if dry_run:
+                    if overwrite_existing or not dst.exists():
                         print(f"  Would copy image: {image_file.name}")
-                    else:
+                else:
+                    if overwrite_existing or not dst.exists():
                         try:
                             shutil.copy2(image_file, dst)
                             images_copied += 1
@@ -208,12 +217,18 @@ def main():
         action="store_true",
         help="Only show what would be copied, don't actually copy",
     )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Copy all candidate SKUs to baseline (replace existing baseline files)",
+    )
     args = parser.parse_args()
 
     result = copy_to_baseline(
         args.candidate_dir,
         args.baseline_dir,
         dry_run=args.dry_run,
+        overwrite_existing=args.overwrite,
     )
 
     print("\n" + "=" * 60)

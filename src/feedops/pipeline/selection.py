@@ -64,31 +64,31 @@ def _strip_keyword_spam(text: str) -> str:
 
 
 def _ensure_brand_format(title: str) -> str:
-    """Ensure Allied Brass has proper pipe separator and is at end.
-
-    Fixes titles like "...Solid Brass Hardware Allied Brass" by ensuring
-    the brand is properly separated with a pipe character.
-    """
+    """Ensure Allied Brass is present once and is the last comma-separated segment."""
     # Remove any trailing brand first (various formats)
     brand_patterns = [
         r"\s*\|\s*Allied Brass\s*$",  # | Allied Brass
-        r"\s+Allied Brass\s*$",  # Allied Brass (no pipe)
+        r"\s*,\s*Allied Brass\s*$",  # , Allied Brass
+        r"\s+Allied Brass\s*$",  # Allied Brass (no separator)
     ]
     clean_title = title
     for pattern in brand_patterns:
         clean_title = re.sub(pattern, "", clean_title)
 
-    # Clean up any trailing pipes or spaces
-    clean_title = clean_title.rstrip(" |")
+    # Clean up any trailing separators or spaces
+    clean_title = clean_title.rstrip(" ,|")
 
-    # Re-add brand with proper format
-    return f"{clean_title} | Allied Brass"
+    # Re-add brand with comma separator
+    if not clean_title:
+        return "Allied Brass"
+    return f"{clean_title}, Allied Brass"
 
 
 def _smart_title_case(text: str) -> str:
     """Apply title case while preserving known acronyms and handling separators."""
-    # Split on pipe separator to preserve structure
-    parts = text.split("|")
+    # Prefer commas, but tolerate pipes from legacy inputs.
+    normalized = text.replace("|", ",")
+    parts = normalized.split(",")
     result_parts = []
     for part in parts:
         words = part.strip().split()
@@ -108,7 +108,7 @@ def _smart_title_case(text: str) -> str:
             else:
                 titled_words.append(word.title())
         result_parts.append(" ".join(titled_words))
-    return " | ".join(result_parts)
+    return ", ".join([p for p in result_parts if p.strip()])
 
 
 def _enforce_canonical_product_type(title: str, canonical: str | None) -> str:

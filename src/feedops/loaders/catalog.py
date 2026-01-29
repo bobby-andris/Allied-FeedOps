@@ -1,6 +1,7 @@
 """Product Catalog CSV loader with duplicate column handling."""
 
 from decimal import Decimal
+from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
@@ -51,6 +52,12 @@ def load_catalog(path: Path | str) -> pd.DataFrame:
         DataFrame with normalized column names.
     """
     path = Path(path)
+    return _load_catalog_cached(str(path.resolve()))
+
+
+@lru_cache(maxsize=2)
+def _load_catalog_cached(path_str: str) -> pd.DataFrame:
+    path = Path(path_str)
     if not path.exists():
         raise FileNotFoundError(f"Catalog not found: {path}")
 
@@ -71,6 +78,18 @@ def get_parent_sku(df: pd.DataFrame, master_sku: str) -> ParentSKU | None:
         ParentSKU with variants, or None if not found.
     """
     rows = df[df["master_sku"] == master_sku]
+    if rows.empty and master_sku:
+        # Catalog master SKU formatting sometimes differs by separator, especially
+        # for slash-style sizes like "QN-31/30" vs hyphenated inputs.
+        candidates = []
+        if "/" in master_sku:
+            candidates.append(master_sku.replace("/", "-"))
+        if "-" in master_sku:
+            candidates.append(master_sku.replace("-", "/"))
+        for candidate in candidates:
+            rows = df[df["master_sku"] == candidate]
+            if not rows.empty:
+                break
     if rows.empty:
         return None
 

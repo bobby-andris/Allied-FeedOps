@@ -16,6 +16,7 @@ from feedops.db.schema import (
     init_db,
     upsert_merchant_center_items,
 )
+from feedops.db.variant_index import get_shopify_product_id_for_master_sku
 from feedops.integrations.merchant_center import fetch_merchant_center_items
 from feedops.integrations.shopify_catalog import (
     _derive_finish,
@@ -27,11 +28,13 @@ from feedops.integrations.shopify_catalog import (
     _parse_gid,
     _strip_html,
     fetch_shopify_product,
+    fetch_shopify_product_by_id,
 )
 from feedops.loaders.catalog import get_parent_sku, load_catalog
 from feedops.loaders.catalog_resolver import resolve_catalog_path
 from feedops.models.parent_sku import ParentSKU
 from feedops.models.variant import Variant
+from feedops.variant_truth import merge_catalog_variant_truth
 
 
 def _resolve_db_path() -> Path:
@@ -54,15 +57,43 @@ def _parse_timestamp(value: str | None) -> datetime | None:
     return parsed
 
 
+def _master_sku_aliases(master_sku: str) -> list[str]:
+    raw = (master_sku or "").strip()
+    if not raw:
+        return []
+    aliases = [raw]
+    upper = raw.upper()
+    if "/" in upper:
+        aliases.append(raw.replace("/", "-"))
+        aliases.append(raw.replace("/", ""))
+    if "-" in upper:
+        aliases.append(raw.replace("-", "/"))
+        aliases.append(raw.replace("-", ""))
+    # Keep order while de-duping
+    seen: set[str] = set()
+    out: list[str] = []
+    for a in aliases:
+        key = a.strip()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(key)
+    return out
+
+
 def _get_cached_shopify_fetched_at(master_sku: str) -> datetime | None:
     db_path = _resolve_db_path()
     if not db_path.exists():
         return None
     conn = get_connection(db_path)
-    row = conn.execute(
-        "SELECT fetched_at FROM shopify_products WHERE master_sku = ?",
-        (master_sku,),
-    ).fetchone()
+    row = None
+    for alias in _master_sku_aliases(master_sku):
+        row = conn.execute(
+            "SELECT fetched_at FROM shopify_products WHERE master_sku = ?",
+            (alias,),
+        ).fetchone()
+        if row:
+            break
     conn.close()
     if not row:
         return None
@@ -218,11 +249,18 @@ def load_parent_sku_unified_with_status(
 ) -> tuple[ParentSKU | None, UnifiedLoadStatus]:
     """Load ParentSKU with hierarchy: DB cache → Shopify API → GMC API → CSV fallback."""
     status = UnifiedLoadStatus()
+    resolved_catalog_path = Path(
+        Path(catalog_path).expanduser() if catalog_path else resolve_catalog_path(None)
+    )
+
     cached_payload = None
     if not force_refresh:
-        cached_payload = get_cached_shopify_product(
-            master_sku, max_age_hours=cache_ttl_hours
-        )
+        for alias in _master_sku_aliases(master_sku):
+            cached_payload = get_cached_shopify_product(
+                alias, max_age_hours=cache_ttl_hours
+            )
+            if cached_payload:
+                break
         if cached_payload:
             parent = _build_parent_from_shopify_payload(
                 cached_payload, master_sku_hint=master_sku
@@ -239,6 +277,19 @@ def load_parent_sku_unified_with_status(
                     parent = parent.model_copy(
                         update={"merchant_center_items": gmc_items}
                     )
+                # Merge catalog variant truth (dimensions/bullets) into Shopify payload.
+                try:
+                    resolved_path = (
+                        Path(catalog_path).expanduser()
+                        if catalog_path
+                        else resolve_catalog_path(None)
+                    )
+                    df = load_catalog(resolved_path)
+                    catalog_parent = get_parent_sku(df, master_sku)
+                    if catalog_parent:
+                        parent = merge_catalog_variant_truth(parent, catalog_parent)
+                except Exception:
+                    pass
                 return parent, status
         print("Cache miss: Shopify product", flush=True)
 
@@ -249,6 +300,16 @@ def load_parent_sku_unified_with_status(
         product = None
         status.api_error = str(exc)
         print(f"Warning: Shopify API failed: {exc}", flush=True)
+
+    if not product:
+        db_path = _resolve_db_path()
+        if db_path.exists():
+            try:
+                product_id = get_shopify_product_id_for_master_sku(db_path, master_sku)
+                if product_id:
+                    product = fetch_shopify_product_by_id(product_id)
+            except Exception:
+                product = None
 
     if product:
         product_id = _extract_product_id(product) or ""
@@ -266,21 +327,37 @@ def load_parent_sku_unified_with_status(
             gmc_items = _load_gmc_items(master_sku, product, cache_ttl_hours)
             if gmc_items:
                 parent = parent.model_copy(update={"merchant_center_items": gmc_items})
+            # Merge catalog variant truth (dimensions/bullets) into Shopify payload.
+            try:
+                resolved_path = (
+                    Path(catalog_path).expanduser()
+                    if catalog_path
+                    else resolve_catalog_path(None)
+                )
+                df = load_catalog(resolved_path)
+                catalog_parent = get_parent_sku(df, master_sku)
+                if catalog_parent:
+                    parent = merge_catalog_variant_truth(parent, catalog_parent)
+            except Exception:
+                pass
             return parent, status
 
     status.csv_attempted = True
     try:
-        resolved_path = (
-            Path(catalog_path).expanduser()
-            if catalog_path
-            else resolve_catalog_path(None)
-        )
-        df = load_catalog(resolved_path)
+        df = load_catalog(resolved_catalog_path)
         parent = get_parent_sku(df, master_sku)
         if parent:
             status.data_source = "csv_fallback"
             parent = parent.model_copy(update={"data_source": status.data_source})
-        print(f"Data source: CSV fallback ({resolved_path})", flush=True)
+        print(f"Data source: CSV fallback ({resolved_catalog_path})", flush=True)
+        try:
+            gmc_items = get_cached_merchant_center_items(
+                master_sku, max_age_hours=cache_ttl_hours
+            )
+            if gmc_items and parent:
+                parent = parent.model_copy(update={"merchant_center_items": gmc_items})
+        except Exception:
+            pass
         return parent, status
     except Exception as exc:
         status.csv_error = str(exc)

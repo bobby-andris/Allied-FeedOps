@@ -5,6 +5,7 @@ from feedops.integrations.keyword_bank import get_external_keywords
 from feedops.integrations.google_ads import fetch_master_sku_keywords
 # Import Evidence from enrichment to avoid duplication
 from feedops.pipeline.enrichment import Evidence, enrich_product
+from feedops.pipeline.size_matrix import build_size_matrix
 
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
@@ -174,25 +175,54 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
 
     # Add finish options from variants
     if parent_sku.variants:
-        finishes = ", ".join(v.finish for v in parent_sku.variants)
+        seen_finishes: set[str] = set()
+        finishes_list: list[str] = []
+        for v in parent_sku.variants:
+            finish = (v.finish or "").strip()
+            if not finish:
+                continue
+            key = finish.casefold()
+            if key in seen_finishes:
+                continue
+            seen_finishes.add(key)
+            finishes_list.append(finish)
+        finishes = ", ".join(finishes_list)
         evidence.append(Evidence(
             field="available_finishes",
             value=finishes,
             source="available_finishes",  # Use attribute name for verifier compatibility
         ))
 
-        # Add first variant dimensions as representative
+        # For multi-size products, avoid injecting a single variant's length/height/width
+        # as if it applies to the entire family. Instead, provide an explicit size list.
+        size_matrix = build_size_matrix(parent_sku)
+        if size_matrix:
+            sizes = [row.get("size_label") for row in size_matrix if row.get("size_label")]
+            if sizes:
+                evidence.append(
+                    Evidence(
+                        field="available_sizes",
+                        value=", ".join(sizes),
+                        source="available_sizes",
+                    )
+                )
+
+        # Add first variant identifiers/images as representative. Only include dimensions
+        # when the product is not multi-size.
         first_variant = parent_sku.variants[0]
-        variant_fields = [
-            ("product_length", "Length"),
-            ("product_height", "Height"),
-            ("product_width", "Width"),
-            ("projection", "Projection"),
-            ("product_weight", "Weight"),
+        variant_fields: list[tuple[str, str]] = [
             ("gtin", "GTIN"),
             ("upc", "UPC"),
             ("main_image_url", "Main Image URL"),
         ]
+        if not size_matrix:
+            variant_fields = [
+                ("product_length", "Length"),
+                ("product_height", "Height"),
+                ("product_width", "Width"),
+                ("projection", "Projection"),
+                ("product_weight", "Weight"),
+            ] + variant_fields
         for field_name, display_name in variant_fields:
             value = getattr(first_variant, field_name, None)
             if value is not None:

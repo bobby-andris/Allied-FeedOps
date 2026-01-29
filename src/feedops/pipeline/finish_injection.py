@@ -124,8 +124,9 @@ def _update_size_in_description(description: str, size: str) -> str:
     size_num = size_match.group(1)
 
     # Pattern to match size references like "18-Inch", "18 Inch", "18-inch", "18 in"
-    # This will replace any existing size with the variant's specific size
-    size_pattern = r"\d+[-\s]?[Ii]nch|\d+[-\s]?in\b"
+    # IMPORTANT: avoid matching the fractional part of decimal measurements (e.g., "2.64-Inch")
+    # which would corrupt dimensions when performing replacements.
+    size_pattern = r"(?<!\.)\b\d+[-\s]?[Ii]nch\b|(?<!\.)\b\d+[-\s]?in\b"
 
     # Replace size references in common contexts
     # "Length: 18 Inch" -> keep as is if already correct, or update
@@ -139,7 +140,7 @@ def _update_size_in_description(description: str, size: str) -> str:
     current_sizes = re.findall(size_pattern, desc)
     if current_sizes:
         # Check if all sizes are already correct
-        correct_pattern = rf"{size_num}[-\s]?[Ii]nch|{size_num}[-\s]?in\b"
+        correct_pattern = rf"(?<!\.)\b{size_num}[-\s]?[Ii]nch\b|(?<!\.)\b{size_num}[-\s]?in\b"
         if not all(re.match(correct_pattern, s, re.IGNORECASE) for s in current_sizes):
             # Replace with the specific size
             desc = re.sub(size_pattern, f"{size_num}-Inch", desc, count=1)
@@ -689,7 +690,8 @@ def generate_variant_title(
                 # Try to insert/replace size in the first segment
                 first_seg = segments[0]
                 # Common patterns: "Towel Bar 18-Inch" or "18-Inch Towel Bar"
-                size_pattern = r"\d+-?[Ii]nch"
+                # Avoid matching fractional parts of decimals like "2.64-Inch"
+                size_pattern = r"(?<!\.)\b\d+\s*-?\s*[Ii]nch\b"
                 if re.search(size_pattern, first_seg):
                     # Replace existing size reference
                     first_seg = re.sub(size_pattern, size.replace(" ", "-"), first_seg)
@@ -701,6 +703,13 @@ def generate_variant_title(
             # Insert finish after first segment
             if not finish_in_title:
                 segments = [segments[0], finish_name] + segments[1:]
+
+            # If finish ends up beyond common truncation zones, move it into the first segment.
+            # This preserves readability while ensuring variants differentiate early in SERPs.
+            joined_preview = " | ".join(segments + ([brand] if brand else []))
+            finish_pos = joined_preview.lower().find(finish_name.lower())
+            if finish_pos >= 70 and len(segments) >= 2 and segments[1] == finish_name:
+                segments = [f"{finish_name} {segments[0]}"] + segments[2:]
         if brand:
             segments.append(brand)
         return " | ".join(segments)

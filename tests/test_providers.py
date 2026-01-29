@@ -100,24 +100,25 @@ async def test_openai_provider_includes_image_input():
     )
 
     mock_response = MagicMock()
-    mock_response.output_text = '{"title": "Test Title"}'
-    mock_response.usage.input_tokens = 100
-    mock_response.usage.output_tokens = 50
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = '{"title": "Test Title"}'
+    mock_response.usage.prompt_tokens = 100
+    mock_response.usage.completion_tokens = 50
 
     with patch.object(
-        provider.client.responses, "create", new_callable=AsyncMock
+        provider.client.chat.completions, "create", new_callable=AsyncMock
     ) as mock_create:
         mock_create.return_value = mock_response
         await provider.generate("Test prompt", {"type": "object"}, image=image_input)
 
         _, kwargs = mock_create.call_args
-        input_payload = kwargs["input"]
-        assert input_payload[0]["role"] == "user"
-        content = input_payload[0]["content"]
-        assert content[0]["type"] == "input_text"
+        messages = kwargs["messages"]
+        assert messages[0]["role"] == "user"
+        content = messages[0]["content"]
+        assert content[0]["type"] == "text"
         assert content[0]["text"] == "Test prompt"
-        assert content[1]["type"] == "input_image"
-        image_url = content[1]["image_url"]
+        assert content[1]["type"] == "image_url"
+        image_url = content[1]["image_url"]["url"]
         prefix = f"data:{image_input.mime_type};base64,"
         assert image_url.startswith(prefix)
         assert base64.b64decode(image_url[len(prefix) :]) == image_input.data

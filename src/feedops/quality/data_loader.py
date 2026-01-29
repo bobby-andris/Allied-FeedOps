@@ -42,6 +42,8 @@ class ExportContent:
     image_url: str = ""
     lifestyle_images: list[dict[str, Any]] = field(default_factory=list)
     selected_lifestyle_image: int | None = None
+    variants: list[dict[str, Any]] = field(default_factory=list)
+    variant_titles: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -151,6 +153,23 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
 
     exports: dict[str, dict[str, ExportContent]] = {}
 
+    def _extract_structured_text(payload: dict[str, Any], field: str) -> str:
+        """Return plain text for either standard or structured fields.
+
+        Supports:
+        - {field}: "..."
+        - structured_{field}: {"content": "..."}
+        """
+        direct = payload.get(field)
+        if isinstance(direct, str):
+            return direct
+        structured = payload.get(f"structured_{field}")
+        if isinstance(structured, dict):
+            content = structured.get("content")
+            if isinstance(content, str):
+                return content
+        return ""
+
     prefixes = [
         ("google-patch-", "google"),
         ("bing-patch-", "bing"),
@@ -171,11 +190,11 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
                 continue
 
             # Get title and description
-            title = data.get("title", "")
+            title = _extract_structured_text(data, "title")
             if platform == "shopify":
                 description = data.get("body_html", "")
             else:
-                description = data.get("description", "")
+                description = _extract_structured_text(data, "description")
 
             # Get metadata
             meta = data.get("_meta", {})
@@ -189,6 +208,24 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
                         selected_lifestyle_image = img.get("variation_num")
                         break
 
+            variants = []
+            for v in (data.get("variants") or []):
+                if not isinstance(v, dict):
+                    continue
+                if platform == "shopify":
+                    v_desc = v.get("body_html", "")
+                else:
+                    v_desc = _extract_structured_text(v, "description")
+                variants.append(
+                    {
+                        "offerId": v.get("offerId", ""),
+                        "title": _extract_structured_text(v, "title"),
+                        "description": v_desc,
+                        "short_title": _extract_structured_text(v, "short_title"),
+                        "_meta": v.get("_meta", {}) if isinstance(v.get("_meta"), dict) else {},
+                    }
+                )
+
             content = ExportContent(
                 title=title,
                 description=description,
@@ -198,6 +235,8 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
                 generated_at=meta.get("generated_at", ""),
                 lifestyle_images=lifestyle_images,
                 selected_lifestyle_image=selected_lifestyle_image,
+                variants=variants,
+                variant_titles=[v.get("title", "") for v in variants if v.get("title")],
             )
 
             # Store _previous for original content reference

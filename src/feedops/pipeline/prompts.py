@@ -147,11 +147,14 @@ BRAND VOICE:
 TITLE REQUIREMENTS:
 - Product type must appear within the first 30 characters (for mobile truncation).
 - Title zones: 1-30 characters (mobile) and 31-70 characters (desktop) are most critical.
-- Start titles with the product type or a feature modifier + product type.
-- NEVER start titles with adjectives or generic benefit words.
-- "Allied Brass" must be the last segment, preceded by a pipe (|).
-- Use pipe separators (|) between major title segments.
-- If collection_context is provided, include the collection name as a pipe-separated segment
+- Start titles with the product type, or a VERIFIED functional modifier + product type
+  (e.g., "ADA-Compliant Grab Bar", "Retractable Wall Hook", "Tilt-Adjustable Mirror").
+- Never start titles with generic marketing adjectives or vague benefit words
+  (e.g., "Premium", "High-Quality", "Luxury", "Best", "Top-Rated").
+- "Allied Brass" must be the last segment.
+- Prefer commas or hyphens between major title segments for readability. Avoid symbol-heavy
+  separators (like pipes) unless needed for legacy consistency.
+- If collection_context is provided, include the collection name as its own segment
   before "Allied Brass". It helps buyers find coordinating pieces.
 - If the product does NOT belong to a collection, omit the collection segment entirely.
 - Write the title the way a shopper would search for the product — it should read naturally.
@@ -175,8 +178,9 @@ COMPETITIVE POSITIONING (EVIDENCE-GATED):
 - If a verified finish count is available, mention finish variety in descriptions.
 
 DESIGN CONTEXT (from enrichment):
-- If collection_context is provided, mention the collection name in BOTH titles and descriptions
-  to help buyers coordinate matching pieces.
+- If collection_context is provided, mention the collection name to help buyers coordinate matching pieces.
+  Prefer including it in descriptions. Include it in titles only if it doesn’t push high-intent terms
+  (product type, key dimension, primary query modifier) out of the first ~70 characters.
 - If design_style is provided, match the tone guidance (e.g., "modern, crisp" vs "elegant, timeless").
 - If feature_title_keywords is provided (e.g., "Reeded Grip", "ADA Compliant", "Tilting"), include
   the most relevant ONE in the title. These are search terms people use.
@@ -224,13 +228,14 @@ OPTIMIZATION_TEMPLATE = """
 ## Title Guidance
 - Identify what this specific product is (see PRODUCT IDENTITY above), then write a natural title.
 - Include: product type, primary dimension, key material, and any critical feature.
-- If collection_context is provided, include the collection name as a pipe-separated segment.
-- "Allied Brass" is always the last segment, preceded by a pipe (|).
+- If collection_context is provided and it fits without hurting scanability, include the collection name near the end.
+- Use simple separators like commas or hyphens. Avoid pipes (|) and gimmicky punctuation.
+- "Allied Brass" should appear once, near the end.
 - Read the title aloud — it should sound like how a shopper would describe the product.
 Examples (for reference, not rigid templates):
-- "Reeded Grip 16-Inch Grab Bar Solid Brass | Dottingham | Allied Brass"
-- "Retractable Wall Hook 2-1/2-Inch Solid Brass | Allied Brass"
-- "Double Glass Shelf with Towel Bar 16-Inch | Waverly Place | Allied Brass"
+- "Reeded Grip 16-Inch Grab Bar, Solid Brass, Dottingham, Allied Brass"
+- "Retractable Wall Hook, 2-1/2-Inch, Solid Brass, Allied Brass"
+- "Double Glass Shelf with Towel Bar, 16-Inch, Waverly Place, Allied Brass"
 
 ## Description Structure
 1. Opening Hook (first 150 chars): What problem does this solve for the buyer?
