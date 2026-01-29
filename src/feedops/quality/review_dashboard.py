@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 import os
 import re
 from collections import Counter
@@ -77,6 +78,72 @@ def load_available_finishes() -> list[str]:
     return sorted(finishes)
 
 
+_ALL_FINISHES_SENTINEL = "__ALL_FINISHES__"
+_ALL_FINISHES_LABEL = "All finishes"
+
+
+def _display_selected_finish(selected_finish: str | None) -> str | None:
+    if selected_finish == _ALL_FINISHES_SENTINEL:
+        return _ALL_FINISHES_LABEL
+    return selected_finish
+
+
+def _coerce_non_negative_int(value: object, *, default: int = 0) -> int:
+    if isinstance(value, bool):
+        return default
+    if not isinstance(value, int):
+        return default
+    if value < 0:
+        return default
+    return value
+
+
+def _clamp_index(index: int, length: int) -> int:
+    if length <= 0:
+        return 0
+    if index < 0:
+        return 0
+    if index >= length:
+        return length - 1
+    return index
+
+
+def _find_variation_index(
+    lifestyle_images: list[dict[str, Any]], variation_num: int
+) -> int | None:
+    for idx, img in enumerate(lifestyle_images):
+        if img.get("variation_num") == variation_num:
+            return idx
+    return None
+
+
+def _update_selected_lifestyle_image_in_patches(
+    *,
+    exports_dir: Path,
+    master_sku: str,
+    selected_variation_num: int,
+) -> None:
+    """Persist selected lifestyle image to patch JSONs so preview/publish can follow it.
+
+    Best-effort: failures should not break the dashboard UI.
+    """
+    prefixes = ("google-patch-", "bing-patch-", "shopify-patch-")
+    for prefix in prefixes:
+        patch_path = exports_dir / f"{prefix}{master_sku}.json"
+        if not patch_path.exists():
+            continue
+        try:
+            data = json.loads(patch_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        if data.get("selected_lifestyle_image") != selected_variation_num:
+            data["selected_lifestyle_image"] = selected_variation_num
+            try:
+                patch_path.write_text(json.dumps(data, indent=2))
+            except OSError:
+                continue
+
+
 def run_dashboard(
     baseline_exports_dir: str | Path,
     candidate_exports_dir: str | Path,
@@ -99,6 +166,9 @@ def run_dashboard(
         layout="wide",
         initial_sidebar_state="expanded",
     )
+
+    st.session_state["feedops_baseline_exports_dir"] = str(baseline_exports_dir)
+    st.session_state["feedops_candidate_exports_dir"] = str(candidate_exports_dir)
 
     # Custom CSS for better styling
     st.markdown(
@@ -982,7 +1052,9 @@ def render_revision_queue_tab(
                 )
                 st.markdown(f"**Image:** {image_status}")
                 if approval["selected_finish"]:
-                    st.caption(f"Finish: {approval['selected_finish']}")
+                    st.caption(
+                        f"Finish: {_display_selected_finish(approval['selected_finish'])}"
+                    )
 
             st.divider()
 
@@ -1118,7 +1190,9 @@ def render_batch_management_tab(
                 if approval["description_approved"]:
                     elements.append("Desc")
                 if approval["image_approved"]:
-                    elements.append(f"Image ({approval['selected_finish'] or 'N/A'})")
+                    elements.append(
+                        f"Image ({_display_selected_finish(approval['selected_finish']) or 'N/A'})"
+                    )
                 st.caption(", ".join(elements) if elements else "No elements")
             with col3:
                 st.caption(
@@ -1587,14 +1661,23 @@ def render_approval_controls(
         col1, col2 = st.columns(2)
         with col1:
             if available_finishes:
+                finish_options = [_ALL_FINISHES_LABEL, *available_finishes]
                 finish_index = 0
-                if default_finish and default_finish in available_finishes:
-                    finish_index = available_finishes.index(default_finish)
-                selected_finish = st.selectbox(
-                    "Select Finish for Image",
-                    options=available_finishes,
+                if default_finish == _ALL_FINISHES_SENTINEL:
+                    finish_index = 0
+                elif default_finish and default_finish in available_finishes:
+                    finish_index = finish_options.index(default_finish)
+                selected_finish_choice = st.selectbox(
+                    "Apply lifestyle image to",
+                    options=finish_options,
                     index=finish_index,
                     key=f"finish_approve_{sku_data.sku}",
+                    help="Choose a single finish, or approve the selected lifestyle image for all finishes.",
+                )
+                selected_finish = (
+                    _ALL_FINISHES_SENTINEL
+                    if selected_finish_choice == _ALL_FINISHES_LABEL
+                    else selected_finish_choice
                 )
             else:
                 st.caption("No finishes available")
@@ -1606,28 +1689,48 @@ def render_approval_controls(
                 or sku_data.candidate.get("bing")
                 or sku_data.candidate.get("shopify")
             )
-            if candidate_content and candidate_content.lifestyle_images:
+            lifestyle_images = (
+                getattr(candidate_content, "lifestyle_images", None)
+                if candidate_content
+                else None
+            )
+            if lifestyle_images:
                 successful_images = [
                     img
-                    for img in candidate_content.lifestyle_images
+                    for img in lifestyle_images
                     if img.get("generation_success", False)
                 ]
-                if successful_images:
+                if not successful_images:
+                    st.caption("No successful lifestyle images available")
+                else:
                     image_options = [
-                        f"Variation {img.get('variation_num', i+1)}"
+                        f"Variation {img.get('variation_num', i + 1)}"
                         for i, img in enumerate(successful_images)
                     ]
-                    default_idx = (
-                        current_approval.get("selected_image_index", 0)
+                    stored_idx = (
+                        current_approval.get("selected_image_index")
                         if current_approval
-                        else 0
+                        else None
                     )
+                    default_idx = _coerce_non_negative_int(stored_idx, default=0)
+                    if stored_idx is None:
+                        selected_num = getattr(
+                            candidate_content, "selected_lifestyle_image", None
+                        )
+                        if isinstance(selected_num, int):
+                            idx_from_patch = _find_variation_index(
+                                successful_images, selected_num
+                            )
+                            if idx_from_patch is not None:
+                                default_idx = idx_from_patch
+                    default_idx = _clamp_index(default_idx, len(successful_images))
                     selected_image_index = st.selectbox(
                         "Select Image Variation",
                         options=range(len(successful_images)),
                         format_func=lambda x: image_options[x],
-                        index=min(default_idx, len(successful_images) - 1),
+                        index=default_idx,
                         key=f"image_idx_{sku_data.sku}",
+                        help="Overrides the AI-selected image when approving. Saved to patch JSON and the approvals database.",
                     )
 
     # Revision notes (for flagging)
@@ -1644,6 +1747,33 @@ def render_approval_controls(
 
     with col1:
         if st.button("✅ Approve", key=f"approve_btn_{sku_data.sku}", type="primary"):
+            selected_variation_num = None
+            if image_approved:
+                candidate_content = (
+                    sku_data.candidate.get("google")
+                    or sku_data.candidate.get("bing")
+                    or sku_data.candidate.get("shopify")
+                )
+                lifestyle_images = (
+                    getattr(candidate_content, "lifestyle_images", None)
+                    if candidate_content
+                    else None
+                )
+                if (
+                    candidate_content
+                    and lifestyle_images
+                    and isinstance(selected_image_index, int)
+                ):
+                    successful_images = [
+                        img
+                        for img in lifestyle_images
+                        if img.get("generation_success", False)
+                    ]
+                    if 0 <= selected_image_index < len(successful_images):
+                        selected_variation_num = successful_images[
+                            selected_image_index
+                        ].get("variation_num")
+
             save_sku_approval(
                 db_path,
                 master_sku=sku_data.sku,
@@ -1656,6 +1786,17 @@ def render_approval_controls(
                 revision_notes=None,
                 reviewed_by="dashboard",
             )
+            if image_approved and isinstance(selected_variation_num, int):
+                exports_dir_raw = st.session_state.get(
+                    "feedops_candidate_exports_dir",
+                    "dashboard_data/lifestyle-eval-candidate",
+                )
+                exports_dir = Path(exports_dir_raw)
+                _update_selected_lifestyle_image_in_patches(
+                    exports_dir=exports_dir,
+                    master_sku=sku_data.sku,
+                    selected_variation_num=selected_variation_num,
+                )
             st.success("SKU approved!")
             st.rerun()
 
@@ -1709,7 +1850,7 @@ def render_lifestyle_images_panel(sku_data: SKUData) -> None:
         return
 
     # Check if lifestyle images exist
-    lifestyle_images = candidate_content.lifestyle_images
+    lifestyle_images = getattr(candidate_content, "lifestyle_images", None) or []
     if not lifestyle_images:
         return
 
@@ -1730,7 +1871,7 @@ def render_lifestyle_images_panel(sku_data: SKUData) -> None:
     # Display variations in columns
     cols = st.columns(len(successful))
 
-    selected_variation = candidate_content.selected_lifestyle_image
+    selected_variation = getattr(candidate_content, "selected_lifestyle_image", None)
 
     for i, img in enumerate(successful):
         with cols[i]:

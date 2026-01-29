@@ -13,6 +13,12 @@ from feedops.quality.review_dashboard import (
     select_patch_variants_for_preview,
     _choose_variant,
     _variant_finish,
+    _ALL_FINISHES_SENTINEL,
+    _clamp_index,
+    _coerce_non_negative_int,
+    _display_selected_finish,
+    _find_variation_index,
+    _update_selected_lifestyle_image_in_patches,
 )
 from feedops.quality.data_loader import (
     load_latest_report,
@@ -239,11 +245,57 @@ class TestExpanderLabelLogic:
             expander_label = (
                 f"{info['icon']} **{info['name']}** — Score: {c_score:.1f}% ({delta_display})"
             )
-
+        
         assert "Score: 92.0%" in expander_label
         assert "🟢 +7.0%" in expander_label
         assert "Original content only" not in expander_label
 
+
+class TestApprovalAndImageSelectionHelpers:
+    def test_display_selected_finish_all_finishes_sentinel(self):
+        assert _display_selected_finish(_ALL_FINISHES_SENTINEL) == "All finishes"
+
+    def test_coerce_non_negative_int_handles_none_bool_and_negative(self):
+        assert _coerce_non_negative_int(None, default=0) == 0
+        assert _coerce_non_negative_int(True, default=7) == 7
+        assert _coerce_non_negative_int(-1, default=0) == 0
+        assert _coerce_non_negative_int(3, default=0) == 3
+
+    def test_clamp_index_bounds(self):
+        assert _clamp_index(0, 0) == 0
+        assert _clamp_index(-1, 3) == 0
+        assert _clamp_index(2, 3) == 2
+        assert _clamp_index(3, 3) == 2
+
+    def test_find_variation_index(self):
+        images = [
+            {"variation_num": 2},
+            {"variation_num": 7},
+            {"variation_num": 9},
+        ]
+        assert _find_variation_index(images, 2) == 0
+        assert _find_variation_index(images, 7) == 1
+        assert _find_variation_index(images, 999) is None
+
+    def test_update_selected_lifestyle_image_in_patches_updates_master_patch(self, tmp_path):
+        exports_dir = tmp_path / "exports"
+        exports_dir.mkdir(parents=True)
+
+        master_sku = "TEST-SKU"
+        patch_path = exports_dir / f"google-patch-{master_sku}.json"
+        patch_path.write_text('{"selected_lifestyle_image": 1}')
+
+        _update_selected_lifestyle_image_in_patches(
+            exports_dir=exports_dir,
+            master_sku=master_sku,
+            selected_variation_num=3,
+        )
+
+        assert patch_path.read_text().strip().startswith("{")
+        import json as _json
+
+        updated = _json.loads(patch_path.read_text())
+        assert updated["selected_lifestyle_image"] == 3
 
 class TestVariantFinishExtraction:
     def test_variant_finish_prefers_meta(self):
