@@ -4,10 +4,13 @@ Generates RSS 2.0 XML feeds that override titles and descriptions in the primary
 Uses custom_label_4 for tracking FeedOps-modified items in Google Ads reports.
 """
 
+import os
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
+
+from feedops.pipeline.offerid_preflight import filter_patches_by_offer_id, load_known_offer_ids
 
 # Google base namespace for product data
 G_NAMESPACE = "http://base.google.com/ns/1.0"
@@ -132,6 +135,27 @@ def generate_supplemental_feed(
 
     # Custom label for tracking
     tracking_label = f"feedops-{environment}"
+
+    preflight_enabled = os.environ.get("FEEDOPS_OFFERID_PREFLIGHT", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    strict = os.environ.get("FEEDOPS_OFFERID_PREFLIGHT_STRICT", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    if preflight_enabled:
+        db_path = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
+        known_offer_ids = load_known_offer_ids(db_path)
+        filtered, missing = filter_patches_by_offer_id(patches, known_offer_ids)
+        if missing and strict:
+            raise ValueError(
+                "OfferId preflight failed (missing in merchant_center_items): "
+                + ", ".join(sorted(missing))
+            )
+        patches = filtered
 
     # Add items from patches
     for patch in patches:
