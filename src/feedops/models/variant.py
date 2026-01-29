@@ -1,7 +1,11 @@
 """Variant model representing a single product variant."""
+
+from __future__ import annotations
+
 import re
-from pydantic import BaseModel, computed_field
 from decimal import Decimal
+
+from pydantic import BaseModel, computed_field
 
 GMCID_PATTERN = re.compile(r"^shopify_US_(\d+)_(\d+)$")
 

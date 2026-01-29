@@ -14,7 +14,7 @@ from feedops.quality.scoring import (
 
 def test_score_title_rewards_product_type_and_dimension():
     title = "18-Inch Wall Mount Towel Bar, Solid Brass | Skyline | Allied Brass"
-    score, notes = score_title(title)
+    score, notes, _zone = score_title(title)
     assert score >= 6
     assert "No primary dimension detected" not in " ".join(notes)
 
