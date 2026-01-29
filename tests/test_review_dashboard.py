@@ -10,6 +10,8 @@ import pytest
 from feedops.quality.review_dashboard import (
     format_variant_description,
     get_dashboard_debug_info,
+    select_patch_variants_for_preview,
+    _choose_variant,
 )
 from feedops.quality.data_loader import (
     load_latest_report,
@@ -223,7 +225,7 @@ class TestExpanderLabelLogic:
         b_score = 85.0
         score_delta = c_score - b_score
         info = {"icon": "🔍", "name": "Google Shopping / Performance Max"}
-        
+
         if not has_baseline and not has_candidate:
             expander_label = f"{info['icon']} **{info['name']}** — Original content only"
         else:
@@ -233,11 +235,50 @@ class TestExpanderLabelLogic:
                 delta_display = f"🔴 {score_delta:.1f}%"
             else:
                 delta_display = f"⚪ {score_delta:+.1f}%"
-            expander_label = f"{info['icon']} **{info['name']}** — Score: {c_score:.1f}% ({delta_display})"
-        
+            expander_label = (
+                f"{info['icon']} **{info['name']}** — Score: {c_score:.1f}% ({delta_display})"
+            )
+
         assert "Score: 92.0%" in expander_label
         assert "🟢 +7.0%" in expander_label
         assert "Original content only" not in expander_label
+
+
+def test_select_patch_variants_for_preview_handles_missing_variants_attr():
+    """Variant preview selection must not crash if cached ExportContent lacks .variants."""
+    from types import SimpleNamespace
+
+    sku_data = SimpleNamespace(
+        candidate={
+            "google": MockContent(title="t", description="d"),  # no .variants attribute
+            "bing": MockContent(title="t", description="d"),  # no .variants attribute
+        }
+    )
+    platform, variants = select_patch_variants_for_preview(sku_data)
+    assert platform is None
+    assert variants == []
+
+
+def test_choose_variant_selects_by_finish_and_option_id():
+    variants = [
+        {
+            "offerId": "id-ab",
+            "title": "Antique Brass Thing",
+            "description": "Description in Antique Brass.",
+            "_meta": {"finish": "Antique Brass", "option_sku": "SKU-AB"},
+        },
+        {
+            "offerId": "id-as",
+            "title": "Autumn Sparkle Thing",
+            "description": "Description in Autumn Sparkle.",
+            "_meta": {"finish": "Autumn Sparkle", "option_sku": "SKU-AS"},
+        },
+    ]
+
+    chosen = _choose_variant(variants, finish="Autumn Sparkle", option_id="SKU-AS")
+    assert chosen is not None
+    assert "Autumn Sparkle" in chosen["description"]
+    assert "Antique Brass" not in chosen["description"]
 
 
 class TestVariantDescriptionFormatting:

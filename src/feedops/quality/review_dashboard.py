@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import os
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -30,10 +31,34 @@ from feedops.pipeline.finish_injection import (
     generate_variant_keywords,
     generate_variant_title,
 )
+from feedops.pipeline.validators import validate_variant_title_uniqueness
 from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
 
 # Default database path
 DEFAULT_DB_PATH = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
+
+_DASHBOARD_DATA_SCHEMA_VERSION = "v2"
+
+
+def _latest_mtime(path: Path | str | None, patterns: tuple[str, ...]) -> float:
+    """Return a cache-busting mtime for a directory and its matching children."""
+    if not path:
+        return 0.0
+    root = Path(path)
+    if not root.exists():
+        return 0.0
+    latest = 0.0
+    try:
+        latest = max(latest, root.stat().st_mtime)
+    except OSError:
+        pass
+    for pattern in patterns:
+        for candidate in root.glob(pattern):
+            try:
+                latest = max(latest, candidate.stat().st_mtime)
+            except OSError:
+                continue
+    return latest
 
 
 def load_available_finishes() -> list[str]:
@@ -225,6 +250,17 @@ def run_dashboard(
     db_path = DEFAULT_DB_PATH
     init_db(db_path)
 
+    with st.sidebar:
+        st.subheader("Data")
+        if st.button(
+            "🧹 Clear data cache",
+            key="clear_data_cache",
+            help="Clears Streamlit's cached data loader results and reruns the app.",
+        ):
+            st.cache_data.clear()
+            st.rerun()
+        st.caption("Cache is automatically invalidated when exports/reports change on disk.")
+
     # Main navigation tabs
     tab_review, tab_revision, tab_batches = st.tabs(
         ["📋 Review Queue", "🔄 Revision Queue", "✅ Approved / Batches"]
@@ -232,7 +268,14 @@ def run_dashboard(
 
     # Load data with caching
     @st.cache_data
-    def load_data():
+    def load_data(
+        *,
+        schema_version: str,
+        baseline_exports_mtime: float,
+        candidate_exports_mtime: float,
+        baseline_reports_mtime: float,
+        candidate_reports_mtime: float,
+    ):
         return load_all_sku_data(
             baseline_exports_dir=baseline_exports_dir,
             candidate_exports_dir=candidate_exports_dir,
@@ -242,7 +285,25 @@ def run_dashboard(
         )
 
     with st.spinner("Loading data..."):
-        all_sku_data = load_data()
+        baseline_exports_mtime = _latest_mtime(
+            baseline_exports_dir, patterns=("*-patch-*.json",)
+        )
+        candidate_exports_mtime = _latest_mtime(
+            candidate_exports_dir, patterns=("*-patch-*.json",)
+        )
+        baseline_reports_mtime = _latest_mtime(
+            baseline_reports_dir, patterns=("sku-*.md",)
+        )
+        candidate_reports_mtime = _latest_mtime(
+            candidate_reports_dir, patterns=("sku-*.md",)
+        )
+        all_sku_data = load_data(
+            schema_version=_DASHBOARD_DATA_SCHEMA_VERSION,
+            baseline_exports_mtime=baseline_exports_mtime,
+            candidate_exports_mtime=candidate_exports_mtime,
+            baseline_reports_mtime=baseline_reports_mtime,
+            candidate_reports_mtime=candidate_reports_mtime,
+        )
 
     if not all_sku_data:
         st.error(
@@ -276,6 +337,18 @@ def run_dashboard(
             all_sku_data=all_sku_data,
             db_path=db_path,
         )
+
+
+def _candidate_google_variant_title_warnings(sku_data: SKUData) -> list[str]:
+    """Compute variant title warnings for the candidate Google patch.
+
+    Uses the same validator as the pipeline. This is a read-only dashboard signal.
+    """
+    google = sku_data.candidate.get("google")
+    variant_titles = getattr(google, "variant_titles", None) if google else None
+    if not variant_titles:
+        return []
+    return validate_variant_title_uniqueness(list(variant_titles))
 
 
 def render_compare_mode(
@@ -680,10 +753,6 @@ def render_sku_detail_panel(
     # Three-way content comparison (always visible - this is the primary content)
     render_content_comparison(sku_data, platform)
 
-    # Variant preview section (collapsed by default)
-    with st.expander("🎨 Variant Preview", expanded=False):
-        render_variant_preview(sku_data, show_divider=False)
-
     # Reasoning inputs (collapsed by default)
     with st.expander("💡 Reasoning Inputs", expanded=False):
         render_reasoning_panel(sku_data, show_header=False)
@@ -800,6 +869,45 @@ def render_review_queue_tab(
         collection=selected_collection if selected_collection != "All" else None,
         score_filter=score_filter if score_filter != "All" else None,
     )
+
+    with st.sidebar:
+        # Variant title warnings (computed on current filter set)
+        warning_counts: Counter[str] = Counter()
+        warnings_by_sku: dict[str, list[str]] = {}
+        for d in filtered_data:
+            warnings = _candidate_google_variant_title_warnings(d)
+            if warnings:
+                warnings_by_sku[d.sku] = warnings
+                for w in warnings:
+                    wl = (w or "").lower()
+                    if "duplicate variant title" in wl:
+                        warning_counts["duplicate"] += 1
+                    elif "appears after the first" in wl and "consider moving finish earlier" in wl:
+                        warning_counts["finish_after_visible_chars"] += 1
+                    else:
+                        warning_counts["other"] += 1
+
+        st.subheader("Variant Title Warnings")
+        st.caption("Flags variants that look identical in truncated Shopping titles (Google).")
+        st.metric("SKUs with warnings", len(warnings_by_sku))
+        if warning_counts:
+            cols = st.columns(3)
+            cols[0].metric("Duplicate titles", warning_counts.get("duplicate", 0))
+            cols[1].metric(
+                "Finish after ~70 chars", warning_counts.get("finish_after_visible_chars", 0)
+            )
+            cols[2].metric("Other", warning_counts.get("other", 0))
+
+        with st.expander("View warning details", expanded=False):
+            if not warnings_by_sku:
+                st.caption("No variant title warnings for the current filter set.")
+            else:
+                sku = st.selectbox(
+                    "SKU",
+                    options=sorted(warnings_by_sku.keys()),
+                    key="variant_title_warning_sku",
+                )
+                st.code("\n".join(warnings_by_sku.get(sku, [])), language="text")
 
     # Main content area
     if compare_mode:
@@ -1395,10 +1503,6 @@ def render_sku_panel(
         # Three-way content comparison (always visible - this is the primary content)
         render_content_comparison(sku_data, platform)
 
-        # Variant preview section (collapsed by default)
-        with st.expander("🎨 Variant Preview", expanded=False):
-            render_variant_preview(sku_data, show_divider=False)
-
         # Reasoning inputs (collapsed by default)
         with st.expander("💡 Reasoning Inputs", expanded=False):
             render_reasoning_panel(sku_data, show_header=False)
@@ -1777,6 +1881,117 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                 for goal in info["optimization"]:
                     st.markdown(f"• {goal}")
 
+            # For Google/Bing, prefer reviewing per-variant content since variants are the
+            # shippable unit (offerId/item_id) and the patch JSON is the source of truth.
+            show_variant_review = plat_key in ("google", "bing")
+            selected_finish: str | None = None
+            selected_option_id: str | None = None
+            variant_mode = False
+            if show_variant_review:
+                baseline_variants = _extract_variants(baseline_content)
+                candidate_variants = _extract_variants(candidate_content)
+                finishes_set: set[str] = set()
+                for v in candidate_variants + baseline_variants:
+                    finish = _variant_finish(v)
+                    if finish:
+                        finishes_set.add(finish)
+                finishes = sorted(finishes_set)
+                if finishes:
+                    st.success(
+                        "Reviewing per-variant (finish) title/description from the patch JSON. "
+                        "This matches what is published for each offerId."
+                    )
+
+                    default_finish = None
+                    if candidate_variants:
+                        default_finish = _variant_finish(candidate_variants[0])
+                    if not default_finish and baseline_variants:
+                        default_finish = _variant_finish(baseline_variants[0])
+                    finish_index = (
+                        finishes.index(default_finish)
+                        if default_finish in finishes
+                        else 0
+                    )
+
+                    selected_finish = st.selectbox(
+                        "Finish",
+                        options=finishes,
+                        index=finish_index,
+                        key=f"content_finish_{plat_key}_{sku_data.sku}",
+                    )
+
+                    option_variants = [
+                        v for v in candidate_variants if _variant_finish(v) == selected_finish
+                    ] or [
+                        v for v in baseline_variants if _variant_finish(v) == selected_finish
+                    ]
+                    option_ids = [_variant_option_id(v) for v in option_variants]
+                    if len(option_ids) > 1:
+                        selected_option_id = st.selectbox(
+                            "Variant (size/option)",
+                            options=option_ids,
+                            key=f"content_option_{plat_key}_{sku_data.sku}",
+                        )
+                    else:
+                        selected_option_id = option_ids[0] if option_ids else None
+
+                    # Apply the selected variant mapping to baseline/candidate display fields.
+                    baseline_selected = _choose_variant(
+                        baseline_variants,
+                        finish=selected_finish,
+                        option_id=selected_option_id,
+                    )
+                    candidate_selected = _choose_variant(
+                        candidate_variants,
+                        finish=selected_finish,
+                        option_id=selected_option_id,
+                    )
+
+                    if baseline_selected:
+                        baseline_title = (
+                            baseline_selected.get("title") or baseline_title
+                        )
+                        baseline_desc = (
+                            baseline_selected.get("description") or baseline_desc
+                        )
+                    if candidate_selected:
+                        candidate_title = (
+                            candidate_selected.get("title") or candidate_title
+                        )
+                        candidate_desc = (
+                            candidate_selected.get("description") or candidate_desc
+                        )
+
+                    with st.expander(
+                        "Advanced: Primary item payload (patch top-level title/description)",
+                        expanded=False,
+                    ):
+                        st.caption(
+                            "These are the patch's top-level title/description fields. "
+                            "For variant-heavy SKUs, focus on the per-variant content above."
+                        )
+                        adv_col1, adv_col2 = st.columns(2)
+                        with adv_col1:
+                            st.markdown("**Baseline primary title/description**")
+                            st.markdown(
+                                f"<div class='content-box'>{html.escape((baseline_content.title if baseline_content else '') or '')}</div>",
+                                unsafe_allow_html=True,
+                            )
+                            st.markdown(
+                                f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape((baseline_content.description if baseline_content else '') or '')}</div>",
+                                unsafe_allow_html=True,
+                            )
+                        with adv_col2:
+                            st.markdown("**Candidate primary title/description**")
+                            st.markdown(
+                                f"<div class='content-box'>{html.escape((candidate_content.title if candidate_content else '') or '')}</div>",
+                                unsafe_allow_html=True,
+                            )
+                            st.markdown(
+                                f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape((candidate_content.description if candidate_content else '') or '')}</div>",
+                                unsafe_allow_html=True,
+                            )
+
             # Conditional column rendering based on available content
             if not has_baseline and not has_candidate:
                 # Only Original column (full width)
@@ -1959,6 +2174,8 @@ def render_reasoning_panel(sku_data: SKUData, show_header: bool = True) -> None:
         st.info("No report data available for this SKU.")
         return
 
+    st.markdown(f"**Provider/Model:** {report.provider_model or 'Unknown'}")
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -1989,12 +2206,16 @@ def render_reasoning_panel(sku_data: SKUData, show_header: bool = True) -> None:
         else:
             st.caption("No enrichment data available")
 
-    # Expandable evidence table
+    # Expandable evidence + prompt (from report markdown)
     if report.evidence_markdown:
-        with st.expander("Full Evidence Table"):
+        with st.expander("Available Product Data"):
             st.markdown(report.evidence_markdown)
 
-    # Provider info
+    if report.prompt_text:
+        with st.expander("Full Prompt"):
+            st.code(report.prompt_text, language="text")
+
+    # Provider info (footer)
     st.caption(
         f"Model: {report.provider_model or 'Unknown'} | Cost: {report.estimated_cost or 'N/A'}"
     )
@@ -2145,6 +2366,69 @@ def format_variant_description(description: str, max_chars: int | None = None) -
     return description[:max_chars] + "..."
 
 
+def _extract_variants(content: Any) -> list[dict[str, Any]]:
+    variants = getattr(content, "variants", None) if content else None
+    if not isinstance(variants, list):
+        return []
+    return [v for v in variants if isinstance(v, dict)]
+
+
+def _variant_finish(variant: dict[str, Any]) -> str | None:
+    meta = variant.get("_meta")
+    if not isinstance(meta, dict):
+        return None
+    finish = meta.get("finish")
+    return finish if isinstance(finish, str) and finish.strip() else None
+
+
+def _variant_option_id(variant: dict[str, Any]) -> str:
+    meta = variant.get("_meta")
+    if isinstance(meta, dict):
+        option_sku = meta.get("option_sku")
+        if isinstance(option_sku, str) and option_sku.strip():
+            return option_sku
+    offer_id = variant.get("offerId")
+    return offer_id if isinstance(offer_id, str) and offer_id.strip() else "(unknown)"
+
+
+def _choose_variant(
+    variants: list[dict[str, Any]],
+    *,
+    finish: str,
+    option_id: str | None,
+) -> dict[str, Any] | None:
+    matching_finish = [v for v in variants if _variant_finish(v) == finish]
+    if not matching_finish:
+        return None
+    if option_id:
+        for v in matching_finish:
+            if _variant_option_id(v) == option_id:
+                return v
+    return matching_finish[0]
+
+
+def select_patch_variants_for_preview(
+    sku_data: SKUData,
+) -> tuple[str | None, list[dict[str, Any]]]:
+    """Return (platform, variants) for the first candidate patch that has variants.
+
+    The dashboard's Variant Preview must reflect the patch JSON (source of truth) when
+    `variants` are present. This helper isolates selection logic so it can be unit tested
+    without Streamlit rendering.
+    """
+    for platform_name in ("google", "bing"):
+        candidate_content = sku_data.candidate.get(platform_name)
+        platform_variants = (
+            getattr(candidate_content, "variants", None) if candidate_content else None
+        )
+        if not isinstance(platform_variants, list) or not platform_variants:
+            continue
+        cleaned = [v for v in platform_variants if isinstance(v, dict)]
+        if cleaned:
+            return platform_name, cleaned
+    return None, []
+
+
 def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None:
     """Render variant preview section with finish selector."""
     if show_divider:
@@ -2155,13 +2439,91 @@ def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None
         "Lifestyle images above apply to all variants."
     )
 
-    # Use product-specific finishes if available, otherwise fall back to all finishes
-    available_finishes = []
+    # Prefer previewing the actual patch variants (this is what will show on Google/Bing).
+    variant_source_platform, variants = select_patch_variants_for_preview(sku_data)
+    if variants:
+        finishes = sorted(
+            {
+                v.get("_meta", {}).get("finish")
+                for v in variants
+                if v.get("_meta", {}).get("finish")
+            }
+        )
+        if not finishes:
+            st.warning("No finish metadata found in patch variants; falling back to generated preview.")
+        else:
+            st.success(
+                f"Previewing the exact per-variant title/description from the generated patch ({(variant_source_platform or 'unknown').title()})."
+            )
+            selected_finish = st.selectbox(
+                "Select Finish to Preview",
+                options=finishes,
+                key=f"finish_select_{sku_data.sku}",
+                help="Shows the exact title/description from the generated patch variants.",
+            )
+
+            finish_variants = [
+                v for v in variants if v.get("_meta", {}).get("finish") == selected_finish
+            ]
+            if not finish_variants:
+                st.info("No variants found for selected finish.")
+                return
+
+            chosen = finish_variants[0]
+            if len(finish_variants) > 1:
+                option_skus = [
+                    v.get("_meta", {}).get("option_sku") or v.get("offerId") or "(unknown)"
+                    for v in finish_variants
+                ]
+                selected_option = st.selectbox(
+                    "Select Variant (Size/Option)",
+                    options=option_skus,
+                    key=f"option_select_{sku_data.sku}",
+                    help="Some finishes have multiple variants (e.g., different sizes).",
+                )
+                idx = option_skus.index(selected_option)
+                chosen = finish_variants[idx]
+
+            variant_title = chosen.get("title", "")
+            variant_description = chosen.get("description", "")
+            category = sku_data.original.category if sku_data.original else None
+            variant_keywords = generate_variant_keywords(selected_finish, category)
+
+            # Display variant preview in two columns
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("##### Variant Title")
+                st.markdown(
+                    f"<div class='content-box'>{html.escape(variant_title) if variant_title else '<em>N/A</em>'}</div>",
+                    unsafe_allow_html=True,
+                )
+
+                st.markdown("##### Variant Keywords")
+                if variant_keywords:
+                    chips_html = "".join(
+                        f"<span class='keyword-chip'>{html.escape(kw)}</span>"
+                        for kw in variant_keywords
+                    )
+                    st.markdown(chips_html, unsafe_allow_html=True)
+                else:
+                    st.caption("No keywords generated")
+
+            with col2:
+                st.markdown("##### Variant Description")
+                preview_desc = format_variant_description(variant_description)
+                st.markdown(
+                    f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(preview_desc) if preview_desc else '<em>N/A</em>'}</div>",
+                    unsafe_allow_html=True,
+                )
+            return
+
+    # Fallback: generated variant preview (legacy). This is useful when patch variants are not present.
+    # Use product-specific finishes if available, otherwise fall back to all finishes.
+    available_finishes: list[str] = []
     if sku_data.original and sku_data.original.available_finishes:
         available_finishes = sku_data.original.available_finishes
-        st.info(
-            f"Showing {len(available_finishes)} finishes available for this product"
-        )
+        st.info(f"Showing {len(available_finishes)} finishes available for this product")
     else:
         available_finishes = load_available_finishes()
         st.warning("Using all finishes (product-specific finish data not available)")
@@ -2170,73 +2532,67 @@ def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None
         st.info("Finish data not available. Ensure data/finishes.txt exists.")
         return
 
-    # Get base content from candidate (prefer Google, fall back to others)
-    candidate_content = (
+    fallback_content = (
         sku_data.candidate.get("google")
         or sku_data.candidate.get("bing")
         or sku_data.candidate.get("shopify")
     )
-
-    if not candidate_content:
+    if not fallback_content:
         st.info("No candidate content available for variant preview.")
         return
 
-    base_title = candidate_content.title
-    base_description = candidate_content.description
+    base_title = fallback_content.title
+    base_description = fallback_content.description
 
-    # Get collection info from original data
-    collection_name = None
-    category = None
-    if sku_data.original:
-        collection_name = sku_data.original.collection
-        category = sku_data.original.category
+    collection_name = sku_data.original.collection if sku_data.original else None
+    category = sku_data.original.category if sku_data.original else None
 
-    # Finish selector dropdown
     selected_finish = st.selectbox(
         "Select Finish to Preview",
         options=available_finishes,
-        key=f"finish_select_{sku_data.sku}",
+        key=f"finish_select_fallback_{sku_data.sku}",
+        help="Generated preview (not pulled from patch variants).",
     )
 
-    if selected_finish:
-        # Generate variant-specific content
-        variant_title = generate_variant_title(base_title, selected_finish)
-        variant_description = generate_variant_description(
-            base_description,
-            selected_finish,
-            collection_name=collection_name,
-            category=category,
-            platform="google",
+    if not selected_finish:
+        return
+
+    variant_title = generate_variant_title(base_title, selected_finish)
+    variant_description = generate_variant_description(
+        base_description,
+        selected_finish,
+        collection_name=collection_name,
+        category=category,
+        platform="google",
+    )
+    variant_keywords = generate_variant_keywords(selected_finish, category)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("##### Variant Title")
+        st.markdown(
+            f"<div class='content-box'>{html.escape(variant_title)}</div>",
+            unsafe_allow_html=True,
         )
-        variant_keywords = generate_variant_keywords(selected_finish, category)
 
-        # Display variant preview in two columns
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("##### Variant Title")
-            st.markdown(
-                f"<div class='content-box'>{html.escape(variant_title)}</div>",
-                unsafe_allow_html=True,
+        st.markdown("##### Variant Keywords")
+        if variant_keywords:
+            chips_html = "".join(
+                f"<span class='keyword-chip'>{html.escape(kw)}</span>"
+                for kw in variant_keywords
             )
+            st.markdown(chips_html, unsafe_allow_html=True)
+        else:
+            st.caption("No keywords generated")
 
-            st.markdown("##### Variant Keywords")
-            if variant_keywords:
-                chips_html = "".join(
-                    f"<span class='keyword-chip'>{html.escape(kw)}</span>"
-                    for kw in variant_keywords
-                )
-                st.markdown(chips_html, unsafe_allow_html=True)
-            else:
-                st.caption("No keywords generated")
-
-        with col2:
-            st.markdown("##### Variant Description")
-            preview_desc = format_variant_description(variant_description)
-            st.markdown(
-                f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(preview_desc)}</div>",
-                unsafe_allow_html=True,
-            )
+    with col2:
+        st.markdown("##### Variant Description")
+        preview_desc = format_variant_description(variant_description)
+        st.markdown(
+            f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(preview_desc)}</div>",
+            unsafe_allow_html=True,
+        )
 
 
 def parse_args():
