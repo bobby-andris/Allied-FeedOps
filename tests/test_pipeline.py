@@ -1163,6 +1163,56 @@ def test_generate_bing_patch_preview_structure(sample_parent_sku):
     assert "description" in patch
 
 
+def test_generate_google_variant_preview_updates_size_when_size_is_in_option_sku(
+    sample_parent_sku,
+    monkeypatch,
+):
+    from feedops.pipeline.reporter import generate_variant_patch_preview
+
+    monkeypatch.setenv("FEEDOPS_FINISH_FORWARD_V2", "true")
+    sample_parent_sku.variants.append(
+        Variant(
+            option_sku="1031/36-ABR",
+            finish="Antique Brass",
+            finish_code="ABR",
+            gmc_id="shopify_US_4542872518788_99999999999998",
+            product_length=36,
+            product_weight=4.0,
+        )
+    )
+    candidate = Candidate(
+        google_title="18-Inch Wall Mount Towel Bar | Skyline | Allied Brass",
+        google_short_title="18-Inch Towel Bar",
+        google_description=(
+            "Keep towels within reach.\n\n"
+            "Specs:\n"
+            "Length: 18 Inch\n"
+        ),
+        bing_title="Test Bing Title",
+        bing_description="Test description " * 30,
+        shopify_title="Test Shopify Title",
+        shopify_description="<p>Test description</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
+        ),
+    )
+
+    patch = generate_variant_patch_preview(
+        sample_parent_sku,
+        sample_parent_sku.variants[-1],
+        candidate,
+        platform="google",
+    )
+    assert "36-Inch" in patch["title"] or "36 Inch" in patch["title"]
+    assert ("Length: 36 Inch" in patch["description"]) or ("Length: 36-Inch" in patch["description"])
+
+
 def test_generate_shopify_patch_preview_structure(sample_parent_sku):
     """Shopify patch preview includes platform fields."""
     candidate = Candidate(
@@ -1187,3 +1237,48 @@ def test_generate_shopify_patch_preview_structure(sample_parent_sku):
     assert "productId" in patch
     assert "title" in patch
     assert "body_html" in patch
+
+
+def test_generate_shopify_patch_preview_multi_size_body_html_is_size_agnostic(
+    sample_parent_sku,
+):
+    sample_parent_sku.variants.append(
+        Variant(
+            option_sku="1031/36-ABR",
+            finish="Antique Brass",
+            finish_code="ABR",
+            gmc_id="shopify_US_4542872518788_99999999999998",
+            product_length=36,
+            product_weight=4.0,
+        )
+    )
+
+    candidate = Candidate(
+        google_title="Test Google Title",
+        google_short_title="Test Short Title",
+        google_description="Test description " * 30,
+        bing_title="Test Bing Title",
+        bing_description="Test description " * 30,
+        shopify_title="Test Shopify Title",
+        shopify_description=(
+            "<p>Keep towels within reach with a wall-mounted towel bar.</p>"
+            "<ul><li>Solid brass construction</li></ul>"
+            "<p>Specs &amp; details:</p>"
+            "<ul><li>Length: 18 Inch</li></ul>"
+        ),
+        claims=[],
+        self_score=Score(
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
+        ),
+    )
+
+    patch = generate_patch_preview(sample_parent_sku, candidate, platform="shopify")
+    assert "Length:" not in patch["body_html"]
+    assert "18 Inch" in patch["body_html"]
+    assert "36 Inch" in patch["body_html"]
+    assert "<table" in patch["body_html"]

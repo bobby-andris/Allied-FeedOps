@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import datetime
+from html import escape
+import re
 
 from feedops.models import Candidate, ParentSKU, Variant
 from feedops.pipeline.enrichment import detect_collection
@@ -12,10 +14,83 @@ from feedops.pipeline.finish_injection import (
     generate_variant_title,
 )
 from feedops.pipeline.selection import RankedCandidate
+from feedops.pipeline.size_matrix import build_size_matrix, get_variant_size_label
 
 # Google Merchant Center digital source type for AI-generated content
 # Required for compliance with April 2024 product data specification update
 DIGITAL_SOURCE_TYPE_AI = "trained_algorithmic_media"
+
+
+_FIRST_P_RE = re.compile(r"<p\b[^>]*>.*?</p>", re.IGNORECASE | re.DOTALL)
+_FIRST_UL_RE = re.compile(r"<ul\b[^>]*>.*?</ul>", re.IGNORECASE | re.DOTALL)
+
+
+def _build_shopify_size_table(parent_sku: ParentSKU) -> str | None:
+    matrix = build_size_matrix(parent_sku)
+    if len(matrix) < 2:
+        return None
+
+    columns: list[tuple[str, str]] = [("overall", "Overall (in)")]
+    if any(row.get("projection_in") for row in matrix):
+        columns.append(("projection_in", "Projection (in)"))
+    if any(row.get("weight_lb") for row in matrix):
+        columns.append(("weight_lb", "Weight (lb)"))
+
+    head_cells = "".join(f"<th>{escape(label)}</th>" for _key, label in columns)
+    rows_html = []
+    for row in matrix:
+        size_label = escape(str(row.get("size_label", "")).strip())
+        if not size_label:
+            continue
+        cells = [f"<td>{size_label}</td>"]
+        for key, _label in columns:
+            cells.append(f"<td>{escape(str(row.get(key, '')).strip())}</td>")
+        rows_html.append(f"<tr>{''.join(cells)}</tr>")
+
+    if not rows_html:
+        return None
+
+    return (
+        "<h3>Size &amp; Specs</h3>"
+        "<table>"
+        f"<thead><tr><th>Size</th>{head_cells}</tr></thead>"
+        f"<tbody>{''.join(rows_html)}</tbody>"
+        "</table>"
+    )
+
+
+def _build_shopify_body_html(parent_sku: ParentSKU, candidate: Candidate) -> str:
+    """Generate Shopify body_html, avoiding single-size claims for multi-size products."""
+    size_table = _build_shopify_size_table(parent_sku)
+    if not size_table:
+        return candidate.shopify_description
+
+    desc = candidate.shopify_description or ""
+    hook_match = _FIRST_P_RE.search(desc)
+    hook = hook_match.group(0) if hook_match else f"<p>{escape(desc.strip())}</p>"
+
+    ul_match = _FIRST_UL_RE.search(desc)
+    if ul_match:
+        highlights = ul_match.group(0)
+    else:
+        bullets = [
+            b
+            for b in [
+                parent_sku.bullet_1,
+                parent_sku.bullet_2,
+                parent_sku.bullet_3,
+                parent_sku.bullet_4,
+                parent_sku.bullet_5,
+            ]
+            if b
+        ]
+        if bullets:
+            lis = "".join(f"<li>{escape(text)}</li>" for text in bullets)
+            highlights = f"<ul>{lis}</ul>"
+        else:
+            highlights = ""
+
+    return f"{hook}{highlights}{size_table}"
 
 
 def _build_structured_title(title: str) -> dict:
@@ -464,7 +539,7 @@ def generate_patch_preview(
         patch = {
             "productId": product_id or offer_id,
             "title": candidate.shopify_title,
-            "body_html": candidate.shopify_description,
+            "body_html": _build_shopify_body_html(parent_sku, candidate),
             "meta_description": candidate.shopify_meta_description,
             "_meta": meta,
             "_previous": previous,
@@ -525,7 +600,13 @@ def generate_variant_patch_preview(
         raise ValueError(f"Unsupported platform: {platform}")
 
     # Generate variant-specific content
-    variant_title = generate_variant_title(base_title, finish_name)
+    variant_size = get_variant_size_label(variant)
+    variant_title = generate_variant_title(
+        base_title,
+        finish_name,
+        size=variant_size if platform in ("google", "bing") else None,
+        platform=platform,
+    )
     variant_description = generate_variant_description(
         base_description=base_description,
         finish_name=finish_name,
@@ -536,6 +617,7 @@ def generate_variant_patch_preview(
         material=parent_sku.material,
         finish_count=len(parent_sku.variants) if parent_sku.variants else None,
         platform=platform,
+        size=variant_size if platform in ("google", "bing") else None,
     )
 
     # Generate finish-specific keywords for this variant
