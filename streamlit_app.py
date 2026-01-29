@@ -13,6 +13,9 @@ from pathlib import Path
 import streamlit as st
 
 
+_APP_BUILD = "2026-01-29.1"
+
+
 def resolve_dashboard_paths(
     repo_root: Path | str,
 ) -> tuple[Path, Path, Path | None, Path | None, Path | None]:
@@ -78,6 +81,7 @@ def main() -> None:
 
     st.sidebar.markdown("---")
     st.sidebar.caption("FeedOps Content Optimization System")
+    st.sidebar.caption(f"Build: {_APP_BUILD}")
 
     # Render selected page
     if page == "📋 Review Queue":
