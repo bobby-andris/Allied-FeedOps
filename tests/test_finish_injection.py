@@ -74,3 +74,27 @@ def test_variant_description_adds_finish_count_bullet(monkeypatch: pytest.Monkey
     )
     bullet_lines = [line for line in result.splitlines() if line.strip().startswith("- ")]
     assert any("28" in line and "finish" in line.lower() for line in bullet_lines)
+
+
+def test_variant_description_does_not_leave_dangling_finish_options_line(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FEEDOPS_FINISH_FORWARD_V2", "true")
+    base_description = (
+        "Keep towels dry and within reach with this wall mount towel bar.\n\n"
+        "Highlights:\n"
+        "- Reliable support for daily use\n\n"
+        "Specs:\n"
+        "- Finish options: multiple designer finish options available\n"
+        "- Warranty: Limited Lifetime Warranty\n"
+    )
+    result = generate_variant_description(
+        base_description=base_description,
+        finish_name="Antique Brass",
+        collection_name="Carolina",
+        collection_group="Traditional",
+        platform="google",
+        size="18 Inch",
+    )
+    assert "multiple designer finish options available" not in result
+    assert "Finish options:" not in result

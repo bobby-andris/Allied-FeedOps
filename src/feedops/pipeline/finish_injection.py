@@ -7,6 +7,8 @@ This module handles:
 4. Injecting snippets into base descriptions
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -541,6 +543,17 @@ def generate_variant_description(
     # Remove generic "Available in X finishes" text since this is for a specific finish
     desc = base_description
 
+    # Remove any Finish options lines entirely (some upstream templates include these as a
+    # generic "available in multiple finishes" statement which becomes incorrect after
+    # finish-specific injection). This must happen before any string replacements to avoid
+    # leaving a dangling unbulleted line.
+    desc = re.sub(r"(?im)^[ \t-]*finish options:.*\n", "", desc)
+    desc = re.sub(
+        r"(?im)^[ \t]*multiple designer finish options available\s*\n",
+        "",
+        desc,
+    )
+
     # For Google/Bing, update size references in description if size is provided
     # For Shopify, keep description generic (covers all sizes on product page)
     if size and platform in ("google", "bing"):
@@ -557,8 +570,6 @@ def generate_variant_description(
         "Finish options: Available in a wide variety of designer finishes",
         "- Finish options: Available in a wide variety of designer finishes",
         "- Available in a wide variety of lifetime designer finishes",
-        "- Finish options: ",
-        "Finish options: ",
     ]
 
     for pattern in patterns_to_remove:
