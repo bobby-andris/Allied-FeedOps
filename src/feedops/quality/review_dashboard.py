@@ -31,7 +31,10 @@ from feedops.pipeline.finish_injection import (
     generate_variant_keywords,
     generate_variant_title,
 )
-from feedops.pipeline.validators import validate_variant_title_uniqueness
+try:
+    from feedops.pipeline.validators import validate_variant_title_uniqueness
+except Exception:  # pragma: no cover
+    validate_variant_title_uniqueness = None
 from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
 
 # Default database path
@@ -344,6 +347,8 @@ def _candidate_google_variant_title_warnings(sku_data: SKUData) -> list[str]:
 
     Uses the same validator as the pipeline. This is a read-only dashboard signal.
     """
+    if not validate_variant_title_uniqueness:
+        return []
     google = sku_data.candidate.get("google")
     variant_titles = getattr(google, "variant_titles", None) if google else None
     if not variant_titles:
