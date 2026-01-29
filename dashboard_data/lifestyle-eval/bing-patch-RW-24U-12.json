@@ -1,11 +1,11 @@
 {
   "sku": "shopify_US_4545088553092_32128610697348",
-  "title": "Wall Mount Paper Towel Holder 15-Inch Solid Brass, Retro Wave Collection Traditional Style Allied Brass",
-  "description": "Add functional storage with a wall mount paper towel holder crafted from solid brass\u2014ideal for keeping paper towels handy while reducing countertop clutter.\n\nHighlights:\n- Wall-mounted paper towel holder (wall mount paper towel rack / paper towel dispenser style) for easy access\n- Solid brass construction with concealed screw mounting hardware\n- Traditional bathroom hardware look that also suits vintage bath accessories and classic bath accessories spaces\n- Designed to coordinate with the retro wave collection for a matching retro wave set\n- Offered in a wide range of lifetime designer finishes, including statement colors\n\nSpecs:\n- Collection: Retro Wave\n- Style: Traditional\n- Material: Brass\n- Mounting type: Wall mount\n- Dimensions: 15-Inch height x 2.25-Inch width x 4-Inch length; 5-Inch projection\n- Weight capacity: 2 lb\n- Product weight: 2.4 lb\n- Assembly required: False\n- Included items: Paper towel holder and all installation hardware\n- Screw size: #8 x 1 1/4\n- Warranty: Limited Lifetime Warranty",
+  "title": "Wall Mount paper towel holder 15-Inch Solid Brass Retro Wave Collection, Traditional Style Allied Brass",
+  "description": "Keep your countertop clean and clutter-free with this wall mount paper towel holder, crafted from solid brass. From the retro wave collection, it delivers a traditional, elegant look and coordinates easily with matching retro wave accessories for a unified space.\n\nHighlights:\n- Space-saving wall-mounted paper towel holder for kitchen organization\n- Solid brass construction\n- Concealed screw mounting hardware for a clean appearance\n- Available in multiple designer finishes to coordinate with traditional bathroom hardware and classic bath accessories\n- Installation hardware included\n\nSpecs:\n- Overall size: 15 in height x 4 in length x 2.25 in width\n- Projection: 5 in\n- Weight capacity: 2 lb\n- Assembly required: No\n- Included items: Paper towel holder and all installation hardware\n- Screw size: #8 x 1 1/4 in\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "RW-24U/12",
-    "generated_at": "2026-01-25T15:40:06.610128",
-    "quality_score": 91.67,
+    "generated_at": "2026-01-25T19:23:16.804364",
+    "quality_score": 90.0,
     "approval_status": "approved"
   },
   "_previous": {
@@ -14,27 +14,27 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/RW-24U-12_var1_20260125_153924.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/RW-24U-12_var1_20260125_192233.png",
       "variation_num": 1,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/RW-24U-12-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_153924",
+      "timestamp": "20260125_192233",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/RW-24U-12_var2_20260125_153939.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/RW-24U-12_var2_20260125_192248.png",
       "variation_num": 2,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/RW-24U-12-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_153939",
+      "timestamp": "20260125_192248",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/RW-24U-12_var3_20260125_153952.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/RW-24U-12_var3_20260125_192302.png",
       "variation_num": 3,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/RW-24U-12-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_153952",
+      "timestamp": "20260125_192302",
       "error_message": null
     }
   ],

@@ -1,0 +1,287 @@
+{
+  "success": [
+    {
+      "master_sku": "920D-6",
+      "category": "Pilot",
+      "quality_score": 90.0,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "CL-41-30",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "P-550-WPT",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "QN-31/30",
+      "category": "Pilot",
+      "quality_score": 88.33,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "SH-84",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "CV-407-8SM",
+      "category": "Pilot",
+      "quality_score": 81.67,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "CL-29",
+      "category": "Pilot",
+      "quality_score": 88.33,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "FT-16",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "MB-20",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "CL-11",
+      "category": "Pilot",
+      "quality_score": 83.33,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "1051",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "WP-GLT-24",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "CL-41-18",
+      "category": "Pilot",
+      "quality_score": 83.33,
+      "status": "rejected",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "HTL-3",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "TS-4L",
+      "category": "Pilot",
+      "quality_score": 90.0,
+      "status": "approved",
+      "lifestyle_images": 3
+    },
+    {
+      "master_sku": "MA-26",
+      "category": "Pilot",
+      "quality_score": 41.67,
+      "status": "rejected",
+      "lifestyle_images": 1
+    },
+    {
+      "master_sku": "WP-61",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "CS-1",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "WP-2TB/16-GAL",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "PR-99",
+      "category": "Pilot",
+      "quality_score": 83.33,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "P-730-GB360",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "BSK-275LA",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "WP-1TB/16",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "WP-2/22-GAL",
+      "category": "Pilot",
+      "quality_score": 88.33,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "WP-GTB-2",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "CL-22",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "A-20",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "CL-5-16",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "WP-2/16-GAL",
+      "category": "Pilot",
+      "quality_score": 88.33,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "MD-22",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "P-200-18-TB",
+      "category": "Pilot",
+      "quality_score": 78.33,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "SQ-20",
+      "category": "Pilot",
+      "quality_score": 81.67,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "RC-5/16TB",
+      "category": "Pilot",
+      "quality_score": 88.33,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "DMF-2/2X",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "1066",
+      "category": "Pilot",
+      "quality_score": 85.0,
+      "status": "rejected",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "CL-24C",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "DT-32",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "NS-5/16",
+      "category": "Pilot",
+      "quality_score": 91.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    },
+    {
+      "master_sku": "TS-28",
+      "category": "Pilot",
+      "quality_score": 86.67,
+      "status": "approved",
+      "lifestyle_images": 0
+    }
+  ],
+  "failed": [
+    {
+      "master_sku": "TS-25",
+      "category": "Pilot",
+      "error": "1 validation error for Candidate\nbing_title\n  Value error, Bing title must be <= 150 characters [type=value_error, input_value='Toilet Paper Stand, 26-I...lection, | Allied Brass', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error"
+    }
+  ],
+  "total_images": 46,
+  "start_time": "2026-01-29T00:44:55.336152",
+  "end_time": "2026-01-29T02:35:26.209005"
+}

@@ -1,14 +1,14 @@
 {
   "offerId": "shopify_US_4542539890820_32116471726212",
-  "title": "Wall Mount towel bar 24-Inch Solid Brass | Mambo Collection Allied Brass",
-  "short_title": "Wall Mount towel bar 24-Inch",
-  "description": "Upgrade your bath with a wall mount towel bar crafted from solid brass, sized for 24-inch center-to-center mounting. Part of the mambo collection for a coordinated, designer look.\n\nHighlights:\n- Solid brass construction for enduring performance\n- Concealed screw mounting hardware for a clean, finished appearance\n- Wall-mounted installation saves floor space and keeps towels within reach\n- Designed to coordinate with matching mambo pieces for a cohesive bath\n- Includes mounting plates and all installation hardware\n\nSpecs:\n- Category: Towel Bars; Shape: straight bar\n- Center-to-center: 24 in; Bar diameter: 0.5 in\n- Overall size: 25 in W x 3 in H; Projection: 3 in\n- Weight capacity: 10 lb; Product weight: 2.4 lb\n- Assembly required: False\n- Finishes: available in a wide variety of lifetime designer finishes, including statement options such as Venetian Bronze, Antique Pewter, Lavender, Glokzin Teal, and Unlacquered Brass\n- Warranty: Limited Lifetime Warranty",
+  "title": "Wall Mount Towel Bar 24-Inch Solid Brass Straight Bar | Mambo Collection Allied Brass",
+  "short_title": "Wall Mount Towel Bar 24-Inch",
+  "description": "Upgrade towel storage with a 24-Inch wall mount towel bar crafted from solid brass for enduring everyday use. Designed as part of the mambo collection for a coordinated, statement-ready bath.\n\nHighlights:\n- Solid brass construction for long-lasting performance\n- Wall-mounted design helps save floor space\n- Concealed screw mounting for a clean, finished look\n- Part of the Mambo collection for matching mambo coordination\n- Available in a wide variety of designer finish options\n\nSpecs:\n- Category: Towel bar\n- Center-to-center: 24 in\n- Bar diameter: 0.5 in\n- Overall size: 25 in W x 3 in H; projection: 3 in\n- Weight capacity: 10 lb\n- Mounting: Wall mount; assembly required: No\n- Includes: towel bar, mounting plates, and all installation hardware\n- Warranty: Limited Lifetime Warranty\n\nSearch terms shoppers use: designer bath accessories, designer bathroom hardware, statement bath accessories, textured bathroom hardware.",
   "channel": "online",
   "contentLanguage": "en",
   "targetCountry": "US",
   "_meta": {
     "master_sku": "MA-21/24",
-    "generated_at": "2026-01-25T05:37:38.581092",
+    "generated_at": "2026-01-25T19:55:51.198914",
     "quality_score": 90.0,
     "approval_status": "approved"
   },
@@ -18,27 +18,27 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/MA-21-24_var1_20260125_053656.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-21-24_var1_20260125_195504.png",
       "variation_num": 1,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MA-21-24-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n\nCONFIGURATION: Two mounting points (left and right ends)\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The towel bar is mounted on the wall outside a glass shower enclosure.\nA single plush bath towel hangs naturally FROM the bar, showing natural drape.\nThe towel is a neutral color (white, gray, or taupe).\nThe bar is positioned at standard 48-inch height.\nNegative space emphasizes the architectural lines of the fixture.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, multiple towels, towels wrapped around\n\nCRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_053656",
+      "timestamp": "20260125_195504",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/MA-21-24_var2_20260125_053710.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-21-24_var2_20260125_195521.png",
       "variation_num": 2,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MA-21-24-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n\nCONFIGURATION: Two mounting points (left and right ends)\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The towel bar is mounted on the wall outside a glass shower enclosure.\nA single plush bath towel hangs naturally FROM the bar, showing natural drape.\nThe towel is a neutral color (white, gray, or taupe).\nThe bar is positioned at standard 48-inch height.\nNegative space emphasizes the architectural lines of the fixture.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, multiple towels, towels wrapped around\n\nCRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_053710",
+      "timestamp": "20260125_195521",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/MA-21-24_var3_20260125_053724.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MA-21-24_var3_20260125_195535.png",
       "variation_num": 3,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MA-21-24-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n\nCONFIGURATION: Two mounting points (left and right ends)\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The towel bar is mounted on the wall outside a glass shower enclosure.\nA single plush bath towel hangs naturally FROM the bar, showing natural drape.\nThe towel is a neutral color (white, gray, or taupe).\nThe bar is positioned at standard 48-inch height.\nNegative space emphasizes the architectural lines of the fixture.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, multiple towels, towels wrapped around\n\nCRITICAL CONSTRAINT: Single towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_053724",
+      "timestamp": "20260125_195535",
       "error_message": null
     }
   ],

@@ -1,11 +1,11 @@
 {
   "sku": "shopify_US_4545073479812_32128536379524",
-  "title": "Freestanding paper towel holder 14.4-Inch solid brass countertop stand, Carolina Collection Allied Brass",
-  "description": "Upgrade your countertop with a freestanding paper towel holder that keeps a roll upright and ready while saving space. This Carolina Collection stand is crafted from solid brass and uses a weighted base to help stay stable when tearing sheets. A felt pad helps protect surfaces from scratches.\n\nHighlights:\n- Freestanding paper towel holder (countertop paper towel stand) requires no wall mounting\n- Solid brass construction for a refined, traditional look\n- Space-saving upright design keeps the roll accessible\n- Designer finish supports corrosion-free and rust-free performance\n- Part of the Carolina Collection for matching Carolina and coordinated classic bath accessories and traditional bathroom hardware\n\nSpecs:\n- Collection: Carolina\n- Style: Traditional\n- Mounting type: Freestanding\n- Material: Brass\n- Dimensions: 6.5-Inch L x 6.5-Inch W x 14.4-Inch H; projection 6.5-Inch\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Assembly required: No\n- Included items: Paper towel holder\n- Warranty: Limited Lifetime Warranty\n- Finish variety: Available in 28 designer finishes, including statement finishes such as Venetian Bronze, Spanish Gold, Lavender, Pink, and Mediterranean Blue",
+  "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Carolina | Allied Brass",
+  "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets.\n\nHighlights:\n- Stable, one-handed tearing with a weighted base that keeps the stand from shifting\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "CL-55",
-    "generated_at": "2026-01-25T05:02:07.643914",
-    "quality_score": 90.0,
+    "generated_at": "2026-01-27T20:35:10.850753",
+    "quality_score": 86.67,
     "approval_status": "approved"
   },
   "_previous": {
@@ -14,29 +14,256 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/CL-55_var1_20260125_050120.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var1_20260125_191244.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-55-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_050120",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_191244",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/CL-55_var2_20260125_050136.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var2_20260125_191258.png",
       "variation_num": 2,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-55-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_050136",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_191258",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/CL-55_var3_20260125_050151.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var3_20260125_191312.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-55-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_050151",
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260125_191312",
       "error_message": null
     }
   ],
-  "selected_lifestyle_image": null
+  "selected_lifestyle_image": 3,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/CL-55_var3_20260125_191312.png",
+  "variants": [
+    {
+      "option_sku": "CL-55-ABR",
+      "finish": "Antique Brass",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Antique Brass | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-ABR"
+    },
+    {
+      "option_sku": "CL-55-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Antique Bronze | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-ABZ"
+    },
+    {
+      "option_sku": "CL-55-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Brushed Bronze | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-BBR"
+    },
+    {
+      "option_sku": "CL-55-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Matte Black | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-BKM"
+    },
+    {
+      "option_sku": "CL-55-CA",
+      "finish": "Antique Copper",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Antique Copper | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-CA"
+    },
+    {
+      "option_sku": "CL-55-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Matte Gray | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials.\n\nHighlights:\n- Stable, one-handed tearing with a weighted base that keeps the stand from shifting\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-GYM"
+    },
+    {
+      "option_sku": "CL-55-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Oil Rubbed Bronze | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-ORB"
+    },
+    {
+      "option_sku": "CL-55-PB",
+      "finish": "Polished Brass",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Polished Brass | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-PB"
+    },
+    {
+      "option_sku": "CL-55-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Polished Chrome | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-PC"
+    },
+    {
+      "option_sku": "CL-55-PEW",
+      "finish": "Antique Pewter",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Antique Pewter | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-PEW"
+    },
+    {
+      "option_sku": "CL-55-PNI",
+      "finish": "Polished Nickel",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Polished Nickel | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-PNI"
+    },
+    {
+      "option_sku": "CL-55-SBR",
+      "finish": "Satin Brass",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Satin Brass | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-SBR"
+    },
+    {
+      "option_sku": "CL-55-SCH",
+      "finish": "Satin Chrome",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Satin Chrome | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-SCH"
+    },
+    {
+      "option_sku": "CL-55-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Satin Nickel | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-SN"
+    },
+    {
+      "option_sku": "CL-55-UNL",
+      "finish": "Unlacquered Brass",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Unlacquered Brass | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-UNL"
+    },
+    {
+      "option_sku": "CL-55-VB",
+      "finish": "Venetian Bronze",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Venetian Bronze | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-VB"
+    },
+    {
+      "option_sku": "CL-55-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Matte White | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere.\n\nHighlights:\n- Stable, one-handed tearing with a weighted base that keeps the stand from shifting\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-WHM"
+    },
+    {
+      "option_sku": "CL-55-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Spanish Gold | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-SGL"
+    },
+    {
+      "option_sku": "CL-55-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Autumn Sparkle | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-ASP"
+    },
+    {
+      "option_sku": "CL-55-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Glokzin Teal | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-GLT"
+    },
+    {
+      "option_sku": "CL-55-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Shaded Beige | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-SHB"
+    },
+    {
+      "option_sku": "CL-55-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Golden Yellow | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-GLY"
+    },
+    {
+      "option_sku": "CL-55-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Flat Troll Blue | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-FTB"
+    },
+    {
+      "option_sku": "CL-55-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Sea Foam Green | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-SFG"
+    },
+    {
+      "option_sku": "CL-55-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Fire Engine Red | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-FER"
+    },
+    {
+      "option_sku": "CL-55-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Lavender | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-LVN"
+    },
+    {
+      "option_sku": "CL-55-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Mediterranean Blue | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-MBL"
+    },
+    {
+      "option_sku": "CL-55-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Paper Towel Holder Stand 14.4-Inch Solid Brass, Freestanding | Pink | Carolina | Allied Brass",
+      "description": "Need a paper towel roll holder that stays put on the counter? This freestanding paper towel holder stand keeps the roll upright for space-saving storage and a steady pull when you tear off sheets in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- No installation needed\u2014freestanding countertop paper towel holder design\n- Countertop protection built in with a felt pad on the base\n- Coordinate a matching Carolina look with the Carolina Collection\n- Solid brass construction with a designer finish for corrosion-free and rust-free performance\n\nSpecs & Installation:\n- Collection: Carolina\n- Style: Traditional\n- Material: Brass\n- Mounting: Freestanding\n- Assembly required: No\n- Dimensions: 6.5 in L x 6.5 in W x 14.4 in H; projection 6.5 in\n- Weight capacity: 5 lb\n- Product weight: 4 lb\n- Included items: Paper towel holder\n- Finish variety: Multiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+      "sku": "CL-55-PNK"
+    }
+  ]
 }

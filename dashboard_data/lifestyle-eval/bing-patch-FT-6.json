@@ -1,11 +1,11 @@
 {
   "sku": "shopify_US_4543270092932_32121282035844",
-  "title": "3-Tier Corner glass shelf 8-Inch x 8-Inch Wall Mount Solid Brass Hardware, Foxtrot Collection Allied Brass",
-  "description": "Add storage and organization to unused corners with a 3-tier corner glass shelf featuring solid brass hardware and thick tempered glass. This wall-mounted corner shelf (glass shelf for bathroom, vanity corner shelf) keeps items within reach while saving floor space. Designed to coordinate with the foxtrot collection and matching foxtrot accessories, it complements textured bathroom hardware, designer bathroom hardware, and statement bath accessories.\n\nHighlights:\n- Three-tier corner shelf creates vertical storage for bath essentials\n- 3/8-Inch thick tempered glass with beveled edges\n- Crafted from solid brass materials\n- Concealed screw mounting for a clean installation\n- Installation hardware included; no assembly required\n\nSpecs:\n- Overall size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mounting type: Wall mount\n- Weight capacity: 2 lb\n- Includes: Glass shelf and all installation hardware\n- Warranty: Limited Lifetime Warranty",
+  "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass",
+  "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Three-tier corner glass shelf (corner wall shelf) keeps toiletries and d\u00e9cor organized\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
   "_meta": {
     "master_sku": "FT-6",
-    "generated_at": "2026-01-25T15:43:00.396939",
-    "quality_score": 90.0,
+    "generated_at": "2026-01-25T19:33:46.489852",
+    "quality_score": 88.33,
     "approval_status": "approved"
   },
   "_previous": {
@@ -14,29 +14,256 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/FT-6_var1_20260125_154217.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/FT-6_var1_20260125_193304.png",
       "variation_num": 1,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/FT-6-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_154217",
+      "timestamp": "20260125_193304",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/FT-6_var2_20260125_154231.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/FT-6_var2_20260125_193318.png",
       "variation_num": 2,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/FT-6-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_154231",
+      "timestamp": "20260125_193318",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval/images/FT-6_var3_20260125_154246.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/FT-6_var3_20260125_193332.png",
       "variation_num": 3,
       "generation_success": true,
       "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/FT-6-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260125_154246",
+      "timestamp": "20260125_193332",
       "error_message": null
     }
   ],
-  "selected_lifestyle_image": null
+  "selected_lifestyle_image": 3,
+  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/FT-6_var3_20260125_193332.png",
+  "variants": [
+    {
+      "option_sku": "FT-6-ABR",
+      "finish": "Antique Brass",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Antique Brass",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-ABR"
+    },
+    {
+      "option_sku": "FT-6-ABZ",
+      "finish": "Antique Bronze",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Antique Bronze",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-ABZ"
+    },
+    {
+      "option_sku": "FT-6-BBR",
+      "finish": "Brushed Bronze",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Brushed Bronze",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-BBR"
+    },
+    {
+      "option_sku": "FT-6-BKM",
+      "finish": "Matte Black",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Matte Black",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-BKM"
+    },
+    {
+      "option_sku": "FT-6-CA",
+      "finish": "Antique Copper",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Antique Copper",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-CA"
+    },
+    {
+      "option_sku": "FT-6-GYM",
+      "finish": "Matte Gray",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Matte Gray",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Three-tier corner glass shelf (corner wall shelf) keeps toiletries and d\u00e9cor organized\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-GYM"
+    },
+    {
+      "option_sku": "FT-6-ORB",
+      "finish": "Oil Rubbed Bronze",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Oil Rubbed Bronze",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-ORB"
+    },
+    {
+      "option_sku": "FT-6-PB",
+      "finish": "Polished Brass",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Polished Brass",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-PB"
+    },
+    {
+      "option_sku": "FT-6-PC",
+      "finish": "Polished Chrome",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Polished Chrome",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-PC"
+    },
+    {
+      "option_sku": "FT-6-PEW",
+      "finish": "Antique Pewter",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Antique Pewter",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-PEW"
+    },
+    {
+      "option_sku": "FT-6-PNI",
+      "finish": "Polished Nickel",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Polished Nickel",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-PNI"
+    },
+    {
+      "option_sku": "FT-6-SBR",
+      "finish": "Satin Brass",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Satin Brass",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-SBR"
+    },
+    {
+      "option_sku": "FT-6-SCH",
+      "finish": "Satin Chrome",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Satin Chrome",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-SCH"
+    },
+    {
+      "option_sku": "FT-6-SN",
+      "finish": "Satin Nickel",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Satin Nickel",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-SN"
+    },
+    {
+      "option_sku": "FT-6-UNL",
+      "finish": "Unlacquered Brass",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Unlacquered Brass",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-UNL"
+    },
+    {
+      "option_sku": "FT-6-VB",
+      "finish": "Venetian Bronze",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Venetian Bronze",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-VB"
+    },
+    {
+      "option_sku": "FT-6-WHM",
+      "finish": "Matte White",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Matte White",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Three-tier corner glass shelf (corner wall shelf) keeps toiletries and d\u00e9cor organized\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-WHM"
+    },
+    {
+      "option_sku": "FT-6-SGL",
+      "finish": "Spanish Gold",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Spanish Gold",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-SGL"
+    },
+    {
+      "option_sku": "FT-6-ASP",
+      "finish": "Autumn Sparkle",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Autumn Sparkle",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-ASP"
+    },
+    {
+      "option_sku": "FT-6-GLT",
+      "finish": "Glokzin Teal",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Glokzin Teal",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-GLT"
+    },
+    {
+      "option_sku": "FT-6-SHB",
+      "finish": "Shaded Beige",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Shaded Beige",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-SHB"
+    },
+    {
+      "option_sku": "FT-6-GLY",
+      "finish": "Golden Yellow",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Golden Yellow",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-GLY"
+    },
+    {
+      "option_sku": "FT-6-FTB",
+      "finish": "Flat Troll Blue",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Flat Troll Blue",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-FTB"
+    },
+    {
+      "option_sku": "FT-6-SFG",
+      "finish": "Sea Foam Green",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Sea Foam Green",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-SFG"
+    },
+    {
+      "option_sku": "FT-6-FER",
+      "finish": "Fire Engine Red",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Fire Engine Red",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-FER"
+    },
+    {
+      "option_sku": "FT-6-LVN",
+      "finish": "Lavender",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Lavender",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-LVN"
+    },
+    {
+      "option_sku": "FT-6-MBL",
+      "finish": "Mediterranean Blue",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Mediterranean Blue",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-MBL"
+    },
+    {
+      "option_sku": "FT-6-PNK",
+      "finish": "Pink",
+      "size": "",
+      "title": "Corner glass shelf 3-Tier 8-Inch Wall Mount Solid Brass Hardware for Bathroom Storage Allied Brass | Pink",
+      "description": "Add organized storage to unused corner space with a wall mount corner glass shelf built with three tiers and thick tempered glass in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This piece is part of the Foxtrot collection, making it easy to create a matching Foxtrot bathroom with coordinated designer bath accessories and designer bathroom hardware.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- 3/8-Inch thick tempered glass with beveled edges for safety and strength\n- Solid brass hardware supports a durable, contemporary look\n- Concealed screw mounting for a clean, built-in appearance\n- Wide variety of lifetime designer finishes for textured bathroom hardware and statement bath accessories styling\n\nSpecs:\n- Size: 8-Inch L x 8-Inch W x 15-Inch H\n- Glass thickness: 0.39 in\n- Mount type: Wall mount\n- Assembly required: No\n- Weight capacity: 2 lb\n- Included: Glass shelf and installation hardware\n- Warranty: Limited Lifetime Warranty",
+      "sku": "FT-6-PNK"
+    }
+  ]
 }

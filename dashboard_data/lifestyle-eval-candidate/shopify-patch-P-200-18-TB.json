@@ -1,13 +1,13 @@
 {
   "productId": "4542573609092",
-  "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Pipeline Collection | Allied Brass",
-  "body_html": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom.</p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>",
+  "title": "18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+  "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom.</p>\n<ul>\n <li><strong>Keep towels within reach:</strong> 18-inch straight bar fits hand towels or bath towels at the sink or shower.</li>\n <li><strong>Get an industrial pipe look:</strong> Designed as pipe-style bath accessories within the Pipeline collection for a coordinated, matching pipeline setup.</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
   "meta_description": "",
   "_meta": {
     "master_sku": "P-200-18-TB",
-    "generated_at": "2026-01-28T12:17:50.832726",
-    "quality_score": 80.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-29T13:14:59.937804",
+    "quality_score": 86.67,
+    "approval_status": "approved"
   },
   "_previous": {
     "title": "Pipeline Collection Towel Bar",
@@ -15,564 +15,528 @@
   },
   "lifestyle_images": [
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-200-18-TB_var1_20260128_121600.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-200-18-TB_var1_20260129_131410.png",
       "variation_num": 1,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/P20018TB-ABZ_511dabc5-7a58-4980-8e70-7268387d81b7.jpg?v=1616881986\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260128_121600",
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-200-18-TB-ABZ.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nBathroom with neutral tiles and clean finishes.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_131410",
       "error_message": null
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-200-18-TB_var2_20260128_121652.png",
+      "image_path": "",
       "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/P20018TB-ABZ_511dabc5-7a58-4980-8e70-7268387d81b7.jpg?v=1616881986\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260128_121652",
-      "error_message": null
+      "generation_success": false,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-200-18-TB-ABZ.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nBathroom with neutral tiles and clean finishes.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_131425",
+      "error_message": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}"
     },
     {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-200-18-TB_var3_20260128_121721.png",
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-200-18-TB_var3_20260129_131427.png",
       "variation_num": 3,
       "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/P20018TB-ABZ_511dabc5-7a58-4980-8e70-7268387d81b7.jpg?v=1616881986\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260128_121721",
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-200-18-TB-ABZ.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nBathroom with neutral tiles and clean finishes.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_131427",
       "error_message": null
     }
   ],
   "selected_lifestyle_image": 3,
-  "lifestyle_image_link": "dashboard_data/lifestyle-eval-candidate/images/P-200-18-TB_var3_20260128_121721.png",
+  "lifestyle_image_link": "data/lifestyle_images/P-200-18-TB_var3_20260129_131427.png",
   "variants": [
     {
-      "option_sku": "P-200-18-TB-ABZ",
-      "finish": "Antique Bronze",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Antique Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. </p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-BBR",
-      "finish": "Brushed Bronze",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Brushed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. </p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-BKM",
-      "finish": "Matte Black",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Black | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. </p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-GYM",
-      "finish": "Matte Gray",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Gray | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-ORB",
-      "finish": "Oil Rubbed Bronze",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Oil Rubbed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. </p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-PC",
-      "finish": "Polished Chrome",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Polished Chrome | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. </p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-SN",
-      "finish": "Satin Nickel",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Satin Nickel | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. </p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-WHM",
-      "finish": "Matte White",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte White | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-SGL",
-      "finish": "Spanish Gold",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Spanish Gold | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. </p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-ASP",
-      "finish": "Autumn Sparkle",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Autumn Sparkle | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. </p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-GLT",
-      "finish": "Glokzin Teal",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Glokzin Teal | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. </p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-SHB",
-      "finish": "Shaded Beige",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Shaded Beige | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. </p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-PNK",
-      "finish": "Pink",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Pink | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. </p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-FER",
-      "finish": "Fire Engine Red",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Fire Engine Red | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. </p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-LVN",
-      "finish": "Lavender",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Lavender | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. </p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-MBL",
-      "finish": "Mediterranean Blue",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Mediterranean Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. </p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-GLY",
-      "finish": "Golden Yellow",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Golden Yellow | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. </p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-FTB",
-      "finish": "Flat Troll Blue",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Flat Troll Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. </p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-18-TB-SFG",
-      "finish": "Sea Foam Green",
-      "size": "18 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Sea Foam Green | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. </p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-ABZ",
-      "finish": "Antique Bronze",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Antique Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. </p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-BBR",
-      "finish": "Brushed Bronze",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Brushed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. </p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-BKM",
-      "finish": "Matte Black",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Black | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. </p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-GYM",
-      "finish": "Matte Gray",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Gray | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-ORB",
-      "finish": "Oil Rubbed Bronze",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Oil Rubbed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. </p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-PC",
-      "finish": "Polished Chrome",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Polished Chrome | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. </p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-SN",
-      "finish": "Satin Nickel",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Satin Nickel | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. </p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-WHM",
-      "finish": "Matte White",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte White | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-SGL",
-      "finish": "Spanish Gold",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Spanish Gold | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. </p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-ASP",
-      "finish": "Autumn Sparkle",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Autumn Sparkle | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. </p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-GLT",
-      "finish": "Glokzin Teal",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Glokzin Teal | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. </p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-SHB",
-      "finish": "Shaded Beige",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Shaded Beige | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. </p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-PNK",
-      "finish": "Pink",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Pink | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. </p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-FER",
-      "finish": "Fire Engine Red",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Fire Engine Red | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. </p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-LVN",
-      "finish": "Lavender",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Lavender | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. </p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-MBL",
-      "finish": "Mediterranean Blue",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Mediterranean Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. </p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-GLY",
-      "finish": "Golden Yellow",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Golden Yellow | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. </p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-FTB",
-      "finish": "Flat Troll Blue",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Flat Troll Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. </p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-24-TB-SFG",
-      "finish": "Sea Foam Green",
-      "size": "24 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Sea Foam Green | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. </p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-ABZ",
-      "finish": "Antique Bronze",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Antique Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. </p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-BBR",
-      "finish": "Brushed Bronze",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Brushed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. </p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-BKM",
-      "finish": "Matte Black",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Black | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. </p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-GYM",
-      "finish": "Matte Gray",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Gray | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-ORB",
-      "finish": "Oil Rubbed Bronze",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Oil Rubbed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. </p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-PC",
-      "finish": "Polished Chrome",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Polished Chrome | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. </p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-SN",
-      "finish": "Satin Nickel",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Satin Nickel | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. </p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-WHM",
-      "finish": "Matte White",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte White | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-SGL",
-      "finish": "Spanish Gold",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Spanish Gold | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. </p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-ASP",
-      "finish": "Autumn Sparkle",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Autumn Sparkle | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. </p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-GLT",
-      "finish": "Glokzin Teal",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Glokzin Teal | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. </p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-SHB",
-      "finish": "Shaded Beige",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Shaded Beige | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. </p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-PNK",
-      "finish": "Pink",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Pink | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. </p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-FER",
-      "finish": "Fire Engine Red",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Fire Engine Red | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. </p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-LVN",
-      "finish": "Lavender",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Lavender | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. </p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-MBL",
-      "finish": "Mediterranean Blue",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Mediterranean Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. </p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-GLY",
-      "finish": "Golden Yellow",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Golden Yellow | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. </p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-FTB",
-      "finish": "Flat Troll Blue",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Flat Troll Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. </p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-30-TB-SFG",
-      "finish": "Sea Foam Green",
-      "size": "30 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Sea Foam Green | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. </p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-ABZ",
-      "finish": "Antique Bronze",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Antique Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. </p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-BBR",
-      "finish": "Brushed Bronze",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Brushed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. </p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-BKM",
-      "finish": "Matte Black",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Black | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. </p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-GYM",
-      "finish": "Matte Gray",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte Gray | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-ORB",
-      "finish": "Oil Rubbed Bronze",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Oil Rubbed Bronze | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. </p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-PC",
-      "finish": "Polished Chrome",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Polished Chrome | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. </p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-SN",
-      "finish": "Satin Nickel",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Satin Nickel | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. </p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-WHM",
-      "finish": "Matte White",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Matte White | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. </p>\n<ul>\n <li><strong>Keep towels organized</strong> with a sturdy, wall-mounted bar sized for everyday use.</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-SGL",
-      "finish": "Spanish Gold",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Spanish Gold | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. </p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-ASP",
-      "finish": "Autumn Sparkle",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Autumn Sparkle | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. </p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-GLT",
-      "finish": "Glokzin Teal",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Glokzin Teal | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. </p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-SHB",
-      "finish": "Shaded Beige",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Shaded Beige | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. </p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-PNK",
-      "finish": "Pink",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Pink | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. </p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-FER",
-      "finish": "Fire Engine Red",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Fire Engine Red | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. </p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-LVN",
-      "finish": "Lavender",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Lavender | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. </p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-MBL",
-      "finish": "Mediterranean Blue",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Mediterranean Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. </p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-GLY",
-      "finish": "Golden Yellow",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Golden Yellow | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. </p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-FTB",
-      "finish": "Flat Troll Blue",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Flat Troll Blue | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. </p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
-    },
-    {
-      "option_sku": "P-200-36-TB-SFG",
-      "finish": "Sea Foam Green",
-      "size": "36 Inch",
-      "title": "18-Inch Towel Bar Wall Mount, Powder Coated Pipe | Sea Foam Green | Pipeline Collection | Allied Brass",
-      "description": "<p>Stop draping towels over doors and counters\u2014this 18-Inch towel bar keeps bath towels neatly hung, within reach, and off the floor while adding an industrial pipe-fitting detail to your bathroom in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. </p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li><strong>Coordinate your space</strong> with the Pipeline towel bars collection\u2014transitional bathroom hardware that suits modern and traditional decor.</li>\n <li><strong>Maintain a clean, decorative finish</strong> with a highly durable powder coat.</li>\n <li><strong>Built for lasting performance</strong> with corrosion-free and rust-free materials.</li>\n <li><strong>Install with a matched look</strong> using color-coordinated mounting hardware.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Product dimensions (L x H x W): 18 x 3 x 3.3 in.</li>\n <li>Box dimensions (L x H x W): 24 x 5 x 5 in.</li>\n <li>Shipping weight: 2.2 lbs</li>\n <li>Finish: powder coated (finish varies by selection)</li>\n <li>Warranty: limited lifetime warranty</li>\n</ul>"
+      "productId": "4542573609092",
+      "variantId": "32116664860804",
+      "title": "Antique Bronze 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. </p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-ABZ",
+        "finish": "Antique Bronze",
+        "finish_keywords": [
+          "antique bronze bathroom hardware",
+          "antique bronze bath accessories",
+          "antique bronze towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.937861",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "32116664893572",
+      "title": "Brushed Bronze 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. </p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-BBR",
+        "finish": "Brushed Bronze",
+        "finish_keywords": [
+          "brushed bronze bathroom hardware",
+          "brushed bronze bath accessories",
+          "brushed bronze towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.937914",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "32116664926340",
+      "title": "Matte Black 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. </p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li>Coordinates with other Pipeline pieces in Matte Black for a striking, cohesive modern look</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-BKM",
+        "finish": "Matte Black",
+        "finish_keywords": [
+          "matte black bathroom hardware",
+          "matte black bath accessories",
+          "matte black towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.937966",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "32116664959108",
+      "title": "Matte Gray 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. </p>\n<ul>\n <li>Pairs with matching Pipeline hardware for refined industrial appeal</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-GYM",
+        "finish": "Matte Gray",
+        "finish_keywords": [
+          "matte gray bathroom hardware",
+          "matte gray bath accessories",
+          "matte gray towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938017",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "32116664991876",
+      "title": "Oil Rubbed Bronze 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. </p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li>Coordinates with other Pipeline pieces for a distinguished, heritage-inspired look</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-ORB",
+        "finish": "Oil Rubbed Bronze",
+        "finish_keywords": [
+          "oil rubbed bronze bathroom hardware",
+          "oil rubbed bronze bath accessories",
+          "oil rubbed bronze towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938069",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "37645398245544",
+      "title": "Polished Chrome 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. </p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li>Pairs beautifully with matching Pipeline accessories in the same finish for a cohesive bathroom design</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-PC",
+        "finish": "Polished Chrome",
+        "finish_keywords": [
+          "polished chrome bathroom hardware",
+          "polished chrome bath accessories",
+          "polished chrome towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938120",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "32116665024644",
+      "title": "Satin Nickel 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. </p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li>Pairs with matching Pipeline pieces for a unified, low-maintenance design</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-SN",
+        "finish": "Satin Nickel",
+        "finish_keywords": [
+          "satin nickel bathroom hardware",
+          "satin nickel bath accessories",
+          "satin nickel towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938172",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "32116665057412",
+      "title": "Matte White 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. </p>\n<ul>\n <li>Coordinates with other Pipeline accessories for a crisp, unified aesthetic</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-WHM",
+        "finish": "Matte White",
+        "finish_keywords": [
+          "matte white bathroom hardware",
+          "matte white bath accessories",
+          "matte white towel bars"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938222",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926350562",
+      "title": "Spanish Gold 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. </p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-SGL",
+        "finish": "Spanish Gold",
+        "finish_keywords": [
+          "spanish gold bathroom hardware",
+          "spanish gold bath accessories",
+          "spanish gold towel bars",
+          "spanish gold statement finish",
+          "spanish gold designer hardware"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938271",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926383330",
+      "title": "Autumn Sparkle 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. </p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-ASP",
+        "finish": "Autumn Sparkle",
+        "finish_keywords": [
+          "autumn sparkle bathroom hardware",
+          "autumn sparkle bath accessories",
+          "autumn sparkle towel bars",
+          "autumn sparkle statement finish",
+          "autumn sparkle designer hardware",
+          "autumn sparkle colored hardware",
+          "autumn sparkle color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938322",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926416098",
+      "title": "Glokzin Teal 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. </p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-GLT",
+        "finish": "Glokzin Teal",
+        "finish_keywords": [
+          "glokzin teal bathroom hardware",
+          "glokzin teal bath accessories",
+          "glokzin teal towel bars",
+          "glokzin teal statement finish",
+          "glokzin teal designer hardware",
+          "glokzin teal colored hardware",
+          "glokzin teal color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938372",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926448866",
+      "title": "Shaded Beige 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. </p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-SHB",
+        "finish": "Shaded Beige",
+        "finish_keywords": [
+          "shaded beige bathroom hardware",
+          "shaded beige bath accessories",
+          "shaded beige towel bars",
+          "shaded beige statement finish",
+          "shaded beige designer hardware",
+          "shaded beige colored hardware",
+          "shaded beige color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938421",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926612706",
+      "title": "Golden Yellow 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. </p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-GLY",
+        "finish": "Golden Yellow",
+        "finish_keywords": [
+          "golden yellow bathroom hardware",
+          "golden yellow bath accessories",
+          "golden yellow towel bars",
+          "golden yellow statement finish",
+          "golden yellow designer hardware",
+          "golden yellow colored hardware",
+          "golden yellow color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938471",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926645474",
+      "title": "Flat Troll Blue 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. </p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-FTB",
+        "finish": "Flat Troll Blue",
+        "finish_keywords": [
+          "flat troll blue bathroom hardware",
+          "flat troll blue bath accessories",
+          "flat troll blue towel bars",
+          "flat troll blue statement finish",
+          "flat troll blue designer hardware"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938521",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926678242",
+      "title": "Sea Foam Green 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. </p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-SFG",
+        "finish": "Sea Foam Green",
+        "finish_keywords": [
+          "sea foam green bathroom hardware",
+          "sea foam green bath accessories",
+          "sea foam green towel bars",
+          "sea foam green statement finish",
+          "sea foam green designer hardware",
+          "sea foam green colored hardware",
+          "sea foam green color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938571",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926514402",
+      "title": "Fire Engine Red 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. </p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-FER",
+        "finish": "Fire Engine Red",
+        "finish_keywords": [
+          "fire engine red bathroom hardware",
+          "fire engine red bath accessories",
+          "fire engine red towel bars",
+          "fire engine red statement finish",
+          "fire engine red designer hardware",
+          "fire engine red colored hardware",
+          "fire engine red color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938621",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926547170",
+      "title": "Lavender 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. </p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-LVN",
+        "finish": "Lavender",
+        "finish_keywords": [
+          "lavender bathroom hardware",
+          "lavender bath accessories",
+          "lavender towel bars",
+          "lavender statement finish",
+          "lavender designer hardware",
+          "lavender colored hardware",
+          "lavender color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938672",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926579938",
+      "title": "Mediterranean Blue 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. </p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-MBL",
+        "finish": "Mediterranean Blue",
+        "finish_keywords": [
+          "mediterranean blue bathroom hardware",
+          "mediterranean blue bath accessories",
+          "mediterranean blue towel bars",
+          "mediterranean blue statement finish",
+          "mediterranean blue designer hardware",
+          "mediterranean blue colored hardware",
+          "mediterranean blue color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938724",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
+    },
+    {
+      "productId": "4542573609092",
+      "variantId": "43098926481634",
+      "title": "Pink 18-Inch Wall Mount Towel Bar (Pipe-Style) - Pipeline Collection, Allied Brass",
+      "body_html": "<p>Stop leaving towels on the counter\u2014this wall-mounted towel bar keeps them organized, dry, and right where you reach for them in the bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. </p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li>Choose from 19 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for daily use:</strong> Iron construction protected with a highly durable powder coat.</li>\n <li><strong>Clean, decorative finish:</strong> Powder-coated surface is designed for corrosion-free and rust-free performance.</li>\n <li><strong>Secure wall installation:</strong> Mounts with included mounting plates and color-coordinated hardware.</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Collection: Pipeline</li>\n <li>Material: Iron</li>\n <li>Mounting: Wall mount</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Overall dimensions (L x H x W): 18 x 3 x 3.3 in</li>\n <li>Projection: 3.3 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Warranty: Limited lifetime warranty</li>\n</ul>",
+      "meta_description": "",
+      "_meta": {
+        "master_sku": "P-200-18-TB",
+        "option_sku": "P-200-18-TB-PNK",
+        "finish": "Pink",
+        "finish_keywords": [
+          "pink bathroom hardware",
+          "pink bath accessories",
+          "pink towel bars",
+          "pink statement finish",
+          "pink designer hardware",
+          "pink colored hardware",
+          "pink color bathroom"
+        ],
+        "generated_at": "2026-01-29T13:14:59.938773",
+        "quality_score": 86.67,
+        "approval_status": "approved"
+      },
+      "_previous": {
+        "title": "Pipeline Collection Towel Bar",
+        "description": "The Pipeline collection is the latest innovation for bathroom fittings from the Allied Brass Brand of products. This towel bar gives the industrial look of pipe fittings while blending aptly with both modern and traditional bathroom decor. This accessory is powder coated with lifetime materials to provide a decorative and clean finish. No wonder, this towel bar gives continual service for years without any trouble. The choice of superior materials makes this item free from corrosion and rust. Towel bar mounts firmly with color coordinating screws and comes with a limited lifetime warranty. Contemporary design with rustic influences Protected using highly durable powder coat Powder coated pipe gives clean finish to this accessory Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Color coordinated mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 18x3x3.3 Box dimensions, in. (LxHxW): 24x5x5 Shipping weight, lbs: 2.2 Installation Instruction Technical Specification P200TB-Installation.PDF P200TB-Specification.PDF"
+      }
     }
   ]
 }
