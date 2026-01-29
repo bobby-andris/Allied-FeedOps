@@ -12,6 +12,7 @@ from feedops.quality.review_dashboard import (
     get_dashboard_debug_info,
     select_patch_variants_for_preview,
     _choose_variant,
+    _variant_finish,
 )
 from feedops.quality.data_loader import (
     load_latest_report,
@@ -242,6 +243,22 @@ class TestExpanderLabelLogic:
         assert "Score: 92.0%" in expander_label
         assert "🟢 +7.0%" in expander_label
         assert "Original content only" not in expander_label
+
+
+class TestVariantFinishExtraction:
+    def test_variant_finish_prefers_meta(self):
+        variant = {
+            "title": "Towel Bar | Autumn Sparkle | Carolina | Allied Brass",
+            "_meta": {"finish": "Antique Brass"},
+        }
+        assert _variant_finish(variant) == "Antique Brass"
+
+    def test_variant_finish_falls_back_to_title_pipe_format(self):
+        variant = {"title": "Towel Bar | Autumn Sparkle | Carolina | Allied Brass"}
+        assert _variant_finish(variant) == "Autumn Sparkle"
+
+    def test_variant_finish_returns_none_when_unavailable(self):
+        assert _variant_finish({}) is None
 
 
 def test_select_patch_variants_for_preview_handles_missing_variants_attr():

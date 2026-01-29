@@ -2380,10 +2380,26 @@ def _extract_variants(content: Any) -> list[dict[str, Any]]:
 
 def _variant_finish(variant: dict[str, Any]) -> str | None:
     meta = variant.get("_meta")
-    if not isinstance(meta, dict):
+    if isinstance(meta, dict):
+        finish = meta.get("finish")
+        if isinstance(finish, str) and finish.strip():
+            return finish.strip()
+
+    title = variant.get("title")
+    if not isinstance(title, str) or not title.strip():
         return None
-    finish = meta.get("finish")
-    return finish if isinstance(finish, str) and finish.strip() else None
+
+    # Many patches encode finish in the variant title (e.g. "... | Autumn Sparkle | Carolina | Allied Brass")
+    parts = [p.strip() for p in title.split("|") if p.strip()]
+    if not parts:
+        return None
+    if parts and parts[-1].lower() == "allied brass":
+        parts = parts[:-1]
+    if len(parts) >= 3:
+        return parts[-2]
+    if len(parts) >= 2:
+        return parts[-1]
+    return None
 
 
 def _variant_option_id(variant: dict[str, Any]) -> str:
