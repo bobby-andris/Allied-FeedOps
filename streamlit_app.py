@@ -13,7 +13,23 @@ from pathlib import Path
 import streamlit as st
 
 
-_APP_BUILD = "2026-01-29.1"
+_APP_BUILD = "2026-01-30.1"
+
+
+def _resolve_path_from_env(repo_root: Path, env_key: str, default: Path) -> Path:
+    raw = os.environ.get(env_key)
+    if not raw:
+        return default
+    candidate = Path(raw)
+    if not candidate.is_absolute():
+        candidate = repo_root / candidate
+    return candidate
+
+
+def _dir_has_patch_jsons(path: Path) -> bool:
+    if not path.exists() or not path.is_dir():
+        return False
+    return any(path.glob("*-patch-*.json"))
 
 
 def resolve_dashboard_paths(
@@ -22,14 +38,29 @@ def resolve_dashboard_paths(
     """Resolve paths for the review dashboard."""
     repo_root = Path(repo_root)
     data_root = repo_root / "dashboard_data"
-    baseline_exports = data_root / "lifestyle-eval"
-    candidate_exports = data_root / "lifestyle-eval-candidate"
-    if not candidate_exports.exists():
+    baseline_exports_default = data_root / "lifestyle-eval"
+    candidate_exports_default = data_root / "lifestyle-eval-candidate"
+
+    baseline_exports = _resolve_path_from_env(
+        repo_root, "FEEDOPS_BASELINE_DIR", baseline_exports_default
+    )
+    candidate_exports = _resolve_path_from_env(
+        repo_root, "FEEDOPS_CANDIDATE_DIR", candidate_exports_default
+    )
+    if not _dir_has_patch_jsons(candidate_exports):
         candidate_exports = baseline_exports
 
-    catalog_path = data_root / "catalog.csv"
-    baseline_reports = baseline_exports / "reports"
-    candidate_reports = candidate_exports / "reports"
+    catalog_path_default = data_root / "catalog.csv"
+    catalog_path = _resolve_path_from_env(repo_root, "FEEDOPS_CATALOG_PATH", catalog_path_default)
+
+    baseline_reports_default = baseline_exports / "reports"
+    candidate_reports_default = candidate_exports / "reports"
+    baseline_reports = _resolve_path_from_env(
+        repo_root, "FEEDOPS_BASELINE_REPORTS", baseline_reports_default
+    )
+    candidate_reports = _resolve_path_from_env(
+        repo_root, "FEEDOPS_CANDIDATE_REPORTS", candidate_reports_default
+    )
 
     return (
         baseline_exports,
@@ -97,6 +128,13 @@ def render_review_dashboard(repo_root: Path) -> None:
     baseline, candidate, catalog, baseline_reports, candidate_reports = (
         resolve_dashboard_paths(repo_root)
     )
+    st.sidebar.markdown("### Data Paths")
+    st.sidebar.caption(f"Baseline exports: `{baseline}`")
+    st.sidebar.caption(f"Candidate exports: `{candidate}`")
+    if baseline_reports:
+        st.sidebar.caption(f"Baseline reports: `{baseline_reports}`")
+    if candidate_reports:
+        st.sidebar.caption(f"Candidate reports: `{candidate_reports}`")
     run_dashboard(
         baseline_exports_dir=baseline,
         candidate_exports_dir=candidate,

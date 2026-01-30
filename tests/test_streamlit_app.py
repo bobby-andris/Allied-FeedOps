@@ -7,6 +7,8 @@ def test_resolve_dashboard_paths_uses_candidate_dir_when_present(tmp_path: Path)
     candidate_dir = data_dir / "lifestyle-eval-candidate"
     (baseline_dir / "reports").mkdir(parents=True)
     (candidate_dir / "reports").mkdir(parents=True)
+    # Candidate directory should be treated as active when it contains export patches.
+    (candidate_dir / "google-patch-TEST.json").write_text("{}")
     catalog_path = data_dir / "catalog.csv"
     catalog_path.write_text("MasterSKU,Category\n")
 
