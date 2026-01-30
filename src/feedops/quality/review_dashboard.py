@@ -37,12 +37,23 @@ try:
 except Exception:  # pragma: no cover
     validate_variant_title_uniqueness = None
 from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
+from feedops.quality.collection_badge import get_collection_badge
 from feedops.quality.shopify_live import load_shopify_live_snapshot
 
 # Default database path
 DEFAULT_DB_PATH = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
 
 _DASHBOARD_DATA_SCHEMA_VERSION = "v2"
+
+
+def _render_collection_badge(collection: str | None) -> None:
+    badge = get_collection_badge(collection)
+    if badge.kind == "designer":
+        st.caption(f"✅ {badge.message}")
+    elif badge.kind == "merchandising":
+        st.caption(f"⚠️ {badge.message}")
+    else:
+        st.caption(f"ℹ️ {badge.message}")
 
 
 def _latest_mtime(path: Path | str | None, patterns: tuple[str, ...]) -> float:
@@ -790,6 +801,7 @@ def render_sku_detail_panel(
         if sku_data.original:
             st.markdown(f"**Category:** {sku_data.original.category}")
             st.markdown(f"**Collection:** {sku_data.original.collection}")
+            _render_collection_badge(sku_data.original.collection)
 
         # Auto-calculated approval status from quality evaluation
         status = sku_data.candidate_scores.get("approval_status", "")
@@ -1540,6 +1552,7 @@ def render_sku_panel(
             if sku_data.original:
                 st.markdown(f"**Category:** {sku_data.original.category}")
                 st.markdown(f"**Collection:** {sku_data.original.collection}")
+                _render_collection_badge(sku_data.original.collection)
 
             # Auto-calculated approval status from quality evaluation
             status = sku_data.candidate_scores.get("approval_status", "")
