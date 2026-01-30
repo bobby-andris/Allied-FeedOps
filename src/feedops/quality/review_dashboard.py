@@ -22,9 +22,11 @@ from feedops.db import (
     get_all_batches,
     get_approved_for_batch,
     get_pending_approvals,
+    get_published_skus,
     get_revision_queue,
     get_sku_approval,
     init_db,
+    is_supabase_available,
     save_sku_approval,
 )
 from feedops.pipeline.finish_injection import (
@@ -351,8 +353,8 @@ def run_dashboard(
         )
 
     # Main navigation tabs
-    tab_review, tab_revision, tab_batches = st.tabs(
-        ["📋 Review Queue", "🔄 Revision Queue", "✅ Approved / Batches"]
+    tab_review, tab_revision, tab_batches, tab_performance = st.tabs(
+        ["📋 Review Queue", "🔄 Revision Queue", "✅ Approved / Batches", "📊 Performance View"]
     )
 
     # Load data with caching
@@ -423,6 +425,12 @@ def run_dashboard(
 
     with tab_batches:
         render_batch_management_tab(
+            all_sku_data=all_sku_data,
+            db_path=db_path,
+        )
+
+    with tab_performance:
+        render_performance_view_tab(
             all_sku_data=all_sku_data,
             db_path=db_path,
         )
@@ -864,9 +872,37 @@ def render_review_queue_tab(
     db_path: Path,
 ) -> None:
     """Render the Review Queue tab with approval controls."""
+    # Filter out SKUs that have been published to production
+    # This is only available when Supabase is configured
+    published_skus: set[str] = set()
+    if is_supabase_available():
+        try:
+            published_skus = get_published_skus(environment="production")
+        except Exception:
+            # If Supabase query fails, show all SKUs
+            published_skus = set()
+    
+    # Filter out published SKUs from the review queue
+    review_sku_data = [
+        sku_data for sku_data in all_sku_data
+        if sku_data.sku not in published_skus
+    ]
+    published_count = len(all_sku_data) - len(review_sku_data)
+    
+    # Recalculate stats for filtered data
+    if published_count > 0:
+        stats = get_summary_stats(review_sku_data)
+    
     # Sidebar filters (shared across app)
     with st.sidebar:
         st.header("Filters")
+        
+        # Show published SKU count if any are filtered
+        if published_count > 0:
+            st.info(
+                f"🚀 **{published_count} SKUs published** to production and "
+                f"moved to Performance View"
+            )
 
         # Search
         search_query = st.text_input("Search SKU", placeholder="Enter SKU...")
@@ -953,9 +989,9 @@ def render_review_queue_tab(
                 language="text",
             )
 
-    # Apply filters
+    # Apply filters (using review_sku_data which excludes published SKUs)
     filtered_data = filter_sku_data(
-        all_sku_data,
+        review_sku_data,
         search_query=search_query,
         category=selected_category if selected_category != "All" else None,
         collection=selected_collection if selected_collection != "All" else None,
@@ -1013,7 +1049,7 @@ def render_review_queue_tab(
         render_compare_mode(filtered_data, platform.lower(), db_path)
     else:
         # Split-pane mode: SKU list on left, details on right
-        render_split_pane_view(filtered_data, all_sku_data, platform.lower(), db_path)
+        render_split_pane_view(filtered_data, review_sku_data, platform.lower(), db_path)
 
 
 def render_revision_queue_tab(
@@ -1307,6 +1343,156 @@ def render_batch_management_tab(
                             dry_run=dry_run,
                             db_path=db_path,
                         )
+
+
+def render_performance_view_tab(
+    all_sku_data: list[SKUData],
+    db_path: Path,
+) -> None:
+    """Render the Performance View tab showing published SKUs and their metrics."""
+    from feedops.db import get_publish_history
+    
+    st.header("Performance View")
+    st.caption("Monitor SKUs that have been published to production")
+    
+    # Get published SKUs
+    published_skus: set[str] = set()
+    if is_supabase_available():
+        try:
+            published_skus = get_published_skus(environment="production")
+        except Exception as e:
+            st.warning(f"Could not fetch published SKUs: {e}")
+    
+    if not published_skus:
+        st.info(
+            "No SKUs have been published to production yet. "
+            "Once you execute a batch with environment='production', "
+            "the published SKUs will appear here."
+        )
+        return
+    
+    # Filter all_sku_data to only show published SKUs
+    published_sku_data = [
+        sku_data for sku_data in all_sku_data
+        if sku_data.sku in published_skus
+    ]
+    
+    # Get publish history for these SKUs
+    publish_history = get_publish_history(
+        environment="production",
+        limit=500,
+    )
+    
+    # Create a lookup for publish events by SKU
+    publish_events_by_sku: dict[str, list[dict]] = {}
+    for event in publish_history:
+        sku = event.get("master_sku", "")
+        if sku not in publish_events_by_sku:
+            publish_events_by_sku[sku] = []
+        publish_events_by_sku[sku].append(event)
+    
+    # Summary metrics
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Published SKUs", len(published_skus))
+    with col2:
+        # Count by platform
+        platforms = {}
+        for event in publish_history:
+            plat = event.get("platform", "unknown")
+            platforms[plat] = platforms.get(plat, 0) + 1
+        st.metric("Publish Events", len(publish_history))
+    with col3:
+        # Average quality score
+        scores = [
+            e.get("quality_score", 0) for e in publish_history
+            if e.get("quality_score")
+        ]
+        avg_score = sum(scores) / len(scores) if scores else 0
+        st.metric("Avg Quality Score", f"{avg_score:.1f}%")
+    
+    st.divider()
+    
+    # Platform breakdown
+    if platforms:
+        st.subheader("Publish Events by Platform")
+        platform_cols = st.columns(len(platforms))
+        for i, (plat, count) in enumerate(sorted(platforms.items())):
+            platform_cols[i].metric(plat.title(), count)
+    
+    st.divider()
+    
+    # Published SKU list with details
+    st.subheader(f"Published SKUs ({len(published_sku_data)})")
+    
+    if not published_sku_data:
+        st.info("No matching SKU data found for published SKUs.")
+        return
+    
+    # Search filter
+    search = st.text_input("Search published SKUs", placeholder="Enter SKU...")
+    
+    filtered_published = published_sku_data
+    if search:
+        search_lower = search.lower()
+        filtered_published = [
+            s for s in published_sku_data
+            if search_lower in s.sku.lower()
+        ]
+    
+    # Display SKUs
+    for sku_data in filtered_published[:50]:  # Limit to 50 for performance
+        events = publish_events_by_sku.get(sku_data.sku, [])
+        latest_event = events[0] if events else {}
+        
+        # Format publish date
+        published_at = latest_event.get("published_at", "")
+        if published_at:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+                published_str = dt.strftime("%Y-%m-%d %H:%M")
+            except Exception:
+                published_str = published_at[:16] if len(published_at) > 16 else published_at
+        else:
+            published_str = "Unknown"
+        
+        quality_score = latest_event.get("quality_score", 0)
+        platform = latest_event.get("platform", "unknown")
+        
+        with st.expander(
+            f"**{sku_data.sku}** — Published {published_str} via {platform} "
+            f"(Score: {quality_score:.1f}%)" if quality_score else
+            f"**{sku_data.sku}** — Published {published_str} via {platform}",
+            expanded=False,
+        ):
+            # Show basic info
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Category:** " + (sku_data.category or "N/A"))
+                st.markdown("**Collection:** " + (sku_data.collection or "N/A"))
+            with col2:
+                st.markdown(f"**Quality Score:** {quality_score:.1f}%")
+                st.markdown(f"**Platform:** {platform}")
+            
+            # Show publish history for this SKU
+            if len(events) > 1:
+                st.markdown("**Publish History:**")
+                for event in events[:5]:
+                    event_time = event.get("published_at", "")[:16]
+                    event_plat = event.get("platform", "")
+                    event_env = event.get("environment", "")
+                    event_status = event.get("status", "")
+                    status_icon = "✅" if event_status == "success" else "❌"
+                    st.caption(f"{status_icon} {event_time} — {event_plat} ({event_env})")
+            
+            # Show current title/description
+            if sku_data.candidate_google:
+                st.markdown("**Published Title (Google):**")
+                st.code(sku_data.candidate_google.get("title", "N/A"))
+    
+    if len(filtered_published) > 50:
+        st.caption(f"Showing first 50 of {len(filtered_published)} published SKUs")
 
 
 def _execute_google_sheets_batch(
