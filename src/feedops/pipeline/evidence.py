@@ -5,6 +5,7 @@ from feedops.integrations.keyword_bank import get_external_keywords
 from feedops.integrations.google_ads import fetch_master_sku_keywords
 # Import Evidence from enrichment to avoid duplication
 from feedops.pipeline.enrichment import Evidence, enrich_product
+from feedops.pipeline.collection_descriptions import is_known_collection_name
 from feedops.pipeline.size_matrix import build_size_matrix
 
 
@@ -161,6 +162,8 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
 
     for field_name, display_name in parent_fields:
         value = getattr(parent_sku, field_name, None)
+        if field_name == "collection" and not is_known_collection_name(value):
+            continue
         if value is not None and value != "":
             formatted = str(value)
             if field_name in _INCH_FIELDS:

@@ -744,6 +744,10 @@ def generate_variant_patch_preview(
     )
     collection_group = collection_context.group if collection_context else None
     collection_subgroup = collection_context.subgroup if collection_context else None
+    if not is_known_collection_name(collection_name):
+        collection_name = None
+        collection_group = None
+        collection_subgroup = None
 
     # Get finish name
     finish_name = variant.finish

@@ -11,6 +11,7 @@ import re
 from typing import Optional
 
 from feedops.models import ParentSKU
+from feedops.pipeline.collection_descriptions import is_known_collection_name
 
 
 # Evidence dataclass - shared with evidence.py (avoid circular import)
@@ -199,6 +200,12 @@ def detect_collection(parent_sku: ParentSKU) -> Optional[CollectionContext]:
     collection_name = parent_sku.collection
     if not collection_name:
         return None
+
+    # Only treat curated designer collections as eligible for title/description guidance.
+    # Shopify merchandising collections (e.g., "Brass Paper Towel Holders") should not be
+    # promoted into titles.
+    if not is_known_collection_name(collection_name):
+        return None
     
     # Try exact match first
     if collection_name in _COLLECTIONS:
@@ -218,6 +225,8 @@ def detect_collection(parent_sku: ParentSKU) -> Optional[CollectionContext]:
     collection_lower = collection_name.lower()
     for name, meta in _COLLECTIONS.items():
         if name.lower() in collection_lower or collection_lower in name.lower():
+            if not is_known_collection_name(name):
+                continue
             return CollectionContext(
                 name=name,
                 group=meta.get("group", ""),
@@ -229,17 +238,7 @@ def detect_collection(parent_sku: ParentSKU) -> Optional[CollectionContext]:
                 ideal_for=meta.get("ideal_for", []),
             )
     
-    # Unknown collection - still flag as collection member
-    return CollectionContext(
-        name=collection_name,
-        group="Unknown",
-        subgroup=None,
-        aesthetic="distinctive design",
-        design_language="coordinated collection piece",
-        tone_keywords=["refined", "coordinated"],
-        coordination_keywords=[f"{collection_name.lower()} collection"],
-        ideal_for=["coordinated bathroom design"],
-    )
+    return None
 
 
 # Design style patterns for classification
