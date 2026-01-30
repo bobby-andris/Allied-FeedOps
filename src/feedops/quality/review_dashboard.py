@@ -37,6 +37,7 @@ try:
 except Exception:  # pragma: no cover
     validate_variant_title_uniqueness = None
 from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
+from feedops.quality.shopify_live import load_shopify_live_snapshot
 
 # Default database path
 DEFAULT_DB_PATH = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
@@ -169,6 +170,7 @@ def run_dashboard(
 
     st.session_state["feedops_baseline_exports_dir"] = str(baseline_exports_dir)
     st.session_state["feedops_candidate_exports_dir"] = str(candidate_exports_dir)
+    st.session_state["feedops_catalog_path"] = str(catalog_path) if catalog_path else ""
 
     # Custom CSS for better styling
     st.markdown(
@@ -1939,6 +1941,56 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
         original_title = sku_data.original.title
         original_desc = sku_data.original.description
 
+    with st.expander("Shopify (Live)", expanded=False):
+        st.caption(
+            "Optional diagnostic view of what is currently on Shopify. "
+            "Cache-first (default 24h TTL); use Refresh to force a new fetch."
+        )
+        enable_live = st.checkbox(
+            "Enable Shopify (Live) lookup",
+            value=False,
+            key=f"shopify_live_enable_{sku_data.sku}",
+        )
+        if enable_live:
+            ttl_hours = st.number_input(
+                "Cache TTL (hours)",
+                min_value=1.0,
+                max_value=168.0,
+                value=24.0,
+                step=1.0,
+                key=f"shopify_live_ttl_{sku_data.sku}",
+                help="Only fetches from Shopify when cached data is older than this TTL, unless you click Refresh.",
+            )
+            force_refresh = st.button(
+                "Refresh from Shopify",
+                key=f"shopify_live_refresh_{sku_data.sku}",
+                help="Forces a fresh Shopify fetch for the currently selected SKU.",
+            )
+            catalog_path = st.session_state.get("feedops_catalog_path") or None
+            live = load_shopify_live_snapshot(
+                sku_data.sku,
+                force_refresh=force_refresh,
+                cache_ttl_hours=float(ttl_hours),
+                catalog_path=catalog_path,
+            )
+            if live.error:
+                st.warning(live.error)
+            else:
+                label = "Fetched just now"
+                if live.data_source == "shopify_cached" and live.age_hours is not None:
+                    label = f"Cached ~{live.age_hours:.1f}h ago"
+                st.caption(f"Source: `{live.data_source}` — {label}")
+                st.markdown("**Title:**")
+                st.markdown(
+                    f"<div class='content-box'>{html.escape(live.title) if live.title else '<em>Not available</em>'}</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown("**Description:**")
+                st.markdown(
+                    f"<div class='content-box' style='white-space: pre-wrap;'>{html.escape(live.description) if live.description else '<em>Not available</em>'}</div>",
+                    unsafe_allow_html=True,
+                )
+
     # Platform info for info boxes
     platform_info = {
         "google": {
@@ -2141,9 +2193,9 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
             # Conditional column rendering based on available content
             if not has_baseline and not has_candidate:
                 # Only Original column (full width)
-                st.markdown("##### Original (Live)")
+                st.markdown("##### Baseline (Snapshot)")
                 st.markdown(
-                    "<div class='version-label'>Current on website</div>",
+                    "<div class='version-label'>Deterministic snapshot for review</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -2170,9 +2222,9 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                 col1, col2, col3 = st.columns(3)
 
                 with col1:
-                    st.markdown("##### Original (Live)")
+                    st.markdown("##### Baseline (Snapshot)")
                     st.markdown(
-                        "<div class='version-label'>Current on website</div>",
+                        "<div class='version-label'>Deterministic snapshot for review</div>",
                         unsafe_allow_html=True,
                     )
 
@@ -2249,9 +2301,9 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    st.markdown("##### Original (Live)")
+                    st.markdown("##### Baseline (Snapshot)")
                     st.markdown(
-                        "<div class='version-label'>Current on website</div>",
+                        "<div class='version-label'>Deterministic snapshot for review</div>",
                         unsafe_allow_html=True,
                     )
 
