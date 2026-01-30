@@ -14,6 +14,7 @@ from feedops.pipeline.finish_injection import (
     generate_variant_keywords,
     generate_variant_title,
 )
+from feedops.pipeline.keyword_placement import get_canonical_product_type
 from feedops.pipeline.collection_descriptions import (
     get_collection_description,
     is_known_collection_name,
@@ -559,6 +560,61 @@ def _selection_meta(candidate: Candidate) -> dict:
     return meta
 
 
+_TRUST_SIGNAL_PATTERNS = [
+    re.compile(r"lifetime warranty", re.IGNORECASE),
+    re.compile(r"assembled in (?:virginia|waynesboro)", re.IGNORECASE),
+    re.compile(r"(?:28|designer) finish", re.IGNORECASE),
+    re.compile(r"solid brass", re.IGNORECASE),
+]
+
+_COMPETITIVE_PATTERNS = [
+    re.compile(r"die[- ]cast zinc", re.IGNORECASE),
+    re.compile(r"outlasts?", re.IGNORECASE),
+    re.compile(r"unlike (?:mass[- ]market|lesser)", re.IGNORECASE),
+    re.compile(r"alternatives?", re.IGNORECASE),
+]
+
+
+def _build_quality_breakdown(candidate: Candidate, platform: str) -> dict:
+    """Build a quality breakdown dict for a given platform's content."""
+    if platform == "google":
+        title = candidate.google_title
+        description = candidate.google_description
+    elif platform == "bing":
+        title = candidate.bing_title
+        description = candidate.bing_description
+    elif platform == "shopify":
+        title = candidate.shopify_title
+        description = candidate.shopify_description
+    else:
+        return {}
+
+    trust_signals_found = sum(
+        1 for pat in _TRUST_SIGNAL_PATTERNS if pat.search(description)
+    )
+    competitive_language_found = any(
+        pat.search(description) for pat in _COMPETITIVE_PATTERNS
+    )
+
+    breakdown: dict = {
+        "title_length": len(title),
+        "description_length": len(description),
+        "trust_signals_found": trust_signals_found,
+        "competitive_language_found": competitive_language_found,
+    }
+
+    # Include per-platform heuristic composite if available
+    if candidate.heuristic_score_breakdown:
+        platform_score = candidate.heuristic_score_breakdown.get(platform)
+        if platform_score is not None:
+            breakdown["heuristic_platform_score"] = platform_score
+
+    if candidate.heuristic_score is not None:
+        breakdown["heuristic_composite"] = candidate.heuristic_score
+
+    return breakdown
+
+
 def generate_patch_preview(
     parent_sku: ParentSKU,
     candidate: Candidate,
@@ -589,6 +645,7 @@ def generate_patch_preview(
         "approval_status": candidate.final_score.approval_status,
     }
     meta.update(_selection_meta(candidate))
+    meta["quality_breakdown"] = _build_quality_breakdown(candidate, platform)
     previous = {
         "title": parent_sku.current_title,
         "description": parent_sku.current_description,
@@ -803,9 +860,11 @@ def generate_variant_patch_preview(
     )
 
     # Generate finish-specific keywords for this variant
+    canonical_pt = get_canonical_product_type(parent_sku.category) if parent_sku.category else None
     variant_keywords = generate_variant_keywords(
         finish_name=finish_name,
         category=parent_sku.category,
+        product_type=canonical_pt,
     )
 
     # Build meta

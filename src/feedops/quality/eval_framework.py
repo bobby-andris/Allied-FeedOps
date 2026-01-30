@@ -251,6 +251,37 @@ def _check_no_citations(text: str, field_name: str) -> CheckResult:
     return CheckResult(name=f"no_citations:{field_name}", passed=True)
 
 
+def _check_title_min_length(title: str, field_name: str) -> CheckResult:
+    """Flag Google/Bing titles under 60 chars."""
+    length = len(title)
+    if length < 60:
+        return CheckResult(
+            name=f"title_min_length:{field_name}",
+            passed=False,
+            detail=f"Title too short ({length} chars, min 60)",
+        )
+    return CheckResult(name=f"title_min_length:{field_name}", passed=True)
+
+
+def _check_bullet_format(description: str, field_name: str) -> CheckResult:
+    """Check for non-standard bullet characters and empty bullets."""
+    issues = []
+    lines = description.split("\n")
+    for i, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if stripped.startswith("\u2022"):
+            issues.append(f"line {i}: Unicode bullet character found (use '- ' instead)")
+        if stripped in ("-", "- "):
+            issues.append(f"line {i}: empty bullet")
+    if issues:
+        return CheckResult(
+            name=f"bullet_format:{field_name}",
+            passed=False,
+            detail="; ".join(issues[:3]),  # limit detail length
+        )
+    return CheckResult(name=f"bullet_format:{field_name}", passed=True)
+
+
 def _check_description_structure(
     description: str, field_name: str, is_html: bool = False
 ) -> CheckResult:
@@ -263,8 +294,11 @@ def _check_description_structure(
             issues.append("missing <p> opening hook")
     else:
         # Plain text: check for bullet points and specs section
+        # Count both "- " and "•" bullets for structural completeness
         lines = description.split("\n")
-        bullet_count = sum(1 for l in lines if l.strip().startswith("- "))
+        bullet_count = sum(
+            1 for l in lines if l.strip().startswith(("- ", "\u2022"))
+        )
         if bullet_count < 3:
             issues.append(f"only {bullet_count} bullet points (need 3+)")
         has_specs = any(
@@ -315,6 +349,63 @@ def _check_bing_synonyms(description: str, category: str | None) -> CheckResult:
         name="bing_synonyms",
         passed=True,
         detail=f"No synonym family for category '{category}'",
+    )
+
+
+_TRUST_SIGNAL_PHRASES = [
+    "lifetime warranty",
+    "limited lifetime warranty",
+    "virginia",
+    "assembled in",
+    "28 designer finishes",
+    "28 finishes",
+    "designer finishes",
+    "matching accessories",
+    "matching pieces",
+]
+
+_COMPETITIVE_PHRASES = [
+    "solid brass",
+    "brass construction",
+    "outlasts",
+    "die-cast zinc",
+    "mass-market",
+    "lesser materials",
+    "won't corrode",
+]
+
+
+def _check_trust_signals(description: str, field_name: str) -> CheckResult:
+    """Verify at least 1 trust signal appears in Shopify descriptions."""
+    lower = description.lower()
+    found = [p for p in _TRUST_SIGNAL_PHRASES if p in lower]
+    if not found:
+        return CheckResult(
+            name=f"trust_signals:{field_name}",
+            passed=False,
+            detail="No trust signals found (warranty, Virginia, finishes, matching pieces)",
+        )
+    return CheckResult(
+        name=f"trust_signals:{field_name}",
+        passed=True,
+        detail=f"Found {len(found)} trust signal(s)",
+    )
+
+
+def _check_competitive_language(description: str, field_name: str) -> CheckResult:
+    """Verify 'solid brass' or competitive differentiation language appears."""
+    lower = description.lower()
+    found = [p for p in _COMPETITIVE_PHRASES if p in lower]
+    if not found:
+        return CheckResult(
+            name=f"competitive_language:{field_name}",
+            passed=False,
+            detail="No competitive differentiation language found (solid brass, outlasts, etc.)",
+        )
+    return CheckResult(
+        name=f"competitive_language:{field_name}",
+        passed=True,
+        detail=f"Found: {', '.join(found[:3])}",
     )
 
 
@@ -376,6 +467,7 @@ def evaluate_sku(
 
         if g_title:
             result.checks.append(_check_char_limit(g_title, "google_title", 150))
+            result.checks.append(_check_title_min_length(g_title, "google_title"))
             result.checks.append(_check_title_starter(g_title, "google_title"))
             result.checks.append(_check_brand_position(g_title, "google_title"))
             result.checks.append(_check_banned_words(g_title, "google_title"))
@@ -388,12 +480,12 @@ def evaluate_sku(
             result.checks.append(
                 _check_desc_length_range(g_desc, "google_description", 600, 800)
             )
-            result.checks.append(
-                _check_description_structure(g_desc, "google_description")
-            )
+            # Google descriptions are attribute-dense feed fuel (not structured
+            # conversion copy), so skip bullet/specs structure check.
+            result.checks.append(_check_bullet_format(g_desc, "google_description"))
 
         if g_title and g_desc:
-            g_score = score_bundle(title=g_title, description=g_desc)
+            g_score = score_bundle(title=g_title, description=g_desc, platform="google")
             result.heuristic_scores["google"] = g_score.composite
             result.checks.append(_check_heuristic_score(g_score, "google"))
 
@@ -404,6 +496,7 @@ def evaluate_sku(
 
         if b_title:
             result.checks.append(_check_char_limit(b_title, "bing_title", 150))
+            result.checks.append(_check_title_min_length(b_title, "bing_title"))
             result.checks.append(_check_title_starter(b_title, "bing_title"))
             result.checks.append(_check_brand_position(b_title, "bing_title"))
             result.checks.append(_check_banned_words(b_title, "bing_title"))
@@ -414,13 +507,13 @@ def evaluate_sku(
             result.checks.append(
                 _check_desc_length_range(b_desc, "bing_description", 700, 1000)
             )
-            result.checks.append(
-                _check_description_structure(b_desc, "bing_description")
-            )
+            # Bing descriptions are attribute-dense feed fuel (not structured
+            # conversion copy), so skip bullet/specs structure check.
             result.checks.append(_check_bing_synonyms(b_desc, category))
+            result.checks.append(_check_bullet_format(b_desc, "bing_description"))
 
         if b_title and b_desc:
-            b_score = score_bundle(title=b_title, description=b_desc)
+            b_score = score_bundle(title=b_title, description=b_desc, platform="bing")
             result.heuristic_scores["bing"] = b_score.composite
             result.checks.append(_check_heuristic_score(b_score, "bing"))
 
@@ -441,6 +534,8 @@ def evaluate_sku(
             result.checks.append(
                 _check_description_structure(s_body, "shopify_body", is_html=True)
             )
+            result.checks.append(_check_trust_signals(s_body, "shopify_body"))
+            result.checks.append(_check_competitive_language(s_body, "shopify_body"))
         if s_meta:
             result.checks.append(
                 _check_char_limit(s_meta, "shopify_meta_description", 155)
@@ -448,7 +543,7 @@ def evaluate_sku(
 
         if s_title and s_body:
             s_score = score_bundle(
-                title=s_title, description=s_body, html_description=True
+                title=s_title, description=s_body, html_description=True, platform="shopify"
             )
             result.heuristic_scores["shopify"] = s_score.composite
             result.checks.append(_check_heuristic_score(s_score, "shopify"))

@@ -6,44 +6,44 @@
   "targetCountry": "US",
   "_meta": {
     "master_sku": "CV-407-8SM",
-    "generated_at": "2026-01-29T11:46:39.398325",
-    "quality_score": 83.33,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:48:22.150249",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 88.5,
+    "selection_score_adjusted": 88.5,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 86.67,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 93,
+      "description_length": 693,
+      "trust_signals_found": 3,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 90.0,
+      "heuristic_composite": 88.5
+    }
   },
   "_previous": {
     "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
     "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
   },
-  "title": "Antique Brass Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-  "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty",
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CV-407-8SM_var1_20260129_114534.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CV-407-8SM-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_114534",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CV-407-8SM_var2_20260129_114554.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CV-407-8SM-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_114554",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CV-407-8SM_var3_20260129_114610.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CV-407-8SM-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_114610",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 3,
-  "lifestyle_image_link": "data/lifestyle_images/CV-407-8SM_var3_20260129_114610.png",
+  "title": "Antique Brass Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+  "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection.",
   "variants": [
     {
       "offerId": "shopify_US_4544675741828_37929912500392",
@@ -56,20 +56,41 @@
         "option_sku": "CV-407-8SM-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass shower door handle",
+          "antique brass bathroom shower door handle",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass shower door hardware"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398443",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150387",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Antique Brass Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Antique Brass Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912533160",
@@ -82,20 +103,41 @@
         "option_sku": "CV-407-8SM-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze shower door handle",
+          "antique bronze bathroom shower door handle",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze shower door hardware"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398502",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150447",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Antique Bronze Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Antique Bronze Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Antique Bronze, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912565928",
@@ -108,20 +150,41 @@
         "option_sku": "CV-407-8SM-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze shower door handle",
+          "brushed bronze bathroom shower door handle",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze shower door hardware"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398553",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150494",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Brushed Bronze Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Brushed Bronze Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Brushed Bronze, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912598696",
@@ -134,20 +197,41 @@
         "option_sku": "CV-407-8SM-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black shower door handle",
+          "matte black bathroom shower door handle",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black shower door hardware"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398603",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150545",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Matte Black Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Coordinates with other Clearview pieces in Matte Black for a striking, cohesive modern look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Matte Black Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom \u2014 available in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912631464",
@@ -160,20 +244,41 @@
         "option_sku": "CV-407-8SM-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper shower door handle",
+          "antique copper bathroom shower door handle",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper shower door hardware"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398651",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150589",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Antique Copper Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Antique Copper Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Antique Copper, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912664232",
@@ -186,20 +291,41 @@
         "option_sku": "CV-407-8SM-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray shower door handle",
+          "matte gray bathroom shower door handle",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray shower door hardware"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398699",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150634",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Matte Gray Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials.\n\nHighlights:\n- Pairs with matching Clearview hardware for refined industrial appeal\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Matte Gray Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912697000",
@@ -212,20 +338,41 @@
         "option_sku": "CV-407-8SM-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze shower door handle",
+          "oil rubbed bronze bathroom shower door handle",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze shower door hardware"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398747",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150681",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Oil Rubbed Bronze Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Oil Rubbed Bronze Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom \u2014 available in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912729768",
@@ -238,20 +385,41 @@
         "option_sku": "CV-407-8SM-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass shower door handle",
+          "polished brass bathroom shower door handle",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass shower door hardware"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398794",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150725",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Polished Brass Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Polished Brass Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Polished Brass, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912762536",
@@ -264,20 +432,41 @@
         "option_sku": "CV-407-8SM-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome shower door handle",
+          "polished chrome bathroom shower door handle",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome shower door hardware"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398842",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150768",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Polished Chrome Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Pairs beautifully with matching Clearview accessories in the same finish for a cohesive bathroom design\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Polished Chrome Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Polished Chrome, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912828072",
@@ -290,20 +479,41 @@
         "option_sku": "CV-407-8SM-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter shower door handle",
+          "antique pewter bathroom shower door handle",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter shower door hardware"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398889",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150810",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Antique Pewter Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Antique Pewter Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Antique Pewter, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912860840",
@@ -316,20 +526,41 @@
         "option_sku": "CV-407-8SM-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel shower door handle",
+          "polished nickel bathroom shower door handle",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel shower door hardware"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398936",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150852",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Polished Nickel Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs seamlessly with matching Clearview hardware for refined continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Polished Nickel Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912893608",
@@ -342,20 +573,41 @@
         "option_sku": "CV-407-8SM-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass shower door handle",
+          "satin brass bathroom shower door handle",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass shower door hardware"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.398982",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150895",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Satin Brass Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Coordinates beautifully with other Clearview hardware in the same finish\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Satin Brass Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912926376",
@@ -368,20 +620,41 @@
         "option_sku": "CV-407-8SM-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome shower door handle",
+          "satin chrome bathroom shower door handle",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome shower door hardware"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.399028",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150939",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Satin Chrome Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Coordinates with other Clearview accessories for a cohesive contemporary look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Satin Chrome Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912959144",
@@ -394,20 +667,41 @@
         "option_sku": "CV-407-8SM-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel shower door handle",
+          "satin nickel bathroom shower door handle",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel shower door hardware"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.399074",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.150982",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Satin Nickel Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs with matching Clearview pieces for a unified, low-maintenance design\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Satin Nickel Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Satin Nickel, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929912991912",
@@ -420,24 +714,45 @@
         "option_sku": "CV-407-8SM-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass shower door handle",
+          "unlacquered brass bathroom shower door handle",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass shower door hardware",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T11:46:39.399122",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151025",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Unlacquered Brass Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Unlacquered Brass Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929913024680",
@@ -450,20 +765,41 @@
         "option_sku": "CV-407-8SM-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze shower door handle",
+          "venetian bronze bathroom shower door handle",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze shower door hardware"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.399168",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151067",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Venetian Bronze Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Venetian Bronze Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Venetian Bronze, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_37929913057448",
@@ -476,20 +812,41 @@
         "option_sku": "CV-407-8SM-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white shower door handle",
+          "matte white bathroom shower door handle",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white shower door hardware"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T11:46:39.399217",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151110",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Matte White Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere.\n\nHighlights:\n- Coordinates with other Clearview accessories for a crisp, unified aesthetic\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Matte White Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Matte White, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352517346",
@@ -502,22 +859,43 @@
         "option_sku": "CV-407-8SM-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold shower door handle",
+          "spanish gold bathroom shower door handle",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold shower door hardware",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T11:46:39.399263",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151152",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Spanish Gold Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Spanish Gold Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Spanish Gold, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352550114",
@@ -530,24 +908,45 @@
         "option_sku": "CV-407-8SM-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle shower door handle",
+          "autumn sparkle bathroom shower door handle",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle shower door hardware",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399310",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151197",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Autumn Sparkle Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Autumn Sparkle Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Autumn Sparkle, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352582882",
@@ -560,24 +959,45 @@
         "option_sku": "CV-407-8SM-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal shower door handle",
+          "glokzin teal bathroom shower door handle",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal shower door hardware",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399355",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151239",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Glokzin Teal Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Glokzin Teal Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352615650",
@@ -590,24 +1010,45 @@
         "option_sku": "CV-407-8SM-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige shower door handle",
+          "shaded beige bathroom shower door handle",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige shower door hardware",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399401",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151282",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Shaded Beige Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Shaded Beige Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Shaded Beige, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352779490",
@@ -620,24 +1061,45 @@
         "option_sku": "CV-407-8SM-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow shower door handle",
+          "golden yellow bathroom shower door handle",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow shower door hardware",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399447",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151324",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Golden Yellow Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Golden Yellow Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352812258",
@@ -650,22 +1112,43 @@
         "option_sku": "CV-407-8SM-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue shower door handle",
+          "flat troll blue bathroom shower door handle",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue shower door hardware",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T11:46:39.399493",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151366",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Flat Troll Blue Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Flat Troll Blue Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom \u2014 available in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352845026",
@@ -678,24 +1161,45 @@
         "option_sku": "CV-407-8SM-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green shower door handle",
+          "sea foam green bathroom shower door handle",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green shower door hardware",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399539",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151411",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Sea Foam Green Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Sea Foam Green Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Sea Foam Green, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352681186",
@@ -708,24 +1212,45 @@
         "option_sku": "CV-407-8SM-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red shower door handle",
+          "fire engine red bathroom shower door handle",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red shower door hardware",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399588",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151459",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Fire Engine Red Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Fire Engine Red Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Fire Engine Red, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352713954",
@@ -738,24 +1263,45 @@
         "option_sku": "CV-407-8SM-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender shower door handle",
+          "lavender bathroom shower door handle",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender shower door hardware",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399633",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151501",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Lavender Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Lavender Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Lavender, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352746722",
@@ -768,24 +1314,45 @@
         "option_sku": "CV-407-8SM-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue shower door handle",
+          "mediterranean blue bathroom shower door handle",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue shower door hardware",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399680",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151545",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Mediterranean Blue Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Mediterranean Blue Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Finished in Mediterranean Blue, shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     },
     {
       "offerId": "shopify_US_4544675741828_43098352648418",
@@ -798,24 +1365,45 @@
         "option_sku": "CV-407-8SM-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink shower door handle",
+          "pink bathroom shower door handle",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink shower door hardware",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T11:46:39.399726",
-        "quality_score": 83.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:48:22.151587",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 88.5,
+        "selection_score_adjusted": 88.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Clearview Collection Single Side Shower Door Pull with Smooth Accents",
         "description": "The clean sharp lines of this modern shower door pull fits well with any bathroom d\u00e9cor ranging from modern to traditional. Made from high quality solid brass with accents of clear acrylic and provided with your choice of any of our lifetime designer finishes, the shower door pull is extremely attractive yet highly functional. Ideal for glass shower doors of all sizes and styles, the easy to install shower door pull comes with durable u-shaped pull made from solid brass and all the hardware necessary for installation. Crafted from the Finest Solid Brass Materials Acrylic components subtly accentuate this elegant design Concealed screw mounting hardware installs easily Available in a variety of lifetime designer finishes Easy installation instructions provided Limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 13x3.9x1.7 Box dimensions, in. (LxHxW): 14x6x6 Shipping weight, lbs: 4"
       },
-      "title": "Pink Shower Door Handle Pull, 9-Inch, Solid Brass & Acrylic, Clearview Collection, Allied Brass",
-      "description": "Get a secure, comfortable grip for opening and closing your glass shower door while keeping a clean, modern look in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished appearance with concealed screw mounting hardware\n- Coordinate across modern bathroom hardware and contemporary bath accessories with multiple designer finish options\n- Install with less guesswork\u2014shower door pull includes installation hardware and instructions\n\nSpecs & Installation:\n- Product type: Single side shower door pull / shower door handle\n- Material: Brass with acrylic accents\n- Mounting: Shower door mount; concealed screw mounting\n- Dimensions (L x H x W): 9 x 3.9 x 1.7 inches\n- Product weight: 3.2 lb\n- Included: Shower door pull and all installation hardware\n- Warranty: Limited lifetime warranty"
+      "title": "Pink Shower Door Handle, 9-Inch Solid Brass Pull, Acrylic Accents, Concealed Mount, Allied Brass",
+      "description": "Shower door handle with 9-inch pull length, 3.9-inch height, and 1.7-inch width for glass shower doors in any bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Solid brass construction with clear acrylic accents delivers a crisp, modern look for contemporary bath accessories and minimalist bathroom fixtures. Shower door mount with concealed screw mounting hardware for a clean, finished appearance; includes shower door pull and all installation hardware. Finish-neutral listing with multiple lifetime designer finish options available. Style: contemporary/modern. Ideal as acrylic bathroom hardware and transparent bathroom accessories to coordinate with other pieces. Limited lifetime warranty. Allied Brass Clearview collection."
     }
   ]
 }

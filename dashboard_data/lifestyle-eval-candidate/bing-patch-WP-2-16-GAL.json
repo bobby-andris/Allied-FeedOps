@@ -1,62 +1,83 @@
 {
   "sku": "shopify_US_4543465947268_32123035025540",
-  "title": "Antique Brass Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-  "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+  "title": "Antique Brass Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+  "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
   "_meta": {
     "master_sku": "WP-2/16-GAL",
-    "generated_at": "2026-01-29T13:07:40.218534",
-    "quality_score": 88.33,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:10:54.664540",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 89.0,
+    "selection_score_adjusted": 89.0,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 90.0,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 2,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 98,
+      "description_length": 879,
+      "trust_signals_found": 2,
+      "competitive_language_found": true,
+      "heuristic_platform_score": 90.0,
+      "heuristic_composite": 89.0
+    }
   },
   "_previous": {
     "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
     "description": "Add a flare of style to your d\u00e9cor with this decorative glass shelf. Shelf can be used anywhere in the home for a great space to store your products. Gallery rail will keep your items secure. Tempered glass is 3/8 Inches thick and all of the hardware is made of solid brass and finished with the highest quality materials to provide a lifetime of beauty. Made with 3/8-in thick tempered glass for safety and strength Crafted from the finest solid brass materials Concealed screw mounting hardware makes installation easy Double shelf is an ideal use of space Glass Dimensions: 16 x 5 Inches Gallery rail designed to keep your items in place Length, in Depth, in Height, in Weight, lbs 16 Inch 16 5 8 10.4 22 Inch 22 5 8 12 Installation Instruction Technical Specification WP216GAL-Installation.PDF WP222GAL-Installation.PDF WP216GAL-Specification.PDF WP222GAL-Specification.PDF"
   },
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-16-GAL_var1_20260129_130629.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/WP-2-16-GAL-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bathroom vanity storage for toiletries and personal care products\nThe scene demonstrates how a homeowner wanting spa-like bathroom organization uses this product daily.\n\nPROBLEM SOLVED: Need elegant storage for daily-use items without visible clutter\n\nITEMS TO SHOW (4-8 items):\n1. Amber glass serum bottles (top shelf)\n2. White ceramic soap dispenser (top shelf)\n3. Small succulent plant or decorative item (top shelf)\n4. Face cream jars (bottom shelf)\n\nCONTEXT REQUIREMENTS:\n- bathroom vanity with mirror above\n- floating vanity or countertop below\n- premium toiletries and skincare products ON shelves (not towels)\n- soft lighting creating glass reflections\n- organized, boutique hotel aesthetic\n\nVALUE DEMONSTRATION: Glass shelves create open, airy feel while displaying products elegantly\nThe image must clearly show: 4-8 toiletry items displayed elegantly on glass shelving\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_130629",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-16-GAL_var2_20260129_130646.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/WP-2-16-GAL-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bathroom vanity storage for toiletries and personal care products\nThe scene demonstrates how a homeowner wanting spa-like bathroom organization uses this product daily.\n\nPROBLEM SOLVED: Need elegant storage for daily-use items without visible clutter\n\nITEMS TO SHOW (4-8 items):\n1. Amber glass serum bottles (top shelf)\n2. White ceramic soap dispenser (top shelf)\n3. Small succulent plant or decorative item (top shelf)\n4. Face cream jars (bottom shelf)\n\nCONTEXT REQUIREMENTS:\n- bathroom vanity with mirror above\n- floating vanity or countertop below\n- premium toiletries and skincare products ON shelves (not towels)\n- soft lighting creating glass reflections\n- organized, boutique hotel aesthetic\n\nVALUE DEMONSTRATION: Glass shelves create open, airy feel while displaying products elegantly\nThe image must clearly show: 4-8 toiletry items displayed elegantly on glass shelving\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_130646",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-16-GAL_var3_20260129_130702.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/WP-2-16-GAL-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bathroom vanity storage for toiletries and personal care products\nThe scene demonstrates how a homeowner wanting spa-like bathroom organization uses this product daily.\n\nPROBLEM SOLVED: Need elegant storage for daily-use items without visible clutter\n\nITEMS TO SHOW (4-8 items):\n1. Amber glass serum bottles (top shelf)\n2. White ceramic soap dispenser (top shelf)\n3. Small succulent plant or decorative item (top shelf)\n4. Face cream jars (bottom shelf)\n\nCONTEXT REQUIREMENTS:\n- bathroom vanity with mirror above\n- floating vanity or countertop below\n- premium toiletries and skincare products ON shelves (not towels)\n- soft lighting creating glass reflections\n- organized, boutique hotel aesthetic\n\nVALUE DEMONSTRATION: Glass shelves create open, airy feel while displaying products elegantly\nThe image must clearly show: 4-8 toiletry items displayed elegantly on glass shelving\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_130702",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 1,
-  "lifestyle_image_link": "data/lifestyle_images/WP-2-16-GAL_var1_20260129_130629.png",
   "variants": [
     {
       "sku": "shopify_US_4543465947268_32123035025540",
-      "title": "Antique Brass Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Antique Brass Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass glass shelf",
+          "antique brass bathroom glass shelf",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass glass shelves"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218596",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664624",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -65,20 +86,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035058308",
-      "title": "Antique Bronze Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Pairs with matching Waverly Place pieces for timeless continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Antique Bronze Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze glass shelf",
+          "antique bronze bathroom glass shelf",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze glass shelves"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218653",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664673",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -87,20 +129,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035091076",
-      "title": "Brushed Bronze Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Pairs with matching Waverly Place accessories for a warm, cohesive aesthetic\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Brushed Bronze Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Brushed Bronze, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze glass shelf",
+          "brushed bronze bathroom glass shelf",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze glass shelves"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218709",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664726",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -109,20 +172,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035123844",
-      "title": "Matte Black Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Matte Black Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Matte Black, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black glass shelf",
+          "matte black bathroom glass shelf",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black glass shelves"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218765",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664777",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -131,20 +215,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035156612",
-      "title": "Antique Copper Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Antique Copper Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper glass shelf",
+          "antique copper bathroom glass shelf",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper glass shelves"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218820",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664827",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -153,20 +258,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035189380",
-      "title": "Matte Gray Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Keep toiletries secure: gallery rail prevents items from sliding off the shelf\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Matte Gray Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray glass shelf",
+          "matte gray bathroom glass shelf",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray glass shelves"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218878",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664879",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -175,20 +301,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035222148",
-      "title": "Oil Rubbed Bronze Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Coordinates with other Waverly Place pieces for a distinguished, heritage-inspired look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Oil Rubbed Bronze Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze glass shelf",
+          "oil rubbed bronze bathroom glass shelf",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze glass shelves"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218934",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664935",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -197,20 +344,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035254916",
-      "title": "Polished Brass Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Coordinates with other Waverly Place pieces for a timeless, unified look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Polished Brass Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass glass shelf",
+          "polished brass bathroom glass shelf",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass glass shelves"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.218992",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.664986",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -219,20 +387,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035287684",
-      "title": "Polished Chrome Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Pairs beautifully with matching Waverly Place accessories in the same finish for a cohesive bathroom design\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Polished Chrome Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome glass shelf",
+          "polished chrome bathroom glass shelf",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome glass shelves"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219048",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665035",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -241,20 +430,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035320452",
-      "title": "Antique Pewter Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Pairs with matching Waverly Place accessories for understated elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Antique Pewter Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Antique Pewter, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter glass shelf",
+          "antique pewter bathroom glass shelf",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter glass shelves"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219105",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665085",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -263,20 +473,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035353220",
-      "title": "Polished Nickel Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs seamlessly with matching Waverly Place hardware for refined continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Polished Nickel Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Polished Nickel, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel glass shelf",
+          "polished nickel bathroom glass shelf",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel glass shelves"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219159",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665133",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -285,20 +516,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035385988",
-      "title": "Satin Brass Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Coordinates beautifully with other Waverly Place hardware in the same finish\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Satin Brass Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass glass shelf",
+          "satin brass bathroom glass shelf",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass glass shelves"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219215",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665181",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -307,20 +559,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035418756",
-      "title": "Satin Chrome Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Coordinates with other Waverly Place accessories for a cohesive contemporary look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Satin Chrome Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome glass shelf",
+          "satin chrome bathroom glass shelf",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome glass shelves"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219270",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665229",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -329,20 +602,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035451524",
-      "title": "Satin Nickel Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs with matching Waverly Place pieces for a unified, low-maintenance design\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Satin Nickel Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel glass shelf",
+          "satin nickel bathroom glass shelf",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel glass shelves"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219325",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665277",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -351,24 +645,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035484292",
-      "title": "Unlacquered Brass Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Unlacquered Brass Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass glass shelf",
+          "unlacquered brass bathroom glass shelf",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass glass shelves",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T13:07:40.219382",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665326",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -377,20 +692,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035517060",
-      "title": "Venetian Bronze Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Pairs elegantly with matching Waverly Place hardware for refined warmth\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Venetian Bronze Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze glass shelf",
+          "venetian bronze bathroom glass shelf",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze glass shelves"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219437",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665374",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -399,20 +735,41 @@
     },
     {
       "sku": "shopify_US_4543465947268_32123035549828",
-      "title": "Matte White Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Keep toiletries secure: gallery rail prevents items from sliding off the shelf\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Matte White Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white glass shelf",
+          "matte white bathroom glass shelf",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white glass shelves"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T13:07:40.219500",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665421",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -421,22 +778,43 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502529250",
-      "title": "Spanish Gold Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Spanish Gold Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Spanish Gold, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold glass shelf",
+          "spanish gold bathroom glass shelf",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold glass shelves",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T13:07:40.219556",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665469",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -445,24 +823,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502562018",
-      "title": "Autumn Sparkle Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Autumn Sparkle Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle glass shelf",
+          "autumn sparkle bathroom glass shelf",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle glass shelves",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219611",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665517",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -471,24 +870,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502594786",
-      "title": "Glokzin Teal Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Glokzin Teal Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal glass shelf",
+          "glokzin teal bathroom glass shelf",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal glass shelves",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219666",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665565",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -497,24 +917,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502627554",
-      "title": "Shaded Beige Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Shaded Beige Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige glass shelf",
+          "shaded beige bathroom glass shelf",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige glass shelves",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219721",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665612",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -523,24 +964,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502791394",
-      "title": "Golden Yellow Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Golden Yellow Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow glass shelf",
+          "golden yellow bathroom glass shelf",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow glass shelves",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219777",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665660",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -549,22 +1011,43 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502824162",
-      "title": "Flat Troll Blue Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Flat Troll Blue Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Flat Troll Blue, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue glass shelf",
+          "flat troll blue bathroom glass shelf",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue glass shelves",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T13:07:40.219832",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665707",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -573,24 +1056,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502856930",
-      "title": "Sea Foam Green Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Sea Foam Green Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Sea Foam Green, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green glass shelf",
+          "sea foam green bathroom glass shelf",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green glass shelves",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219888",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665777",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -599,24 +1103,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502693090",
-      "title": "Fire Engine Red Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Fire Engine Red Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass \u2014 available in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red glass shelf",
+          "fire engine red bathroom glass shelf",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red glass shelves",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219943",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665825",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -625,24 +1150,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502725858",
-      "title": "Lavender Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Lavender Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Finished in Lavender, glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender glass shelf",
+          "lavender bathroom glass shelf",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender glass shelves",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.219998",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665873",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -651,24 +1197,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502758626",
-      "title": "Mediterranean Blue Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Mediterranean Blue Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue glass shelf",
+          "mediterranean blue bathroom glass shelf",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue glass shelves",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.220055",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665921",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",
@@ -677,24 +1244,45 @@
     },
     {
       "sku": "shopify_US_4543465947268_43098502660322",
-      "title": "Pink Glass Shelf, Double Tier 16-Inch X 5-Inch Wall Mount, Solid Brass Hardware, Gallery Rail, Waverly Place, Allied Brass",
-      "description": "Clear counter space and keep daily essentials within reach with this wall-mounted glass shelf in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This double glass shelf (also called a bathroom shelf or wall shelf) provides two tiers of storage, and the gallery rail keeps bottles and accessories in place.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable strength: 3/8-Inch thick tempered glass for safety and durability\n- Built with enduring hardware: solid brass construction supports the shelves\n- Finished look on the wall: concealed screw mounting hardware\n\nSpecs & Installation:\n- Product type: double glass shelf / bathroom shelf / wall shelf\n- Glass dimensions (each shelf): 16-Inch x 5-Inch\n- Overall dimensions: 16-Inch length x 5-Inch depth (projection) x 8-Inch height\n- Materials: tempered glass shelves; solid brass hardware (brass construction)\n- Mounting: wall mount, wall-mounted, wall hanging installation with concealed screws\n- Weight capacity: 4 lb\n- Product weight: 10.4 lb\n- Assembly required: No\n- Included items: glass shelf and all installation hardware\n- Screw size: #8 x 1 1/4-Inch\n- Collection: Waverly Place collection for matching Waverly Place and other transitional bath accessories / transitional bathroom hardware",
+      "title": "Pink Glass Shelf, 16-Inch Double Wall-Mounted Shelf W/ Gallery Rail, Solid Brass Hardware, Allied Brass",
+      "description": "Glass shelf for bathroom storage, 16 inches / 16-inch / 16in double wall-mount shelf with gallery rail and 3/8-in (0.38 in) tempered glass in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This wall-mounted glass shelf acts as a bathroom shelf, wall shelf, and floating shelf alternative for holding toiletries while saving counter space. Two-tier double shelf design; gallery rail keeps items in place. Solid brass hardware with concealed screw mounting for a clean, finished appearance. Dimensions: 16 in length x 5 in depth/projection x 8 in height; glass dimensions 16 x 5 inches. Weight capacity 4 lb. Includes glass shelf and all installation hardware; screw size #8 x 1 1/4. Transitional bath accessories and transitional bathroom hardware styling, part of the Waverly Place collection for matching Waverly Place pieces and grooved bathroom hardware coordination. Lifetime warranty. Allied Brass Waverly Place collection.",
       "_meta": {
         "master_sku": "WP-2/16-GAL",
         "option_sku": "WP-2/16-GAL-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink glass shelf",
+          "pink bathroom glass shelf",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink glass shelves",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T13:07:40.220110",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:10:54.665968",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 89.0,
+        "selection_score_adjusted": 89.0,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Waverly Place Collection Double Glass Shelf with Gallery Rail",

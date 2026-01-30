@@ -126,13 +126,18 @@ class Candidate(BaseModel):
     @field_validator("shopify_meta_description")
     @classmethod
     def validate_shopify_meta_description_length(cls, v: str) -> str:
-        """Shopify meta description should be <= 155 characters for SEO."""
-        # Allow up to 160 for slight flexibility, but warn in scoring
+        """Shopify meta description should be <= 155 characters for SEO.
+
+        Truncates at the nearest word boundary if over 160 characters,
+        rather than rejecting the entire candidate.
+        """
         if len(v) > 160:
-            raise ValueError(
-                "Shopify meta description must be <= 160 characters "
-                "(155 recommended for full visibility)"
-            )
+            truncated = v[:157]
+            # Cut at last space to avoid partial words
+            last_space = truncated.rfind(" ")
+            if last_space > 100:
+                truncated = truncated[:last_space]
+            v = truncated.rstrip(".,;:- ") + "..."
         return v
 
     @property

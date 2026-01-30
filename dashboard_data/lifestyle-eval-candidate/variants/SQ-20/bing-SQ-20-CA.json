@@ -1,19 +1,40 @@
 {
   "sku": "shopify_US_4538723762308_32096366362756",
-  "title": "Shower Squeegee Solid Brass 15-Inch With Wall Hook | Antique Copper | Squeegee Collection | Allied Brass",
-  "description": "Keep shower doors, tile, and mirrors clear after every rinse in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This wall-mounted shower squeegee (also called a shower glass squeegee or bathroom squeegee) removes moisture in quick, easy strokes and stores on the included decorative hook.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a cohesive look with the Squeegee collection\u2014designed to pair with transitional bathroom hardware and other versatile bath accessories\n- Built with solid brass materials (brass construction) and a blade that can be easily replaced\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 10 x 15 x 10 in.\n- Box dimensions (L x H x W): 16 x 10 x 8 in.\n- Shipping weight: 4 lb\n- Includes: squeegee + mounting hook\nmultiple designer finish options available",
+  "title": "Antique Copper Shower Squeegee, 20-Inch Wall-Mounted Solid Brass W/ Mounting Hook, Traditional, Allied Brass",
+  "description": "Finished in Antique Copper, shower squeegee for bathroom glass, 20 inches (20-inch, 20in) wall mount / wall-mounted design with decorative mounting hook to store the squeegee on the wall, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. Use this shower squeegee to clear water from shower doors, tile, and mirrors to help prevent water spots. Solid brass construction with a smooth handle; traditional style to match traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures. Includes squeegee, blade, mounting hook, and all installation hardware; the squeegee blade can be easily replaced. Product dimensions: 10 x 15 x 10 in (LxHxW). Weight capacity: 2 lb. Designer lifetime finish options for corrosion-free and rust-free performance. Limited lifetime warranty.",
   "_meta": {
     "master_sku": "SQ-20",
     "option_sku": "SQ-20-CA",
     "finish": "Antique Copper",
     "finish_keywords": [
+      "antique copper squeegee",
+      "antique copper bathroom squeegee",
       "antique copper bathroom hardware",
-      "antique copper bath accessories",
-      "antique copper squeegee"
+      "antique copper bath accessories"
     ],
-    "generated_at": "2026-01-28T12:20:51.692387",
-    "quality_score": 81.67,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T15:14:34.646210",
+    "quality_score": 88.33,
+    "approval_status": "rejected",
+    "heuristic_score": 87.67,
+    "selection_score_adjusted": 87.67,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 90.0,
+      "shopify": 90.0
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Shower Squeegee with Smooth Handle",

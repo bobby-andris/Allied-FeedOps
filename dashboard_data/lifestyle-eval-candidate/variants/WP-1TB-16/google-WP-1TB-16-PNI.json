@@ -1,16 +1,6 @@
 {
   "offerId": "shopify_US_4543457788036_32123003437188",
-  "title": "Glass Shelf With Towel Bar 16-Inch Solid Brass Wall Mount | Polished Nickel | Waverly Place | Allied Brass",
-  "short_title": "Glass Shelf 16-Inch With Towel Bar, Polished Nickel",
-  "description": "Clear counter clutter and keep towels within reach with a wall-mounted glass shelf that adds storage without taking up vanity space in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs seamlessly with matching Waverly Place hardware for refined continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your space with the Waverly Place collection for matching Waverly Place accessories and a cohesive look\n\nSpecs & Installation:\n- Shelf dimensions: 16 x 5 inches\n- Glass thickness: 3/8 inch (0.38 in)\n- Projection: 5 inches\n- Weight capacity: 2 lb\n- Mounting: wall mount (hardware included)\n- Assembly: not required\n- Included: glass shelf and all installation hardware\n- Warranty: Limited Lifetime Warranty\n- Style: traditional / transitional bath accessories; pairs well with transitional bathroom hardware",
-  "structured_title": {
-    "digital_source_type": "trained_algorithmic_media",
-    "content": "Glass Shelf With Towel Bar 16-Inch Solid Brass Wall Mount | Polished Nickel | Waverly Place | Allied Brass"
-  },
-  "structured_description": {
-    "digital_source_type": "trained_algorithmic_media",
-    "content": "Clear counter clutter and keep towels within reach with a wall-mounted glass shelf that adds storage without taking up vanity space in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs seamlessly with matching Waverly Place hardware for refined continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your space with the Waverly Place collection for matching Waverly Place accessories and a cohesive look\n\nSpecs & Installation:\n- Shelf dimensions: 16 x 5 inches\n- Glass thickness: 3/8 inch (0.38 in)\n- Projection: 5 inches\n- Weight capacity: 2 lb\n- Mounting: wall mount (hardware included)\n- Assembly: not required\n- Included: glass shelf and all installation hardware\n- Warranty: Limited Lifetime Warranty\n- Style: traditional / transitional bath accessories; pairs well with transitional bathroom hardware"
-  },
+  "short_title": "Polished Nickel Glass Shelf 16-Inch",
   "channel": "online",
   "contentLanguage": "en",
   "targetCountry": "US",
@@ -19,16 +9,39 @@
     "option_sku": "WP-1TB/16-PNI",
     "finish": "Polished Nickel",
     "finish_keywords": [
+      "polished nickel glass shelf",
+      "polished nickel bathroom glass shelf",
       "polished nickel bathroom hardware",
-      "polished nickel bath accessories",
-      "polished nickel glass shelves"
+      "polished nickel bath accessories"
     ],
-    "generated_at": "2026-01-28T03:15:12.793521",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:04:37.291545",
+    "quality_score": 88.33,
+    "approval_status": "rejected",
+    "heuristic_score": 87.17,
+    "selection_score_adjusted": 87.17,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 90.0,
+      "shopify": 86.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
-    "title": "Waverly Place 16 Inch Glass Vanity Shelf with Integrated Towel Bar",
-    "description": "Add space and organization to your bathroom with this simple, traditional style glass shelf. Featuring tempered, beveled-edged glass and solid brass hardware this shelf is crafted for durability, strength and style. One of the many coordinating accessories in the Allied Brass Waverly Place Collection, this subtle glass shelf is the perfect complement to your bathroom d\u00e9cor."
-  }
+    "title": "Waverly Place Collection Glass Vanity Shelf  with Integrated Towel Bar",
+    "description": "Add space and organization to your bathroom with this simple, traditional style glass shelf. Featuring tempered, beveled-edged glass and solid brass hardware this shelf is crafted for durability, strength and style. One of the many coordinating accessories in the Allied Brass Waverly Place Collection, this subtle glass shelf is the perfect complement to your bathroom d\u00e9cor. Made with 3/8-in thick tempered glass for safety and strength Crafted from the finest solid brass materials Clever design includes integrated towel bar Glass Dimensions: 16 x 5 Inches Designer finish will provide Corrosion-free and rust-free performance Limited Lifetime Warranty Length, in Depth, in Height, in Weight, lbs 16 Inch 16 5 5 4 22 Inch 22 5 5 4.8 Installation Instruction Technical Specification WP-1TB-16 Installation Instructions.PDF WP1TB22-Installation.PDF WP-1TB-16 Technical Specs.PDF WP1TB22-Specification.PDF"
+  },
+  "title": "Polished Nickel Glass Shelf With Towel Bar, 16-Inch Wall Mount, Tempered Glass & Solid Brass Hardware, Allied Brass",
+  "description": "Finished in Polished Nickel, glass shelf with integrated towel bar, 16 x 5 inch tempered beveled glass (3/8-in thick) with solid brass hardware for bathroom vanity storage and towel hanging, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Wall mount glass vanity shelf keeps toiletries organized while the built-in towel bar adds function in a compact footprint. Traditional-to-transitional style for versatile bath accessories and transitional bathroom hardware updates. Includes glass shelf and all installation hardware; uses #8 x 1 1/4\" screws. Weight capacity 2 lb. Corrosion-free and rust-free performance with designer finish options. Limited lifetime warranty. Allied Brass Waverly Place collection."
 }

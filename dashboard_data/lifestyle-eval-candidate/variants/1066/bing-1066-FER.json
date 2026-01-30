@@ -1,23 +1,43 @@
 {
   "sku": "shopify_US_4538728874116_43094058205410",
-  "title": "Vanity Top Toilet Tissue Holder 5.5 X 6 X 5 Solid Brass | Fire Engine Red | Vanity Top Accessories | Allied Brass",
-  "description": "Need a place for toilet paper but don\u2019t have wall space? This vanity top toilet tissue holder is a countertop toilet paper holder (also called a toilet tissue holder or toilet roll holder) designed to sit on the vanity top so a roll stays close at hand in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.\n\nHighlights\n- Conserve wall space in a small bathroom or powder room with a vanity-top, counter-set design\n- Keep toilet tissue accessible next to the sink for guests and daily routines\n- Built for lasting use with solid brass construction and brass construction throughout\n- Coordinate with the Vanity Top Accessories collection for a consistent, transitional bathroom hardware look\n- Offered in multiple designer finish options to match versatile bath accessories across the room\n\nSpecs & Details\n- Product dimensions (L x H x W): 5.5 x 6 x 5 in.\n- Box dimensions (L x H x W): 12 x 10 x 6 in.\n- Shipping weight: 5 lbs\n- Installation style: vanity top / countertop placement (not wall-mounted, not wall mount, not wall hanging)\n- Limited lifetime warranty\n- Assembled in the USA",
+  "title": "Fire Engine Red Vanity Top Toilet Tissue Holder, 5.5-Inch Solid Brass Countertop Toilet Paper Stand, Contemporary Bath Accessory, Allied Brass",
+  "description": "Vanity top toilet tissue holder for bathroom countertops and vanities where wall space is limited \u2014 available in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Dimensions: 5.5 inches L x 6 inches H x 5 inches W (5.5-inch, 6-inch, 5-inch). Solid brass construction with a weighted base to help prevent tipping; felt pad helps prevent scratching on any surface. Use as a toilet paper holder, toilet tissue holder, tissue holder, toilet roll holder, or countertop toilet paper stand. Contemporary style that fits modern bathroom hardware, contemporary bath accessories, and minimalist bathroom fixtures. Includes: vanity top toilet tissue holder; no assembly required. Product weight: 4 lb. Multiple designer finish options available. Limited lifetime warranty. Allied Brass 1066.",
   "_meta": {
     "master_sku": "1066",
     "option_sku": "1066-FER",
     "finish": "Fire Engine Red",
     "finish_keywords": [
+      "fire engine red vanity top accessories",
       "fire engine red bathroom hardware",
       "fire engine red bath accessories",
-      "fire engine red vanity top accessories",
       "fire engine red statement finish",
       "fire engine red designer hardware",
       "fire engine red colored hardware",
       "fire engine red color bathroom"
     ],
-    "generated_at": "2026-01-28T12:36:04.352491",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T15:18:10.129145",
+    "quality_score": 91.67,
+    "approval_status": "approved",
+    "heuristic_score": 87.17,
+    "selection_score_adjusted": 87.17,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 86.67,
+      "shopify": 90.0
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 0,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Vanity Top Toilet Tissue Holder",

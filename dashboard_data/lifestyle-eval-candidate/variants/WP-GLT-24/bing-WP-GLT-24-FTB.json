@@ -1,21 +1,42 @@
 {
   "sku": "shopify_US_4545335558276_43093705457890",
-  "title": "Toilet Paper Holder With Glass Shelf 8.75-Inch Solid Brass | Flat Troll Blue | Covered Wall-Mounted Toilet Paper Holder | Glass Shelves | Allied Brass",
-  "description": "Keep your bathroom organized while keeping toilet tissue protected with this wall-mounted toilet paper holder (also called a tissue holder or toilet roll holder) that includes a glass shelf above the roll in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Clean install appearance: concealed screw mounting hardware creates a finished look\n- Space-saving setup: wall mount, wall-mounted, wall hanging style keeps surfaces clear\n- Coordinate your bath: designed to match the Glass Shelves collection for a cohesive set of versatile bath accessories and transitional bathroom hardware\n\nSpecs & Installation:\n- Product type: toilet paper holder / toilet paper holder with shelf / tissue holder\n- Dimensions (L x H x W): 8.75 x 4.6 x 6 inches\n- Construction: solid brass hardware (brass construction) with glass shelf\n- Mounting: wall mount / wall-mounted; concealed screw mounting hardware\nmultiple designer finish options available (28 finishes)\n- Warranty: limited lifetime warranty\n- Box dimensions: 18 x 12 x 6 inches\n- Shipping weight: 7 lbs",
+  "title": "Flat Troll Blue Toilet Paper Holder With Glass Shelf, 8.75-Inch Wall-Mounted Solid Brass Toilet Paper Holder, Allied Brass",
+  "description": "Toilet paper holder with glass shelf for bathroom use, sized 8.75 inches L x 4.6 inches H x 6 inches W (8.75-inch, 8.75in) \u2014 available in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. Wall mount / wall-mounted two-post toilet tissue holder with a glass shelf above the roll to keep small items dry and within reach. Solid brass construction (brass hardware) with concealed screw mounting for a clean look. Use as a toilet paper holder, toilet tissue holder, bathroom tissue holder, toilet roll holder, or wall mount toilet paper holder with shelf. Includes toilet paper holder and all installation hardware; assembly required: false. Weight capacity: 250 lb. Limited lifetime warranty. Coordinates with transitional bath accessories and transitional bathroom hardware in the Waverly Place collection (matching Waverly Place, grooved bathroom hardware) by Allied Brass.",
   "_meta": {
     "master_sku": "WP-GLT-24",
     "option_sku": "WP-GLT-24-FTB",
     "finish": "Flat Troll Blue",
     "finish_keywords": [
+      "flat troll blue toilet paper holder",
+      "flat troll blue bathroom toilet paper holder",
       "flat troll blue bathroom hardware",
       "flat troll blue bath accessories",
-      "flat troll blue toilet paper holders",
       "flat troll blue statement finish",
       "flat troll blue designer hardware"
     ],
-    "generated_at": "2026-01-28T02:48:34.069801",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:54:57.802719",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 90.5,
+    "selection_score_adjusted": 90.5,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 90.0,
+      "shopify": 93.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Waverly Place Collection Two Post Toilet Tissue Holder with Glass Shelf",

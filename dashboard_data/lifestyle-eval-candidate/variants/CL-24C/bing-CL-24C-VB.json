@@ -1,19 +1,40 @@
 {
   "sku": "shopify_US_4545184530564_32129252556932",
-  "title": "Recessed Toilet Paper Holder 6.125-Inch Square | Venetian Bronze | Carolina | Allied Brass",
-  "description": "Create a built-in look and reclaim space around the toilet with a recessed toilet paper holder in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This wall-mounted, in-wall toilet paper holder (also called a toilet tissue holder or toilet roll holder) from the Carolina collection is designed to coordinate with traditional bathroom hardware and classic bath accessories.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Pairs elegantly with matching Carolina hardware for refined warmth\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Straightforward installation: coordinating mounting hardware is included\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 6.125 x 6.125 x 4 in.\n- Box dimensions (L x H x W): 10 x 6 x 4 in.\n- Shipping weight: 2.4 lbs\n- Mounting style: recessed/in-wall; wall mount / wall-mounted / wall hanging application using concealed screws\nmultiple designer finish options available\n- Warranty: limited lifetime warranty",
+  "title": "Venetian Bronze Recessed Toilet Paper Holder, 6.125-Inch X 6.125-Inch, Brass, In-Wall Recessed Mount, Allied Brass",
+  "description": "Finished in Venetian Bronze, recessed toilet paper holder for bathroom use with an in-wall, recessed mount that saves space and delivers a built-in look, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Face dimensions: 6.125 inches x 6.125 inches (6.125-inch square); projection: 4 inches (4-in). Brass construction with a designer finish for corrosion-free, rust-free performance. Traditional style to match classic bath accessories and heritage bathroom fixtures. Concealed screw mounting hardware provides a clean, finished appearance. Use as a toilet paper holder, toilet tissue holder, bathroom toilet paper holder, recessed toilet paper holder, or in-wall toilet paper holder. Includes the recessed toilet paper holder and all installation hardware. Limited lifetime warranty. Carolina collection for matching Carolina traditional bathroom hardware. Allied Brass Carolina.",
   "_meta": {
     "master_sku": "CL-24C",
     "option_sku": "CL-24C-VB",
     "finish": "Venetian Bronze",
     "finish_keywords": [
+      "venetian bronze toilet paper holder",
+      "venetian bronze bathroom toilet paper holder",
       "venetian bronze bathroom hardware",
-      "venetian bronze bath accessories",
-      "venetian bronze toilet paper holders"
+      "venetian bronze bath accessories"
     ],
-    "generated_at": "2026-01-28T12:38:50.125442",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:19:44.111978",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 84.67,
+    "selection_score_adjusted": 84.67,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 83.33,
+      "shopify": 76.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 2,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Carolina Collection Recessed Toilet Paper Holder",

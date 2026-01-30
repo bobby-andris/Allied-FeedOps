@@ -1,19 +1,39 @@
 {
   "sku": "shopify_US_4545142784132_32128934510724",
-  "title": "Vanity Top Soap Dispenser Solid Brass 5 Oz | Matte Black | Brass & Glass Soap Dispensers | Allied Brass | Countertop Lotion Pump | Allied Brass",
-  "description": "Stop juggling bottles around the sink and keep soap within easy reach with a vanity top soap dispenser in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This countertop soap dispenser (also called a lotion dispenser or hand soap pump) is sized for everyday bathroom use and styled to match transitional bathroom hardware.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose enduring hardware made with solid brass and brass construction\n- Coordinate easily with versatile bath accessories from the Brass & Glass Soap Dispensers collection\n- Finish flexibility for matching faucets and accessories with multiple designer finish options\n\nSpecs & Details:\n- Product type: Vanity top soap dispenser / countertop soap dispenser / lotion dispenser\n- Use: Soap, lotion, or hand sanitizer\n- Material: Solid brass (brass construction)\n- Mounting/location: Vanity top / countertop (counter-mount style)\n- Capacity: 5 oz\n- Dimensions (L x H x W): 3 in x 7 in x 5 in\n- Box dimensions (L x H x W): 10 in x 6 in x 4 in\n- Shipping weight: 3 lbs\n- Warranty: Limited lifetime warranty\n- Assembly: Assembled in the USA",
+  "title": "Matte Black Vanity Top Soap Dispenser, 7-Inch H Countertop Solid Brass, 5 Oz Bottle, Allied Brass",
+  "description": "Finished in Matte Black, vanity top soap dispenser for bathroom sink use, countertop/vanity-top mount, crafted from solid brass, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. Dimensions: 3 inches L x 7 inches H x 5 inches W (3-inch x 7-inch x 5-inch); projection 4 inches. Use as a soap dispenser, lotion dispenser, or hand sanitizer dispenser with the included 5 ounce bottle. Traditional design with classic elements; space-saving footprint for smaller vanity tops. Includes: soap dispenser. No assembly required. Rated weight capacity: 5 lb.  and covered by a limited lifetime warranty. Ideal for shoppers searching: vanity top soap dispenser, countertop soap dispenser, bathroom soap dispenser, sink soap dispenser, lotion pump dispenser. Coordinates with matching Waverly Place pieces; part of the Waverly Place collection of grooved bathroom hardware, transitional bath accessories, transitional bathroom hardware, and versatile bath accessories. Allied Brass Waverly Place.",
   "_meta": {
     "master_sku": "WP-61",
     "option_sku": "WP-61-BKM",
     "finish": "Matte Black",
     "finish_keywords": [
+      "matte black soap dispensers",
       "matte black bathroom hardware",
-      "matte black bath accessories",
-      "matte black soap dispensers"
+      "matte black bath accessories"
     ],
-    "generated_at": "2026-01-28T03:00:02.870719",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T14:59:37.217771",
+    "quality_score": 91.67,
+    "approval_status": "approved",
+    "heuristic_score": 84.83,
+    "selection_score_adjusted": 84.83,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 86.67,
+      "shopify": 90.0
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Vanity Top Soap Dispenser",

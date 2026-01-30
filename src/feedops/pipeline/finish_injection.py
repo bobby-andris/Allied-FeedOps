@@ -52,7 +52,9 @@ def _apply_room_context(text: str, room_context: str | None) -> str:
     """Normalize room wording to match kitchen vs bathroom context."""
     if not text or room_context != "kitchen":
         return text
-    text = re.sub(r"\bbathrooms?\b", "kitchens", text, flags=re.IGNORECASE)
+    # Replace plural first, then singular, to preserve number agreement
+    text = re.sub(r"\bbathrooms\b", "kitchens", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bbathroom\b", "kitchen", text, flags=re.IGNORECASE)
     text = re.sub(r"\bbath\b", "kitchen", text, flags=re.IGNORECASE)
     return text
 
@@ -156,8 +158,13 @@ def _replace_first_sentence_with_finish(
     description: str,
     finish_name: str,
     clause: str | None,
+    sku_hint: str = "",
 ) -> str:
-    """Replace the first sentence with a finish-forward version."""
+    """Replace the first sentence with a finish-forward version.
+
+    Uses deterministic pattern variation (based on sku_hint hash) to avoid
+    every variant description starting with the same sentence structure.
+    """
     if not description:
         return description
     # Match a sentence-ending period — skip decimal points inside numbers
@@ -173,10 +180,34 @@ def _replace_first_sentence_with_finish(
     if not base_sentence or finish_name.lower() in base_sentence.lower():
         return description
     base_sentence = base_sentence.rstrip(".")
-    if clause:
-        new_sentence = f"{base_sentence} in {finish_name}, {clause}."
-    else:
-        new_sentence = f"{base_sentence} in {finish_name}."
+
+    # Strip leading <p> tag if present — re-added after pattern application
+    # so that all patterns produce text inside the HTML element.
+    html_prefix = ""
+    if base_sentence.startswith("<p>"):
+        html_prefix = "<p>"
+        base_sentence = base_sentence[3:]
+
+    # Select sentence pattern deterministically by SKU hash
+    patterns = [
+        # Pattern 0: original — "{base} in {Finish}, {clause}."
+        lambda base, fn, cl: f"{base} in {fn}, {cl}." if cl else f"{base} in {fn}.",
+        # Pattern 1: finish-forward — "Finished in {Finish}, {base}..."
+        lambda base, fn, cl: (
+            f"Finished in {fn}, {base[0].lower()}{base[1:]}"
+            + (f", {cl}" if cl else "")
+            + "."
+        ),
+        # Pattern 2: dash-style — "{base} — available in {Finish}..."
+        lambda base, fn, cl: (
+            f"{base} — available in {fn}"
+            + (f", {cl}" if cl else "")
+            + "."
+        ),
+    ]
+    idx = hash(sku_hint) % len(patterns) if sku_hint else 0
+    new_sentence = html_prefix + patterns[idx](base_sentence, finish_name, clause)
+
     if not rest:
         return new_sentence
     if rest.startswith("\n"):
@@ -411,17 +442,28 @@ def _get_finish_specific_bullets(
     finish_name: str,
     meta: dict,
     room_context: str | None = None,
+    category: str | None = None,
 ) -> list[str]:
-    """Generate finish-appropriate benefit bullets."""
+    """Generate finish-appropriate benefit bullets.
+
+    When a product category is provided, bullets are tailored to the
+    product type for more relevant copy.
+    """
     bullets: list[str] = []
     finish_category = meta.get("category", "")
     description_type = meta.get("description_type", "coordination")
     finish_lower = finish_name.lower()
+    cat_lower = (category or "").lower()
 
     if finish_category == "statement_color":
-        bullets.append(
-            f"{finish_name} transforms this essential into a conversation piece"
-        )
+        if "grab bar" in cat_lower or "ada" in cat_lower:
+            bullets.append(f"{finish_name} adds style to a safety essential")
+        elif "cabinet" in cat_lower:
+            bullets.append(f"{finish_name} makes a bold accent on cabinetry")
+        else:
+            bullets.append(
+                f"{finish_name} transforms this essential into a conversation piece"
+            )
         bullets.append(
             f"{finish_name} delivers a bold design statement with personal style"
         )
@@ -558,8 +600,9 @@ def generate_variant_description(
         desc,
     )
 
-    # For Google/Bing, update size references in description if size is provided
-    # For Shopify, keep description generic (covers all sizes on product page)
+    # For Google/Bing, update size references in description if size is provided.
+    # For Shopify, keep description generic — Shopify product pages display all
+    # size variants together, so size-specific language would be misleading.
     if size and platform in ("google", "bing"):
         desc = _update_size_in_description(desc, size)
 
@@ -608,7 +651,9 @@ def generate_variant_description(
 
     meta = get_finish_metadata(finish_name)
     clause = _build_finish_benefit_clause(finish_name, meta, room_context)
-    desc = _replace_first_sentence_with_finish(desc, finish_name, clause)
+    # Build a deterministic hint from finish + category for sentence pattern variation
+    sku_hint = f"{finish_name}:{category or ''}"
+    desc = _replace_first_sentence_with_finish(desc, finish_name, clause, sku_hint=sku_hint)
 
     replacement_bullets: list[str] = []
     if meta:
@@ -616,6 +661,7 @@ def generate_variant_description(
             finish_name,
             meta,
             room_context=room_context,
+            category=category,
         )
         if finish_bullets:
             replacement_bullets.append(finish_bullets[0])
@@ -738,6 +784,7 @@ def generate_variant_title(
 def generate_variant_keywords(
     finish_name: str,
     category: str | None = None,
+    product_type: str | None = None,
 ) -> list[str]:
     """Generate finish-specific keywords for a variant.
 
@@ -746,6 +793,7 @@ def generate_variant_keywords(
     Args:
         finish_name: The variant's finish (e.g., "Fire Engine Red", "Polished Chrome")
         category: The product category for more specific keywords (e.g., "Towel Bars")
+        product_type: The canonical product type (e.g., "Towel Bar") for targeted keywords
 
     Returns:
         List of finish-specific keywords for search targeting
@@ -753,14 +801,22 @@ def generate_variant_keywords(
     keywords = []
     finish_lower = finish_name.lower()
 
-    # Base finish + product type keywords
-    keywords.append(f"{finish_lower} bathroom hardware")
-    keywords.append(f"{finish_lower} bath accessories")
+    # Product-type-specific keywords take priority
+    if product_type:
+        pt_lower = product_type.lower()
+        keywords.append(f"{finish_lower} {pt_lower}")
+        # Add room-qualified version
+        room = "kitchen" if "kitchen" in (category or "").lower() else "bathroom"
+        keywords.append(f"{finish_lower} {room} {pt_lower}")
 
-    # Category-specific keywords if provided
-    if category:
+    # Category-specific keywords if provided (and no product_type)
+    if category and not product_type:
         category_lower = category.lower()
         keywords.append(f"{finish_lower} {category_lower}")
+
+    # Generic fallback (keep but lower priority)
+    keywords.append(f"{finish_lower} bathroom hardware")
+    keywords.append(f"{finish_lower} bath accessories")
 
     # Check finish metadata for additional keyword opportunities
     meta = get_finish_metadata(finish_name)

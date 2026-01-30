@@ -1,24 +1,45 @@
 {
   "sku": "shopify_US_4543457788036_43098506789090",
-  "title": "Glass Shelf With Towel Bar 16-Inch Wall-Mounted Solid Brass | Spanish Gold | Waverly Place | Allied Brass",
-  "description": "Clear counter clutter and add everyday storage with this wall-mounted glass shelf\u2014also a bathroom shelf or wall shelf\u2014with an integrated towel bar (towel rack/towel holder) for towels at the sink in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Designed for the Waverly Place collection, it coordinates easily with matching Waverly Place pieces and complements transitional bath accessories and transitional bathroom hardware.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Depend on solid brass hardware and brass construction for lasting wall-hanging support\n- Save space with a wall mount / wall-mounted installation\n\nSpecs & Installation:\n- Shelf dimensions: 16 x 5 inches\n- Glass thickness: 3/8 inch (0.38 in)\n- Projection from wall: 5 inches\n- Weight capacity: 2 lb\n- Mounting type: wall mount\n- Included: glass shelf and all installation hardware (screw size #8 x 1 1/4)\n- Assembly required: no\n- Warranty: Limited Lifetime Warranty",
+  "title": "Spanish Gold Glass Shelf With Towel Bar, 16-Inch Wall-Mounted Tempered Glass, Solid Brass Hardware, Allied Brass",
+  "description": "Finished in Spanish Gold, glass shelf with integrated towel bar for bathroom organization: 16 inches x 5 inches (16-inch, 16 in) tempered, beveled-edge glass vanity shelf with 3/8-in (0.38 in) thick glass and solid brass hardware, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Use as a bathroom wall shelf over a vanity for toiletries and d\u00e9cor, plus a towel bar/towel rack/towel holder below for hand towels. Wall mount / wall-mounted installation with included hardware (glass shelf and all installation hardware); screw size #8 x 1 1/4\". Traditional styling that fits transitional bath accessories and transitional bathroom hardware, ideal for matching Waverly Place collection looks and grooved bathroom hardware themes. Weight capacity 2 lb. Corrosion-free and rust-free performance. Limited lifetime warranty. Allied Brass Waverly Place collection.",
   "_meta": {
     "master_sku": "WP-1TB/16",
     "option_sku": "WP-1TB/16-SGL",
     "finish": "Spanish Gold",
     "finish_keywords": [
+      "spanish gold glass shelf",
+      "spanish gold bathroom glass shelf",
       "spanish gold bathroom hardware",
       "spanish gold bath accessories",
-      "spanish gold glass shelves",
       "spanish gold statement finish",
       "spanish gold designer hardware"
     ],
-    "generated_at": "2026-01-28T03:15:12.794415",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:04:37.294647",
+    "quality_score": 88.33,
+    "approval_status": "rejected",
+    "heuristic_score": 87.17,
+    "selection_score_adjusted": 87.17,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 90.0,
+      "shopify": 86.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
-    "title": "Waverly Place 16 Inch Glass Vanity Shelf with Integrated Towel Bar",
-    "description": "Add space and organization to your bathroom with this simple, traditional style glass shelf. Featuring tempered, beveled-edged glass and solid brass hardware this shelf is crafted for durability, strength and style. One of the many coordinating accessories in the Allied Brass Waverly Place Collection, this subtle glass shelf is the perfect complement to your bathroom d\u00e9cor."
+    "title": "Waverly Place Collection Glass Vanity Shelf  with Integrated Towel Bar",
+    "description": "Add space and organization to your bathroom with this simple, traditional style glass shelf. Featuring tempered, beveled-edged glass and solid brass hardware this shelf is crafted for durability, strength and style. One of the many coordinating accessories in the Allied Brass Waverly Place Collection, this subtle glass shelf is the perfect complement to your bathroom d\u00e9cor. Made with 3/8-in thick tempered glass for safety and strength Crafted from the finest solid brass materials Clever design includes integrated towel bar Glass Dimensions: 16 x 5 Inches Designer finish will provide Corrosion-free and rust-free performance Limited Lifetime Warranty Length, in Depth, in Height, in Weight, lbs 16 Inch 16 5 5 4 22 Inch 22 5 5 4.8 Installation Instruction Technical Specification WP-1TB-16 Installation Instructions.PDF WP1TB22-Installation.PDF WP-1TB-16 Technical Specs.PDF WP1TB22-Specification.PDF"
   }
 }

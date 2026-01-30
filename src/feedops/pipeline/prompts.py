@@ -342,6 +342,74 @@ Score each dimension by counting how many required elements are present:
    [ ] Keywords from placement plan used as search intent, NOT stated as product facts"""
 
 # ---------------------------------------------------------------------------
+# CATEGORY GUIDANCE (injected into dynamic user prompt per-SKU)
+# ---------------------------------------------------------------------------
+# Category-specific writing hints that help the LLM tailor content structure
+# to product types with different buyer intent patterns. These go in the
+# dynamic user prompt (not system prompt) to preserve prompt caching.
+# ---------------------------------------------------------------------------
+
+_CATEGORY_GUIDANCE = {
+    "niche_functional": {
+        "categories": [
+            "retractable",
+            "garment rod",
+            "cabinet pull",
+            "cabinet knob",
+            "squeegee",
+            "door pull",
+            "shower door",
+        ],
+        "guidance": """CATEGORY NOTE: This is a niche/functional product. Shoppers searching
+for this product type already know what they want — focus on WHY THIS ONE over competitors
+(material quality, dimensions, mounting system) rather than generic bathroom upgrade hooks.
+For Google/Bing: lead with exact product type and differentiating specs.
+For Shopify: open with the specific problem this product solves, not a generic bathroom hook.""",
+    },
+    "towel_storage": {
+        "categories": [
+            "towel bar",
+            "towel ring",
+            "towel holder",
+            "towel stand",
+            "towel valet",
+            "towel shelf",
+            "guest towel",
+        ],
+        "guidance": """CATEGORY NOTE: High-competition category. Differentiate on construction
+(solid brass vs die-cast zinc), finish variety, and collection coordination.
+For Google/Bing: include towel bar/rack/holder synonyms and exact dimensions early.
+For Shopify: address the common frustration (flimsy bars, mismatched finishes) in opening.""",
+    },
+    "safety_ada": {
+        "categories": ["grab bar", "ada"],
+        "guidance": """CATEGORY NOTE: Safety-critical product. Lead with functional assurance
+(weight capacity, ADA compliance, mounting security). Trust signals matter more than aesthetics.
+For Google/Bing: include "ADA compliant", weight capacity, mounting type as primary attributes.
+For Shopify: open with safety/accessibility benefit, then mention that it doesn't sacrifice style.""",
+    },
+}
+
+
+def build_category_guidance(category: str | None) -> str:
+    """Return category-specific writing guidance for the user prompt.
+
+    Args:
+        category: The product category (e.g., "Towel Bars", "Grab Bars")
+
+    Returns:
+        Category guidance string or empty string if no match.
+    """
+    if not category:
+        return ""
+    cat_lower = category.lower()
+    for group in _CATEGORY_GUIDANCE.values():
+        if any(kw in cat_lower for kw in group["categories"]):
+            return f"\n{group['guidance']}\n"
+    return ""
+
+
+# ---------------------------------------------------------------------------
 # DYNAMIC USER PROMPT (per-SKU, assembled at runtime)
 # ---------------------------------------------------------------------------
 # Contains only the evidence table, keyword placement plan, and master SKU.
@@ -352,7 +420,7 @@ USER_PROMPT_TEMPLATE = """\
 {evidence_table}
 
 {keyword_placement}
-
+{category_guidance}
 Respond with valid JSON matching this schema:
 {schema}
 
@@ -368,7 +436,7 @@ OPTIMIZATION_TEMPLATE = """
 {evidence_table}
 
 {keyword_placement}
-
+{category_guidance}
 ## Output Format
 Respond with valid JSON matching this schema:
 {schema}

@@ -740,10 +740,10 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
     llm = AsyncMock(spec=LLMProvider)
     llm.generate.side_effect = [
         {
-            "google_title": "Test Google Title 1",
+            "google_title": "18-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "google_short_title": "Test Short Title 1",
             "google_description": "Test description " * 30,
-            "bing_title": "Test Bing Title 1",
+            "bing_title": "18-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "bing_description": "Test description " * 30,
             "shopify_title": "Test Shopify Title 1",
             "shopify_description": "<p>Test description</p>",
@@ -758,10 +758,10 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
             },
         },
         {
-            "google_title": "Test Google Title 2",
+            "google_title": "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "google_short_title": "Test Short Title 2",
             "google_description": "Test description " * 30,
-            "bing_title": "Test Bing Title 2",
+            "bing_title": "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "bing_description": "Test description " * 30,
             "shopify_title": "Test Shopify Title 2",
             "shopify_description": "<p>Test description</p>",
@@ -776,10 +776,10 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
             },
         },
         {
-            "google_title": "Test Google Title 3",
+            "google_title": "30-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "google_short_title": "Test Short Title 3",
             "google_description": "Test description " * 30,
-            "bing_title": "Test Bing Title 3",
+            "bing_title": "30-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "bing_description": "Test description " * 30,
             "shopify_title": "Test Shopify Title 3",
             "shopify_description": "<p>Test description</p>",
@@ -832,10 +832,10 @@ async def test_generate_candidates_skips_failed_attempts(sample_parent_sku):
             },
         },
         {
-            "google_title": "Test Google Title 2",
+            "google_title": "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "google_short_title": "Test Short Title 2",
             "google_description": "Test description " * 30,
-            "bing_title": "Test Bing Title 2",
+            "bing_title": "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
             "bing_description": "Test description " * 30,
             "shopify_title": "Test Shopify Title 2",
             "shopify_description": "<p>Test description</p>",
@@ -854,7 +854,7 @@ async def test_generate_candidates_skips_failed_attempts(sample_parent_sku):
     candidates, errors = await generate_candidates(sample_parent_sku, llm, 2)
 
     assert len(candidates) == 1
-    assert candidates[0].google_title == "Test Google Title 2"
+    assert candidates[0].google_title == "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass"
     assert len(errors) == 1
 
 

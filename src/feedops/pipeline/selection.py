@@ -63,6 +63,23 @@ def _strip_keyword_spam(text: str) -> str:
     return result.strip()
 
 
+def normalize_bullets(text: str) -> str:
+    """Standardize bullet format: Unicode bullets to dash, remove empties.
+
+    Applied to all description fields after LLM generation to fix:
+    - Unicode bullet characters (``\\u2022``) replaced with ``- ``
+    - Asterisk bullets replaced with ``- ``
+    - Empty bullet lines removed
+    """
+    # Replace Unicode bullets and asterisk bullets with dash
+    text = text.replace("\u2022 ", "- ").replace("\u2022", "- ")
+    text = re.sub(r"^(\s*)\* ", r"\1- ", text, flags=re.MULTILINE)
+    # Remove empty bullet lines (just "- " or "-" with nothing after)
+    lines = text.split("\n")
+    lines = [line for line in lines if line.strip() not in ("-", "- ", "- \r")]
+    return "\n".join(lines)
+
+
 def _ensure_brand_format(title: str) -> str:
     """Ensure Allied Brass is present once and is the last comma-separated segment."""
     # Remove any trailing brand first (various formats)
@@ -171,6 +188,7 @@ class RankedCandidate:
     heuristic: CandidateHeuristicScore
     validation_errors: list[str]
     index: int
+    keyword_errors: list[str] | None = None
 
 
 def parse_num_candidates(env_value: str | None) -> int:
@@ -250,9 +268,10 @@ def sanitize_candidate_content(
         if field == "google_short_title":
             value = _dedupe_product_types(value)
             value = _trim_google_short_title(value)
-        # Strip SEO keyword spam from descriptions
+        # Strip SEO keyword spam and normalize bullets in descriptions
         if field in description_fields:
             value = _strip_keyword_spam(value)
+            value = normalize_bullets(value)
         updates[field] = value
     return candidate.model_copy(update=updates)
 
@@ -266,10 +285,9 @@ def rank_candidates(
     for idx, candidate in enumerate(candidates):
         heuristic = score_candidate(candidate, weights=weights)
         validation_errors = validate_candidate_content(candidate)
+        keyword_errors: list[str] = []
         if keyword_plan:
-            validation_errors.extend(
-                validate_candidate_keyword_placement(candidate, keyword_plan)
-            )
+            keyword_errors = validate_candidate_keyword_placement(candidate, keyword_plan)
         candidate_index = (
             candidate.candidate_index if candidate.candidate_index is not None else idx
         )
@@ -279,15 +297,17 @@ def rank_candidates(
                 heuristic=heuristic,
                 validation_errors=validation_errors,
                 index=candidate_index,
+                keyword_errors=keyword_errors,
             )
         )
     return ranked
 
 
-def _rank_sort_key(entry: RankedCandidate) -> tuple[bool, float, float, int]:
+def _rank_sort_key(entry: RankedCandidate) -> tuple[bool, float, int, float, int]:
     return (
-        bool(entry.validation_errors),
+        bool(entry.validation_errors),           # Hard errors first
         -entry.heuristic.adjusted_weighted_composite,
+        len(entry.keyword_errors or []),          # Fewer keyword misses preferred
         -entry.heuristic.google.composite,
         entry.index,
     )
@@ -311,15 +331,15 @@ def select_best_candidate(
     # Always sanitize to apply canonical product types and deduplication
     sanitized = sanitize_candidate_content(selected, category=category)
     sanitized_errors = validate_candidate_content(sanitized)
+    sanitized_keyword_errors: list[str] = []
     if keyword_plan:
-        sanitized_errors.extend(
-            validate_candidate_keyword_placement(sanitized, keyword_plan)
-        )
+        sanitized_keyword_errors = validate_candidate_keyword_placement(sanitized, keyword_plan)
     ranked_sorted[0] = RankedCandidate(
         candidate=sanitized,
         heuristic=best.heuristic,
         validation_errors=sanitized_errors,
         index=best.index,
+        keyword_errors=sanitized_keyword_errors,
     )
     selected = sanitized
 

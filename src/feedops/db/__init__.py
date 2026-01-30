@@ -66,15 +66,20 @@ else:
         save_sku_approval,
         update_batch_status,
     )
-    
+
     # Provide stub functions for Supabase-only features
-    def get_published_skus(*, platform: str | None = None, environment: str = "production") -> set[str]:
+    def get_published_skus(
+        *, platform: str | None = None, environment: str = "production"
+    ) -> set[str]:
         """Stub for SQLite mode - returns empty set."""
         return set()
-    
-    def get_skus_needing_review(*, all_skus: list[str], platform: str | None = None) -> list[str]:
+
+    def get_skus_needing_review(
+        *, all_skus: list[str], platform: str | None = None
+    ) -> list[str]:
         """Stub for SQLite mode - returns all SKUs."""
         return all_skus
+
 
 __all__ = [
     # Core database functions

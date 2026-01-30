@@ -1,23 +1,48 @@
 {
   "sku": "shopify_US_4543084265604_43093882929378",
-  "title": "Guest Towel Stand 16.3-Inch Solid Brass | Pink | Carolina Collection | Allied Brass | Countertop Vanity Hand Towel Holder Rack | Allied Brass",
-  "description": "Keep clean hand towels by the sink without wall mounting in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This Carolina Collection guest towel stand is a countertop towel stand (also called a towel holder or towel rack) designed for vanity-top use in the bathroom or bath.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Countertop protection: Felt pad on the bottom helps prevent scratching on bathroom surfaces\n- Traditional coordination: Made to complement matching Carolina and other classic bath accessories and heritage bathroom fixtures\n- Solid brass build: Crafted from solid brass materials (brass construction)\n\nSpecs:\n- Product type: Countertop/vanity-top guest towel stand (freestanding; not wall-mounted / not wall hanging)\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+  "title": "Guest Towel Holder Stand, Allied Brass, Pink",
+  "description": "Finished in Pink, guest towel holder stand for bathroom vanity countertops, 11-inch size, crafted from solid brass with traditional styling, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Use as a guest towel holder, hand towel stand, or washcloth holder with a two-arm towel bar design that keeps towels within reach of the sink. Countertop, freestanding, vertical stand (no wall mount) with a heavy base to help prevent tipping and a felt pad on the bottom to protect countertop surfaces. Dimensions: 16.3 inches L x 14 inches H x 5.5 inches W (16.3 in, 14 in, 5.5 in). Weight capacity: 20 lb. No assembly required.  for matching Carolina and heritage bathroom fixtures. Limited Lifetime Warranty. Allied Brass Carolina collection.",
   "_meta": {
     "master_sku": "CL-11",
     "option_sku": "CL-11-PNK",
     "finish": "Pink",
     "finish_keywords": [
+      "pink guest towel holder",
+      "pink bathroom guest towel holder",
       "pink bathroom hardware",
       "pink bath accessories",
-      "pink towel stand",
       "pink statement finish",
       "pink designer hardware",
       "pink colored hardware",
       "pink color bathroom"
     ],
-    "generated_at": "2026-01-28T02:43:22.007382",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T14:53:12.885607",
+    "quality_score": 91.67,
+    "approval_status": "approved",
+    "heuristic_score": 80.83,
+    "selection_score_adjusted": 80.38,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 73.33,
+      "shopify": 76.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.45,
+    "soft_gate_warnings": [
+      "Bing: Title missing primary dimension in first 70 chars",
+      "Shopify: Title missing primary dimension in first 70 chars"
+    ],
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 1,
+      "shopify": 1
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Carolina Collection Guest Towel Stand",

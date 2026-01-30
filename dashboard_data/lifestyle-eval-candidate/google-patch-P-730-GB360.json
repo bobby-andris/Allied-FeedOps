@@ -1,53 +1,53 @@
 {
   "offerId": "shopify_US_8033759002850_43853036454114",
-  "short_title": "Antique Bronze Grab Bar, 60-Inch",
+  "short_title": "Antique Bronze Grab Bar, 63-Inch",
   "channel": "online",
   "contentLanguage": "en",
   "targetCountry": "US",
   "_meta": {
     "master_sku": "P-730-GB360",
-    "generated_at": "2026-01-29T12:39:44.071143",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:02:57.275983",
+    "quality_score": 88.33,
+    "approval_status": "approved",
+    "heuristic_score": 83.83,
+    "selection_score_adjusted": 83.83,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 86.67,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 2,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 74,
+      "description_length": 677,
+      "trust_signals_found": 1,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 83.33,
+      "heuristic_composite": 83.83
+    }
   },
   "_previous": {
     "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
     "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
   },
-  "title": "Antique Bronze Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-  "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty",
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var1_20260129_123824.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-730-GB360-ABZ.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nIndustrial bathroom with exposed concrete, blackened metal accents. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_123824",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var2_20260129_123840.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-730-GB360-ABZ.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nIndustrial bathroom with exposed concrete, blackened metal accents. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_123840",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/P-730-GB360_var3_20260129_123855.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/P-730-GB360-ABZ.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nIndustrial bathroom with exposed concrete, blackened metal accents. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Natural soft lighting with good product visibility\nCamera: 3/4 angle, product in sharp focus\nMood: Professional, clean, lifestyle photography\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_123855",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 2,
-  "lifestyle_image_link": "data/lifestyle_images/P-730-GB360_var2_20260129_123840.png",
+  "title": "Antique Bronze Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+  "description": "Finished in Antique Bronze, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline.",
   "variants": [
     {
       "offerId": "shopify_US_8033759002850_43853036454114",
-      "short_title": "Antique Bronze Grab Bar, 60-Inch",
+      "short_title": "Antique Bronze Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -56,24 +56,45 @@
         "option_sku": "P-730-GB360-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze grab bar",
+          "antique bronze bathroom grab bar",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze grab bars"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071246",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276128",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Antique Bronze Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Antique Bronze Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Antique Bronze, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036486882",
-      "short_title": "Brushed Bronze Grab Bar, 60-Inch",
+      "short_title": "Brushed Bronze Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -82,24 +103,45 @@
         "option_sku": "P-730-GB360-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze grab bar",
+          "brushed bronze bathroom grab bar",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze grab bars"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071300",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276187",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Brushed Bronze Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Brushed Bronze Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036519650",
-      "short_title": "Matte Black Grab Bar, 60-Inch",
+      "short_title": "Matte Black Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -108,24 +150,45 @@
         "option_sku": "P-730-GB360-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black grab bar",
+          "matte black bathroom grab bar",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black grab bars"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071349",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276230",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Matte Black Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Coordinates with other Pipeline pieces in Matte Black for a striking, cohesive modern look\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Matte Black Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Matte Black, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036552418",
-      "short_title": "Matte Gray Grab Bar, 60-Inch",
+      "short_title": "Matte Gray Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -134,24 +197,45 @@
         "option_sku": "P-730-GB360-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray grab bar",
+          "matte gray bathroom grab bar",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray grab bars"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071393",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276271",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Matte Gray Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials.\n\nHighlights:\n- Pairs with matching Pipeline hardware for refined industrial appeal\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Matte Gray Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Matte Gray, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036585186",
-      "short_title": "Oil Rubbed Bronze Grab Bar, 60-Inch",
+      "short_title": "Oil Rubbed Bronze Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -160,24 +244,45 @@
         "option_sku": "P-730-GB360-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze grab bar",
+          "oil rubbed bronze bathroom grab bar",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze grab bars"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071436",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276311",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Oil Rubbed Bronze Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Coordinates with other Pipeline pieces for a distinguished, heritage-inspired look\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Oil Rubbed Bronze Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036617954",
-      "short_title": "Polished Chrome Grab Bar, 60-Inch",
+      "short_title": "Polished Chrome Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -186,24 +291,45 @@
         "option_sku": "P-730-GB360-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome grab bar",
+          "polished chrome bathroom grab bar",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome grab bars"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071479",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276350",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Polished Chrome Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Pairs beautifully with matching Pipeline accessories in the same finish for a cohesive bathroom design\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Polished Chrome Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036650722",
-      "short_title": "Satin Nickel Grab Bar, 60-Inch",
+      "short_title": "Satin Nickel Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -212,24 +338,45 @@
         "option_sku": "P-730-GB360-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel grab bar",
+          "satin nickel bathroom grab bar",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel grab bars"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071521",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276390",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Satin Nickel Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs with matching Pipeline pieces for a unified, low-maintenance design\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Satin Nickel Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility \u2014 available in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036683490",
-      "short_title": "Matte White Grab Bar, 60-Inch",
+      "short_title": "Matte White Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -238,24 +385,45 @@
         "option_sku": "P-730-GB360-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white grab bar",
+          "matte white bathroom grab bar",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white grab bars"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T12:39:44.071562",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276428",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Matte White Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere.\n\nHighlights:\n- Coordinates with other Pipeline accessories for a crisp, unified aesthetic\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Matte White Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Matte White, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036716258",
-      "short_title": "Spanish Gold Grab Bar, 60-Inch",
+      "short_title": "Spanish Gold Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -264,26 +432,47 @@
         "option_sku": "P-730-GB360-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold grab bar",
+          "spanish gold bathroom grab bar",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold grab bars",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T12:39:44.071603",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276467",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Spanish Gold Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Spanish Gold Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Spanish Gold, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036749026",
-      "short_title": "Autumn Sparkle Grab Bar, 60-Inch",
+      "short_title": "Autumn Sparkle Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -292,28 +481,49 @@
         "option_sku": "P-730-GB360-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle grab bar",
+          "autumn sparkle bathroom grab bar",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle grab bars",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071645",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276505",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Autumn Sparkle Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Autumn Sparkle Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Autumn Sparkle, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036781794",
-      "short_title": "Glokzin Teal Grab Bar, 60-Inch",
+      "short_title": "Glokzin Teal Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -322,28 +532,49 @@
         "option_sku": "P-730-GB360-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal grab bar",
+          "glokzin teal bathroom grab bar",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal grab bars",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071685",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276542",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Glokzin Teal Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Glokzin Teal Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036814562",
-      "short_title": "Shaded Beige Grab Bar, 60-Inch",
+      "short_title": "Shaded Beige Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -352,28 +583,49 @@
         "option_sku": "P-730-GB360-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige grab bar",
+          "shaded beige bathroom grab bar",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige grab bars",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071725",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276602",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Shaded Beige Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Shaded Beige Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036847330",
-      "short_title": "Golden Yellow Grab Bar, 60-Inch",
+      "short_title": "Golden Yellow Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -382,28 +634,49 @@
         "option_sku": "P-730-GB360-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow grab bar",
+          "golden yellow bathroom grab bar",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow grab bars",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071765",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276644",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Golden Yellow Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Golden Yellow Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility \u2014 available in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036880098",
-      "short_title": "Flat Troll Blue Grab Bar, 60-Inch",
+      "short_title": "Flat Troll Blue Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -412,26 +685,47 @@
         "option_sku": "P-730-GB360-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue grab bar",
+          "flat troll blue bathroom grab bar",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue grab bars",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T12:39:44.071806",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276683",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Flat Troll Blue Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Flat Troll Blue Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility \u2014 available in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036912866",
-      "short_title": "Sea Foam Green Grab Bar, 60-Inch",
+      "short_title": "Sea Foam Green Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -440,28 +734,49 @@
         "option_sku": "P-730-GB360-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green grab bar",
+          "sea foam green bathroom grab bar",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green grab bars",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071847",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276721",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Sea Foam Green Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Sea Foam Green Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility \u2014 available in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036945634",
-      "short_title": "Fire Engine Red Grab Bar, 60-Inch",
+      "short_title": "Fire Engine Red Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -470,28 +785,49 @@
         "option_sku": "P-730-GB360-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red grab bar",
+          "fire engine red bathroom grab bar",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red grab bars",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071888",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276759",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Fire Engine Red Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Fire Engine Red Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853036978402",
-      "short_title": "Lavender Grab Bar, 60-Inch",
+      "short_title": "Lavender Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -500,28 +836,49 @@
         "option_sku": "P-730-GB360-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender grab bar",
+          "lavender bathroom grab bar",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender grab bars",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071936",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276796",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Lavender Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Lavender Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Finished in Lavender, grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853037011170",
-      "short_title": "Mediterranean Blue Grab Bar, 60-Inch",
+      "short_title": "Mediterranean Blue Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -530,28 +887,49 @@
         "option_sku": "P-730-GB360-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue grab bar",
+          "mediterranean blue bathroom grab bar",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue grab bars",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.071978",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276836",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Mediterranean Blue Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Mediterranean Blue Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     },
     {
       "offerId": "shopify_US_8033759002850_43853037043938",
-      "short_title": "Pink Grab Bar, 60-Inch",
+      "short_title": "Pink Grab Bar, 63-Inch",
       "channel": "online",
       "contentLanguage": "en",
       "targetCountry": "US",
@@ -560,24 +938,45 @@
         "option_sku": "P-730-GB360-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink grab bar",
+          "pink bathroom grab bar",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink grab bars",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T12:39:44.072018",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:02:57.276875",
+        "quality_score": 88.33,
+        "approval_status": "approved",
+        "heuristic_score": 83.83,
+        "selection_score_adjusted": 83.83,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 86.67,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 2,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Pipeline Extended 3 Post Grab Bar - 60 inch",
         "description": "Make your bathroom a safer and more accessible space with the extended length 3 post grab bar from the Allied Brass Pipeline Collection. Designed with the needs of seniors, people with disabilities, and caregivers in mind, this grab bar provides balance, security, and ease of use. The industrial look of the Pipeline collection adds a modern touch to any bathroom decor, while the lifetime materials ensure a clean, decorative finish that lasts for years. With superior materials that are free from corrosion and rust, this grab bar is a reliable and stylish addition to your bathroom. Trust Allied Brass to provide high-quality bathroom fittings that enhance your safety and comfort. Contemporary pipe design with industrial influences ADA Compliant Bars feature a third center bracket to ensure stability Protected using highly durable powder coat finish Designer finish will provide Corrosion-free and rust-free performance Provided with a limited lifetime warranty Specification & Documentation Product dimensions, in. (LxHxW): 63x3x3.58 Box dimensions, in. (LxHxW): 64x6x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification P-730-GB360-Installation.pdf P-730-GB360-Specification.pdf"
       },
-      "title": "Pink Grab Bar, 60-Inch 3-Post Wall Mount, Iron Pipe, Pipeline Collection, Allied Brass",
-      "description": "Create a safer, more accessible bathroom with an extended-length grab bar that provides secure support where you need it most in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 19 designer finishes to match the rest of your bathroom\n- Industrial, pipe-style look that complements loft bathroom fixtures and industrial bathroom hardware\n- Enduring finish protection with a highly durable powder coat finish for corrosion-free, rust-free performance\n- Easy to coordinate with matching Pipeline collection pipe-style bath accessories and pipe-style accessories\n\nSpecs & Installation:\n- Collection: Pipeline\n- Mounting: Wall mount\n- Material: Iron Pipe\n- Dimensions (L x H x W): 63 in x 3 in x 3.58 in (projection 3.58 in)\n- Weight capacity: 250 lb\n- Product weight: 5 lb\n- Assembly required: No\n- Warranty: Limited lifetime warranty"
+      "title": "Pink Grab Bar, 63-Inch 3-Post Wall Mount Iron Pipe, ADA Compliant, Allied Brass",
+      "description": "Grab bar, 63-inch extended length with 3-post wall mount, iron pipe construction, ADA compliant support bar for safer bathroom accessibility in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This bathroom grab bar uses a third center bracket for added stability and a powder coat finish for corrosion-free, rust-free performance. Industrial, pipe-style design matches loft bathroom fixtures and industrial bathroom hardware, ideal for seniors, caregivers, and accessible bath layouts. Dimensions: 63 in L x 3 in H x 3.58 in projection. Rated 250 lb weight capacity. Part of the Pipeline collection for matching pipeline, pipe-style bath accessories and pipe-style accessories. Limited lifetime warranty. Allied Brass Pipeline."
     }
   ]
 }

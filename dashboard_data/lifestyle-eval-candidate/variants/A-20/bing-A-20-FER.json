@@ -1,23 +1,44 @@
 {
   "sku": "shopify_US_4542922064004_43093937127650",
-  "title": "3 Inch Cabinet Pull Solid Brass | Fire Engine Red | Cabinet Hardware Collection | Allied Brass",
-  "description": "Bring a clean, coordinated look to bathroom cabinets and drawers while improving everyday grip in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This 3 inch cabinet pull (also called a cabinet handle or drawer pull) is part of a cabinet hardware collection suited to transitional bathroom hardware and versatile bath accessories.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Durable build: solid brass construction\n- Ready to install: mounting hardware included\n- Finish flexibility: offered in multiple designer finish options\n\nSpecs & Installation:\n- Product dimensions (L x H x W): 3.9 x 1.6 x 3 in.\n- Box dimensions (L x H x W): 3 x 3 x 3 in.\n- Shipping weight: 1 lb.\n- Assembly: assembled in the USA\n- Warranty: limited lifetime warranty",
+  "title": "Fire Engine Red Cabinet Pull, 3-Inch Solid Brass Cabinet-Mount Traditional Handle, 3.9 In Length, Allied Brass",
+  "description": "Cabinet pull (cabinet handle) for cabinets and drawers, sized at 3 inches (3-inch, 3 in) with solid brass construction and cabinet-mount installation in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Use as a cabinet pull or drawer pull to update kitchen or bathroom cabinetry in a traditional style. Overall dimensions: 3.9 inches length (3.9 in), 1.6 inches height (1.6 in), 0.9 inches width (0.9 in); 1 inch projection (1 in). Weight capacity: 2 lb. Includes the cabinet pull and all installation hardware; assembly required: false. Offered in multiple designer finish options for corrosion-free and rust-free performance. Limited lifetime warranty. Complements traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures. Allied Brass.",
   "_meta": {
     "master_sku": "A-20",
     "option_sku": "A-20-FER",
     "finish": "Fire Engine Red",
     "finish_keywords": [
+      "fire engine red cabinet pull",
+      "fire engine red bathroom cabinet pull",
       "fire engine red bathroom hardware",
       "fire engine red bath accessories",
-      "fire engine red cabinet pull",
       "fire engine red statement finish",
       "fire engine red designer hardware",
       "fire engine red colored hardware",
       "fire engine red color bathroom"
     ],
-    "generated_at": "2026-01-28T12:05:20.528549",
-    "quality_score": 85.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:09:07.456822",
+    "quality_score": 86.67,
+    "approval_status": "approved",
+    "heuristic_score": 86.67,
+    "selection_score_adjusted": 86.67,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 86.67,
+      "shopify": 86.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "3 Inch Cabinet Pull",

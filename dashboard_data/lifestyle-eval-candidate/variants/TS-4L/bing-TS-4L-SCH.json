@@ -1,19 +1,39 @@
 {
   "sku": "shopify_US_4544991723652_32128218169476",
-  "title": "Freestanding 4 Pivoting Swing Arm Towel Valet 49-In Solid Brass | Satin Chrome | Assorted Free Standing Accessories | Allied Brass",
-  "description": "Need towel storage without wall drilling? This freestanding 4 pivoting swing arm towel valet is a floor towel stand (also called a towel rack or towel holder) that creates dedicated space for bath towels in the bathroom in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor with a large weighted base designed to help prevent tipping\n- Built for enduring bathroom use with solid brass construction engineered to resist rust and corrosion\n- Coordinate a cohesive look with the Assorted Free Standing Accessories collection and multiple designer finish options\n\nSpecs & Details:\n- Type: freestanding floor towel valet / towel stand / towel rack / towel holder\n- Dimensions (L x H x W): 12 in. x 49 in. x 10.5 in.\n- Shipping weight: 17 lbs\n- Assembly: some assembly required\n- Warranty: limited lifetime warranty\n- Made in the USA",
+  "title": "Satin Chrome Freestanding 4 Pivoting Swing Arm Towel Valet, 49-Inch Solid Brass Towel Stand, Traditional, Allied Brass",
+  "description": "Freestanding 4 pivoting swing arm towel valet for bathroom towel storage and towel drying in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Floor standing towel stand / freestanding towel rack / towel holder with four pivoting swing arms to maximize space and separate towels. Dimensions: 49 inches high (49-inch, 49in) x 12 inches long (12-inch, 12in) x 10.5 inches wide (10.5-inch, 10.5in). Crafted from solid brass (brass construction) for corrosion-free and rust-free performance with a lifetime designer finish. Heavy solid brass base helps prevent tipping; felt pad helps prevent scratching on any surface. Traditional style for traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures. Includes towel stand. Some assembly required. Limited lifetime warranty. Allied Brass.",
   "_meta": {
     "master_sku": "TS-4L",
     "option_sku": "TS-4L-SCH",
     "finish": "Satin Chrome",
     "finish_keywords": [
+      "satin chrome assorted free standing accessories",
       "satin chrome bathroom hardware",
-      "satin chrome bath accessories",
-      "satin chrome assorted freestanding accessories"
+      "satin chrome bath accessories"
     ],
-    "generated_at": "2026-01-28T02:55:40.092890",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:57:46.390113",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 83.83,
+    "selection_score_adjusted": 83.83,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 86.67,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 2,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Freestanding 4 Pivoting Swing Arm Towel Valet",

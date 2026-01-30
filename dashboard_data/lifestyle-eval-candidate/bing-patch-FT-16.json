@@ -1,62 +1,83 @@
 {
   "sku": "shopify_US_4545450475652_32130384232580",
-  "title": "Antique Brass Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-  "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+  "title": "Antique Brass Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+  "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
   "_meta": {
     "master_sku": "FT-16",
-    "generated_at": "2026-01-29T11:52:50.706968",
-    "quality_score": 90.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:50:04.366033",
+    "quality_score": 91.67,
+    "approval_status": "approved",
+    "heuristic_score": 90.5,
+    "selection_score_adjusted": 90.5,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 90.0,
+      "shopify": 93.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 89,
+      "description_length": 773,
+      "trust_signals_found": 2,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 90.0,
+      "heuristic_composite": 90.5
+    }
   },
   "_previous": {
     "title": "Foxtrot Towel Ring",
     "description": "The contemporary motif from this elegant collection has timeless appeal. Towel ring is constructed of solid brass and is an ideal six inches in diameter. It is ideal for displaying your favorite decorative towels or for providing the space for daily use. Made of the Finest Solid Brass Materials Concealed screw mounting hardware installs easily Available in a variety of designer finishes Assembled in the U.S.A. Specification & Documentation Product dimensions, in. (LxHxW): 6x6x6 Box dimensions, in. (LxHxW): 10x6x4 Shipping weight, lbs: 2 Installation Instruction Technical Specification FT16-Installation.PDF FT16-Specification.PDF"
   },
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/FT-16_var1_20260129_115141.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/FT-16-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Hand towel storage near sink for hand drying\nThe scene demonstrates how a homeowner, guest bathroom host uses this product daily.\n\nPROBLEM SOLVED: Need convenient hand towel placement for frequent handwashing\n\nITEMS TO SHOW (1-1 items):\n1. Single hand towel (16x30 inches) pulled through ring\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near sink\n- sink or vanity partially visible\n- hand towel in neutral or accent color\n- towel passed THROUGH ring once (not wrapped around)\n- ring at comfortable reach height (42-48 inches)\n\nVALUE DEMONSTRATION: Compact ring design saves space while keeping hand towel accessible\nThe image must clearly show: Single hand towel threaded through ring, hanging naturally\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: hand towel pulled THROUGH the ring and hanging naturally\n\u274c FORBIDDEN: towel wrapped AROUND the ring multiple times, towel folded on the ring\n\nCRITICAL CONSTRAINT: Towel passes THROUGH ring once, hangs naturally.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_115141",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/FT-16_var2_20260129_115156.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/FT-16-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Hand towel storage near sink for hand drying\nThe scene demonstrates how a homeowner, guest bathroom host uses this product daily.\n\nPROBLEM SOLVED: Need convenient hand towel placement for frequent handwashing\n\nITEMS TO SHOW (1-1 items):\n1. Single hand towel (16x30 inches) pulled through ring\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near sink\n- sink or vanity partially visible\n- hand towel in neutral or accent color\n- towel passed THROUGH ring once (not wrapped around)\n- ring at comfortable reach height (42-48 inches)\n\nVALUE DEMONSTRATION: Compact ring design saves space while keeping hand towel accessible\nThe image must clearly show: Single hand towel threaded through ring, hanging naturally\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: hand towel pulled THROUGH the ring and hanging naturally\n\u274c FORBIDDEN: towel wrapped AROUND the ring multiple times, towel folded on the ring\n\nCRITICAL CONSTRAINT: Towel passes THROUGH ring once, hangs naturally.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_115156",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/FT-16_var3_20260129_115211.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/FT-16-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Hand towel storage near sink for hand drying\nThe scene demonstrates how a homeowner, guest bathroom host uses this product daily.\n\nPROBLEM SOLVED: Need convenient hand towel placement for frequent handwashing\n\nITEMS TO SHOW (1-1 items):\n1. Single hand towel (16x30 inches) pulled through ring\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near sink\n- sink or vanity partially visible\n- hand towel in neutral or accent color\n- towel passed THROUGH ring once (not wrapped around)\n- ring at comfortable reach height (42-48 inches)\n\nVALUE DEMONSTRATION: Compact ring design saves space while keeping hand towel accessible\nThe image must clearly show: Single hand towel threaded through ring, hanging naturally\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: hand towel pulled THROUGH the ring and hanging naturally\n\u274c FORBIDDEN: towel wrapped AROUND the ring multiple times, towel folded on the ring\n\nCRITICAL CONSTRAINT: Towel passes THROUGH ring once, hangs naturally.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_115211",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 2,
-  "lifestyle_image_link": "data/lifestyle_images/FT-16_var2_20260129_115156.png",
   "variants": [
     {
       "sku": "shopify_US_4545450475652_32130384232580",
-      "title": "Antique Brass Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Antique Brass Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass towel ring",
+          "antique brass bathroom towel ring",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass towel rings"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707045",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366132",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -65,20 +86,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384265348",
-      "title": "Antique Bronze Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Antique Bronze Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Antique Bronze, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze towel ring",
+          "antique bronze bathroom towel ring",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze towel rings"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707117",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366196",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -87,20 +129,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384298116",
-      "title": "Brushed Bronze Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Brushed Bronze Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze towel ring",
+          "brushed bronze bathroom towel ring",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze towel rings"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707186",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366257",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -109,20 +172,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384330884",
-      "title": "Matte Black Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Coordinates with other Foxtrot pieces in Matte Black for a striking, cohesive modern look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Matte Black Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black towel ring",
+          "matte black bathroom towel ring",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black towel rings"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707257",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366318",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -131,20 +215,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384363652",
-      "title": "Antique Copper Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Antique Copper Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper towel ring",
+          "antique copper bathroom towel ring",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper towel rings"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707325",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366379",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -153,20 +258,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384396420",
-      "title": "Matte Gray Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Pairs with matching Foxtrot hardware for refined industrial appeal\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Matte Gray Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Matte Gray, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray towel ring",
+          "matte gray bathroom towel ring",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray towel rings"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707394",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366441",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -175,20 +301,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384429188",
-      "title": "Oil Rubbed Bronze Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Coordinates with other Foxtrot pieces for a distinguished, heritage-inspired look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Oil Rubbed Bronze Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze towel ring",
+          "oil rubbed bronze bathroom towel ring",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze towel rings"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707465",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366504",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -197,20 +344,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384461956",
-      "title": "Polished Brass Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Polished Brass Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass towel ring",
+          "polished brass bathroom towel ring",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass towel rings"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707534",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366563",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -219,20 +387,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384494724",
-      "title": "Polished Chrome Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Pairs beautifully with matching Foxtrot accessories in the same finish for a cohesive bathroom design\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Polished Chrome Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome towel ring",
+          "polished chrome bathroom towel ring",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome towel rings"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707603",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366623",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -241,20 +430,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384527492",
-      "title": "Antique Pewter Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Antique Pewter Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Antique Pewter, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter towel ring",
+          "antique pewter bathroom towel ring",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter towel rings"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707672",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366684",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -263,20 +473,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384560260",
-      "title": "Polished Nickel Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs seamlessly with matching Foxtrot hardware for refined continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Polished Nickel Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Polished Nickel, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel towel ring",
+          "polished nickel bathroom towel ring",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel towel rings"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707741",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366744",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -285,20 +516,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384593028",
-      "title": "Satin Brass Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Coordinates beautifully with other Foxtrot hardware in the same finish\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Satin Brass Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass towel ring",
+          "satin brass bathroom towel ring",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass towel rings"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707809",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366803",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -307,20 +559,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384625796",
-      "title": "Satin Chrome Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Coordinates with other Foxtrot accessories for a cohesive contemporary look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Satin Chrome Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome towel ring",
+          "satin chrome bathroom towel ring",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome towel rings"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707878",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366862",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -329,20 +602,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384658564",
-      "title": "Satin Nickel Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Pairs with matching Foxtrot pieces for a unified, low-maintenance design\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Satin Nickel Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel towel ring",
+          "satin nickel bathroom towel ring",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel towel rings"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.707946",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366923",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -351,24 +645,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384691332",
-      "title": "Unlacquered Brass Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Unlacquered Brass Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass towel ring",
+          "unlacquered brass bathroom towel ring",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass towel rings",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T11:52:50.708014",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.366985",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -377,20 +692,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384724100",
-      "title": "Venetian Bronze Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Venetian Bronze Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Venetian Bronze, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze towel ring",
+          "venetian bronze bathroom towel ring",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze towel rings"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.708082",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367046",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -399,20 +735,41 @@
     },
     {
       "sku": "shopify_US_4545450475652_32130384756868",
-      "title": "Matte White Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Coordinates with other Foxtrot accessories for a crisp, unified aesthetic\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Matte White Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white towel ring",
+          "matte white bathroom towel ring",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white towel rings"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T11:52:50.708150",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367105",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -421,22 +778,43 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698183394",
-      "title": "Spanish Gold Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Spanish Gold Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Spanish Gold, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold towel ring",
+          "spanish gold bathroom towel ring",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold towel rings",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T11:52:50.708219",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367165",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -445,24 +823,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698216162",
-      "title": "Autumn Sparkle Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Autumn Sparkle Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Autumn Sparkle, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle towel ring",
+          "autumn sparkle bathroom towel ring",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle towel rings",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708286",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367223",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -471,24 +870,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698248930",
-      "title": "Glokzin Teal Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Glokzin Teal Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal towel ring",
+          "glokzin teal bathroom towel ring",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal towel rings",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708354",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367282",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -497,24 +917,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698281698",
-      "title": "Shaded Beige Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Shaded Beige Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Shaded Beige, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige towel ring",
+          "shaded beige bathroom towel ring",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige towel rings",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708421",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367340",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -523,24 +964,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698314466",
-      "title": "Golden Yellow Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Golden Yellow Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Golden Yellow, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow towel ring",
+          "golden yellow bathroom towel ring",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow towel rings",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708490",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367423",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -549,22 +1011,43 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698347234",
-      "title": "Flat Troll Blue Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Flat Troll Blue Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue towel ring",
+          "flat troll blue bathroom towel ring",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue towel rings",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T11:52:50.708558",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367484",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -573,24 +1056,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698380002",
-      "title": "Sea Foam Green Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Sea Foam Green Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green towel ring",
+          "sea foam green bathroom towel ring",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green towel rings",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708626",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367556",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -599,24 +1103,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698412770",
-      "title": "Fire Engine Red Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Fire Engine Red Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Finished in Fire Engine Red, towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red towel ring",
+          "fire engine red bathroom towel ring",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red towel rings",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708694",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367616",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -625,24 +1150,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698445538",
-      "title": "Lavender Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Lavender Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender towel ring",
+          "lavender bathroom towel ring",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender towel rings",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708762",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367675",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -651,24 +1197,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698478306",
-      "title": "Mediterranean Blue Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Mediterranean Blue Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue towel ring",
+          "mediterranean blue bathroom towel ring",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue towel rings",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708831",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367734",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",
@@ -677,24 +1244,45 @@
     },
     {
       "sku": "shopify_US_4545450475652_43093698511074",
-      "title": "Pink Towel Ring 6-Inch, Solid Brass Wall Mount, Concealed Screws, Foxtrot Collection, Allied Brass",
-      "description": "Stop draping hand towels on the counter\u2014this wall-mounted towel ring keeps a towel ready right where you need it at the sink in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This bathroom towel ring (also called a towel holder or towel rack) features a round 6-inch diameter ring and concealed screw mounting for a clean, finished look. Built with solid brass for enduring everyday use, it coordinates with matching Foxtrot collection pieces for a cohesive set of designer bathroom hardware and statement bath accessories.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Choose long-lasting strength with solid brass and brass construction\n- Style-forward coordination with the Foxtrot collection and matching Foxtrot accessories\n\nSpecs & Installation:\n- Product: Bathroom towel ring / towel holder / towel rack\n- Shape: Round\n- Diameter: 6 inches\n- Overall size (L x H x W): 6 x 6 x 6 inches\n- Projection from wall: 2 inches\n- Mounting type: Wall mount (concealed screw mounting)\n- Weight capacity: 10 lb\n- Included items: Towel ring and all installation hardware\n- Assembly required: No\n- Product weight: 1.6 lb\n- Warranty: Limited Lifetime Warranty\n- Assembled in the U.S.A.",
+      "title": "Pink Towel Ring, 6-Inch Diameter, Wall-Mounted Solid Brass Bathroom Towel Holder, Allied Brass",
+      "description": "Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels \u2014 available in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Solid brass construction with concealed screw mounting hardware for a clean look; wall mount installation saves space. Use as a towel ring, towel holder, or bathroom towel hanger near the sink or vanity. Overall product dimensions: 6 x 6 x 6 inches (LxHxW) with 2-inch projection; supports up to 10 lb weight capacity. Includes towel ring and all installation hardware; assembly required: false. Contemporary style from the Foxtrot collection\u2014ideal for matching Foxtrot, textured bathroom hardware, designer bath accessories, designer bathroom hardware, and statement bath accessories. Limited lifetime warranty. Allied Brass Foxtrot collection.",
       "_meta": {
         "master_sku": "FT-16",
         "option_sku": "FT-16-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink towel ring",
+          "pink bathroom towel ring",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink towel rings",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T11:52:50.708900",
-        "quality_score": 90.0,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:50:04.367793",
+        "quality_score": 91.67,
+        "approval_status": "approved",
+        "heuristic_score": 90.5,
+        "selection_score_adjusted": 90.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 90.0,
+          "shopify": 93.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Foxtrot Towel Ring",

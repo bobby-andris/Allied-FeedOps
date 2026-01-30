@@ -224,7 +224,19 @@ def optimize(
         data_source = getattr(result, "data_source", None)
         if data_source:
             console.print(f"Data source: {data_source}")
-        console.print(f"[bold]Quality Score: {score.composite}%[/bold]")
+        if result.heuristic_score is not None:
+            console.print(
+                f"[bold]Quality Score: {result.heuristic_score:.1f}% (heuristic)[/bold]"
+                f"  |  LLM Self-Score: {score.composite}%"
+            )
+        else:
+            console.print(f"[bold]Quality Score: {score.composite}% (LLM self-score)[/bold]")
+        if result.heuristic_score_breakdown:
+            parts = [
+                f"{platform}: {val:.1f}%"
+                for platform, val in result.heuristic_score_breakdown.items()
+            ]
+            console.print(f"  Breakdown: {' | '.join(parts)}")
         console.print(f"Status: {score.approval_status.upper()}")
         safe_sku = parent_sku.replace("/", "-")
         console.print(f"\nReport saved to: {output_dir}/sku-{safe_sku}-*.md")

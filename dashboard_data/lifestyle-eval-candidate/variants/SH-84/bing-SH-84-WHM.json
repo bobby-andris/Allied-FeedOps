@@ -1,19 +1,39 @@
 {
   "sku": "shopify_US_4544976748676_32128185565316",
-  "title": "Freestanding 4 Pivoting Swing Arm Towel Stand 49-Inch Solid Brass | Matte White | Assorted Free Standing Accessories | Allied Brass",
-  "description": "Need more towel space without putting holes in tile? This freestanding towel stand (also called a towel rack or towel holder) adds flexible, floor-standing towel storage for the bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. Four pivoting swing arms rotate so you can separate bath towels and keep them easy to grab.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Place it anywhere: freestanding, floor-standing design with no wall mount / wall-mounted installation required\n- Stable footprint: large, weighted base is designed to help prevent tipping\n- Built to last: solid brass construction resists rust and corrosion\n- Coordinate your bath hardware: designed to match the Assorted Free Standing Accessories collection and other transitional bathroom hardware\n\nSpecs & Details:\n- Product type: Bath towel stand / towel rail / towel rack / towel holder (freestanding)\n- Number of arms: 4 swing arms, pivoting\n- Material: Solid brass (brass construction)\n- Dimensions (L x H x W): 12 in. x 49 in. x 9.25 in.\n- Assembly: Some assembly required\nMultiple designer finish options available\n- Warranty: Limited lifetime warranty\n- Assembled in the USA",
+  "title": "Matte White Freestanding 4 Pivoting Swing Arm Towel Stand, 49-Inch Solid Brass Bathroom Stand, Allied Brass",
+  "description": "Finished in Matte White, freestanding 4 pivoting swing arm towel stand for bathroom towel storage and drying, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This freestanding towel stand / towel rack / towel holder uses four pivoting swing arms to separate towels and maximize space with no wall mounting. Size: 49 inches tall (49-inch, 49 in) with a 12 inches x 9.25 inches base footprint (12-inch x 9.25-inch; 12 in x 9.25 in). Solid brass construction with a heavy weighted base to help prevent tipping, plus a felt pad to prevent scratching on surfaces. Modern, clean-lined transitional look as part of the Soho collection, ideal for matching Soho and other versatile bath accessories. Weight capacity: 20 lb. Some assembly required. Includes towel stand. Limited lifetime warranty. Allied Brass, Soho collection.",
   "_meta": {
     "master_sku": "SH-84",
     "option_sku": "SH-84-WHM",
     "finish": "Matte White",
     "finish_keywords": [
+      "matte white assorted free standing accessories",
       "matte white bathroom hardware",
-      "matte white bath accessories",
-      "matte white assorted freestanding accessories"
+      "matte white bath accessories"
     ],
-    "generated_at": "2026-01-28T02:32:11.290226",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:47:29.901408",
+    "quality_score": 93.33,
+    "approval_status": "approved",
+    "heuristic_score": 81.5,
+    "selection_score_adjusted": 81.5,
+    "heuristic_score_breakdown": {
+      "google": 80.0,
+      "bing": 86.67,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 2,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Freestanding 4 Pivoting Swing Arm Towel Stand",

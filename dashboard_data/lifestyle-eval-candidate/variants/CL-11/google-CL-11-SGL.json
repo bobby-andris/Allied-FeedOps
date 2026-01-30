@@ -1,16 +1,6 @@
 {
   "offerId": "shopify_US_4543084265604_43087513059554",
-  "title": "Guest Towel Stand 16.3-Inch Solid Brass | Spanish Gold | Carolina Collection | Allied Brass",
-  "short_title": "Guest Towel Stand 16.3-Inch, Spanish Gold",
-  "description": "Keep hand towels right where you need them\u2014next to the sink\u2014without drilling into walls in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. The Carolina Collection guest towel stand adds convenient countertop towel storage with a classic, traditional look.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Protect countertop surfaces: Felt pad on the bottom helps prevent scratching\n- Coordinate a matched bath: Designed to pair with matching Carolina and other traditional bathroom hardware\n- Built for lasting use: Crafted from solid brass construction\n\nSpecs:\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
-  "structured_title": {
-    "digital_source_type": "trained_algorithmic_media",
-    "content": "Guest Towel Stand 16.3-Inch Solid Brass | Spanish Gold | Carolina Collection | Allied Brass"
-  },
-  "structured_description": {
-    "digital_source_type": "trained_algorithmic_media",
-    "content": "Keep hand towels right where you need them\u2014next to the sink\u2014without drilling into walls in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. The Carolina Collection guest towel stand adds convenient countertop towel storage with a classic, traditional look.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Protect countertop surfaces: Felt pad on the bottom helps prevent scratching\n- Coordinate a matched bath: Designed to pair with matching Carolina and other traditional bathroom hardware\n- Built for lasting use: Crafted from solid brass construction\n\nSpecs:\n- Overall dimensions (L x H x W): 16.3 x 14 x 5.5 in.\n- Box dimensions (L x H x W): 18 x 8 x 8 in.\n- Shipping weight: 7 lbs.\nMultiple designer finish options available\n- Warranty: Limited Lifetime Warranty"
-  },
+  "short_title": "Spanish Gold Guest Towel Holder, 11-Inch",
   "channel": "online",
   "contentLanguage": "en",
   "targetCountry": "US",
@@ -19,18 +9,45 @@
     "option_sku": "CL-11-SGL",
     "finish": "Spanish Gold",
     "finish_keywords": [
+      "spanish gold guest towel holder",
+      "spanish gold bathroom guest towel holder",
       "spanish gold bathroom hardware",
       "spanish gold bath accessories",
-      "spanish gold towel stand",
       "spanish gold statement finish",
       "spanish gold designer hardware"
     ],
-    "generated_at": "2026-01-28T02:43:22.006440",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T14:53:12.882580",
+    "quality_score": 91.67,
+    "approval_status": "approved",
+    "heuristic_score": 80.83,
+    "selection_score_adjusted": 80.38,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 73.33,
+      "shopify": 76.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.45,
+    "soft_gate_warnings": [
+      "Bing: Title missing primary dimension in first 70 chars",
+      "Shopify: Title missing primary dimension in first 70 chars"
+    ],
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 1,
+      "shopify": 1
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Carolina Collection Guest Towel Stand",
     "description": "This elegantly crafted vanity top guest towel stand will add style and convenience to your bathroom d\u00e9cor. Guest towel stand has two arms to keep your towels within reach of the sink where they are needed. Guest towel stand was designed ideally for hand towels and washcloths. Heavy base will help prevent stand from tipping and felt pad on bottom will protect countertop surfaces. Crafted from the finest solid brass materials Felt pad will prevent scratching on any surface Heavy base will help prevent tipping Traditional design with classic design elements Available in a wide variety of lifetime designer finishes Limited Lifetime Warranty Specification & Documentation Product dimensions, in. (LxHxW): 16.3x14x5.5 Box dimensions, in. (LxHxW): 18x8x8 Shipping weight, lbs: 7"
-  }
+  },
+  "title": "Spanish Gold Guest Towel Holder Stand, 11-Inch Countertop Solid Brass, Carolina Collection, Allied Brass",
+  "description": "Finished in Spanish Gold, guest towel holder stand, 11-inch size, solid brass construction for bathroom vanity countertops; holds hand towels and washcloths with a two-arm design, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Countertop/freestanding vertical stand with a heavy base to resist tipping and a felt pad to protect countertop surfaces from scratches. Traditional/classic styling for traditional bathroom hardware and classic bath accessories. No assembly required. Product dimensions: 16.3 in L x 14 in H x 5.5 in W. Weight capacity: 20 lb. . Limited Lifetime Warranty. Allied Brass Carolina collection."
 }

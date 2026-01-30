@@ -6,44 +6,44 @@
   "targetCountry": "US",
   "_meta": {
     "master_sku": "CL-29",
-    "generated_at": "2026-01-29T11:49:41.921162",
+    "generated_at": "2026-01-30T14:49:09.650804",
     "quality_score": 90.0,
-    "approval_status": "approved"
+    "approval_status": "approved",
+    "heuristic_score": 84.33,
+    "selection_score_adjusted": 84.33,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 90.0,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 105,
+      "description_length": 578,
+      "trust_signals_found": 3,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 83.33,
+      "heuristic_composite": 84.33
+    }
   },
   "_previous": {
     "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
     "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
   },
-  "title": "Antique Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-  "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Coordinates with other Carolina accessories for a curated, collected look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand",
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-29_var1_20260129_114833.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-29-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Toilet paper storage and dispensing in bathroom\nThe scene demonstrates how a homeowner, bathroom user uses this product daily.\n\nPROBLEM SOLVED: Need convenient toilet paper access at proper height\n\nITEMS TO SHOW (1-1 items):\n1. White premium toilet paper roll installed on holder\n\nCONTEXT REQUIREMENTS:\n- bathroom wall next to toilet\n- toilet edge partially visible for context\n- holder at standard height (26 inches from floor)\n- clean minimal wall area\n- paper roll showing proper installation\n\nVALUE DEMONSTRATION: Proper mounting height and reach for comfortable use\nThe image must clearly show: Single toilet paper roll ready for use\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_114833",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-29_var2_20260129_114849.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-29-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Toilet paper storage and dispensing in bathroom\nThe scene demonstrates how a homeowner, bathroom user uses this product daily.\n\nPROBLEM SOLVED: Need convenient toilet paper access at proper height\n\nITEMS TO SHOW (1-1 items):\n1. White premium toilet paper roll installed on holder\n\nCONTEXT REQUIREMENTS:\n- bathroom wall next to toilet\n- toilet edge partially visible for context\n- holder at standard height (26 inches from floor)\n- clean minimal wall area\n- paper roll showing proper installation\n\nVALUE DEMONSTRATION: Proper mounting height and reach for comfortable use\nThe image must clearly show: Single toilet paper roll ready for use\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_114849",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-29_var3_20260129_114909.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-29-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Toilet paper storage and dispensing in bathroom\nThe scene demonstrates how a homeowner, bathroom user uses this product daily.\n\nPROBLEM SOLVED: Need convenient toilet paper access at proper height\n\nITEMS TO SHOW (1-1 items):\n1. White premium toilet paper roll installed on holder\n\nCONTEXT REQUIREMENTS:\n- bathroom wall next to toilet\n- toilet edge partially visible for context\n- holder at standard height (26 inches from floor)\n- clean minimal wall area\n- paper roll showing proper installation\n\nVALUE DEMONSTRATION: Proper mounting height and reach for comfortable use\nThe image must clearly show: Single toilet paper roll ready for use\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_114909",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 3,
-  "lifestyle_image_link": "data/lifestyle_images/CL-29_var3_20260129_114909.png",
+  "title": "Antique Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+  "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection.",
   "variants": [
     {
       "offerId": "shopify_US_4543014273156_32119560044676",
@@ -56,20 +56,41 @@
         "option_sku": "CL-29-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass toilet paper stand",
+          "antique brass bathroom toilet paper stand",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass freestanding toilet tissue stands"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921292",
+        "generated_at": "2026-01-30T14:49:09.650952",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Antique Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Coordinates with other Carolina accessories for a curated, collected look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Antique Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119560208516",
@@ -82,20 +103,41 @@
         "option_sku": "CL-29-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze toilet paper stand",
+          "antique bronze bathroom toilet paper stand",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze freestanding toilet tissue stands"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921364",
+        "generated_at": "2026-01-30T14:49:09.651024",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Antique Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Pairs with matching Carolina pieces for timeless continuity\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Antique Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Antique Bronze, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119560372356",
@@ -108,20 +150,41 @@
         "option_sku": "CL-29-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze toilet paper stand",
+          "brushed bronze bathroom toilet paper stand",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze freestanding toilet tissue stands"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921427",
+        "generated_at": "2026-01-30T14:49:09.651086",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Brushed Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Pairs with matching Carolina accessories for a warm, cohesive aesthetic\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Brushed Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119560503428",
@@ -134,20 +197,41 @@
         "option_sku": "CL-29-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black toilet paper stand",
+          "matte black bathroom toilet paper stand",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black freestanding toilet tissue stands"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921487",
+        "generated_at": "2026-01-30T14:49:09.651151",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Matte Black Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Matte Black Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119560667268",
@@ -160,20 +244,41 @@
         "option_sku": "CL-29-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper toilet paper stand",
+          "antique copper bathroom toilet paper stand",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper freestanding toilet tissue stands"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921547",
+        "generated_at": "2026-01-30T14:49:09.651211",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Antique Copper Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Coordinates with other Carolina hardware for artisan-inspired warmth\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Antique Copper Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Antique Copper, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119560765572",
@@ -186,20 +291,41 @@
         "option_sku": "CL-29-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray toilet paper stand",
+          "matte gray bathroom toilet paper stand",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray freestanding toilet tissue stands"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921606",
+        "generated_at": "2026-01-30T14:49:09.651272",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Matte Gray Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Change rolls quickly\u2014European-style hook makes swaps easy\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Matte Gray Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119560896644",
@@ -212,20 +338,41 @@
         "option_sku": "CL-29-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze toilet paper stand",
+          "oil rubbed bronze bathroom toilet paper stand",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze freestanding toilet tissue stands"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921666",
+        "generated_at": "2026-01-30T14:49:09.651330",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Oil Rubbed Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Coordinates with other Carolina pieces for a distinguished, heritage-inspired look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Oil Rubbed Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561093252",
@@ -238,20 +385,41 @@
         "option_sku": "CL-29-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass toilet paper stand",
+          "polished brass bathroom toilet paper stand",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass freestanding toilet tissue stands"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921726",
+        "generated_at": "2026-01-30T14:49:09.651388",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Polished Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Coordinates with other Carolina pieces for a timeless, unified look\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Polished Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561224324",
@@ -264,20 +432,41 @@
         "option_sku": "CL-29-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome toilet paper stand",
+          "polished chrome bathroom toilet paper stand",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome freestanding toilet tissue stands"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921785",
+        "generated_at": "2026-01-30T14:49:09.651445",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Polished Chrome Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Polished Chrome Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Polished Chrome, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561388164",
@@ -290,20 +479,41 @@
         "option_sku": "CL-29-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter toilet paper stand",
+          "antique pewter bathroom toilet paper stand",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter freestanding toilet tissue stands"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921850",
+        "generated_at": "2026-01-30T14:49:09.651502",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Antique Pewter Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Pairs with matching Carolina accessories for understated elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Antique Pewter Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Antique Pewter, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561453700",
@@ -316,20 +526,41 @@
         "option_sku": "CL-29-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel toilet paper stand",
+          "polished nickel bathroom toilet paper stand",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel freestanding toilet tissue stands"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921909",
+        "generated_at": "2026-01-30T14:49:09.651559",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Polished Nickel Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Polished Nickel Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561650308",
@@ -342,20 +573,41 @@
         "option_sku": "CL-29-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass toilet paper stand",
+          "satin brass bathroom toilet paper stand",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass freestanding toilet tissue stands"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.921967",
+        "generated_at": "2026-01-30T14:49:09.651616",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Satin Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Satin Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561814148",
@@ -368,20 +620,41 @@
         "option_sku": "CL-29-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome toilet paper stand",
+          "satin chrome bathroom toilet paper stand",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome freestanding toilet tissue stands"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.922025",
+        "generated_at": "2026-01-30T14:49:09.651673",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Satin Chrome Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Satin Chrome Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119561977988",
@@ -394,20 +667,41 @@
         "option_sku": "CL-29-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel toilet paper stand",
+          "satin nickel bathroom toilet paper stand",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel freestanding toilet tissue stands"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.922083",
+        "generated_at": "2026-01-30T14:49:09.651730",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Satin Nickel Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Satin Nickel Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119562109060",
@@ -420,24 +714,45 @@
         "option_sku": "CL-29-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass toilet paper stand",
+          "unlacquered brass bathroom toilet paper stand",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass freestanding toilet tissue stands",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T11:49:41.922142",
+        "generated_at": "2026-01-30T14:49:09.651788",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Unlacquered Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Unlacquered Brass Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119562272900",
@@ -450,20 +765,41 @@
         "option_sku": "CL-29-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze toilet paper stand",
+          "venetian bronze bathroom toilet paper stand",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze freestanding toilet tissue stands"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.922201",
+        "generated_at": "2026-01-30T14:49:09.651845",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Venetian Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Pairs elegantly with matching Carolina hardware for refined warmth\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Venetian Bronze Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_32119562436740",
@@ -476,20 +812,41 @@
         "option_sku": "CL-29-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white toilet paper stand",
+          "matte white bathroom toilet paper stand",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white freestanding toilet tissue stands"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T11:49:41.922259",
+        "generated_at": "2026-01-30T14:49:09.651902",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Matte White Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Change rolls quickly\u2014European-style hook makes swaps easy\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Matte White Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Matte White, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904392418",
@@ -502,22 +859,43 @@
         "option_sku": "CL-29-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold toilet paper stand",
+          "spanish gold bathroom toilet paper stand",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold freestanding toilet tissue stands",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T11:49:41.922317",
+        "generated_at": "2026-01-30T14:49:09.651962",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Spanish Gold Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Spanish Gold Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Spanish Gold, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904425186",
@@ -530,24 +908,45 @@
         "option_sku": "CL-29-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle toilet paper stand",
+          "autumn sparkle bathroom toilet paper stand",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle freestanding toilet tissue stands",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922380",
+        "generated_at": "2026-01-30T14:49:09.652019",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Autumn Sparkle Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Autumn Sparkle Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904457954",
@@ -560,24 +959,45 @@
         "option_sku": "CL-29-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal toilet paper stand",
+          "glokzin teal bathroom toilet paper stand",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal freestanding toilet tissue stands",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922438",
+        "generated_at": "2026-01-30T14:49:09.652076",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Glokzin Teal Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Glokzin Teal Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904490722",
@@ -590,24 +1010,45 @@
         "option_sku": "CL-29-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige toilet paper stand",
+          "shaded beige bathroom toilet paper stand",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige freestanding toilet tissue stands",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922495",
+        "generated_at": "2026-01-30T14:49:09.652132",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Shaded Beige Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Shaded Beige Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Shaded Beige, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904523490",
@@ -620,24 +1061,45 @@
         "option_sku": "CL-29-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow toilet paper stand",
+          "golden yellow bathroom toilet paper stand",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow freestanding toilet tissue stands",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922553",
+        "generated_at": "2026-01-30T14:49:09.652188",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Golden Yellow Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Golden Yellow Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904556258",
@@ -650,22 +1112,43 @@
         "option_sku": "CL-29-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue toilet paper stand",
+          "flat troll blue bathroom toilet paper stand",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue freestanding toilet tissue stands",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T11:49:41.922612",
+        "generated_at": "2026-01-30T14:49:09.652245",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Flat Troll Blue Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Flat Troll Blue Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904589026",
@@ -678,24 +1161,45 @@
         "option_sku": "CL-29-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green toilet paper stand",
+          "sea foam green bathroom toilet paper stand",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green freestanding toilet tissue stands",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922669",
+        "generated_at": "2026-01-30T14:49:09.652301",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Sea Foam Green Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Sea Foam Green Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904621794",
@@ -708,24 +1212,45 @@
         "option_sku": "CL-29-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red toilet paper stand",
+          "fire engine red bathroom toilet paper stand",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red freestanding toilet tissue stands",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922727",
+        "generated_at": "2026-01-30T14:49:09.652360",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Fire Engine Red Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Fire Engine Red Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Fire Engine Red, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904654562",
@@ -738,24 +1263,45 @@
         "option_sku": "CL-29-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender toilet paper stand",
+          "lavender bathroom toilet paper stand",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender freestanding toilet tissue stands",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922784",
+        "generated_at": "2026-01-30T14:49:09.652416",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Lavender Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Lavender Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904687330",
@@ -768,24 +1314,45 @@
         "option_sku": "CL-29-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue toilet paper stand",
+          "mediterranean blue bathroom toilet paper stand",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue freestanding toilet tissue stands",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922843",
+        "generated_at": "2026-01-30T14:49:09.652473",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Mediterranean Blue Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Mediterranean Blue Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Finished in Mediterranean Blue, toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     },
     {
       "offerId": "shopify_US_4543014273156_43093904720098",
@@ -798,24 +1365,45 @@
         "option_sku": "CL-29-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink toilet paper stand",
+          "pink bathroom toilet paper stand",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink freestanding toilet tissue stands",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T11:49:41.922901",
+        "generated_at": "2026-01-30T14:49:09.652530",
         "quality_score": 90.0,
-        "approval_status": "approved"
+        "approval_status": "approved",
+        "heuristic_score": 84.33,
+        "selection_score_adjusted": 84.33,
+        "heuristic_score_breakdown": {
+          "google": 83.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Free Standing Euro Style Toilet Paper Holder",
         "description": "Add the finishing touch to your bathroom with this elegant free standing European style toilet tissue stand. When wall space is at a premium this product works great to provide the essential part of your project. European style hook makes changing the roll quick and easy, so there should be no more arguments about changing the roll. Made of the finest solid brass materials with a sturdy base that will keep the stand secure from tipping. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping European style makes changing the roll quick and easy Traditional design with classic design elements Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Specification & Documentation Product dimensions, in. (LxHxW): 8x27x6 Box dimensions, in. (LxHxW): 10x29x8 Shipping weight, lbs: 5.6"
       },
-      "title": "Pink Toilet Paper Stand, 29-Inch Freestanding Solid Brass, Carolina Collection, Allied Brass",
-      "description": "Keep toilet paper within easy reach without drilling into walls\u2014ideal when wall space is limited in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This freestanding toilet paper stand features a European-style hook for fast, simple roll changes and a heavy base designed to help prevent tipping.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stay stable on the floor\u2014heavy base helps prevent tipping\n- Coordinate a classic look\u2014traditional design in the Carolina collection\n- Built for lasting use\u2014crafted from solid brass\n\nSpecs & Installation:\n- Product type: Freestanding toilet tissue stand (toilet paper stand)\n- Material: Brass\n- Dimensions (L x H x W): 8 in. x 27 in. x 6 in.\n- Assembly: Some assembly required\n- Warranty: Limited lifetime warranty\n- Included: Toilet tissue stand"
+      "title": "Pink Toilet Paper Stand, 29-Inch Freestanding Solid Brass Euro Style Holder, Carolina Collection, Allied Brass",
+      "description": "Toilet paper stand, 29-inch freestanding solid brass European style toilet tissue holder for bathroom use when wall space is limited \u2014 available in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Floor-standing design with a heavy base to help prevent tipping and a Euro-style hook for quick roll changes. Traditional/classic styling to coordinate with traditional bathroom hardware and classic bath accessories. Product dimensions: 8 in L x 27 in H x 6 in W. Includes toilet tissue stand; some assembly required. Available in multiple lifetime designer finishes and covered by a limited lifetime warranty. Allied Brass Carolina collection."
     }
   ]
 }

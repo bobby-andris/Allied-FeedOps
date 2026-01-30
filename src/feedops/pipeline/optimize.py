@@ -41,6 +41,8 @@ class OptimizationResult:
     report: str
     patch_previews: dict[str, dict]
     timestamp: str
+    heuristic_score: float | None = None
+    heuristic_score_breakdown: dict[str, float] | None = None
 
 
 def estimate_llm_cost(
@@ -463,4 +465,6 @@ async def optimize_parent_sku(
         report=report,
         patch_previews=patch_previews,
         timestamp=timestamp,
+        heuristic_score=verified_candidate.heuristic_score,
+        heuristic_score_breakdown=verified_candidate.heuristic_score_breakdown,
     )

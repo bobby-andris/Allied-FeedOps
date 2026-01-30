@@ -1,62 +1,83 @@
 {
   "sku": "shopify_US_4542499979396_32116323811460",
-  "title": "Antique Brass Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-  "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Coordinates with other Carolina accessories for a curated, collected look\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+  "title": "Antique Brass Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+  "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
   "_meta": {
     "master_sku": "CL-41-18",
-    "generated_at": "2026-01-29T12:10:32.216463",
-    "quality_score": 88.33,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:55:52.656521",
+    "quality_score": 93.33,
+    "approval_status": "approved",
+    "heuristic_score": 91.5,
+    "selection_score_adjusted": 91.5,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 93.33,
+      "shopify": 96.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 0,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 96,
+      "description_length": 792,
+      "trust_signals_found": 3,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 93.33,
+      "heuristic_composite": 91.5
+    }
   },
   "_previous": {
     "title": "Carolina Collection Towel Bar",
     "description": "The Carolina Collection towel bar from Allied Brass is a blend of elegant form and simplified detail. Made from the finest solid brass materials and finished with a lifetime decorative finish, this traditional towel bar is extremely attractive yet highly functional. The Carolina Collection has bath accessories to meet your design and decorating needs. Crafted from the finest solid brass materials Concealed screw mounting hardware makes installation easy Wall mounted design is an ideal use of space Easy installation. Mounting hardware included Available in a wide variety of lifetime designer finishes Limited Lifetime Warranty Length, in Depth, in Height, in Weight, lbs 18 Inch 20 2 3.5 2.4 24 Inch 26 2 3.5 3.2 30 Inch 30 2 3.5 3.2 36 Inch 36 2 3.5 4"
   },
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-18_var1_20260129_120924.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-41-18-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_120924",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-18_var2_20260129_120944.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-41-18-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_120944",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/CL-41-18_var3_20260129_120958.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/CL-41-18-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nSINGLE TOWEL BAR:\nBACKPLATE (2 total - one at each end):\n- Shape: Perfect SQUARE or CIRCLE (depends on design)\n- Surface: Flat with decorative detail or pattern\n- This is a single flat surface - not layered or stepped\n\nEND CAP:\n- Small projection extending from backplate center\n- Clean geometric shape\n\nBAR:\n- Cylindrical round bar connecting the two end caps\n- Smooth, polished finish\n- Holds 1-2 full-size bath towels\n\nCONFIGURATION: Two mounting points (left and right ends), standard single-bar design\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. Classic elegant styling.\n\nCUSTOMER USE CASE: Bath towel storage for individual or couple\nThe scene demonstrates how a individual or couple using master bathroom uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang bath towel after shower\n\nITEMS TO SHOW (1-2 items):\n1. single large bath towel (27x54 inches)\n\nCONTEXT REQUIREMENTS:\n- bathroom wall outside shower\n- towel in neutral color (white, gray, taupe)\n- towel showing natural drape\n- shower door or enclosure partially visible\n\nVALUE DEMONSTRATION: Classic single-bar design for everyday bath towel storage\nThe image must clearly show: Holds 1-2 full-size bath towels\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bath towel hanging FROM the horizontal bar, showing natural drape and weight\n\u274c FORBIDDEN: towels folded and stacked on top of the bar, towels wrapped around\n\nCRITICAL CONSTRAINT: Towel must HANG from the bar, not folded on top of it.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_120958",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 2,
-  "lifestyle_image_link": "data/lifestyle_images/CL-41-18_var2_20260129_120944.png",
   "variants": [
     {
       "sku": "shopify_US_4542499979396_32116323811460",
-      "title": "Antique Brass Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Coordinates with other Carolina accessories for a curated, collected look\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Antique Brass Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass towel bar",
+          "antique brass bathroom towel bar",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass towel bars"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216539",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656618",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -65,20 +86,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116323844228",
-      "title": "Antique Bronze Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Pairs with matching Carolina pieces for timeless continuity\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Antique Bronze Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Antique Bronze, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze towel bar",
+          "antique bronze bathroom towel bar",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze towel bars"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216606",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656680",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -87,20 +129,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116323876996",
-      "title": "Brushed Bronze Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Pairs with matching Carolina accessories for a warm, cohesive aesthetic\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Brushed Bronze Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze towel bar",
+          "brushed bronze bathroom towel bar",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze towel bars"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216672",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656740",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -109,20 +172,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116323909764",
-      "title": "Matte Black Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Matte Black Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Matte Black, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black towel bar",
+          "matte black bathroom towel bar",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black towel bars"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216736",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656800",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -131,20 +215,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116323942532",
-      "title": "Antique Copper Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Coordinates with other Carolina hardware for artisan-inspired warmth\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Antique Copper Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Antique Copper, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper towel bar",
+          "antique copper bathroom towel bar",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper towel bars"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216799",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656859",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -153,20 +258,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324008068",
-      "title": "Matte Gray Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Cleaner installation appearance: concealed screw mounting hardware\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Matte Gray Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Matte Gray, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which provides a sophisticated neutral that complements concrete, stone, and other modern materials. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray towel bar",
+          "matte gray bathroom towel bar",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray towel bars"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216863",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656922",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -175,20 +301,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324073604",
-      "title": "Oil Rubbed Bronze Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Coordinates with other Carolina pieces for a distinguished, heritage-inspired look\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Oil Rubbed Bronze Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze towel bar",
+          "oil rubbed bronze bathroom towel bar",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze towel bars"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216927",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.656982",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -197,20 +344,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324171908",
-      "title": "Polished Brass Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Coordinates with other Carolina pieces for a timeless, unified look\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Polished Brass Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass towel bar",
+          "polished brass bathroom towel bar",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass towel bars"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.216990",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657042",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -219,20 +387,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324204676",
-      "title": "Polished Chrome Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Polished Chrome Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome towel bar",
+          "polished chrome bathroom towel bar",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome towel bars"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217053",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657102",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -241,20 +430,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324237444",
-      "title": "Antique Pewter Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Pairs with matching Carolina accessories for understated elegance\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Antique Pewter Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter towel bar",
+          "antique pewter bathroom towel bar",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter towel bars"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217117",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657168",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -263,20 +473,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324270212",
-      "title": "Polished Nickel Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Polished Nickel Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Polished Nickel, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel towel bar",
+          "polished nickel bathroom towel bar",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel towel bars"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217181",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657236",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -285,20 +516,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324302980",
-      "title": "Satin Brass Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Satin Brass Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass towel bar",
+          "satin brass bathroom towel bar",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass towel bars"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217245",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657297",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -307,20 +559,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324335748",
-      "title": "Satin Chrome Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Satin Chrome Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Satin Chrome, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome towel bar",
+          "satin chrome bathroom towel bar",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome towel bars"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217308",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657355",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -329,20 +602,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324368516",
-      "title": "Satin Nickel Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Satin Nickel Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Satin Nickel, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel towel bar",
+          "satin nickel bathroom towel bar",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel towel bars"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217371",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657416",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -351,24 +645,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324401284",
-      "title": "Unlacquered Brass Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Unlacquered Brass Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass towel bar",
+          "unlacquered brass bathroom towel bar",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass towel bars",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T12:10:32.217434",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657475",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -377,20 +692,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324434052",
-      "title": "Venetian Bronze Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Pairs elegantly with matching Carolina hardware for refined warmth\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Venetian Bronze Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Venetian Bronze, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze towel bar",
+          "venetian bronze bathroom towel bar",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze towel bars"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217498",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657534",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -399,20 +735,41 @@
     },
     {
       "sku": "shopify_US_4542499979396_32116324466820",
-      "title": "Matte White Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Cleaner installation appearance: concealed screw mounting hardware\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Matte White Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white towel bar",
+          "matte white bathroom towel bar",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white towel bars"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T12:10:32.217561",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657592",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -421,22 +778,43 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958659810",
-      "title": "Spanish Gold Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Spanish Gold Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold towel bar",
+          "spanish gold bathroom towel bar",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold towel bars",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T12:10:32.217623",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657651",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -445,24 +823,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958692578",
-      "title": "Autumn Sparkle Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Autumn Sparkle Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Autumn Sparkle, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle towel bar",
+          "autumn sparkle bathroom towel bar",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle towel bars",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.217686",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657713",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -471,24 +870,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958725346",
-      "title": "Glokzin Teal Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Glokzin Teal Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Glokzin Teal, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal towel bar",
+          "glokzin teal bathroom towel bar",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal towel bars",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.217750",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657773",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -497,24 +917,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958758114",
-      "title": "Shaded Beige Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Shaded Beige Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Shaded Beige, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige towel bar",
+          "shaded beige bathroom towel bar",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige towel bars",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.217816",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657832",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -523,24 +964,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958823650",
-      "title": "Fire Engine Red Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Fire Engine Red Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Fire Engine Red, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red towel bar",
+          "fire engine red bathroom towel bar",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red towel bars",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.217880",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657893",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -549,24 +1011,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958856418",
-      "title": "Lavender Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Lavender Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender towel bar",
+          "lavender bathroom towel bar",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender towel bars",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.217943",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.657953",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -575,24 +1058,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958889186",
-      "title": "Mediterranean Blue Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Mediterranean Blue Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "Finished in Mediterranean Blue, 18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches), which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue towel bar",
+          "mediterranean blue bathroom towel bar",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue towel bars",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.218008",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.658014",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",
@@ -601,24 +1105,45 @@
     },
     {
       "sku": "shopify_US_4542499979396_43098958790882",
-      "title": "Pink Towel Bar 18-Inch Ctc, Solid Brass Wall-Mounted Towel Bar, Carolina Collection, Allied Brass",
-      "description": "Create an easy, dedicated place to hang and dry towels in the bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This wall-mounted towel bar (also called a towel rack or towel holder) is part of the Carolina Collection and features a traditional, straight-bar design with concealed mounting for a clean look.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 25 designer finishes to match the rest of your bathroom\n- Use wall space efficiently: wall mount / wall-mounted / wall hanging installation\n- Built for everyday bathroom use: solid brass with brass construction\n- Coordinate your bath: designed to match other Carolina Collection classic bath accessories and traditional bathroom hardware\n\nSpecs & Installation:\n- Product type: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (matching Carolina)\n- Style: Traditional; shape: straight bar\n- Material: Brass (solid brass)\n- Mounting type: Wall mount (wall-mounted)\n- Center-to-center: 18 in\n- Bar diameter: 0.75 in\n- Weight capacity: 10 lb\n- Screw size: #8 X1 1/4\"\n- Included items: towel bar, mounting plates, and all installation hardware\n- Assembly required: No\n- Warranty: Limited Lifetime Warranty",
+      "title": "Pink Towel Bar 18-Inch Wall-Mounted Solid Brass Straight Bar, Concealed Mount, Carolina, Allied Brass",
+      "description": "18-inch towel bar for bathroom use with 18 in center-to-center spacing (18-inch, 18 inches) \u2014 available in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Wall-mounted towel bar with concealed screw mounting for a clean look and space-saving wall mount installation. Solid brass / brass construction with a straight bar design in a traditional style. Use as a towel bar, towel rack, or towel holder for hand towels or bath towels in classic bath accessories and traditional bathroom hardware layouts. Bar diameter: 0.75 in. Depth/projection: 2 in. Height: 3.5 in. Weight capacity: 10 lb. Includes towel bar, mounting plates, and all installation hardware; assembly required: false.  for matching Carolina collection bathrooms and matching Carolina decor. Limited Lifetime Warranty. Allied Brass Carolina collection.",
       "_meta": {
         "master_sku": "CL-41-18",
         "option_sku": "CL-41-18-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink towel bar",
+          "pink bathroom towel bar",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink towel bars",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T12:10:32.218071",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:55:52.658074",
+        "quality_score": 93.33,
+        "approval_status": "approved",
+        "heuristic_score": 91.5,
+        "selection_score_adjusted": 91.5,
+        "heuristic_score_breakdown": {
+          "google": 90.0,
+          "bing": 93.33,
+          "shopify": 96.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Carolina Collection Towel Bar",

@@ -1,23 +1,44 @@
 {
   "sku": "shopify_US_4542499979396_43098959413474",
-  "title": "Towel Bar 30-Inch Solid Brass Wall Mount | Lavender | Carolina Collection | Allied Brass | Wall-Mounted Bath Towel Bar Holder | Allied Brass",
-  "description": "Stop draping towels over the door or vanity in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall-mounted towel bar (also called a towel rack or towel holder) adds a dedicated, easy-to-reach hanging spot in the bathroom while matching classic, traditional d\u00e9cor.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 100 designer finishes to match the rest of your bathroom\n- Maintain a clean, finished installation with concealed screw mounting hardware\n- Maximize bathroom wall space with a wall mount, wall-mounted, wall hanging design\n\nSpecs & Installation:\n- Product: towel bar / towel rack / towel holder\n- Collection: Carolina Collection (traditional bathroom hardware; heritage bathroom fixtures styling)\n- Length: 30-Inch\n- Overall dimensions: 30 in L x 2 in D x 3.5 in H\n- Weight: 3.2 lbs\n- Material: solid brass (brass construction)\n- Mounting: wall mount with concealed screw mounting; mounting hardware included\nmultiple designer finish options available\n- Warranty: Limited Lifetime Warranty",
+  "title": "Lavender Towel Bar, 30-Inch Wall-Mounted Solid Brass Straight Bar, Carolina Collection, Allied Brass",
+  "description": "30-inch towel bar for bathroom use with wall mount, straight bar design, and traditional style in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall-mounted towel bar (also searched as towel rack, towel holder, towel rail) is crafted from solid brass with concealed screw mounting for a clean, finished appearance. Size: 30 inches / 30-inch; center-to-center 30 in; bar diameter 0.75 in. Wall mount installation uses space efficiently and includes mounting plates and all installation hardware (screw size #8 x 1 1/4). Weight capacity 10 lb.  and covered by a Limited Lifetime Warranty. Ideal for matching Carolina collection and traditional bathroom hardware / classic bath accessories. Allied Brass Carolina.",
   "_meta": {
     "master_sku": "CL-41-30",
     "option_sku": "CL-41-30-LVN",
     "finish": "Lavender",
     "finish_keywords": [
+      "lavender towel bar",
+      "lavender bathroom towel bar",
       "lavender bathroom hardware",
       "lavender bath accessories",
-      "lavender towel bars",
       "lavender statement finish",
       "lavender designer hardware",
       "lavender colored hardware",
       "lavender color bathroom"
     ],
-    "generated_at": "2026-01-28T02:25:53.416491",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T14:44:28.829271",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 92.0,
+    "selection_score_adjusted": 92.0,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 96.67,
+      "shopify": 96.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 0,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Carolina Collection Towel Bar",

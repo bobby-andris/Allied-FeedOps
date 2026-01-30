@@ -22,13 +22,14 @@ _client: Client | None = None
 
 def _get_supabase_config() -> tuple[str, str] | None:
     """Get Supabase URL and key from Streamlit secrets or environment.
-    
+
     Returns:
         Tuple of (url, key) or None if not configured.
     """
     # Try Streamlit secrets first
     try:
         import streamlit as st
+
         if hasattr(st, "secrets"):
             url = st.secrets.get("SUPABASE_URL")
             key = st.secrets.get("SUPABASE_KEY")
@@ -36,13 +37,13 @@ def _get_supabase_config() -> tuple[str, str] | None:
                 return url, key
     except Exception:
         pass
-    
+
     # Fall back to environment variables
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_KEY")
     if url and key:
         return url, key
-    
+
     return None
 
 
@@ -81,20 +82,24 @@ def save_sku_approval(
     reviewed_by: str | None = None,
 ) -> str:
     """Save or update a SKU approval record in Supabase.
-    
+
     Returns:
         The master_sku (primary key).
     """
     client = get_client()
     now = datetime.now(timezone.utc).isoformat()
-    
+
     # Determine overall approval status based on element approvals
     if status == "pending":
         if title_approved and description_approved and image_approved:
             status = "approved"
-        elif title_approved is False or description_approved is False or image_approved is False:
+        elif (
+            title_approved is False
+            or description_approved is False
+            or image_approved is False
+        ):
             status = "rejected"
-    
+
     data = {
         "master_sku": master_sku,
         "approval_status": status,
@@ -103,13 +108,12 @@ def save_sku_approval(
         "notes": revision_notes,
         "updated_at": now,
     }
-    
+
     # Upsert (insert or update)
-    result = client.table("sku_approvals").upsert(
-        data,
-        on_conflict="master_sku"
-    ).execute()
-    
+    result = (
+        client.table("sku_approvals").upsert(data, on_conflict="master_sku").execute()
+    )
+
     return master_sku
 
 
@@ -119,14 +123,14 @@ def get_sku_approval(
 ) -> dict | None:
     """Get approval state for a SKU from Supabase."""
     client = get_client()
-    
-    result = client.table("sku_approvals").select("*").eq(
-        "master_sku", master_sku
-    ).execute()
-    
+
+    result = (
+        client.table("sku_approvals").select("*").eq("master_sku", master_sku).execute()
+    )
+
     if not result.data:
         return None
-    
+
     row = result.data[0]
     return {
         "master_sku": row["master_sku"],
@@ -145,11 +149,16 @@ def get_pending_approvals(
 ) -> list[dict]:
     """Get SKUs awaiting review (pending status) from Supabase."""
     client = get_client()
-    
-    result = client.table("sku_approvals").select("*").eq(
-        "approval_status", "pending"
-    ).order("created_at", desc=False).limit(limit).execute()
-    
+
+    result = (
+        client.table("sku_approvals")
+        .select("*")
+        .eq("approval_status", "pending")
+        .order("created_at", desc=False)
+        .limit(limit)
+        .execute()
+    )
+
     return [
         {
             "master_sku": row["master_sku"],
@@ -170,27 +179,32 @@ def get_approved_for_batch(
 ) -> list[dict]:
     """Get approved SKUs ready for batching from Supabase."""
     client = get_client()
-    
+
     # Get all approved SKUs
-    result = client.table("sku_approvals").select("*").eq(
-        "approval_status", "approved"
-    ).order("updated_at", desc=False).limit(limit).execute()
-    
+    result = (
+        client.table("sku_approvals")
+        .select("*")
+        .eq("approval_status", "approved")
+        .order("updated_at", desc=False)
+        .limit(limit)
+        .execute()
+    )
+
     if not result.data:
         return []
-    
+
     approved = result.data
-    
+
     if exclude_batched:
         # Get SKUs already in batches
-        batched_result = client.table("batch_sku_assignments").select(
-            "master_sku"
-        ).execute()
+        batched_result = (
+            client.table("batch_sku_assignments").select("master_sku").execute()
+        )
         batched_skus = {row["master_sku"] for row in batched_result.data}
-        
+
         # Filter out batched SKUs
         approved = [row for row in approved if row["master_sku"] not in batched_skus]
-    
+
     return [
         {
             "master_sku": row["master_sku"],
@@ -215,22 +229,25 @@ def create_batch(
     skus: list[str] | None = None,
 ) -> str:
     """Create a new publish batch in Supabase.
-    
+
     Returns:
         The generated batch_id.
     """
     client = get_client()
     now = datetime.now(timezone.utc)
     date_str = now.strftime("%Y-%m-%d")
-    
+
     # Count existing batches for today to generate unique ID
-    existing = client.table("publish_batches").select(
-        "batch_id", count="exact"
-    ).like("batch_id", f"Batch-{date_str}-%").execute()
-    
+    existing = (
+        client.table("publish_batches")
+        .select("batch_id", count="exact")
+        .like("batch_id", f"Batch-{date_str}-%")
+        .execute()
+    )
+
     seq = (existing.count or 0) + 1
     batch_id = f"Batch-{date_str}-{seq:03d}"
-    
+
     # Create batch
     batch_data = {
         "batch_id": batch_id,
@@ -239,13 +256,13 @@ def create_batch(
         "created_at": now.isoformat(),
         "notes": str(selection_criteria) if selection_criteria else None,
     }
-    
+
     client.table("publish_batches").insert(batch_data).execute()
-    
+
     # Assign SKUs if provided
     if skus:
         assign_skus_to_batch(batch_id=batch_id, skus=skus)
-    
+
     return batch_id
 
 
@@ -255,14 +272,14 @@ def get_batch(
 ) -> dict | None:
     """Get batch details by ID from Supabase."""
     client = get_client()
-    
-    result = client.table("publish_batches").select("*").eq(
-        "batch_id", batch_id
-    ).execute()
-    
+
+    result = (
+        client.table("publish_batches").select("*").eq("batch_id", batch_id).execute()
+    )
+
     if not result.data:
         return None
-    
+
     row = result.data[0]
     return {
         "batch_id": row["batch_id"],
@@ -283,14 +300,14 @@ def get_all_batches(
 ) -> list[dict]:
     """Get all batches, optionally filtered by status, from Supabase."""
     client = get_client()
-    
+
     query = client.table("publish_batches").select("*")
-    
+
     if status:
         query = query.eq("status", status)
-    
+
     result = query.order("created_at", desc=True).limit(limit).execute()
-    
+
     return [
         {
             "batch_id": row["batch_id"],
@@ -312,13 +329,13 @@ def assign_skus_to_batch(
     skus: list[str],
 ) -> int:
     """Assign SKUs to a batch in Supabase.
-    
+
     Returns:
         Number of SKUs assigned.
     """
     client = get_client()
     now = datetime.now(timezone.utc).isoformat()
-    
+
     # Prepare assignment records
     assignments = [
         {
@@ -328,13 +345,14 @@ def assign_skus_to_batch(
         }
         for sku in skus
     ]
-    
+
     # Use upsert to handle duplicates gracefully
-    result = client.table("batch_sku_assignments").upsert(
-        assignments,
-        on_conflict="batch_id,master_sku"
-    ).execute()
-    
+    result = (
+        client.table("batch_sku_assignments")
+        .upsert(assignments, on_conflict="batch_id,master_sku")
+        .execute()
+    )
+
     return len(result.data) if result.data else 0
 
 
@@ -344,11 +362,15 @@ def get_batch_skus(
 ) -> list[str]:
     """Get all SKUs assigned to a batch from Supabase."""
     client = get_client()
-    
-    result = client.table("batch_sku_assignments").select(
-        "master_sku"
-    ).eq("batch_id", batch_id).order("created_at", desc=False).execute()
-    
+
+    result = (
+        client.table("batch_sku_assignments")
+        .select("master_sku")
+        .eq("batch_id", batch_id)
+        .order("created_at", desc=False)
+        .execute()
+    )
+
     return [row["master_sku"] for row in result.data]
 
 
@@ -361,21 +383,19 @@ def update_batch_status(
 ) -> None:
     """Update batch status and counts in Supabase."""
     client = get_client()
-    
+
     updates: dict[str, Any] = {"status": status}
-    
+
     if status == "published":
         updates["executed_at"] = datetime.now(timezone.utc).isoformat()
-    
+
     if success_count is not None:
         updates["success_count"] = success_count
-    
+
     if failed_count is not None:
         updates["failed_count"] = failed_count
-    
-    client.table("publish_batches").update(updates).eq(
-        "batch_id", batch_id
-    ).execute()
+
+    client.table("publish_batches").update(updates).eq("batch_id", batch_id).execute()
 
 
 # Publish event functions
@@ -397,12 +417,12 @@ def log_publish_event(
     **kwargs,  # Accept extra kwargs for compatibility
 ) -> int:
     """Log a publish event to Supabase.
-    
+
     Returns:
         ID of the inserted row.
     """
     client = get_client()
-    
+
     data = {
         "master_sku": master_sku,
         "platform": platform,
@@ -415,9 +435,9 @@ def log_publish_event(
         "error_message": error_message,
         "published_at": datetime.now(timezone.utc).isoformat(),
     }
-    
+
     result = client.table("publish_events").insert(data).execute()
-    
+
     return result.data[0]["id"] if result.data else 0
 
 
@@ -430,20 +450,20 @@ def get_publish_history(
 ) -> list[dict]:
     """Retrieve publish event history from Supabase."""
     client = get_client()
-    
+
     query = client.table("publish_events").select("*")
-    
+
     if master_sku:
         query = query.eq("master_sku", master_sku)
-    
+
     if platform:
         query = query.eq("platform", platform)
-    
+
     if environment:
         query = query.eq("environment", environment)
-    
+
     result = query.order("published_at", desc=True).limit(limit).execute()
-    
+
     return [
         {
             "id": row["id"],
@@ -482,20 +502,23 @@ def get_published_skus(
     environment: str = "production",
 ) -> set[str]:
     """Get set of SKUs that have been successfully published.
-    
+
     This is used to filter out published SKUs from the Review Queue.
     """
     client = get_client()
-    
-    query = client.table("publish_events").select("master_sku").eq(
-        "environment", environment
-    ).eq("status", "success")
-    
+
+    query = (
+        client.table("publish_events")
+        .select("master_sku")
+        .eq("environment", environment)
+        .eq("status", "success")
+    )
+
     if platform:
         query = query.eq("platform", platform)
-    
+
     result = query.execute()
-    
+
     return {row["master_sku"] for row in result.data}
 
 
@@ -505,11 +528,11 @@ def get_skus_needing_review(
     platform: str | None = None,
 ) -> list[str]:
     """Filter SKUs to only those not yet published to production.
-    
+
     Args:
         all_skus: List of all candidate SKUs (from patch files).
         platform: Optional platform filter.
-    
+
     Returns:
         List of SKUs that haven't been published to production.
     """

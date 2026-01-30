@@ -6,44 +6,44 @@
   "targetCountry": "US",
   "_meta": {
     "master_sku": "MD-22",
-    "generated_at": "2026-01-29T13:11:43.094589",
-    "quality_score": 88.33,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:11:58.541756",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 78.67,
+    "selection_score_adjusted": 78.67,
+    "heuristic_score_breakdown": {
+      "google": 76.67,
+      "bing": 80.0,
+      "shopify": 86.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 0,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 97,
+      "description_length": 697,
+      "trust_signals_found": 1,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 76.67,
+      "heuristic_composite": 78.67
+    }
   },
   "_previous": {
     "title": "Modern Retractable Wall Hook",
     "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
   },
-  "title": "Antique Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-  "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no",
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var1_20260129_131029.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MD-22-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nROBE HOOK:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth surface\n- Secured to wall with screws\n\nHOOK PROJECTION:\n- Curved or straight projection extending from wall\n- Single or double hook design\n- Smooth polished finish\n- Designed for hanging robes or towels\n\nCONFIGURATION: Simple hook for quick hang-up of robes and towels\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bathrobe and towel hanging near shower entry\nThe scene demonstrates how a homeowner using bathrobe in morning/evening routine uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang robe before shower and after bath\n\nITEMS TO SHOW (1-1 items):\n1. Plush white bathrobe or large bath towel hanging FROM hook\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near shower entry or door\n- bathrobe hanging naturally showing hook function\n- shower door or enclosure visible in background\n- single item (not multiple items piled on hook)\n\nVALUE DEMONSTRATION: Simple hook design for quick hang-up of robes and towels\nThe image must clearly show: Single bathrobe or oversized towel showing natural drape from hook\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_131029",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var2_20260129_131045.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MD-22-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nROBE HOOK:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth surface\n- Secured to wall with screws\n\nHOOK PROJECTION:\n- Curved or straight projection extending from wall\n- Single or double hook design\n- Smooth polished finish\n- Designed for hanging robes or towels\n\nCONFIGURATION: Simple hook for quick hang-up of robes and towels\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bathrobe and towel hanging near shower entry\nThe scene demonstrates how a homeowner using bathrobe in morning/evening routine uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang robe before shower and after bath\n\nITEMS TO SHOW (1-1 items):\n1. Plush white bathrobe or large bath towel hanging FROM hook\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near shower entry or door\n- bathrobe hanging naturally showing hook function\n- shower door or enclosure visible in background\n- single item (not multiple items piled on hook)\n\nVALUE DEMONSTRATION: Simple hook design for quick hang-up of robes and towels\nThe image must clearly show: Single bathrobe or oversized towel showing natural drape from hook\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_131045",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/MD-22_var3_20260129_131103.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/MD-22-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nROBE HOOK:\nBACKPLATE:\n- Mounting plate (circular or square)\n- Decorative pattern or smooth surface\n- Secured to wall with screws\n\nHOOK PROJECTION:\n- Curved or straight projection extending from wall\n- Single or double hook design\n- Smooth polished finish\n- Designed for hanging robes or towels\n\nCONFIGURATION: Simple hook for quick hang-up of robes and towels\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. Clean, minimal aesthetic.\n\nCUSTOMER USE CASE: Bathrobe and towel hanging near shower entry\nThe scene demonstrates how a homeowner using bathrobe in morning/evening routine uses this product daily.\n\nPROBLEM SOLVED: Need convenient place to hang robe before shower and after bath\n\nITEMS TO SHOW (1-1 items):\n1. Plush white bathrobe or large bath towel hanging FROM hook\n\nCONTEXT REQUIREMENTS:\n- bathroom wall near shower entry or door\n- bathrobe hanging naturally showing hook function\n- shower door or enclosure visible in background\n- single item (not multiple items piled on hook)\n\nVALUE DEMONSTRATION: Simple hook design for quick hang-up of robes and towels\nThe image must clearly show: Single bathrobe or oversized towel showing natural drape from hook\n\nSCENE TYPE: lifestyle\nShow lifestyle staging that demonstrates practical use\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: bathrobe or towel hanging FROM the hook, showing natural drape downward\n\u274c FORBIDDEN: multiple items piled on hook, items placed ON TOP of hook, items wrapped around hook\n\nCRITICAL CONSTRAINT: Single item must HANG from hook, not stacked or wrapped.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_131103",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 2,
-  "lifestyle_image_link": "data/lifestyle_images/MD-22_var2_20260129_131045.png",
+  "title": "Antique Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+  "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass.",
   "variants": [
     {
       "offerId": "shopify_US_7721205596386_42803121881314",
@@ -56,20 +56,40 @@
         "option_sku": "MD-22-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass retractable hooks and garment rods",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass retractable hooks and garment rods"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.094736",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.541971",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Antique Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Antique Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803121914082",
@@ -82,20 +102,40 @@
         "option_sku": "MD-22-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze retractable hooks and garment rods",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze retractable hooks and garment rods"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.094820",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542038",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Antique Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Antique Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803121946850",
@@ -108,20 +148,40 @@
         "option_sku": "MD-22-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze retractable hooks and garment rods",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze retractable hooks and garment rods"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.094897",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542102",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Brushed Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Brushed Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803121979618",
@@ -134,20 +194,40 @@
         "option_sku": "MD-22-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black retractable hooks and garment rods",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black retractable hooks and garment rods"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.094967",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542161",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Matte Black Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Matte Black Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122012386",
@@ -160,20 +240,40 @@
         "option_sku": "MD-22-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper retractable hooks and garment rods",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper retractable hooks and garment rods"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095036",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542222",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Antique Copper Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Antique Copper Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122045154",
@@ -186,20 +286,40 @@
         "option_sku": "MD-22-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray retractable hooks and garment rods",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray retractable hooks and garment rods"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095105",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542285",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Matte Gray Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Hang everyday essentials securely: supports up to 15 lb for robes, towels, and coats\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Matte Gray Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122077922",
@@ -212,20 +332,40 @@
         "option_sku": "MD-22-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze retractable hooks and garment rods",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze retractable hooks and garment rods"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095176",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542352",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Oil Rubbed Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Oil Rubbed Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122110690",
@@ -238,20 +378,40 @@
         "option_sku": "MD-22-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass retractable hooks and garment rods",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass retractable hooks and garment rods"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095245",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542409",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Polished Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Polished Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122143458",
@@ -264,20 +424,40 @@
         "option_sku": "MD-22-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome retractable hooks and garment rods",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome retractable hooks and garment rods"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095313",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542467",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Polished Chrome Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Polished Chrome Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122176226",
@@ -290,20 +470,40 @@
         "option_sku": "MD-22-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter retractable hooks and garment rods",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter retractable hooks and garment rods"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095380",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542524",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Antique Pewter Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Antique Pewter Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Finished in Antique Pewter, modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122208994",
@@ -316,20 +516,40 @@
         "option_sku": "MD-22-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel retractable hooks and garment rods",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel retractable hooks and garment rods"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095448",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542581",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Polished Nickel Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Polished Nickel Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122241762",
@@ -342,20 +562,40 @@
         "option_sku": "MD-22-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass retractable hooks and garment rods",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass retractable hooks and garment rods"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095517",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542638",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Satin Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Satin Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122274530",
@@ -368,20 +608,40 @@
         "option_sku": "MD-22-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome retractable hooks and garment rods",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome retractable hooks and garment rods"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095586",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542694",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Satin Chrome Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Satin Chrome Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122307298",
@@ -394,20 +654,40 @@
         "option_sku": "MD-22-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel retractable hooks and garment rods",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel retractable hooks and garment rods"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095654",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542750",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Satin Nickel Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Satin Nickel Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Finished in Satin Nickel, modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122340066",
@@ -420,24 +700,44 @@
         "option_sku": "MD-22-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass retractable hooks and garment rods",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass retractable hooks and garment rods",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T13:11:43.095724",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542812",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Unlacquered Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Unlacquered Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122372834",
@@ -450,20 +750,40 @@
         "option_sku": "MD-22-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze retractable hooks and garment rods",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze retractable hooks and garment rods"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095793",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542870",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Venetian Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Venetian Bronze Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Finished in Venetian Bronze, modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_42803122405602",
@@ -476,20 +796,40 @@
         "option_sku": "MD-22-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white retractable hooks and garment rods",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white retractable hooks and garment rods"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T13:11:43.095861",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542929",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Matte White Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Hang everyday essentials securely: supports up to 15 lb for robes, towels, and coats\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Matte White Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Finished in Matte White, modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627175138",
@@ -502,22 +842,42 @@
         "option_sku": "MD-22-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold retractable hooks and garment rods",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold retractable hooks and garment rods",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T13:11:43.095931",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.542988",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Spanish Gold Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Spanish Gold Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627207906",
@@ -530,24 +890,44 @@
         "option_sku": "MD-22-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle retractable hooks and garment rods",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle retractable hooks and garment rods",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096001",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543045",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Autumn Sparkle Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Autumn Sparkle Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627240674",
@@ -560,24 +940,44 @@
         "option_sku": "MD-22-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal retractable hooks and garment rods",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal retractable hooks and garment rods",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096069",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543101",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Glokzin Teal Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Glokzin Teal Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627273442",
@@ -590,24 +990,44 @@
         "option_sku": "MD-22-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige retractable hooks and garment rods",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige retractable hooks and garment rods",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096136",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543156",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Shaded Beige Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Shaded Beige Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627306210",
@@ -620,24 +1040,44 @@
         "option_sku": "MD-22-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow retractable hooks and garment rods",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow retractable hooks and garment rods",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096205",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543236",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Golden Yellow Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Golden Yellow Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627338978",
@@ -650,22 +1090,42 @@
         "option_sku": "MD-22-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue retractable hooks and garment rods",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue retractable hooks and garment rods",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T13:11:43.096273",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543298",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Flat Troll Blue Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Flat Troll Blue Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627371746",
@@ -678,24 +1138,44 @@
         "option_sku": "MD-22-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green retractable hooks and garment rods",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green retractable hooks and garment rods",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096340",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543355",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Sea Foam Green Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Sea Foam Green Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627404514",
@@ -708,24 +1188,44 @@
         "option_sku": "MD-22-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red retractable hooks and garment rods",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red retractable hooks and garment rods",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096409",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543413",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Fire Engine Red Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Fire Engine Red Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627437282",
@@ -738,24 +1238,44 @@
         "option_sku": "MD-22-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender retractable hooks and garment rods",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender retractable hooks and garment rods",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096477",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543469",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Lavender Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Lavender Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style \u2014 available in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627470050",
@@ -768,24 +1288,44 @@
         "option_sku": "MD-22-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue retractable hooks and garment rods",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue retractable hooks and garment rods",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096545",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543527",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Mediterranean Blue Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Mediterranean Blue Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     },
     {
       "offerId": "shopify_US_7721205596386_43093627502818",
@@ -798,24 +1338,44 @@
         "option_sku": "MD-22-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink retractable hooks and garment rods",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink retractable hooks and garment rods",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T13:11:43.096612",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:11:58.543582",
+        "quality_score": 90.0,
+        "approval_status": "approved",
+        "heuristic_score": 78.67,
+        "selection_score_adjusted": 78.67,
+        "heuristic_score_breakdown": {
+          "google": 76.67,
+          "bing": 80.0,
+          "shopify": 86.67
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 0,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Modern Retractable Wall Hook",
         "description": "Avondale Decor's retractable wall hook is a unique and space-saving solution for hanging coats, robes, towels, or any other items you need to keep within reach. The hook installs quickly and easily without the need for additional support on or built into the wall \u2014 just drill a hole and use the included toggle bolts to fasten it in place. The rod pulls out to provide 2-1/2'' of hanging space, then can be pushed back in so it's out of the way when not in use. Choose from 17 stylish finishes and four different models to match your decor. Gives you the option to remove the knob tip supplied with the item and replace it with a cabinet knob of your own, allowing you to match existing ones in the room! Can hold up to 15 pounds Fits standard interior walls Installation does require drilling a 3/4'' dia. hole through drywall and 3 small holes around 2 1/2'' of hanging space All mounting hardware included Specification & Documentation Product dimensions, in. (LxHxW): 2x2x3.75 Box dimensions, in. (LxHxW): 12x10x4 Shipping weight, lbs: 1.3 Installation Instruction Technical Specification MD-22-Installation.pdf MD-22-Specification.pdf"
       },
-      "title": "Pink Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Solid Brass, Wall Mount, Retractable Hooks And Garment Rods, Allied Brass",
-      "description": "Keep towels, robes, and clothing within reach without a hook sticking out into your bathroom in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This modern retractable wall hook pulls out to create 2-1/2 inches of hanging space, then pushes back in when not in use\u2014ideal for tight layouts and clean sightlines.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Coordinate your hardware: part of the retractable hooks and garment rods collection with multiple designer finish options available\n- Match existing knobs: removable knob tip lets you swap in your own cabinet knob\n- Install with confidence: wall mount design for standard interior walls; mounting hardware included\n\nSpecs & Installation:\n- Material: brass\n- Mounting: wall mount\n- Hanging space (pull-out): 2-1/2 in\n- Product dimensions (L x H x W): 2 in x 2 in x 3.75 in\n- Projection: 1 in\n- Weight capacity: 15 lb\n- Installation notes: requires drilling a 3/4 in diameter hole through drywall plus three small holes; includes toggle bolts (6/32 toggles)\n- Assembly required: no"
+      "title": "Pink Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall Mount Brass, 15 Lb Capacity, Allied Brass",
+      "description": "Finished in Pink, modern retractable wall hook with 2-1/2 inch pull-out hanging space for bathroom towels, robes, and clothing; wall mount brass construction in a crisp, clean modern style, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Retracts flush when not in use to keep minimalist bathroom fixtures looking uncluttered. Fits standard interior walls and installs with included hardware using toggle bolts; requires drilling a 3/4 inch diameter hole through drywall plus three small holes around the opening. Rated to hold up to 15 lb. Knob tip can be removed and replaced with your own cabinet knob to match existing bathroom decor. Product size 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Backed by a lifetime warranty. Allied Brass."
     }
   ]
 }

@@ -524,6 +524,39 @@ _ATTRIBUTE_DENSITY_CUES = [
 ]
 
 
+_PRODUCT_TYPE_SYNONYM_GROUPS = {
+    "towel bar": ["towel rack", "towel holder", "towel rail"],
+    "grab bar": ["safety bar", "support bar", "bathroom grab bar"],
+    "toilet paper holder": ["tissue holder", "toilet roll holder", "tp holder"],
+    "robe hook": ["towel hook", "bathroom hook", "wall hook"],
+    "glass shelf": ["bathroom shelf", "wall shelf", "floating shelf"],
+    "paper towel holder": ["paper towel stand", "kitchen towel holder"],
+    "cabinet knob": ["drawer knob", "cabinet pull"],
+    "towel ring": ["towel loop", "hand towel holder"],
+    "soap dish": ["soap holder", "soap tray"],
+    "wall mirror": ["bath mirror", "vanity mirror"],
+}
+
+_ROOM_CONTEXT_PHRASES = (
+    "bathroom",
+    "kitchen",
+    "bath ",
+    "powder room",
+    "laundry",
+    "mudroom",
+)
+
+
+def _count_synonym_coverage(text_lower: str) -> int:
+    """Count how many product-type synonym groups have 2+ hits in text."""
+    for canonical, synonyms in _PRODUCT_TYPE_SYNONYM_GROUPS.items():
+        all_terms = [canonical] + synonyms
+        hits = sum(1 for term in all_terms if term in text_lower)
+        if hits >= 2:
+            return hits
+    return 0
+
+
 def score_description(
     description: str, *, html: bool = False, platform: str = "google"
 ) -> tuple[int, list[str]]:
@@ -555,15 +588,36 @@ def score_description(
             notes.append("Missing <ul><li> highlights block")
 
     text_len = len(text)
-    if 600 <= text_len <= 1000:
-        score += 2  # Within target range (600-800 Google, 700-1000 Bing)
-    elif text_len >= 500:
-        score += 1
-        notes.append("Description outside ideal 600-1000 character target range")
-    elif text_len >= 300:
-        notes.append("Description under 500 characters")
-    else:
-        notes.append("Description under 300 characters")
+    if platform == "google":
+        if 600 <= text_len <= 800:
+            score += 2
+        elif 500 <= text_len <= 900:
+            score += 1
+            notes.append("Description outside ideal 600-800 character target for Google")
+        elif text_len >= 300:
+            notes.append("Description under 500 characters")
+        else:
+            notes.append("Description under 300 characters")
+    elif platform == "bing":
+        if 700 <= text_len <= 1000:
+            score += 2
+        elif 600 <= text_len <= 1100:
+            score += 1
+            notes.append("Description outside ideal 700-1000 character target for Bing")
+        elif text_len >= 300:
+            notes.append("Description under 600 characters for Bing")
+        else:
+            notes.append("Description under 300 characters")
+    else:  # shopify
+        if 600 <= text_len <= 1000:
+            score += 2
+        elif text_len >= 500:
+            score += 1
+            notes.append("Description outside ideal 600-1000 character target range")
+        elif text_len >= 300:
+            notes.append("Description under 500 characters")
+        else:
+            notes.append("Description under 300 characters")
 
     opening = text[:160].lower()
 
@@ -631,6 +685,17 @@ def score_description(
     else:
         # Google/Bing: +1 for "lifetime warranty" or "solid brass" anywhere
         if "lifetime warranty" in text_lower or "solid brass" in text_lower:
+            score += 1
+
+    if platform in ("google", "bing"):
+        # Synonym coverage: reward inclusion of product-type synonyms
+        # (e.g., "towel bar" + "towel rack" + "towel holder")
+        synonym_hits = _count_synonym_coverage(text_lower)
+        if synonym_hits >= 2:
+            score += 1
+
+        # Room context: reward explicit room-type mention
+        if any(room in text_lower for room in _ROOM_CONTEXT_PHRASES):
             score += 1
 
     if "installation" in text_lower or "mounting" in text_lower:
@@ -729,7 +794,16 @@ def score_brand_voice(text: str) -> tuple[int, list[str]]:
 
     t = text.lower()
     cue_hits = sum(1 for cue in _PREMIUM_CUES if cue in t)
-    score += min(5, cue_hits)  # up to +5
+    # Diminishing returns: first 2 hits = +1 each, next 2 = +1 each, cap at +4
+    if cue_hits >= 1:
+        score += min(2, cue_hits)       # +1 or +2 for first 2
+    if cue_hits >= 3:
+        score += min(2, cue_hits - 2)   # +1 or +2 for next 2
+
+    # Reward natural voice (absence of generic filler patterns)
+    generic_fillers = ["this product", "this item", "this piece", "our product"]
+    if not any(filler in t for filler in generic_fillers):
+        score += 1
 
     if _ALL_CAPS_WORD_RE.search(text):
         notes.append("ALL CAPS word detected")
@@ -755,7 +829,11 @@ def score_bundle(
 
     Includes detailed title zone analysis for understanding keyword placement.
     """
-    ctr, ctr_notes, zone_analysis = score_title(title, platform=platform)
+    # Normalize title separators before scoring to match export format
+    normalized_title = title.replace(" | ", ", ").replace("|", ", ")
+    normalized_title = re.sub(r"\s{2,}", " ", normalized_title).strip()
+
+    ctr, ctr_notes, zone_analysis = score_title(normalized_title, platform=platform)
     cvr, cvr_notes = score_description(
         description, html=html_description, platform=platform
     )
@@ -857,7 +935,13 @@ def score_candidate(
             soft_gate_warnings.append(f"{platform_labels[platform]}: {warning}")
 
     weighted_composite = round(weighted_total / weight_sum, 2)
-    soft_gate_penalty = round(weighted_misses * 2.0, 2)
+    # Tiered penalty: first miss costs 1.5, subsequent misses cost 1.0 each
+    if weighted_misses <= 0:
+        soft_gate_penalty = 0.0
+    elif weighted_misses <= 1:
+        soft_gate_penalty = round(weighted_misses * 1.5, 2)
+    else:
+        soft_gate_penalty = round(1.5 + (weighted_misses - 1) * 1.0, 2)
     adjusted_weighted = max(0.0, round(weighted_composite - soft_gate_penalty, 2))
 
     return CandidateHeuristicScore(

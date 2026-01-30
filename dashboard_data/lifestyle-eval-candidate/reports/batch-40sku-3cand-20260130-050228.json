@@ -1,0 +1,527 @@
+{
+  "success": [
+    {
+      "master_sku": "920D-6",
+      "heuristic_score": 77.67,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 83.33
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-41-30",
+      "heuristic_score": 84.33,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 90.0
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "P-550-WPT",
+      "heuristic_score": 76.67,
+      "llm_self_score": 85.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 76.67
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "QN-31/30",
+      "heuristic_score": 84.33,
+      "llm_self_score": 93.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 90.0
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "SH-84",
+      "heuristic_score": 65.83,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 63.33,
+        "bing": 66.67,
+        "shopify": 76.67
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CV-407-8SM",
+      "heuristic_score": 78.5,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 76.67,
+        "shopify": 73.33
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-29",
+      "heuristic_score": 77.17,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 83.33,
+        "shopify": 73.33
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "FT-16",
+      "heuristic_score": 83.33,
+      "llm_self_score": 93.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 83.33
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "MB-20",
+      "heuristic_score": 84.33,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 90.0
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-11",
+      "heuristic_score": 77.17,
+      "llm_self_score": 93.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 80.0
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "1051",
+      "heuristic_score": 82.33,
+      "llm_self_score": 85.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 76.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-GLT-24",
+      "heuristic_score": 81.0,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 86.67
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-41-18",
+      "heuristic_score": 79.83,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 60.0
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "HTL-3",
+      "heuristic_score": 76.67,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 76.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "TS-4L",
+      "heuristic_score": 71.0,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 70.0,
+        "bing": 70.0,
+        "shopify": 76.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "MA-26",
+      "heuristic_score": 81.0,
+      "llm_self_score": 86.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 86.67
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-61",
+      "heuristic_score": 80.5,
+      "llm_self_score": 95.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 76.67,
+        "shopify": 86.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CS-1",
+      "heuristic_score": 74.33,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 73.33,
+        "bing": 73.33,
+        "shopify": 80.0
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-2TB/16-GAL",
+      "heuristic_score": 81.0,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 86.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "PR-99",
+      "heuristic_score": 81.0,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 86.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "P-730-GB360",
+      "heuristic_score": 76.67,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 73.33,
+        "shopify": 80.0
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "BSK-275LA",
+      "heuristic_score": 83.33,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 76.67,
+        "shopify": 90.0
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-1TB/16",
+      "heuristic_score": 80.5,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 83.33
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-2/22-GAL",
+      "heuristic_score": 78.17,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 86.67
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-GTB-2",
+      "heuristic_score": 80.5,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 83.33
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-22",
+      "heuristic_score": 67.67,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 66.67,
+        "bing": 63.33,
+        "shopify": 76.67
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "A-20",
+      "heuristic_score": 72.0,
+      "llm_self_score": 81.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 70.0,
+        "bing": 73.33,
+        "shopify": 80.0
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-5-16",
+      "heuristic_score": 83.83,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 86.67
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "WP-2/16-GAL",
+      "heuristic_score": 77.67,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 83.33
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "MD-22",
+      "heuristic_score": 68.17,
+      "llm_self_score": 93.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 66.67,
+        "bing": 66.67,
+        "shopify": 76.67
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "P-200-18-TB",
+      "heuristic_score": 77.67,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 83.33
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "SQ-20",
+      "heuristic_score": 78.67,
+      "llm_self_score": 85.0,
+      "status": "rejected",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 83.33,
+        "shopify": 83.33
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "RC-5/16TB",
+      "heuristic_score": 81.5,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 80.0,
+        "shopify": 90.0
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "DMF-2/2X",
+      "heuristic_score": 73.83,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 73.33,
+        "bing": 70.0,
+        "shopify": 80.0
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "TS-25",
+      "heuristic_score": 80.5,
+      "llm_self_score": 86.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 80.0,
+        "bing": 83.33,
+        "shopify": 80.0
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "1066",
+      "heuristic_score": 77.67,
+      "llm_self_score": 91.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 83.33
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "CL-24C",
+      "heuristic_score": 76.67,
+      "llm_self_score": 86.67,
+      "status": "approved",
+      "breakdown": {
+        "google": 76.67,
+        "bing": 76.67,
+        "shopify": 76.67
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "DT-32",
+      "heuristic_score": 84.33,
+      "llm_self_score": 88.33,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 90.0
+      },
+      "candidate_index": 1,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "NS-5/16",
+      "heuristic_score": 84.83,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 93.33
+      },
+      "candidate_index": 0,
+      "num_candidates": 3
+    },
+    {
+      "master_sku": "TS-28",
+      "heuristic_score": 82.83,
+      "llm_self_score": 90.0,
+      "status": "approved",
+      "breakdown": {
+        "google": 83.33,
+        "bing": 83.33,
+        "shopify": 80.0
+      },
+      "candidate_index": 2,
+      "num_candidates": 3
+    }
+  ],
+  "failed": [],
+  "start_time": "2026-01-30T04:28:04.166159",
+  "end_time": "2026-01-30T05:02:28.422063"
+}

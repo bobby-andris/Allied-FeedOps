@@ -18,6 +18,9 @@ class _DummyCandidate:
 
 class _DummyResult:
     candidate = _DummyCandidate()
+    heuristic_score = None
+    heuristic_score_breakdown = None
+    data_source = None
 
 
 def test_healthcheck_uses_resolver(monkeypatch, tmp_path):

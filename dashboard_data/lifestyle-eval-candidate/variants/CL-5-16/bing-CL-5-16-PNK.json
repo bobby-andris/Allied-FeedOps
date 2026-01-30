@@ -1,23 +1,44 @@
 {
   "sku": "shopify_US_4543237914756_43098729185506",
-  "title": "Triple Glass Shelf 16-Inch Wall-Mounted Solid Brass | Pink | Carolina | Allied Brass | Bathroom Wall Shelf Storage | Allied Brass",
-  "description": "Get organized bathroom storage without crowding the vanity\u2014this triple glass shelf adds three levels of space in one wall-mounted unit in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. It works as a glass shelf, bathroom shelf, and wall shelf for daily essentials while keeping a classic look.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 56 designer finishes to match the rest of your bathroom\n- Durable support where it counts: solid brass construction (solid brass hardware) with thick, beveled-edge glass\n- Classic coordination: made to pair with matching Carolina collection pieces for traditional bathroom hardware and classic bath accessories\n\nSpecs & Installation:\n- Product type: Triple glass shelf / glass shelving unit (wall mount, wall-mounted, wall hanging)\n- Glass dimensions: 16 x 5 inches\n- Approx. overall (16-inch model): 16 in L x 5.54 in D x 16 in H\n- Weight (16-inch model): 11.2 lbs\n- Mounting: Wall mount with concealed screw mounting hardware\n- Materials: Thick beveled-edge glass; brass construction hardware\n- Warranty: Limited Lifetime Warranty\nMultiple designer finish options available",
+  "title": "Pink Triple Glass Shelf, 16 X 5 In, Wall-Mounted W/ Solid Brass Hardware, Carolina Collection, Allied Brass",
+  "description": "Triple glass shelf for bathroom storage with 16 x 5 inches (16-inch x 5-inch, 16in x 5in) glass dimensions and a wall mount, wall-mounted installation in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This 3-tier wall mounted glass shelf provides organized space for toiletries while keeping counters clear. Built with thick 0.38 in beveled-edge glass and solid brass hardware; concealed screw mounting creates a clean, finished appearance. Includes the glass shelf and all installation hardware; screw size #8 x 1 1/4 in. Rated weight capacity: 6 lb. Traditional style for classic bath accessories, heritage bathroom fixtures, and traditional bathroom hardware. Use as a bathroom glass shelf, wall mount glass shelf, or 3 tier glass shelf. Limited Lifetime Warranty. Matching Carolina available; Carolina collection by Allied Brass.",
   "_meta": {
     "master_sku": "CL-5-16",
     "option_sku": "CL-5-16-PNK",
     "finish": "Pink",
     "finish_keywords": [
+      "pink glass shelf",
+      "pink bathroom glass shelf",
       "pink bathroom hardware",
       "pink bath accessories",
-      "pink glass shelves",
       "pink statement finish",
       "pink designer hardware",
       "pink colored hardware",
       "pink color bathroom"
     ],
-    "generated_at": "2026-01-28T03:19:17.162308",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T15:09:55.645808",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 89.5,
+    "selection_score_adjusted": 89.5,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 90.0,
+      "shopify": 86.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Carolina Collection Triple Glass Shelf",

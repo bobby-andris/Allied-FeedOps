@@ -6,44 +6,44 @@
   "targetCountry": "US",
   "_meta": {
     "master_sku": "1051",
-    "generated_at": "2026-01-29T12:03:29.418863",
-    "quality_score": 88.33,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T14:54:02.703352",
+    "quality_score": 85.0,
+    "approval_status": "approved",
+    "heuristic_score": 91.33,
+    "selection_score_adjusted": 91.33,
+    "heuristic_score_breakdown": {
+      "google": 93.33,
+      "bing": 90.0,
+      "shopify": 83.33
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 103,
+      "description_length": 605,
+      "trust_signals_found": 3,
+      "competitive_language_found": false,
+      "heuristic_platform_score": 93.33,
+      "heuristic_composite": 91.33
+    }
   },
   "_previous": {
     "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
     "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
   },
-  "title": "Antique Brass Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-  "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty",
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1051_var1_20260129_120209.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1051-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOUNTERTOP PAPER TOWEL HOLDER:\nWEIGHTED BASE:\n- Wide or weighted base for stability\n- Prevents tipping when pulling paper towels\n- Decorative finish matching kitchen hardware\n\nVERTICAL POST:\n- Center post extending 12-14 inches tall\n- Holds paper towel roll vertically\n- Smooth polished finish\n\nTOP FINIAL/CAP:\n- Decorative top piece preventing roll from sliding off\n- May have spring-loaded or friction mechanism for roll security\n\nPAPER TOWEL ROLL:\n- Standard kitchen paper towel roll installed on post\n- Positioned upright for easy one-handed tearing\n\nCONFIGURATION: Freestanding countertop model, easily moved to where needed\n\nSCENE CONTEXT (narrative description):\nModern kitchen with white quartz countertops, stainless steel sink, and subway tile backsplash. Bright natural lighting.\n\nCUSTOMER USE CASE: Kitchen cleanup during cooking and food preparation\nThe scene demonstrates how a home cook preparing meals, parent cooking dinner uses this product daily.\n\nPROBLEM SOLVED: Need quick, one-handed access to paper towels while hands are messy from cooking\n\nITEMS TO SHOW (1-1 items):\n1. paper towel roll on holder\n\nCONTEXT REQUIREMENTS:\n- kitchen counter with cooking activity\n- cutting board with vegetables or ingredients\n- sink visible in background\n- stove or cooking area nearby\n\nVALUE DEMONSTRATION: Freestanding countertop placement for flexibility, weighted base prevents tipping during use\nThe image must clearly show: Single roll ready for instant one-handed access\n\nSCENE TYPE: in-use\nShow the product in active use during Kitchen cleanup during cooking and food preparation\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context\n\u274c FORBIDDEN: Bathroom setting (unless specifically bathroom paper towels), empty holder\n\nCRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_120209",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1051_var2_20260129_120231.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1051-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOUNTERTOP PAPER TOWEL HOLDER:\nWEIGHTED BASE:\n- Wide or weighted base for stability\n- Prevents tipping when pulling paper towels\n- Decorative finish matching kitchen hardware\n\nVERTICAL POST:\n- Center post extending 12-14 inches tall\n- Holds paper towel roll vertically\n- Smooth polished finish\n\nTOP FINIAL/CAP:\n- Decorative top piece preventing roll from sliding off\n- May have spring-loaded or friction mechanism for roll security\n\nPAPER TOWEL ROLL:\n- Standard kitchen paper towel roll installed on post\n- Positioned upright for easy one-handed tearing\n\nCONFIGURATION: Freestanding countertop model, easily moved to where needed\n\nSCENE CONTEXT (narrative description):\nModern kitchen with white quartz countertops, stainless steel sink, and subway tile backsplash. Bright natural lighting.\n\nCUSTOMER USE CASE: Kitchen cleanup during cooking and food preparation\nThe scene demonstrates how a home cook preparing meals, parent cooking dinner uses this product daily.\n\nPROBLEM SOLVED: Need quick, one-handed access to paper towels while hands are messy from cooking\n\nITEMS TO SHOW (1-1 items):\n1. paper towel roll on holder\n\nCONTEXT REQUIREMENTS:\n- kitchen counter with cooking activity\n- cutting board with vegetables or ingredients\n- sink visible in background\n- stove or cooking area nearby\n\nVALUE DEMONSTRATION: Freestanding countertop placement for flexibility, weighted base prevents tipping during use\nThe image must clearly show: Single roll ready for instant one-handed access\n\nSCENE TYPE: in-use\nShow the product in active use during Kitchen cleanup during cooking and food preparation\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context\n\u274c FORBIDDEN: Bathroom setting (unless specifically bathroom paper towels), empty holder\n\nCRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_120231",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/1051_var3_20260129_120249.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/1051-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOUNTERTOP PAPER TOWEL HOLDER:\nWEIGHTED BASE:\n- Wide or weighted base for stability\n- Prevents tipping when pulling paper towels\n- Decorative finish matching kitchen hardware\n\nVERTICAL POST:\n- Center post extending 12-14 inches tall\n- Holds paper towel roll vertically\n- Smooth polished finish\n\nTOP FINIAL/CAP:\n- Decorative top piece preventing roll from sliding off\n- May have spring-loaded or friction mechanism for roll security\n\nPAPER TOWEL ROLL:\n- Standard kitchen paper towel roll installed on post\n- Positioned upright for easy one-handed tearing\n\nCONFIGURATION: Freestanding countertop model, easily moved to where needed\n\nSCENE CONTEXT (narrative description):\nModern kitchen with white quartz countertops, stainless steel sink, and subway tile backsplash. Bright natural lighting.\n\nCUSTOMER USE CASE: Kitchen cleanup during cooking and food preparation\nThe scene demonstrates how a home cook preparing meals, parent cooking dinner uses this product daily.\n\nPROBLEM SOLVED: Need quick, one-handed access to paper towels while hands are messy from cooking\n\nITEMS TO SHOW (1-1 items):\n1. paper towel roll on holder\n\nCONTEXT REQUIREMENTS:\n- kitchen counter with cooking activity\n- cutting board with vegetables or ingredients\n- sink visible in background\n- stove or cooking area nearby\n\nVALUE DEMONSTRATION: Freestanding countertop placement for flexibility, weighted base prevents tipping during use\nThe image must clearly show: Single roll ready for instant one-handed access\n\nSCENE TYPE: in-use\nShow the product in active use during Kitchen cleanup during cooking and food preparation\n\nThis is not just product photography - this shows customers HOW they will use this product and WHY they need it.\n\nPRODUCT USAGE VALIDATION:\n\u2705 CORRECT USAGE: Kitchen counter or cabinet area with paper towel roll installed, suggesting cooking/food prep context\n\u274c FORBIDDEN: Bathroom setting (unless specifically bathroom paper towels), empty holder\n\nCRITICAL: Must show KITCHEN context with cooking or sink area visible. Paper towel holders are primarily KITCHEN products used during meal preparation.\n\nThe AI must verify the scene shows CORRECT usage only.\nAny forbidden usage will result in image rejection.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_120249",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 1,
-  "lifestyle_image_link": "data/lifestyle_images/1051_var1_20260129_120209.png",
+  "title": "Antique Brass Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+  "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass.",
   "variants": [
     {
       "offerId": "shopify_US_4545063682180_32128479559812",
@@ -56,20 +56,41 @@
         "option_sku": "1051-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass paper towel holder",
+          "antique brass bathroom paper towel holder",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass paper towel holders"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.418986",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703479",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Antique Brass Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Antique Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Antique Brass Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479592580",
@@ -82,20 +103,41 @@
         "option_sku": "1051-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze paper towel holder",
+          "antique bronze bathroom paper towel holder",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze paper towel holders"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419046",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703533",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Antique Bronze Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Antique Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Antique Bronze Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479625348",
@@ -108,20 +150,41 @@
         "option_sku": "1051-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze paper towel holder",
+          "brushed bronze bathroom paper towel holder",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze paper towel holders"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419099",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703580",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Brushed Bronze Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional kitchens. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Brushed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Brushed Bronze Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional kitchens. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479658116",
@@ -134,20 +197,41 @@
         "option_sku": "1051-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black paper towel holder",
+          "matte black bathroom paper towel holder",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black paper towel holders"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419149",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703626",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Matte Black Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary kitchens designs. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Matte Black makes a bold, modern statement\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Matte Black Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary kitchen designs. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479690884",
@@ -160,20 +244,41 @@
         "option_sku": "1051-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper paper towel holder",
+          "antique copper bathroom paper towel holder",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper paper towel holders"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419196",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703670",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Antique Copper Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style kitchens. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Antique Copper creates an inviting, organic feel\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Antique Copper Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style kitchens. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479723652",
@@ -186,20 +291,41 @@
         "option_sku": "1051-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray paper towel holder",
+          "matte gray bathroom paper towel holder",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray paper towel holders"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419242",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703710",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Matte Gray Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Protects countertops with a felt pad under the base\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Matte Gray Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479756420",
@@ -212,20 +338,41 @@
         "option_sku": "1051-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze paper towel holder",
+          "oil rubbed bronze bathroom paper towel holder",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze paper towel holders"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419291",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703755",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Oil Rubbed Bronze Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any kitchens. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Oil Rubbed Bronze Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any kitchen. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479789188",
@@ -238,20 +385,41 @@
         "option_sku": "1051-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass paper towel holder",
+          "polished brass bathroom paper towel holder",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass paper towel holders"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419339",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703798",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Polished Brass Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic kitchens fixtures. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Polished Brass Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic kitchen fixtures. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479821956",
@@ -264,20 +432,41 @@
         "option_sku": "1051-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome paper towel holder",
+          "polished chrome bathroom paper towel holder",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome paper towel holders"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419386",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703842",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Polished Chrome Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Polished Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Polished Chrome Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Polished Chrome, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479854724",
@@ -290,20 +479,41 @@
         "option_sku": "1051-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter paper towel holder",
+          "antique pewter bathroom paper towel holder",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter paper towel holders"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419432",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703883",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Antique Pewter Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Antique Pewter blends effortlessly with transitional decor\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Antique Pewter Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Antique Pewter, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479887492",
@@ -316,20 +526,41 @@
         "option_sku": "1051-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel paper towel holder",
+          "polished nickel bathroom paper towel holder",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel paper towel holders"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419480",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703927",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Polished Nickel Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Polished Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Polished Nickel Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Polished Nickel, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479920260",
@@ -342,20 +573,41 @@
         "option_sku": "1051-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass paper towel holder",
+          "satin brass bathroom paper towel holder",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass paper towel holders"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419525",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.703968",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Satin Brass Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Satin Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Satin Brass Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479953028",
@@ -368,20 +620,41 @@
         "option_sku": "1051-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome paper towel holder",
+          "satin chrome bathroom paper towel holder",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome paper towel holders"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419573",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704011",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Satin Chrome Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Satin Chrome coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Satin Chrome Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128479985796",
@@ -394,20 +667,41 @@
         "option_sku": "1051-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel paper towel holder",
+          "satin nickel bathroom paper towel holder",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel paper towel holders"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419620",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704054",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Satin Nickel Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use kitchens. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Satin Nickel coordinates seamlessly with chrome faucets and fixtures\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Satin Nickel Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Satin Nickel, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use kitchens. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128480018564",
@@ -420,24 +714,45 @@
         "option_sku": "1051-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass paper towel holder",
+          "unlacquered brass bathroom paper towel holder",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass paper towel holders",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T12:03:29.419670",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704101",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Unlacquered Brass Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Unlacquered Brass develops a unique, one-of-a-kind patina over time\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Unlacquered Brass Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128480051332",
@@ -450,20 +765,41 @@
         "option_sku": "1051-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze paper towel holder",
+          "venetian bronze bathroom paper towel holder",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze paper towel holders"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419717",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704148",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Venetian Bronze Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Venetian Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Venetian Bronze Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_32128480084100",
@@ -476,20 +812,41 @@
         "option_sku": "1051-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white paper towel holder",
+          "matte white bathroom paper towel holder",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white paper towel holders"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T12:03:29.419762",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704188",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Matte White Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy kitchens atmosphere. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Protects countertops with a felt pad under the base\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Matte White Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Matte White, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which brings clean, fresh simplicity that brightens spaces and creates a light, airy kitchen atmosphere. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839642850",
@@ -502,22 +859,43 @@
         "option_sku": "1051-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold paper towel holder",
+          "spanish gold bathroom paper towel holder",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold paper towel holders",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T12:03:29.419808",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704233",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Spanish Gold Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished kitchens. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Spanish Gold elevates the room with luxe gold tones\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Spanish Gold Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Spanish Gold, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished kitchens. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839675618",
@@ -530,24 +908,45 @@
         "option_sku": "1051-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle paper towel holder",
+          "autumn sparkle bathroom paper towel holder",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle paper towel holders",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.419856",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704276",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Autumn Sparkle Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Autumn Sparkle transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Autumn Sparkle Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839708386",
@@ -560,24 +959,45 @@
         "option_sku": "1051-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal paper towel holder",
+          "glokzin teal bathroom paper towel holder",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal paper towel holders",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.419905",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704320",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Glokzin Teal Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern kitchens. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Glokzin Teal transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Glokzin Teal Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Glokzin Teal, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern kitchens. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839741154",
@@ -590,24 +1010,45 @@
         "option_sku": "1051-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige paper towel holder",
+          "shaded beige bathroom paper towel holder",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige paper towel holders",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.419953",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704364",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Shaded Beige Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Shaded Beige transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Shaded Beige Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Shaded Beige, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839773922",
@@ -620,24 +1061,45 @@
         "option_sku": "1051-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow paper towel holder",
+          "golden yellow bathroom paper towel holder",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow paper towel holders",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.420002",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704408",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Golden Yellow Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Golden Yellow, which radiates warm, sunny energy that brightens any kitchens with cheerful, optimistic personality. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Golden Yellow transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Golden Yellow Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Golden Yellow, which radiates warm, sunny energy that brightens any kitchen with cheerful, optimistic personality. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839806690",
@@ -650,22 +1112,43 @@
         "option_sku": "1051-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue paper towel holder",
+          "flat troll blue bathroom paper towel holder",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue paper towel holders",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T12:03:29.420050",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704449",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Flat Troll Blue Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary kitchens designs. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Flat Troll Blue creates a distinctive focal point\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Flat Troll Blue Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Flat Troll Blue, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary kitchen designs. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839839458",
@@ -678,24 +1161,45 @@
         "option_sku": "1051-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green paper towel holder",
+          "sea foam green bathroom paper towel holder",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green paper towel holders",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.420105",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704493",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Sea Foam Green Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Sea Foam Green transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Sea Foam Green Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839872226",
@@ -708,24 +1212,45 @@
         "option_sku": "1051-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red paper towel holder",
+          "fire engine red bathroom paper towel holder",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red paper towel holders",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.420153",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704537",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Fire Engine Red Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Fire Engine Red, which makes a fearless design statement, transforming functional kitchens hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Fire Engine Red transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Fire Engine Red Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Fire Engine Red, which makes a fearless design statement, transforming functional kitchen hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839904994",
@@ -738,24 +1263,45 @@
         "option_sku": "1051-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender paper towel holder",
+          "lavender bathroom paper towel holder",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender paper towel holders",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.420200",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704580",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Lavender Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Lavender transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Lavender Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839937762",
@@ -768,24 +1314,45 @@
         "option_sku": "1051-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue paper towel holder",
+          "mediterranean blue bathroom paper towel holder",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue paper towel holders",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.420249",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704627",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Mediterranean Blue Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Mediterranean Blue transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Mediterranean Blue Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use \u2014 available in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     },
     {
       "offerId": "shopify_US_4545063682180_43093839970530",
@@ -798,24 +1365,45 @@
         "option_sku": "1051-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink paper towel holder",
+          "pink bathroom paper towel holder",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink paper towel holders",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T12:03:29.420315",
-        "quality_score": 88.33,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T14:54:02.704670",
+        "quality_score": 85.0,
+        "approval_status": "approved",
+        "heuristic_score": 91.33,
+        "selection_score_adjusted": 91.33,
+        "heuristic_score_breakdown": {
+          "google": 93.33,
+          "bing": 90.0,
+          "shopify": 83.33
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Contemporary Counter Top Kitchen Paper Towel Valet",
         "description": "Complete your kitchen d\u00e9cor with this finely crafted counter top paper towel valet. Keep your counter top clutter free while adding the finishing touch to your space. Made of solid brass and provided with a lifetime finish to insure products will never rust. Crafted of the Finest Solid Brass Materials Available in a variety of lifetime designer finishes Concealed screw mounting hardware installs easily Products are provided with a limited lifetime warranty Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 5x14x5 Box dimensions, in. (LxHxW): 16x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification 1051-Specification.PDF"
       },
-      "title": "Pink Paper Towel Holder, 14-Inch Freestanding Countertop, Solid Brass, Brass Paper Towel Holders Collection, Allied Brass",
-      "description": "Keep paper towels right where you need them and keep your kitchen countertop clear in Pink, which brings playful, modern energy to kitchens design, offering a fresh take on hardware that celebrates individuality. This freestanding paper towel holder (paper towel valet) stands securely on a weighted base and includes a felt pad to protect surfaces.\n\nHighlights:\n- Pink transforms this essential into a conversation piece\n- Choose from 28 designer finishes to match the rest of your kitchen\n- Adds a clean, contemporary look with a simple freestanding design\n- Coordinates with the Brass Paper Towel Holders collection for a cohesive space\n- Choose your look with multiple designer finish options\n\nSpecs & Details:\n- Product type: Freestanding countertop paper towel holder\n- Material: Brass (solid brass construction)\n- Dimensions (L x H x W): 5 in x 14 in x 5 in\n- Product weight: 4.8 lb\n- Assembly required: No\n- Included: Paper towel holder\n- Warranty: Limited Lifetime Warranty"
+      "title": "Pink Paper Towel Holder, 14-Inch Freestanding Solid Brass Countertop Stand, Contemporary Style, Allied Brass",
+      "description": "Finished in Pink, paper towel holder with 14-inch height and 5 x 5-inch footprint, solid brass construction for countertop kitchen use, which brings playful, modern energy to kitchen design, offering a fresh take on hardware that celebrates individuality. Freestanding paper towel stand/paper towel valet keeps rolls accessible without wall mounting. Weighted base helps prevent tipping; felt pad helps protect countertops from scratches. Contemporary, modern crisp design for clean-lined kitchens. Available in multiple lifetime designer finishes; designer finish provides corrosion-free and rust-free performance. Includes paper towel holder. Limited lifetime warranty. Dimensions (LxHxW): 5 x 14 x 5 in; product weight 4.8 lb. Allied Brass."
     }
   ]
 }

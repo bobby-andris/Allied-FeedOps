@@ -193,17 +193,11 @@ def verify_claims(candidate: Candidate, parent_sku: ParentSKU) -> tuple[Candidat
         factual_accuracy=accuracy_score,
     )
 
-    verified_candidate = Candidate(
-        google_title=candidate.google_title,
-        google_short_title=candidate.google_short_title,
-        google_description=candidate.google_description,
-        bing_title=candidate.bing_title,
-        bing_description=candidate.bing_description,
-        shopify_title=candidate.shopify_title,
-        shopify_description=candidate.shopify_description,
-        claims=verified_claims,
-        self_score=candidate.self_score,
-        verified_score=verified_score,
+    verified_candidate = candidate.model_copy(
+        update={
+            "claims": verified_claims,
+            "verified_score": verified_score,
+        }
     )
 
     return verified_candidate, errors

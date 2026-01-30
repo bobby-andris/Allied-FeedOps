@@ -1,19 +1,39 @@
 {
   "sku": "shopify_US_7721205596386_42803122110690",
-  "title": "Modern Retractable Wall Hook 2-1/2-Inch Extendable | Polished Brass | Retractable Hooks And Garment Rods | Allied Brass",
-  "description": "Add hanging space where you need it\u2014without a hook constantly protruding into your bathroom in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This modern retractable wall hook (also used as a wall hook or bathroom robe hook) pulls out for use and pushes back in when you want a cleaner, low-profile wall.\n\nHighlights:\n- Polished Brass brings warm, timeless elegance\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Dependable support for everyday items\u2014holds up to 15 pounds when installed as directed\n- Coordinate your look\u2014part of the retractable hooks and garment rods collection, designed to complement transitional bathroom hardware and versatile bath accessories\n- Customize the front detail\u2014remove the supplied knob tip and replace it with a cabinet knob of your own\n\nSpecs & Installation (wall mount / wall-mounted / wall hanging):\n- Extension: 2-1/2 inches\n- Product size (L x H x W): 2 x 2 x 3.75 inches\n- Capacity: up to 15 lb\n- Fits: standard interior walls\n- Mounting: drill one 3/4-inch diameter hole through drywall and three small holes; installs with included toggle bolts and all mounting hardware",
+  "title": "Polished Brass Modern Retractable Wall Hook, 2-1/2-Inch Pull-Out, Wall-Mounted Brass, 15 Lb, Allied Brass",
+  "description": "Modern retractable wall hook for bathroom use with 2-1/2 inches / 2-1/2-inch / 2.5 inch pull-out hanging space for towels, robes, and clothing in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This wall-mounted hook retracts back in when not in use for a clean look in modern bathroom hardware, contemporary bath accessories, and minimalist bathroom fixtures. Brass construction; wall mount installation for standard interior walls. Includes mounting hardware and toggle bolts; installation requires drilling a 3/4 inch dia. hole through drywall plus three small holes around the opening. Weight capacity: 15 lb. Customize the look by removing the included knob tip and replacing it with your own cabinet knob. Dimensions: 2 in L x 2 in H x 3.75 in W; projection 1 in; product weight 1 lb. Lifetime warranty. Allied Brass.",
   "_meta": {
     "master_sku": "MD-22",
     "option_sku": "MD-22-PB",
     "finish": "Polished Brass",
     "finish_keywords": [
+      "polished brass retractable hooks and garment rods",
       "polished brass bathroom hardware",
-      "polished brass bath accessories",
-      "polished brass retractable wall hook"
+      "polished brass bath accessories"
     ],
-    "generated_at": "2026-01-28T12:13:56.680065",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:11:58.558001",
+    "quality_score": 90.0,
+    "approval_status": "approved",
+    "heuristic_score": 78.67,
+    "selection_score_adjusted": 78.67,
+    "heuristic_score_breakdown": {
+      "google": 76.67,
+      "bing": 80.0,
+      "shopify": 86.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 0,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Modern Retractable Wall Hook",

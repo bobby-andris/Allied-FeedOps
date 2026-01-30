@@ -1,21 +1,42 @@
 {
   "productId": "4542499979396",
   "variantId": "32116324171908",
-  "title": "18-Inch Towel Bar, Solid Brass Wall Mount | Polished Brass | Carolina Collection | Allied Brass",
-  "body_html": "<p>Keep towels neatly displayed and easy to grab with a wall-mounted towel bar that brings traditional style to everyday bathroom organization in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. Designed as part of the Carolina Collection, it coordinates effortlessly with matching Carolina accessories for a classic, timeless look.</p>\n<ul>\n <li>Polished Brass brings warm, timeless elegance</li>\n <li>Coordinates with other Carolina pieces for a timeless, unified look</li>\n <li>Choose from 100 designer finishes to match the rest of your bathroom</li>\n <li><strong>Coordinated bathroom design:</strong> Pairs with other Carolina Collection pieces for classic bath accessories and heritage bathroom fixtures.</li>\n <li><strong>Built from solid brass:</strong> Brass construction for enduring use.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong><br>\nLength: 18 Inch<br>\nOverall width: 20<br>\nDepth (projection): 2<br>\nHeight: 3.5<br>\nWeight: 2.4 lbs<br>\nMounting: Wall mounted; concealed screw mounting; mounting hardware included<br>\nMultiple designer finish options available<br>\nWarranty: Limited Lifetime Warranty</p>",
-  "meta_description": "",
+  "title": "Polished Brass 18-Inch Wall Mount Towel Bar - Solid Brass Straight Bar, Carolina Collection (Traditional Style), Allied Brass",
+  "body_html": "<p>Stop settling for flimsy towel bars and mismatched finishes\u2014this 18-inch wall mount towel bar brings a clean, coordinated look to your bathroom \u2014 available in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. <strong>Backed by a lifetime warranty</strong>, it\u2019s crafted from solid brass for enduring everyday use.</p>\n<p>Part of the <strong>Carolina collection</strong>\u2014a traditional, timeless suite designed for matching Carolina bathrooms and classic bath accessories.</p>\n<ul>\n <li>Polished Brass brings warm, timeless elegance</li>\n <li>Coordinates with other Carolina pieces for a timeless, unified look</li>\n <li>Choose from 25 designer finishes to match the rest of your bathroom</li>\n <li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n <li>Choose from multiple designer finish options to coordinate with traditional bathroom hardware</li>\n</ul>\n<p><strong>Complete your bathroom</strong> with matching pieces from the Carolina collection.</p>\n<p><strong>Specs</strong></p>\n<ul>\n <li>Product type: Towel bar (straight bar)</li>\n <li>Center-to-center: 18 in</li>\n <li>Bar diameter: 0.75 in</li>\n <li>Projection (depth): 2 in</li>\n <li>Overall height: 3.5 in</li>\n <li>Weight capacity: 10 lb</li>\n <li>Mounting type: Wall mount (concealed screw mounting)</li>\n <li>Included: Towel bar, mounting plates, and all installation hardware</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
+  "meta_description": "18-inch wall mount towel bar in solid brass with concealed mounting. Traditional Carolina collection style, multiple finish options, limited lifetime warranty.",
   "_meta": {
     "master_sku": "CL-41-18",
     "option_sku": "CL-41-18-PB",
     "finish": "Polished Brass",
     "finish_keywords": [
+      "polished brass towel bar",
+      "polished brass bathroom towel bar",
       "polished brass bathroom hardware",
-      "polished brass bath accessories",
-      "polished brass towel bars"
+      "polished brass bath accessories"
     ],
-    "generated_at": "2026-01-28T02:50:25.641727",
-    "quality_score": 85.0,
-    "approval_status": "rejected"
+    "generated_at": "2026-01-30T14:55:52.670282",
+    "quality_score": 93.33,
+    "approval_status": "approved",
+    "heuristic_score": 91.5,
+    "selection_score_adjusted": 91.5,
+    "heuristic_score_breakdown": {
+      "google": 90.0,
+      "bing": 93.33,
+      "shopify": 96.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 0,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Carolina Collection Towel Bar",

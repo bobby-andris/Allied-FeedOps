@@ -1,19 +1,39 @@
 {
   "sku": "shopify_US_4544951648388_32128137724036",
-  "title": "Freestanding Coat Rack 60-Inch Solid Brass, 8 Pivoting Pegs | Oil Rubbed Bronze | Assorted Free Standing Accessories | Allied Brass",
-  "description": "Need a no-drill place to hang coats and towels in the bathroom? This freestanding coat rack (also used as a towel stand or garment rack) keeps items off chairs and counters with eight pivoting pegs for organized, easy access in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Built with solid brass construction and designed as transitional bathroom hardware, it complements versatile bath accessories while letting you place it anywhere\u2014no wall mount, wall-mounted brackets, or wall hanging installation required.\n\nHighlights:\n- Oil Rubbed Bronze brings rich depth and character\n- Choose from 28 designer finishes to match the rest of your bathroom\n- Stable on the floor: weighted base is designed to keep the rack stable to prevent tipping\n- Floor-friendly: felt pad helps prevent scratching on tile, wood, or other surfaces\n- Coordinate a matching look: part of the Assorted Free Standing Accessories collection with multiple designer finish options\n\nSpecs & Installation:\n- Product type: freestanding coat rack / towel stand / garment rack\n- Dimensions (L x H x W): 10 x 60 x 10 in.\n- Material: solid brass; brass construction\n- Base: weighted base with felt pad\n- Assembly: some assembly required\n- Box dimensions (L x H x W): 26 x 26 x 12 in.\n- Shipping weight: 18 lbs.",
+  "title": "Oil Rubbed Bronze Freestanding Coat Rack, 60-Inch Solid Brass, Eight Pivoting Pegs, 10X10 Base, Allied Brass",
+  "description": "Finished in Oil Rubbed Bronze, freestanding coat rack with eight pivoting pegs for bathroom organization\u2014ideal for coats, robes, hats, and accessories, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. Floor standing coat rack / freestanding standing coat rack (no wall mount, no wall-mounted installation). Solid brass construction with traditional style and contemporary design elements for traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures. Size: 60 inches tall (60-inch, 60 in) with a 10 inches x 10 inches footprint (10-inch, 10 in); overall product dimensions (LxHxW) 10 x 60 x 10. Weighted base keeps the rack stable to help prevent tipping; felt pad helps prevent scratching on floors. Assembly required. Weight capacity 18 lb. Includes: freestanding coat rack. Lifetime warranty. Allied Brass.",
   "_meta": {
     "master_sku": "CS-1",
     "option_sku": "CS-1-ORB",
     "finish": "Oil Rubbed Bronze",
     "finish_keywords": [
+      "oil rubbed bronze assorted free standing accessories",
       "oil rubbed bronze bathroom hardware",
-      "oil rubbed bronze bath accessories",
-      "oil rubbed bronze assorted freestanding accessories"
+      "oil rubbed bronze bath accessories"
     ],
-    "generated_at": "2026-01-28T03:02:45.890346",
-    "quality_score": 85.0,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:00:24.565840",
+    "quality_score": 88.33,
+    "approval_status": "approved",
+    "heuristic_score": 82.33,
+    "selection_score_adjusted": 82.33,
+    "heuristic_score_breakdown": {
+      "google": 83.33,
+      "bing": 83.33,
+      "shopify": 76.67
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 2,
+    "num_candidates": 3
   },
   "_previous": {
     "title": "Freestanding Coat Rack with Eight Pivoting Pegs",

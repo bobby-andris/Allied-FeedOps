@@ -1,65 +1,86 @@
 {
   "productId": "4538723762308",
-  "title": "Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-  "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li><strong>Keep glass and tile spot-free after every shower</strong> with a smooth, easy-glide blade.</li>\n <li><strong>Store it right where you need it</strong> using the included wall-mounted hook for a tidy shower area.</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-  "meta_description": "",
+  "title": "Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+  "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Wipe away moisture fast to reduce water spotting on glass, tile, and mirrors</li>\n<li>Save space with a wall mount mounting hook that keeps the squeegee within reach</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+  "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
   "_meta": {
     "master_sku": "SQ-20",
-    "generated_at": "2026-01-29T13:19:15.684821",
-    "quality_score": 86.67,
-    "approval_status": "approved"
+    "generated_at": "2026-01-30T15:14:34.638605",
+    "quality_score": 88.33,
+    "approval_status": "rejected",
+    "heuristic_score": 87.67,
+    "selection_score_adjusted": 87.67,
+    "heuristic_score_breakdown": {
+      "google": 86.67,
+      "bing": 90.0,
+      "shopify": 90.0
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 0.0,
+    "soft_gate_miss_counts": {
+      "google": 0,
+      "bing": 0,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3,
+    "quality_breakdown": {
+      "title_length": 122,
+      "description_length": 1224,
+      "trust_signals_found": 2,
+      "competitive_language_found": true,
+      "heuristic_platform_score": 90.0,
+      "heuristic_composite": 87.67
+    }
   },
   "_previous": {
     "title": "Shower Squeegee with Smooth Handle",
     "description": "Use this shower squeegee to remove moisture in quick and easy strokes. Keep your tile, mirrors and shower doors spot-free by removing excess water after your shower. The decorative mounting hook will keep your squeegee securely supported when properly installed in the wall. Squeegee is made of the finest solid brass materials and provided with one of our designer lifetime finishes. You can also buy Squeegee Blade Replacement . Crafted of the Finest Solid Brass Materials Blade can be easily replaced Keep your shower doors, tile and mirrors clean and free of water spotting Mounting Hook included Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 10x15x10 Box dimensions, in. (LxHxW): 16x10x8 Shipping weight, lbs: 4 Installation Instruction Technical Specification SQ20-Installation.PDF SQ20-Specification.PDF"
   },
-  "lifestyle_images": [
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/SQ-20_var1_20260129_131721.png",
-      "variation_num": 1,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/SQ-20-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_131721",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/SQ-20_var2_20260129_131828.png",
-      "variation_num": 2,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/SQ-20-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_131828",
-      "error_message": null
-    },
-    {
-      "image_path": "dashboard_data/lifestyle-eval-candidate/images/SQ-20_var3_20260129_131842.png",
-      "variation_num": 3,
-      "generation_success": true,
-      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://storage.alliedbrass.com/images/products/main/hq/3000px/SQ-20-ABR.jpg\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nTraditional bathroom with cream subway tiles, warm brass fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Warm 3500K with natural light creating golden highlights\nCamera: 3/4 angle showing dimensional details\nMood: Classic elegance, warm luxury, traditional sophistication\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
-      "timestamp": "20260129_131842",
-      "error_message": null
-    }
-  ],
-  "selected_lifestyle_image": 2,
-  "lifestyle_image_link": "data/lifestyle_images/SQ-20_var2_20260129_131828.png",
   "variants": [
     {
       "productId": "4538723762308",
       "variantId": "32096366231684",
-      "title": "Antique Brass Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Antique Brass, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Antique Brass brings warm, timeless elegance</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Antique Brass Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Antique Brass, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which features a softened, aged golden patina that brings vintage charm and character to traditional spaces. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Antique Brass brings warm, timeless elegance</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-ABR",
         "finish": "Antique Brass",
         "finish_keywords": [
+          "antique brass squeegee",
+          "antique brass bathroom squeegee",
           "antique brass bathroom hardware",
-          "antique brass bath accessories",
-          "antique brass squeegee"
+          "antique brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.684894",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.638720",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -69,21 +90,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366264452",
-      "title": "Antique Bronze Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Antique Bronze brings rich depth and character</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Antique Bronze Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Antique Bronze, which combines deep brown tones with subtle warm highlights, offering heritage appeal with modern durability. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Antique Bronze brings rich depth and character</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-ABZ",
         "finish": "Antique Bronze",
         "finish_keywords": [
+          "antique bronze squeegee",
+          "antique bronze bathroom squeegee",
           "antique bronze bathroom hardware",
-          "antique bronze bath accessories",
-          "antique bronze squeegee"
+          "antique bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.684964",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.638803",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -93,21 +135,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366297220",
-      "title": "Brushed Bronze Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Brushed Bronze brings rich depth and character</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Brushed Bronze Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Brushed Bronze, which features warm, earthy tones with a softly textured surface that adds depth to traditional and transitional bathrooms. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Brushed Bronze brings rich depth and character</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-BBR",
         "finish": "Brushed Bronze",
         "finish_keywords": [
+          "brushed bronze squeegee",
+          "brushed bronze bathroom squeegee",
           "brushed bronze bathroom hardware",
-          "brushed bronze bath accessories",
-          "brushed bronze squeegee"
+          "brushed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685033",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.638881",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -117,21 +180,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366329988",
-      "title": "Matte Black Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Matte Black, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Matte Black makes a bold, modern statement</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Matte Black Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Matte Black, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Matte Black makes a bold, modern statement</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-BKM",
         "finish": "Matte Black",
         "finish_keywords": [
+          "matte black squeegee",
+          "matte black bathroom squeegee",
           "matte black bathroom hardware",
-          "matte black bath accessories",
-          "matte black squeegee"
+          "matte black bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685101",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.638965",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -141,21 +225,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366362756",
-      "title": "Antique Copper Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Antique Copper, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Antique Copper creates an inviting, organic feel</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Antique Copper Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Antique Copper, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which brings warm, reddish-brown tones with natural variation, perfect for rustic or craftsman-style bathrooms. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Antique Copper creates an inviting, organic feel</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-CA",
         "finish": "Antique Copper",
         "finish_keywords": [
+          "antique copper squeegee",
+          "antique copper bathroom squeegee",
           "antique copper bathroom hardware",
-          "antique copper bath accessories",
-          "antique copper squeegee"
+          "antique copper bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685168",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639037",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -165,21 +270,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366395524",
-      "title": "Matte Gray Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Matte Gray, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Store it right where you need it</strong> using the included wall-mounted hook for a tidy shower area.</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Matte Gray Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Matte Gray, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which provides a sophisticated neutral that complements concrete, stone, and other modern materials. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Save space with a wall mount mounting hook that keeps the squeegee within reach</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-GYM",
         "finish": "Matte Gray",
         "finish_keywords": [
+          "matte gray squeegee",
+          "matte gray bathroom squeegee",
           "matte gray bathroom hardware",
-          "matte gray bath accessories",
-          "matte gray squeegee"
+          "matte gray bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685234",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639107",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -189,21 +315,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366428292",
-      "title": "Oil Rubbed Bronze Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Oil Rubbed Bronze brings rich depth and character</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Oil Rubbed Bronze Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Oil Rubbed Bronze, which offers rich, dark brown tones with subtle copper highlights, bringing Old World character to any bathroom. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Oil Rubbed Bronze brings rich depth and character</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-ORB",
         "finish": "Oil Rubbed Bronze",
         "finish_keywords": [
+          "oil rubbed bronze squeegee",
+          "oil rubbed bronze bathroom squeegee",
           "oil rubbed bronze bathroom hardware",
-          "oil rubbed bronze bath accessories",
-          "oil rubbed bronze squeegee"
+          "oil rubbed bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685324",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639202",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -213,21 +360,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366461060",
-      "title": "Polished Brass Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Polished Brass, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Polished Brass brings warm, timeless elegance</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Polished Brass Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Polished Brass, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which brings warm, golden elegance that complements traditional faucets and classic bathroom fixtures. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Polished Brass brings warm, timeless elegance</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-PB",
         "finish": "Polished Brass",
         "finish_keywords": [
+          "polished brass squeegee",
+          "polished brass bathroom squeegee",
           "polished brass bathroom hardware",
-          "polished brass bath accessories",
-          "polished brass squeegee"
+          "polished brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685392",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639272",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -237,21 +405,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366493828",
-      "title": "Polished Chrome Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Polished Chrome, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Polished Chrome Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Polished Chrome, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Polished Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-PC",
         "finish": "Polished Chrome",
         "finish_keywords": [
+          "polished chrome squeegee",
+          "polished chrome bathroom squeegee",
           "polished chrome bathroom hardware",
-          "polished chrome bath accessories",
-          "polished chrome squeegee"
+          "polished chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685459",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639341",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -261,21 +450,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366526596",
-      "title": "Antique Pewter Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Antique Pewter blends effortlessly with transitional decor</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Antique Pewter Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Antique Pewter, which offers a soft, silvery-gray tone with subtle warmth, bridging traditional and contemporary aesthetics. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Antique Pewter blends effortlessly with transitional decor</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-PEW",
         "finish": "Antique Pewter",
         "finish_keywords": [
+          "antique pewter squeegee",
+          "antique pewter bathroom squeegee",
           "antique pewter bathroom hardware",
-          "antique pewter bath accessories",
-          "antique pewter squeegee"
+          "antique pewter bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685525",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639410",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -285,21 +495,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366559364",
-      "title": "Polished Nickel Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Polished Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Polished Nickel Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Polished Nickel, which offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Polished Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-PNI",
         "finish": "Polished Nickel",
         "finish_keywords": [
+          "polished nickel squeegee",
+          "polished nickel bathroom squeegee",
           "polished nickel bathroom hardware",
-          "polished nickel bath accessories",
-          "polished nickel squeegee"
+          "polished nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685591",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639480",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -309,21 +540,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366592132",
-      "title": "Satin Brass Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Satin Brass brings warm, timeless elegance</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Satin Brass Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Satin Brass, which combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Satin Brass brings warm, timeless elegance</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-SBR",
         "finish": "Satin Brass",
         "finish_keywords": [
+          "satin brass squeegee",
+          "satin brass bathroom squeegee",
           "satin brass bathroom hardware",
-          "satin brass bath accessories",
-          "satin brass squeegee"
+          "satin brass bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685658",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639548",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -333,21 +585,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366624900",
-      "title": "Satin Chrome Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Satin Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Satin Chrome Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Satin Chrome, which provides a brushed, matte-like surface that resists fingerprints while maintaining a modern, understated elegance. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Satin Chrome coordinates seamlessly with chrome faucets and fixtures</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-SCH",
         "finish": "Satin Chrome",
         "finish_keywords": [
+          "satin chrome squeegee",
+          "satin chrome bathroom squeegee",
           "satin chrome bathroom hardware",
-          "satin chrome bath accessories",
-          "satin chrome squeegee"
+          "satin chrome bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685725",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639617",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -357,21 +630,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366657668",
-      "title": "Satin Nickel Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Satin Nickel Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Satin Nickel, which offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Satin Nickel coordinates seamlessly with chrome faucets and fixtures</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-SN",
         "finish": "Satin Nickel",
         "finish_keywords": [
+          "satin nickel squeegee",
+          "satin nickel bathroom squeegee",
           "satin nickel bathroom hardware",
-          "satin nickel bath accessories",
-          "satin nickel squeegee"
+          "satin nickel bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685791",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639686",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -381,25 +675,46 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366690436",
-      "title": "Unlacquered Brass Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Unlacquered Brass develops a unique, one-of-a-kind patina over time</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Unlacquered Brass Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Unlacquered Brass, which is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Unlacquered Brass develops a unique, one-of-a-kind patina over time</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-UNL",
         "finish": "Unlacquered Brass",
         "finish_keywords": [
+          "unlacquered brass squeegee",
+          "unlacquered brass bathroom squeegee",
           "unlacquered brass bathroom hardware",
           "unlacquered brass bath accessories",
-          "unlacquered brass squeegee",
           "unlacquered brass statement finish",
           "unlacquered brass designer hardware",
           "unlacquered brass living finish",
           "unlacquered brass patina"
         ],
-        "generated_at": "2026-01-29T13:19:15.685857",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639756",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -409,21 +724,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366723204",
-      "title": "Venetian Bronze Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Venetian Bronze brings rich depth and character</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Venetian Bronze Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Venetian Bronze, which presents deep, warm undertones with subtle golden accents, evoking European craftsmanship and timeless style. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Venetian Bronze brings rich depth and character</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-VB",
         "finish": "Venetian Bronze",
         "finish_keywords": [
+          "venetian bronze squeegee",
+          "venetian bronze bathroom squeegee",
           "venetian bronze bathroom hardware",
-          "venetian bronze bath accessories",
-          "venetian bronze squeegee"
+          "venetian bronze bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685924",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639826",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -433,21 +769,42 @@
     {
       "productId": "4538723762308",
       "variantId": "32096366755972",
-      "title": "Matte White Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Matte White, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Store it right where you need it</strong> using the included wall-mounted hook for a tidy shower area.</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Matte White Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Matte White, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which brings clean, fresh simplicity that brightens spaces and creates a light, airy bathroom atmosphere. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Save space with a wall mount mounting hook that keeps the squeegee within reach</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-WHM",
         "finish": "Matte White",
         "finish_keywords": [
+          "matte white squeegee",
+          "matte white bathroom squeegee",
           "matte white bathroom hardware",
-          "matte white bath accessories",
-          "matte white squeegee"
+          "matte white bath accessories"
         ],
-        "generated_at": "2026-01-29T13:19:15.685996",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639899",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -457,23 +814,44 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058402018",
-      "title": "Spanish Gold Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Spanish Gold, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Spanish Gold elevates the room with luxe gold tones</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Spanish Gold Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Spanish Gold, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which presents a rich, warm golden tone with European-inspired elegance, bringing luxury and sophistication to distinguished bathrooms. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Spanish Gold elevates the room with luxe gold tones</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-SGL",
         "finish": "Spanish Gold",
         "finish_keywords": [
+          "spanish gold squeegee",
+          "spanish gold bathroom squeegee",
           "spanish gold bathroom hardware",
           "spanish gold bath accessories",
-          "spanish gold squeegee",
           "spanish gold statement finish",
           "spanish gold designer hardware"
         ],
-        "generated_at": "2026-01-29T13:19:15.686066",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.639969",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -483,25 +861,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058434786",
-      "title": "Autumn Sparkle Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Autumn Sparkle transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Autumn Sparkle Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Autumn Sparkle, which captures the rich, warm tones of fall foliage with subtle shimmer, bringing seasonal warmth year-round. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Autumn Sparkle transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-ASP",
         "finish": "Autumn Sparkle",
         "finish_keywords": [
+          "autumn sparkle squeegee",
+          "autumn sparkle bathroom squeegee",
           "autumn sparkle bathroom hardware",
           "autumn sparkle bath accessories",
-          "autumn sparkle squeegee",
           "autumn sparkle statement finish",
           "autumn sparkle designer hardware",
           "autumn sparkle colored hardware",
           "autumn sparkle color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686134",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640038",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -511,25 +910,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058467554",
-      "title": "Glokzin Teal Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Glokzin Teal transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Glokzin Teal Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Glokzin Teal, which delivers rich, jewel-toned sophistication, adding artistic depth and a designer touch to modern bathrooms. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Glokzin Teal transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-GLT",
         "finish": "Glokzin Teal",
         "finish_keywords": [
+          "glokzin teal squeegee",
+          "glokzin teal bathroom squeegee",
           "glokzin teal bathroom hardware",
           "glokzin teal bath accessories",
-          "glokzin teal squeegee",
           "glokzin teal statement finish",
           "glokzin teal designer hardware",
           "glokzin teal colored hardware",
           "glokzin teal color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686205",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640107",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -539,25 +959,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058500322",
-      "title": "Shaded Beige Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Shaded Beige transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Shaded Beige Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Shaded Beige, which offers sophisticated warmth in a soft, neutral tone that complements natural materials and earthy palettes. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Shaded Beige transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-SHB",
         "finish": "Shaded Beige",
         "finish_keywords": [
+          "shaded beige squeegee",
+          "shaded beige bathroom squeegee",
           "shaded beige bathroom hardware",
           "shaded beige bath accessories",
-          "shaded beige squeegee",
           "shaded beige statement finish",
           "shaded beige designer hardware",
           "shaded beige colored hardware",
           "shaded beige color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686271",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640176",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -567,25 +1008,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058533090",
-      "title": "Golden Yellow Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Golden Yellow transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Golden Yellow Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Golden Yellow transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-GLY",
         "finish": "Golden Yellow",
         "finish_keywords": [
+          "golden yellow squeegee",
+          "golden yellow bathroom squeegee",
           "golden yellow bathroom hardware",
           "golden yellow bath accessories",
-          "golden yellow squeegee",
           "golden yellow statement finish",
           "golden yellow designer hardware",
           "golden yellow colored hardware",
           "golden yellow color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686337",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640246",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -595,23 +1057,44 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058565858",
-      "title": "Flat Troll Blue Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Flat Troll Blue, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Flat Troll Blue creates a distinctive focal point</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Flat Troll Blue Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Flat Troll Blue, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which presents a distinctive, muted blue-gray tone that adds artistic character to contemporary bathroom designs. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Flat Troll Blue creates a distinctive focal point</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-FTB",
         "finish": "Flat Troll Blue",
         "finish_keywords": [
+          "flat troll blue squeegee",
+          "flat troll blue bathroom squeegee",
           "flat troll blue bathroom hardware",
           "flat troll blue bath accessories",
-          "flat troll blue squeegee",
           "flat troll blue statement finish",
           "flat troll blue designer hardware"
         ],
-        "generated_at": "2026-01-29T13:19:15.686402",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640314",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -621,25 +1104,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058598626",
-      "title": "Sea Foam Green Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Sea Foam Green, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Sea Foam Green transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Sea Foam Green Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Sea Foam Green, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which captures the tranquil essence of ocean-inspired design, bringing soft, natural color to coastal and contemporary spaces. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Sea Foam Green transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-SFG",
         "finish": "Sea Foam Green",
         "finish_keywords": [
+          "sea foam green squeegee",
+          "sea foam green bathroom squeegee",
           "sea foam green bathroom hardware",
           "sea foam green bath accessories",
-          "sea foam green squeegee",
           "sea foam green statement finish",
           "sea foam green designer hardware",
           "sea foam green colored hardware",
           "sea foam green color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686468",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640385",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -649,25 +1153,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058631394",
-      "title": "Fire Engine Red Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Fire Engine Red transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Fire Engine Red Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook \u2014 available in Fire Engine Red, which makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Fire Engine Red transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-FER",
         "finish": "Fire Engine Red",
         "finish_keywords": [
+          "fire engine red squeegee",
+          "fire engine red bathroom squeegee",
           "fire engine red bathroom hardware",
           "fire engine red bath accessories",
-          "fire engine red squeegee",
           "fire engine red statement finish",
           "fire engine red designer hardware",
           "fire engine red colored hardware",
           "fire engine red color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686534",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640455",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -677,25 +1202,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058664162",
-      "title": "Lavender Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Lavender transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Lavender Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Lavender, which introduces soft, calming color that adds a touch of unexpected elegance, perfect for creating a spa-like retreat. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Lavender transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-LVN",
         "finish": "Lavender",
         "finish_keywords": [
+          "lavender squeegee",
+          "lavender bathroom squeegee",
           "lavender bathroom hardware",
           "lavender bath accessories",
-          "lavender squeegee",
           "lavender statement finish",
           "lavender designer hardware",
           "lavender colored hardware",
           "lavender color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686599",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640524",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -705,25 +1251,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058696930",
-      "title": "Mediterranean Blue Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Mediterranean Blue transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Mediterranean Blue Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook in Mediterranean Blue, which presents a deep, sophisticated blue with subtle purple undertones, evoking the rich depths of coastal waters for a bold yet refined statement. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Mediterranean Blue transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-MBL",
         "finish": "Mediterranean Blue",
         "finish_keywords": [
+          "mediterranean blue squeegee",
+          "mediterranean blue bathroom squeegee",
           "mediterranean blue bathroom hardware",
           "mediterranean blue bath accessories",
-          "mediterranean blue squeegee",
           "mediterranean blue statement finish",
           "mediterranean blue designer hardware",
           "mediterranean blue colored hardware",
           "mediterranean blue color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686665",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640595",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",
@@ -733,25 +1300,46 @@
     {
       "productId": "4538723762308",
       "variantId": "43094058729698",
-      "title": "Pink Shower Squeegee With Smooth Handle, 20-Inch, Solid Brass, Wall Mount Hook, Squeegee Collection, Allied Brass",
-      "body_html": "<p>Stop water spots and streaks before they dry on your shower doors, tile, and mirrors in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. This wall-mount shower squeegee clears moisture in quick, easy strokes and stores neatly on its included mounting hook.</p>\n<ul>\n <li>Pink transforms this essential into a conversation piece</li>\n <li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n <li><strong>Built for lasting strength</strong> with solid brass construction.</li>\n <li><strong>Maintain long-term performance</strong> with a blade that can be easily replaced.</li>\n <li><strong>Create a coordinated look</strong> with the distinctive Squeegee collection and multiple designer finish options.</li>\n</ul>\n<p><strong>Specs &amp; Installation</strong></p>\n<ul>\n <li>Size: 20 Inch</li>\n <li>Product dimensions (L x H x W): 10 x 15 x 10 in.</li>\n <li>Mounting: Wall mount (mounting hook and all installation hardware included)</li>\n <li>Included: Squeegee, blade, mounting hook, installation hardware</li>\n <li>Weight capacity: 2 lb</li>\n <li>Assembly required: No</li>\n <li>Warranty: Limited Lifetime Warranty</li>\n</ul>",
-      "meta_description": "",
+      "title": "Pink Shower Squeegee With Smooth Handle, 20-Inch, Wall Mount Solid Brass With Mounting Hook - Traditional Style, Allied Brass",
+      "body_html": "<p>Finished in Pink, keep shower doors, tile, and mirrors spot-free after every rinse with a wall-mounted shower squeegee that stores neatly on its included hook, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. <strong>Backed by a limited lifetime warranty</strong>, this solid brass set is built for daily bathroom use.</p>\n<ul>\n<li>Pink transforms this essential into a conversation piece</li>\n<li>Choose from 28 designer finishes to match the rest of your bathroom</li>\n<li>Choose a look that fits traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures</li>\n<li>Replace the blade easily when it\u2019s time to refresh performance</li>\n<li>Solid brass construction outlasts die-cast zinc and plastic alternatives</li>\n</ul>\n<p><strong>What\u2019s included</strong></p>\n<ul>\n<li>Squeegee, blade, mounting hook, and all installation hardware</li>\n</ul>\n<p><strong>Specs</strong></p>\n<ul>\n<li>Size: 20 Inch</li>\n<li>Product dimensions (LxHxW): 10 x 15 x 10 in</li>\n<li>Mounting: Wall mount</li>\n<li>Material: Brass (solid brass construction)</li>\n<li>Weight capacity: 2 lb</li>\n<li>Assembly required: No</li>\n<li>Warranty: Limited Lifetime Warranty</li>\n</ul>\n<p>Complete your bathroom with coordinating pieces in matching finishes.</p>",
+      "meta_description": "Wall mount shower squeegee, 20-Inch solid brass with smooth handle and hook. Keeps shower doors and mirrors spot-free; blade replaceable.",
       "_meta": {
         "master_sku": "SQ-20",
         "option_sku": "SQ-20-PNK",
         "finish": "Pink",
         "finish_keywords": [
+          "pink squeegee",
+          "pink bathroom squeegee",
           "pink bathroom hardware",
           "pink bath accessories",
-          "pink squeegee",
           "pink statement finish",
           "pink designer hardware",
           "pink colored hardware",
           "pink color bathroom"
         ],
-        "generated_at": "2026-01-29T13:19:15.686730",
-        "quality_score": 86.67,
-        "approval_status": "approved"
+        "generated_at": "2026-01-30T15:14:34.640664",
+        "quality_score": 88.33,
+        "approval_status": "rejected",
+        "heuristic_score": 87.67,
+        "selection_score_adjusted": 87.67,
+        "heuristic_score_breakdown": {
+          "google": 86.67,
+          "bing": 90.0,
+          "shopify": 90.0
+        },
+        "selection_weights": {
+          "google": 0.7,
+          "bing": 0.15,
+          "shopify": 0.15
+        },
+        "soft_gate_penalty": 0.0,
+        "soft_gate_miss_counts": {
+          "google": 0,
+          "bing": 0,
+          "shopify": 0
+        },
+        "candidate_index": 1,
+        "num_candidates": 3
       },
       "_previous": {
         "title": "Shower Squeegee with Smooth Handle",

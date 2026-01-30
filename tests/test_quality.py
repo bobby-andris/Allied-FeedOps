@@ -105,15 +105,18 @@ def test_score_candidate_weighted_composite_matches_platform_scores():
     google_score = score_bundle(
         title=candidate.google_title,
         description=candidate.google_description,
+        platform="google",
     )
     bing_score = score_bundle(
         title=candidate.bing_title,
         description=candidate.bing_description,
+        platform="bing",
     )
     shopify_score = score_bundle(
         title=candidate.shopify_title,
         description=candidate.shopify_description,
         html_description=True,
+        platform="shopify",
     )
     expected = round(
         (

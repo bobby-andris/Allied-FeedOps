@@ -1,5 +1,6 @@
 """Candidate generator using LLM providers."""
 
+import asyncio
 import json
 
 from feedops.models import Candidate, Claim, ParentSKU, Score
@@ -15,6 +16,7 @@ from feedops.pipeline.prompts import (
     OPTIMIZATION_TEMPLATE,
     SYSTEM_PROMPT,
     USER_PROMPT_TEMPLATE,
+    build_category_guidance,
 )
 from feedops.providers.base import LLMProvider
 
@@ -135,6 +137,7 @@ def build_prompt(parent_sku: ParentSKU) -> str:
         system_prompt=SYSTEM_PROMPT,
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
+        category_guidance=build_category_guidance(parent_sku.category),
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )
@@ -162,6 +165,7 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
     user_prompt = USER_PROMPT_TEMPLATE.format(
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
+        category_guidance=build_category_guidance(parent_sku.category),
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )
@@ -246,6 +250,22 @@ async def generate_candidate(
     return candidates[0]
 
 
+_MIN_TITLE_LENGTH = 60
+
+
+def _needs_title_retry(candidate: Candidate) -> list[str]:
+    """Check if a candidate has titles that are too short.
+
+    Returns list of field names that failed the minimum length check.
+    """
+    short_fields = []
+    for field in ("google_title", "bing_title"):
+        value = getattr(candidate, field, "")
+        if len(value) < _MIN_TITLE_LENGTH:
+            short_fields.append(field)
+    return short_fields
+
+
 async def generate_candidates(
     parent_sku: ParentSKU,
     llm: LLMProvider,
@@ -253,6 +273,10 @@ async def generate_candidates(
     reasoning_effort: str | None = None,
 ) -> tuple[list[Candidate], list[str]]:
     """Generate multiple optimized candidates for a ParentSKU.
+
+    If any candidate has a google_title or bing_title shorter than 60
+    characters, it is regenerated once. This guards against edge cases
+    where the model produces truncated titles for products with short names.
 
     Args:
         parent_sku: The parent SKU to optimize.
@@ -271,24 +295,80 @@ async def generate_candidates(
         if main_image_url:
             image = await fetch_image(main_image_url)
 
-    candidates: list[Candidate] = []
-    errors: list[str] = []
-    for idx in range(count):
+    async def _generate_one(idx: int) -> Candidate:
+        response = await llm.generate(
+            user_prompt,
+            CANDIDATE_SCHEMA,
+            image=image,
+            system_prompt=system_prompt,
+            reasoning_effort=reasoning_effort,
+        )
+        candidate = parse_candidate_response(response)
+        return candidate.model_copy(
+            update={"candidate_index": idx, "num_candidates": count}
+        )
+
+    if count == 1:
+        # Fast path: no concurrency overhead for single candidate
+        candidates: list[Candidate] = []
+        errors: list[str] = []
         try:
-            response = await llm.generate(
-                user_prompt,
-                CANDIDATE_SCHEMA,
-                image=image,
-                system_prompt=system_prompt,
-                reasoning_effort=reasoning_effort,
-            )
-            candidate = parse_candidate_response(response)
-            candidates.append(
-                candidate.model_copy(
-                    update={"candidate_index": idx, "num_candidates": count}
-                )
-            )
+            candidates.append(await _generate_one(0))
         except Exception as exc:
-            errors.append(f"Candidate {idx}: {exc}")
+            errors.append(f"Candidate 0: {exc}")
+        # Retry once if title is too short
+        if candidates:
+            short_fields = _needs_title_retry(candidates[0])
+            if short_fields:
+                errors.append(
+                    f"Candidate 0 retry: {', '.join(short_fields)} under "
+                    f"{_MIN_TITLE_LENGTH} chars ({', '.join(str(len(getattr(candidates[0], f))) for f in short_fields)})"
+                )
+                try:
+                    retry = await _generate_one(0)
+                    retry_short = _needs_title_retry(retry)
+                    if not retry_short:
+                        candidates[0] = retry
+                    elif len(retry.google_title) > len(candidates[0].google_title):
+                        # Take the retry if it's at least longer
+                        candidates[0] = retry
+                except Exception as exc:
+                    errors.append(f"Candidate 0 retry failed: {exc}")
+        return candidates, errors
+
+    # Parallel generation for multiple candidates
+    tasks = [_generate_one(idx) for idx in range(count)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    candidates = []
+    errors = []
+    retry_indices = []
+    for idx, result in enumerate(results):
+        if isinstance(result, Exception):
+            errors.append(f"Candidate {idx}: {result}")
+        else:
+            candidates.append(result)
+            short_fields = _needs_title_retry(result)
+            if short_fields:
+                errors.append(
+                    f"Candidate {idx} retry: {', '.join(short_fields)} under "
+                    f"{_MIN_TITLE_LENGTH} chars"
+                )
+                retry_indices.append(len(candidates) - 1)
+
+    # Retry candidates with short titles (parallel)
+    if retry_indices:
+        retry_tasks = [_generate_one(candidates[i].candidate_index or i) for i in retry_indices]
+        retry_results = await asyncio.gather(*retry_tasks, return_exceptions=True)
+        for pos, retry_result in zip(retry_indices, retry_results):
+            if isinstance(retry_result, Exception):
+                errors.append(f"Retry failed for candidate at position {pos}: {retry_result}")
+                continue
+            original = candidates[pos]
+            retry_short = _needs_title_retry(retry_result)
+            if not retry_short:
+                candidates[pos] = retry_result
+            elif len(retry_result.google_title) > len(original.google_title):
+                candidates[pos] = retry_result
 
     return candidates, errors
