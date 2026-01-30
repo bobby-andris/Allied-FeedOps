@@ -8,6 +8,7 @@ def test_load_exports_dir_includes_variant_descriptions(tmp_path):
         "offerId": "shopify_US_parent",
         "title": "Base Title",
         "description": "Base Description",
+        "_previous": {"title": "Prev Title", "description": "Prev Desc"},
         "variants": [
             {
                 "offerId": "shopify_US_variant_1",
@@ -30,9 +31,10 @@ def test_load_exports_dir_includes_variant_descriptions(tmp_path):
     exports = load_exports_dir(tmp_path)
     google = exports["TESTSKU"]["google"]
     assert len(google.variants) == 2
+    assert google.previous_title == "Prev Title"
+    assert google.previous_description == "Prev Desc"
     assert google.variants[0]["_meta"]["finish"] == "Antique Brass"
     assert google.variants[0]["description"] == "Variant description in Antique Brass."
     assert google.variants[1]["_meta"]["finish"] == "Satin Nickel"
     assert google.variants[1]["title"] == "Satin Nickel Something, Allied Brass"
     assert google.variants[1]["description"] == "Variant description in Satin Nickel."
-

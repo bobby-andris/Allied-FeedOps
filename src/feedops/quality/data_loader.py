@@ -35,6 +35,8 @@ class ExportContent:
 
     title: str
     description: str
+    previous_title: str = ""
+    previous_description: str = ""
     short_title: str = ""
     quality_score: float = 0.0
     approval_status: str = ""
@@ -229,6 +231,8 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
             content = ExportContent(
                 title=title,
                 description=description,
+                previous_title="",
+                previous_description="",
                 short_title=data.get("short_title", ""),
                 quality_score=meta.get("quality_score", 0.0),
                 approval_status=meta.get("approval_status", ""),
@@ -242,6 +246,10 @@ def load_exports_dir(exports_dir: Path | str) -> dict[str, dict[str, ExportConte
             # Store _previous for original content reference
             previous = data.get("_previous", {})
             if previous:
+                if isinstance(previous.get("title"), str):
+                    content.previous_title = previous.get("title", "")
+                if isinstance(previous.get("description"), str):
+                    content.previous_description = previous.get("description", "")
                 content.image_url = previous.get("image_url", "")
 
             exports.setdefault(sku, {})[platform] = content
@@ -410,6 +418,40 @@ def load_all_sku_data(
                 if _slugify(orig_sku) == _slugify(sku):
                     original = originals[orig_sku]
                     break
+
+        # If catalog data is missing for this SKU (common in partial catalogs),
+        # fall back to the source `_previous` payload captured in the export patch.
+        if not original:
+            for platform_name in ("google", "bing", "shopify"):
+                baseline_content = baseline_exports.get(sku, {}).get(platform_name)
+                if (
+                    baseline_content
+                    and baseline_content.previous_title
+                    and baseline_content.previous_description
+                ):
+                    original = OriginalContent(
+                        master_sku=sku,
+                        title=baseline_content.previous_title,
+                        description=baseline_content.previous_description,
+                    )
+                    break
+        else:
+            # If catalog row exists but uses a different schema and leaves title/description blank,
+            # prefer `_previous` for those fields.
+            if not original.title or not original.description:
+                for platform_name in ("google", "bing", "shopify"):
+                    baseline_content = baseline_exports.get(sku, {}).get(platform_name)
+                    if not baseline_content:
+                        continue
+                    if not original.title and baseline_content.previous_title:
+                        original.title = baseline_content.previous_title
+                    if (
+                        not original.description
+                        and baseline_content.previous_description
+                    ):
+                        original.description = baseline_content.previous_description
+                    if original.title and original.description:
+                        break
 
         # Load reports
         safe_sku = _slugify(sku)
