@@ -465,10 +465,13 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         else:
             notes.append("Missing <ul><li> highlights block")
 
-    if len(text) >= 500:
-        score += 2
-    elif len(text) >= 300:
+    text_len = len(text)
+    if 600 <= text_len <= 1000:
+        score += 2  # Within target range (600-800 Google, 700-1000 Bing)
+    elif text_len >= 500:
         score += 1
+        notes.append("Description outside ideal 600-1000 character target range")
+    elif text_len >= 300:
         notes.append("Description under 500 characters")
     else:
         notes.append("Description under 300 characters")

@@ -14,6 +14,7 @@ from feedops.pipeline.prompts import (
     CANDIDATE_SCHEMA,
     OPTIMIZATION_TEMPLATE,
     SYSTEM_PROMPT,
+    USER_PROMPT_TEMPLATE,
 )
 from feedops.providers.base import LLMProvider
 
@@ -113,7 +114,11 @@ def _trim_title_to_length(title: str, max_len: int) -> str:
 
 
 def build_prompt(parent_sku: ParentSKU) -> str:
-    """Build the full optimization prompt for a ParentSKU.
+    """Build the full optimization prompt for a ParentSKU (legacy single-string).
+
+    This is the legacy single-string prompt used for reporting and backward
+    compatibility. For LLM calls, prefer build_split_prompt() which separates
+    static system content (cacheable) from dynamic user content.
 
     Args:
         parent_sku: The parent SKU to optimize.
@@ -134,6 +139,33 @@ def build_prompt(parent_sku: ParentSKU) -> str:
         master_sku=parent_sku.master_sku,
     )
     return prompt
+
+
+def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
+    """Build cache-optimized split prompt for a ParentSKU.
+
+    Returns a (system_prompt, user_prompt) tuple. The system_prompt is
+    identical across all SKUs and variants, enabling OpenAI prompt caching.
+    The user_prompt contains only per-SKU evidence, keywords, and schema.
+
+    Args:
+        parent_sku: The parent SKU to optimize.
+
+    Returns:
+        Tuple of (system_prompt, user_prompt).
+    """
+    evidence = build_evidence_table(parent_sku)
+    evidence_markdown = format_evidence_markdown(evidence)
+    keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
+    keyword_placement = format_keyword_placement_section(keyword_plan)
+
+    user_prompt = USER_PROMPT_TEMPLATE.format(
+        evidence_table=evidence_markdown,
+        keyword_placement=keyword_placement,
+        schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
+        master_sku=parent_sku.master_sku,
+    )
+    return SYSTEM_PROMPT, user_prompt
 
 
 def parse_candidate_response(response: dict) -> Candidate:
@@ -218,10 +250,21 @@ async def generate_candidates(
     parent_sku: ParentSKU,
     llm: LLMProvider,
     n: int,
+    reasoning_effort: str | None = None,
 ) -> tuple[list[Candidate], list[str]]:
-    """Generate multiple optimized candidates for a ParentSKU."""
+    """Generate multiple optimized candidates for a ParentSKU.
+
+    Args:
+        parent_sku: The parent SKU to optimize.
+        llm: The LLM provider to use.
+        n: Number of candidates to generate.
+        reasoning_effort: Optional reasoning effort level ("low", "medium", "high").
+
+    Returns:
+        Tuple of (candidates, errors).
+    """
     count = max(1, n)
-    prompt = build_prompt(parent_sku)
+    system_prompt, user_prompt = build_split_prompt(parent_sku)
     image = None
     if parent_sku.variants:
         main_image_url = parent_sku.variants[0].main_image_url
@@ -232,7 +275,13 @@ async def generate_candidates(
     errors: list[str] = []
     for idx in range(count):
         try:
-            response = await llm.generate(prompt, CANDIDATE_SCHEMA, image=image)
+            response = await llm.generate(
+                user_prompt,
+                CANDIDATE_SCHEMA,
+                image=image,
+                system_prompt=system_prompt,
+                reasoning_effort=reasoning_effort,
+            )
             candidate = parse_candidate_response(response)
             candidates.append(
                 candidate.model_copy(
@@ -242,5 +291,4 @@ async def generate_candidates(
         except Exception as exc:
             errors.append(f"Candidate {idx}: {exc}")
 
-    return candidates, errors
     return candidates, errors

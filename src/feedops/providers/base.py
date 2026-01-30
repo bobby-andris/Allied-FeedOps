@@ -26,13 +26,21 @@ class LLMProvider(ABC):
         prompt: str,
         schema: dict[str, Any],
         image: ImageInput | None = None,
+        system_prompt: str | None = None,
+        reasoning_effort: str | None = None,
     ) -> dict[str, Any]:
         """Generate structured JSON response from prompt.
 
         Args:
-            prompt: The full prompt including evidence table and constraints.
+            prompt: The user prompt (dynamic per-SKU content).
             schema: JSON schema the response must conform to.
             image: Optional image payload for multimodal models.
+            system_prompt: Optional static system prompt. When provided, sent as
+                a separate system/developer message to enable prompt caching.
+                If None, the prompt is sent as a single user message (legacy).
+            reasoning_effort: Optional reasoning effort level for models that
+                support it (e.g. GPT-5.2). One of "low", "medium", "high".
+                When None, the model uses its default.
 
         Returns:
             Parsed JSON dict matching the schema.

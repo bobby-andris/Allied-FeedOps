@@ -293,9 +293,15 @@ def generate_report(
     ):
         prompt_tokens = token_usage.get("prompt_tokens", 0)
         completion_tokens = token_usage.get("completion_tokens", 0)
+        cached_tokens = token_usage.get("cached_tokens", 0)
         token_usage_label = (
             f"Prompt tokens: {prompt_tokens}, Completion tokens: {completion_tokens}"
         )
+        if cached_tokens:
+            cache_pct = cached_tokens * 100 // max(prompt_tokens, 1)
+            token_usage_label += (
+                f", Cached tokens: {cached_tokens} ({cache_pct}% cache hit)"
+            )
     else:
         token_usage_label = "Not available"
 

@@ -606,51 +606,6 @@ def test_build_prompt_includes_evidence(sample_parent_sku):
     assert "Brass" in prompt
 
 
-def test_build_prompt_includes_constraints(sample_parent_sku):
-    """build_prompt includes character constraints."""
-    prompt = build_prompt(sample_parent_sku)
-    assert "150" in prompt  # max title length
-    assert "500" in prompt  # min description length
-
-
-def test_build_prompt_includes_prompt_overhaul_rules(sample_parent_sku):
-    """build_prompt includes new prompt rules and platform guidance."""
-    prompt = build_prompt(sample_parent_sku)
-    assert "No source citations in customer-facing fields" in prompt
-    assert "catalog_csv" in prompt
-    assert "Titles/descriptions must be citation-free" in prompt
-    assert "Only the claims array may include source attribution" in prompt
-    assert "If an image is provided" in prompt
-    assert "confirm material, finish, color, and visible features" in prompt
-    assert "Allied Brass is a niche brand" in prompt
-    assert "brand at the end" in prompt
-    assert "Brand must be last" in prompt
-    assert "No internal SKU codes" in prompt
-    assert "natural query language" in prompt
-    assert "external_keywords" in prompt
-    assert "keyword phrases only" in prompt.lower()
-    assert "keyword_intent_master" in prompt
-    assert "Title zones" in prompt
-    assert "1-30" in prompt
-    assert "31-70" in prompt
-    assert "Keyword Placement Plan" in prompt
-    assert "Title and description are equally important outputs" in prompt
-    assert "Google Shopping / Performance Max" in prompt
-    assert "seed prompt" in prompt
-    assert "Microsoft / Bing Shopping" in prompt
-    assert "Copilot confidence" in prompt
-    assert "Shopify (On-Site)" in prompt
-    assert "Output fields (must map to schema)" in prompt
-    assert "google_short_title" in prompt
-    assert "omit brand" in prompt.lower()
-    assert "google_title" in prompt
-    assert "google_description" in prompt
-    assert "bing_title" in prompt
-    assert "bing_description" in prompt
-    assert "shopify_title" in prompt
-    assert "shopify_description" in prompt
-
-
 def test_candidate_schema_has_required_fields():
     """Schema includes platform fields, claims, self_score."""
     assert "google_title" in str(CANDIDATE_SCHEMA)

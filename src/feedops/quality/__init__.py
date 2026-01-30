@@ -10,6 +10,12 @@ from feedops.quality.data_loader import (
     load_catalog_originals,
     load_exports_dir,
 )
+from feedops.quality.eval_framework import (
+    EvalReport,
+    SKUEvalResult,
+    evaluate_regression,
+    render_report,
+)
 from feedops.quality.evaluator import evaluate_exports_dir
 from feedops.quality.quality_gates import (
     AUTO_APPROVE_THRESHOLD,
@@ -28,6 +34,11 @@ from feedops.quality.scoring import score_brand_voice, score_description, score_
 __all__ = [
     # Evaluator
     "evaluate_exports_dir",
+    # Eval framework (regression testing)
+    "evaluate_regression",
+    "render_report",
+    "EvalReport",
+    "SKUEvalResult",
     # Scoring
     "score_title",
     "score_description",

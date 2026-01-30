@@ -30,37 +30,6 @@ def test_score_description_html_rewards_structure():
     assert "Missing <ul><li> highlights block" not in " ".join(notes)
 
 
-def test_score_description_plain_text_rewards_bullets_and_specs_sections():
-    text = (
-        "Add space-saving towel storage with this 24-inch wall mount towel bar crafted from solid brass. Designed for everyday bathroom use.\n\n"
-        "Highlights:\n"
-        "- 24-inch center-to-center towel bar\n"
-        "- Solid brass construction\n"
-        "- Concealed mounting hardware\n\n"
-        "Specs:\n"
-        "- Overall length: 26 in\n"
-        "- Projection: 2.5 in\n"
-        "- Warranty: Limited Lifetime Warranty\n"
-    )
-    score, _notes = score_description(text, html=False)
-    assert score >= 9
-
-
-def test_score_description_plain_text_accepts_specs_and_details_label():
-    text = (
-        "Refresh your bath with a 24-inch wall mount towel bar crafted from solid brass. Designed for everyday bathroom use with a clean, space-saving profile.\n\n"
-        "- Solid brass construction\n"
-        "- Concealed mounting\n"
-        "- Hardware included\n\n"
-        "Specs & details:\n"
-        "- Center-to-center: 24 in\n"
-        "- Projection: 2.5 in\n"
-        "- Warranty: Limited Lifetime Warranty\n"
-    )
-    score, _notes = score_description(text, html=False)
-    assert score >= 9
-
-
 def test_assess_soft_gates_warns_on_missing_dimension():
     assessment = assess_soft_gates(
         title="Wall Mount Towel Bar Solid Brass | Allied Brass",

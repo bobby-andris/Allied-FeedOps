@@ -30,7 +30,7 @@ class OpenAIProvider(LLMProvider):
         self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
         self.max_retries = max_retries
-        self._last_usage = {"prompt_tokens": 0, "completion_tokens": 0}
+        self._last_usage = {"prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0}
 
     def _use_max_completion_tokens(self) -> bool:
         """Return True when model requires max_completion_tokens."""
@@ -61,17 +61,30 @@ class OpenAIProvider(LLMProvider):
             logger.warning(f"OpenAI health check failed: {e}")
             return False
 
+    def _supports_reasoning_effort(self) -> bool:
+        """Return True when the model supports the reasoning_effort parameter."""
+        return self.model.startswith("gpt-5") or self.model.startswith("o")
+
     async def generate(
         self,
         prompt: str,
         schema: dict[str, Any],
         image: ImageInput | None = None,
+        system_prompt: str | None = None,
+        reasoning_effort: str | None = None,
     ) -> dict[str, Any]:
         """Generate structured JSON response with retry loop.
 
+        When *system_prompt* is provided, it is sent as a separate system
+        message so OpenAI can cache the static prefix across requests.
+
         Args:
-            prompt: Full prompt with evidence table and constraints.
+            prompt: User prompt (dynamic per-SKU content).
             schema: Expected JSON schema for validation.
+            image: Optional image for multimodal models.
+            system_prompt: Optional static system prompt for cache efficiency.
+            reasoning_effort: Optional reasoning effort level ("low", "medium",
+                "high"). Only applied to models that support it (GPT-5.x, o-series).
 
         Returns:
             Parsed JSON dict.
@@ -79,7 +92,17 @@ class OpenAIProvider(LLMProvider):
         Raises:
             LLMError: After max_retries failures.
         """
-        messages: list[dict[str, Any]] = [{"role": "user", "content": prompt}]
+        # Build initial message list with optional system message for caching.
+        messages: list[dict[str, Any]] = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        # Build reasoning_effort kwarg for models that support it.
+        reasoning_params: dict[str, str] = {}
+        if reasoning_effort and self._supports_reasoning_effort():
+            reasoning_params["reasoning_effort"] = reasoning_effort
+
         current_prompt = prompt
         last_error = None
         content = ""
@@ -94,25 +117,32 @@ class OpenAIProvider(LLMProvider):
 
                 if image:
                     encoded = base64.b64encode(image.data).decode("utf-8")
+                    image_messages: list[dict[str, Any]] = []
+                    if system_prompt:
+                        image_messages.append(
+                            {"role": "system", "content": system_prompt}
+                        )
+                    image_messages.append(
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": current_prompt},
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:{image.mime_type};base64,{encoded}"
+                                    },
+                                },
+                            ],
+                        }
+                    )
                     response = await self.client.chat.completions.create(
                         model=self.model,
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": [
-                                    {"type": "text", "text": current_prompt},
-                                    {
-                                        "type": "image_url",
-                                        "image_url": {
-                                            "url": f"data:{image.mime_type};base64,{encoded}"
-                                        },
-                                    },
-                                ],
-                            }
-                        ],
+                        messages=image_messages,
                         response_format={"type": "json_object"},
                         temperature=0.7,
                         **token_params,
+                        **reasoning_params,
                     )
                     self._last_usage = _extract_usage(response)
                     content = response.choices[0].message.content
@@ -123,10 +153,19 @@ class OpenAIProvider(LLMProvider):
                         response_format={"type": "json_object"},
                         temperature=0.7,
                         **token_params,
+                        **reasoning_params,
                     )
                     self._last_usage = _extract_usage(response)
                     content = response.choices[0].message.content
-                logger.debug(f"Token usage: {self._last_usage}")
+                cached = self._last_usage.get("cached_tokens", 0)
+                if cached:
+                    logger.info(
+                        f"Token usage: {self._last_usage} "
+                        f"(cache hit: {cached}/{self._last_usage.get('prompt_tokens', 0)} "
+                        f"= {cached * 100 // max(self._last_usage.get('prompt_tokens', 1), 1)}%)"
+                    )
+                else:
+                    logger.debug(f"Token usage: {self._last_usage}")
                 result = json.loads(content)
                 return result
 
@@ -166,17 +205,46 @@ class OpenAIProvider(LLMProvider):
         return self._last_usage.copy()
 
 
+def _extract_cached_tokens(usage: Any) -> int:
+    """Extract cached_tokens from prompt_tokens_details if available."""
+    # Dict-style usage (e.g. from mock or raw dict)
+    if isinstance(usage, dict):
+        details = usage.get("prompt_tokens_details") or {}
+        if isinstance(details, dict):
+            return details.get("cached_tokens", 0) or 0
+        return getattr(details, "cached_tokens", 0) or 0
+
+    # Object-style usage (OpenAI SDK response)
+    details = getattr(usage, "prompt_tokens_details", None)
+    if details is None:
+        return 0
+    if isinstance(details, dict):
+        return details.get("cached_tokens", 0) or 0
+    return getattr(details, "cached_tokens", 0) or 0
+
+
 def _extract_usage(response: Any) -> dict[str, int]:
-    """Normalize usage fields across OpenAI response types."""
+    """Normalize usage fields across OpenAI response types.
+
+    Extracts prompt_tokens, completion_tokens, and cached_tokens
+    (from prompt_tokens_details) for cache hit rate monitoring.
+    """
     usage = getattr(response, "usage", None)
     if usage is None:
-        return {"prompt_tokens": 0, "completion_tokens": 0}
+        return {"prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0}
+
+    cached_tokens = _extract_cached_tokens(usage)
+
     if isinstance(usage, dict):
         prompt_tokens = usage.get("prompt_tokens") or usage.get("input_tokens") or 0
         completion_tokens = (
             usage.get("completion_tokens") or usage.get("output_tokens") or 0
         )
-        return {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}
+        return {
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "cached_tokens": cached_tokens,
+        }
 
     prompt_tokens = getattr(usage, "prompt_tokens", None)
     if prompt_tokens is None:
@@ -187,6 +255,7 @@ def _extract_usage(response: Any) -> dict[str, int]:
     return {
         "prompt_tokens": prompt_tokens or 0,
         "completion_tokens": completion_tokens or 0,
+        "cached_tokens": cached_tokens,
     }
 
 

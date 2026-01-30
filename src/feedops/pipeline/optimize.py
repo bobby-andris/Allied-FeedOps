@@ -67,9 +67,14 @@ def estimate_llm_cost(
     if not rates:
         return None
 
-    return (prompt_tokens / 1_000_000) * rates["input"] + (
-        completion_tokens / 1_000_000
-    ) * rates["output"]
+    cached_tokens = token_usage.get("cached_tokens", 0) or 0
+    uncached_input = max(prompt_tokens - cached_tokens, 0)
+    # Cached tokens are billed at 50% of input rate per OpenAI pricing.
+    input_cost = (uncached_input / 1_000_000) * rates["input"] + (
+        cached_tokens / 1_000_000
+    ) * rates["input"] * 0.5
+    output_cost = (completion_tokens / 1_000_000) * rates["output"]
+    return input_cost + output_cost
 
 
 async def optimize_parent_sku(
@@ -138,8 +143,9 @@ async def optimize_parent_sku(
         candidate_weights = parse_candidate_weights(
             os.environ.get("FEEDOPS_CANDIDATE_WEIGHTS")
         )
+    reasoning_effort = os.environ.get("FEEDOPS_REASONING_EFFORT")
     candidates, generation_errors = await generate_candidates(
-        parent_sku, provider, num_candidates
+        parent_sku, provider, num_candidates, reasoning_effort=reasoning_effort
     )
     if not candidates:
         detail = (

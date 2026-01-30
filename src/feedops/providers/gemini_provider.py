@@ -88,12 +88,18 @@ class GeminiProvider(LLMProvider):
         prompt: str,
         schema: dict[str, Any],
         image: ImageInput | None = None,
+        system_prompt: str | None = None,
+        reasoning_effort: str | None = None,
     ) -> dict[str, Any]:
         """Generate structured JSON response.
 
         Args:
-            prompt: Full prompt with evidence table and constraints.
+            prompt: User prompt (dynamic per-SKU content).
             schema: Expected JSON schema (used for repair hints).
+            image: Optional image for multimodal models.
+            system_prompt: Optional static system prompt. For Gemini, prepended
+                to prompt (Gemini does not have a separate system message channel).
+            reasoning_effort: Not used by Gemini; accepted for interface compatibility.
 
         Returns:
             Parsed JSON dict.
@@ -101,7 +107,11 @@ class GeminiProvider(LLMProvider):
         Raises:
             LLMError: After max_retries failures.
         """
-        current_prompt = prompt + "\n\nRespond with valid JSON only, no markdown."
+        # Gemini doesn't have system messages; prepend to user prompt.
+        full_prompt = prompt
+        if system_prompt:
+            full_prompt = system_prompt + "\n\n" + prompt
+        current_prompt = full_prompt + "\n\nRespond with valid JSON only, no markdown."
         last_error = None
 
         for attempt in range(self.max_retries):
@@ -117,7 +127,7 @@ class GeminiProvider(LLMProvider):
                 current_prompt = f"""Your previous response was not valid JSON.
 Error: {last_error}
 
-Original request: {prompt}
+Original request: {full_prompt}
 
 Please respond with ONLY valid JSON, no explanations or markdown."""
 

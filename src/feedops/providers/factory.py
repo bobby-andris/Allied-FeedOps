@@ -80,10 +80,18 @@ class FallbackProvider(LLMProvider):
         prompt: str,
         schema: dict,
         image: ImageInput | None = None,
+        system_prompt: str | None = None,
+        reasoning_effort: str | None = None,
     ) -> dict:
         """Try primary, fall back to secondary on failure."""
         try:
-            return await self.primary.generate(prompt, schema, image=image)
+            return await self.primary.generate(
+                prompt, schema, image=image, system_prompt=system_prompt,
+                reasoning_effort=reasoning_effort,
+            )
         except Exception as e:
             logger.warning(f"Primary provider failed: {e}, trying fallback")
-            return await self.fallback.generate(prompt, schema, image=image)
+            return await self.fallback.generate(
+                prompt, schema, image=image, system_prompt=system_prompt,
+                reasoning_effort=reasoning_effort,
+            )
