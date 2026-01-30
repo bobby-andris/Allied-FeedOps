@@ -32,12 +32,13 @@ from feedops.pipeline.finish_injection import (
     generate_variant_keywords,
     generate_variant_title,
 )
+
 try:
     from feedops.pipeline.validators import validate_variant_title_uniqueness
 except Exception:  # pragma: no cover
     validate_variant_title_uniqueness = None
-from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
 from feedops.quality.collection_badge import get_collection_badge
+from feedops.quality.data_loader import SKUData, get_summary_stats, load_all_sku_data
 from feedops.quality.shopify_live import load_shopify_live_snapshot
 
 # Default database path
@@ -345,7 +346,9 @@ def run_dashboard(
         ):
             st.cache_data.clear()
             st.rerun()
-        st.caption("Cache is automatically invalidated when exports/reports change on disk.")
+        st.caption(
+            "Cache is automatically invalidated when exports/reports change on disk."
+        )
 
     # Main navigation tabs
     tab_review, tab_revision, tab_batches = st.tabs(
@@ -971,19 +974,25 @@ def render_review_queue_tab(
                     wl = (w or "").lower()
                     if "duplicate variant title" in wl:
                         warning_counts["duplicate"] += 1
-                    elif "appears after the first" in wl and "consider moving finish earlier" in wl:
+                    elif (
+                        "appears after the first" in wl
+                        and "consider moving finish earlier" in wl
+                    ):
                         warning_counts["finish_after_visible_chars"] += 1
                     else:
                         warning_counts["other"] += 1
 
         st.subheader("Variant Title Warnings")
-        st.caption("Flags variants that look identical in truncated Shopping titles (Google).")
+        st.caption(
+            "Flags variants that look identical in truncated Shopping titles (Google)."
+        )
         st.metric("SKUs with warnings", len(warnings_by_sku))
         if warning_counts:
             cols = st.columns(3)
             cols[0].metric("Duplicate titles", warning_counts.get("duplicate", 0))
             cols[1].metric(
-                "Finish after ~70 chars", warning_counts.get("finish_after_visible_chars", 0)
+                "Finish after ~70 chars",
+                warning_counts.get("finish_after_visible_chars", 0),
             )
             cols[2].metric("Other", warning_counts.get("other", 0))
 
@@ -1270,13 +1279,14 @@ def render_batch_management_tab(
                 if batch["status"] == "pending" and batch_skus:
                     st.divider()
                     st.markdown("**Execute Batch**")
-                    
+
                     exec_col1, exec_col2 = st.columns(2)
                     with exec_col1:
                         target_platform = st.selectbox(
                             "Target Platform",
                             ["google", "bing", "shopify", "all"],
                             key=f"exec_platform_{batch['batch_id']}",
+                            help="google: Push to GMC supplemental feed via Google Sheets",
                         )
                     with exec_col2:
                         dry_run = st.checkbox(
@@ -1284,7 +1294,7 @@ def render_batch_management_tab(
                             value=True,
                             key=f"dry_run_{batch['batch_id']}",
                         )
-                    
+
                     if st.button(
                         "🚀 Execute Batch" if not dry_run else "👁️ Preview Batch",
                         key=f"exec_{batch['batch_id']}",
@@ -1299,6 +1309,126 @@ def render_batch_management_tab(
                         )
 
 
+def _execute_google_sheets_batch(
+    batch_id: str,
+    batch_skus: list[str],
+    patches_dir: Path,
+    dry_run: bool,
+    db_path: Path,
+) -> None:
+    """Execute a batch publish to Google Sheets.
+
+    This uses the Google Sheets API to push all batch SKUs to the
+    GMC supplemental feed spreadsheet in a single operation.
+    """
+    from feedops.db import log_publish_event, update_batch_status
+    from feedops.integrations.google_sheets import (
+        load_patches_for_batch,
+        push_patches_to_sheet,
+    )
+
+    with st.spinner(
+        f"{'Previewing' if dry_run else 'Publishing'} {len(batch_skus)} SKUs to Google Sheets..."
+    ):
+        try:
+            # Load patches for all SKUs in the batch
+            patches = load_patches_for_batch(patches_dir, batch_skus, platform="google")
+
+            if not patches:
+                st.error(f"No Google patches found for batch {batch_id}")
+                return
+
+            # Push to Google Sheets
+            result = push_patches_to_sheet(
+                patches=patches,
+                environment="staging",  # Could make this configurable
+                dry_run=dry_run,
+                include_variants=True,
+            )
+
+            # Display results
+            if result.get("success"):
+                if dry_run:
+                    st.success(
+                        f"✅ Preview complete - would push {len(patches)} SKUs to Google Sheets"
+                    )
+                    st.info(
+                        f"**Summary:**\n"
+                        f"- Total variants: {result.get('total_variants', 0)}\n"
+                        f"- Rows to update: {result.get('updated_count', 0)}\n"
+                        f"- Rows to append: {result.get('appended_count', 0)}"
+                    )
+                else:
+                    st.success(
+                        f"✅ Successfully pushed {len(patches)} SKUs to Google Sheets"
+                    )
+                    st.info(
+                        f"**Results:**\n"
+                        f"- Total variants: {result.get('total_variants', 0)}\n"
+                        f"- Rows updated: {result.get('updated_count', 0)}\n"
+                        f"- Rows appended: {result.get('appended_count', 0)}"
+                    )
+
+                    # Log publish events for each SKU
+                    for patch in patches:
+                        meta = patch.get("_meta", {})
+                        sku = meta.get("master_sku", "")
+                        if sku:
+                            log_publish_event(
+                                db_path,
+                                master_sku=sku,
+                                platform="google",
+                                environment="staging",
+                                action="publish",
+                                patch_file=patch.get("_source_file", ""),
+                                status="success",
+                                quality_score=meta.get("quality_score"),
+                                approval_status=meta.get("approval_status"),
+                                batch_id=batch_id,
+                            )
+
+                    # Update batch status
+                    update_batch_status(
+                        db_path,
+                        batch_id=batch_id,
+                        status="published",
+                        success_count=len(patches),
+                        failed_count=0,
+                    )
+
+                # Show detailed breakdown
+                with st.expander("📊 Detailed Results"):
+                    for patch in patches:
+                        meta = patch.get("_meta", {})
+                        sku = meta.get("master_sku", "")
+                        variants = patch.get("variants", [])
+                        st.markdown(
+                            f"**{sku}**: {len(variants)} variants, "
+                            f"score: {meta.get('quality_score', 0):.1f}%"
+                        )
+            else:
+                errors = result.get("errors", ["Unknown error"])
+                st.error(f"❌ Failed to push to Google Sheets")
+                for error in errors:
+                    st.error(f"• {error}")
+
+                if not dry_run:
+                    update_batch_status(
+                        db_path,
+                        batch_id=batch_id,
+                        status="failed",
+                        success_count=0,
+                        failed_count=len(patches),
+                    )
+
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
+            import traceback
+
+            with st.expander("Error Details"):
+                st.code(traceback.format_exc())
+
+
 def _execute_batch_action(
     batch_id: str,
     batch_skus: list[str],
@@ -1307,21 +1437,48 @@ def _execute_batch_action(
     db_path: Path,
 ) -> None:
     """Execute a batch publish action."""
-    from pathlib import Path as PathLib
     from datetime import datetime, timezone
-    
+    from pathlib import Path as PathLib
+
     patches_dir = PathLib("dashboard_data/lifestyle-eval-candidate")
-    
-    platforms = [platform] if platform != "all" else ["google", "bing", "shopify"]
-    
+
+    # Handle google as Google Sheets batch operation
+    if platform == "google":
+        _execute_google_sheets_batch(
+            batch_id=batch_id,
+            batch_skus=batch_skus,
+            patches_dir=patches_dir,
+            dry_run=dry_run,
+            db_path=db_path,
+        )
+        return
+
+    # For "all", handle Google via Sheets separately, then do Bing/Shopify per-SKU
+    if platform == "all":
+        st.markdown("### Google (via Sheets)")
+        _execute_google_sheets_batch(
+            batch_id=batch_id,
+            batch_skus=batch_skus,
+            patches_dir=patches_dir,
+            dry_run=dry_run,
+            db_path=db_path,
+        )
+        st.divider()
+        st.markdown("### Bing & Shopify")
+        platforms = ["bing", "shopify"]
+    else:
+        platforms = [platform]
+
     results = []
     success_count = 0
     failed_count = 0
-    
-    with st.spinner(f"{'Previewing' if dry_run else 'Publishing'} {len(batch_skus)} SKUs..."):
+
+    with st.spinner(
+        f"{'Previewing' if dry_run else 'Publishing'} {len(batch_skus)} SKUs..."
+    ):
         for sku in batch_skus:
             sku_results = {"sku": sku, "platforms": {}}
-            
+
             for plat in platforms:
                 # Load patch
                 patch_file = patches_dir / f"{plat}-patch-{sku}.json"
@@ -1331,26 +1488,31 @@ def _execute_batch_action(
                         "error": "Patch file not found",
                     }
                     continue
-                
+
                 try:
                     import json
+
                     patch = json.loads(patch_file.read_text())
-                    
+
                     if plat == "shopify":
                         title = patch.get("title", "")
                         description = patch.get("body_html", "")
                         product_id = patch.get("productId")
-                        
+
                         if dry_run:
                             sku_results["platforms"][plat] = {
                                 "success": True,
                                 "dry_run": True,
                                 "product_id": product_id,
-                                "title": title[:50] + "..." if len(title) > 50 else title,
+                                "title": (
+                                    title[:50] + "..." if len(title) > 50 else title
+                                ),
                             }
                         else:
-                            from feedops.integrations.shopify_catalog import publish_to_shopify
-                            
+                            from feedops.integrations.shopify_catalog import (
+                                publish_to_shopify,
+                            )
+
                             result = publish_to_shopify(
                                 product_id=str(product_id),
                                 title=title,
@@ -1363,39 +1525,18 @@ def _execute_batch_action(
                                 success_count += 1
                             else:
                                 failed_count += 1
-                    
-                    elif plat == "google":
-                        title = patch.get("title", "")
-                        description = patch.get("description", "")
-                        offer_id = patch.get("offerId", "")
-                        variants = patch.get("variants", [])
-                        
-                        if dry_run:
-                            sku_results["platforms"][plat] = {
-                                "success": True,
-                                "dry_run": True,
-                                "offer_id": offer_id,
-                                "title": title[:50] + "..." if len(title) > 50 else title,
-                                "variant_count": len(variants),
-                            }
-                        else:
-                            # For now, just generate the feed - actual GMC push requires more setup
-                            sku_results["platforms"][plat] = {
-                                "success": True,
-                                "message": "Feed generated (GMC push requires API setup)",
-                                "variant_count": len(variants),
-                            }
-                            success_count += 1
-                    
+
                     elif plat == "bing":
                         title = patch.get("title", "")
                         variants = patch.get("variants", [])
-                        
+
                         if dry_run:
                             sku_results["platforms"][plat] = {
                                 "success": True,
                                 "dry_run": True,
-                                "title": title[:50] + "..." if len(title) > 50 else title,
+                                "title": (
+                                    title[:50] + "..." if len(title) > 50 else title
+                                ),
                                 "variant_count": len(variants),
                             }
                         else:
@@ -1405,24 +1546,25 @@ def _execute_batch_action(
                                 "variant_count": len(variants),
                             }
                             success_count += 1
-                
+
                 except Exception as e:
                     sku_results["platforms"][plat] = {
                         "success": False,
                         "error": str(e),
                     }
                     failed_count += 1
-            
+
             results.append(sku_results)
-    
+
     # Display results
     if dry_run:
         st.success(f"✅ Preview complete for {len(batch_skus)} SKUs")
     else:
         st.success(f"✅ Batch executed: {success_count} success, {failed_count} failed")
-        
+
         # Update batch status
         from feedops.db import update_batch_status
+
         update_batch_status(
             db_path,
             batch_id=batch_id,
@@ -1430,7 +1572,7 @@ def _execute_batch_action(
             success_count=success_count,
             failed_count=failed_count,
         )
-    
+
     # Show detailed results
     for result in results:
         with st.expander(f"📦 {result['sku']}"):
@@ -1441,11 +1583,17 @@ def _execute_batch_action(
                         if plat_result.get("title"):
                             st.code(plat_result["title"])
                         if plat_result.get("variant_count"):
-                            st.caption(f"Includes {plat_result['variant_count']} variants")
+                            st.caption(
+                                f"Includes {plat_result['variant_count']} variants"
+                            )
                     else:
-                        st.success(f"**{plat.upper()}** - {plat_result.get('message', 'Published')}")
+                        st.success(
+                            f"**{plat.upper()}** - {plat_result.get('message', 'Published')}"
+                        )
                 else:
-                    st.error(f"**{plat.upper()}** - Error: {plat_result.get('error', 'Unknown error')}")
+                    st.error(
+                        f"**{plat.upper()}** - Error: {plat_result.get('error', 'Unknown error')}"
+                    )
 
 
 def filter_sku_data(
@@ -2132,9 +2280,13 @@ def render_content_comparison(sku_data: SKUData, platform: str) -> None:
                     )
 
                     option_variants = [
-                        v for v in candidate_variants if _variant_finish(v) == selected_finish
+                        v
+                        for v in candidate_variants
+                        if _variant_finish(v) == selected_finish
                     ] or [
-                        v for v in baseline_variants if _variant_finish(v) == selected_finish
+                        v
+                        for v in baseline_variants
+                        if _variant_finish(v) == selected_finish
                     ]
                     option_ids = [_variant_option_id(v) for v in option_variants]
                     if len(option_ids) > 1:
@@ -2677,7 +2829,9 @@ def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None
             }
         )
         if not finishes:
-            st.warning("No finish metadata found in patch variants; falling back to generated preview.")
+            st.warning(
+                "No finish metadata found in patch variants; falling back to generated preview."
+            )
         else:
             st.success(
                 f"Previewing the exact per-variant title/description from the generated patch ({(variant_source_platform or 'unknown').title()})."
@@ -2690,7 +2844,9 @@ def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None
             )
 
             finish_variants = [
-                v for v in variants if v.get("_meta", {}).get("finish") == selected_finish
+                v
+                for v in variants
+                if v.get("_meta", {}).get("finish") == selected_finish
             ]
             if not finish_variants:
                 st.info("No variants found for selected finish.")
@@ -2699,7 +2855,9 @@ def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None
             chosen = finish_variants[0]
             if len(finish_variants) > 1:
                 option_skus = [
-                    v.get("_meta", {}).get("option_sku") or v.get("offerId") or "(unknown)"
+                    v.get("_meta", {}).get("option_sku")
+                    or v.get("offerId")
+                    or "(unknown)"
                     for v in finish_variants
                 ]
                 selected_option = st.selectbox(
@@ -2750,7 +2908,9 @@ def render_variant_preview(sku_data: SKUData, show_divider: bool = True) -> None
     available_finishes: list[str] = []
     if sku_data.original and sku_data.original.available_finishes:
         available_finishes = sku_data.original.available_finishes
-        st.info(f"Showing {len(available_finishes)} finishes available for this product")
+        st.info(
+            f"Showing {len(available_finishes)} finishes available for this product"
+        )
     else:
         available_finishes = load_available_finishes()
         st.warning("Using all finishes (product-specific finish data not available)")

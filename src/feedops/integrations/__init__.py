@@ -18,6 +18,7 @@ __all__ = [
     "shopify_catalog",
     "google_supplemental",
     "google_feed_upload",
+    "google_sheets",
     "bing_catalog",
 ]
 
@@ -28,6 +29,7 @@ def __getattr__(name: str) -> Any:  # pragma: no cover
         "shopify_catalog",
         "google_supplemental",
         "google_feed_upload",
+        "google_sheets",
         "bing_catalog",
         "google_ads",
         "analytics",

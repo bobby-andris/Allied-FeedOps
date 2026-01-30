@@ -718,3 +718,153 @@ def export_bing_command(
     console.print(
         f"[dim]Upload this file to Bing Merchant Center via FTP or manual upload[/dim]"
     )
+
+
+@publish_app.command(name="publish-google")
+def publish_google_command(
+    batch_id: Optional[str] = typer.Option(
+        None, "--batch-id", "-b", help="Batch ID to publish"
+    ),
+    sku: Optional[str] = typer.Option(
+        None, "--sku", help="Single SKU to publish (alternative to batch)"
+    ),
+    patches_dir: Optional[str] = typer.Option(
+        None, "--patches-dir", help="Directory containing patch files"
+    ),
+    environment: str = typer.Option(
+        "staging", "--environment", "-e", help="Environment: staging or production"
+    ),
+    spreadsheet_id: Optional[str] = typer.Option(
+        None,
+        "--spreadsheet-id",
+        help="Google Sheets spreadsheet ID (uses env var if not set)",
+    ),
+    sheet_name: Optional[str] = typer.Option(
+        None, "--sheet-name", help="Worksheet name (uses first sheet if not set)"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Preview changes without writing to sheet"
+    ),
+):
+    """Push optimized content to Google Merchant Center via Google Sheets.
+
+    This command updates a Google Sheet that serves as a supplemental feed
+    for Google Merchant Center. It supports upsert logic:
+    - If an offer ID exists in the sheet, the row is updated
+    - If the offer ID is new, a new row is appended
+
+    Authentication (one of):
+    - Local: GOOGLE_APPLICATION_CREDENTIALS env var pointing to service account JSON
+    - Streamlit Cloud: st.secrets["gcp_service_account"] with service account fields
+
+    Spreadsheet ID (one of):
+    - st.secrets["GOOGLE_SHEETS_SPREADSHEET_ID"] (Streamlit Cloud)
+    - GOOGLE_NEW_MERCHANT_CENTER_SHEETS_SPREADSHEET_ID env var
+    - --spreadsheet-id parameter
+
+    Examples:
+
+        # Dry run for a batch
+        feedops publish-google --batch-id Batch-2026-01-30-001 --dry-run
+
+        # Publish a batch to staging
+        feedops publish-google --batch-id Batch-2026-01-30-001 --environment staging
+
+        # Publish a single SKU
+        feedops publish-google --sku BSK-275LA --environment staging
+
+        # Publish to production
+        feedops publish-google --batch-id Batch-2026-01-30-001 --environment production
+    """
+    from feedops.integrations.google_sheets import (
+        load_patches_for_batch,
+        publish_batch_to_sheets,
+        push_patches_to_sheet,
+    )
+
+    if not batch_id and not sku:
+        console.print("[red]Error: Must specify --batch-id or --sku[/red]")
+        raise typer.Exit(1)
+
+    if batch_id and sku:
+        console.print("[red]Error: Cannot specify both --batch-id and --sku[/red]")
+        raise typer.Exit(1)
+
+    patches_path = _get_patches_dir(patches_dir)
+    db_path = _get_db_path()
+    init_db(db_path)
+
+    console.print(f"\n[bold]Publishing to Google Sheets[/bold]")
+    console.print(f"Environment: {environment}")
+    if batch_id:
+        console.print(f"Batch: {batch_id}")
+    else:
+        console.print(f"SKU: {sku}")
+    console.print(f"Dry run: {dry_run}\n")
+
+    try:
+        if batch_id:
+            # Publish entire batch
+            result = publish_batch_to_sheets(
+                batch_id=batch_id,
+                patches_dir=patches_path,
+                environment=environment,
+                spreadsheet_id=spreadsheet_id,
+                sheet_name=sheet_name,
+                dry_run=dry_run,
+                db_path=db_path,
+            )
+        else:
+            # Publish single SKU
+            patches = load_patches_for_batch(patches_path, [sku], platform="google")
+            if not patches:
+                console.print(f"[red]No Google patch found for SKU: {sku}[/red]")
+                raise typer.Exit(1)
+
+            result = push_patches_to_sheet(
+                patches=patches,
+                environment=environment,
+                spreadsheet_id=spreadsheet_id,
+                sheet_name=sheet_name,
+                dry_run=dry_run,
+                include_variants=True,
+            )
+
+            # Log publish event for single SKU (if not dry run)
+            if not dry_run and result.get("success"):
+                patch = patches[0]
+                meta = patch.get("_meta", {})
+                log_publish_event(
+                    db_path,
+                    master_sku=sku,
+                    platform="google",
+                    environment=environment,
+                    action="publish",
+                    patch_file=patch.get("_source_file", ""),
+                    status="success",
+                    quality_score=meta.get("quality_score"),
+                    approval_status=meta.get("approval_status"),
+                )
+
+        # Display results
+        if result.get("success"):
+            if dry_run:
+                console.print("[yellow]DRY RUN - No changes made[/yellow]")
+
+            console.print(f"\n[bold]Results:[/bold]")
+            console.print(
+                f"  Total variants processed: {result.get('total_variants', 0)}"
+            )
+            console.print(f"  Rows updated: {result.get('updated_count', 0)}")
+            console.print(f"  Rows appended: {result.get('appended_count', 0)}")
+            console.print(f"\n[green]✓ Successfully pushed to Google Sheets[/green]")
+        else:
+            errors = result.get("errors", ["Unknown error"])
+            console.print(f"\n[red]✗ Failed to push to Google Sheets[/red]")
+            for error in errors:
+                console.print(f"  [red]• {error}[/red]")
+            raise typer.Exit(1)
+
+    except Exception as e:
+        console.print(f"\n[red]✗ Error: {e}[/red]")
+        raise typer.Exit(1)
