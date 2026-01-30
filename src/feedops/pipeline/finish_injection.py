@@ -160,7 +160,10 @@ def _replace_first_sentence_with_finish(
     """Replace the first sentence with a finish-forward version."""
     if not description:
         return description
-    match = re.search(r"\.", description)
+    # Match a sentence-ending period — skip decimal points inside numbers
+    # like "4.5 in" or "0.38 in" by requiring the period NOT be surrounded
+    # by digits on both sides.
+    match = re.search(r"(?<!\d)\.(?!\d)", description)
     if not match:
         base_sentence = description.strip()
         rest = ""
@@ -502,9 +505,9 @@ def _get_competitive_bullet(
     if material:
         material_lower = material.lower()
         if "solid brass" in material_lower:
-            return "Built from solid brass for long-term durability"
+            return "Solid brass construction -- outlasts die-cast zinc and plastic alternatives found in mass-market brands"
         if "brass" in material_lower:
-            return "Crafted from brass for long-term durability"
+            return "Brass construction -- outlasts die-cast zinc and plastic alternatives"
     return None
 
 

@@ -123,19 +123,49 @@ TITLE SUCCESS CRITERIA:
 - Product type appears in first 30 characters (mobile truncation).
 - Key dimension (e.g., "18-Inch") appears before character 70.
 - "Allied Brass" is the final segment.
-- google_title and bing_title: max 150 characters.
+- google_title and bing_title: minimum 60 characters, target 70-100 characters, max 150 characters.
+- Title MUST include: product type, primary dimension, material OR mount type, brand "Allied Brass".
+- If title is under 60 characters, add: collection name, secondary dimension, or additional spec.
 - google_short_title: max 70 characters, product type + key dimension only (no brand/collection).
 - shopify_title: max 255 characters, H1-friendly.
 - Use commas or hyphens as separators. No pipes.
 - Never start with banned adjectives: Premium, Luxury, Best, High-Quality, Top-Rated.
 
-DESCRIPTION SUCCESS CRITERIA:
-- First sentence addresses the buyer's problem or desired outcome (not the product itself).
-- 3-5 outcome-first bullet highlights follow the opening hook.
+DESCRIPTION SUCCESS CRITERIA (platform-specific -- read carefully):
+
+GOOGLE DESCRIPTION (feed fuel -- NOT shown to shoppers):
+- First 150 chars: product type + key dimensions + material + primary use case.
+- Pack with searchable attributes: room type, mount type, material, style.
+- Include natural synonyms shoppers search: e.g. "towel bar" + "towel rack" + "towel holder".
+- End with brand + collection for long-tail matching.
+- Do NOT write persuasive marketing copy -- this is semantic fuel for Google's matching algorithm.
+- A Google description reads like a rich product specification paragraph, not an ad.
+- Target 600-800 characters, plain text.
+
+BING DESCRIPTION (literal keyword matching -- NOT shown to shoppers):
+- Same attribute-dense approach as Google but with MORE explicit synonyms.
+- Bing's algorithm is more literal than Google's -- include exact-match keyword variations.
+- Include product type synonyms: e.g. "towel bar", "towel rack", "towel holder", "bathroom towel bar", "wall mount towel bar".
+- Include dimensions in multiple formats: e.g. "24 inches", "24-inch", "24in".
+- A Bing description covers every plausible way a shopper might search for this product.
+- Target 700-1000 characters, plain text, MUST include 2-3 product type synonyms.
+
+SHOPIFY DESCRIPTION (shown to shoppers on product page -- this IS the sales pitch):
+- First sentence: address buyer's problem or desired outcome.
+- Mention ONE trust signal in the opening: "Backed by a lifetime warranty" or "Assembled in Virginia" or "Choose from 28 designer finishes".
+- REQUIRED in Shopify description (at least 2 of these 4):
+  * "Backed by a lifetime warranty"
+  * "Assembled in Virginia, USA"
+  * "Available in 28 designer finishes to match any decor"
+  * "Part of the [Collection] collection -- coordinate with 42+ matching accessories"
+- 3-5 outcome-first bullet highlights (not feature-first).
+- Include competitive edge: "Solid brass construction outlasts die-cast zinc alternatives".
+- Collection coordination CTA: "Complete your bathroom with matching pieces".
 - Specs section includes dimensions, weight capacity, mounting, warranty.
-- google_description: target 600-800 characters, plain text.
-- bing_description: target 700-1000 characters, plain text, MUST include 2-3 product type synonyms.
-- shopify_description: HTML with <p> hook, <ul><li> highlights, specs.
+- A Shopify description makes someone click Add to Cart.
+- HTML with <p> hook, <ul><li> highlights, specs.
+
+SHOPIFY META DESCRIPTION:
 - shopify_meta_description: target 140-155 characters, standalone summary with primary keyword.
 
 FACTUAL ACCURACY:
@@ -145,9 +175,14 @@ FACTUAL ACCURACY:
 - external_keywords and keyword_intent_master are keywords to prioritize, not facts.
 - Competitor patterns are inspiration only, never product facts.
 
+BULLET FORMAT:
+- Bullet format: always use "- " (dash followed by space). Never use bullet characters like the Unicode bullet, asterisk, or other bullet markers.
+- Never output empty bullets ("- " with no text after it).
+
 BANNED CONTENT:
 - No source citations (catalog_csv.* references) in titles/descriptions.
 - No internal SKU codes in titles/descriptions.
+- No internal pipeline terminology: MasterSKU, finish-neutral, finish injection, downstream, variant phrasing, evidence table, placement plan.
 - No ALL CAPS marketing language, URLs, pricing, or shipping text.
 - No keyword lists or "Search terms shoppers use:" in descriptions.
 - BANNED WORDS: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate.
@@ -166,9 +201,17 @@ BRAND VOICE:
 - Include a collection coordination hook when collection_context is available:
   "Complete your [room] with matching pieces from the [Collection] collection."
 
-OPENING HOOK:
-- Ask: what frustration or need drove the buyer to search? That's your opening.
+OPENING HOOK (Shopify only -- Google/Bing should lead with attributes, not hooks):
+- Ask: what frustration or need drove the buyer to search? That's your Shopify opening.
 - Include one competitive differentiator in the first 150 characters (finish variety, lifetime warranty, or solid brass construction).
+
+COMPETITIVE DIFFERENTIATION (Shopify descriptions):
+- Include at least one competitive comparison (without naming competitors):
+  * "Solid brass construction outlasts die-cast zinc and plastic alternatives"
+  * "Unlike mass-market alternatives, [product] features solid brass internals"
+  * "Designed for daily use -- solid brass won't corrode, pit, or tarnish like lesser materials"
+- For Google/Bing feed fuel: include "solid brass" as a prominent attribute that shoppers
+  actively search for and that the algorithm uses for quality matching.
 
 BING SYNONYM STRATEGY (literal keyword matching):
 - Towel Bars: towel bar, towel rack, towel holder, towel rail
@@ -220,27 +263,83 @@ reads like a spec sheet, no bullet structure, no specific usage scenario.
 
 === PLATFORM SPECIFICS ===
 
-Google Shopping / Performance Max:
+Google Shopping / Performance Max (descriptions are FEED FUEL, not shown to shoppers):
+- Descriptions influence which search queries trigger your Shopping ads.
+- Attribute-dense content = more relevant impressions = better ROAS.
 - Semantic matching allows synonyms; front-loaded keywords still matter.
 - Feed seeds PMax asset generation across Search, Display, and YouTube.
 - Plain text descriptions (no HTML).
+- Lead descriptions with product type, dimensions, material, mount type -- NOT persuasive hooks.
+- Include "solid brass" as a prominent attribute -- key differentiator for quality matching.
+- Include "lifetime warranty" and "solid brass" or "brass construction" as natural attribute phrases.
 
-Bing Shopping:
+Bing Shopping (descriptions are FEED FUEL, not shown to shoppers):
 - MORE LITERAL keyword matching than Google. Explicit synonyms are critical.
 - Brand required in titles. Copilot extracts specifications from descriptions.
-- Descriptions should be longer than Google to cover synonyms.
+- Descriptions should be longer than Google to cover synonym variations.
+- Include product mount type variations: "wall mount", "wall-mounted", "freestanding", "countertop".
+- Include "solid brass" prominently -- shoppers actively search for this.
+- Include "lifetime warranty" near the product type mention.
 
-Shopify:
+Shopify (descriptions ARE shown to shoppers -- this is the sales pitch):
 - Title becomes H1. Meta snippet is first ~155 characters.
 - HTML descriptions: <p> hook, <ul><li> highlights, specs/warranty.
+- First sentence must address buyer's problem or desired outcome.
+- Include at least ONE trust signal in the first two sentences.
+- Include competitive differentiation (solid brass vs die-cast zinc).
+- Collection coordination CTA when collection_context is available.
 
-=== SCORING RUBRIC (self-score each 0-10) ===
-1. Specificity: Specific/verifiable claims vs generic
-2. Benefit Coverage: Benefits in first 150 characters
-3. Keyword Inclusion: Target keywords in optimal positions
-4. Format Adherence: Character limits and structure
-5. Brand Voice: Confident tone, no banned superlatives
-6. Factual Accuracy: Every claim traceable to evidence"""
+=== SCORING RUBRIC (self-score each 0-10 using the checklists below) ===
+
+Score each dimension by counting how many required elements are present:
+- 10 = ALL required elements present
+- 7-9 = missing 1-2 required elements
+- 4-6 = missing 3+ required elements
+- 1-3 = fundamentally wrong or missing the dimension entirely
+- 0 = not attempted
+
+1. Specificity (check these elements):
+   [ ] At least one concrete dimension (e.g. "18-Inch", "24-Inch")
+   [ ] Material stated explicitly (e.g. "solid brass")
+   [ ] Mount type or installation method mentioned
+   [ ] Product type named in first 30 characters of title
+   [ ] At least one measurable claim (weight capacity, finish count, etc.)
+
+2. Benefit Coverage (check these elements):
+   [ ] Shopify description opens with buyer problem or desired outcome
+   [ ] Trust signal in first 150 characters of Shopify description
+   [ ] At least 3 outcome-first bullet highlights in Shopify
+   [ ] Google/Bing descriptions lead with attributes, not marketing hooks
+   [ ] Competitive differentiator mentioned (solid brass vs alternatives)
+
+3. Keyword Inclusion (check these elements):
+   [ ] Primary keyword from placement plan in google_title
+   [ ] Primary keyword from placement plan in bing_title
+   [ ] At least 2 product-type synonyms in bing_description
+   [ ] "solid brass" appears in Google and Bing descriptions
+   [ ] Room context keyword present (bathroom/kitchen as appropriate)
+
+4. Format Adherence (check these elements):
+   [ ] google_title and bing_title are 60-150 characters
+   [ ] google_short_title is under 70 characters
+   [ ] google_description is 600-800 characters
+   [ ] bing_description is 700-1000 characters
+   [ ] shopify_description uses HTML structure (<p>, <ul><li>)
+   [ ] shopify_meta_description is 140-155 characters
+
+5. Brand Voice (check these elements):
+   [ ] No banned words (finest, luxurious, premium, exclusive, etc.)
+   [ ] "Allied Brass" is the final segment in titles
+   [ ] Confident, direct phrasing (not hedging: "helps provide" -> "provides")
+   [ ] No ALL CAPS marketing language
+   [ ] Collection name referenced in descriptions (when available)
+
+6. Factual Accuracy (check these elements):
+   [ ] Every dimension matches evidence table exactly
+   [ ] Material claims match evidence table
+   [ ] No invented specifications
+   [ ] Claims array traces each fact to a source_field
+   [ ] Keywords from placement plan used as search intent, NOT stated as product facts"""
 
 # ---------------------------------------------------------------------------
 # DYNAMIC USER PROMPT (per-SKU, assembled at runtime)

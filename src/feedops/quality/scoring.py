@@ -34,10 +34,13 @@ MAX_TITLE_LENGTH = 150  # Google Shopping max title length
 
 _PRODUCT_TYPE_PHRASES = [
     "towel bar",
+    "towel rail",
     "cabinet knob",
     "grab bar",
     "toilet paper holder",
+    "toilet paper stand",
     "toilet tissue",
+    "tissue stand",
     "towel ring",
     "robe hook",
     "guest towel",
@@ -48,18 +51,29 @@ _PRODUCT_TYPE_PHRASES = [
     "glass shelf",
     "wood shelf",
     "wall mirror",
+    "vanity mirror",
     "make-up mirror",
     "makeup mirror",
     "shower door",
     "shower curtain",
     "paper towel",
     "wall hook",
+    "coat rack",
+    "coat stand",
     "retractable",
     "garment rod",
     "squeegee",
     "vanity tray",
     "tissue holder",
+    "toothbrush holder",
+    "tumbler holder",
+    "tumbler toothbrush",
     "basket",
+    "towel stand",
+    "towel valet",
+    "cabinet pull",
+    "cabinet handle",
+    "drawer pull",
 ]
 
 _MATERIAL_WORDS = [
@@ -75,6 +89,10 @@ _MATERIAL_WORDS = [
 _FUNCTIONAL_MODIFIERS = [
     "wall mount",
     "wall-mounted",
+    "freestanding",
+    "free standing",
+    "countertop",
+    "vanity top",
     "concealed",
     "ada",
     "pivot",
@@ -82,6 +100,7 @@ _FUNCTIONAL_MODIFIERS = [
     "tilting",
     "retractable",
     "quick",
+    "double-sided",
 ]
 
 _PREMIUM_CUES = [
@@ -329,6 +348,7 @@ def score_title(
     *,
     require_brand: bool = True,
     include_zone_analysis: bool = True,
+    platform: str = "google",
 ) -> tuple[int, list[str], Optional[TitleZoneAnalysis]]:
     """CTR proxy score for a title (0-10).
 
@@ -338,11 +358,13 @@ def score_title(
     - Material and functional modifier presence
     - Brand placement (should be at end for lesser-known brands)
     - Prohibited content (URLs, citations, ALL CAPS, marketing language)
+    - Minimum length for Google/Bing (60 chars)
 
     Args:
         title: The title to score
         require_brand: Whether brand presence is required
         include_zone_analysis: Whether to include detailed zone analysis
+        platform: Target platform (google, bing, shopify)
 
     Returns:
         Tuple of (score, notes, zone_analysis)
@@ -372,6 +394,11 @@ def score_title(
         score += 1
     if 70 <= length <= MAX_TITLE_LENGTH:
         score += 1
+
+    # Google/Bing minimum title length penalty
+    if platform in ("google", "bing") and length < 60:
+        notes.append(f"Title under 60 chars ({length}) -- missing search coverage")
+        score -= 1
 
     # Product type scoring - zone-aware
     if zone_analysis:
@@ -441,8 +468,70 @@ def score_title(
     return _clamp_0_10(score), notes, zone_analysis
 
 
-def score_description(description: str, *, html: bool = False) -> tuple[int, list[str]]:
-    """CVR proxy score for a description (0-10)."""
+_TRUST_SIGNAL_PHRASES = [
+    "lifetime warranty",
+    "limited lifetime warranty",
+    "virginia",
+    "assembled in",
+    "28 designer finishes",
+    "28 finishes",
+    "designer finishes",
+    "42+ collection",
+    "42 collection",
+    "matching accessories",
+    "matching pieces",
+]
+
+_ATTRIBUTE_DENSITY_CUES = [
+    # Product type cues
+    "towel bar",
+    "towel rail",
+    "grab bar",
+    "toilet paper",
+    "tissue stand",
+    "robe hook",
+    "glass shelf",
+    "soap dish",
+    "soap dispenser",
+    "towel ring",
+    "cabinet knob",
+    "paper towel",
+    "wall mirror",
+    "makeup mirror",
+    "make-up mirror",
+    "vanity mirror",
+    "coat rack",
+    "toothbrush holder",
+    "tumbler",
+    "towel holder",
+    "towel shelf",
+    "wall hook",
+    "towel stand",
+    "towel valet",
+    "cabinet pull",
+    "cabinet handle",
+    "drawer pull",
+    # Material/mount cues
+    "solid brass",
+    "brass construction",
+    "wall mount",
+    "wall-mounted",
+    "freestanding",
+    "free standing",
+    "countertop",
+    "vanity top",
+    # Dimension cues are handled by _INCH_RE
+]
+
+
+def score_description(
+    description: str, *, html: bool = False, platform: str = "google"
+) -> tuple[int, list[str]]:
+    """CVR proxy score for a description (0-10).
+
+    Platform-aware: Google/Bing reward attribute density in the opening;
+    Shopify rewards engagement hooks and trust signals.
+    """
     notes: list[str] = []
     score = 0
 
@@ -477,12 +566,27 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         notes.append("Description under 300 characters")
 
     opening = text[:160].lower()
-    if any(w in opening for w in _OPENING_ENGAGEMENT_CUES):
-        score += 2
+
+    if platform in ("google", "bing"):
+        # Feed fuel: reward attribute density in first 150 chars
+        first_150 = text[:150].lower()
+        attr_hits = sum(1 for cue in _ATTRIBUTE_DENSITY_CUES if cue in first_150)
+        has_dim_in_opening = bool(_INCH_RE.search(text[:150]))
+        if attr_hits >= 2 or (attr_hits >= 1 and has_dim_in_opening):
+            score += 2
+        elif attr_hits >= 1:
+            score += 1
+            notes.append("Opening has few searchable attributes (feed fuel)")
+        else:
+            notes.append("Opening lacks searchable attributes -- should lead with product type + specs")
     else:
-        notes.append(
-            "Opening may lack engagement hook (no problem/outcome cue detected)"
-        )
+        # Shopify: reward engagement hooks (original behavior)
+        if any(w in opening for w in _OPENING_ENGAGEMENT_CUES):
+            score += 2
+        else:
+            notes.append(
+                "Opening may lack engagement hook (no problem/outcome cue detected)"
+            )
 
     # Specs presence: at least 3 numeric/measurement tokens.
     measurements = len(_INCH_RE.findall(text)) + len(
@@ -493,13 +597,13 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
     else:
         notes.append("Few measurable specs detected")
 
-    if not html:
-        # Plain-text structure cues: reward Highlights + Specs sections.
+    if not html and platform == "shopify":
+        # Shopify plain-text structure cues (not applicable to Google/Bing feed fuel).
         lower = description.lower()
         bullet_lines = [
             line.strip()
             for line in description.splitlines()
-            if line.strip().startswith(("-", "•"))
+            if line.strip().startswith(("-", "\u2022"))
         ]
         if len(bullet_lines) >= 3:
             score += 1
@@ -511,16 +615,31 @@ def score_description(description: str, *, html: bool = False) -> tuple[int, lis
         else:
             notes.append("Missing specs section")
 
-    # Mentions warranty/installation details helps confidence.
-    if "warranty" in text.lower():
-        score += 1
-    if "installation" in text.lower() or "mounting" in text.lower():
+    # Trust signal scoring -- platform-aware weighting
+    text_lower = text.lower()
+    trust_hits = sum(1 for phrase in _TRUST_SIGNAL_PHRASES if phrase in text_lower)
+
+    if platform == "shopify":
+        # Shopify: trust signals in first 200 chars are highly valuable
+        first_200 = text[:200].lower()
+        early_trust_hits = sum(
+            1 for phrase in _TRUST_SIGNAL_PHRASES if phrase in first_200
+        )
+        score += min(3, early_trust_hits * 2)  # +2 each, max +6 -> clamped to +3 here
+        if early_trust_hits == 0 and trust_hits == 0:
+            notes.append("No trust signals found (warranty, Virginia, finishes)")
+    else:
+        # Google/Bing: +1 for "lifetime warranty" or "solid brass" anywhere
+        if "lifetime warranty" in text_lower or "solid brass" in text_lower:
+            score += 1
+
+    if "installation" in text_lower or "mounting" in text_lower:
         score += 1
 
     if "!" in description:
         notes.append("Exclamation point detected")
         score -= 1
-    if any(bad in text.lower() for bad in _BANNED_MARKETING):
+    if any(bad in text_lower for bad in _BANNED_MARKETING):
         notes.append("Promotional/budget language detected")
         score -= 2
 
@@ -532,8 +651,14 @@ def assess_soft_gates(
     title: str,
     description: str,
     html_description: bool = False,
+    platform: str = "shopify",
 ) -> SoftGateAssessment:
-    """Evaluate structure signals without hard-failing."""
+    """Evaluate structure signals without hard-failing.
+
+    Platform-aware: Google/Bing feed descriptions are attribute-dense by design
+    and should NOT be penalised for missing engagement hooks or HTML bullets,
+    which are Shopify-specific quality signals.
+    """
     warnings: list[str] = []
 
     has_dimension = bool(_INCH_RE.search(title[:70]))
@@ -545,23 +670,33 @@ def assess_soft_gates(
         text = re.sub(r"<[^>]+>", " ", description)
         text = re.sub(r"\s+", " ", text).strip()
 
-    opening = text[:160].lower()
-    has_benefit_verb = any(w in opening for w in _OPENING_ENGAGEMENT_CUES)
-    if not has_benefit_verb:
-        warnings.append("Opening lacks engagement hook")
-
-    if html_description:
-        lower_html = description.lower()
-        has_bullets = "<ul" in lower_html and "<li" in lower_html
+    # Engagement hook: only relevant for Shopify (shopper-facing copy).
+    # Google/Bing feed descriptions lead with attributes by design.
+    if platform == "shopify":
+        opening = text[:160].lower()
+        has_benefit_verb = any(w in opening for w in _OPENING_ENGAGEMENT_CUES)
+        if not has_benefit_verb:
+            warnings.append("Opening lacks engagement hook")
     else:
-        bullet_lines = [
-            line.strip()
-            for line in description.splitlines()
-            if line.strip().startswith(("-", "•"))
-        ]
-        has_bullets = len(bullet_lines) >= 3
-    if not has_bullets:
-        warnings.append("Missing structured bullets")
+        has_benefit_verb = True  # Not applicable for feed platforms
+
+    # Structured bullets: only relevant for Shopify HTML descriptions.
+    # Google/Bing feed descriptions are plain text by design.
+    if platform == "shopify":
+        if html_description:
+            lower_html = description.lower()
+            has_bullets = "<ul" in lower_html and "<li" in lower_html
+        else:
+            bullet_lines = [
+                line.strip()
+                for line in description.splitlines()
+                if line.strip().startswith(("-", "•"))
+            ]
+            has_bullets = len(bullet_lines) >= 3
+        if not has_bullets:
+            warnings.append("Missing structured bullets")
+    else:
+        has_bullets = True  # Not applicable for feed platforms
 
     lower_text = text.lower()
     measurements = len(_INCH_RE.findall(text)) + len(
@@ -610,14 +745,20 @@ def score_brand_voice(text: str) -> tuple[int, list[str]]:
 
 
 def score_bundle(
-    *, title: str, description: str, html_description: bool = False
+    *,
+    title: str,
+    description: str,
+    html_description: bool = False,
+    platform: str = "google",
 ) -> HeuristicScore:
     """Convenience scorer combining title+description into a composite.
 
     Includes detailed title zone analysis for understanding keyword placement.
     """
-    ctr, ctr_notes, zone_analysis = score_title(title)
-    cvr, cvr_notes = score_description(description, html=html_description)
+    ctr, ctr_notes, zone_analysis = score_title(title, platform=platform)
+    cvr, cvr_notes = score_description(
+        description, html=html_description, platform=platform
+    )
     voice, voice_notes = score_brand_voice(title + "\n" + description)
     notes = tuple(dict.fromkeys([*ctr_notes, *cvr_notes, *voice_notes]))
     return HeuristicScore(
@@ -649,30 +790,36 @@ def score_candidate(
     google_score = score_bundle(
         title=candidate.google_title,
         description=candidate.google_description,
+        platform="google",
     )
     bing_score = score_bundle(
         title=candidate.bing_title,
         description=candidate.bing_description,
+        platform="bing",
     )
     shopify_score = score_bundle(
         title=candidate.shopify_title,
         description=candidate.shopify_description,
         html_description=True,
+        platform="shopify",
     )
 
     soft_gates = {
         "google": assess_soft_gates(
             title=candidate.google_title,
             description=candidate.google_description,
+            platform="google",
         ),
         "bing": assess_soft_gates(
             title=candidate.bing_title,
             description=candidate.bing_description,
+            platform="bing",
         ),
         "shopify": assess_soft_gates(
             title=candidate.shopify_title,
             description=candidate.shopify_description,
             html_description=True,
+            platform="shopify",
         ),
     }
 
