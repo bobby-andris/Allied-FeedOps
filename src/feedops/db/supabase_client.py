@@ -15,9 +15,13 @@ import os
 from datetime import datetime, timezone
 from typing import Any
 
-from supabase import Client, create_client
+try:
+    from supabase import Client, create_client
+except ImportError:
+    Client = None  # type: ignore[assignment,misc]
+    create_client = None  # type: ignore[assignment]
 
-_client: Client | None = None
+_client: Client | None = None  # type: ignore[type-arg]
 
 
 def _get_supabase_config() -> tuple[str, str] | None:
@@ -49,6 +53,8 @@ def _get_supabase_config() -> tuple[str, str] | None:
 
 def is_supabase_available() -> bool:
     """Check if Supabase is configured and available."""
+    if Client is None:
+        return False
     return _get_supabase_config() is not None
 
 
