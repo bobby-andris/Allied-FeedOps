@@ -46,7 +46,7 @@ from feedops.quality.shopify_live import load_shopify_live_snapshot
 # Default database path
 DEFAULT_DB_PATH = Path(os.environ.get("DATABASE_PATH", "data/feedops.db"))
 
-_DASHBOARD_DATA_SCHEMA_VERSION = "v2"
+_DASHBOARD_DATA_SCHEMA_VERSION = "v3"
 
 
 def _render_collection_badge(collection: str | None) -> None:
