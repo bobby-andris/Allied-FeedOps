@@ -20,75 +20,87 @@ def _extract_sku_from_filename(prefix: str, path: Path) -> str | None:
 def evaluate_exports_dir(exports_dir: Path) -> list[dict[str, Any]]:
     """Evaluate all platform patch exports in a directory.
 
-    Returns a list of per-SKU result dicts suitable for printing or report generation.
+    When patch files contain pre-computed heuristic scores in ``_meta``
+    (written by the optimization pipeline), those composites are preferred
+    over re-scoring the exported variant text.  This ensures the dashboard
+    displays the same scores as the batch report, since the pipeline scores
+    *parent* content before finish-injection while the exported top-level
+    title/description is post-injection variant text.
+
+    Per-dimension breakdowns (ctr_proxy, cvr_proxy, brand_voice) are still
+    computed live so the Quality Score Breakdown table remains populated.
+
+    Returns a list of per-SKU result dicts suitable for printing or report
+    generation.
     """
     exports_dir = Path(exports_dir)
-    google_files = list(exports_dir.glob("google-patch-*.json"))
-    bing_files = list(exports_dir.glob("bing-patch-*.json"))
-    shopify_files = list(exports_dir.glob("shopify-patch-*.json"))
 
+    _PLATFORMS: list[tuple[str, str, str, bool]] = [
+        # (platform, file_prefix, description_field, html_description)
+        ("google", "google-patch-", "description", False),
+        ("bing", "bing-patch-", "description", False),
+        ("shopify", "shopify-patch-", "body_html", True),
+    ]
+
+    # Collect all SKUs across platforms
     skus: set[str] = set()
-    for p in google_files:
-        sku = _extract_sku_from_filename("google-patch-", p)
-        if sku:
-            skus.add(sku)
-    for p in bing_files:
-        sku = _extract_sku_from_filename("bing-patch-", p)
-        if sku:
-            skus.add(sku)
-    for p in shopify_files:
-        sku = _extract_sku_from_filename("shopify-patch-", p)
-        if sku:
-            skus.add(sku)
+    for _plat, prefix, _desc_field, _html in _PLATFORMS:
+        for p in exports_dir.glob(f"{prefix}*.json"):
+            sku = _extract_sku_from_filename(prefix, p)
+            if sku:
+                skus.add(sku)
 
     results: list[dict[str, Any]] = []
     for sku in sorted(skus):
         row: dict[str, Any] = {"sku": sku}
-        platform_scores: list[HeuristicScore] = []
+        platform_composites: list[float] = []
+        meta_heuristic: float | None = None  # pipeline weighted composite
 
-        google_path = exports_dir / f"google-patch-{sku}.json"
-        if google_path.exists():
-            google = json.loads(google_path.read_text())
-            title = google.get("title")
-            description = google.get("description")
-            if title and description:
-                score = score_bundle(title=title, description=description)
-                platform_scores.append(score)
-                google_score = asdict(score)
-                google_score["composite"] = score.composite
-                row["google"] = google_score
+        for platform, prefix, desc_field, is_html in _PLATFORMS:
+            path = exports_dir / f"{prefix}{sku}.json"
+            if not path.exists():
+                continue
 
-        bing_path = exports_dir / f"bing-patch-{sku}.json"
-        if bing_path.exists():
-            bing = json.loads(bing_path.read_text())
-            title = bing.get("title")
-            description = bing.get("description")
-            if title and description:
-                score = score_bundle(title=title, description=description)
-                platform_scores.append(score)
-                bing_score = asdict(score)
-                bing_score["composite"] = score.composite
-                row["bing"] = bing_score
+            data = json.loads(path.read_text())
+            title = data.get("title")
+            description = data.get(desc_field)
+            if not title or not description:
+                continue
 
-        shopify_path = exports_dir / f"shopify-patch-{sku}.json"
-        if shopify_path.exists():
-            shopify = json.loads(shopify_path.read_text())
-            title = shopify.get("title")
-            body_html = shopify.get("body_html")
-            if title and body_html:
-                score = score_bundle(
-                    title=title,
-                    description=body_html,
-                    html_description=True,
-                )
-                platform_scores.append(score)
-                shopify_score = asdict(score)
-                shopify_score["composite"] = score.composite
-                row["shopify"] = shopify_score
+            # Pre-computed scores from the pipeline (_meta)
+            meta = data.get("_meta") or {}
+            breakdown = meta.get("heuristic_score_breakdown") or {}
+            meta_platform_score = breakdown.get(platform)
 
-        if platform_scores:
+            # Pipeline weighted composite (identical across platform files)
+            if meta_heuristic is None and meta.get("heuristic_score") is not None:
+                meta_heuristic = meta["heuristic_score"]
+
+            # Live score for per-dimension breakdown, with correct platform
+            score = score_bundle(
+                title=title,
+                description=description,
+                html_description=is_html,
+                platform=platform,
+            )
+            score_dict = asdict(score)
+
+            # Prefer pipeline composite over live re-score
+            if meta_platform_score is not None:
+                score_dict["composite"] = meta_platform_score
+                platform_composites.append(meta_platform_score)
+            else:
+                score_dict["composite"] = score.composite
+                platform_composites.append(score.composite)
+
+            row[platform] = score_dict
+
+        # Overall composite: prefer pipeline weighted score
+        if meta_heuristic is not None:
+            row["composite"] = meta_heuristic
+        elif platform_composites:
             row["composite"] = round(
-                sum(s.composite for s in platform_scores) / len(platform_scores), 2
+                sum(platform_composites) / len(platform_composites), 2
             )
         else:
             row["composite"] = 0.0

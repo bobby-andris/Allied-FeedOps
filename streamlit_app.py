@@ -13,7 +13,7 @@ from pathlib import Path
 import streamlit as st
 
 
-_APP_BUILD = "2026-01-30.1"
+_APP_BUILD = "2026-01-30.2"
 
 
 def _resolve_path_from_env(repo_root: Path, env_key: str, default: Path) -> Path:
