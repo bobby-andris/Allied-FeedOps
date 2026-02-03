@@ -307,7 +307,6 @@ export default async function SkuReviewPage({
       </Tabs>
 
       {/* Lifestyle Images Section */}
-      <div className="text-xs text-muted-foreground my-2">Debug: {images?.length || 0} images found</div>
       {images && images.length > 0 && (
         <>
           <Separator className="my-8" />
