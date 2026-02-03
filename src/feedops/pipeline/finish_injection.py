@@ -154,6 +154,49 @@ def _update_size_in_description(description: str, size: str) -> str:
     return desc
 
 
+def _extract_product_type(text: str) -> str:
+    """Extract the primary product type noun from a sentence.
+
+    Used to create natural finish-forward sentences like
+    "The Antique Brass finish adds character to this towel bar..."
+    """
+    # Common product type patterns to extract
+    product_types = [
+        "towel bar",
+        "towel ring",
+        "towel holder",
+        "towel shelf",
+        "towel stand",
+        "grab bar",
+        "robe hook",
+        "toilet paper holder",
+        "tissue holder",
+        "soap dish",
+        "soap dispenser",
+        "glass shelf",
+        "wall mirror",
+        "makeup mirror",
+        "paper towel holder",
+        "cabinet knob",
+        "cabinet pull",
+        "shower basket",
+        "shower caddy",
+        "toothbrush holder",
+        "tumbler holder",
+        "coat rack",
+        "garment rod",
+        "squeegee",
+        "vanity tray",
+    ]
+    text_lower = text.lower()
+    for pt in product_types:
+        if pt in text_lower:
+            return pt
+    # Fallback: return first few words (likely contains product type)
+    words = text.split()[:4]
+    return " ".join(words).lower().rstrip(",.")
+
+
 def _replace_first_sentence_with_finish(
     description: str,
     finish_name: str,
@@ -164,6 +207,10 @@ def _replace_first_sentence_with_finish(
 
     Uses deterministic pattern variation (based on sku_hint hash) to avoid
     every variant description starting with the same sentence structure.
+
+    Key improvement: Patterns now produce natural prose instead of prepending
+    finish info to dimension dumps. The goal is readable sentences, not
+    "Finished in X, product, 18.75 in L x 2.25 in H..." style openings.
     """
     if not description:
         return description
@@ -188,25 +235,61 @@ def _replace_first_sentence_with_finish(
         html_prefix = "<p>"
         base_sentence = base_sentence[3:]
 
+    # Check if base sentence starts with a dimension dump (robotic pattern)
+    # e.g., "shower basket, 18.75 in L x 2.25 in H..."
+    # If so, use a pattern that restructures rather than just prepending finish
+    is_dimension_dump = bool(
+        re.search(r"^[^,]+,\s*\d+(?:\.\d+)?\s*(?:in|inch)", base_sentence, re.IGNORECASE)
+    )
+
+    # Extract product type for natural sentence construction
+    product_type = _extract_product_type(base_sentence)
+
     # Select sentence pattern deterministically by SKU hash
-    patterns = [
-        # Pattern 0: original — "{base} in {Finish}, {clause}."
-        lambda base, fn, cl: f"{base} in {fn}, {cl}." if cl else f"{base} in {fn}.",
-        # Pattern 1: finish-forward — "Finished in {Finish}, {base}..."
-        lambda base, fn, cl: (
-            f"Finished in {fn}, {base[0].lower()}{base[1:]}"
-            + (f", {cl}" if cl else "")
-            + "."
-        ),
-        # Pattern 2: dash-style — "{base} — available in {Finish}..."
-        lambda base, fn, cl: (
-            f"{base} — available in {fn}"
-            + (f", {cl}" if cl else "")
-            + "."
-        ),
-    ]
-    idx = hash(sku_hint) % len(patterns) if sku_hint else 0
-    new_sentence = html_prefix + patterns[idx](base_sentence, finish_name, clause)
+    if is_dimension_dump:
+        # Special patterns for dimension dumps — restructure into natural prose
+        patterns = [
+            # Pattern 0: "This {product} in {Finish} {clause}."
+            lambda base, fn, cl, pt: (
+                f"This {pt} in {fn}" + (f" {cl}" if cl else "") + "."
+            ),
+            # Pattern 1: "The {Finish} finish on this {product} {clause}."
+            lambda base, fn, cl, pt: (
+                f"The {fn} finish on this {pt}"
+                + (f" {cl}" if cl else " adds style and durability")
+                + "."
+            ),
+            # Pattern 2: "Available in {Finish}, this {product} {clause}."
+            lambda base, fn, cl, pt: (
+                f"Available in {fn}, this {pt}"
+                + (f" {cl}" if cl else " combines form and function")
+                + "."
+            ),
+        ]
+        idx = hash(sku_hint) % len(patterns) if sku_hint else 0
+        new_sentence = html_prefix + patterns[idx](
+            base_sentence, finish_name, clause, product_type
+        )
+    else:
+        # Normal patterns for well-formed base sentences
+        patterns = [
+            # Pattern 0: "{base} in {Finish}, {clause}."
+            lambda base, fn, cl: f"{base} in {fn}" + (f", {cl}" if cl else "") + ".",
+            # Pattern 1: "In {Finish}, {base}..."
+            lambda base, fn, cl: (
+                f"In {fn}, {base[0].lower()}{base[1:]}"
+                + (f", {cl}" if cl else "")
+                + "."
+            ),
+            # Pattern 2: "{base}. Available in {Finish}, {clause}."
+            lambda base, fn, cl: (
+                f"{base}. Available in {fn}"
+                + (f", {cl}" if cl else "")
+                + "."
+            ),
+        ]
+        idx = hash(sku_hint) % len(patterns) if sku_hint else 0
+        new_sentence = html_prefix + patterns[idx](base_sentence, finish_name, clause)
 
     if not rest:
         return new_sentence

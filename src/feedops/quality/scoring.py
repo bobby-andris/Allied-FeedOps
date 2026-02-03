@@ -319,12 +319,19 @@ class HeuristicScore:
     ctr_proxy: int
     cvr_proxy: int
     brand_voice: int
+    readability: int = 10  # Default to max for backwards compatibility
     notes: tuple[str, ...] = ()
     title_zone_analysis: Optional[TitleZoneAnalysis] = None
 
     @property
     def composite(self) -> float:
-        return round((self.ctr_proxy + self.cvr_proxy + self.brand_voice) / 30 * 100, 2)
+        # Include readability in composite (weighted 25% of total)
+        return round(
+            (self.ctr_proxy + self.cvr_proxy + self.brand_voice + self.readability)
+            / 40
+            * 100,
+            2,
+        )
 
 
 @dataclass(frozen=True)
@@ -711,6 +718,83 @@ def score_description(
     return _clamp_0_10(score), notes
 
 
+def score_readability(text: str, *, platform: str = "google") -> tuple[int, list[str]]:
+    """Readability proxy score (0-10). Penalizes robotic content.
+
+    Only applies to Google/Bing feed descriptions which historically
+    prioritized keyword density over prose quality. Shopify descriptions
+    are already optimized for human readers.
+
+    Scoring criteria:
+    - First sentence over 80 chars: -2
+    - Dimension dump in opening (dimensions before product type): -2
+    - Keyword list at end (comma-separated generic phrases): -2
+    - Any sentence over 100 chars: -1 per (max -2)
+    - Ends with brand-only fragment ("Allied Brass."): -1
+
+    Args:
+        text: The description text to score
+        platform: Target platform (only google/bing are scored)
+
+    Returns:
+        Tuple of (score 0-10, list of notes)
+    """
+    notes: list[str] = []
+
+    # Only score Google/Bing -- Shopify descriptions are already human-focused
+    if platform not in ("google", "bing"):
+        return 10, notes
+
+    score = 10  # Start at max, subtract for issues
+
+    if not text or len(text) < 50:
+        return score, notes
+
+    # Split into sentences (accounting for decimal numbers like "2.5 in")
+    sentences = re.split(r"(?<!\d)\.(?!\d)\s*", text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    first_sentence = sentences[0] if sentences else ""
+
+    # Penalty: First sentence over 80 chars
+    if len(first_sentence) > 80:
+        score -= 2
+        notes.append(f"First sentence too long ({len(first_sentence)} chars, max 80)")
+
+    # Penalty: Dimension dump in opening
+    # Pattern: starts with "Finished in X," followed by product type, then dimensions
+    # e.g., "Finished in Antique Brass, shower basket, 18.75 in L x 2.25 in H..."
+    dimension_dump_pattern = r"^(?:Finished in \w+[\w\s]*,\s*)?[^,]+,\s*\d+(?:\.\d+)?\s*(?:in|inch)"
+    if re.match(dimension_dump_pattern, text, re.IGNORECASE):
+        score -= 2
+        notes.append("Opens with dimension dump -- lead with benefit or natural prose")
+
+    # Penalty: Keyword list at end
+    # Pattern: ends with "Fits X hardware, Y accessories, Z fixtures" style lists
+    keyword_list_pattern = (
+        r"(?:fits|matches|complements|coordinates with|works with)\s+"
+        r"(?:\w+\s+)?(?:bathroom|bath|kitchen)\s+(?:hardware|accessories|fixtures)"
+        r"(?:\s*,\s*(?:\w+\s+)?(?:bathroom|bath|kitchen)\s+(?:hardware|accessories|fixtures)){1,}\.?\s*$"
+    )
+    if re.search(keyword_list_pattern, text, re.IGNORECASE):
+        score -= 2
+        notes.append("Ends with keyword list -- integrate terms naturally into prose")
+
+    # Penalty: Run-on sentences (any sentence over 100 chars)
+    long_sentences = [s for s in sentences if len(s) > 100]
+    if long_sentences:
+        penalty = min(2, len(long_sentences))
+        score -= penalty
+        notes.append(f"{len(long_sentences)} run-on sentence(s) over 100 chars")
+
+    # Penalty: Ends with just brand name fragment
+    if re.search(r"\.\s*Allied Brass\.?\s*$", text):
+        score -= 1
+        notes.append("Ends with brand-only fragment -- integrate into final sentence")
+
+    return _clamp_0_10(score), notes
+
+
 def assess_soft_gates(
     *,
     title: str,
@@ -828,6 +912,7 @@ def score_bundle(
     """Convenience scorer combining title+description into a composite.
 
     Includes detailed title zone analysis for understanding keyword placement.
+    Includes readability scoring for Google/Bing feed descriptions.
     """
     # Normalize title separators before scoring to match export format
     normalized_title = title.replace(" | ", ", ").replace("|", ", ")
@@ -838,11 +923,15 @@ def score_bundle(
         description, html=html_description, platform=platform
     )
     voice, voice_notes = score_brand_voice(title + "\n" + description)
-    notes = tuple(dict.fromkeys([*ctr_notes, *cvr_notes, *voice_notes]))
+    readability, readability_notes = score_readability(description, platform=platform)
+    notes = tuple(
+        dict.fromkeys([*ctr_notes, *cvr_notes, *voice_notes, *readability_notes])
+    )
     return HeuristicScore(
         ctr_proxy=ctr,
         cvr_proxy=cvr,
         brand_voice=voice,
+        readability=readability,
         notes=notes,
         title_zone_analysis=zone_analysis,
     )

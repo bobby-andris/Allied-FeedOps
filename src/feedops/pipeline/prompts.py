@@ -133,22 +133,23 @@ TITLE SUCCESS CRITERIA:
 
 DESCRIPTION SUCCESS CRITERIA (platform-specific -- read carefully):
 
-GOOGLE DESCRIPTION (feed fuel -- NOT shown to shoppers):
-- First 150 chars: product type + key dimensions + material + primary use case.
-- Pack with searchable attributes: room type, mount type, material, style.
+GOOGLE DESCRIPTION (attribute-rich AND human-readable -- MAY appear in Shopping ads):
+- First sentence: product type + ONE key dimension + material in natural prose (not a data dump).
+- Write complete sentences with proper grammar -- descriptions appear in Shopping ad snippets.
+- Include searchable attributes naturally woven into prose, not listed or dumped.
+- Avoid run-on sentences: keep each sentence under 80 characters when possible.
+- Never end with keyword lists ("Fits X, Y, Z hardware") or brand-only fragments ("Allied Brass.").
 - Include natural synonyms shoppers search: e.g. "towel bar" + "towel rack" + "towel holder".
-- End with brand + collection for long-tail matching.
-- Do NOT write persuasive marketing copy -- this is semantic fuel for Google's matching algorithm.
-- A Google description reads like a rich product specification paragraph, not an ad.
+- Include room context, mount type, material, and collection for algorithm matching.
 - Target 600-800 characters, plain text.
 
-BING DESCRIPTION (literal keyword matching -- NOT shown to shoppers):
-- Same attribute-dense approach as Google but with MORE explicit synonyms.
-- Bing's algorithm is more literal than Google's -- include exact-match keyword variations.
-- Include product type synonyms: e.g. "towel bar", "towel rack", "towel holder", "bathroom towel bar", "wall mount towel bar".
-- Include dimensions in multiple formats: e.g. "24 inches", "24-inch", "24in".
-- A Bing description covers every plausible way a shopper might search for this product.
-- Target 700-1000 characters, plain text, MUST include 2-3 product type synonyms.
+BING DESCRIPTION (attribute-rich AND human-readable -- MAY appear in search results):
+- Same readable prose quality as Google -- not a keyword dump.
+- Bing's algorithm is more literal than Google's -- include explicit synonym variations naturally.
+- Include product type synonyms in natural sentences: e.g. "This towel bar (also called a towel rack or towel holder)..."
+- Include dimensions naturally: "This 24-inch wall-mounted towel bar..." not "24 inches, 24-inch, 24in".
+- Write for humans first, algorithm matching second -- both benefit from quality prose.
+- Target 700-1000 characters, plain text, MUST include 2-3 product type synonyms woven into sentences.
 
 SHOPIFY DESCRIPTION (shown to shoppers on product page -- this IS the sales pitch):
 - First sentence: address buyer's problem or desired outcome.
@@ -256,10 +257,22 @@ no collection, no brand at end.
 BAD TITLE: "Allied Brass Dottingham Collection 18-Inch Towel Bar"
 WHY: Brand first instead of last, product type after character 30.
 
-BAD DESCRIPTION: "This towel bar is made of brass. It mounts to the wall. It comes in 28
+BAD DESCRIPTION (Shopify): "This towel bar is made of brass. It mounts to the wall. It comes in 28
 finishes. It has a lifetime warranty."
 WHY: Feature-first (not problem-first), no engagement hook, no outcome-driven benefits,
 reads like a spec sheet, no bullet structure, no specific usage scenario.
+
+BAD GOOGLE/BING DESCRIPTION: "Finished in Antique Brass, shower basket, 18.75 in L x 2.25 in H x 4.13 in W, solid brass wall mount oval combination shower caddy for bathroom bath/shower storage, which features a softened, aged golden patina that brings vintage charm and classic elegance to traditional and transitional bathrooms."
+WHY: Opens with dimension dump in first sentence. The "shower basket, 18.75 in L x..." structure is robotic -- dimensions should be woven into natural prose, not listed after a comma.
+
+BAD GOOGLE/BING DESCRIPTION: "...Assembly not required. Limited lifetime warranty. Fits traditional bathroom hardware, classic bath accessories, heritage bathroom fixtures. Allied Brass."
+WHY: Ends with keyword list ("Fits X, Y, Z") and brand-only fragment ("Allied Brass."). These look like SEO spam and hurt brand perception. Integrate keywords naturally into sentences.
+
+BAD GOOGLE/BING DESCRIPTION (first sentence 120+ chars): "This wall-mounted solid brass 18-inch towel bar with concealed mounting hardware and lifetime warranty in Polished Chrome provides secure towel storage for bathrooms."
+WHY: Run-on first sentence. Break into multiple sentences: "This 18-inch wall-mounted towel bar in Polished Chrome provides secure towel storage. Solid brass construction with concealed mounting hardware. Backed by a lifetime warranty."
+
+GOOD GOOGLE/BING DESCRIPTION: "This 18-inch wall-mounted shower basket in Antique Brass keeps bath essentials organized with timeless style. Solid brass construction with ventilated wires resists rust. The oval combination caddy holds shampoo, soap, and accessories while saving shower floor space. Concealed mounting hardware provides a clean look. Backed by Allied Brass's limited lifetime warranty."
+WHY: Same key attributes (dimensions, finish, material, warranty, brand) woven into natural, readable sentences. Each sentence under 80 chars. No dimension dumps, no keyword lists.
 
 === PLATFORM SPECIFICS ===
 
