@@ -39,9 +39,15 @@ def test_generate_variant_title_moves_finish_into_first_segment_when_finish_woul
     assert result.endswith("| Allied Brass")
 
 
-def test_variant_description_finish_in_first_sentence_and_no_finish_block(
+def test_variant_description_finish_in_opening_and_no_finish_block(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Finish should appear early in description (within first ~200 chars).
+
+    The new approach adds finish as a separate short sentence rather than
+    appending a long clause to the first sentence. This creates more
+    readable output.
+    """
     monkeypatch.setenv("FEEDOPS_FINISH_FORWARD_V2", "true")
     result = generate_variant_description(
         base_description=_base_description(),
@@ -50,9 +56,12 @@ def test_variant_description_finish_in_first_sentence_and_no_finish_block(
         collection_group="Transitional",
         platform="google",
     )
-    first_sentence = result.split(".", 1)[0]
-    assert "Polished Nickel" in first_sentence
+    # Finish should appear early in description (within first ~200 chars)
+    opening = result[:200]
+    assert "Polished Nickel" in opening
+    # Should not have verbose "About This Finish" block
     assert "About This Finish" not in result
+    # Should have finish-related bullet
     bullet_lines = [line for line in result.splitlines() if line.strip().startswith("- ")]
     assert any("Polished Nickel" in line for line in bullet_lines)
 

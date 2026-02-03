@@ -59,48 +59,62 @@ def _apply_room_context(text: str, room_context: str | None) -> str:
     return text
 
 
-def _build_finish_benefit_clause(
+def _build_finish_benefit_sentence(
     finish_name: str,
     meta: dict | None,
     room_context: str | None,
 ) -> str | None:
-    """Build a relative clause describing the finish benefit.
+    """Build a SHORT standalone sentence describing the finish benefit.
 
-    The returned string is joined onto the first sentence as:
-        ``"...in {finish_name}, {clause}."``
-    so it must be grammatically valid after a comma — typically a
-    relative clause starting with "which" or a participial phrase.
+    Instead of appending a long clause to the first sentence (which creates
+    run-on sentences), this returns a brief separate sentence that can be
+    added after the finish mention.
+
+    Returns something like:
+        "This finish offers a warm alternative to chrome."
+    Or None if no benefit info is available.
     """
     if not meta:
         return None
     functional_desc = (meta.get("functional_description") or "").strip()
     if not functional_desc:
         return None
+
     functional_desc = _apply_room_context(functional_desc, room_context).rstrip(".")
-    lower = functional_desc.lower()
-    finish_lower = finish_name.lower()
-    if lower.startswith(finish_lower):
-        rest = functional_desc[len(finish_name) :].lstrip()
-        if not rest:
-            return None
-        # If the remainder starts with a verb, make it a relative clause.
-        if rest.lower().startswith(_FINISH_VERB_PREFIXES):
-            return f"which {rest}"
-        # Otherwise also wrap with "which" so the join is grammatical.
-        # "in Antique Brass, features a softened..." is broken;
-        # "in Antique Brass, which features a softened..." is correct.
-        if rest[0].islower():
-            return f"which {rest}"
-        # Starts with uppercase — treat as an appositive.
-        first_word = rest.split()[0].rstrip(",").lower()
-        if first_word.startswith(("a ", "an ")):
-            return rest[0].lower() + rest[1:]
-        return f"which {rest[0].lower()}{rest[1:]}"
-    # functional_desc doesn't start with finish name — use as-is,
-    # but ensure it can follow "in {finish}, ..."
-    if functional_desc[0].isupper():
-        return f"which {functional_desc[0].lower()}{functional_desc[1:]}"
-    return f"which {functional_desc}"
+
+    # If description is already short enough, use it directly
+    if len(functional_desc) <= 80:
+        return f"{functional_desc}."
+
+    # For longer descriptions, find a natural break point
+    # First try: split at "that" or "which" clauses (these are usually additional detail)
+    for marker in [" that ", " which ", " with a ", " with an "]:
+        if marker in functional_desc:
+            idx = functional_desc.index(marker)
+            if 30 <= idx <= 80:  # Only if it gives us a reasonable length
+                return f"{functional_desc[:idx].rstrip()}."
+
+    # Second try: split at sentence boundary
+    if ". " in functional_desc:
+        first_part = functional_desc.split(". ")[0]
+        if len(first_part) <= 80:
+            return f"{first_part}."
+
+    # Last resort: take first meaningful chunk at word boundary
+    # Find a good break point around 60-70 chars
+    words = functional_desc.split()
+    result = []
+    length = 0
+    for word in words:
+        if length + len(word) + 1 > 70:
+            break
+        result.append(word)
+        length += len(word) + 1
+
+    if result:
+        return f"{' '.join(result)}."
+
+    return None  # Can't make a good short sentence
 
 
 def _update_size_in_description(description: str, size: str) -> str:
@@ -154,148 +168,73 @@ def _update_size_in_description(description: str, size: str) -> str:
     return desc
 
 
-def _extract_product_type(text: str) -> str:
-    """Extract the primary product type noun from a sentence.
-
-    Used to create natural finish-forward sentences like
-    "The Antique Brass finish adds character to this towel bar..."
-    """
-    # Common product type patterns to extract
-    product_types = [
-        "towel bar",
-        "towel ring",
-        "towel holder",
-        "towel shelf",
-        "towel stand",
-        "grab bar",
-        "robe hook",
-        "toilet paper holder",
-        "tissue holder",
-        "soap dish",
-        "soap dispenser",
-        "glass shelf",
-        "wall mirror",
-        "makeup mirror",
-        "paper towel holder",
-        "cabinet knob",
-        "cabinet pull",
-        "shower basket",
-        "shower caddy",
-        "toothbrush holder",
-        "tumbler holder",
-        "coat rack",
-        "garment rod",
-        "squeegee",
-        "vanity tray",
-    ]
-    text_lower = text.lower()
-    for pt in product_types:
-        if pt in text_lower:
-            return pt
-    # Fallback: return first few words (likely contains product type)
-    words = text.split()[:4]
-    return " ".join(words).lower().rstrip(",.")
-
-
 def _replace_first_sentence_with_finish(
     description: str,
     finish_name: str,
-    clause: str | None,
+    benefit_sentence: str | None,
     sku_hint: str = "",
 ) -> str:
-    """Replace the first sentence with a finish-forward version.
+    """Add finish info to the description without creating run-on sentences.
 
-    Uses deterministic pattern variation (based on sku_hint hash) to avoid
-    every variant description starting with the same sentence structure.
+    Philosophy: Keep it simple. Add finish name briefly, then add benefit
+    as a separate short sentence if available. Don't append long clauses.
 
-    Key improvement: Patterns now produce natural prose instead of prepending
-    finish info to dimension dumps. The goal is readable sentences, not
-    "Finished in X, product, 18.75 in L x 2.25 in H..." style openings.
+    Examples of GOOD output:
+        "This 14-inch towel bar is crafted from solid brass. Available in
+         Antique Brass. This finish adds vintage warmth."
+
+    Examples of BAD output (what we're avoiding):
+        "This 14-inch towel bar is crafted from solid brass in Antique Brass,
+         which features a softened, aged golden patina that brings vintage
+         charm and character to traditional and transitional bathrooms."
     """
     if not description:
         return description
-    # Match a sentence-ending period — skip decimal points inside numbers
-    # like "4.5 in" or "0.38 in" by requiring the period NOT be surrounded
-    # by digits on both sides.
+
+    # If finish already mentioned, don't duplicate
+    if finish_name.lower() in description.lower():
+        return description
+
+    # Find first sentence boundary (skip decimal points like "4.5 in")
     match = re.search(r"(?<!\d)\.(?!\d)", description)
     if not match:
-        base_sentence = description.strip()
+        first_sentence = description.strip().rstrip(".")
         rest = ""
     else:
-        base_sentence = description[: match.start()].strip()
-        rest = description[match.end() :]
-    if not base_sentence or finish_name.lower() in base_sentence.lower():
-        return description
-    base_sentence = base_sentence.rstrip(".")
+        first_sentence = description[: match.start()].strip()
+        rest = description[match.end():]
 
-    # Strip leading <p> tag if present — re-added after pattern application
-    # so that all patterns produce text inside the HTML element.
+    # Handle HTML prefix
     html_prefix = ""
-    if base_sentence.startswith("<p>"):
+    if first_sentence.startswith("<p>"):
         html_prefix = "<p>"
-        base_sentence = base_sentence[3:]
+        first_sentence = first_sentence[3:]
 
-    # Check if base sentence starts with a dimension dump (robotic pattern)
-    # e.g., "shower basket, 18.75 in L x 2.25 in H..."
-    # If so, use a pattern that restructures rather than just prepending finish
-    is_dimension_dump = bool(
-        re.search(r"^[^,]+,\s*\d+(?:\.\d+)?\s*(?:in|inch)", base_sentence, re.IGNORECASE)
-    )
-
-    # Extract product type for natural sentence construction
-    product_type = _extract_product_type(base_sentence)
-
-    # Select sentence pattern deterministically by SKU hash
-    if is_dimension_dump:
-        # Special patterns for dimension dumps — restructure into natural prose
-        patterns = [
-            # Pattern 0: "This {product} in {Finish} {clause}."
-            lambda base, fn, cl, pt: (
-                f"This {pt} in {fn}" + (f" {cl}" if cl else "") + "."
-            ),
-            # Pattern 1: "The {Finish} finish on this {product} {clause}."
-            lambda base, fn, cl, pt: (
-                f"The {fn} finish on this {pt}"
-                + (f" {cl}" if cl else " adds style and durability")
-                + "."
-            ),
-            # Pattern 2: "Available in {Finish}, this {product} {clause}."
-            lambda base, fn, cl, pt: (
-                f"Available in {fn}, this {pt}"
-                + (f" {cl}" if cl else " combines form and function")
-                + "."
-            ),
-        ]
-        idx = hash(sku_hint) % len(patterns) if sku_hint else 0
-        new_sentence = html_prefix + patterns[idx](
-            base_sentence, finish_name, clause, product_type
-        )
+    # Simple approach: Add "Available in {Finish}." after first sentence
+    # Then add short benefit sentence if we have one
+    finish_mention = f"Available in {finish_name}."
+    if benefit_sentence:
+        # Keep benefit sentence SHORT - just the key point
+        finish_info = f"{finish_mention} {benefit_sentence}"
     else:
-        # Normal patterns for well-formed base sentences
-        patterns = [
-            # Pattern 0: "{base} in {Finish}, {clause}."
-            lambda base, fn, cl: f"{base} in {fn}" + (f", {cl}" if cl else "") + ".",
-            # Pattern 1: "In {Finish}, {base}..."
-            lambda base, fn, cl: (
-                f"In {fn}, {base[0].lower()}{base[1:]}"
-                + (f", {cl}" if cl else "")
-                + "."
-            ),
-            # Pattern 2: "{base}. Available in {Finish}, {clause}."
-            lambda base, fn, cl: (
-                f"{base}. Available in {fn}"
-                + (f", {cl}" if cl else "")
-                + "."
-            ),
-        ]
-        idx = hash(sku_hint) % len(patterns) if sku_hint else 0
-        new_sentence = html_prefix + patterns[idx](base_sentence, finish_name, clause)
+        finish_info = finish_mention
 
-    if not rest:
-        return new_sentence
-    if rest.startswith("\n"):
-        return f"{new_sentence}{rest}"
-    return f"{new_sentence} {rest.lstrip()}"
+    # Reconstruct: first sentence + finish info + rest
+    result = f"{html_prefix}{first_sentence}. {finish_info}"
+
+    if rest:
+        # Preserve paragraph breaks (double newlines) but remove single leading space
+        if rest.startswith("\n\n"):
+            # Keep double newline for paragraph break
+            result = f"{result}{rest}"
+        elif rest.startswith("\n"):
+            # Single newline - keep it
+            result = f"{result}{rest}"
+        else:
+            # No newline - add space before continuing text
+            result = f"{result} {rest.lstrip()}"
+
+    return result
 
 
 def _replace_highlight_bullets(
@@ -733,10 +672,8 @@ def generate_variant_description(
         return desc.strip()
 
     meta = get_finish_metadata(finish_name)
-    clause = _build_finish_benefit_clause(finish_name, meta, room_context)
-    # Build a deterministic hint from finish + category for sentence pattern variation
-    sku_hint = f"{finish_name}:{category or ''}"
-    desc = _replace_first_sentence_with_finish(desc, finish_name, clause, sku_hint=sku_hint)
+    benefit_sentence = _build_finish_benefit_sentence(finish_name, meta, room_context)
+    desc = _replace_first_sentence_with_finish(desc, finish_name, benefit_sentence)
 
     replacement_bullets: list[str] = []
     if meta:

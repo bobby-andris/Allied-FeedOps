@@ -719,18 +719,18 @@ def score_description(
 
 
 def score_readability(text: str, *, platform: str = "google") -> tuple[int, list[str]]:
-    """Readability proxy score (0-10). Penalizes robotic content.
+    """Readability proxy score (0-10). Penalizes egregiously robotic content.
 
-    Only applies to Google/Bing feed descriptions which historically
-    prioritized keyword density over prose quality. Shopify descriptions
-    are already optimized for human readers.
+    Philosophy: We're not enforcing rigid rules. We're catching obvious
+    problems that hurt brand perception. Good writing has rhythm - a long
+    sentence followed by a short one can work well. We only penalize
+    egregious issues.
 
-    Scoring criteria:
-    - First sentence over 80 chars: -2
-    - Dimension dump in opening (dimensions before product type): -2
-    - Keyword list at end (comma-separated generic phrases): -2
-    - Any sentence over 100 chars: -1 per (max -2)
-    - Ends with brand-only fragment ("Allied Brass."): -1
+    Scoring criteria (lenient):
+    - Dimension dump in opening: -3 (this is clearly robotic)
+    - Keyword list at end: -2 (looks like SEO spam)
+    - Very long sentences (>150 chars): -1 each (max -2)
+    - Brand-only fragment at end: -1 (minor issue)
 
     Args:
         text: The description text to score
@@ -754,23 +754,15 @@ def score_readability(text: str, *, platform: str = "google") -> tuple[int, list
     sentences = re.split(r"(?<!\d)\.(?!\d)\s*", text)
     sentences = [s.strip() for s in sentences if s.strip()]
 
-    first_sentence = sentences[0] if sentences else ""
-
-    # Penalty: First sentence over 80 chars
-    if len(first_sentence) > 80:
-        score -= 2
-        notes.append(f"First sentence too long ({len(first_sentence)} chars, max 80)")
-
-    # Penalty: Dimension dump in opening
-    # Pattern: starts with "Finished in X," followed by product type, then dimensions
-    # e.g., "Finished in Antique Brass, shower basket, 18.75 in L x 2.25 in H..."
+    # Penalty: Dimension dump in opening (clearly robotic)
+    # Pattern: "Finished in X, product, 18.75 in L x 2.25 in H..."
     dimension_dump_pattern = r"^(?:Finished in \w+[\w\s]*,\s*)?[^,]+,\s*\d+(?:\.\d+)?\s*(?:in|inch)"
     if re.match(dimension_dump_pattern, text, re.IGNORECASE):
-        score -= 2
-        notes.append("Opens with dimension dump -- lead with benefit or natural prose")
+        score -= 3
+        notes.append("Opens with dimension dump -- needs natural prose")
 
-    # Penalty: Keyword list at end
-    # Pattern: ends with "Fits X hardware, Y accessories, Z fixtures" style lists
+    # Penalty: Keyword list at end (SEO spam pattern)
+    # Pattern: "Fits X hardware, Y accessories, Z fixtures"
     keyword_list_pattern = (
         r"(?:fits|matches|complements|coordinates with|works with)\s+"
         r"(?:\w+\s+)?(?:bathroom|bath|kitchen)\s+(?:hardware|accessories|fixtures)"
@@ -778,19 +770,20 @@ def score_readability(text: str, *, platform: str = "google") -> tuple[int, list
     )
     if re.search(keyword_list_pattern, text, re.IGNORECASE):
         score -= 2
-        notes.append("Ends with keyword list -- integrate terms naturally into prose")
+        notes.append("Ends with keyword list -- integrate naturally")
 
-    # Penalty: Run-on sentences (any sentence over 100 chars)
-    long_sentences = [s for s in sentences if len(s) > 100]
-    if long_sentences:
-        penalty = min(2, len(long_sentences))
+    # Penalty: Very long sentences (>150 chars is genuinely hard to read)
+    # Note: 100-150 chars is fine - good writing has varied sentence length
+    very_long = [s for s in sentences if len(s) > 150]
+    if very_long:
+        penalty = min(2, len(very_long))
         score -= penalty
-        notes.append(f"{len(long_sentences)} run-on sentence(s) over 100 chars")
+        notes.append(f"{len(very_long)} sentence(s) over 150 chars")
 
-    # Penalty: Ends with just brand name fragment
+    # Penalty: Ends with brand-only fragment (minor issue)
     if re.search(r"\.\s*Allied Brass\.?\s*$", text):
         score -= 1
-        notes.append("Ends with brand-only fragment -- integrate into final sentence")
+        notes.append("Ends with brand-only fragment")
 
     return _clamp_0_10(score), notes
 
