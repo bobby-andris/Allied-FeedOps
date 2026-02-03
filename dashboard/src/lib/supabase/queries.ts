@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { SkuApproval, PublishBatch, GeneratedContent } from './types'
+import { SkuApproval, PublishBatch, GeneratedContent, VariantIndex, VariantApproval } from './types'
 
 // Use generic SupabaseClient until we have generated types
 type Client = SupabaseClient
@@ -104,6 +104,103 @@ export async function approveElement(
 ) {
   const field = `${element}_approved`
   return updateApproval(client, masterSku, {
+    [field]: approved ? 1 : 0,
+  })
+}
+
+// Variant Queries
+export async function getVariantsForSku(client: Client, masterSku: string) {
+  const { data, error } = await client
+    .from('variant_index')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .order('finish', { ascending: true })
+
+  if (error) throw error
+  return data as VariantIndex[]
+}
+
+export async function getVariantApprovals(client: Client, masterSku: string) {
+  const { data, error } = await client
+    .from('variant_approvals')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .order('finish', { ascending: true })
+
+  if (error) throw error
+  return data as VariantApproval[]
+}
+
+export async function getVariantApproval(client: Client, masterSku: string, finish: string) {
+  const { data, error } = await client
+    .from('variant_approvals')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .eq('finish', finish)
+    .single()
+
+  if (error && error.code !== 'PGRST116') throw error
+  return data as VariantApproval | null
+}
+
+export async function updateVariantApproval(
+  client: Client,
+  masterSku: string,
+  finish: string,
+  approval: Partial<Omit<VariantApproval, 'id' | 'master_sku' | 'finish' | 'created_at'>>
+) {
+  // First check if record exists
+  const { data: existing } = await client
+    .from('variant_approvals')
+    .select('id')
+    .eq('master_sku', masterSku)
+    .eq('finish', finish)
+    .single()
+
+  if (existing) {
+    // Update existing record
+    const { data, error } = await client
+      .from('variant_approvals')
+      .update({
+        ...approval,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('master_sku', masterSku)
+      .eq('finish', finish)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as VariantApproval
+  } else {
+    // Insert new record
+    const { data, error } = await client
+      .from('variant_approvals')
+      .insert({
+        master_sku: masterSku,
+        finish,
+        ...approval,
+        approval_status: approval.approval_status || 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as VariantApproval
+  }
+}
+
+export async function approveVariantElement(
+  client: Client,
+  masterSku: string,
+  finish: string,
+  element: 'title' | 'description' | 'image',
+  approved: boolean
+) {
+  const field = `${element}_approved`
+  return updateVariantApproval(client, masterSku, finish, {
     [field]: approved ? 1 : 0,
   })
 }

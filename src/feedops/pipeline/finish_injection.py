@@ -5,13 +5,32 @@ This module handles:
 2. Determining if finish + collection aesthetics align
 3. Generating finish-specific description snippets
 4. Injecting snippets into base descriptions
+
+DEPRECATION NOTICE (2026-02-03):
+The post-processing approach in this module is being superseded by LLM-at-variant-time
+generation (FEEDOPS_VARIANT_AT_LLM_TIME=1). The new approach generates finish-specific
+content directly from the LLM, producing more natural finish integration.
+
+DEPRECATED FUNCTIONS (retained for fallback):
+- generate_variant_description() - Use generator.generate_variant_candidate() instead
+- _replace_first_sentence_with_finish() - Causes awkward "Available in X. X features..."
+- _build_finish_benefit_sentence() - Creates truncated sentences
+- inject_finish_into_description() - Post-processing can't integrate naturally
+- generate_finish_snippet() - Superseded by LLM context injection
+
+RETAINED UTILITIES:
+- get_finish_metadata() - Still useful for finish context
+- generate_variant_title() - Title injection is simpler than descriptions
+- generate_variant_keywords() - Useful for variant-level targeting
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
+import warnings
 from pathlib import Path
 from typing import Optional
 
@@ -359,6 +378,10 @@ def generate_finish_snippet(
 ) -> Optional[str]:
     """Generate a finish-specific description snippet.
 
+    .. deprecated::
+        This function is part of the post-processing approach. Use
+        generator.generate_variant_candidate() for LLM-integrated finish content.
+
     Args:
         finish_name: The finish name (e.g., "Polished Chrome", "Fire Engine Red")
         collection_name: The collection name (e.g., "Dottingham", "Pipeline")
@@ -590,6 +613,12 @@ def generate_variant_description(
 ) -> str:
     """Generate a variant-specific description with finish content.
 
+    .. deprecated::
+        This function uses post-processing to inject finish content, which creates
+        awkward patterns like "Available in Antique Brass. Antique Brass features...".
+        Use generator.generate_variant_candidate() with FEEDOPS_VARIANT_AT_LLM_TIME=1
+        for natural finish integration.
+
     This is the main entry point for generating per-GMCID descriptions.
 
     Args:
@@ -608,6 +637,11 @@ def generate_variant_description(
     Returns:
         Variant-specific description with finish content injected
     """
+    # Log deprecation warning (don't use warnings.warn to avoid breaking existing code)
+    logging.debug(
+        "generate_variant_description() is deprecated. "
+        "Enable FEEDOPS_VARIANT_AT_LLM_TIME=1 for natural finish integration."
+    )
     # Remove generic "Available in X finishes" text since this is for a specific finish
     desc = base_description
 

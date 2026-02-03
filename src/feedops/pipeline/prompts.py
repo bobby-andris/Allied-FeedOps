@@ -131,40 +131,53 @@ TITLE SUCCESS CRITERIA:
 - Use commas or hyphens as separators. No pipes.
 - Never start with banned adjectives: Premium, Luxury, Best, High-Quality, Top-Rated.
 
-DESCRIPTION SUCCESS CRITERIA (platform-specific -- read carefully):
+DESCRIPTION SUCCESS CRITERIA:
 
-GOOGLE DESCRIPTION (attribute-rich AND human-readable -- MAY appear in Shopping ads):
-- First sentence: product type + ONE key dimension + material in natural prose (not a data dump).
-- Write complete sentences with proper grammar -- descriptions appear in Shopping ad snippets.
-- Include searchable attributes naturally woven into prose, not listed or dumped.
-- Avoid run-on sentences: keep each sentence under 80 characters when possible.
-- Never end with keyword lists ("Fits X, Y, Z hardware") or brand-only fragments ("Allied Brass.").
-- Include natural synonyms shoppers search: e.g. "towel bar" + "towel rack" + "towel holder".
-- Include room context, mount type, material, and collection for algorithm matching.
-- Target 600-800 characters, plain text.
+BEFORE YOU WRITE, THINK ABOUT WHO IS READING THIS:
 
-BING DESCRIPTION (attribute-rich AND human-readable -- MAY appear in search results):
-- Same readable prose quality as Google -- not a keyword dump.
-- Bing's algorithm is more literal than Google's -- include explicit synonym variations naturally.
-- Include product type synonyms in natural sentences: e.g. "This towel bar (also called a towel rack or towel holder)..."
-- Include dimensions naturally: "This 24-inch wall-mounted towel bar..." not "24 inches, 24-inch, 24in".
-- Write for humans first, algorithm matching second -- both benefit from quality prose.
-- Target 700-1000 characters, plain text, MUST include 2-3 product type synonyms woven into sentences.
+1. WHO IS SEARCHING FOR THIS PRODUCT?
+- A homeowner renovating a bathroom who wants it to look intentional, not like an afterthought
+- A designer specifying fixtures for a client who expects quality
+- Someone replacing a broken/ugly product who wants an upgrade, not just a replacement
 
-SHOPIFY DESCRIPTION (shown to shoppers on product page -- this IS the sales pitch):
-- First sentence: address buyer's problem or desired outcome.
-- Mention ONE trust signal in the opening: "Backed by a lifetime warranty" or "Assembled in Virginia" or "Choose from 28 designer finishes".
-- REQUIRED in Shopify description (at least 2 of these 4):
-  * "Backed by a lifetime warranty"
-  * "Assembled in Virginia, USA"
-  * "Available in 28 designer finishes to match any decor"
-  * "Part of the [Collection] collection -- coordinate with 42+ matching accessories"
-- 3-5 outcome-first bullet highlights (not feature-first).
-- Include competitive edge: "Solid brass construction outlasts die-cast zinc alternatives".
-- Collection coordination CTA: "Complete your bathroom with matching pieces".
-- Specs section includes dimensions, weight capacity, mounting, warranty.
-- A Shopify description makes someone click Add to Cart.
-- HTML with <p> hook, <ul><li> highlights, specs.
+2. WHAT QUESTIONS DO THEY HAVE BEFORE SPENDING $80+?
+- "Will this look good in MY bathroom?" → Help them visualize it
+- "Will this match my other fixtures?" → Address finish coordination
+- "Is this actually better than the $20 Amazon option?" → Explain the value
+- "Will this last? Is it quality?" → Provide trust signals (material, warranty)
+- Product-specific questions vary: grab bar buyers ask about weight capacity, shower basket buyers ask about drainage
+
+3. WHAT MAKES ALLIED BRASS WORTH IT?
+Allied Brass is NOT competing on price. We compete on:
+- Style without sacrifice: You don't have to choose between "looks good" and "works well"
+- Personalization: 28 finishes to match any bathroom vision
+- Innovation: Rollerless TP holders, retractable rods, decorative grab bars, ventilated baskets
+- Durability: Solid brass outlasts plastic and die-cast that crack and corrode
+- Coordination: Match everything across 42+ collections
+
+PLATFORM CONTEXT (understand the buyer's journey):
+- Google/Bing (variant): One specific finish. This is the customer's FIRST impression. Make them want to click. They haven't committed yet.
+- Shopify (master): All finishes on one page. Customer already clicked. Help them choose a finish and add to cart. They're further down the funnel.
+
+GOOGLE DESCRIPTION:
+- This is a variant listing (one finish). The finish is the design choice they're about to make.
+- Write for a human who is scanning Shopping ads. Answer their questions. Make them click.
+- Weave the finish naturally into your description—it's part of the product's appeal.
+- Plain text only.
+
+BING DESCRIPTION:
+- Also a variant listing (one finish). Bing's algorithm is more literal than Google's.
+- Include product synonyms naturally (shower basket/caddy, towel bar/rack).
+- Write for humans first—Bing's AI also reads your descriptions.
+- Plain text only.
+
+SHOPIFY DESCRIPTION:
+- This is the MASTER SKU. All finishes share this page. Don't mention a specific finish.
+- The customer already clicked—now convince them to add to cart.
+- Open with their problem or desired outcome, not product specs.
+- Highlight finish variety as a benefit: "28 designer finishes to match your vision"
+- Include trust signals: warranty, material quality, Virginia assembly.
+- Format: HTML with <p> opening, <ul><li> bullet benefits, specs section.
 
 SHOPIFY META DESCRIPTION:
 - shopify_meta_description: target 140-155 characters, standalone summary with primary keyword.
@@ -173,7 +186,9 @@ FACTUAL ACCURACY:
 - Never invent specifications not in the evidence table.
 - Every factual claim must be traceable to the evidence table.
 - Keywords from the placement plan are search intent signals, NOT product facts.
-- external_keywords and keyword_intent_master are keywords to prioritize, not facts.
+- external_keywords, keyword_intent_master, and design_intent_keywords are for SEO targeting—weave ONE naturally into prose, do NOT list them.
+  BAD: "...pairs well with traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures."
+  GOOD: "...complements traditional bathroom hardware."
 - Competitor patterns are inspiration only, never product facts.
 
 BULLET FORMAT:
@@ -190,6 +205,17 @@ BANNED CONTENT:
 
 === P1: SHOULD FOLLOW (scored) ===
 
+PRODUCT INNOVATION CONTEXT (use when relevant to THIS product):
+Some Allied Brass products have innovations that competitors don't offer:
+- Shower baskets: ventilated wires drain water (bottles dry faster)
+- Grab bars: decorative ADA compliance (safety that looks designed, not institutional)
+- Toilet paper holders: rollerless (no clicking), multi-roll (never run out), recessed (built-in look)
+- Towel bars: double bars, integrated hooks, hotel-style train racks
+- Garment rods: retractable (hidden when not needed)
+- Mirrors: tilting, magnifying, swing arm
+
+When one of these innovations applies, make it a selling point. Don't just list features—explain why the buyer should care.
+
 BRAND VOICE:
 - Use confident, specific phrasing (e.g., "crafted", "enduring") when supported by evidence.
 - State what the product does directly. A grab bar provides secure support (not "helps provide").
@@ -202,27 +228,13 @@ BRAND VOICE:
 - Include a collection coordination hook when collection_context is available:
   "Complete your [room] with matching pieces from the [Collection] collection."
 
-OPENING HOOK (Shopify only -- Google/Bing should lead with attributes, not hooks):
-- Ask: what frustration or need drove the buyer to search? That's your Shopify opening.
-- Include one competitive differentiator in the first 150 characters (finish variety, lifetime warranty, or solid brass construction).
-
-COMPETITIVE DIFFERENTIATION (Shopify descriptions):
-- Include at least one competitive comparison (without naming competitors):
-  * "Solid brass construction outlasts die-cast zinc and plastic alternatives"
-  * "Unlike mass-market alternatives, [product] features solid brass internals"
-  * "Designed for daily use -- solid brass won't corrode, pit, or tarnish like lesser materials"
-- For Google/Bing feed fuel: include "solid brass" as a prominent attribute that shoppers
-  actively search for and that the algorithm uses for quality matching.
-
-BING SYNONYM STRATEGY (literal keyword matching):
-- Towel Bars: towel bar, towel rack, towel holder, towel rail
-- Grab Bars: grab bar, safety bar, bathroom grab bar, ADA grab bar, support bar
-- Toilet Paper Holders: toilet paper holder, tissue holder, toilet roll holder
-- Robe Hooks: robe hook, towel hook, bathroom hook, wall hook
-- Glass Shelves: glass shelf, bathroom shelf, wall shelf, floating shelf
-- Paper Towel Holders: paper towel holder, paper towel stand, kitchen towel holder
-Include material variations (solid brass, brass construction) and mounting alternatives
-(wall mount, wall-mounted) naturally in Bing descriptions.
+HELPFUL CONTEXT FOR BING:
+Bing's algorithm is more literal than Google's. Including synonyms naturally helps:
+- Towel Bars: towel bar, towel rack, towel holder
+- Grab Bars: grab bar, safety bar, ADA grab bar
+- Toilet Paper Holders: toilet paper holder, tissue holder
+- Robe Hooks: robe hook, towel hook, bathroom hook
+Use your judgment on which synonyms are natural for each product.
 
 DESIGN CONTEXT:
 - If collection_context is provided, mention the collection name; prefer descriptions over titles.
@@ -233,8 +245,9 @@ DESIGN CONTEXT:
 - If competitive_edge is provided, use as primary value proposition in descriptions.
 
 FINISH STRATEGY:
-- MasterSKU descriptions must be finish-neutral.
-- Finish-forward variant phrasing is applied downstream by finish injection.
+- MasterSKU descriptions are finish-neutral (for Shopify where all finishes share one page).
+- When generating for a specific finish variant (Google/Bing), integrate the finish naturally.
+- See "FINISH-SPECIFIC CONTENT" in the BUYER PSYCHOLOGY section for integration guidance.
 
 ROOM CONTEXT:
 - Kitchen products: use "kitchen" terminology only (never "bathroom" or "bath").
@@ -247,6 +260,48 @@ ROOM CONTEXT:
 - Shopify meta description should NOT be a truncation of the description.
 - Google short title should work as an overlay label.
 - Installation ease messaging: "installs in minutes with included hardware" (when supported by evidence).
+
+=== BUYER PSYCHOLOGY ===
+
+THE CORE QUESTION: Allied Brass costs $80 when Amazon has $20 alternatives.
+Your description must help the buyer understand why it's worth it.
+
+FINISH INTEGRATION (for variant generation):
+When writing for a specific finish variant, the finish is part of the product's appeal.
+Weave it naturally—don't bolt it on awkwardly.
+- Natural: "This towel bar in Polished Chrome coordinates with modern faucets..."
+- Awkward: "Available in Polished Chrome. Polished Chrome delivers a bright, mirror-like sheen..."
+
+=== GOOD EXAMPLES (produce output like these) ===
+
+GOOD GOOGLE DESCRIPTION (finish-specific variant):
+"This 14-inch freestanding paper towel holder in Polished Chrome keeps kitchen roll within reach.
+The mirror-like finish coordinates with chrome faucets and modern fixtures. Solid brass construction
+with a weighted base prevents tipping while the felt pad protects countertops. Compact 5x5 inch
+footprint fits beside the sink or stove. Backed by a limited lifetime warranty."
+WHY IT WORKS: Finish woven naturally into opening. Each sentence adds value. No repetition.
+Attributes in prose, not dumps. Answers "will it tip?" and "will it scratch my counter?"
+
+GOOD GOOGLE DESCRIPTION (shower basket):
+"This 18.75-inch shower basket in Antique Brass keeps bath essentials organized with vintage-inspired
+warmth. The aged golden finish coordinates with brass and bronze fixtures. Ventilated solid brass
+wires drain quickly and resist rust. Wall-mount design saves shower floor space. Includes concealed
+mounting hardware for a clean look. Backed by Allied Brass's limited lifetime warranty."
+WHY IT WORKS: Finish integrated naturally. Addresses storage need, rust concern, and aesthetics.
+No dimension dumps. Trust signal (warranty) present but not buried.
+
+GOOD SHOPIFY DESCRIPTION (addresses buyer problem):
+"<p>Tired of flimsy towel bars that pull out of the wall? This 18-inch wall-mounted towel bar
+features solid brass construction that outlasts die-cast zinc alternatives. Backed by a lifetime
+warranty.</p>
+<ul>
+<li>Holds wet towels securely without sagging</li>
+<li>Solid brass won't corrode, pit, or tarnish</li>
+<li>Concealed mounting hardware for a clean look</li>
+<li>Choose from 28 designer finishes to match any decor</li>
+</ul>"
+WHY IT WORKS: Opens with problem (flimsy bars), competitive differentiator (solid brass),
+and trust signal (lifetime warranty). Bullets are outcome-first, not feature-first.
 
 === ANTI-PATTERNS (never produce output like these) ===
 
@@ -272,7 +327,7 @@ BAD GOOGLE/BING DESCRIPTION (first sentence 120+ chars): "This wall-mounted soli
 WHY: Run-on first sentence. Break into multiple sentences: "This 18-inch wall-mounted towel bar in Polished Chrome provides secure towel storage. Solid brass construction with concealed mounting hardware. Backed by a lifetime warranty."
 
 GOOD GOOGLE/BING DESCRIPTION: "This 18-inch wall-mounted shower basket in Antique Brass keeps bath essentials organized with timeless style. Solid brass construction with ventilated wires resists rust. The oval combination caddy holds shampoo, soap, and accessories while saving shower floor space. Concealed mounting hardware provides a clean look. Backed by Allied Brass's limited lifetime warranty."
-WHY: Same key attributes (dimensions, finish, material, warranty, brand) woven into natural, readable sentences. Each sentence under 80 chars. No dimension dumps, no keyword lists.
+WHY: Same key attributes (dimensions, finish, material, warranty, brand) woven into natural, readable sentences. Finish naturally integrated. No dimension dumps, no keyword lists.
 
 === PLATFORM SPECIFICS ===
 
@@ -456,3 +511,51 @@ Respond with valid JSON matching this schema:
 
 Now optimize the title and description for MasterSKU: {master_sku}
 """
+
+# ---------------------------------------------------------------------------
+# FINISH CONTEXT TEMPLATE (for variant-specific generation)
+# ---------------------------------------------------------------------------
+# This template is injected into the user prompt when generating content for
+# a specific finish variant (Google/Bing). It provides finish-specific context
+# that allows the LLM to integrate the finish naturally into the description.
+# ---------------------------------------------------------------------------
+
+FINISH_CONTEXT_TEMPLATE = """\
+=== VARIANT CONTEXT ===
+This content is for a SPECIFIC FINISH VARIANT, not the master SKU.
+Generate finish-specific content for: {finish_name}
+
+FINISH DETAILS:
+- Finish name: {finish_name}
+- Category: {finish_category}
+- Character: {finish_character}
+- Style context: {style_context}
+- Platform emphasis: {platform_emphasis}
+
+INTEGRATION REQUIREMENTS:
+- Weave "{finish_name}" naturally into the FIRST SENTENCE of the description.
+- Do NOT use "Available in {finish_name}. {finish_name} features..." pattern.
+- For Google/Bing titles: include "{finish_name}" early in the title.
+- The finish should feel like a selling point, not an awkward addition.
+
+GOOD INTEGRATION EXAMPLES:
+- "This 18-inch towel bar in {finish_name} coordinates with modern bathroom fixtures."
+- "Keep bath essentials organized with this shower basket in {finish_name}."
+- "The {finish_name} finish brings [character] to this solid brass [product]."
+
+BAD INTEGRATION (never do this):
+- "Available in {finish_name}. {finish_name} features a..."
+- "This product comes in {finish_name}. The {finish_name} finish..."
+"""
+
+# Template for variant-aware user prompt
+VARIANT_USER_PROMPT_TEMPLATE = """\
+{evidence_table}
+
+{keyword_placement}
+{category_guidance}
+{finish_context}
+Respond with valid JSON matching this schema:
+{schema}
+
+Optimize title and description for variant: {variant_sku} (finish: {finish_name})"""

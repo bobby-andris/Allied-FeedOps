@@ -788,6 +788,89 @@ def score_readability(text: str, *, platform: str = "google") -> tuple[int, list
     return _clamp_0_10(score), notes
 
 
+def score_finish_integration(
+    description: str, finish_name: str, *, platform: str = "google"
+) -> tuple[int, list[str]]:
+    """Score how naturally a finish is integrated into a variant description (0-10).
+
+    Good integration:
+    - Finish appears once, woven naturally into prose
+    - Finish in first sentence, positioned like "This towel bar in Polished Chrome..."
+    - Finish followed by benefit/coordination language, not repeated
+
+    Bad integration (penalized):
+    - "Available in X. X features..." pattern (repetitive, robotic)
+    - Finish name repeated 3+ times (over-optimization)
+    - Finish mentioned but not in first 200 chars (buried)
+
+    Args:
+        description: The variant description to score
+        finish_name: The expected finish name (e.g., "Antique Brass")
+        platform: Target platform (google, bing, shopify)
+
+    Returns:
+        Tuple of (score 0-10, list of notes)
+    """
+    notes: list[str] = []
+    score = 10  # Start at max, subtract for issues
+
+    if not description or not finish_name:
+        return score, notes
+
+    text_lower = description.lower()
+    finish_lower = finish_name.lower()
+
+    # Count finish occurrences
+    finish_count = text_lower.count(finish_lower)
+
+    # Check for the problematic "Available in X. X features..." pattern
+    awkward_pattern = rf"available in {re.escape(finish_lower)}[.!?]\s*{re.escape(finish_lower)}\s+(?:features?|offers?|delivers?|brings?|provides?|makes?)"
+    if re.search(awkward_pattern, text_lower):
+        score -= 4
+        notes.append(f"Awkward pattern: 'Available in {finish_name}. {finish_name} features...'")
+
+    # Check if finish appears in first 200 chars (should be early for variant descriptions)
+    first_200 = text_lower[:200]
+    if finish_lower not in first_200:
+        score -= 2
+        notes.append(f"Finish '{finish_name}' not in first 200 characters")
+
+    # Check if finish is repeated too many times (over-optimization)
+    if finish_count >= 4:
+        score -= 2
+        notes.append(f"Finish '{finish_name}' appears {finish_count} times (over-optimized)")
+    elif finish_count >= 3:
+        score -= 1
+        notes.append(f"Finish '{finish_name}' appears {finish_count} times")
+
+    # Bonus: Check for natural integration patterns
+    # Good: "in [Finish]" or "[Finish] finish" or "This [product] in [Finish]"
+    natural_patterns = [
+        rf"\bin {re.escape(finish_lower)}\b",  # "in Polished Chrome"
+        rf"{re.escape(finish_lower)} finish\b",  # "Polished Chrome finish"
+        rf"this .{{0,30}}\bin {re.escape(finish_lower)}\b",  # "This towel bar in Polished Chrome"
+    ]
+    has_natural_integration = any(
+        re.search(p, first_200) for p in natural_patterns
+    )
+    if has_natural_integration and finish_count <= 2:
+        # Natural integration, not over-repeated - this is good
+        pass  # Keep full score
+    elif finish_count == 0:
+        # Finish not mentioned at all (might be a master SKU description)
+        score -= 1
+        notes.append(f"Finish '{finish_name}' not found in description")
+
+    # Check for truncated sentences (common in post-processing)
+    # Pattern: sentence ending with comma or mid-word
+    truncation_pattern = r"[a-z]{3},\.|\.\."
+    if re.search(truncation_pattern, text_lower):
+        score -= 1
+        notes.append("Possible truncated sentence detected")
+
+    return _clamp_0_10(score), notes
+
+
 def assess_soft_gates(
     *,
     title: str,

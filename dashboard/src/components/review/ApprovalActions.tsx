@@ -8,12 +8,13 @@ import { toast } from 'sonner'
 
 interface ApprovalActionsProps {
   sku: string
+  finish?: string | null  // If provided, uses variant-level approval
   type: 'title' | 'description' | 'image' | 'all'
   currentApproval?: boolean | null
   size?: 'sm' | 'default'
 }
 
-export function ApprovalActions({ sku, type, currentApproval, size = 'default' }: ApprovalActionsProps) {
+export function ApprovalActions({ sku, finish, type, currentApproval, size = 'default' }: ApprovalActionsProps) {
   const [loading, setLoading] = useState<'approve' | 'reject' | 'revision' | null>(null)
   const router = useRouter()
 
@@ -21,6 +22,11 @@ export function ApprovalActions({ sku, type, currentApproval, size = 'default' }
     setLoading(action)
     try {
       const body: Record<string, unknown> = { master_sku: sku }
+      
+      // Add finish for variant-level approvals
+      if (finish) {
+        body.finish = finish
+      }
       
       if (type === 'all') {
         // Approve/reject all elements
@@ -32,7 +38,10 @@ export function ApprovalActions({ sku, type, currentApproval, size = 'default' }
         body[`${type}_approved`] = action === 'approve' ? true : action === 'reject' ? false : null
       }
 
-      const response = await fetch('/api/approvals', {
+      // Use variant API if finish is provided, otherwise use master SKU API
+      const apiUrl = finish ? '/api/variants/approvals' : '/api/approvals'
+      
+      const response = await fetch(apiUrl, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -42,12 +51,13 @@ export function ApprovalActions({ sku, type, currentApproval, size = 'default' }
         throw new Error('Failed to update approval')
       }
 
+      const finishLabel = finish ? ` (${finish})` : ''
       toast.success(
         action === 'approve' 
-          ? `${type === 'all' ? 'All content' : type.charAt(0).toUpperCase() + type.slice(1)} approved` 
+          ? `${type === 'all' ? 'All content' : type.charAt(0).toUpperCase() + type.slice(1)} approved${finishLabel}` 
           : action === 'reject'
-          ? `${type === 'all' ? 'All content' : type.charAt(0).toUpperCase() + type.slice(1)} rejected`
-          : 'Revision requested'
+          ? `${type === 'all' ? 'All content' : type.charAt(0).toUpperCase() + type.slice(1)} rejected${finishLabel}`
+          : `Revision requested${finishLabel}`
       )
       
       router.refresh()

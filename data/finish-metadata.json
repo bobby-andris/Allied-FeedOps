@@ -1,9 +1,14 @@
 {
   "_metadata": {
     "description": "Finish metadata for variant-level description personalization",
-    "last_updated": "2026-01-24",
+    "last_updated": "2026-02-03",
     "total_finishes": 30,
-    "notes": "Each finish has: category, description_type (coordination vs statement), functional_description, style_affinities (for collection matching)"
+    "notes": "Each finish has: category, description_type (coordination vs statement), functional_description, style_affinities (for collection matching), opening_phrase (for natural sentence integration), style_context (fixture coordination), platform_hints (platform-specific emphasis)"
+  },
+  "_platform_hints": {
+    "google": "Focus on material coordination and searchable attributes",
+    "bing": "Include explicit finish synonyms for literal keyword matching",
+    "shopify": "Emphasize design aesthetic and buyer appeal"
   },
   "finishes": {
     "Polished Chrome": {
@@ -11,7 +16,9 @@
       "description_type": "coordination",
       "style_affinities": ["modern", "contemporary", "transitional"],
       "functional_description": "Polished Chrome delivers a bright, mirror-like sheen that coordinates effortlessly with chrome faucets and modern fixtures.",
-      "coordination_note": "pairs beautifully with matching {collection} accessories in the same finish for a cohesive bathroom design"
+      "coordination_note": "pairs beautifully with matching {collection} accessories in the same finish for a cohesive bathroom design",
+      "opening_phrase": "in Polished Chrome coordinates with modern chrome faucets",
+      "style_context": "chrome faucets, modern fixtures, contemporary hardware"
     },
     "Polished Brass": {
       "category": "classic_metallic",
@@ -25,7 +32,9 @@
       "description_type": "coordination",
       "style_affinities": ["transitional", "modern", "contemporary"],
       "functional_description": "Polished Nickel offers a softer, warmer alternative to chrome with a subtle golden undertone that suits transitional spaces.",
-      "coordination_note": "pairs seamlessly with matching {collection} hardware for refined continuity"
+      "coordination_note": "pairs seamlessly with matching {collection} hardware for refined continuity",
+      "opening_phrase": "in Polished Nickel brings warm elegance to transitional spaces",
+      "style_context": "polished nickel faucets, transitional fixtures, warm metallic accents"
     },
     "Satin Chrome": {
       "category": "classic_metallic",
@@ -39,14 +48,18 @@
       "description_type": "coordination",
       "style_affinities": ["transitional", "modern", "contemporary"],
       "functional_description": "Satin Nickel offers a warm, brushed finish that hides water spots and fingerprints, perfect for high-use bathrooms.",
-      "coordination_note": "pairs with matching {collection} pieces for a unified, low-maintenance design"
+      "coordination_note": "pairs with matching {collection} pieces for a unified, low-maintenance design",
+      "opening_phrase": "in Satin Nickel hides fingerprints while adding warm elegance",
+      "style_context": "brushed nickel faucets, transitional fixtures, low-maintenance hardware"
     },
     "Satin Brass": {
       "category": "classic_metallic",
       "description_type": "coordination",
       "style_affinities": ["transitional", "modern", "contemporary"],
       "functional_description": "Satin Brass combines warm golden tones with a brushed texture, bringing modern warmth without the high shine of polished brass.",
-      "coordination_note": "coordinates beautifully with other {collection} hardware in the same finish"
+      "coordination_note": "coordinates beautifully with other {collection} hardware in the same finish",
+      "opening_phrase": "in Satin Brass adds modern warmth with a brushed golden finish",
+      "style_context": "brushed brass faucets, modern gold fixtures, transitional hardware"
     },
     "Brushed Bronze": {
       "category": "warm_metallic",
@@ -74,7 +87,9 @@
       "description_type": "coordination",
       "style_affinities": ["traditional", "classic", "vintage"],
       "functional_description": "Antique Brass features a softened, aged golden patina that brings vintage charm and character to traditional spaces.",
-      "coordination_note": "coordinates with other {collection} accessories for a curated, collected look"
+      "coordination_note": "coordinates with other {collection} accessories for a curated, collected look",
+      "opening_phrase": "in Antique Brass brings vintage charm to traditional spaces",
+      "style_context": "antique brass fixtures, vintage hardware, traditional decor, bronze and copper accents"
     },
     "Antique Bronze": {
       "category": "warm_metallic",
@@ -102,7 +117,9 @@
       "description_type": "coordination",
       "style_affinities": ["modern", "contemporary", "industrial", "minimalist"],
       "functional_description": "Matte Black makes a bold, modern statement with its sleek, non-reflective surface that anchors contemporary bathroom designs.",
-      "coordination_note": "coordinates with other {collection} pieces in Matte Black for a striking, cohesive modern look"
+      "coordination_note": "coordinates with other {collection} pieces in Matte Black for a striking, cohesive modern look",
+      "opening_phrase": "in Matte Black makes a bold statement in modern spaces",
+      "style_context": "black faucets, modern fixtures, industrial hardware, minimalist design"
     },
     "Matte Gray": {
       "category": "contemporary_neutral",
@@ -123,7 +140,9 @@
       "description_type": "statement",
       "style_affinities": ["traditional", "transitional", "artisan"],
       "functional_description": "Unlacquered Brass is a living finish that develops a unique natural patina over time, gaining character and warmth with age. Each piece becomes one-of-a-kind, perfect for those who appreciate authentic materials that tell a story.",
-      "coordination_note": null
+      "coordination_note": null,
+      "opening_phrase": "in Unlacquered Brass develops a unique patina over time",
+      "style_context": "living finishes, artisan hardware, authentic materials, vintage aesthetic"
     },
     "Spanish Gold": {
       "category": "premium_metallic",
@@ -137,7 +156,9 @@
       "description_type": "statement",
       "style_affinities": ["contemporary", "eclectic", "bold"],
       "functional_description": "Fire Engine Red makes a fearless design statement, transforming functional bathroom hardware into a vibrant focal point. A bold choice for those who embrace color and personality in their space.",
-      "coordination_note": null
+      "coordination_note": null,
+      "opening_phrase": "in Fire Engine Red transforms this essential into a conversation piece",
+      "style_context": "bold accents, statement hardware, colorful bathrooms, eclectic design"
     },
     "Mediterranean Blue": {
       "category": "statement_color",

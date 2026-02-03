@@ -29,6 +29,18 @@ from feedops.pipeline.validators import validate_variant_title_uniqueness
 DIGITAL_SOURCE_TYPE_AI = "trained_algorithmic_media"
 
 
+def _variant_at_llm_time_enabled() -> bool:
+    """Check if variant-at-LLM-time generation is enabled.
+
+    When enabled, variant descriptions are generated directly by the LLM with
+    finish context, rather than post-processed via finish_injection.py.
+    """
+    value = os.getenv("FEEDOPS_VARIANT_AT_LLM_TIME")
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes"}
+
+
 _FIRST_P_RE = re.compile(r"<p\b[^>]*>.*?</p>", re.IGNORECASE | re.DOTALL)
 _FIRST_UL_RE = re.compile(r"<ul\b[^>]*>.*?</ul>", re.IGNORECASE | re.DOTALL)
 
@@ -786,6 +798,7 @@ def generate_variant_patch_preview(
     variant: Variant,
     candidate: Candidate,
     platform: str = "google",
+    variant_candidate: Candidate | None = None,
 ) -> dict:
     """Generate platform-specific patch preview JSON for a specific variant.
 
@@ -794,8 +807,11 @@ def generate_variant_patch_preview(
     Args:
         parent_sku: The parent SKU.
         variant: The specific variant to generate patch for.
-        candidate: The optimized candidate (base content).
+        candidate: The optimized candidate (base content for titles/fallback).
         platform: One of "google", "bing", or "shopify".
+        variant_candidate: Optional pre-generated candidate with finish-integrated
+            content. When provided and FEEDOPS_VARIANT_AT_LLM_TIME is enabled,
+            uses this instead of post-processing via generate_variant_description().
 
     Returns:
         Dict in platform-specific patch format with finish-specific content.
@@ -838,26 +854,43 @@ def generate_variant_patch_preview(
     }
     is_multi_size = len(size_labels) > 1
     variant_size = get_variant_size_label(variant) if is_multi_size else None
-    variant_title = _normalize_title_separators(
-        generate_variant_title(
-            base_title,
-            finish_name,
-            size=variant_size if platform in ("google", "bing") else None,
-            platform=platform,
+
+    # Check if we should use pre-generated variant content (LLM-at-variant-time)
+    use_llm_variant = _variant_at_llm_time_enabled() and variant_candidate is not None
+
+    if use_llm_variant:
+        # Use pre-generated content with naturally integrated finish
+        if platform == "google":
+            variant_title = _normalize_title_separators(variant_candidate.google_title)
+            variant_description = variant_candidate.google_description
+        elif platform == "bing":
+            variant_title = _normalize_title_separators(variant_candidate.bing_title)
+            variant_description = variant_candidate.bing_description
+        else:  # shopify
+            variant_title = _normalize_title_separators(variant_candidate.shopify_title)
+            variant_description = variant_candidate.shopify_description
+    else:
+        # Fallback: Use post-processing via finish_injection
+        variant_title = _normalize_title_separators(
+            generate_variant_title(
+                base_title,
+                finish_name,
+                size=variant_size if platform in ("google", "bing") else None,
+                platform=platform,
+            )
         )
-    )
-    variant_description = generate_variant_description(
-        base_description=base_description,
-        finish_name=finish_name,
-        collection_name=collection_name,
-        collection_group=collection_group,
-        collection_subgroup=collection_subgroup,
-        category=parent_sku.category,
-        material=parent_sku.material,
-        finish_count=len(parent_sku.variants) if parent_sku.variants else None,
-        platform=platform,
-        size=variant_size if platform in ("google", "bing") else None,
-    )
+        variant_description = generate_variant_description(
+            base_description=base_description,
+            finish_name=finish_name,
+            collection_name=collection_name,
+            collection_group=collection_group,
+            collection_subgroup=collection_subgroup,
+            category=parent_sku.category,
+            material=parent_sku.material,
+            finish_count=len(parent_sku.variants) if parent_sku.variants else None,
+            platform=platform,
+            size=variant_size if platform in ("google", "bing") else None,
+        )
 
     # Generate finish-specific keywords for this variant
     canonical_pt = get_canonical_product_type(parent_sku.category) if parent_sku.category else None

@@ -1,20 +1,98 @@
+'use client'
+
+import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { Database, Key, Bell, Shield } from "lucide-react"
+import { Database, Key, Bell, Shield, RefreshCw, ShoppingCart, BarChart3, TrendingUp } from "lucide-react"
+import { ApiStatusCard, type ServiceStatusType } from "@/components/settings/ApiStatusCard"
+
+// Types for health check response
+interface ServiceStatus {
+  status: ServiceStatusType
+  latency?: number
+  error?: string
+  projectId?: string
+  customerId?: string
+  spreadsheetId?: string
+  spreadsheetTitle?: string
+  shopName?: string
+  storeUrl?: string
+  propertyId?: string
+  note?: string
+}
+
+interface HealthResponse {
+  supabase: ServiceStatus
+  googleAds: ServiceStatus
+  gmc: ServiceStatus
+  shopify: ServiceStatus
+  googleAnalytics: ServiceStatus
+}
 
 export default function SettingsPage() {
+  const [health, setHealth] = useState<HealthResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const fetchHealth = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true)
+    } else {
+      setLoading(true)
+    }
+
+    try {
+      const response = await fetch('/api/health')
+      if (!response.ok) {
+        throw new Error(`Health check failed: ${response.status}`)
+      }
+      const data = await response.json()
+      setHealth(data)
+    } catch (error) {
+      console.error('Failed to fetch health status:', error)
+      // Set error state for all services
+      setHealth({
+        supabase: { status: 'error', error: 'Failed to check status' },
+        googleAds: { status: 'error', error: 'Failed to check status' },
+        gmc: { status: 'error', error: 'Failed to check status' },
+        shopify: { status: 'error', error: 'Failed to check status' },
+        googleAnalytics: { status: 'error', error: 'Failed to check status' },
+      })
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchHealth()
+  }, [fetchHealth])
+
+  const handleRefresh = () => {
+    fetchHealth(true)
+  }
+
   return (
     <div className="p-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Configure dashboard preferences and integrations
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground">
+            Configure dashboard preferences and integrations
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Checking...' : 'Refresh Status'}
+        </Button>
       </div>
 
       <div className="space-y-6">
@@ -30,13 +108,17 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Connection Status</p>
-                <p className="text-sm text-muted-foreground">Supabase project: qezuszwufortkiutlhym</p>
-              </div>
-              <Badge className="bg-green-100 text-green-800">Connected</Badge>
-            </div>
+            <ApiStatusCard
+              name="Supabase"
+              status={health?.supabase?.status || 'unknown'}
+              details={health?.supabase?.projectId 
+                ? `Project: ${health.supabase.projectId}`
+                : 'Checking connection...'
+              }
+              error={health?.supabase?.error}
+              latency={health?.supabase?.latency}
+              loading={loading}
+            />
             <Separator />
             <div className="space-y-2">
               <Label htmlFor="supabase-url">Supabase URL</Label>
@@ -61,37 +143,56 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Google Merchant Center</p>
-                <p className="text-sm text-muted-foreground">Feed sync enabled</p>
-              </div>
-              <Badge className="bg-green-100 text-green-800">Active</Badge>
-            </div>
+            <ApiStatusCard
+              name="Google Merchant Center"
+              icon={<ShoppingCart className="h-4 w-4 text-muted-foreground" />}
+              status={health?.gmc?.status || 'unknown'}
+              details={health?.gmc?.spreadsheetTitle 
+                ? `Spreadsheet: ${health.gmc.spreadsheetTitle}`
+                : health?.gmc?.status === 'connected' 
+                  ? 'Feed sync enabled'
+                  : undefined
+              }
+              error={health?.gmc?.error}
+              latency={health?.gmc?.latency}
+              loading={loading}
+            />
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Shopify</p>
-                <p className="text-sm text-muted-foreground">GraphQL Admin API</p>
-              </div>
-              <Badge className="bg-green-100 text-green-800">Active</Badge>
-            </div>
+            <ApiStatusCard
+              name="Shopify"
+              icon={<ShoppingCart className="h-4 w-4 text-muted-foreground" />}
+              status={health?.shopify?.status || 'unknown'}
+              details={health?.shopify?.shopName 
+                ? `Store: ${health.shopify.shopName}`
+                : health?.shopify?.storeUrl
+                  ? `Store: ${health.shopify.storeUrl}`
+                  : 'GraphQL Admin API'
+              }
+              error={health?.shopify?.error}
+              latency={health?.shopify?.latency}
+              loading={loading}
+            />
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Google Analytics</p>
-                <p className="text-sm text-muted-foreground">Allied Brass - GA4 (Old)</p>
-              </div>
-              <Badge className="bg-green-100 text-green-800">Active</Badge>
-            </div>
+            <ApiStatusCard
+              name="Google Analytics"
+              icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+              status={health?.googleAnalytics?.status || 'unknown'}
+              details={health?.googleAnalytics?.propertyId || 'Allied Brass - GA4 (Old)'}
+              error={health?.googleAnalytics?.error}
+              loading={loading}
+            />
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Google Ads</p>
-                <p className="text-sm text-muted-foreground">Customer ID: 6253381786</p>
-              </div>
-              <Badge className="bg-green-100 text-green-800">Active</Badge>
-            </div>
+            <ApiStatusCard
+              name="Google Ads"
+              icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+              status={health?.googleAds?.status || 'unknown'}
+              details={health?.googleAds?.customerId 
+                ? `Customer ID: ${health.googleAds.customerId}`
+                : undefined
+              }
+              error={health?.googleAds?.error}
+              loading={loading}
+            />
           </CardContent>
         </Card>
 

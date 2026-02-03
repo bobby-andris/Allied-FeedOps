@@ -115,6 +115,17 @@ export interface PerformanceBaseline {
   created_at: string
 }
 
+export interface VariantIndex {
+  id: string
+  gmc_offer_id: string
+  master_sku: string
+  shopify_product_id: string | null
+  shopify_variant_id: string | null
+  finish: string | null
+  finish_code: string | null
+  dimensions: string | null
+}
+
 // Database schema type
 export interface Database {
   public: {
@@ -158,6 +169,11 @@ export interface Database {
         Row: PerformanceBaseline
         Insert: Omit<PerformanceBaseline, 'id' | 'created_at'>
         Update: Partial<Omit<PerformanceBaseline, 'id' | 'created_at'>>
+      }
+      variant_index: {
+        Row: VariantIndex
+        Insert: Omit<VariantIndex, 'id'>
+        Update: Partial<Omit<VariantIndex, 'id'>>
       }
     }
   }

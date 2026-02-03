@@ -2,10 +2,13 @@
 
 import asyncio
 import json
+import logging
+import os
 
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.collection_descriptions import is_known_collection_name
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.finish_injection import get_finish_metadata
 from feedops.pipeline.images import fetch_image
 from feedops.pipeline.keyword_placement import (
     build_keyword_placement_plan,
@@ -13,9 +16,11 @@ from feedops.pipeline.keyword_placement import (
 )
 from feedops.pipeline.prompts import (
     CANDIDATE_SCHEMA,
+    FINISH_CONTEXT_TEMPLATE,
     OPTIMIZATION_TEMPLATE,
     SYSTEM_PROMPT,
     USER_PROMPT_TEMPLATE,
+    VARIANT_USER_PROMPT_TEMPLATE,
     build_category_guidance,
 )
 from feedops.providers.base import LLMProvider
@@ -370,5 +375,176 @@ async def generate_candidates(
                 candidates[pos] = retry_result
             elif len(retry_result.google_title) > len(original.google_title):
                 candidates[pos] = retry_result
+
+    return candidates, errors
+
+
+# ---------------------------------------------------------------------------
+# VARIANT-SPECIFIC GENERATION (finish-integrated content)
+# ---------------------------------------------------------------------------
+# These functions generate content for specific finish variants directly from
+# the LLM, rather than post-processing master SKU content. This produces more
+# natural finish integration in descriptions.
+# ---------------------------------------------------------------------------
+
+
+def _variant_generation_enabled() -> bool:
+    """Check if variant-at-LLM-time generation is enabled."""
+    value = os.getenv("FEEDOPS_VARIANT_AT_LLM_TIME")
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes"}
+
+
+def build_variant_prompt(
+    parent_sku: ParentSKU,
+    finish_name: str,
+    platform: str = "google",
+) -> tuple[str, str]:
+    """Build prompt with finish context for variant generation.
+
+    Args:
+        parent_sku: The parent SKU to optimize.
+        finish_name: The specific finish for this variant (e.g., "Antique Brass").
+        platform: Target platform (google, bing, shopify).
+
+    Returns:
+        Tuple of (system_prompt, user_prompt) with finish context injected.
+    """
+    evidence = build_evidence_table(parent_sku)
+    evidence_markdown = format_evidence_markdown(evidence)
+    keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
+    keyword_placement = format_keyword_placement_section(keyword_plan)
+
+    # Get finish metadata for context
+    finish_meta = get_finish_metadata(finish_name) or {}
+    finish_category = finish_meta.get("category", "metallic")
+    finish_character = finish_meta.get("functional_description", "")
+    style_affinities = finish_meta.get("style_affinities", [])
+    style_context = ", ".join(style_affinities) if style_affinities else "versatile"
+
+    # Platform-specific emphasis
+    platform_emphasis = {
+        "google": "material coordination and searchable attributes",
+        "bing": "explicit finish synonyms and literal keyword matching",
+        "shopify": "design aesthetic and buyer appeal",
+    }.get(platform, "natural integration")
+
+    # Build finish context
+    finish_context = FINISH_CONTEXT_TEMPLATE.format(
+        finish_name=finish_name,
+        finish_category=finish_category,
+        finish_character=finish_character,
+        style_context=style_context,
+        platform_emphasis=platform_emphasis,
+    )
+
+    # Build variant SKU identifier
+    variant_sku = f"{parent_sku.master_sku}-{finish_name.upper().replace(' ', '-')[:3]}"
+
+    # Build user prompt with finish context
+    user_prompt = VARIANT_USER_PROMPT_TEMPLATE.format(
+        evidence_table=evidence_markdown,
+        keyword_placement=keyword_placement,
+        category_guidance=build_category_guidance(parent_sku.category),
+        finish_context=finish_context,
+        schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
+        variant_sku=variant_sku,
+        finish_name=finish_name,
+    )
+
+    return SYSTEM_PROMPT, user_prompt
+
+
+async def generate_variant_candidate(
+    parent_sku: ParentSKU,
+    finish_name: str,
+    llm: LLMProvider,
+    platform: str = "google",
+) -> Candidate:
+    """Generate a finish-specific candidate directly from LLM.
+
+    This produces content where the finish is naturally integrated into the
+    description, rather than being awkwardly injected via post-processing.
+
+    Args:
+        parent_sku: The parent SKU to optimize.
+        finish_name: The specific finish for this variant (e.g., "Antique Brass").
+        llm: The LLM provider to use.
+        platform: Target platform (google, bing, shopify).
+
+    Returns:
+        Candidate with finish-integrated content.
+    """
+    system_prompt, user_prompt = build_variant_prompt(parent_sku, finish_name, platform)
+
+    # Fetch image if available
+    image = None
+    if parent_sku.variants:
+        main_image_url = parent_sku.variants[0].main_image_url
+        if main_image_url:
+            image = await fetch_image(main_image_url)
+
+    response = await llm.generate(
+        user_prompt,
+        CANDIDATE_SCHEMA,
+        image=image,
+        system_prompt=system_prompt,
+    )
+
+    candidate = parse_candidate_response(response)
+
+    # Validate that finish appears in the description
+    desc_lower = candidate.google_description.lower()
+    if finish_name.lower() not in desc_lower:
+        # Log warning but don't fail - the content may still be good
+        logging.warning(
+            f"Finish '{finish_name}' not found in generated description for {parent_sku.master_sku}"
+        )
+
+    return candidate
+
+
+async def generate_variant_candidates_batch(
+    parent_sku: ParentSKU,
+    finish_names: list[str],
+    llm: LLMProvider,
+    platform: str = "google",
+    max_concurrent: int = 5,
+) -> tuple[dict[str, Candidate], list[str]]:
+    """Generate candidates for multiple finish variants in parallel.
+
+    Args:
+        parent_sku: The parent SKU to optimize.
+        finish_names: List of finish names to generate variants for.
+        llm: The LLM provider to use.
+        platform: Target platform.
+        max_concurrent: Maximum concurrent LLM calls.
+
+    Returns:
+        Tuple of (finish_name -> Candidate dict, list of errors).
+    """
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def _generate_one(finish: str) -> tuple[str, Candidate | Exception]:
+        async with semaphore:
+            try:
+                candidate = await generate_variant_candidate(
+                    parent_sku, finish, llm, platform
+                )
+                return (finish, candidate)
+            except Exception as e:
+                return (finish, e)
+
+    results = await asyncio.gather(*[_generate_one(f) for f in finish_names])
+
+    candidates: dict[str, Candidate] = {}
+    errors: list[str] = []
+
+    for finish, result in results:
+        if isinstance(result, Exception):
+            errors.append(f"{finish}: {result}")
+        else:
+            candidates[finish] = result
 
     return candidates, errors
