@@ -13,7 +13,7 @@ from pathlib import Path
 import streamlit as st
 
 
-_APP_BUILD = "2026-02-03.3"
+_APP_BUILD = "2026-02-03.4"
 
 
 def _resolve_path_from_env(repo_root: Path, env_key: str, default: Path) -> Path:
@@ -150,18 +150,25 @@ def render_performance_dashboard() -> None:
 
     import pandas as pd
 
-    from feedops.db import get_connection, init_db
+    from feedops.db import get_connection, init_db, is_supabase_available
 
     # Initialize database
     db_path = get_db_path()
-    if not db_path.exists():
+    if not db_path.exists() and not is_supabase_available():
         st.warning(
             "Database not found. Run `feedops performance baseline` and "
             "`feedops performance fetch` to populate data."
         )
         return
 
-    init_db(db_path)
+    if not is_supabase_available():
+        init_db(db_path)
+
+    # Show backend status in sidebar
+    if is_supabase_available():
+        st.sidebar.success("Connected to Supabase")
+    else:
+        st.sidebar.info("Using local SQLite database")
 
     st.title("📊 FeedOps Performance Dashboard")
     st.markdown("Monitor the impact of optimized content across platforms.")
