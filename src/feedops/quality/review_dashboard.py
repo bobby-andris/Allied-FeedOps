@@ -1505,8 +1505,10 @@ def render_performance_view_tab(
             # Show basic info
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown("**Category:** " + (sku_data.category or "N/A"))
-                st.markdown("**Collection:** " + (sku_data.collection or "N/A"))
+                category = sku_data.original.category if sku_data.original else None
+                collection = sku_data.original.collection if sku_data.original else None
+                st.markdown("**Category:** " + (category or "N/A"))
+                st.markdown("**Collection:** " + (collection or "N/A"))
             with col2:
                 st.markdown(f"**Quality Score:** {quality_score:.1f}%")
                 st.markdown(f"**Platform:** {platform}")
@@ -1523,9 +1525,11 @@ def render_performance_view_tab(
                     st.caption(f"{status_icon} {event_time} — {event_plat} ({event_env})")
             
             # Show current title/description
-            if sku_data.candidate_google:
+            candidate_google = sku_data.candidate.get("google")
+            if candidate_google:
                 st.markdown("**Published Title (Google):**")
-                st.code(sku_data.candidate_google.get("title", "N/A"))
+                title = getattr(candidate_google, "title", None) or "N/A"
+                st.code(title)
     
     st.divider()
 
