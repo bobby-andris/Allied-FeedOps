@@ -265,9 +265,9 @@ def load_batch_performance(platform: str) -> pd.DataFrame:
     query = """
     SELECT
         pb.batch_id,
-        pb.batch_label,
+        pb.name as batch_label,
         pb.created_at as batch_created,
-        pb.published_at as batch_published,
+        pb.executed_at as batch_published,
         pb.status as batch_status,
         pb.sku_count,
         pb.success_count,
