@@ -1201,5 +1201,32 @@
         "description": "This elegant freestanding toilet tissue stand provides a decorative touch to your bathroom. This toilet tissue stands is a great product when wall space is at a premium. Made of the finest solid brass materials with a sturdy base that will keep the stand secure. Designer finishes will provide a lifetime of use. Toilet Tissue Stand is 26 Inches High Made of Solid Brass Materials that can never rust Sturdy base prevents tipping Tissue Roller is color coordinated solid brass Some assembly required Assembled in the U.S.A. Specification & Documentation Product dimensions, in. (LxHxW): 5.5x26x6 Box dimensions, in. (LxHxW): 9x9x29 Shipping weight, lbs: 6 Installation Instruction Technical Specification TS25-Specification.PDF TS25D-Specification.PDF TS25T-Specification.PDF"
       }
     }
-  ]
+  ],
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-25_var1_20260128_123221.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS25-ABR.jpg?v=1616874494\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260128_123221",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-25_var2_20260128_123239.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS25-ABR.jpg?v=1616874494\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260128_123239",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-25_var3_20260128_123300.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS25-ABR.jpg?v=1616874494\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260128_123300",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": 1
 }

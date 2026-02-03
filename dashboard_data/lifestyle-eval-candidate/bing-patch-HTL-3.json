@@ -1289,5 +1289,32 @@
         "description": "Add a stylish touch to your bathroom with this elegant train rack towel shelf. Our versatile design makes efficient use of your space. This elegant train rack is created from the finest brass materials. Our high-quality designer finishes are hand polished to perfection. Easy installation with included mounting hardware Available in a variety of lifetime designer finishes Space saving and versatile design Some assembly required Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 23x10x9 Box dimensions, in. (LxHxW): 24x6x6 Shipping weight, lbs: 7 Installation Instruction Technical Specification HTL3-Installation.PDF HTL3-Specification.PDF"
       }
     }
-  ]
+  ],
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/HTL-3_var1_20260129_013205.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/HTL3-ABR.jpg?v=1616849450\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013205",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/HTL-3_var2_20260129_013220.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/HTL3-ABR.jpg?v=1616849450\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013220",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/HTL-3_var3_20260129_013234.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/HTL3-ABR.jpg?v=1616849450\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013234",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": 3
 }

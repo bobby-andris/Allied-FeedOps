@@ -1377,5 +1377,32 @@
       "title": "Pink Freestanding 4 Pivoting Swing Arm Towel Valet, 49-Inch Solid Brass Stand, Traditional Style, Allied Brass",
       "description": "Freestanding 4 pivoting swing arm towel valet, 49 in H x 12 in L x 10.5 in W, solid brass towel stand for bathroom towel storage and drying \u2014 available in Pink, which brings playful, modern energy to bathroom design, offering a fresh take on hardware that celebrates individuality. Traditional style floor-standing towel rack/towel holder with four pivoting arms to maximize space and keep towels separated. Heavy solid brass base helps prevent tipping; felt pad helps prevent scratching on floors. Brass construction is designed for corrosion-free, rust-free performance with a lifetime designer finish. Some assembly required. Includes towel stand. Limited lifetime warranty. Ideal for traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures. Allied Brass."
     }
-  ]
+  ],
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-4L_var1_20260129_013607.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS4L-ABR.jpg?v=1616858585\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013607",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-4L_var2_20260129_013624.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS4L-ABR.jpg?v=1616858585\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013624",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-4L_var3_20260129_013645.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS4L-ABR.jpg?v=1616858585\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013645",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": 1
 }

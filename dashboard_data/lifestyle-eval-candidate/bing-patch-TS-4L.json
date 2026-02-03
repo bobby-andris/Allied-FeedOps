@@ -1261,5 +1261,32 @@
         "description": "This elegantly designed freestanding swing arm towel stand provides a convenient and stylish space to hang your favorite towels. Towel stand has 4 pivoting arms so that you can maximize your space. Large base is weighted to help prevent tipping. Towel stand is made of the finest solid brass materials so that it will not rust or corrode and is provided with one of our designer lifetime finishes. Crafted of the Finest Solid Brass Materials Heavy base will help prevent tipping Available in a variety of lifetime designer finishes Products are provided with a limited lifetime warranty Some assembly required Assembled in the USA Specification & Documentation Product dimensions, in. (LxHxW): 12x49x10.5 Box dimensions, in. (LxHxW): 20x12x54 Shipping weight, lbs: 17 Installation Instruction Technical Specification TS4L-assembly_instillation.pdf"
       }
     }
-  ]
+  ],
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-4L_var1_20260129_013607.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS4L-ABR.jpg?v=1616858585\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013607",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-4L_var2_20260129_013624.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS4L-ABR.jpg?v=1616858585\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013624",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/TS-4L_var3_20260129_013645.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.\n\nREFERENCE IMAGES:\nReference Image 1 (Primary): https://cdn.shopify.com/s/files/1/0287/8658/9828/products/TS4L-ABR.jpg?v=1616858585\n\nIf any reference image includes staging elements (towels, toilet paper) that obscure product details,\nprioritize the clearest image for component fidelity.\n\nPRODUCT VISUAL INVENTORY:\nCOMPONENTS (as visible in reference image):\n- Primary mounting hardware\n- Decorative elements as shown\n- Finish details matching reference\n\nStudy the reference image carefully and replicate exactly.\n\nSCENE CONTEXT (narrative description):\nModern bathroom with white large-format porcelain tiles, chrome fixtures. The bathroom fixture is mounted at standard height.\nClean, professional installation in an uncluttered setting.\nSoft, even lighting highlights the product's finish and details.\n\nPRODUCT USAGE VALIDATION:\nShow the product in its typical, correct usage scenario.\nAvoid any atypical or incorrect usage that would confuse customers.\n\nTECHNICAL SPECIFICATIONS:\nLighting: Bright even 5500K illumination with directional spotlight for crisp shadows\nCamera: 3/4 angle, product sharp focus, background soft\nMood: Clean, minimal, architectural precision\n\nRemember: The product must be an EXACT REPLICA of the reference. Study every detail carefully.",
+      "timestamp": "20260129_013645",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": 1
 }
