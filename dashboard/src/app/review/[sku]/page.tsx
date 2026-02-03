@@ -26,9 +26,18 @@ interface ImageRecord {
   master_sku: string
   variation_index: number
   image_url: string | null
-  local_path: string | null
-  quality_score: number | null
+  thumbnail_url: string | null
+  score: number | null
   selected: boolean
+}
+
+// Convert local file path to GitHub raw URL
+function getImageUrl(imagePath: string | null): string | null {
+  if (!imagePath) return null
+  // If it's already a full URL, return as-is
+  if (imagePath.startsWith('http')) return imagePath
+  // Convert local path to GitHub raw URL
+  return `https://raw.githubusercontent.com/bobby-andris/Allied-FeedOps/master/${imagePath}`
 }
 
 interface ApprovalRecord {
@@ -332,7 +341,7 @@ export default async function SkuReviewPage({
                     <div className="aspect-square bg-muted rounded flex items-center justify-center text-muted-foreground overflow-hidden">
                       {image.image_url ? (
                         <img 
-                          src={image.image_url} 
+                          src={getImageUrl(image.image_url) || ''} 
                           alt={`Variation ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -342,8 +351,8 @@ export default async function SkuReviewPage({
                     </div>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Variation {index + 1}</span>
-                      {image.quality_score && (
-                        <QualityScore score={image.quality_score} size="sm" showLabel={false} />
+                      {image.score && (
+                        <QualityScore score={image.score} size="sm" showLabel={false} />
                       )}
                     </div>
                     {image.selected && (
