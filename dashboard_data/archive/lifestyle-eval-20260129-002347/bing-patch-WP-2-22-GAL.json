@@ -1,0 +1,90 @@
+{
+  "sku": "shopify_US_4543465947268_32123035582596",
+  "title": "Double Glass Shelf 22-Inch Wall-Mounted W/ Gallery Rail, Solid Brass | Waverly Place | Allied Brass",
+  "description": "Organize toiletries where you need them\u2014this wall-mounted double glass shelf keeps bottles and daily bathroom essentials off the counter while staying easy to reach. This glass shelf works as a bathroom shelf and wall shelf, with a gallery rail designed to keep your items in place.\n\nHighlights:\n- Store more in less space\u2014double shelf layout creates two levels of storage for a versatile bath accessory setup\n- Keep items from sliding\u2014gallery rails add security for soaps, skincare, and small bottles\n- Built for everyday bathroom use\u20143/8-Inch thick tempered glass for safety and strength\n- Strong, coordinating hardware\u2014solid brass construction with concealed screw mounting for a clean look\n- Designed to match\u2014part of the Waverly Place collection for matching Waverly Place pieces and transitional bath accessories / transitional bathroom hardware\n\nSpecs & Installation:\n- Product type: wall-mounted glass shelf (bathroom shelf / wall shelf)\n- Shelf glass dimensions: 22 x 5 Inches\n- Overall dimensions: 22 in L x 5 in projection x 8 in H\n- Glass thickness: 0.38 in (3/8-Inch), tempered\n- Weight capacity: 4 lb\n- Mounting: wall mount / wall-mounted / wall hanging; concealed screw mounting\n- Assembly required: false\n- Includes: glass shelf and all installation hardware; screw size #8 x 1 1/4\"",
+  "_meta": {
+    "master_sku": "WP-2/22-GAL",
+    "generated_at": "2026-01-28T11:24:40.370343",
+    "quality_score": 88.33,
+    "approval_status": "approved"
+  },
+  "_previous": {
+    "title": "Waverly Place 22 Inch Double Glass Shelf with Gallery Rail",
+    "description": "Add a flare of style to your d\u00e9cor with this decorative glass shelf. Shelf can be used anywhere in the home for a great space to store your products. Gallery rail will keep your items secure. Tempered glass is 3/8 Inches thick and all of the hardware is made of solid brass and finished with the highest quality materials to provide a lifetime of beauty."
+  },
+  "lifestyle_images": [
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var1_20260127_144332.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144332",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var1_20260127_163538.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_163538",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var1_20260128_110735.png",
+      "variation_num": 1,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260128_110735",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var2_20260127_144348.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144348",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var2_20260127_163555.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_163555",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var2_20260128_111839.png",
+      "variation_num": 2,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260128_111839",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var3_20260127_144404.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_144404",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var3_20260127_163613.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260127_163613",
+      "error_message": null
+    },
+    {
+      "image_path": "dashboard_data/lifestyle-eval-candidate/images/WP-2-22-GAL_var3_20260128_111910.png",
+      "variation_num": 3,
+      "generation_success": true,
+      "prompt_used": "(Prompt not available - image linked retroactively)",
+      "timestamp": "20260128_111910",
+      "error_message": null
+    }
+  ],
+  "selected_lifestyle_image": null
+}

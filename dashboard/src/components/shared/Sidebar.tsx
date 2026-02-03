@@ -1,15 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   ClipboardList,
   Layers,
   BarChart3,
   Settings,
   Home,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
+import type { User } from '@supabase/supabase-js'
 
 const navigation = [
   { name: 'Overview', href: '/', icon: Home },
@@ -21,6 +26,22 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+  }, [])
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
@@ -58,8 +79,22 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t p-4">
+      {/* User & Sign Out */}
+      <div className="border-t p-4 space-y-3">
+        {user && (
+          <div className="text-xs text-muted-foreground truncate px-1">
+            {user.email}
+          </div>
+        )}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full justify-start text-muted-foreground"
+          onClick={handleSignOut}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Sign Out
+        </Button>
         <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
           <p className="font-medium text-foreground">Allied Brass</p>
           <p>Feed Optimization Dashboard</p>

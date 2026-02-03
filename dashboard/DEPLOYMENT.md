@@ -5,11 +5,13 @@
 ### Option 1: Vercel Git Integration (Recommended)
 
 1. **Push the branch to GitHub:**
+
    ```bash
    git push -u origin feature/nextjs-dashboard
    ```
 
 2. **Connect to Vercel:**
+
    - Go to [vercel.com/new](https://vercel.com/new)
    - Import the `Allied-FeedOps` repository
    - Configure the project:
@@ -19,6 +21,7 @@
      - **Output Directory:** `.next`
 
 3. **Set Environment Variables:**
+
    - `NEXT_PUBLIC_SUPABASE_URL`: `https://qezuszwufortkiutlhym.supabase.co`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: (from Supabase dashboard)
    - `SUPABASE_SERVICE_ROLE_KEY`: (from Supabase dashboard - keep secret!)
@@ -30,16 +33,19 @@
 ### Option 2: Vercel CLI
 
 1. **Install Vercel CLI:**
+
    ```bash
    npm install -g vercel
    ```
 
 2. **Login to Vercel:**
+
    ```bash
    vercel login
    ```
 
 3. **Deploy from dashboard directory:**
+
    ```bash
    cd dashboard
    vercel --prod
@@ -54,11 +60,11 @@
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key (public) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-only) |
+| Variable                        | Required | Description                             |
+| ------------------------------- | -------- | --------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase project URL                    |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key (public)         |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Supabase service role key (server-only) |
 
 ## Post-Deployment Checklist
 
@@ -72,10 +78,10 @@
 
 The new Next.js dashboard runs alongside the existing Streamlit dashboard:
 
-| Dashboard | URL |
-|-----------|-----|
+| Dashboard           | URL                                                   |
+| ------------------- | ----------------------------------------------------- |
 | Streamlit (current) | `allied-feedops-nqhv5z5vpypgcikbr8hhzy.streamlit.app` |
-| Next.js (new) | `feedops-dashboard.vercel.app` (or your custom URL) |
+| Next.js (new)       | `feedops-dashboard.vercel.app` (or your custom URL)   |
 
 Both dashboards connect to the same Supabase database, so data is synchronized.
 
@@ -84,6 +90,7 @@ Both dashboards connect to the same Supabase database, so data is synchronized.
 ### Build Failures
 
 Check build logs:
+
 ```bash
 # Via Vercel CLI
 vercel logs

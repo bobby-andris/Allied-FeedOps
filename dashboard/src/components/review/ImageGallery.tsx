@@ -1,179 +1,241 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Check, X, ZoomIn } from 'lucide-react'
-import { QualityScore } from '@/components/shared/QualityScore'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Check, X, ChevronLeft, ChevronRight, ZoomIn, Loader2 } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
-interface ImageVariation {
-  variationIndex: number
-  imageUrl: string | null
+interface ImageRecord {
+  id: string
+  master_sku: string
+  variation_index: number
+  image_url: string | null
+  thumbnail_url: string | null
   score: number | null
   selected: boolean
 }
 
 interface ImageGalleryProps {
-  images: ImageVariation[]
-  approved?: boolean | null
-  onSelect: (variationIndex: number) => void
-  onApprove?: () => void
-  onReject?: () => void
-  disabled?: boolean
+  images: ImageRecord[]
+  sku: string
 }
 
-export function ImageGallery({
-  images,
-  approved,
-  onSelect,
-  onApprove,
-  onReject,
-  disabled = false,
-}: ImageGalleryProps) {
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+// Convert local file path to GitHub raw URL
+function getImageUrl(imagePath: string | null): string | null {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  return `https://raw.githubusercontent.com/bobby-andris/Allied-FeedOps/master/${imagePath}`
+}
 
-  const getApprovalStatus = () => {
-    if (approved === true) return { label: 'Approved', className: 'bg-green-100 text-green-800' }
-    if (approved === false) return { label: 'Rejected', className: 'bg-red-100 text-red-800' }
-    return { label: 'Pending', className: 'bg-gray-100 text-gray-800' }
+export function ImageGallery({ images, sku }: ImageGalleryProps) {
+  const [selectedImage, setSelectedImage] = useState<ImageRecord | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [selectingImage, setSelectingImage] = useState<string | null>(null)
+  const router = useRouter()
+
+  const openModal = (image: ImageRecord, index: number) => {
+    setSelectedImage(image)
+    setCurrentIndex(index)
   }
 
-  const status = getApprovalStatus()
-  const selectedImage = images.find(img => img.selected)
+  const closeModal = () => {
+    setSelectedImage(null)
+  }
+
+  const goToPrevious = () => {
+    const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1
+    setCurrentIndex(newIndex)
+    setSelectedImage(images[newIndex])
+  }
+
+  const goToNext = () => {
+    const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0
+    setCurrentIndex(newIndex)
+    setSelectedImage(images[newIndex])
+  }
+
+  const handleSelectImage = async (imageId: string) => {
+    setSelectingImage(imageId)
+    try {
+      const response = await fetch('/api/images', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          image_id: imageId,
+          master_sku: sku,
+          selected: true 
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to select image')
+      }
+
+      toast.success('Image selected successfully')
+      router.refresh()
+      closeModal()
+    } catch (error) {
+      console.error('Select image error:', error)
+      toast.error('Failed to select image')
+    } finally {
+      setSelectingImage(null)
+    }
+  }
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                Lifestyle Images
-                <Badge className={status.className}>{status.label}</Badge>
-              </CardTitle>
-              <CardDescription>
-                Select the best lifestyle image for this SKU
-              </CardDescription>
-            </div>
-            {!disabled && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={approved === false ? 'bg-red-50 border-red-200' : 'text-red-600'}
-                  onClick={onReject}
-                >
-                  <X className="h-4 w-4 mr-1" /> Reject
-                </Button>
-                <Button
-                  size="sm"
-                  className={approved === true ? 'bg-green-600' : 'bg-green-600 hover:bg-green-700'}
-                  onClick={onApprove}
-                >
-                  <Check className="h-4 w-4 mr-1" /> Approve
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {images.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No lifestyle images generated for this SKU
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-4">
-              {images.map((image) => (
-                <div
-                  key={image.variationIndex}
-                  className={`relative rounded-lg border-2 p-2 cursor-pointer transition-all ${
-                    image.selected
-                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => !disabled && onSelect(image.variationIndex)}
-                >
-                  {/* Image Container */}
-                  <div className="aspect-square bg-muted rounded overflow-hidden relative group">
-                    {image.imageUrl ? (
-                      <>
-                        <img
-                          src={image.imageUrl}
-                          alt={`Variation ${image.variationIndex + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setPreviewImage(image.imageUrl)
-                          }}
-                        >
-                          <ZoomIn className="h-8 w-8 text-white" />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        No Image
-                      </div>
-                    )}
+      <div className="grid grid-cols-3 gap-4">
+        {images.map((image, index) => (
+          <div 
+            key={image.id || index} 
+            className={`relative rounded-lg border-2 p-2 cursor-pointer transition-all hover:shadow-lg ${
+              image.selected ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+            }`}
+            onClick={() => openModal(image, index)}
+          >
+            <div className="aspect-square bg-muted rounded flex items-center justify-center text-muted-foreground overflow-hidden relative group">
+              {image.image_url ? (
+                <>
+                  <img 
+                    src={getImageUrl(image.image_url) || ''} 
+                    alt={`Variation ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <ZoomIn className="h-8 w-8 text-white" />
                   </div>
-
-                  {/* Info */}
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Variation {image.variationIndex + 1}
-                    </span>
-                    {image.score !== null && (
-                      <QualityScore score={image.score} size="sm" showLabel={false} />
-                    )}
-                  </div>
-
-                  {/* Selected Badge */}
-                  {image.selected && (
-                    <Badge className="absolute top-4 right-4 bg-primary">
-                      Selected
-                    </Badge>
-                  )}
-                </div>
-              ))}
+                </>
+              ) : (
+                <span>Image {index + 1}</span>
+              )}
             </div>
-          )}
-
-          {selectedImage && (
-            <div className="mt-4 p-3 rounded-lg bg-muted text-sm">
-              <span className="font-medium">Selected: </span>
-              Variation {selectedImage.variationIndex + 1}
-              {selectedImage.score !== null && (
-                <span className="ml-2 text-muted-foreground">
-                  (Score: {selectedImage.score})
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Variation {index + 1}</span>
+              {image.score && (
+                <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                  image.score >= 80 ? 'bg-green-100 text-green-800' :
+                  image.score >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {image.score}
                 </span>
               )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+            {image.selected && (
+              <Badge className="absolute top-4 right-4 bg-primary">Selected</Badge>
+            )}
+          </div>
+        ))}
+      </div>
 
-      {/* Image Preview Dialog */}
-      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+      <Dialog open={selectedImage !== null} onOpenChange={() => closeModal()}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Image Preview</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Image Variation {currentIndex + 1} of {images.length}</span>
+              {selectedImage?.selected && (
+                <Badge className="bg-primary">Currently Selected</Badge>
+              )}
+            </DialogTitle>
           </DialogHeader>
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-auto rounded-lg"
-            />
-          )}
+          
+          <div className="relative">
+            {/* Navigation arrows */}
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white"
+                  onClick={goToPrevious}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white"
+                  onClick={goToNext}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </Button>
+              </>
+            )}
+
+            {/* Image */}
+            <div className="flex items-center justify-center bg-muted rounded-lg overflow-hidden" style={{ minHeight: '500px' }}>
+              {selectedImage?.image_url ? (
+                <img 
+                  src={getImageUrl(selectedImage.image_url) || ''} 
+                  alt={`Variation ${currentIndex + 1}`}
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+              ) : (
+                <span className="text-muted-foreground">No image available</span>
+              )}
+            </div>
+          </div>
+
+          {/* Thumbnail strip */}
+          <div className="flex gap-2 justify-center overflow-x-auto py-2">
+            {images.map((image, index) => (
+              <button
+                key={image.id || index}
+                onClick={() => {
+                  setCurrentIndex(index)
+                  setSelectedImage(image)
+                }}
+                className={`flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden transition-all ${
+                  index === currentIndex 
+                    ? 'border-primary ring-2 ring-primary/30' 
+                    : 'border-muted hover:border-primary/50'
+                }`}
+              >
+                {image.image_url ? (
+                  <img 
+                    src={getImageUrl(image.image_url) || ''} 
+                    alt={`Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center text-xs">
+                    {index + 1}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              {selectedImage?.score && (
+                <span>Quality Score: <strong>{selectedImage.score}</strong></span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={closeModal}>
+                Close
+              </Button>
+              {!selectedImage?.selected && (
+                <Button 
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => selectedImage && handleSelectImage(selectedImage.id)}
+                  disabled={selectingImage !== null}
+                >
+                  {selectingImage === selectedImage?.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  Select This Image
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

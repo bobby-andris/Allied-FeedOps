@@ -1,0 +1,65 @@
+{
+  "success": [
+    {
+      "master_sku": "CL-41-30",
+      "note": "Towel Bar (towel_storage guidance)",
+      "quality_score": 90.0,
+      "status": "approved",
+      "heuristic_score": 90.0,
+      "google_score": 90.0,
+      "bing_score": 93.33,
+      "shopify_score": 86.67,
+      "soft_gate_penalty": 0.0,
+      "selection_score_adjusted": 90.0
+    },
+    {
+      "master_sku": "MD-22",
+      "note": "Retractable Hooks (niche_functional guidance)",
+      "quality_score": 93.33,
+      "status": "approved",
+      "heuristic_score": 81.5,
+      "google_score": 80.0,
+      "bing_score": 83.33,
+      "shopify_score": 86.67,
+      "soft_gate_penalty": 0.0,
+      "selection_score_adjusted": 81.5
+    },
+    {
+      "master_sku": "P-730-GB360",
+      "note": "Grab Bar (safety_ada guidance)",
+      "quality_score": 90.0,
+      "status": "approved",
+      "heuristic_score": 85.17,
+      "google_score": 86.67,
+      "bing_score": 86.67,
+      "shopify_score": 76.67,
+      "soft_gate_penalty": 0.0,
+      "selection_score_adjusted": 85.17
+    },
+    {
+      "master_sku": "A-20",
+      "note": "Cabinet Hardware (niche_functional guidance)",
+      "quality_score": 85.0,
+      "status": "approved",
+      "heuristic_score": 89.0,
+      "google_score": 90.0,
+      "bing_score": 86.67,
+      "shopify_score": 86.67,
+      "soft_gate_penalty": 0.0,
+      "selection_score_adjusted": 89.0
+    },
+    {
+      "master_sku": "1051",
+      "note": "Paper Towel Holder (no category guidance)",
+      "quality_score": 85.0,
+      "status": "approved",
+      "heuristic_score": 92.83,
+      "google_score": 93.33,
+      "bing_score": 93.33,
+      "shopify_score": 90.0,
+      "soft_gate_penalty": 0.0,
+      "selection_score_adjusted": 92.83
+    }
+  ],
+  "failed": []
+}

@@ -77,6 +77,7 @@ def load_patch_previous(
         "product_id": patch.get("productId") if platform == "shopify" else None,
         "offer_id": patch.get("offerId") if platform == "google" else None,
         "sku": patch.get("sku") if platform == "bing" else None,
+        "variants": previous.get("variants"),
     }
 
 
@@ -218,10 +219,41 @@ def rollback_content(
             error_msg = "; ".join(result.get("errors", ["Unknown error"]))
 
     elif platform == "google":
-        # Google rollback: Remove from supplemental feed
-        # This is handled by regenerating the supplemental feed without this SKU
-        # For now, we just log the rollback event
-        pass
+        # Google rollback: push original content back to Google Sheets
+        try:
+            from feedops.integrations.google_sheets import push_patches_to_sheet
+
+            # Build rollback patch with original content for all variants
+            rollback_variants = []
+            original_variants = previous.get("variants") or []
+            if original_variants:
+                for v in original_variants:
+                    rollback_variants.append(v)
+            else:
+                # Single-item rollback
+                offer_id = previous.get("offer_id")
+                if offer_id:
+                    rollback_variants.append({
+                        "offerId": offer_id,
+                        "title": original_title or "",
+                        "description": original_description or "",
+                    })
+
+            if rollback_variants:
+                rollback_patch = {
+                    "variants": rollback_variants,
+                    "lifestyle_image_link": "",  # Remove lifestyle image
+                    "_meta": {"master_sku": sku},
+                }
+                result = push_patches_to_sheet(
+                    patches=[rollback_patch],
+                    environment="production",
+                    dry_run=False,
+                )
+                if not result.get("success"):
+                    error_msg = "; ".join(result.get("errors", ["Sheet update failed"]))
+        except Exception as e:
+            error_msg = f"Google rollback error: {e}"
 
     elif platform == "bing":
         # Bing rollback: Regenerate feed without this SKU's patches

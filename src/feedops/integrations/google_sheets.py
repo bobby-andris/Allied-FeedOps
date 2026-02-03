@@ -455,6 +455,19 @@ def push_patches_to_sheet(
         column_map = build_column_map(headers)
         num_columns = len(headers)
 
+        # Ensure lifestyle_image_link column exists
+        if "lifestyle_image_link" not in column_map:
+            new_col_idx = num_columns
+            column_map["lifestyle_image_link"] = new_col_idx
+            num_columns += 1
+            if not dry_run:
+                spreadsheet = get_spreadsheet(spreadsheet_id, credentials_path)
+                if sheet_name:
+                    worksheet = spreadsheet.worksheet(sheet_name)
+                else:
+                    worksheet = spreadsheet.sheet1
+                worksheet.update_cell(1, new_col_idx + 1, "lifestyle_image_link")
+
         # Ensure we have the required columns
         required_cols = ["id"]
         for col in required_cols:
@@ -494,12 +507,23 @@ def push_patches_to_sheet(
 
                 result["total_variants"] += 1
 
+                # Per-variant lifestyle image filtering
+                approved_finish = patch.get("_image_approved_finish")
+                variant_finish = item.get("_meta", {}).get("finish", "")
+                if approved_finish == "__ALL_FINISHES__" or approved_finish == variant_finish:
+                    row_lifestyle_image = lifestyle_image_link
+                elif not approved_finish:
+                    # No finish restriction — apply to all (backward compat)
+                    row_lifestyle_image = lifestyle_image_link
+                else:
+                    row_lifestyle_image = ""
+
                 row_data = {
                     "id": offer_id,
                     "title": item.get("title", ""),
                     "description": item.get("description", ""),
                     "short_title": item.get("short_title", ""),
-                    "lifestyle_image_link": lifestyle_image_link,
+                    "lifestyle_image_link": row_lifestyle_image,
                     "custom_label_4": tracking_label,
                 }
 

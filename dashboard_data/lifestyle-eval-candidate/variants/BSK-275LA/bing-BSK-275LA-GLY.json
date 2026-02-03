@@ -1,7 +1,7 @@
 {
   "sku": "shopify_US_4531833766020_43094065709282",
-  "title": "Golden Yellow Shower Basket, 18.75-Inch Solid Brass Wall-Mounted Oval Combination Caddy, Concealed Screw Mount, Allied Brass",
-  "description": "Shower basket for bathroom shower storage with solid brass construction and wall mount installation \u2014 available in Golden Yellow, which radiates warm, sunny energy that brightens any bathroom with cheerful, optimistic personality. Size: 18.75 inches long (18.75-inch, 18.75 in), 2.25 inches high (2.25-inch, 2.25 in), 4.13 inches wide/projection (4.13-inch, 4.13 in). This oval combination shower basket / shower caddy uses rust proof solid brass wires that will never rust, plus a designer finish for corrosion-free, rust-free performance. Concealed screw mounting system creates a clean look; wall-mounted design saves space in the bath or shower. Includes basket and all installation hardware; no assembly required. Traditional style suited to traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures. Limited lifetime warranty. Allied Brass.",
+  "title": "Golden Yellow Shower Basket, 18.75-Inch Wall-Mounted Solid Brass Oval Combination Caddy, Allied Brass",
+  "description": "Add organized storage to your bath or shower with this 18.75-inch wall-mounted shower basket. Available in Golden Yellow. Golden Yellow radiates warm, sunny energy. The oval combination caddy provides a secure place for shampoo, conditioner, soap, and daily essentials while the ventilated, heavy-gauge solid brass wires promote drainage and will never rust. Solid brass construction delivers lasting durability, and the concealed screw mounting system creates a clean, finished appearance on the wall. Overall size is 18.75 in L x 2.25 in H x 4.13 in W with 4.13 in projection. Includes the basket and all installation hardware; no assembly required. A smart upgrade for traditional bathroom hardware, classic bath accessories, and heritage bathroom fixtures, and it\u2019s backed by a limited lifetime warranty.",
   "_meta": {
     "master_sku": "BSK-275LA",
     "option_sku": "BSK-275LA-GLY",
@@ -16,15 +16,15 @@
       "golden yellow colored hardware",
       "golden yellow color bathroom"
     ],
-    "generated_at": "2026-01-30T15:03:47.980076",
-    "quality_score": 90.0,
+    "generated_at": "2026-02-03T12:09:59.009902",
+    "quality_score": 93.33,
     "approval_status": "approved",
-    "heuristic_score": 90.5,
-    "selection_score_adjusted": 90.5,
+    "heuristic_score": 90.38,
+    "selection_score_adjusted": 90.38,
     "heuristic_score_breakdown": {
       "google": 90.0,
-      "bing": 90.0,
-      "shopify": 93.33
+      "bing": 87.5,
+      "shopify": 95.0
     },
     "selection_weights": {
       "google": 0.7,

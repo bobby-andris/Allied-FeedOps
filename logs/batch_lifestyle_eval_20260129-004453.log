@@ -1,0 +1,1542 @@
+================================================================================
+Batch Lifestyle Image Optimization
+================================================================================
+Total SKUs: 40
+Images per SKU: 3
+Expected total images: 120
+Output: dashboard_data/lifestyle-eval-candidate
+Reports: dashboard_data/lifestyle-eval-candidate/reports
+================================================================================
+
+
+[1/40] Processing: 920D-6 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1370m ago)
+Cache hit: Shopify product
+Cache miss: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for 920D-6...
+======================================================================
+Prompt length: 2353 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: 920D-6_var1_20260129_004936.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: 920D-6_var2_20260129_004949.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: 920D-6_var3_20260129_005005.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 89.2 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 80)
+  Evaluating variation 2...
+    ✅ Composite: 92.0 (Accuracy: 95, Composition: 85, Background: 100, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 90.3 (Accuracy: 92, Composition: 85, Background: 95, Aesthetic: 88)
+
+🏆 Best image: Variation 2 (Score: 92.0)
+✅ Selected variation 2 as best image
+✅ Lifestyle images attached to candidate (selected: variation 2)
+  ✅ Quality Score: 90.0%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[2/40] Processing: CL-41-30 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1365m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-41-30...
+======================================================================
+Prompt length: 2623 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: CL-41-30_var1_20260129_005210.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: CL-41-30_var2_20260129_005225.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: CL-41-30_var3_20260129_005239.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 91.8 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 90)
+  Evaluating variation 2...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 1 (Score: 91.8)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[3/40] Processing: P-550-WPT (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1366m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for P-550-WPT...
+======================================================================
+Prompt length: 2919 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: P-550-WPT_var1_20260129_005501.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: P-550-WPT_var2_20260129_005518.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: P-550-WPT_var3_20260129_005534.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 1 (Score: 85.8)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[4/40] Processing: QN-31/30 (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for QN-31/30...
+======================================================================
+Prompt length: 2598 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: QN-31-30_var1_20260129_005840.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: QN-31-30_var2_20260129_005855.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: QN-31-30_var3_20260129_005910.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 91.8 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 90)
+  Evaluating variation 2...
+    ✅ Composite: 87.8 (Accuracy: 85, Composition: 88, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 1 (Score: 91.8)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 88.33%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[5/40] Processing: SH-84 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1368m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for SH-84...
+======================================================================
+Prompt length: 1420 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: SH-84_var1_20260129_010225.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: SH-84_var2_20260129_010239.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: SH-84_var3_20260129_010254.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 90.0 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 90.0 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 84.8 (Accuracy: 85, Composition: 80, Background: 90, Aesthetic: 85)
+
+🏆 Best image: Variation 1 (Score: 90.0)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[6/40] Processing: CV-407-8SM (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1351m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CV-407-8SM...
+======================================================================
+Prompt length: 1425 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: CV-407-8SM_var1_20260129_010528.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: CV-407-8SM_var2_20260129_010542.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: CV-407-8SM_var3_20260129_010559.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 91.8 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 90)
+  Evaluating variation 2...
+    ✅ Composite: 90.0 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 91.0 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 1 (Score: 91.8)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 81.67%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[7/40] Processing: CL-29 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1352m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-29...
+======================================================================
+Prompt length: 2120 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: CL-29_var1_20260129_010822.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: CL-29_var2_20260129_010838.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: CL-29_var3_20260129_010855.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 91.0 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 85.0 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 80)
+
+🏆 Best image: Variation 1 (Score: 91.0)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 88.33%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[8/40] Processing: FT-16 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1353m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for FT-16...
+======================================================================
+Prompt length: 2392 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: FT-16_var1_20260129_011123.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: FT-16_var2_20260129_011140.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: FT-16_var3_20260129_011156.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 87.0 (Accuracy: 85, Composition: 85, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 87.8 (Accuracy: 85, Composition: 88, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 90.3 (Accuracy: 92, Composition: 85, Background: 95, Aesthetic: 88)
+
+🏆 Best image: Variation 3 (Score: 90.3)
+✅ Selected variation 3 as best image
+✅ Lifestyle images attached to candidate (selected: variation 3)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[9/40] Processing: MB-20 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1352m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for MB-20...
+======================================================================
+Prompt length: 2602 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: MB-20_var1_20260129_011520.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: MB-20_var2_20260129_011537.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: MB-20_var3_20260129_011552.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 87.8 (Accuracy: 85, Composition: 88, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 3 (Score: 87.8)
+✅ Selected variation 3 as best image
+✅ Lifestyle images attached to candidate (selected: variation 3)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[10/40] Processing: CL-11 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1354m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-11...
+======================================================================
+Prompt length: 1418 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: CL-11_var1_20260129_011954.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: CL-11_var2_20260129_012011.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: CL-11_var3_20260129_012030.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 91.8 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 90)
+  Evaluating variation 3...
+    ✅ Composite: 91.8 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 90)
+
+🏆 Best image: Variation 2 (Score: 91.8)
+✅ Selected variation 2 as best image
+✅ Lifestyle images attached to candidate (selected: variation 2)
+  ✅ Quality Score: 83.33%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[11/40] Processing: 1051 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1357m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for 1051...
+======================================================================
+Prompt length: 2981 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: 1051_var1_20260129_012251.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: 1051_var2_20260129_012308.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: 1051_var3_20260129_012323.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 88.5 (Accuracy: 85, Composition: 88, Background: 95, Aesthetic: 90)
+  Evaluating variation 2...
+    ✅ Composite: 91.8 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 90)
+  Evaluating variation 3...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 2 (Score: 91.8)
+✅ Selected variation 2 as best image
+✅ Lifestyle images attached to candidate (selected: variation 2)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[12/40] Processing: WP-GLT-24 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1358m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-GLT-24...
+======================================================================
+Prompt length: 2604 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: WP-GLT-24_var1_20260129_012610.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: WP-GLT-24_var2_20260129_012626.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: WP-GLT-24_var3_20260129_012644.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 91.0 (Accuracy: 95, Composition: 85, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 2 (Score: 91.0)
+✅ Selected variation 2 as best image
+✅ Lifestyle images attached to candidate (selected: variation 2)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[13/40] Processing: CL-41-18 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1358m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-41-18...
+======================================================================
+Prompt length: 2623 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: CL-41-18_var1_20260129_012908.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: CL-41-18_var2_20260129_012924.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: CL-41-18_var3_20260129_012939.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 90.0 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 89.8 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 90)
+  Evaluating variation 3...
+    ✅ Composite: 90.5 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 88)
+
+🏆 Best image: Variation 3 (Score: 90.5)
+✅ Selected variation 3 as best image
+✅ Lifestyle images attached to candidate (selected: variation 3)
+  ✅ Quality Score: 83.33%
+  ✅ Status: rejected
+  🖼️  Images: 3/3
+
+[14/40] Processing: HTL-3 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1359m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for HTL-3...
+======================================================================
+Prompt length: 1420 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: HTL-3_var1_20260129_013205.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: HTL-3_var2_20260129_013220.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: HTL-3_var3_20260129_013234.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 2...
+    ✅ Composite: 85.8 (Accuracy: 85, Composition: 80, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+
+🏆 Best image: Variation 3 (Score: 89.0)
+✅ Selected variation 3 as best image
+✅ Lifestyle images attached to candidate (selected: variation 3)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[15/40] Processing: TS-4L (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1360m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for TS-4L...
+======================================================================
+Prompt length: 1420 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: TS-4L_var1_20260129_013607.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ✅ Saved: TS-4L_var2_20260129_013624.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 3...
+  ✅ Saved: TS-4L_var3_20260129_013645.png
+    ✓ AI metadata added via PNG text chunks
+
+✅ Generated 3/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 3 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 90.3 (Accuracy: 92, Composition: 85, Background: 95, Aesthetic: 88)
+  Evaluating variation 2...
+    ✅ Composite: 89.0 (Accuracy: 90, Composition: 85, Background: 95, Aesthetic: 85)
+  Evaluating variation 3...
+    ✅ Composite: 84.8 (Accuracy: 85, Composition: 80, Background: 90, Aesthetic: 85)
+
+🏆 Best image: Variation 1 (Score: 90.3)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 90.0%
+  ✅ Status: approved
+  🖼️  Images: 3/3
+
+[16/40] Processing: MA-26 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1361m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for MA-26...
+======================================================================
+Prompt length: 1420 characters
+Reference images used: 1
+  Generating variation 1...
+  ✅ Saved: MA-26_var1_20260129_013914.png
+    ✓ AI metadata added via PNG text chunks
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 1/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+
+Scoring 1 lifestyle images...
+  Evaluating variation 1...
+    ✅ Composite: 90.5 (Accuracy: 95, Composition: 85, Background: 90, Aesthetic: 88)
+
+🏆 Best image: Variation 1 (Score: 90.5)
+✅ Selected variation 1 as best image
+✅ Lifestyle images attached to candidate (selected: variation 1)
+  ✅ Quality Score: 41.67%
+  ✅ Status: rejected
+  🖼️  Images: 1/3
+
+[17/40] Processing: WP-61 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1362m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-61...
+======================================================================
+Prompt length: 1418 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[18/40] Processing: CS-1 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1361m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CS-1...
+======================================================================
+Prompt length: 1419 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[19/40] Processing: WP-2TB/16-GAL (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-2TB/16-GAL...
+======================================================================
+Error downloading image from https://assets.alliedbrass.com/images/products/dimensions/WP-2TB-16-GAL_ASZ1.jpg: 404 Client Error: Not Found for url: https://assets.alliedbrass.com/images/products/dimensions/WP-2TB-16-GAL_ASZ1.jpg
+Prompt length: 2369 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[20/40] Processing: PR-99 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1360m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for PR-99...
+======================================================================
+Prompt length: 1457 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 83.33%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[21/40] Processing: P-730-GB360 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1360m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for P-730-GB360...
+======================================================================
+Prompt length: 1425 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[22/40] Processing: BSK-275LA (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1360m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for BSK-275LA...
+======================================================================
+Prompt length: 1461 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[23/40] Processing: WP-1TB/16 (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-1TB/16...
+======================================================================
+Error downloading image from https://assets.alliedbrass.com/images/products/dimensions/WP-1TB-16_ASZ1.jpg: 404 Client Error: Not Found for url: https://assets.alliedbrass.com/images/products/dimensions/WP-1TB-16_ASZ1.jpg
+Prompt length: 2365 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[24/40] Processing: WP-2/22-GAL (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-2/22-GAL...
+======================================================================
+Error downloading image from https://assets.alliedbrass.com/images/products/dimensions/WP-2-22-GAL_ASZ1.jpg: 404 Client Error: Not Found for url: https://assets.alliedbrass.com/images/products/dimensions/WP-2-22-GAL_ASZ1.jpg
+Prompt length: 2341 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 88.33%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[25/40] Processing: WP-GTB-2 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1362m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-GTB-2...
+======================================================================
+Prompt length: 1422 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[26/40] Processing: CL-22 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1364m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-22...
+======================================================================
+Prompt length: 2639 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[27/40] Processing: A-20 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1366m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for A-20...
+======================================================================
+Prompt length: 1419 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[28/40] Processing: CL-5-16 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1367m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-5-16...
+======================================================================
+Prompt length: 2399 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[29/40] Processing: WP-2/16-GAL (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for WP-2/16-GAL...
+======================================================================
+Error downloading image from https://assets.alliedbrass.com/images/products/dimensions/WP-2-16-GAL_ASZ1.jpg: 404 Client Error: Not Found for url: https://assets.alliedbrass.com/images/products/dimensions/WP-2-16-GAL_ASZ1.jpg
+Prompt length: 2341 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 88.33%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[30/40] Processing: MD-22 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1370m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for MD-22...
+======================================================================
+Prompt length: 2602 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[31/40] Processing: P-200-18-TB (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1372m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+JSON parse error (attempt 1): Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for P-200-18-TB...
+======================================================================
+Prompt length: 2662 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 78.33%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[32/40] Processing: SQ-20 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1375m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for SQ-20...
+======================================================================
+Prompt length: 1420 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 81.67%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[33/40] Processing: RC-5/16TB (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for RC-5/16TB...
+======================================================================
+Prompt length: 2365 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 88.33%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[34/40] Processing: DMF-2/2X (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for DMF-2/2X...
+======================================================================
+Error downloading image from https://assets.alliedbrass.com/images/products/lifestyle/DMF-2-2X-ABR_LST1.jpg: 404 Client Error: Not Found for url: https://assets.alliedbrass.com/images/products/lifestyle/DMF-2-2X-ABR_LST1.jpg
+Error downloading image from https://assets.alliedbrass.com/images/products/dimensions/DMF-2-2X_ASZ1.jpg: 404 Client Error: Not Found for url: https://assets.alliedbrass.com/images/products/dimensions/DMF-2-2X_ASZ1.jpg
+Prompt length: 1398 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[35/40] Processing: TS-25 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1380m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+  ❌ Error: 1 validation error for Candidate
+bing_title
+  Value error, Bing title must be <= 150 characters [type=value_error, input_value='Toilet Paper Stand, 26-I...lection, | Allied Brass', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/value_error
+
+[36/40] Processing: 1066 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1381m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for 1066...
+======================================================================
+Prompt length: 1457 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 85.0%
+  ✅ Status: rejected
+  🖼️  Images: 0/3
+
+[37/40] Processing: CL-24C (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1382m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for CL-24C...
+======================================================================
+Prompt length: 2362 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[38/40] Processing: DT-32 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1383m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for DT-32...
+======================================================================
+Prompt length: 1457 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[39/40] Processing: NS-5/16 (Pilot)
+------------------------------------------------------------
+Cache miss: Shopify product
+Data source: CSV fallback (data/catalog/Product Catalog.csv)
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for NS-5/16...
+======================================================================
+Prompt length: 2356 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 91.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+[40/40] Processing: TS-28 (Pilot)
+------------------------------------------------------------
+Data source: Shopify API (cached 1386m ago)
+Cache hit: Shopify product
+Cache hit: Merchant Center items
+
+======================================================================
+Step 4: Generating lifestyle images...
+======================================================================
+
+======================================================================
+Generating lifestyle images for TS-28...
+======================================================================
+Prompt length: 1420 characters
+Reference images used: 1
+  Generating variation 1...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 2...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+  Generating variation 3...
+  ❌ Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 0', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel'}]}]}}
+
+✅ Generated 0/3 variations
+
+======================================================================
+Selecting best lifestyle image using AI evaluation...
+======================================================================
+No successful images to score
+✅ Lifestyle images attached to candidate (selected: variation None)
+  ✅ Quality Score: 86.67%
+  ✅ Status: approved
+  🖼️  Images: 0/3
+
+================================================================================
+BATCH COMPLETE
+================================================================================
+Successful: 39/40
+Failed: 1/40
+Total lifestyle images: 46
+
+Failed SKUs:
+  - TS-25: 1 validation error for Candidate
+bing_title
+  Value error, Bing title must be <= 150 characters [type=value_error, input_value='Toilet Paper Stand, 26-I...lection, | Allied Brass', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/value_error
+
+Average Quality Score: 84.70%
+
+Summary saved to: dashboard_data/lifestyle-eval-candidate/reports/batch-summary-20260129-023526.json
+
+================================================================================
+Next: View results in Streamlit dashboard:
+  streamlit run streamlit_app.py
+================================================================================
