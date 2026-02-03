@@ -31,6 +31,7 @@ if is_supabase_available():
         assign_skus_to_batch,
         create_batch,
         get_all_batches,
+        get_all_performance_baselines,
         get_approved_for_batch,
         get_batch,
         get_batch_skus,
@@ -58,6 +59,7 @@ else:
         assign_skus_to_batch,
         create_batch,
         get_all_batches,
+        get_all_performance_baselines,
         get_approved_for_batch,
         get_batch,
         get_batch_skus,
@@ -104,6 +106,7 @@ __all__ = [
     "get_performance_snapshots",
     "save_performance_baseline",
     "get_performance_baseline",
+    "get_all_performance_baselines",
     "get_published_skus_for_review",
     # SKU approval functions
     "save_sku_approval",

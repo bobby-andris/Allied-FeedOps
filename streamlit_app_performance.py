@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import streamlit as st
 
-from feedops.db import get_connection, init_db
+from feedops.db import get_connection, init_db, is_supabase_available
 
 # Page config
 st.set_page_config(
@@ -42,12 +42,110 @@ def load_performance_data(
     environment: str,
 ) -> pd.DataFrame:
     """Load performance data from database."""
+    if is_supabase_available():
+        return _load_performance_data_supabase(platform, min_days, environment)
+    else:
+        return _load_performance_data_sqlite(platform, min_days, environment)
+
+
+def _load_performance_data_supabase(
+    platform: str,
+    min_days: int,
+    environment: str,
+) -> pd.DataFrame:
+    """Load performance data using Supabase table API + pandas merge."""
+    from datetime import timezone
+
+    from feedops.db.supabase_client import (
+        get_all_performance_baselines,
+        get_client,
+        get_performance_snapshots,
+    )
+
+    client = get_client()
+
+    # 1. Fetch publish_events
+    query = (
+        client.table("publish_events")
+        .select("id, master_sku, platform, environment, published_at, quality_score, product_category")
+        .eq("platform", platform)
+        .eq("action", "publish")
+        .eq("status", "success")
+    )
+    if environment != "all":
+        query = query.eq("environment", environment)
+
+    result = query.order("published_at", desc=True).limit(500).execute()
+
+    if not result.data:
+        return pd.DataFrame()
+
+    df_events = pd.DataFrame(result.data).rename(columns={"id": "publish_id"})
+
+    # Filter by min_days in Python
+    cutoff = datetime.now(timezone.utc) - timedelta(days=min_days)
+    df_events["published_at_dt"] = pd.to_datetime(df_events["published_at"], utc=True)
+    df_events = df_events[df_events["published_at_dt"] <= cutoff]
+    df_events = df_events.drop(columns=["published_at_dt"])
+
+    if df_events.empty:
+        return pd.DataFrame()
+
+    # 2. Fetch performance_snapshots
+    snapshots = get_performance_snapshots(platform=platform, limit=2000)
+    df_snapshots = pd.DataFrame(snapshots) if snapshots else pd.DataFrame()
+
+    # 3. Fetch performance_baselines
+    baselines = get_all_performance_baselines(platform=platform)
+    df_baselines = pd.DataFrame(baselines) if baselines else pd.DataFrame()
+
+    # 4. Merge events + snapshots on (master_sku, platform)
+    if not df_snapshots.empty:
+        snapshot_cols = ["master_sku", "platform", "snapshot_date", "impressions",
+                         "clicks", "ctr", "conversions", "conversion_value", "cvr", "cost", "roas"]
+        available_cols = [c for c in snapshot_cols if c in df_snapshots.columns]
+        df = df_events.merge(
+            df_snapshots[available_cols],
+            on=["master_sku", "platform"],
+            how="left"
+        )
+    else:
+        df = df_events.copy()
+        for col in ["snapshot_date", "impressions", "clicks", "ctr",
+                    "conversions", "conversion_value", "cvr", "cost", "roas"]:
+            df[col] = None
+
+    # 5. Merge result + baselines
+    if not df_baselines.empty:
+        df_baselines = df_baselines.rename(columns={
+            "avg_ctr": "baseline_ctr",
+            "avg_cvr": "baseline_cvr",
+            "avg_roas": "baseline_roas",
+            "avg_impressions": "baseline_impressions",
+            "avg_conversions": "baseline_conversions",
+        })
+        df = df.merge(df_baselines, on=["master_sku", "platform"], how="left")
+    else:
+        for col in ["baseline_ctr", "baseline_cvr", "baseline_roas",
+                    "baseline_impressions", "baseline_conversions"]:
+            df[col] = None
+
+    return _add_delta_calculations(df)
+
+
+def _load_performance_data_sqlite(
+    platform: str,
+    min_days: int,
+    environment: str,
+) -> pd.DataFrame:
+    """Load performance data using SQLite raw SQL."""
     db_path = get_db_path()
     if not db_path.exists():
         return pd.DataFrame()
 
     conn = get_connection(db_path)
 
+    # FIXED: JOIN on (master_sku, platform) instead of publish_event_id
     query = """
     SELECT
         p.id as publish_id,
@@ -56,6 +154,7 @@ def load_performance_data(
         p.environment,
         p.published_at,
         p.quality_score,
+        p.product_category,
         ps.snapshot_date,
         ps.impressions,
         ps.clicks,
@@ -71,8 +170,10 @@ def load_performance_data(
         pb.avg_impressions as baseline_impressions,
         pb.avg_conversions as baseline_conversions
     FROM publish_events p
-    LEFT JOIN performance_snapshots ps ON p.id = ps.publish_event_id
-    LEFT JOIN performance_baselines pb ON p.master_sku = pb.master_sku AND p.platform = pb.platform
+    LEFT JOIN performance_snapshots ps
+        ON p.master_sku = ps.master_sku AND p.platform = ps.platform
+    LEFT JOIN performance_baselines pb
+        ON p.master_sku = pb.master_sku AND p.platform = pb.platform
     WHERE p.platform = ?
       AND p.action = 'publish'
       AND p.status = 'success'
@@ -88,50 +189,57 @@ def load_performance_data(
 
     try:
         df = pd.read_sql(query, conn, params=params)
-        conn.close()
-
-        # Calculate deltas
-        if not df.empty:
-            df["ctr_delta_pct"] = df.apply(
-                lambda r: (
-                    ((r["ctr"] - r["baseline_ctr"]) / r["baseline_ctr"] * 100)
-                    if r["baseline_ctr"] and r["baseline_ctr"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-            df["cvr_delta_pct"] = df.apply(
-                lambda r: (
-                    ((r["cvr"] - r["baseline_cvr"]) / r["baseline_cvr"] * 100)
-                    if r["baseline_cvr"] and r["baseline_cvr"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-            df["roas_delta_pct"] = df.apply(
-                lambda r: (
-                    ((r["roas"] - r["baseline_roas"]) / r["baseline_roas"] * 100)
-                    if r["baseline_roas"] and r["baseline_roas"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-            df["days_since_publish"] = df["published_at"].apply(
-                lambda x: (
-                    (
-                        datetime.now()
-                        - datetime.fromisoformat(x.replace("Z", "+00:00"))
-                    ).days
-                    if x
-                    else None
-                )
-            )
-
-        return df
+        return _add_delta_calculations(df)
     except Exception as e:
         st.error(f"Error loading data: {e}")
-        conn.close()
         return pd.DataFrame()
+    finally:
+        conn.close()
+
+
+def _add_delta_calculations(df: pd.DataFrame) -> pd.DataFrame:
+    """Add CTR/CVR/ROAS delta calculations to dataframe."""
+    from datetime import timezone
+
+    if df.empty:
+        return df
+
+    df["ctr_delta_pct"] = df.apply(
+        lambda r: (
+            ((r["ctr"] - r["baseline_ctr"]) / r["baseline_ctr"] * 100)
+            if r.get("baseline_ctr") and r["baseline_ctr"] > 0
+            else None
+        ),
+        axis=1,
+    )
+    df["cvr_delta_pct"] = df.apply(
+        lambda r: (
+            ((r["cvr"] - r["baseline_cvr"]) / r["baseline_cvr"] * 100)
+            if r.get("baseline_cvr") and r["baseline_cvr"] > 0
+            else None
+        ),
+        axis=1,
+    )
+    df["roas_delta_pct"] = df.apply(
+        lambda r: (
+            ((r["roas"] - r["baseline_roas"]) / r["baseline_roas"] * 100)
+            if r.get("baseline_roas") and r["baseline_roas"] > 0
+            else None
+        ),
+        axis=1,
+    )
+    df["days_since_publish"] = df["published_at"].apply(
+        lambda x: (
+            (
+                datetime.now(timezone.utc)
+                - datetime.fromisoformat(str(x).replace("Z", "+00:00"))
+            ).days
+            if x
+            else None
+        )
+    )
+
+    return df
 
 
 @st.cache_data(ttl=300)
@@ -181,12 +289,128 @@ def load_category_performance(
     platform: str, min_days: int, environment: str
 ) -> pd.DataFrame:
     """Load performance data grouped by product category."""
+    if is_supabase_available():
+        return _load_category_performance_supabase(platform, min_days, environment)
+    else:
+        return _load_category_performance_sqlite(platform, min_days, environment)
+
+
+def _load_category_performance_supabase(
+    platform: str, min_days: int, environment: str
+) -> pd.DataFrame:
+    """Load category performance using Supabase + pandas aggregation."""
+    from datetime import timezone
+
+    from feedops.db.supabase_client import (
+        get_all_performance_baselines,
+        get_client,
+        get_performance_snapshots,
+    )
+
+    client = get_client()
+
+    # 1. Fetch publish_events with category
+    query = (
+        client.table("publish_events")
+        .select("id, master_sku, platform, environment, published_at, product_category")
+        .eq("platform", platform)
+        .eq("action", "publish")
+        .eq("status", "success")
+        .not_.is_("product_category", "null")
+    )
+    if environment != "all":
+        query = query.eq("environment", environment)
+
+    result = query.order("published_at", desc=True).limit(500).execute()
+
+    if not result.data:
+        return pd.DataFrame()
+
+    df_events = pd.DataFrame(result.data)
+
+    # Filter by min_days
+    cutoff = datetime.now(timezone.utc) - timedelta(days=min_days)
+    df_events["published_at_dt"] = pd.to_datetime(df_events["published_at"], utc=True)
+    df_events = df_events[df_events["published_at_dt"] <= cutoff]
+
+    if df_events.empty:
+        return pd.DataFrame()
+
+    # 2. Fetch snapshots and baselines
+    snapshots = get_performance_snapshots(platform=platform, limit=2000)
+    df_snapshots = pd.DataFrame(snapshots) if snapshots else pd.DataFrame()
+
+    baselines = get_all_performance_baselines(platform=platform)
+    df_baselines = pd.DataFrame(baselines) if baselines else pd.DataFrame()
+
+    # 3. Merge events with snapshots
+    if not df_snapshots.empty:
+        df = df_events.merge(
+            df_snapshots[["master_sku", "platform", "impressions", "clicks",
+                         "ctr", "conversions", "conversion_value", "cvr", "roas"]],
+            on=["master_sku", "platform"],
+            how="left"
+        )
+    else:
+        df = df_events.copy()
+        for col in ["impressions", "clicks", "ctr", "conversions",
+                    "conversion_value", "cvr", "roas"]:
+            df[col] = None
+
+    # 4. Merge with baselines
+    if not df_baselines.empty:
+        df_baselines = df_baselines.rename(columns={
+            "avg_ctr": "baseline_ctr",
+            "avg_roas": "baseline_roas",
+        })
+        df = df.merge(
+            df_baselines[["master_sku", "platform", "baseline_ctr", "baseline_roas"]],
+            on=["master_sku", "platform"],
+            how="left"
+        )
+    else:
+        df["baseline_ctr"] = None
+        df["baseline_roas"] = None
+
+    # 5. Group by category
+    grouped = df.groupby("product_category").agg({
+        "master_sku": "nunique",
+        "roas": "mean",
+        "ctr": "mean",
+        "cvr": "mean",
+        "impressions": "sum",
+        "conversions": "sum",
+        "conversion_value": "sum",
+        "baseline_roas": "mean",
+        "baseline_ctr": "mean",
+    }).reset_index()
+
+    grouped = grouped.rename(columns={
+        "master_sku": "sku_count",
+        "roas": "avg_roas",
+        "ctr": "avg_ctr",
+        "cvr": "avg_cvr",
+        "impressions": "total_impressions",
+        "conversions": "total_conversions",
+        "conversion_value": "total_revenue",
+        "baseline_roas": "avg_baseline_roas",
+        "baseline_ctr": "avg_baseline_ctr",
+    })
+
+    return _add_category_deltas(grouped)
+
+
+def _load_category_performance_sqlite(
+    platform: str, min_days: int, environment: str
+) -> pd.DataFrame:
+    """Load category performance using SQLite raw SQL."""
     db_path = get_db_path()
     if not db_path.exists():
         return pd.DataFrame()
 
     conn = get_connection(db_path)
 
+    # FIXED: JOIN on (master_sku, platform) instead of publish_event_id
     query = """
     SELECT
         p.product_category,
@@ -200,8 +424,10 @@ def load_category_performance(
         AVG(pb.avg_roas) as avg_baseline_roas,
         AVG(pb.avg_ctr) as avg_baseline_ctr
     FROM publish_events p
-    LEFT JOIN performance_snapshots ps ON p.id = ps.publish_event_id
-    LEFT JOIN performance_baselines pb ON p.master_sku = pb.master_sku AND p.platform = pb.platform
+    LEFT JOIN performance_snapshots ps
+        ON p.master_sku = ps.master_sku AND p.platform = ps.platform
+    LEFT JOIN performance_baselines pb
+        ON p.master_sku = pb.master_sku AND p.platform = pb.platform
     WHERE p.platform = ?
       AND p.action = 'publish'
       AND p.status = 'success'
@@ -218,50 +444,173 @@ def load_category_performance(
 
     try:
         df = pd.read_sql(query, conn, params=params)
-        conn.close()
-
-        if not df.empty:
-            df["roas_delta_pct"] = df.apply(
-                lambda r: (
-                    (
-                        (r["avg_roas"] - r["avg_baseline_roas"])
-                        / r["avg_baseline_roas"]
-                        * 100
-                    )
-                    if r["avg_baseline_roas"] and r["avg_baseline_roas"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-            df["ctr_delta_pct"] = df.apply(
-                lambda r: (
-                    (
-                        (r["avg_ctr"] - r["avg_baseline_ctr"])
-                        / r["avg_baseline_ctr"]
-                        * 100
-                    )
-                    if r["avg_baseline_ctr"] and r["avg_baseline_ctr"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-
-        return df
+        return _add_category_deltas(df)
     except Exception as e:
         st.error(f"Error loading category data: {e}")
-        conn.close()
         return pd.DataFrame()
+    finally:
+        conn.close()
+
+
+def _add_category_deltas(df: pd.DataFrame) -> pd.DataFrame:
+    """Add ROAS and CTR delta calculations to category dataframe."""
+    if df.empty:
+        return df
+
+    df["roas_delta_pct"] = df.apply(
+        lambda r: (
+            (
+                (r["avg_roas"] - r["avg_baseline_roas"])
+                / r["avg_baseline_roas"]
+                * 100
+            )
+            if r.get("avg_baseline_roas") and r["avg_baseline_roas"] > 0
+            else None
+        ),
+        axis=1,
+    )
+    df["ctr_delta_pct"] = df.apply(
+        lambda r: (
+            (
+                (r["avg_ctr"] - r["avg_baseline_ctr"])
+                / r["avg_baseline_ctr"]
+                * 100
+            )
+            if r.get("avg_baseline_ctr") and r["avg_baseline_ctr"] > 0
+            else None
+        ),
+        axis=1,
+    )
+
+    return df
 
 
 @st.cache_data(ttl=300)
 def load_batch_performance(platform: str) -> pd.DataFrame:
     """Load performance data grouped by batch."""
+    if is_supabase_available():
+        return _load_batch_performance_supabase(platform)
+    else:
+        return _load_batch_performance_sqlite(platform)
+
+
+def _load_batch_performance_supabase(platform: str) -> pd.DataFrame:
+    """Load batch performance using Supabase + pandas aggregation."""
+    from feedops.db.supabase_client import (
+        get_all_batches,
+        get_all_performance_baselines,
+        get_client,
+        get_performance_snapshots,
+    )
+
+    # 1. Fetch all batches
+    batches = get_all_batches(limit=100)
+    if not batches:
+        return pd.DataFrame()
+
+    df_batches = pd.DataFrame(batches)
+    df_batches = df_batches.rename(columns={
+        "name": "batch_label",
+        "created_at": "batch_created",
+        "executed_at": "batch_published",
+        "status": "batch_status",
+    })
+
+    client = get_client()
+
+    # 2. Fetch publish_events for platform
+    result = (
+        client.table("publish_events")
+        .select("id, master_sku, platform, batch_id")
+        .eq("platform", platform)
+        .not_.is_("batch_id", "null")
+        .execute()
+    )
+    df_events = pd.DataFrame(result.data) if result.data else pd.DataFrame()
+
+    if df_events.empty:
+        # Return batches with empty metrics
+        for col in ["tracked_skus", "avg_roas", "avg_ctr", "avg_cvr",
+                    "total_impressions", "total_conversions", "total_revenue",
+                    "roas_lift_pct", "ctr_lift_pct"]:
+            df_batches[col] = None
+        return df_batches
+
+    # 3. Fetch snapshots and baselines
+    snapshots = get_performance_snapshots(platform=platform, limit=2000)
+    df_snapshots = pd.DataFrame(snapshots) if snapshots else pd.DataFrame()
+
+    baselines = get_all_performance_baselines(platform=platform)
+    df_baselines = pd.DataFrame(baselines) if baselines else pd.DataFrame()
+
+    # 4. Merge events with snapshots (using master_sku, platform)
+    if not df_snapshots.empty:
+        df_events = df_events.merge(
+            df_snapshots[["master_sku", "platform", "impressions", "clicks",
+                         "ctr", "conversions", "conversion_value", "cvr", "roas"]],
+            on=["master_sku", "platform"],
+            how="left"
+        )
+    else:
+        for col in ["impressions", "clicks", "ctr", "conversions",
+                    "conversion_value", "cvr", "roas"]:
+            df_events[col] = None
+
+    # 5. Merge with baselines
+    if not df_baselines.empty:
+        df_baselines = df_baselines.rename(columns={
+            "avg_ctr": "baseline_ctr",
+            "avg_roas": "baseline_roas",
+        })
+        df_events = df_events.merge(
+            df_baselines[["master_sku", "platform", "baseline_ctr", "baseline_roas"]],
+            on=["master_sku", "platform"],
+            how="left"
+        )
+    else:
+        df_events["baseline_ctr"] = None
+        df_events["baseline_roas"] = None
+
+    # 6. Aggregate by batch_id
+    batch_stats = df_events.groupby("batch_id").agg({
+        "master_sku": "nunique",
+        "roas": "mean",
+        "ctr": "mean",
+        "cvr": "mean",
+        "impressions": "sum",
+        "conversions": "sum",
+        "conversion_value": "sum",
+        "baseline_roas": "mean",
+        "baseline_ctr": "mean",
+    }).reset_index()
+
+    batch_stats = batch_stats.rename(columns={
+        "master_sku": "tracked_skus",
+        "roas": "avg_roas",
+        "ctr": "avg_ctr",
+        "cvr": "avg_cvr",
+        "impressions": "total_impressions",
+        "conversions": "total_conversions",
+        "conversion_value": "total_revenue",
+        "baseline_roas": "avg_baseline_roas",
+        "baseline_ctr": "avg_baseline_ctr",
+    })
+
+    # 7. Merge batch metadata with stats
+    df = df_batches.merge(batch_stats, on="batch_id", how="left")
+
+    return _add_batch_deltas(df)
+
+
+def _load_batch_performance_sqlite(platform: str) -> pd.DataFrame:
+    """Load batch performance using SQLite raw SQL."""
     db_path = get_db_path()
     if not db_path.exists():
         return pd.DataFrame()
 
     conn = get_connection(db_path)
 
+    # FIXED: JOIN on (master_sku, platform) instead of publish_event_id
     query = """
     SELECT
         pb.batch_id,
@@ -283,47 +632,55 @@ def load_batch_performance(platform: str) -> pd.DataFrame:
         AVG(baseline.avg_ctr) as avg_baseline_ctr
     FROM publish_batches pb
     LEFT JOIN publish_events pe ON pb.batch_id = pe.batch_id AND pe.platform = ?
-    LEFT JOIN performance_snapshots ps ON pe.id = ps.publish_event_id
-    LEFT JOIN performance_baselines baseline ON pe.master_sku = baseline.master_sku AND pe.platform = baseline.platform
+    LEFT JOIN performance_snapshots ps
+        ON pe.master_sku = ps.master_sku AND pe.platform = ps.platform
+    LEFT JOIN performance_baselines baseline
+        ON pe.master_sku = baseline.master_sku AND pe.platform = baseline.platform
     GROUP BY pb.batch_id
     ORDER BY pb.created_at DESC
     """
 
     try:
         df = pd.read_sql(query, conn, params=[platform])
-        conn.close()
-
-        if not df.empty:
-            df["roas_lift_pct"] = df.apply(
-                lambda r: (
-                    (
-                        (r["avg_roas"] - r["avg_baseline_roas"])
-                        / r["avg_baseline_roas"]
-                        * 100
-                    )
-                    if r["avg_baseline_roas"] and r["avg_baseline_roas"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-            df["ctr_lift_pct"] = df.apply(
-                lambda r: (
-                    (
-                        (r["avg_ctr"] - r["avg_baseline_ctr"])
-                        / r["avg_baseline_ctr"]
-                        * 100
-                    )
-                    if r["avg_baseline_ctr"] and r["avg_baseline_ctr"] > 0
-                    else None
-                ),
-                axis=1,
-            )
-
-        return df
+        return _add_batch_deltas(df)
     except Exception as e:
         st.error(f"Error loading batch data: {e}")
-        conn.close()
         return pd.DataFrame()
+    finally:
+        conn.close()
+
+
+def _add_batch_deltas(df: pd.DataFrame) -> pd.DataFrame:
+    """Add ROAS and CTR lift calculations to batch dataframe."""
+    if df.empty:
+        return df
+
+    df["roas_lift_pct"] = df.apply(
+        lambda r: (
+            (
+                (r["avg_roas"] - r["avg_baseline_roas"])
+                / r["avg_baseline_roas"]
+                * 100
+            )
+            if r.get("avg_baseline_roas") and r["avg_baseline_roas"] > 0
+            else None
+        ),
+        axis=1,
+    )
+    df["ctr_lift_pct"] = df.apply(
+        lambda r: (
+            (
+                (r["avg_ctr"] - r["avg_baseline_ctr"])
+                / r["avg_baseline_ctr"]
+                * 100
+            )
+            if r.get("avg_baseline_ctr") and r["avg_baseline_ctr"] > 0
+            else None
+        ),
+        axis=1,
+    )
+
+    return df
 
 
 def render_overall_tab(df: pd.DataFrame, stats: dict, platform: str):
@@ -739,6 +1096,12 @@ def main():
         return
 
     init_db(db_path)
+
+    # Show backend status in sidebar
+    if is_supabase_available():
+        st.sidebar.success("Connected to Supabase")
+    else:
+        st.sidebar.info("Using local SQLite database")
 
     # Sidebar filters
     st.sidebar.header("Filters")

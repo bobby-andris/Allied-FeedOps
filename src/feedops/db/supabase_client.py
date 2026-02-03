@@ -962,3 +962,33 @@ def get_performance_snapshots(
         }
         for row in result.data
     ]
+
+
+@_with_retry
+def get_all_performance_baselines(
+    _db_path=None,
+    *,
+    platform: str | None = None,
+) -> list[dict]:
+    """Retrieve all performance baselines, optionally filtered by platform."""
+    client = get_client()
+
+    query = client.table("performance_baselines").select("*")
+
+    if platform:
+        query = query.eq("platform", platform)
+
+    result = query.execute()
+
+    return [
+        {
+            "master_sku": row["master_sku"],
+            "platform": row["platform"],
+            "avg_ctr": row.get("avg_ctr"),
+            "avg_cvr": row.get("avg_cvr"),
+            "avg_roas": row.get("avg_roas"),
+            "avg_impressions": row.get("avg_impressions"),
+            "avg_conversions": row.get("avg_conversions"),
+        }
+        for row in result.data
+    ]

@@ -1242,6 +1242,50 @@ def get_performance_baseline(
     }
 
 
+def get_all_performance_baselines(
+    db_path: Path | str,
+    *,
+    platform: str | None = None,
+) -> list[dict]:
+    """Retrieve all performance baselines, optionally filtered by platform.
+
+    Args:
+        db_path: Path to database file.
+        platform: Optional platform filter.
+
+    Returns:
+        List of baseline dicts.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+
+    query = "SELECT * FROM performance_baselines WHERE 1=1"
+    params: list = []
+
+    if platform:
+        query += " AND platform = ?"
+        params.append(platform)
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    return [
+        {
+            "master_sku": row["master_sku"],
+            "platform": row["platform"],
+            "avg_ctr": row["avg_ctr"],
+            "avg_cvr": row["avg_cvr"],
+            "avg_roas": row["avg_roas"],
+            "avg_impressions": row["avg_impressions"],
+            "avg_conversions": row["avg_conversions"],
+        }
+        for row in rows
+    ]
+
+
 def get_published_skus_for_review(
     db_path: Path | str,
     *,
