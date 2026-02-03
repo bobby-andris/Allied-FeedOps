@@ -7,6 +7,9 @@ creds/
 .playwright/
 .playwright-mcp/
 
+# Streamlit secrets (never commit)
+.streamlit/secrets.toml
+
 # Environment files (never commit secrets)
 .env
 .env.*
@@ -38,6 +41,11 @@ exports/
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Next.js (dashboard/)
+dashboard/.next/
+dashboard/out/
+dashboard/.vercel
 
 # Python
 __pycache__/
