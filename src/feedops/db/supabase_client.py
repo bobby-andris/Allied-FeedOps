@@ -989,6 +989,121 @@ def get_all_performance_baselines(
             "avg_roas": row.get("avg_roas"),
             "avg_impressions": row.get("avg_impressions"),
             "avg_conversions": row.get("avg_conversions"),
+            "baseline_start_date": row.get("baseline_start_date"),
+            "baseline_end_date": row.get("baseline_end_date"),
         }
         for row in result.data
     ]
+
+
+@_with_retry
+def get_performance_time_series(
+    _db_path=None,
+    *,
+    master_sku: str,
+    platform: str,
+    limit: int = 90,
+) -> list[dict]:
+    """Retrieve performance snapshots for time series visualization.
+
+    Returns snapshots sorted by date (oldest first) for charting.
+
+    Args:
+        master_sku: The MasterSKU to query.
+        platform: Platform ('google', 'bing', 'shopify').
+        limit: Maximum number of snapshots to return.
+
+    Returns:
+        List of snapshot dicts sorted by snapshot_date ascending.
+    """
+    client = get_client()
+
+    result = (
+        client.table("performance_snapshots")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .eq("platform", platform)
+        .order("snapshot_date", desc=False)  # Oldest first for time series
+        .limit(limit)
+        .execute()
+    )
+
+    return [
+        {
+            "id": row["id"],
+            "master_sku": row["master_sku"],
+            "platform": row["platform"],
+            "snapshot_date": row["snapshot_date"],
+            "impressions": row.get("impressions", 0),
+            "clicks": row.get("clicks", 0),
+            "ctr": row.get("ctr", 0.0),
+            "conversions": row.get("conversions", 0),
+            "conversion_value": row.get("conversion_value", 0.0),
+            "cvr": row.get("cvr", 0.0),
+            "cost": row.get("cost", 0.0),
+            "roas": row.get("roas", 0.0),
+            "days_since_publish": row.get("days_since_publish"),
+        }
+        for row in result.data
+    ]
+
+
+def get_sku_with_baseline_and_publish(
+    _db_path=None,
+    *,
+    master_sku: str,
+    platform: str,
+) -> dict | None:
+    """Get comprehensive SKU data including baseline, publish event, and latest snapshot.
+
+    Returns a combined dict with all data needed for performance visualization.
+    """
+    client = get_client()
+
+    # Get baseline
+    baseline_result = (
+        client.table("performance_baselines")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .eq("platform", platform)
+        .execute()
+    )
+    baseline = baseline_result.data[0] if baseline_result.data else None
+
+    # Get publish event
+    publish_result = (
+        client.table("publish_events")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .eq("platform", platform)
+        .eq("action", "publish")
+        .eq("status", "success")
+        .order("published_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    publish_event = publish_result.data[0] if publish_result.data else None
+
+    # Get latest snapshot
+    snapshot_result = (
+        client.table("performance_snapshots")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .eq("platform", platform)
+        .order("snapshot_date", desc=True)
+        .limit(1)
+        .execute()
+    )
+    latest_snapshot = snapshot_result.data[0] if snapshot_result.data else None
+
+    if not publish_event:
+        return None
+
+    return {
+        "master_sku": master_sku,
+        "platform": platform,
+        "published_at": publish_event.get("published_at"),
+        "product_category": publish_event.get("product_category"),
+        "baseline": baseline,
+        "latest_snapshot": latest_snapshot,
+    }

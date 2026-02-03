@@ -2,6 +2,9 @@
 
 Streamlit dashboard for monitoring and visualizing performance metrics
 of FeedOps-optimized content across Google, Bing, and Shopify platforms.
+
+Redesigned to clearly answer: "Are the optimizations working?" by showing
+before/after comparisons with trend visualization.
 """
 
 from __future__ import annotations
@@ -21,6 +24,11 @@ import pandas as pd
 import streamlit as st
 
 from feedops.db import get_connection, init_db, is_supabase_available
+
+# Verdict thresholds for SKU classification
+WINNING_THRESHOLD = 10  # ROAS lift > 10% = winning
+NEEDS_ATTENTION_THRESHOLD = -15  # ROAS lift < -15% = needs attention
+MIN_DAYS_FOR_VERDICT = 7  # Minimum days since publish for verdict
 
 # Page config
 st.set_page_config(
@@ -128,7 +136,8 @@ def _load_performance_data_supabase(
         df = df.merge(df_baselines, on=["master_sku", "platform"], how="left")
     else:
         for col in ["baseline_ctr", "baseline_cvr", "baseline_roas",
-                    "baseline_impressions", "baseline_conversions"]:
+                    "baseline_impressions", "baseline_conversions",
+                    "baseline_start_date", "baseline_end_date"]:
             df[col] = None
 
     return _add_delta_calculations(df)
@@ -287,6 +296,29 @@ def load_summary_stats(platform: str, min_days: int, environment: str) -> dict:
         "avg_roas_lift": avg_roas_lift,
         "positive_roas_pct": positive_roas_pct,
     }
+
+
+@st.cache_data(ttl=300)
+def load_sku_time_series(master_sku: str, platform: str) -> pd.DataFrame:
+    """Load time series snapshots for a specific SKU.
+
+    Returns a DataFrame with daily performance data sorted by date (oldest first).
+    """
+    if is_supabase_available():
+        from feedops.db.supabase_client import get_performance_time_series
+        snapshots = get_performance_time_series(master_sku=master_sku, platform=platform)
+    else:
+        from feedops.db.schema import get_performance_snapshots
+        db_path = get_db_path()
+        snapshots = get_performance_snapshots(db_path, master_sku=master_sku, platform=platform)
+
+    if not snapshots:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(snapshots)
+    df["snapshot_date"] = pd.to_datetime(df["snapshot_date"])
+    df = df.sort_values("snapshot_date")
+    return df
 
 
 @st.cache_data(ttl=300)
@@ -693,51 +725,86 @@ def _add_batch_deltas(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _classify_sku_verdict(
+    roas_delta: float | None,
+    days_since_publish: int | None,
+    has_baseline: bool,
+    has_current: bool,
+) -> tuple[str, str, str]:
+    """Classify a SKU's performance verdict.
+
+    Returns:
+        Tuple of (verdict, emoji, css_class):
+        - verdict: "WINNING", "MONITORING", "NEEDS ATTENTION", "INSUFFICIENT DATA"
+        - emoji: Emoji for display
+        - css_class: CSS class for styling
+    """
+    # Check data sufficiency
+    if not has_baseline or not has_current:
+        return "INSUFFICIENT DATA", "⚪", "neutral"
+
+    if days_since_publish is None or days_since_publish < MIN_DAYS_FOR_VERDICT:
+        return "MONITORING", "🟡", "warning"
+
+    if roas_delta is None:
+        return "INSUFFICIENT DATA", "⚪", "neutral"
+
+    if roas_delta > WINNING_THRESHOLD:
+        return "WINNING", "🟢", "success"
+    elif roas_delta < NEEDS_ATTENTION_THRESHOLD:
+        return "NEEDS ATTENTION", "🔴", "error"
+    else:
+        return "MONITORING", "🟡", "warning"
+
+
+def _format_date(date_str: str | None) -> str:
+    """Format date string for display."""
+    if not date_str:
+        return "N/A"
+    try:
+        dt = datetime.fromisoformat(str(date_str).replace("Z", "+00:00"))
+        return dt.strftime("%b %d, %Y")
+    except (ValueError, TypeError):
+        return str(date_str)[:10] if date_str else "N/A"
+
+
+def _format_metric_delta(current: float | None, baseline: float | None, is_pct: bool = False) -> tuple[str, str, str]:
+    """Format a metric with delta for display.
+
+    Returns:
+        Tuple of (current_str, delta_str, delta_class):
+        - current_str: Formatted current value
+        - delta_str: Formatted delta (e.g., "+15.2%")
+        - delta_class: CSS class for coloring ("positive", "negative", "neutral")
+    """
+    if current is None:
+        return "N/A", "", "neutral"
+
+    if is_pct:
+        current_str = f"{current:.2%}" if current < 1 else f"{current:.1f}%"
+    else:
+        current_str = f"{current:,.2f}" if isinstance(current, float) else f"{current:,}"
+
+    if baseline is None or baseline == 0:
+        return current_str, "No baseline", "neutral"
+
+    delta_pct = ((current - baseline) / baseline) * 100
+    delta_str = f"{delta_pct:+.1f}%"
+
+    if delta_pct > 0:
+        delta_class = "positive"
+    elif delta_pct < 0:
+        delta_class = "negative"
+    else:
+        delta_class = "neutral"
+
+    return current_str, delta_str, delta_class
+
+
 def render_overall_tab(df: pd.DataFrame, stats: dict, platform: str):
-    """Render the overall performance view."""
-    # Summary metrics row
-    st.header("Summary Metrics")
-    col1, col2, col3, col4, col5 = st.columns(5)
+    """Render the overall performance view with before/after comparison."""
 
-    with col1:
-        st.metric("Total SKUs", stats["total_skus"])
-
-    with col2:
-        if stats["avg_ctr_lift"] is not None:
-            st.metric(
-                "Avg CTR Lift",
-                f"{stats['avg_ctr_lift']:.1f}%",
-                delta=f"{stats['avg_ctr_lift']:.1f}%",
-            )
-        else:
-            st.metric("Avg CTR Lift", "N/A")
-
-    with col3:
-        if stats["avg_cvr_lift"] is not None:
-            st.metric(
-                "Avg CVR Lift",
-                f"{stats['avg_cvr_lift']:.1f}%",
-                delta=f"{stats['avg_cvr_lift']:.1f}%",
-            )
-        else:
-            st.metric("Avg CVR Lift", "N/A")
-
-    with col4:
-        if stats["avg_roas_lift"] is not None:
-            st.metric(
-                "Avg ROAS Lift",
-                f"{stats['avg_roas_lift']:.1f}%",
-                delta=f"{stats['avg_roas_lift']:.1f}%",
-            )
-        else:
-            st.metric("Avg ROAS Lift", "N/A")
-
-    with col5:
-        if stats["positive_roas_pct"] is not None:
-            st.metric("% Positive ROAS", f"{stats['positive_roas_pct']:.0f}%")
-        else:
-            st.metric("% Positive ROAS", "N/A")
-
+    # Handle empty state
     if df.empty:
         st.info(
             "No performance data available yet. Run the following commands to populate:\n\n"
@@ -746,141 +813,323 @@ def render_overall_tab(df: pd.DataFrame, stats: dict, platform: str):
         )
         return
 
-    # Performance table
-    st.header("SKU Performance")
+    # Deduplicate by SKU (take latest snapshot)
+    df_unique = df.drop_duplicates(subset=["master_sku"], keep="first").copy()
 
-    # Prepare display dataframe
-    df_display = df.drop_duplicates(subset=["master_sku"], keep="first").copy()
+    # Classify each SKU
+    verdicts = []
+    for _, row in df_unique.iterrows():
+        has_baseline = pd.notna(row.get("baseline_roas")) or pd.notna(row.get("baseline_ctr"))
+        has_current = pd.notna(row.get("roas")) or pd.notna(row.get("ctr"))
+        verdict, emoji, css_class = _classify_sku_verdict(
+            row.get("roas_delta_pct"),
+            row.get("days_since_publish"),
+            has_baseline,
+            has_current,
+        )
+        verdicts.append({
+            "verdict": verdict,
+            "emoji": emoji,
+            "css_class": css_class,
+        })
 
-    # Select and rename columns for display
-    display_cols = [
-        "master_sku",
-        "environment",
-        "days_since_publish",
-        "ctr_delta_pct",
-        "cvr_delta_pct",
-        "roas_delta_pct",
-        "impressions",
-        "conversions",
-        "conversion_value",
-    ]
+    df_unique["verdict"] = [v["verdict"] for v in verdicts]
+    df_unique["verdict_emoji"] = [v["emoji"] for v in verdicts]
 
-    df_display = df_display[[c for c in display_cols if c in df_display.columns]]
+    # Count verdicts
+    winning_count = len(df_unique[df_unique["verdict"] == "WINNING"])
+    monitoring_count = len(df_unique[df_unique["verdict"] == "MONITORING"])
+    needs_attention_count = len(df_unique[df_unique["verdict"] == "NEEDS ATTENTION"])
+    insufficient_count = len(df_unique[df_unique["verdict"] == "INSUFFICIENT DATA"])
 
-    # Rename for display
-    df_display = df_display.rename(
-        columns={
-            "master_sku": "SKU",
-            "environment": "Env",
-            "days_since_publish": "Days",
-            "ctr_delta_pct": "CTR Δ%",
-            "cvr_delta_pct": "CVR Δ%",
-            "roas_delta_pct": "ROAS Δ%",
-            "impressions": "Impressions",
-            "conversions": "Conversions",
-            "conversion_value": "Revenue",
-        }
-    )
+    # === SUMMARY BANNER ===
+    st.markdown("### Summary")
+    summary_cols = st.columns(4)
+    with summary_cols[0]:
+        st.metric("Published SKUs", stats["total_skus"])
+    with summary_cols[1]:
+        st.metric("🟢 Winning", winning_count, help="ROAS lift > +10%")
+    with summary_cols[2]:
+        st.metric("🟡 Monitoring", monitoring_count, help="ROAS between -15% and +10%, or < 7 days since publish")
+    with summary_cols[3]:
+        st.metric("🔴 Needs Attention", needs_attention_count, help="ROAS lift < -15%")
 
-    # Style the dataframe
-    def color_delta(val):
-        if pd.isna(val):
-            return ""
-        if val > 0:
-            return "color: green"
-        elif val < 0:
-            return "color: red"
-        return ""
+    st.divider()
 
-    styled_df = df_display.style.applymap(
-        color_delta, subset=["CTR Δ%", "CVR Δ%", "ROAS Δ%"]
-    ).format(
-        {
-            "CTR Δ%": "{:.1f}%",
-            "CVR Δ%": "{:.1f}%",
-            "ROAS Δ%": "{:.1f}%",
-            "Revenue": "${:,.2f}",
-            "Impressions": "{:,.0f}",
-            "Conversions": "{:,.0f}",
-        },
-        na_rep="N/A",
-    )
+    # === SKU DETAIL CARDS ===
+    st.markdown("### SKU Performance Details")
+    st.caption("Comparing baseline (pre-optimization) vs current (post-optimization) metrics")
 
-    st.dataframe(styled_df, width="stretch", hide_index=True)
+    # Sort by verdict priority: Needs Attention first, then Monitoring, then Winning
+    verdict_order = {"NEEDS ATTENTION": 0, "MONITORING": 1, "INSUFFICIENT DATA": 2, "WINNING": 3}
+    df_sorted = df_unique.copy()
+    df_sorted["verdict_order"] = df_sorted["verdict"].map(verdict_order)
+    df_sorted = df_sorted.sort_values("verdict_order")
 
-    # Charts
-    st.header("Performance Trends")
+    for _, row in df_sorted.iterrows():
+        sku = row["master_sku"]
+        verdict = row["verdict"]
+        emoji = row["verdict_emoji"]
+        published_at = row.get("published_at")
+        days_since = row.get("days_since_publish")
+        category = row.get("product_category", "Unknown")
+
+        # Determine container styling based on verdict
+        if verdict == "NEEDS ATTENTION":
+            border_color = "#ff4b4b"
+        elif verdict == "WINNING":
+            border_color = "#21c354"
+        else:
+            border_color = "#faca2b"
+
+        # Create expandable card for each SKU
+        with st.expander(f"{emoji} **SKU {sku}** — {verdict}", expanded=(verdict == "NEEDS ATTENTION")):
+            # Header row with publish info
+            info_cols = st.columns([2, 2, 2])
+            with info_cols[0]:
+                st.markdown(f"**Published:** {_format_date(published_at)}")
+            with info_cols[1]:
+                days_str = f"{days_since} days ago" if days_since is not None else "N/A"
+                st.markdown(f"**Days Since:** {days_str}")
+            with info_cols[2]:
+                st.markdown(f"**Category:** {category or 'N/A'}")
+
+            st.markdown("---")
+
+            # === METRICS COMPARISON TABLE ===
+            metric_cols = st.columns([2, 2, 2, 2])
+
+            # Headers
+            with metric_cols[0]:
+                st.markdown("**Metric**")
+            with metric_cols[1]:
+                # Get baseline period dates if available
+                baseline_start = row.get("baseline_start_date")
+                baseline_end = row.get("baseline_end_date")
+                if baseline_start and baseline_end:
+                    st.markdown(f"**Baseline** ({baseline_start[:7]})")
+                else:
+                    st.markdown("**Baseline (Pre-Opt)**")
+            with metric_cols[2]:
+                st.markdown("**Current**")
+            with metric_cols[3]:
+                st.markdown("**Change**")
+
+            # CTR Row
+            ctr_cols = st.columns([2, 2, 2, 2])
+            with ctr_cols[0]:
+                st.markdown("CTR")
+            with ctr_cols[1]:
+                baseline_ctr = row.get("baseline_ctr")
+                st.markdown(f"{baseline_ctr:.2%}" if pd.notna(baseline_ctr) else "N/A")
+            with ctr_cols[2]:
+                current_ctr = row.get("ctr")
+                st.markdown(f"{current_ctr:.2%}" if pd.notna(current_ctr) else "N/A")
+            with ctr_cols[3]:
+                ctr_delta = row.get("ctr_delta_pct")
+                if pd.notna(ctr_delta):
+                    color = "green" if ctr_delta > 0 else "red" if ctr_delta < 0 else "gray"
+                    st.markdown(f":{color}[{ctr_delta:+.1f}%]")
+                else:
+                    st.markdown("N/A")
+
+            # Impressions Row
+            imp_cols = st.columns([2, 2, 2, 2])
+            with imp_cols[0]:
+                st.markdown("Impressions")
+            with imp_cols[1]:
+                baseline_imp = row.get("baseline_impressions")
+                st.markdown(f"{baseline_imp:,.0f}/day" if pd.notna(baseline_imp) else "N/A")
+            with imp_cols[2]:
+                current_imp = row.get("impressions")
+                st.markdown(f"{current_imp:,.0f}" if pd.notna(current_imp) else "N/A")
+            with imp_cols[3]:
+                if pd.notna(baseline_imp) and pd.notna(current_imp) and baseline_imp > 0:
+                    imp_delta = ((current_imp - baseline_imp) / baseline_imp) * 100
+                    color = "green" if imp_delta > 0 else "red" if imp_delta < 0 else "gray"
+                    st.markdown(f":{color}[{imp_delta:+.1f}%]")
+                else:
+                    st.markdown("N/A")
+
+            # Conversions Row
+            conv_cols = st.columns([2, 2, 2, 2])
+            with conv_cols[0]:
+                st.markdown("Conversions")
+            with conv_cols[1]:
+                baseline_conv = row.get("baseline_conversions")
+                st.markdown(f"{baseline_conv:.1f}/day" if pd.notna(baseline_conv) else "N/A")
+            with conv_cols[2]:
+                current_conv = row.get("conversions")
+                st.markdown(f"{current_conv:,.0f}" if pd.notna(current_conv) else "N/A")
+            with conv_cols[3]:
+                cvr_delta = row.get("cvr_delta_pct")
+                if pd.notna(cvr_delta):
+                    color = "green" if cvr_delta > 0 else "red" if cvr_delta < 0 else "gray"
+                    st.markdown(f":{color}[{cvr_delta:+.1f}%]")
+                else:
+                    st.markdown("N/A")
+
+            # ROAS Row
+            roas_cols = st.columns([2, 2, 2, 2])
+            with roas_cols[0]:
+                st.markdown("**ROAS**")
+            with roas_cols[1]:
+                baseline_roas = row.get("baseline_roas")
+                st.markdown(f"**{baseline_roas:.2f}**" if pd.notna(baseline_roas) else "N/A")
+            with roas_cols[2]:
+                current_roas = row.get("roas")
+                st.markdown(f"**{current_roas:.2f}**" if pd.notna(current_roas) else "N/A")
+            with roas_cols[3]:
+                roas_delta = row.get("roas_delta_pct")
+                if pd.notna(roas_delta):
+                    color = "green" if roas_delta > 0 else "red" if roas_delta < 0 else "gray"
+                    st.markdown(f":**{color}[{roas_delta:+.1f}%]**")
+                else:
+                    st.markdown("N/A")
+
+            # Revenue Row
+            rev_cols = st.columns([2, 2, 2, 2])
+            with rev_cols[0]:
+                st.markdown("Revenue")
+            with rev_cols[1]:
+                baseline_conv_value = row.get("baseline_conversions")
+                # Note: we don't have baseline conversion value, just show N/A
+                st.markdown("N/A (daily avg)")
+            with rev_cols[2]:
+                current_rev = row.get("conversion_value")
+                st.markdown(f"${current_rev:,.2f}" if pd.notna(current_rev) else "N/A")
+            with rev_cols[3]:
+                st.markdown("—")
+
+            # === TIME SERIES CHART ===
+            st.markdown("---")
+            st.markdown("**Performance Trend**")
+
+            # Load time series data for this SKU
+            ts_data = load_sku_time_series(sku, platform)
+
+            if not ts_data.empty and len(ts_data) > 1:
+                # Create chart with CTR over time
+                chart_cols = st.columns(2)
+
+                with chart_cols[0]:
+                    st.markdown("*CTR Over Time*")
+                    ctr_chart = ts_data[["snapshot_date", "ctr"]].copy()
+                    ctr_chart = ctr_chart.set_index("snapshot_date")
+                    ctr_chart = ctr_chart.rename(columns={"ctr": "CTR"})
+
+                    # Add baseline reference line if available
+                    baseline_ctr = row.get("baseline_ctr")
+                    if pd.notna(baseline_ctr):
+                        ctr_chart["Baseline"] = baseline_ctr
+
+                    st.line_chart(ctr_chart, color=["#2196F3", "#ff9800"] if "Baseline" in ctr_chart.columns else "#2196F3")
+
+                with chart_cols[1]:
+                    st.markdown("*Impressions Over Time*")
+                    imp_chart = ts_data[["snapshot_date", "impressions"]].copy()
+                    imp_chart = imp_chart.set_index("snapshot_date")
+                    imp_chart = imp_chart.rename(columns={"impressions": "Impressions"})
+
+                    # Add baseline reference if available
+                    baseline_imp = row.get("baseline_impressions")
+                    if pd.notna(baseline_imp):
+                        imp_chart["Baseline (daily avg)"] = baseline_imp
+
+                    st.line_chart(imp_chart, color=["#4CAF50", "#ff9800"] if "Baseline (daily avg)" in imp_chart.columns else "#4CAF50")
+
+                # Show publish date marker info
+                if pd.notna(published_at):
+                    st.caption(f"Published on {_format_date(published_at)} — baseline represents pre-optimization average")
+            else:
+                st.info("Time series data requires multiple snapshots. Run `feedops performance fetch` to collect more data points.")
+
+    st.divider()
+
+    # === PERFORMANCE TREND CHARTS ===
+    st.markdown("### Performance Overview Charts")
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("ROAS Change by SKU")
-        if "roas_delta_pct" in df_display.columns:
-            chart_data = df_display[["SKU", "ROAS Δ%"]].dropna()
-            if not chart_data.empty:
-                chart_data = chart_data.set_index("SKU")
-                st.bar_chart(chart_data, color="#4CAF50")
-            else:
-                st.info("No ROAS data available")
+        st.markdown("**ROAS Change by SKU**")
+        chart_data = df_unique[["master_sku", "roas_delta_pct"]].dropna()
+        if not chart_data.empty:
+            chart_data = chart_data.rename(columns={"master_sku": "SKU", "roas_delta_pct": "ROAS Δ%"})
+            chart_data = chart_data.set_index("SKU")
+            st.bar_chart(chart_data, color="#4CAF50")
+        else:
+            st.info("No ROAS data available")
 
     with col2:
-        st.subheader("CTR Change by SKU")
-        if "ctr_delta_pct" in df_display.columns:
-            chart_data = df_display[["SKU", "CTR Δ%"]].dropna()
-            if not chart_data.empty:
-                chart_data = chart_data.set_index("SKU")
-                st.bar_chart(chart_data, color="#2196F3")
+        st.markdown("**CTR Change by SKU**")
+        chart_data = df_unique[["master_sku", "ctr_delta_pct"]].dropna()
+        if not chart_data.empty:
+            chart_data = chart_data.rename(columns={"master_sku": "SKU", "ctr_delta_pct": "CTR Δ%"})
+            chart_data = chart_data.set_index("SKU")
+            st.bar_chart(chart_data, color="#2196F3")
+        else:
+            st.info("No CTR data available")
+
+    st.divider()
+
+    # === RECOMMENDATIONS SECTION ===
+    st.markdown("### Recommendations")
+
+    # Get SKUs by verdict
+    needs_attention_skus = df_unique[df_unique["verdict"] == "NEEDS ATTENTION"]
+    winning_skus = df_unique[df_unique["verdict"] == "WINNING"]
+    monitoring_skus = df_unique[df_unique["verdict"] == "MONITORING"]
+
+    if not needs_attention_skus.empty:
+        st.markdown("#### 🔴 Action Required")
+        for _, row in needs_attention_skus.iterrows():
+            sku = row["master_sku"]
+            roas_delta = row.get("roas_delta_pct", 0)
+            ctr_delta = row.get("ctr_delta_pct", 0)
+            days = row.get("days_since_publish", 0)
+
+            st.markdown(f"**SKU {sku}**: ROAS dropped **{roas_delta:.1f}%** after {days} days.")
+
+            # Provide specific recommendations based on metrics
+            recommendations = []
+            if pd.notna(ctr_delta) and ctr_delta < -20:
+                recommendations.append("- CTR significantly down. Review title changes - may be less compelling.")
+            if pd.notna(roas_delta) and roas_delta < -30:
+                recommendations.append("- Consider rollback if decline continues after 14 days.")
+            if days and days < 14:
+                recommendations.append("- Still early. Monitor for another week before rollback decision.")
             else:
-                st.info("No CTR data available")
+                recommendations.append("- Run A/B test comparing old vs new content if possible.")
 
-    # Recommendations section
-    st.header("Recommendations")
+            for rec in recommendations:
+                st.markdown(rec)
+            st.markdown("")
 
-    # Identify underperformers
-    underperformers = (
-        df_display[df_display["ROAS Δ%"] < -15]
-        if "ROAS Δ%" in df_display.columns
-        else pd.DataFrame()
-    )
-    winners = (
-        df_display[df_display["ROAS Δ%"] > 10]
-        if "ROAS Δ%" in df_display.columns
-        else pd.DataFrame()
-    )
-    monitors = (
-        df_display[(df_display["ROAS Δ%"] >= -15) & (df_display["ROAS Δ%"] <= 10)]
-        if "ROAS Δ%" in df_display.columns
-        else pd.DataFrame()
-    )
+    if not monitoring_skus.empty:
+        with st.expander(f"🟡 Monitoring ({len(monitoring_skus)} SKUs)", expanded=False):
+            for _, row in monitoring_skus.iterrows():
+                sku = row["master_sku"]
+                roas_delta = row.get("roas_delta_pct")
+                days = row.get("days_since_publish", 0)
 
-    col1, col2, col3 = st.columns(3)
+                if pd.notna(roas_delta):
+                    st.markdown(f"- **{sku}**: {roas_delta:+.1f}% ROAS ({days} days)")
+                else:
+                    st.markdown(f"- **{sku}**: Awaiting data ({days} days)")
 
-    with col1:
-        st.markdown("### ✅ Winners")
-        st.markdown(f"**{len(winners)} SKUs** with ROAS > +10%")
-        if not winners.empty:
-            for _, row in winners.iterrows():
-                st.markdown(f"- {row['SKU']}: **{row['ROAS Δ%']:+.1f}%**")
-
-    with col2:
-        st.markdown("### 👀 Monitor")
-        st.markdown(f"**{len(monitors)} SKUs** with ROAS between -15% and +10%")
-        if not monitors.empty and len(monitors) <= 10:
-            for _, row in monitors.iterrows():
-                delta = row["ROAS Δ%"]
-                if pd.notna(delta):
-                    st.markdown(f"- {row['SKU']}: {delta:+.1f}%")
-
-    with col3:
-        st.markdown("### ⚠️ Consider Rollback")
-        st.markdown(f"**{len(underperformers)} SKUs** with ROAS < -15%")
-        if not underperformers.empty:
-            for _, row in underperformers.iterrows():
-                st.markdown(f"- {row['SKU']}: **{row['ROAS Δ%']:+.1f}%**")
+    if not winning_skus.empty:
+        with st.expander(f"🟢 Winners ({len(winning_skus)} SKUs)", expanded=False):
+            for _, row in winning_skus.iterrows():
+                sku = row["master_sku"]
+                roas_delta = row.get("roas_delta_pct", 0)
+                days = row.get("days_since_publish", 0)
+                st.markdown(f"- **{sku}**: +{roas_delta:.1f}% ROAS lift after {days} days! Consider applying similar optimizations to related SKUs.")
 
     # Footer
     st.markdown("---")
-    st.markdown(
-        "*Data refreshes every 5 minutes. Run `feedops performance fetch` to update metrics.*"
+    st.caption(
+        "Data refreshes every 5 minutes. Run `feedops performance fetch` to update metrics. "
+        "Verdicts require at least 7 days of data for meaningful comparison."
     )
 
 
