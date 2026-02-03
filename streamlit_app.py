@@ -13,7 +13,7 @@ from pathlib import Path
 import streamlit as st
 
 
-_APP_BUILD = "2026-02-03.4"
+_APP_BUILD = "2026-02-03.5"
 
 
 def _resolve_path_from_env(repo_root: Path, env_key: str, default: Path) -> Path:
@@ -184,15 +184,6 @@ def render_performance_dashboard() -> None:
         key="perf_platform",
     )
 
-    min_days = st.sidebar.slider(
-        "Min Days Since Publish",
-        min_value=7,
-        max_value=60,
-        value=14,
-        help="Only show SKUs published at least this many days ago",
-        key="perf_min_days",
-    )
-
     environment = st.sidebar.selectbox(
         "Environment",
         options=["all", "staging", "production"],
@@ -218,12 +209,12 @@ def render_performance_dashboard() -> None:
     )
 
     with tab_overall:
-        df = load_performance_data(platform, min_days, environment)
-        stats = load_summary_stats(platform, min_days, environment)
+        df = load_performance_data(platform, 0, environment)
+        stats = load_summary_stats(platform, 0, environment)
         render_overall_tab(df, stats, platform)
 
     with tab_category:
-        render_category_tab(platform, min_days, environment)
+        render_category_tab(platform, 0, environment)
 
     with tab_batch:
         render_batch_tab(platform)

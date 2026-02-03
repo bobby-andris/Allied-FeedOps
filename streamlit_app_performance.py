@@ -82,14 +82,15 @@ def _load_performance_data_supabase(
 
     df_events = pd.DataFrame(result.data).rename(columns={"id": "publish_id"})
 
-    # Filter by min_days in Python
-    cutoff = datetime.now(timezone.utc) - timedelta(days=min_days)
-    df_events["published_at_dt"] = pd.to_datetime(df_events["published_at"], utc=True)
-    df_events = df_events[df_events["published_at_dt"] <= cutoff]
-    df_events = df_events.drop(columns=["published_at_dt"])
+    # Filter by min_days in Python (only if min_days > 0)
+    if min_days > 0:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=min_days)
+        df_events["published_at_dt"] = pd.to_datetime(df_events["published_at"], utc=True)
+        df_events = df_events[df_events["published_at_dt"] <= cutoff]
+        df_events = df_events.drop(columns=["published_at_dt"])
 
-    if df_events.empty:
-        return pd.DataFrame()
+        if df_events.empty:
+            return pd.DataFrame()
 
     # 2. Fetch performance_snapshots
     snapshots = get_performance_snapshots(platform=platform, limit=2000)
@@ -177,9 +178,13 @@ def _load_performance_data_sqlite(
     WHERE p.platform = ?
       AND p.action = 'publish'
       AND p.status = 'success'
-      AND julianday('now') - julianday(p.published_at) >= ?
     """
-    params = [platform, min_days]
+    params = [platform]
+
+    # Only filter by min_days if > 0
+    if min_days > 0:
+        query += " AND julianday('now') - julianday(p.published_at) >= ?"
+        params.append(min_days)
 
     if environment != "all":
         query += " AND p.environment = ?"
@@ -328,13 +333,14 @@ def _load_category_performance_supabase(
 
     df_events = pd.DataFrame(result.data)
 
-    # Filter by min_days
-    cutoff = datetime.now(timezone.utc) - timedelta(days=min_days)
-    df_events["published_at_dt"] = pd.to_datetime(df_events["published_at"], utc=True)
-    df_events = df_events[df_events["published_at_dt"] <= cutoff]
+    # Filter by min_days (only if > 0)
+    if min_days > 0:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=min_days)
+        df_events["published_at_dt"] = pd.to_datetime(df_events["published_at"], utc=True)
+        df_events = df_events[df_events["published_at_dt"] <= cutoff]
 
-    if df_events.empty:
-        return pd.DataFrame()
+        if df_events.empty:
+            return pd.DataFrame()
 
     # 2. Fetch snapshots and baselines
     snapshots = get_performance_snapshots(platform=platform, limit=2000)
@@ -432,9 +438,13 @@ def _load_category_performance_sqlite(
       AND p.action = 'publish'
       AND p.status = 'success'
       AND p.product_category IS NOT NULL
-      AND julianday('now') - julianday(p.published_at) >= ?
     """
-    params = [platform, min_days]
+    params = [platform]
+
+    # Only filter by min_days if > 0
+    if min_days > 0:
+        query += " AND julianday('now') - julianday(p.published_at) >= ?"
+        params.append(min_days)
 
     if environment != "all":
         query += " AND p.environment = ?"
@@ -1113,14 +1123,6 @@ def main():
         help="Select the advertising platform to view",
     )
 
-    min_days = st.sidebar.slider(
-        "Min Days Since Publish",
-        min_value=7,
-        max_value=60,
-        value=14,
-        help="Only show SKUs published at least this many days ago",
-    )
-
     environment = st.sidebar.selectbox(
         "Environment",
         options=["all", "staging", "production"],
@@ -1135,12 +1137,12 @@ def main():
 
     with tab_overall:
         # Load data for overall view
-        df = load_performance_data(platform, min_days, environment)
-        stats = load_summary_stats(platform, min_days, environment)
+        df = load_performance_data(platform, 0, environment)
+        stats = load_summary_stats(platform, 0, environment)
         render_overall_tab(df, stats, platform)
 
     with tab_category:
-        render_category_tab(platform, min_days, environment)
+        render_category_tab(platform, 0, environment)
 
     with tab_batch:
         render_batch_tab(platform)
