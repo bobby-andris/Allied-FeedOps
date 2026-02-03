@@ -1217,7 +1217,7 @@ def render_batch_management_tab(
             if selected_skus:
                 batch_id = create_batch(
                     db_path,
-                    batch_name=batch_name if batch_name else None,
+                    batch_label=batch_name if batch_name else None,
                     skus=selected_skus,
                     notes={
                         "method": "fifo",
