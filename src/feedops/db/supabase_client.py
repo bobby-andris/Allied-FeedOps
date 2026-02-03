@@ -12,8 +12,10 @@ Configuration:
 from __future__ import annotations
 
 import os
+import time
 from datetime import datetime, timezone
-from typing import Any
+from functools import wraps
+from typing import Any, Callable, TypeVar
 
 try:
     from supabase import Client, create_client
@@ -22,6 +24,43 @@ except ImportError:
     create_client = None  # type: ignore[assignment]
 
 _client: Client | None = None  # type: ignore[type-arg]
+
+# Retry configuration for transient errors
+MAX_RETRIES = 3
+RETRY_DELAY_SECONDS = 0.5
+
+T = TypeVar("T")
+
+
+def _with_retry(func: Callable[..., T]) -> Callable[..., T]:
+    """Decorator to retry Supabase operations on transient errors.
+
+    Handles httpx.RemoteProtocolError and similar connection issues
+    that can occur with Supabase on Streamlit Cloud.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> T:
+        last_error = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                error_name = type(e).__name__
+                # Retry on transient connection errors
+                if any(x in error_name for x in ["RemoteProtocolError", "ConnectionError", "TimeoutError"]) or \
+                   any(x in str(e) for x in ["Server disconnected", "Connection reset", "timed out"]):
+                    last_error = e
+                    if attempt < MAX_RETRIES - 1:
+                        time.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
+                        # Reset the client to get a fresh connection
+                        global _client
+                        _client = None
+                        continue
+                # Non-retryable error, raise immediately
+                raise
+        # All retries exhausted
+        raise last_error  # type: ignore[misc]
+    return wrapper
 
 
 def _get_supabase_config() -> tuple[str, str] | None:
@@ -97,6 +136,7 @@ def _row_to_approval_dict(row: dict) -> dict:
 # SKU Approval functions
 
 
+@_with_retry
 def save_sku_approval(
     _db_path=None,
     *,
@@ -149,6 +189,7 @@ def save_sku_approval(
     return master_sku
 
 
+@_with_retry
 def get_sku_approval(
     _db_path=None,
     *,
@@ -168,6 +209,7 @@ def get_sku_approval(
     return _row_to_approval_dict(row)
 
 
+@_with_retry
 def get_pending_approvals(
     _db_path=None,
     *,
@@ -188,6 +230,7 @@ def get_pending_approvals(
     return [_row_to_approval_dict(row) for row in result.data]
 
 
+@_with_retry
 def get_approved_for_batch(
     _db_path=None,
     *,
@@ -228,6 +271,7 @@ def get_approved_for_batch(
 # Batch management functions
 
 
+@_with_retry
 def create_batch(
     _db_path=None,
     *,
@@ -280,6 +324,7 @@ def create_batch(
     return batch_id
 
 
+@_with_retry
 def get_batch(
     _db_path=None,
     *,
@@ -310,6 +355,7 @@ def get_batch(
     }
 
 
+@_with_retry
 def get_all_batches(
     _db_path=None,
     *,
@@ -343,6 +389,7 @@ def get_all_batches(
     ]
 
 
+@_with_retry
 def assign_skus_to_batch(
     *,
     batch_id: str,
@@ -376,6 +423,7 @@ def assign_skus_to_batch(
     return len(result.data) if result.data else 0
 
 
+@_with_retry
 def get_batch_skus(
     _db_path=None,
     *,
@@ -395,6 +443,7 @@ def get_batch_skus(
     return [row["master_sku"] for row in result.data]
 
 
+@_with_retry
 def update_batch_status(
     _db_path=None,
     *,
@@ -423,6 +472,7 @@ def update_batch_status(
 # Publish event functions
 
 
+@_with_retry
 def log_publish_event(
     _db_path=None,
     *,
@@ -472,6 +522,7 @@ def log_publish_event(
     return result.data[0]["id"] if result.data else 0
 
 
+@_with_retry
 def get_publish_history(
     _db_path=None,
     *,
@@ -534,6 +585,7 @@ def get_last_publish_event(
     return history[0] if history else None
 
 
+@_with_retry
 def get_published_skus(
     _db_path=None,
     *,
@@ -580,6 +632,7 @@ def get_skus_needing_review(
     return [sku for sku in all_skus if sku not in published]
 
 
+@_with_retry
 def get_revision_queue(_db_path=None, *, limit: int = 100) -> list[dict]:
     """Get SKUs that need revision from Supabase."""
     client = get_client()
@@ -652,6 +705,7 @@ def save_variant_approval(
     return master_sku
 
 
+@_with_retry
 def get_variant_approval(
     _db_path=None,
     *,
