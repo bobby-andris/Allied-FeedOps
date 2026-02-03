@@ -4,6 +4,7 @@ pydantic-settings>=2.0
 openai>=1.0
 google-ads>=28.4.1
 google-api-python-client>=2.0
+gspread>=6.0
 google-genai>=1.0
 google-auth>=2.48.0
 httpx>=0.25
