@@ -306,7 +306,7 @@ export default async function SkuReviewPage({
         )}
       </Tabs>
 
-      {/* Lifestyle Images */}
+      {/* Lifestyle Images Section */}
       {images.length > 0 && (
         <>
           <Separator className="my-8" />
