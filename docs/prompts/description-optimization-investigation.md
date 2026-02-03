@@ -1,108 +1,172 @@
 # Description Optimization Investigation
 
-**Copy the prompt below into a new Claude Code chat.**
+This investigation is split into **3 separate chats** to avoid context overflow.
 
 ---
 
-## The Prompt
+## Prompt 1: Data Gathering
+
+Run this first. Copy into a new chat:
 
 ```
-## The Problem
+## Task: Gather Search & Sales Data for Description Optimization
 
-Allied Brass sells premium bathroom hardware ($60-$150) competing against Amazon ($15-$30). Our descriptions score 90% internally but read like spec sheets and don't justify the premium price.
+Allied Brass sells premium bathroom hardware ($60-$150). We need to understand what people actually search for and which finishes sell best.
 
-Example (shower basket BSK-275LA):
-"This 18.75-inch wall-mounted shower basket is crafted from solid brass... Available in Antique Brass. Antique Brass features a softened, aged golden patina..."
+### Task 1: Search Term Analysis
+Use Google Ads MCP (customer ID: 6253381786).
 
-Problems: Opens with dimensions, awkward finish injection, doesn't answer "why pay 4x more?"
+Query shopping_performance_view to find:
+1. Top search queries for shower storage products - do people search "shower basket" or "shower caddy" or "shower organizer"?
+2. Which queries get clicks vs impressions only?
+3. Do people search for specific finishes? ("matte black towel bar", "brass shower caddy")
 
-## Your Mission (Do These In Order)
+### Task 2: Finish Popularity
+Use Shopify Dev MCP to find:
+1. Which of the 28 finishes sell best overall?
+2. Which finishes have the highest conversion rates?
+3. Any patterns? (Are metallics more popular than colors like Pink/Lavender?)
 
-### Phase 1: Read Context
-Read @docs/prompts/description-optimization-context.md for critical background on:
-- Master SKU vs Variant SKU architecture (CRITICAL - understand this first)
-- The 28 finishes and why they matter
-- MCP servers available and their IDs
+### Output Format
+Provide findings in this format so I can use them in the next chat:
 
-Then read @CLAUDE.md for project defaults.
+**Search Terms Findings:**
+- Top queries: [list]
+- Finish-specific searches: [list]
+- Queries with impressions but no clicks: [list]
 
-### Phase 2: Gather Real Data
-Use Google Ads MCP (customer ID: 6253381786) to find:
-- What do people ACTUALLY search for shower caddies? ("shower basket" vs "shower caddy"?)
-- Do people search for specific finishes? ("matte black towel bar")
-- What queries get impressions but no clicks? (reveals gaps)
+**Finish Popularity Findings:**
+- Top 5 finishes by sales: [list]
+- Top 5 finishes by conversion rate: [list]
+- Patterns observed: [notes]
+```
 
-Query Shopify Dev MCP for:
-- Which finishes sell best?
-- Which have highest conversion rates?
+**Save the output from Prompt 1 before starting Prompt 2.**
 
-### Phase 3: Analyze Current System
-Read these files:
-- @src/feedops/pipeline/prompts.py (lines 134-200) - current LLM prompt
-- @src/feedops/pipeline/finish_injection.py - current finish injection (IT'S BROKEN)
-- @dashboard_data/lifestyle-eval-candidate/google-patch-BSK-275LA.json - current output
+---
 
-Identify what's causing robotic output.
+## Prompt 2: Analysis
 
-### Phase 4: Create Framework
-Create a simple framework (3-5 principles, NOT 15 rules) for descriptions that:
-1. Open with benefit, not specs
-2. Answer buyer questions (Will it rust? Why pay more?)
-3. Justify the premium price
-4. Work for BOTH:
-   - Master descriptions (Shopify, finish-neutral)
-   - Variant descriptions (Google/Bing, finish-specific)
+After Prompt 1 completes, run this in a new chat:
 
-### Phase 5: Fix Finish Injection
-Recommend how to fix the awkward finish injection:
-- How should master descriptions be structured?
-- How should finish content be incorporated in variants?
-- Should different finishes have different selling points?
+```
+## Task: Analyze Current Description System
 
-### Phase 6: Prove It Works
-Write TWO descriptions for BSK-275LA:
-1. **Master (Shopify)**: Finish-neutral, works for all 28 finishes
-2. **Variant (Google/Bing)**: Antique Brass, finish is a selling point
+### Context from Previous Research
+[PASTE YOUR FINDINGS FROM PROMPT 1 HERE]
 
-Validate: Would YOU click the variant over a $20 Amazon option?
+### Your Analysis Tasks
 
-## Deliverables
+#### Task 1: Understand the Architecture
+Read @docs/prompts/description-optimization-context.md
 
-1. Search intent findings (with data)
-2. Finish popularity findings (with data)
-3. Framework (3-5 principles for master AND variant)
-4. Finish injection recommendations
-5. Proof of concept descriptions (master + variant)
-6. Exact prompt changes for @src/feedops/pipeline/prompts.py (copy-paste ready)
+Key things to understand:
+- Master SKU vs Variant SKU (Shopify vs Google/Bing)
+- Why descriptions need to be finish-neutral for Shopify
+- Why finish injection exists for Google/Bing variants
 
-## Key Constraints
+#### Task 2: Analyze Current Prompt
+Read @src/feedops/pipeline/prompts.py (focus on lines 134-200)
 
-- Use REAL DATA from MCP servers, not assumptions
-- Master descriptions must be finish-neutral
-- Variant descriptions should make finish a selling point
-- First 150 chars matter most (Shopping ad snippet)
-- Framework must work across 40+ product categories
+Identify:
+- What rules are causing robotic output?
+- What's missing that would help justify premium pricing?
 
-## Success Test
+#### Task 3: Analyze Finish Injection
+Read @src/feedops/pipeline/finish_injection.py
 
-Not "does it score 90% internally."
+Identify:
+- Why does it create awkward output like "Available in Antique Brass. Antique Brass features..."?
+- What needs to change?
 
-Real test: "Would a shopper comparing this $80 Antique Brass shower basket to a $20 Amazon one click ours AND feel confident buying it?"
+#### Task 4: Review Current Output
+Read @dashboard_data/lifestyle-eval-candidate/google-patch-BSK-275LA.json
+
+Look at the actual description being generated. What's wrong with it?
+
+### Output Format
+
+**Architecture Understanding:**
+- Master SKU used for: [X]
+- Variant SKU used for: [X]
+- Finish injection purpose: [X]
+
+**Current Prompt Problems:**
+- [list specific issues]
+
+**Finish Injection Problems:**
+- [list specific issues]
+
+**Current Output Problems:**
+- [list specific issues]
+```
+
+**Save the output from Prompt 2 before starting Prompt 3.**
+
+---
+
+## Prompt 3: Solution
+
+After Prompt 2 completes, run this in a new chat:
+
+```
+## Task: Create Description Framework & Recommendations
+
+### Context from Previous Research
+
+**Data Findings:**
+[PASTE PROMPT 1 FINDINGS]
+
+**Analysis Findings:**
+[PASTE PROMPT 2 FINDINGS]
+
+### Background
+- Allied Brass: Premium bathroom hardware ($60-$150 vs $15-$30 Amazon)
+- 28 finishes available (competitive advantage)
+- Master SKU = Shopify (finish-neutral, user toggles finishes)
+- Variant SKU = Google/Bing (finish-specific, separate listings)
+
+### Your Tasks
+
+#### Task 1: Create Framework
+Create 3-5 simple principles (NOT 15 rules) for descriptions that:
+- Open with benefit, not specs
+- Answer "why pay 4x more than Amazon?"
+- Work for BOTH master (finish-neutral) and variant (finish-specific)
+
+#### Task 2: Fix Finish Injection
+Recommend:
+- How master descriptions should be structured
+- How variant descriptions should incorporate finish naturally
+- Better finish-specific benefit content (not just "features a patina")
+
+#### Task 3: Write Proof of Concept
+For BSK-275LA (shower basket), write:
+1. **Master description** (Shopify) - finish-neutral
+2. **Variant description** (Google/Bing) - Antique Brass finish
+
+Test: Would YOU click the variant over a $20 Amazon option?
+
+#### Task 4: Provide Prompt Changes
+Write the exact text to replace in @src/feedops/pipeline/prompts.py (lines 136-152).
+
+Make it copy-paste ready.
+
+### Deliverables
+1. Framework (3-5 principles)
+2. Finish injection recommendations
+3. Two proof-of-concept descriptions
+4. Copy-paste prompt changes for prompts.py
 ```
 
 ---
 
-## If You Run Out of Context
+## Quick Reference
 
-If the chat gets long, you can continue in a new chat with this follow-up prompt:
+| Prompt | Purpose | Output |
+|--------|---------|--------|
+| 1 | Data gathering | Search terms + finish popularity |
+| 2 | Analysis | Problems with current system |
+| 3 | Solution | Framework + descriptions + prompt changes |
 
-```
-Continue the description optimization investigation.
-
-Previous findings: [paste key findings from previous chat]
-
-Remaining tasks:
-- [list what's left to do]
-
-Read @docs/prompts/description-optimization-context.md for background.
-```
+Each prompt should complete without hitting context limits.
