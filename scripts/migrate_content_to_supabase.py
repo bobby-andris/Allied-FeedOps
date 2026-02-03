@@ -50,11 +50,15 @@ STORAGE_BUCKET = "lifestyle-images"
 def get_supabase_client() -> Client:
     """Create Supabase client from environment variables."""
     url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-    key = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    key = (
+        os.getenv("SUPABASE_SERVICE_KEY") 
+        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        or os.getenv("SUPABASE_KEY")  # Fallback to anon key if RLS policies allow
+    )
     
     if not url or not key:
         raise ValueError(
-            "Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_SERVICE_KEY "
+            "Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_KEY "
             "environment variables or add them to .env file."
         )
     
