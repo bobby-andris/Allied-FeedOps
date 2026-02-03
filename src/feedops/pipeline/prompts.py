@@ -133,23 +133,26 @@ TITLE SUCCESS CRITERIA:
 
 DESCRIPTION SUCCESS CRITERIA (platform-specific -- read carefully):
 
-GOOGLE DESCRIPTION (attribute-rich AND human-readable -- MAY appear in Shopping ads):
-- First sentence: product type + ONE key dimension + material in natural prose (not a data dump).
-- Write complete sentences with proper grammar -- descriptions appear in Shopping ad snippets.
-- Include searchable attributes naturally woven into prose, not listed or dumped.
-- Avoid run-on sentences: keep each sentence under 80 characters when possible.
-- Never end with keyword lists ("Fits X, Y, Z hardware") or brand-only fragments ("Allied Brass.").
-- Include natural synonyms shoppers search: e.g. "towel bar" + "towel rack" + "towel holder".
-- Include room context, mount type, material, and collection for algorithm matching.
-- Target 600-800 characters, plain text.
+GOOGLE & BING DESCRIPTIONS (intent-first approach):
 
-BING DESCRIPTION (attribute-rich AND human-readable -- MAY appear in search results):
-- Same readable prose quality as Google -- not a keyword dump.
-- Bing's algorithm is more literal than Google's -- include explicit synonym variations naturally.
-- Include product type synonyms in natural sentences: e.g. "This towel bar (also called a towel rack or towel holder)..."
-- Include dimensions naturally: "This 24-inch wall-mounted towel bar..." not "24 inches, 24-inch, 24in".
-- Write for humans first, algorithm matching second -- both benefit from quality prose.
-- Target 700-1000 characters, plain text, MUST include 2-3 product type synonyms woven into sentences.
+Before writing, mentally answer these questions:
+1. What would a real shopper type into Google to find this exact product?
+2. What 3 questions does a buyer need answered before purchasing?
+3. What makes this product worth buying over a cheaper alternative?
+
+Then write a description that:
+- Uses search terms naturally (e.g., "shower caddy" not just "shower basket" if that's what people search)
+- Answers the buyer's key questions in the first 2-3 sentences
+- Mentions one concrete differentiator (solid brass vs die-cast zinc, lifetime warranty, 28 finish options)
+- Includes key specs (dimensions, material, mount type) woven naturally into sentences
+- Reads like a knowledgeable salesperson explaining the product, not a spec sheet
+
+Hard constraints:
+- Google: 600-800 characters, plain text
+- Bing: 700-1000 characters, plain text (include 2-3 product type synonyms naturally)
+- Never open with "Finished in [finish]" followed by a dimension dump
+- Never end with keyword lists ("Fits traditional hardware, classic accessories...")
+- Never end with just "Allied Brass." as a fragment
 
 SHOPIFY DESCRIPTION (shown to shoppers on product page -- this IS the sales pitch):
 - First sentence: address buyer's problem or desired outcome.
