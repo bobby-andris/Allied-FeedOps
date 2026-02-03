@@ -551,7 +551,7 @@ def _render_compare_panel(
             "rejected": "❌",
             "pending": "⏳",
         }
-        status_badge = status_badges.get(current_approval["status"], "")
+        status_badge = status_badges.get(current_approval["approval_status"], "")
 
     # Header
     st.markdown(f"### {sku_data.sku} {status_badge}")
@@ -741,7 +741,7 @@ def render_split_pane_view(
                     "rejected": "❌",
                     "pending": "⏳",
                 }
-                status_icon = status_icons.get(current_approval["status"], "")
+                status_icon = status_icons.get(current_approval["approval_status"], "")
 
             # Highlight if selected
             is_selected = sku_data.sku == st.session_state.selected_sku
@@ -826,7 +826,7 @@ def render_sku_detail_panel(
 
         # Manual approval status
         if current_approval:
-            manual_status = current_approval["status"]
+            manual_status = current_approval["approval_status"]
             manual_colors = {
                 "pending": "⏳",
                 "approved": "✅",
@@ -1077,13 +1077,13 @@ def render_revision_queue_tab(
         sku_data = sku_data_map.get(master_sku)
 
         with st.expander(
-            f"**{master_sku}** — Flagged {approval['reviewed_at'][:10] if approval['reviewed_at'] else 'N/A'}",
+            f"**{master_sku}** — Flagged {approval['approved_at'][:10] if approval['approved_at'] else 'N/A'}",
             expanded=False,
         ):
             # Show revision notes
-            if approval["revision_notes"]:
+            if approval["notes"]:
                 st.markdown(
-                    f"<div class='revision-note'><strong>Revision Notes:</strong> {html.escape(approval['revision_notes'])}</div>",
+                    f"<div class='revision-note'><strong>Revision Notes:</strong> {html.escape(approval['notes'])}</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -1147,7 +1147,7 @@ def render_revision_queue_tab(
                         db_path,
                         master_sku=master_sku,
                         status="pending",
-                        revision_notes=None,
+                        notes=None,
                     )
                     st.success("Moved back to Review Queue")
                     st.rerun()
@@ -1186,7 +1186,7 @@ def render_batch_management_tab(
 
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        batch_label = st.text_input(
+        batch_name = st.text_input(
             "Batch Label (optional)",
             placeholder="e.g., 'Q1 2026 Towel Bars'",
             key="new_batch_label",
@@ -1217,9 +1217,9 @@ def render_batch_management_tab(
             if selected_skus:
                 batch_id = create_batch(
                     db_path,
-                    batch_label=batch_label if batch_label else None,
+                    batch_name=batch_name if batch_name else None,
                     skus=selected_skus,
-                    selection_criteria={
+                    notes={
                         "method": "fifo",
                         "batch_size": batch_size,
                     },
@@ -1255,7 +1255,7 @@ def render_batch_management_tab(
                 st.caption(", ".join(elements) if elements else "No elements")
             with col3:
                 st.caption(
-                    approval["reviewed_at"][:10] if approval["reviewed_at"] else "N/A"
+                    approval["approved_at"][:10] if approval["approved_at"] else "N/A"
                 )
 
         if len(approved) > 20:
@@ -1289,16 +1289,16 @@ def render_batch_management_tab(
                 with col3:
                     st.metric("Failed", batch["failed_count"])
 
-                if batch["batch_label"]:
-                    st.markdown(f"**Label:** {batch['batch_label']}")
+                if batch["name"]:
+                    st.markdown(f"**Label:** {batch['name']}")
                 if batch["target_date"]:
                     st.markdown(f"**Target Date:** {batch['target_date']}")
 
                 st.caption(
                     f"Created: {batch['created_at'][:10] if batch['created_at'] else 'N/A'}"
                 )
-                if batch["published_at"]:
-                    st.caption(f"Published: {batch['published_at'][:10]}")
+                if batch["executed_at"]:
+                    st.caption(f"Published: {batch['executed_at'][:10]}")
 
                 # Show SKUs in batch
                 from feedops.db import get_batch_skus
@@ -1316,7 +1316,7 @@ def render_batch_management_tab(
                     st.divider()
                     st.markdown("**Execute Batch**")
 
-                    exec_col1, exec_col2 = st.columns(2)
+                    exec_col1, exec_col2, exec_col3 = st.columns(3)
                     with exec_col1:
                         target_platform = st.selectbox(
                             "Target Platform",
@@ -1325,11 +1325,21 @@ def render_batch_management_tab(
                             help="google: Push to GMC supplemental feed via Google Sheets",
                         )
                     with exec_col2:
+                        target_environment = st.selectbox(
+                            "Environment",
+                            ["staging", "production"],
+                            key=f"exec_env_{batch['batch_id']}",
+                            help="staging: safe preview label. production: live feed data.",
+                        )
+                    with exec_col3:
                         dry_run = st.checkbox(
                             "Dry Run (preview only)",
                             value=True,
                             key=f"dry_run_{batch['batch_id']}",
                         )
+
+                    if target_environment == "production" and not dry_run:
+                        st.warning("⚠️ Production publish will update live Shopping feeds.")
 
                     if st.button(
                         "🚀 Execute Batch" if not dry_run else "👁️ Preview Batch",
@@ -1342,7 +1352,33 @@ def render_batch_management_tab(
                             platform=target_platform,
                             dry_run=dry_run,
                             db_path=db_path,
+                            environment=target_environment,
                         )
+
+                # Rollback for published batches
+                if batch["status"] in ("published", "partial") and batch_skus:
+                    st.divider()
+                    st.markdown("**Rollback**")
+
+                    rollback_col1, rollback_col2 = st.columns(2)
+                    with rollback_col1:
+                        rollback_dry_run = st.checkbox(
+                            "Preview rollback",
+                            value=True,
+                            key=f"rollback_dry_{batch['batch_id']}",
+                        )
+                    with rollback_col2:
+                        if st.button(
+                            "🔙 Preview Rollback" if rollback_dry_run else "🔙 Execute Rollback",
+                            key=f"rollback_{batch['batch_id']}",
+                            type="secondary",
+                        ):
+                            _execute_rollback(
+                                batch_id=batch["batch_id"],
+                                batch_skus=batch_skus,
+                                dry_run=rollback_dry_run,
+                                db_path=db_path,
+                            )
 
 
 def render_performance_view_tab(
@@ -1491,8 +1527,190 @@ def render_performance_view_tab(
                 st.markdown("**Published Title (Google):**")
                 st.code(sku_data.candidate_google.get("title", "N/A"))
     
+    st.divider()
+
+    # Performance baseline capture section
+    st.subheader("Capture Performance Baseline")
+    st.caption(
+        "Capture pre-publish or current performance metrics for published SKUs. "
+        "These baselines are used to measure content optimization impact."
+    )
+
+    baseline_col1, baseline_col2 = st.columns(2)
+    with baseline_col1:
+        baseline_platform = st.selectbox(
+            "Platform",
+            ["google", "shopify"],
+            key="baseline_platform",
+            help="Platform to fetch metrics for",
+        )
+    with baseline_col2:
+        baseline_days = st.number_input(
+            "Baseline period (days)",
+            min_value=7,
+            max_value=90,
+            value=30,
+            key="baseline_days",
+            help="Number of days to average for baseline metrics",
+        )
+
+    if st.button("📊 Capture Baseline for Published SKUs", key="capture_baseline"):
+        from datetime import datetime, timedelta, timezone
+
+        from feedops.db import get_performance_baseline, save_performance_baseline
+
+        published_sku_list = list(published_skus)
+        if not published_sku_list:
+            st.warning("No published SKUs to capture baselines for.")
+        else:
+            with st.spinner(f"Capturing baselines for {len(published_sku_list)} SKUs..."):
+                end_date = datetime.now(timezone.utc).date()
+                start_date = end_date - timedelta(days=baseline_days)
+
+                captured = 0
+                skipped = 0
+                for sku in published_sku_list:
+                    # Check if baseline already exists
+                    existing = get_performance_baseline(
+                        db_path, master_sku=sku, platform=baseline_platform
+                    )
+                    if existing:
+                        skipped += 1
+                        continue
+
+                    # Save placeholder baseline (actual metrics to be filled by monitoring job)
+                    save_performance_baseline(
+                        db_path,
+                        master_sku=sku,
+                        platform=baseline_platform,
+                        baseline_start_date=start_date.isoformat(),
+                        baseline_end_date=end_date.isoformat(),
+                    )
+                    captured += 1
+
+                if captured > 0:
+                    st.success(
+                        f"Captured {captured} baselines for {baseline_platform}. "
+                        f"({skipped} already had baselines)"
+                    )
+                else:
+                    st.info(f"All {skipped} published SKUs already have baselines.")
+
     if len(filtered_published) > 50:
         st.caption(f"Showing first 50 of {len(filtered_published)} published SKUs")
+
+    # --- Published SKU Monitoring ---
+    st.divider()
+    st.subheader("Published SKU Monitoring")
+    st.caption(
+        "Track recently published SKUs and compare current metrics against baselines."
+    )
+
+    from datetime import datetime, timezone
+
+    from feedops.db import get_performance_baseline
+
+    # Build monitoring table from publish events
+    monitoring_rows: list[dict] = []
+    now = datetime.now(timezone.utc)
+    seen_skus: set[str] = set()
+
+    for event in publish_history:
+        sku = event.get("master_sku", "")
+        if not sku or sku in seen_skus:
+            continue
+        seen_skus.add(sku)
+
+        published_at = event.get("published_at", "")
+        days_since = None
+        if published_at:
+            try:
+                dt = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+                days_since = (now - dt).days
+            except Exception:
+                pass
+
+        plat = event.get("platform", "unknown")
+        baseline = get_performance_baseline(
+            db_path, master_sku=sku, platform=plat,
+        )
+
+        monitoring_rows.append({
+            "sku": sku,
+            "platform": plat,
+            "published_at": published_at[:10] if published_at else "Unknown",
+            "days_since": days_since,
+            "quality_score": event.get("quality_score"),
+            "baseline": baseline,
+        })
+
+    # Sort by most recently published
+    monitoring_rows.sort(
+        key=lambda r: r.get("days_since") if r.get("days_since") is not None else 9999,
+    )
+
+    if monitoring_rows:
+        # Show monitoring table
+        for row in monitoring_rows[:30]:
+            days_label = (
+                f"{row['days_since']}d ago" if row["days_since"] is not None else "?"
+            )
+            score_label = (
+                f" | Score: {row['quality_score']:.1f}%"
+                if row.get("quality_score")
+                else ""
+            )
+            baseline_label = (
+                " | Baseline captured"
+                if row.get("baseline")
+                else " | No baseline"
+            )
+
+            with st.expander(
+                f"**{row['sku']}** — {row['platform']} — published {days_label}"
+                f"{score_label}{baseline_label}",
+                expanded=False,
+            ):
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Published", row["published_at"])
+                with col2:
+                    st.metric("Days Since Publish", row.get("days_since", "N/A"))
+                with col3:
+                    st.metric("Platform", row["platform"].title())
+
+                baseline = row.get("baseline")
+                if baseline:
+                    st.markdown("**Baseline Metrics:**")
+                    b_cols = st.columns(4)
+                    with b_cols[0]:
+                        val = baseline.get("avg_impressions")
+                        st.metric("Avg Impressions", f"{val:.0f}" if val else "—")
+                    with b_cols[1]:
+                        val = baseline.get("avg_clicks")
+                        st.metric("Avg Clicks", f"{val:.0f}" if val else "—")
+                    with b_cols[2]:
+                        val = baseline.get("avg_ctr")
+                        st.metric("Avg CTR", f"{val:.2%}" if val else "—")
+                    with b_cols[3]:
+                        val = baseline.get("avg_conversions")
+                        st.metric("Avg Conversions", f"{val:.1f}" if val else "—")
+                else:
+                    st.info("No baseline captured yet. Use the 'Capture Baseline' button above.")
+
+        if len(monitoring_rows) > 30:
+            st.caption(f"Showing first 30 of {len(monitoring_rows)} monitored SKUs")
+    else:
+        st.info("No published SKUs to monitor yet.")
+
+    # Fetch Latest Metrics button (stub)
+    st.divider()
+    if st.button("🔄 Fetch Latest Metrics", key="fetch_latest_metrics"):
+        st.info(
+            "Metric fetching is not yet connected to a data source. "
+            "This will pull live performance data from Google Ads / Analytics "
+            "once the integration is configured."
+        )
 
 
 def _execute_google_sheets_batch(
@@ -1501,6 +1719,7 @@ def _execute_google_sheets_batch(
     patches_dir: Path,
     dry_run: bool,
     db_path: Path,
+    environment: str = "staging",
 ) -> None:
     """Execute a batch publish to Google Sheets.
 
@@ -1520,6 +1739,36 @@ def _execute_google_sheets_batch(
             # Load patches for all SKUs in the batch
             patches = load_patches_for_batch(patches_dir, batch_skus, platform="google")
 
+            # Enrich patches with lifestyle image data from approvals
+            for patch in patches:
+                meta = patch.get("_meta", {})
+                sku = meta.get("master_sku", "")
+                if not sku:
+                    continue
+                try:
+                    approval = get_sku_approval(db_path, master_sku=sku)
+                    if approval and approval.get("image_approved"):
+                        # Set the finish filter for per-variant image assignment
+                        patch["_image_approved_finish"] = approval.get(
+                            "selected_finish", "__ALL_FINISHES__"
+                        )
+                        # Try to upload image to CDN (best-effort)
+                        try:
+                            from feedops.integrations.shopify_catalog import (
+                                upload_selected_lifestyle_image,
+                            )
+                            img_result = upload_selected_lifestyle_image(
+                                patch, images_base_dir=patches_dir
+                            )
+                            if img_result and img_result.get("success"):
+                                patch["lifestyle_image_link"] = img_result.get(
+                                    "image_url", ""
+                                )
+                        except Exception:
+                            pass  # Image upload is best-effort
+                except Exception:
+                    pass  # Don't fail the batch for image enrichment errors
+
             if not patches:
                 st.error(f"No Google patches found for batch {batch_id}")
                 return
@@ -1527,7 +1776,7 @@ def _execute_google_sheets_batch(
             # Push to Google Sheets
             result = push_patches_to_sheet(
                 patches=patches,
-                environment="staging",  # Could make this configurable
+                environment=environment,
                 dry_run=dry_run,
                 include_variants=True,
             )
@@ -1564,7 +1813,7 @@ def _execute_google_sheets_batch(
                                 db_path,
                                 master_sku=sku,
                                 platform="google",
-                                environment="staging",
+                                environment=environment,
                                 action="publish",
                                 patch_file=patch.get("_source_file", ""),
                                 status="success",
@@ -1621,6 +1870,7 @@ def _execute_batch_action(
     platform: str,
     dry_run: bool,
     db_path: Path,
+    environment: str = "staging",
 ) -> None:
     """Execute a batch publish action."""
     from datetime import datetime, timezone
@@ -1636,6 +1886,7 @@ def _execute_batch_action(
             patches_dir=patches_dir,
             dry_run=dry_run,
             db_path=db_path,
+            environment=environment,
         )
         return
 
@@ -1648,6 +1899,7 @@ def _execute_batch_action(
             patches_dir=patches_dir,
             dry_run=dry_run,
             db_path=db_path,
+            environment=environment,
         )
         st.divider()
         st.markdown("### Bing & Shopify")
@@ -1697,18 +1949,46 @@ def _execute_batch_action(
                         else:
                             from feedops.integrations.shopify_catalog import (
                                 publish_to_shopify,
+                                upload_selected_lifestyle_image,
                             )
 
                             result = publish_to_shopify(
                                 product_id=str(product_id),
                                 title=title,
                                 description_html=description,
-                                environment="staging",
+                                environment=environment,
                                 dry_run=False,
                             )
                             sku_results["platforms"][plat] = result
                             if result.get("success"):
                                 success_count += 1
+
+                                # Upload lifestyle image if approved
+                                try:
+                                    approval = get_sku_approval(db_path, master_sku=sku)
+                                    if approval and approval.get("image_approved"):
+                                        upload_selected_lifestyle_image(
+                                            patch, images_base_dir=patches_dir,
+                                        )
+                                except Exception:
+                                    pass  # Image upload is best-effort
+
+                                # Log publish event
+                                from feedops.db import log_publish_event
+
+                                meta = patch.get("_meta", {})
+                                log_publish_event(
+                                    db_path,
+                                    master_sku=sku,
+                                    platform="shopify",
+                                    environment=environment,
+                                    action="publish",
+                                    patch_file=str(patch_file),
+                                    status="success",
+                                    quality_score=meta.get("quality_score"),
+                                    approval_status=meta.get("approval_status"),
+                                    batch_id=batch_id,
+                                )
                             else:
                                 failed_count += 1
 
@@ -1732,6 +2012,23 @@ def _execute_batch_action(
                                 "variant_count": len(variants),
                             }
                             success_count += 1
+
+                            # Log publish event for Bing
+                            from feedops.db import log_publish_event
+
+                            meta = patch.get("_meta", {})
+                            log_publish_event(
+                                db_path,
+                                master_sku=sku,
+                                platform="bing",
+                                environment=environment,
+                                action="publish",
+                                patch_file=str(patch_file),
+                                status="success",
+                                quality_score=meta.get("quality_score"),
+                                approval_status=meta.get("approval_status"),
+                                batch_id=batch_id,
+                            )
 
                 except Exception as e:
                     sku_results["platforms"][plat] = {
@@ -1780,6 +2077,69 @@ def _execute_batch_action(
                     st.error(
                         f"**{plat.upper()}** - Error: {plat_result.get('error', 'Unknown error')}"
                     )
+
+
+def _execute_rollback(
+    batch_id: str,
+    batch_skus: list[str],
+    dry_run: bool,
+    db_path: Path,
+) -> None:
+    """Execute rollback for a published batch."""
+    from feedops.db import update_batch_status
+    from feedops.rollback import batch_rollback
+
+    patches_dir = Path("dashboard_data/lifestyle-eval-candidate")
+
+    with st.spinner(
+        f"{'Previewing' if dry_run else 'Executing'} rollback for {len(batch_skus)} SKUs..."
+    ):
+        all_results = []
+        for platform in ["google", "shopify"]:
+            results = batch_rollback(
+                batch_skus,
+                platform,
+                patches_dir=patches_dir,
+                db_path=db_path,
+                dry_run=dry_run,
+            )
+            all_results.extend(results)
+
+        # Display results
+        successes = sum(1 for r in all_results if r.success)
+        failures = sum(1 for r in all_results if not r.success)
+
+        if dry_run:
+            st.info(f"Would rollback {successes} SKU-platform combinations ({failures} not available)")
+            for r in all_results:
+                if r.success:
+                    st.markdown(
+                        f"- **{r.sku}** ({r.platform}): restore original title"
+                    )
+                    if r.original_title:
+                        with st.expander(f"Preview: {r.sku} ({r.platform})"):
+                            st.markdown(f"**Original title:** {r.original_title}")
+                            if r.original_description:
+                                desc_preview = r.original_description[:200]
+                                st.markdown(f"**Original description:** {desc_preview}...")
+        else:
+            if successes > 0:
+                st.success(f"Rolled back {successes}/{len(all_results)} successfully")
+            if failures > 0:
+                st.warning(f"{failures} rollbacks failed or unavailable")
+            for r in all_results:
+                if r.success:
+                    st.markdown(f"- ✅ **{r.sku}** ({r.platform}): {r.message}")
+                else:
+                    st.markdown(f"- ❌ **{r.sku}** ({r.platform}): {r.error or r.message}")
+
+            # Update batch status
+            update_batch_status(
+                db_path,
+                batch_id=batch_id,
+                status="rolled_back",
+            )
+            st.rerun()
 
 
 def filter_sku_data(
@@ -1861,11 +2221,11 @@ def render_sku_panel(
     # Determine approval indicator for expander title
     approval_indicator = ""
     if current_approval:
-        if current_approval["status"] == "approved":
+        if current_approval["approval_status"] == "approved":
             approval_indicator = " ✅"
-        elif current_approval["status"] == "revision":
+        elif current_approval["approval_status"] == "revision":
             approval_indicator = " 🔄"
-        elif current_approval["status"] == "rejected":
+        elif current_approval["approval_status"] == "rejected":
             approval_indicator = " ❌"
 
     # SKU header
@@ -1904,7 +2264,7 @@ def render_sku_panel(
 
             # Manual approval status
             if current_approval:
-                manual_status = current_approval["status"]
+                manual_status = current_approval["approval_status"]
                 manual_colors = {
                     "pending": "⏳",
                     "approved": "✅",
@@ -1951,11 +2311,11 @@ def render_approval_controls(
     # Determine CSS class based on status
     status_class = ""
     if current_approval:
-        if current_approval["status"] == "approved":
+        if current_approval["approval_status"] == "approved":
             status_class = "approval-approved"
-        elif current_approval["status"] == "revision":
+        elif current_approval["approval_status"] == "revision":
             status_class = "approval-revision"
-        elif current_approval["status"] == "rejected":
+        elif current_approval["approval_status"] == "rejected":
             status_class = "approval-rejected"
 
     # Get available finishes
@@ -2085,7 +2445,7 @@ def render_approval_controls(
     # Revision notes (for flagging)
     revision_notes = st.text_area(
         "Revision Notes (optional)",
-        value=current_approval.get("revision_notes", "") if current_approval else "",
+        value=current_approval.get("notes", "") if current_approval else "",
         placeholder="Describe what needs to be changed...",
         key=f"revision_notes_{sku_data.sku}",
         height=80,
@@ -2132,8 +2492,8 @@ def render_approval_controls(
                 selected_finish=selected_finish,
                 selected_image_index=selected_image_index,
                 status="approved",
-                revision_notes=None,
-                reviewed_by="dashboard",
+                notes=None,
+                approved_by="dashboard",
             )
             if image_approved and isinstance(selected_variation_num, int):
                 exports_dir_raw = st.session_state.get(
@@ -2165,8 +2525,8 @@ def render_approval_controls(
                     selected_finish=selected_finish,
                     selected_image_index=selected_image_index,
                     status="revision",
-                    revision_notes=revision_notes,
-                    reviewed_by="dashboard",
+                    notes=revision_notes,
+                    approved_by="dashboard",
                 )
                 st.warning("SKU flagged for revision")
                 st.rerun()
@@ -2180,8 +2540,8 @@ def render_approval_controls(
                 description_approved=False,
                 image_approved=False,
                 status="rejected",
-                revision_notes=revision_notes,
-                reviewed_by="dashboard",
+                notes=revision_notes,
+                approved_by="dashboard",
             )
             st.error("SKU rejected")
             st.rerun()

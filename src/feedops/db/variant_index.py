@@ -102,6 +102,8 @@ def build_variant_index(
         master_sku = (row.get("master_sku") or "").strip()
         option_sku = (row.get("option_sku") or "").strip()
         core_sku = (row.get("core_sku") or "").strip()
+        finish = (row.get("finish") or "").strip() or None
+        finish_code = (row.get("finish_code") or "").strip() or None
         product_id, variant_id = parse_gmcid(gmc_id)
         rows_to_upsert.append(
             (
@@ -113,6 +115,8 @@ def build_variant_index(
                 core_sku or None,
                 product_id,
                 variant_id,
+                finish,
+                finish_code,
                 (row.get("product_length") or "").strip() or None,
                 (row.get("product_width") or "").strip() or None,
                 (row.get("product_height") or "").strip() or None,
@@ -144,6 +148,8 @@ def build_variant_index(
                 core_sku,
                 shopify_product_id,
                 shopify_variant_id,
+                finish,
+                finish_code,
                 product_length,
                 product_width,
                 product_height,
@@ -155,7 +161,7 @@ def build_variant_index(
                 collection,
                 material,
                 updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             rows_to_upsert,
         )
@@ -214,4 +220,21 @@ def get_offer_ids_for_master_sku(db_path: Path, master_sku: str) -> list[str]:
     finally:
         conn.close()
     return [r["gmc_id"] for r in rows if r and r["gmc_id"]]
+
+
+def get_finish_for_gmc_id(db_path: Path, gmc_id: str) -> tuple[str | None, str | None]:
+    """Return (finish, finish_code) for a given GMC ID from variant_index."""
+    if not gmc_id or not Path(db_path).exists():
+        return (None, None)
+    conn = get_connection(db_path)
+    try:
+        row = conn.execute(
+            "SELECT finish, finish_code FROM variant_index WHERE gmc_id = ?",
+            (gmc_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return (None, None)
+    return (row["finish"], row["finish_code"])
 

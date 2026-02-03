@@ -72,10 +72,33 @@ def get_client() -> Client:
     return _client
 
 
+def _row_to_approval_dict(row: dict) -> dict:
+    """Convert a Supabase sku_approvals row to a consistent dict.
+
+    Column names now match between SQLite and Supabase, so this is
+    mostly pass-through with boolean normalization.
+    """
+    return {
+        "master_sku": row["master_sku"],
+        "title_approved": row.get("title_approved"),
+        "description_approved": row.get("description_approved"),
+        "image_approved": row.get("image_approved"),
+        "selected_finish": row.get("selected_finish"),
+        "selected_image_index": row.get("selected_image_index"),
+        "approval_status": row.get("approval_status", "pending"),
+        "notes": row.get("notes"),
+        "approved_by": row.get("approved_by"),
+        "approved_at": row.get("approved_at") or row.get("updated_at"),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+    }
+
+
 # SKU Approval functions
 
 
 def save_sku_approval(
+    _db_path=None,
     *,
     master_sku: str,
     title_approved: bool | None = None,
@@ -84,8 +107,8 @@ def save_sku_approval(
     selected_finish: str | None = None,
     selected_image_index: int | None = None,
     status: str = "pending",
-    revision_notes: str | None = None,
-    reviewed_by: str | None = None,
+    notes: str | None = None,
+    approved_by: str | None = None,
 ) -> str:
     """Save or update a SKU approval record in Supabase.
 
@@ -109,21 +132,25 @@ def save_sku_approval(
     data = {
         "master_sku": master_sku,
         "approval_status": status,
+        "title_approved": title_approved,
+        "description_approved": description_approved,
+        "image_approved": image_approved,
+        "selected_finish": selected_finish,
+        "selected_image_index": selected_image_index,
         "approved_at": now if status == "approved" else None,
-        "approved_by": reviewed_by,
-        "notes": revision_notes,
+        "approved_by": approved_by,
+        "notes": notes,
         "updated_at": now,
     }
 
     # Upsert (insert or update)
-    result = (
-        client.table("sku_approvals").upsert(data, on_conflict="master_sku").execute()
-    )
+    client.table("sku_approvals").upsert(data, on_conflict="master_sku").execute()
 
     return master_sku
 
 
 def get_sku_approval(
+    _db_path=None,
     *,
     master_sku: str,
 ) -> dict | None:
@@ -138,18 +165,11 @@ def get_sku_approval(
         return None
 
     row = result.data[0]
-    return {
-        "master_sku": row["master_sku"],
-        "status": row["approval_status"],
-        "approved_at": row.get("approved_at"),
-        "approved_by": row.get("approved_by"),
-        "notes": row.get("notes"),
-        "created_at": row.get("created_at"),
-        "updated_at": row.get("updated_at"),
-    }
+    return _row_to_approval_dict(row)
 
 
 def get_pending_approvals(
+    _db_path=None,
     *,
     limit: int = 100,
 ) -> list[dict]:
@@ -165,20 +185,11 @@ def get_pending_approvals(
         .execute()
     )
 
-    return [
-        {
-            "master_sku": row["master_sku"],
-            "status": row["approval_status"],
-            "approved_at": row.get("approved_at"),
-            "notes": row.get("notes"),
-            "created_at": row.get("created_at"),
-            "updated_at": row.get("updated_at"),
-        }
-        for row in result.data
-    ]
+    return [_row_to_approval_dict(row) for row in result.data]
 
 
 def get_approved_for_batch(
+    _db_path=None,
     *,
     exclude_batched: bool = True,
     limit: int = 500,
@@ -211,28 +222,21 @@ def get_approved_for_batch(
         # Filter out batched SKUs
         approved = [row for row in approved if row["master_sku"] not in batched_skus]
 
-    return [
-        {
-            "master_sku": row["master_sku"],
-            "status": row["approval_status"],
-            "approved_at": row.get("approved_at"),
-            "notes": row.get("notes"),
-            "created_at": row.get("created_at"),
-            "updated_at": row.get("updated_at"),
-        }
-        for row in approved
-    ]
+    return [_row_to_approval_dict(row) for row in approved]
 
 
 # Batch management functions
 
 
 def create_batch(
+    _db_path=None,
     *,
     batch_label: str | None = None,
     target_date: str | None = None,
-    selection_criteria: dict | None = None,
+    notes: dict | str | None = None,
     skus: list[str] | None = None,
+    # Legacy alias
+    selection_criteria: dict | None = None,
 ) -> str:
     """Create a new publish batch in Supabase.
 
@@ -254,13 +258,17 @@ def create_batch(
     seq = (existing.count or 0) + 1
     batch_id = f"Batch-{date_str}-{seq:03d}"
 
+    # Resolve notes from either param
+    resolved_notes = notes or selection_criteria
+    notes_str = str(resolved_notes) if resolved_notes else None
+
     # Create batch
     batch_data = {
         "batch_id": batch_id,
         "name": batch_label,
         "status": "pending",
         "created_at": now.isoformat(),
-        "notes": str(selection_criteria) if selection_criteria else None,
+        "notes": notes_str,
     }
 
     client.table("publish_batches").insert(batch_data).execute()
@@ -273,6 +281,7 @@ def create_batch(
 
 
 def get_batch(
+    _db_path=None,
     *,
     batch_id: str,
 ) -> dict | None:
@@ -289,17 +298,20 @@ def get_batch(
     row = result.data[0]
     return {
         "batch_id": row["batch_id"],
-        "batch_label": row.get("name"),
+        "name": row.get("name"),
+        "target_date": row.get("target_date"),
         "status": row["status"],
+        "notes": row.get("notes"),
         "created_at": row.get("created_at"),
         "executed_at": row.get("executed_at"),
+        "sku_count": row.get("sku_count", 0),
         "success_count": row.get("success_count", 0),
         "failed_count": row.get("failed_count", 0),
-        "notes": row.get("notes"),
     }
 
 
 def get_all_batches(
+    _db_path=None,
     *,
     status: str | None = None,
     limit: int = 50,
@@ -317,13 +329,15 @@ def get_all_batches(
     return [
         {
             "batch_id": row["batch_id"],
-            "batch_label": row.get("name"),
+            "name": row.get("name"),
+            "target_date": row.get("target_date"),
             "status": row["status"],
+            "notes": row.get("notes"),
             "created_at": row.get("created_at"),
             "executed_at": row.get("executed_at"),
+            "sku_count": row.get("sku_count", 0),
             "success_count": row.get("success_count", 0),
             "failed_count": row.get("failed_count", 0),
-            "notes": row.get("notes"),
         }
         for row in result.data
     ]
@@ -363,6 +377,7 @@ def assign_skus_to_batch(
 
 
 def get_batch_skus(
+    _db_path=None,
     *,
     batch_id: str,
 ) -> list[str]:
@@ -381,6 +396,7 @@ def get_batch_skus(
 
 
 def update_batch_status(
+    _db_path=None,
     *,
     batch_id: str,
     status: str,
@@ -408,6 +424,7 @@ def update_batch_status(
 
 
 def log_publish_event(
+    _db_path=None,
     *,
     master_sku: str,
     platform: str,
@@ -419,7 +436,10 @@ def log_publish_event(
     approval_status: str | None = None,
     error_message: str | None = None,
     published_by: str | None = None,
+    rollback_id: int | None = None,
     batch_id: str | None = None,
+    product_category: str | None = None,
+    product_collection: str | None = None,
     **kwargs,  # Accept extra kwargs for compatibility
 ) -> int:
     """Log a publish event to Supabase.
@@ -438,8 +458,13 @@ def log_publish_event(
         "batch_id": batch_id,
         "patch_file": patch_file,
         "quality_score": quality_score,
+        "approval_status": approval_status,
         "error_message": error_message,
         "published_at": datetime.now(timezone.utc).isoformat(),
+        "published_by": published_by or "cli",
+        "rollback_id": rollback_id,
+        "product_category": product_category,
+        "product_collection": product_collection,
     }
 
     result = client.table("publish_events").insert(data).execute()
@@ -448,6 +473,7 @@ def log_publish_event(
 
 
 def get_publish_history(
+    _db_path=None,
     *,
     master_sku: str | None = None,
     platform: str | None = None,
@@ -481,14 +507,20 @@ def get_publish_history(
             "batch_id": row.get("batch_id"),
             "patch_file": row.get("patch_file"),
             "quality_score": row.get("quality_score"),
+            "approval_status": row.get("approval_status"),
             "error_message": row.get("error_message"),
             "published_at": row.get("published_at"),
+            "published_by": row.get("published_by"),
+            "rollback_id": row.get("rollback_id"),
+            "product_category": row.get("product_category"),
+            "product_collection": row.get("product_collection"),
         }
         for row in result.data
     ]
 
 
 def get_last_publish_event(
+    _db_path=None,
     *,
     master_sku: str,
     platform: str,
@@ -503,6 +535,7 @@ def get_last_publish_event(
 
 
 def get_published_skus(
+    _db_path=None,
     *,
     platform: str | None = None,
     environment: str = "production",
@@ -529,6 +562,7 @@ def get_published_skus(
 
 
 def get_skus_needing_review(
+    _db_path=None,
     *,
     all_skus: list[str],
     platform: str | None = None,
@@ -544,3 +578,333 @@ def get_skus_needing_review(
     """
     published = get_published_skus(platform=platform, environment="production")
     return [sku for sku in all_skus if sku not in published]
+
+
+def get_revision_queue(_db_path=None, *, limit: int = 100) -> list[dict]:
+    """Get SKUs that need revision from Supabase."""
+    client = get_client()
+    result = (
+        client.table("sku_approvals")
+        .select("*")
+        .eq("approval_status", "revision")
+        .order("updated_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return [_row_to_approval_dict(row) for row in result.data]
+
+
+# Variant Approval functions
+
+
+def save_variant_approval(
+    _db_path=None,
+    *,
+    master_sku: str,
+    finish: str,
+    finish_code: str | None = None,
+    title_approved: bool | None = None,
+    description_approved: bool | None = None,
+    image_approved: bool | None = None,
+    selected_image_index: int | None = None,
+    status: str = "pending",
+    notes: str | None = None,
+    approved_by: str | None = None,
+) -> str:
+    """Save or update a variant approval record in Supabase.
+
+    Returns:
+        The master_sku.
+    """
+    client = get_client()
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Auto-derive status
+    if status == "pending":
+        if title_approved and description_approved and image_approved:
+            status = "approved"
+        elif (
+            title_approved is False
+            or description_approved is False
+            or image_approved is False
+        ):
+            status = "rejected"
+
+    data = {
+        "master_sku": master_sku,
+        "finish": finish,
+        "finish_code": finish_code,
+        "title_approved": title_approved,
+        "description_approved": description_approved,
+        "image_approved": image_approved,
+        "selected_image_index": selected_image_index,
+        "approval_status": status,
+        "notes": notes,
+        "approved_by": approved_by,
+        "approved_at": now if status == "approved" else None,
+        "updated_at": now,
+    }
+
+    client.table("variant_approvals").upsert(
+        data, on_conflict="master_sku,finish"
+    ).execute()
+
+    return master_sku
+
+
+def get_variant_approval(
+    _db_path=None,
+    *,
+    master_sku: str,
+    finish: str,
+) -> dict | None:
+    """Get variant approval for a specific master_sku + finish."""
+    client = get_client()
+
+    result = (
+        client.table("variant_approvals")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .eq("finish", finish)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    row = result.data[0]
+    return {
+        "id": row.get("id"),
+        "master_sku": row["master_sku"],
+        "finish": row["finish"],
+        "finish_code": row.get("finish_code"),
+        "title_approved": row.get("title_approved"),
+        "description_approved": row.get("description_approved"),
+        "image_approved": row.get("image_approved"),
+        "selected_image_index": row.get("selected_image_index"),
+        "approval_status": row.get("approval_status", "pending"),
+        "notes": row.get("notes"),
+        "approved_by": row.get("approved_by"),
+        "approved_at": row.get("approved_at"),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+    }
+
+
+def get_variant_approvals_for_sku(
+    _db_path=None,
+    *,
+    master_sku: str,
+) -> list[dict]:
+    """Get all variant approvals for a given master SKU."""
+    client = get_client()
+
+    result = (
+        client.table("variant_approvals")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .order("finish", desc=False)
+        .execute()
+    )
+
+    return [
+        {
+            "id": row.get("id"),
+            "master_sku": row["master_sku"],
+            "finish": row["finish"],
+            "finish_code": row.get("finish_code"),
+            "title_approved": row.get("title_approved"),
+            "description_approved": row.get("description_approved"),
+            "image_approved": row.get("image_approved"),
+            "selected_image_index": row.get("selected_image_index"),
+            "approval_status": row.get("approval_status", "pending"),
+            "notes": row.get("notes"),
+            "approved_by": row.get("approved_by"),
+            "approved_at": row.get("approved_at"),
+            "created_at": row.get("created_at"),
+            "updated_at": row.get("updated_at"),
+        }
+        for row in result.data
+    ]
+
+
+# Performance tracking functions (mirror SQLite interface)
+
+
+def save_performance_baseline(
+    _db_path=None,
+    *,
+    master_sku: str,
+    platform: str,
+    baseline_start_date: str,
+    baseline_end_date: str,
+    avg_impressions: float | None = None,
+    avg_clicks: float | None = None,
+    avg_ctr: float | None = None,
+    avg_conversions: float | None = None,
+    avg_conversion_value: float | None = None,
+    avg_cvr: float | None = None,
+    avg_cost: float | None = None,
+    avg_roas: float | None = None,
+) -> None:
+    """Save or update a performance baseline in Supabase."""
+    client = get_client()
+
+    data = {
+        "master_sku": master_sku,
+        "platform": platform,
+        "baseline_start_date": baseline_start_date,
+        "baseline_end_date": baseline_end_date,
+        "avg_impressions": avg_impressions,
+        "avg_clicks": avg_clicks,
+        "avg_ctr": avg_ctr,
+        "avg_conversions": avg_conversions,
+        "avg_conversion_value": avg_conversion_value,
+        "avg_cvr": avg_cvr,
+        "avg_cost": avg_cost,
+        "avg_roas": avg_roas,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    client.table("performance_baselines").upsert(
+        data, on_conflict="master_sku,platform"
+    ).execute()
+
+
+def get_performance_baseline(
+    _db_path=None,
+    *,
+    master_sku: str,
+    platform: str,
+) -> dict | None:
+    """Retrieve a performance baseline for a SKU/platform combination."""
+    client = get_client()
+
+    result = (
+        client.table("performance_baselines")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .eq("platform", platform)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    row = result.data[0]
+    return {
+        "master_sku": row["master_sku"],
+        "platform": row["platform"],
+        "baseline_start_date": row.get("baseline_start_date"),
+        "baseline_end_date": row.get("baseline_end_date"),
+        "avg_impressions": row.get("avg_impressions"),
+        "avg_clicks": row.get("avg_clicks"),
+        "avg_ctr": row.get("avg_ctr"),
+        "avg_conversions": row.get("avg_conversions"),
+        "avg_conversion_value": row.get("avg_conversion_value"),
+        "avg_cvr": row.get("avg_cvr"),
+        "avg_cost": row.get("avg_cost"),
+        "avg_roas": row.get("avg_roas"),
+        "created_at": row.get("created_at"),
+    }
+
+
+def save_performance_snapshot(
+    _db_path=None,
+    *,
+    master_sku: str,
+    platform: str,
+    environment: str,
+    snapshot_date: str,
+    impressions: int = 0,
+    clicks: int = 0,
+    ctr: float = 0.0,
+    conversions: int = 0,
+    conversion_value: float = 0.0,
+    cvr: float = 0.0,
+    cost: float = 0.0,
+    cpc: float = 0.0,
+    roas: float = 0.0,
+    publish_event_id: int | None = None,
+    content_version: str | None = None,
+    days_since_publish: int | None = None,
+) -> int:
+    """Save a performance snapshot to Supabase."""
+    client = get_client()
+
+    data = {
+        "master_sku": master_sku,
+        "platform": platform,
+        "environment": environment,
+        "snapshot_date": snapshot_date,
+        "impressions": impressions,
+        "clicks": clicks,
+        "ctr": ctr,
+        "conversions": conversions,
+        "conversion_value": conversion_value,
+        "cvr": cvr,
+        "cost": cost,
+        "cpc": cpc,
+        "roas": roas,
+        "publish_event_id": publish_event_id,
+        "content_version": content_version,
+        "days_since_publish": days_since_publish,
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    result = client.table("performance_snapshots").insert(data).execute()
+
+    return result.data[0]["id"] if result.data else 0
+
+
+def get_performance_snapshots(
+    _db_path=None,
+    *,
+    master_sku: str | None = None,
+    platform: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    limit: int = 1000,
+) -> list[dict]:
+    """Retrieve performance snapshots from Supabase."""
+    client = get_client()
+
+    query = client.table("performance_snapshots").select("*")
+
+    if master_sku:
+        query = query.eq("master_sku", master_sku)
+
+    if platform:
+        query = query.eq("platform", platform)
+
+    if start_date:
+        query = query.gte("snapshot_date", start_date)
+
+    if end_date:
+        query = query.lte("snapshot_date", end_date)
+
+    result = query.order("snapshot_date", desc=True).limit(limit).execute()
+
+    return [
+        {
+            "id": row["id"],
+            "master_sku": row["master_sku"],
+            "platform": row["platform"],
+            "environment": row["environment"],
+            "snapshot_date": row["snapshot_date"],
+            "impressions": row.get("impressions", 0),
+            "clicks": row.get("clicks", 0),
+            "ctr": row.get("ctr", 0.0),
+            "conversions": row.get("conversions", 0),
+            "conversion_value": row.get("conversion_value", 0.0),
+            "cvr": row.get("cvr", 0.0),
+            "cost": row.get("cost", 0.0),
+            "cpc": row.get("cpc", 0.0),
+            "roas": row.get("roas", 0.0),
+            "publish_event_id": row.get("publish_event_id"),
+            "content_version": row.get("content_version"),
+            "days_since_publish": row.get("days_since_publish"),
+            "fetched_at": row.get("fetched_at"),
+        }
+        for row in result.data
+    ]

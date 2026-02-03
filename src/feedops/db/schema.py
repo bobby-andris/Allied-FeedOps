@@ -9,6 +9,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+def _rename_column_safe(conn, table, old_name, new_name):
+    """Rename a column if the old name exists. No-op if already renamed."""
+    try:
+        conn.execute(f"ALTER TABLE {table} RENAME COLUMN {old_name} TO {new_name}")
+    except sqlite3.OperationalError:
+        pass
+
+
+def _add_column_safe(conn, table, column, col_type):
+    """Add a column if it doesn't already exist."""
+    try:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
+    except sqlite3.OperationalError:
+        pass
+
+
 def get_connection(db_path: Path | str) -> sqlite3.Connection:
     """Get SQLite connection.
 
@@ -141,6 +157,10 @@ def init_db(db_path: Path | str) -> None:
             shopify_product_id TEXT,
             shopify_variant_id TEXT,
 
+            -- Finish info from catalog
+            finish TEXT,
+            finish_code TEXT,
+
             -- Dimensions (kept as raw text to preserve units/format)
             product_length TEXT,
             product_width TEXT,
@@ -159,6 +179,10 @@ def init_db(db_path: Path | str) -> None:
         )
     """
     )
+
+    # Migrate: add finish columns to existing variant_index tables
+    _add_column_safe(conn, "variant_index", "finish", "TEXT")
+    _add_column_safe(conn, "variant_index", "finish_code", "TEXT")
 
     conn.execute(
         """
@@ -354,31 +378,37 @@ def init_db(db_path: Path | str) -> None:
         CREATE TABLE IF NOT EXISTS sku_approvals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             master_sku TEXT NOT NULL UNIQUE,
-            
+
             -- Element-level approvals (NULL = not reviewed, 1 = approved, 0 = rejected)
             title_approved INTEGER,
             description_approved INTEGER,
             image_approved INTEGER,
             selected_finish TEXT,
             selected_image_index INTEGER,
-            
+
             -- Overall state
-            status TEXT NOT NULL DEFAULT 'pending',
-            revision_notes TEXT,
-            
+            approval_status TEXT NOT NULL DEFAULT 'pending',
+            notes TEXT,
+
             -- Metadata
-            reviewed_by TEXT,
-            reviewed_at TEXT,
+            approved_by TEXT,
+            approved_at TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )
     """
     )
 
+    # Migrate old column names to new ones for existing databases
+    _rename_column_safe(conn, "sku_approvals", "status", "approval_status")
+    _rename_column_safe(conn, "sku_approvals", "reviewed_by", "approved_by")
+    _rename_column_safe(conn, "sku_approvals", "reviewed_at", "approved_at")
+    _rename_column_safe(conn, "sku_approvals", "revision_notes", "notes")
+
     conn.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_approvals_status
-        ON sku_approvals(status, updated_at DESC)
+        ON sku_approvals(approval_status, updated_at DESC)
     """
     )
 
@@ -388,21 +418,26 @@ def init_db(db_path: Path | str) -> None:
         CREATE TABLE IF NOT EXISTS publish_batches (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             batch_id TEXT NOT NULL UNIQUE,
-            batch_label TEXT,
+            name TEXT,
             target_date TEXT,
             status TEXT NOT NULL DEFAULT 'pending',
-            
-            selection_criteria TEXT,
-            
+
+            notes TEXT,
+
             created_at TEXT NOT NULL,
-            published_at TEXT,
-            
+            executed_at TEXT,
+
             sku_count INTEGER DEFAULT 0,
             success_count INTEGER DEFAULT 0,
             failed_count INTEGER DEFAULT 0
         )
     """
     )
+
+    # Migrate old column names to new ones for existing databases
+    _rename_column_safe(conn, "publish_batches", "batch_label", "name")
+    _rename_column_safe(conn, "publish_batches", "published_at", "executed_at")
+    _rename_column_safe(conn, "publish_batches", "selection_criteria", "notes")
 
     conn.execute(
         """
@@ -418,17 +453,43 @@ def init_db(db_path: Path | str) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             batch_id TEXT NOT NULL,
             master_sku TEXT NOT NULL,
-            assigned_at TEXT NOT NULL,
+            created_at TEXT NOT NULL,
             UNIQUE(batch_id, master_sku),
             FOREIGN KEY (batch_id) REFERENCES publish_batches(batch_id)
         )
     """
     )
 
+    # Migrate old column name for existing databases
+    _rename_column_safe(conn, "batch_sku_assignments", "assigned_at", "created_at")
+
     conn.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_batch_assignments
         ON batch_sku_assignments(batch_id, master_sku)
+    """
+    )
+
+    # Variant-level approvals (per-finish approval tracking)
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS variant_approvals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            master_sku TEXT NOT NULL,
+            finish TEXT NOT NULL,
+            finish_code TEXT,
+            title_approved INTEGER,
+            description_approved INTEGER,
+            image_approved INTEGER,
+            selected_image_index INTEGER,
+            approval_status TEXT NOT NULL DEFAULT 'pending',
+            notes TEXT,
+            approved_by TEXT,
+            approved_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(master_sku, finish)
+        )
     """
     )
 
@@ -807,6 +868,7 @@ def get_publish_history(
     *,
     master_sku: str | None = None,
     platform: str | None = None,
+    environment: str | None = None,
     limit: int = 50,
 ) -> list[dict]:
     """Retrieve publish event history from the database.
@@ -815,6 +877,7 @@ def get_publish_history(
         db_path: Path to database file.
         master_sku: Optional filter by SKU.
         platform: Optional filter by platform.
+        environment: Optional filter by environment ('staging', 'production').
         limit: Maximum number of records to return.
 
     Returns:
@@ -837,6 +900,10 @@ def get_publish_history(
     if platform:
         query += " AND platform = ?"
         params.append(platform)
+
+    if environment:
+        query += " AND environment = ?"
+        params.append(environment)
 
     query += " ORDER BY published_at DESC LIMIT ?"
     params.append(limit)
@@ -1258,8 +1325,8 @@ def save_sku_approval(
     selected_finish: str | None = None,
     selected_image_index: int | None = None,
     status: str = "pending",
-    revision_notes: str | None = None,
-    reviewed_by: str | None = None,
+    notes: str | None = None,
+    approved_by: str | None = None,
 ) -> int:
     """Save or update a SKU approval record.
 
@@ -1272,8 +1339,8 @@ def save_sku_approval(
         selected_finish: Which finish variant the image was approved for.
         selected_image_index: Which lifestyle image was selected (0-based).
         status: Overall status ('pending', 'approved', 'revision', 'rejected').
-        revision_notes: Notes explaining why revision is needed.
-        reviewed_by: Who performed the review.
+        notes: Notes explaining why revision is needed.
+        approved_by: Who performed the review.
 
     Returns:
         ID of the approval record.
@@ -1291,6 +1358,17 @@ def save_sku_approval(
     )
     image_int = 1 if image_approved else (0 if image_approved is False else None)
 
+    # Auto-derive overall status from element-level approvals
+    if status == "pending":
+        if title_approved and description_approved and image_approved:
+            status = "approved"
+        elif (
+            title_approved is False
+            or description_approved is False
+            or image_approved is False
+        ):
+            status = "rejected"
+
     # Check if record exists
     existing = conn.execute(
         "SELECT id FROM sku_approvals WHERE master_sku = ?",
@@ -1306,10 +1384,10 @@ def save_sku_approval(
                 image_approved = ?,
                 selected_finish = ?,
                 selected_image_index = ?,
-                status = ?,
-                revision_notes = ?,
-                reviewed_by = ?,
-                reviewed_at = ?,
+                approval_status = ?,
+                notes = ?,
+                approved_by = ?,
+                approved_at = ?,
                 updated_at = ?
             WHERE master_sku = ?
             """,
@@ -1320,8 +1398,8 @@ def save_sku_approval(
                 selected_finish,
                 selected_image_index,
                 status,
-                revision_notes,
-                reviewed_by,
+                notes,
+                approved_by,
                 now,
                 now,
                 master_sku,
@@ -1333,8 +1411,8 @@ def save_sku_approval(
             """
             INSERT INTO sku_approvals (
                 master_sku, title_approved, description_approved, image_approved,
-                selected_finish, selected_image_index, status, revision_notes,
-                reviewed_by, reviewed_at, created_at, updated_at
+                selected_finish, selected_image_index, approval_status, notes,
+                approved_by, approved_at, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
@@ -1345,8 +1423,8 @@ def save_sku_approval(
                 selected_finish,
                 selected_image_index,
                 status,
-                revision_notes,
-                reviewed_by,
+                notes,
+                approved_by,
                 now,
                 now,
                 now,
@@ -1403,10 +1481,10 @@ def get_sku_approval(
         ),
         "selected_finish": row["selected_finish"],
         "selected_image_index": row["selected_image_index"],
-        "status": row["status"],
-        "revision_notes": row["revision_notes"],
-        "reviewed_by": row["reviewed_by"],
-        "reviewed_at": row["reviewed_at"],
+        "approval_status": row["approval_status"],
+        "notes": row["notes"],
+        "approved_by": row["approved_by"],
+        "approved_at": row["approved_at"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
     }
@@ -1434,7 +1512,7 @@ def get_pending_approvals(
     rows = conn.execute(
         """
         SELECT * FROM sku_approvals
-        WHERE status = 'pending'
+        WHERE approval_status = 'pending'
         ORDER BY created_at ASC
         LIMIT ?
         """,
@@ -1467,7 +1545,7 @@ def get_revision_queue(
     rows = conn.execute(
         """
         SELECT * FROM sku_approvals
-        WHERE status = 'revision'
+        WHERE approval_status = 'revision'
         ORDER BY updated_at DESC
         LIMIT ?
         """,
@@ -1504,7 +1582,7 @@ def get_approved_for_batch(
         query = """
             SELECT sa.* FROM sku_approvals sa
             LEFT JOIN batch_sku_assignments bsa ON sa.master_sku = bsa.master_sku
-            WHERE sa.status = 'approved'
+            WHERE sa.approval_status = 'approved'
               AND bsa.id IS NULL
             ORDER BY sa.updated_at ASC
             LIMIT ?
@@ -1512,7 +1590,7 @@ def get_approved_for_batch(
     else:
         query = """
             SELECT * FROM sku_approvals
-            WHERE status = 'approved'
+            WHERE approval_status = 'approved'
             ORDER BY updated_at ASC
             LIMIT ?
         """
@@ -1541,10 +1619,10 @@ def _row_to_approval_dict(row) -> dict:
         ),
         "selected_finish": row["selected_finish"],
         "selected_image_index": row["selected_image_index"],
-        "status": row["status"],
-        "revision_notes": row["revision_notes"],
-        "reviewed_by": row["reviewed_by"],
-        "reviewed_at": row["reviewed_at"],
+        "approval_status": row["approval_status"],
+        "notes": row["notes"],
+        "approved_by": row["approved_by"],
+        "approved_at": row["approved_at"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
     }
@@ -1558,8 +1636,10 @@ def create_batch(
     *,
     batch_label: str | None = None,
     target_date: str | None = None,
-    selection_criteria: dict | None = None,
+    notes: dict | str | None = None,
     skus: list[str] | None = None,
+    # Legacy alias
+    selection_criteria: dict | None = None,
 ) -> str:
     """Create a new publish batch.
 
@@ -1567,8 +1647,9 @@ def create_batch(
         db_path: Path to database file.
         batch_label: Optional custom label for the batch.
         target_date: Planned publish date (YYYY-MM-DD).
-        selection_criteria: JSON-serializable dict of selection criteria.
+        notes: Optional notes (JSON-serializable dict or string).
         skus: Optional list of SKUs to immediately assign to this batch.
+        selection_criteria: Legacy alias for notes.
 
     Returns:
         The generated batch_id.
@@ -1588,20 +1669,22 @@ def create_batch(
     seq = (existing["cnt"] or 0) + 1
     batch_id = f"Batch-{date_str}-{seq:03d}"
 
-    criteria_json = json.dumps(selection_criteria) if selection_criteria else None
+    # Resolve notes from either param
+    resolved_notes = notes or selection_criteria
+    notes_str = json.dumps(resolved_notes) if isinstance(resolved_notes, dict) else resolved_notes
 
     conn.execute(
         """
         INSERT INTO publish_batches (
-            batch_id, batch_label, target_date, status,
-            selection_criteria, created_at, sku_count
+            batch_id, name, target_date, status,
+            notes, created_at, sku_count
         ) VALUES (?, ?, ?, 'pending', ?, ?, ?)
         """,
         (
             batch_id,
             batch_label,
             target_date,
-            criteria_json,
+            notes_str,
             now.isoformat(),
             len(skus) if skus else 0,
         ),
@@ -1613,7 +1696,7 @@ def create_batch(
             conn.execute(
                 """
                 INSERT OR IGNORE INTO batch_sku_assignments (
-                    batch_id, master_sku, assigned_at
+                    batch_id, master_sku, created_at
                 ) VALUES (?, ?, ?)
                 """,
                 (batch_id, sku, now.isoformat()),
@@ -1655,14 +1738,12 @@ def get_batch(
     return {
         "id": row["id"],
         "batch_id": row["batch_id"],
-        "batch_label": row["batch_label"],
+        "name": row["name"],
         "target_date": row["target_date"],
         "status": row["status"],
-        "selection_criteria": (
-            json.loads(row["selection_criteria"]) if row["selection_criteria"] else None
-        ),
+        "notes": row["notes"],
         "created_at": row["created_at"],
-        "published_at": row["published_at"],
+        "executed_at": row["executed_at"],
         "sku_count": row["sku_count"],
         "success_count": row["success_count"],
         "failed_count": row["failed_count"],
@@ -1719,16 +1800,12 @@ def get_all_batches(
             {
                 "id": row["id"],
                 "batch_id": row["batch_id"],
-                "batch_label": row["batch_label"],
+                "name": row["name"],
                 "target_date": row["target_date"],
                 "status": row["status"],
-                "selection_criteria": (
-                    json.loads(row["selection_criteria"])
-                    if row["selection_criteria"]
-                    else None
-                ),
+                "notes": row["notes"],
                 "created_at": row["created_at"],
-                "published_at": row["published_at"],
+                "executed_at": row["executed_at"],
                 "sku_count": row["sku_count"],
                 "success_count": row["success_count"],
                 "failed_count": row["failed_count"],
@@ -1765,7 +1842,7 @@ def assign_skus_to_batch(
             conn.execute(
                 """
                 INSERT INTO batch_sku_assignments (
-                    batch_id, master_sku, assigned_at
+                    batch_id, master_sku, created_at
                 ) VALUES (?, ?, ?)
                 """,
                 (batch_id, sku, now),
@@ -1813,7 +1890,7 @@ def get_batch_skus(
         """
         SELECT master_sku FROM batch_sku_assignments
         WHERE batch_id = ?
-        ORDER BY assigned_at
+        ORDER BY created_at
         """,
         (batch_id,),
     ).fetchall()
@@ -1849,7 +1926,7 @@ def update_batch_status(
     params: list = [status]
 
     if status == "published":
-        updates.append("published_at = ?")
+        updates.append("executed_at = ?")
         params.append(datetime.now(timezone.utc).isoformat())
 
     if success_count is not None:
@@ -1868,3 +1945,308 @@ def update_batch_status(
     )
     conn.commit()
     conn.close()
+
+
+# Published SKU tracking functions
+
+
+def get_published_skus(
+    db_path: Path | str,
+    *,
+    platform: str | None = None,
+    environment: str = "production",
+) -> set[str]:
+    """Get set of SKUs that have been successfully published.
+
+    Args:
+        db_path: Path to database file.
+        platform: Optional platform filter.
+        environment: Environment filter (default: 'production').
+
+    Returns:
+        Set of MasterSKUs that have been published successfully.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return set()
+
+    conn = get_connection(db_path)
+
+    query = """
+        SELECT DISTINCT master_sku FROM publish_events
+        WHERE environment = ? AND status = 'success'
+    """
+    params: list = [environment]
+
+    if platform:
+        query += " AND platform = ?"
+        params.append(platform)
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    return {row["master_sku"] for row in rows}
+
+
+def get_skus_needing_review(
+    db_path: Path | str,
+    *,
+    all_skus: list[str],
+    platform: str | None = None,
+) -> list[str]:
+    """Filter SKUs to only those not yet published to production.
+
+    Args:
+        db_path: Path to database file.
+        all_skus: List of all candidate SKUs.
+        platform: Optional platform filter.
+
+    Returns:
+        List of SKUs that haven't been published to production.
+    """
+    published = get_published_skus(db_path, platform=platform, environment="production")
+    return [sku for sku in all_skus if sku not in published]
+
+
+# Variant Approval functions
+
+
+def save_variant_approval(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    finish: str,
+    finish_code: str | None = None,
+    title_approved: bool | None = None,
+    description_approved: bool | None = None,
+    image_approved: bool | None = None,
+    selected_image_index: int | None = None,
+    status: str = "pending",
+    notes: str | None = None,
+    approved_by: str | None = None,
+) -> int:
+    """Save or update a variant (per-finish) approval record.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU.
+        finish: The finish name (e.g., 'Polished Chrome').
+        finish_code: Optional finish code.
+        title_approved: Whether title is approved.
+        description_approved: Whether description is approved.
+        image_approved: Whether image is approved.
+        selected_image_index: Which image was selected.
+        status: Overall status.
+        notes: Revision notes.
+        approved_by: Who reviewed.
+
+    Returns:
+        ID of the approval record.
+    """
+    db_path = Path(db_path)
+    init_db(db_path)
+    conn = get_connection(db_path)
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    title_int = 1 if title_approved else (0 if title_approved is False else None)
+    desc_int = (
+        1 if description_approved else (0 if description_approved is False else None)
+    )
+    image_int = 1 if image_approved else (0 if image_approved is False else None)
+
+    # Auto-derive status
+    if status == "pending":
+        if title_approved and description_approved and image_approved:
+            status = "approved"
+        elif (
+            title_approved is False
+            or description_approved is False
+            or image_approved is False
+        ):
+            status = "rejected"
+
+    existing = conn.execute(
+        "SELECT id FROM variant_approvals WHERE master_sku = ? AND finish = ?",
+        (master_sku, finish),
+    ).fetchone()
+
+    if existing:
+        conn.execute(
+            """
+            UPDATE variant_approvals SET
+                finish_code = ?,
+                title_approved = ?,
+                description_approved = ?,
+                image_approved = ?,
+                selected_image_index = ?,
+                approval_status = ?,
+                notes = ?,
+                approved_by = ?,
+                approved_at = ?,
+                updated_at = ?
+            WHERE master_sku = ? AND finish = ?
+            """,
+            (
+                finish_code,
+                title_int,
+                desc_int,
+                image_int,
+                selected_image_index,
+                status,
+                notes,
+                approved_by,
+                now,
+                now,
+                master_sku,
+                finish,
+            ),
+        )
+        record_id = existing["id"]
+    else:
+        cursor = conn.execute(
+            """
+            INSERT INTO variant_approvals (
+                master_sku, finish, finish_code,
+                title_approved, description_approved, image_approved,
+                selected_image_index, approval_status, notes,
+                approved_by, approved_at, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                master_sku,
+                finish,
+                finish_code,
+                title_int,
+                desc_int,
+                image_int,
+                selected_image_index,
+                status,
+                notes,
+                approved_by,
+                now,
+                now,
+                now,
+            ),
+        )
+        record_id = cursor.lastrowid
+
+    conn.commit()
+    conn.close()
+    return record_id
+
+
+def get_variant_approval(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+    finish: str,
+) -> dict | None:
+    """Get approval state for a specific variant (master_sku + finish).
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU.
+        finish: The finish name.
+
+    Returns:
+        Approval dict or None if not found.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(db_path)
+    row = conn.execute(
+        "SELECT * FROM variant_approvals WHERE master_sku = ? AND finish = ?",
+        (master_sku, finish),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return {
+        "id": row["id"],
+        "master_sku": row["master_sku"],
+        "finish": row["finish"],
+        "finish_code": row["finish_code"],
+        "title_approved": (
+            row["title_approved"] == 1 if row["title_approved"] is not None else None
+        ),
+        "description_approved": (
+            row["description_approved"] == 1
+            if row["description_approved"] is not None
+            else None
+        ),
+        "image_approved": (
+            row["image_approved"] == 1 if row["image_approved"] is not None else None
+        ),
+        "selected_image_index": row["selected_image_index"],
+        "approval_status": row["approval_status"],
+        "notes": row["notes"],
+        "approved_by": row["approved_by"],
+        "approved_at": row["approved_at"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def get_variant_approvals_for_sku(
+    db_path: Path | str,
+    *,
+    master_sku: str,
+) -> list[dict]:
+    """Get all variant approvals for a given master SKU.
+
+    Args:
+        db_path: Path to database file.
+        master_sku: The MasterSKU.
+
+    Returns:
+        List of variant approval dicts.
+    """
+    db_path = Path(db_path)
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(db_path)
+    rows = conn.execute(
+        "SELECT * FROM variant_approvals WHERE master_sku = ? ORDER BY finish",
+        (master_sku,),
+    ).fetchall()
+    conn.close()
+
+    results = []
+    for row in rows:
+        results.append(
+            {
+                "id": row["id"],
+                "master_sku": row["master_sku"],
+                "finish": row["finish"],
+                "finish_code": row["finish_code"],
+                "title_approved": (
+                    row["title_approved"] == 1
+                    if row["title_approved"] is not None
+                    else None
+                ),
+                "description_approved": (
+                    row["description_approved"] == 1
+                    if row["description_approved"] is not None
+                    else None
+                ),
+                "image_approved": (
+                    row["image_approved"] == 1
+                    if row["image_approved"] is not None
+                    else None
+                ),
+                "selected_image_index": row["selected_image_index"],
+                "approval_status": row["approval_status"],
+                "notes": row["notes"],
+                "approved_by": row["approved_by"],
+                "approved_at": row["approved_at"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+        )
+    return results

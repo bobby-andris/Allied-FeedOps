@@ -15,15 +15,10 @@ from feedops.db.schema import (
     get_cached_merchant_center_items,
     get_cached_shopify_product,
     get_connection,
-    get_performance_baseline,
-    get_performance_snapshots,
     get_published_skus_for_review,
-    get_revision_queue,
     init_db,
     log_keyword_intent_snapshot,
     log_optimization,
-    save_performance_baseline,
-    save_performance_snapshot,
 )
 
 # Import Supabase client for availability check
@@ -41,12 +36,20 @@ if is_supabase_available():
         get_batch_skus,
         get_last_publish_event,
         get_pending_approvals,
+        get_performance_baseline,
+        get_performance_snapshots,
         get_publish_history,
         get_published_skus,
+        get_revision_queue,
         get_sku_approval,
         get_skus_needing_review,
+        get_variant_approval,
+        get_variant_approvals_for_sku,
         log_publish_event,
+        save_performance_baseline,
+        save_performance_snapshot,
         save_sku_approval,
+        save_variant_approval,
         update_batch_status,
     )
 else:
@@ -60,25 +63,22 @@ else:
         get_batch_skus,
         get_last_publish_event,
         get_pending_approvals,
+        get_performance_baseline,
+        get_performance_snapshots,
         get_publish_history,
+        get_published_skus,
+        get_revision_queue,
         get_sku_approval,
+        get_skus_needing_review,
+        get_variant_approval,
+        get_variant_approvals_for_sku,
         log_publish_event,
+        save_performance_baseline,
+        save_performance_snapshot,
         save_sku_approval,
+        save_variant_approval,
         update_batch_status,
     )
-
-    # Provide stub functions for Supabase-only features
-    def get_published_skus(
-        *, platform: str | None = None, environment: str = "production"
-    ) -> set[str]:
-        """Stub for SQLite mode - returns empty set."""
-        return set()
-
-    def get_skus_needing_review(
-        *, all_skus: list[str], platform: str | None = None
-    ) -> list[str]:
-        """Stub for SQLite mode - returns all SKUs."""
-        return all_skus
 
 
 __all__ = [
@@ -97,6 +97,8 @@ __all__ = [
     "log_publish_event",
     "get_publish_history",
     "get_last_publish_event",
+    "get_published_skus",
+    "get_skus_needing_review",
     # Performance tracking
     "save_performance_snapshot",
     "get_performance_snapshots",
@@ -109,6 +111,10 @@ __all__ = [
     "get_pending_approvals",
     "get_revision_queue",
     "get_approved_for_batch",
+    # Variant approval functions
+    "save_variant_approval",
+    "get_variant_approval",
+    "get_variant_approvals_for_sku",
     # Batch management functions
     "create_batch",
     "get_batch",
@@ -116,7 +122,4 @@ __all__ = [
     "assign_skus_to_batch",
     "get_batch_skus",
     "update_batch_status",
-    # Supabase-specific functions
-    "get_published_skus",
-    "get_skus_needing_review",
 ]
