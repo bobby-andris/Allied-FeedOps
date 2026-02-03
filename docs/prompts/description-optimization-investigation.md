@@ -1,116 +1,92 @@
 # Description Optimization Investigation Prompt
 
-Use this prompt in a **new Claude Code chat** to investigate and improve Google/Bing descriptions with an unbiased perspective.
+Use this prompt in a **new Claude Code chat** to investigate and improve Google/Bing descriptions with fresh perspective and real data.
 
 ---
 
 ## The Prompt
 
 ```
-You are investigating whether the Google/Bing product descriptions for Allied Brass bathroom hardware are actually good, despite scoring 90% on internal quality metrics.
+## Context
+We've been optimizing product descriptions for Allied Brass (bathroom hardware)
+using mechanical metrics like sentence length, attribute density, and keyword
+placement. The descriptions score well on our internal metrics but may not
+actually help products get found or clicked.
 
-## PROBLEM STATEMENT
+Example of what we're producing (shower basket):
+"This 18.75-inch wall-mounted shower basket is crafted from solid brass for lasting
+bathroom storage. Available in Antique Brass. Antique Brass features a softened,
+aged golden patina..."
 
-Current descriptions sound robotic. Example (shower basket):
-"Finished in Antique Brass, shower basket, 18.75 in L x 2.25 in H x 4.13 in W, solid brass wall mount oval combination shower caddy for bathroom bath/shower storage, which features a softened, aged golden patina..."
+This feels wrong. It reads like a spec sheet, not something that connects with
+what a shopper is actually searching for.
 
-This scores 90% internally but:
-- Opens with dimension dump, not engaging prose
-- Doesn't match what users actually search for
-- Doesn't answer buyer questions
-- Sounds like a spec sheet with keywords bolted on
+## Your Mission
 
-## YOUR INVESTIGATION TASKS
+### Phase 1: Understand Real Search Behavior
+1. Use the Google Ads MCP (customer ID: 6253381786) to pull search term data:
+   - What queries are people ACTUALLY using to find shower caddies/baskets?
+   - What queries lead to clicks vs impressions only?
+   - What's the gap between what we're writing and what people search?
 
-### 1. Understand the Current System
-Read these files to understand what we're working with:
+2. Use Apify to scrape top-ranking competitors on Google Shopping for "shower caddy":
+   - How do their descriptions read?
+   - What do they lead with?
+   - What attributes do they emphasize?
 
-- Current prompt: @src/feedops/pipeline/prompts.py (lines 134-200)
-- Quality scoring: @src/feedops/quality/scoring.py
-- Finish injection: @src/feedops/pipeline/finish_injection.py
-- Example output: @dashboard_data/lifestyle-eval-candidate/google-patch-BSK-275LA.json
+### Phase 2: Analyze User Intent
+For each product category (shower baskets, towel bars, grab bars, etc.):
+1. What PROBLEM does this product solve?
+2. What QUESTIONS does a buyer have before purchasing?
+3. What would make someone CLICK this result vs a competitor?
 
-### 2. Review Existing Research
-We've done deep research on product listing optimization. Read these:
+### Phase 3: Create a New Description Philosophy
+Based on your research, create a simple framework for descriptions that:
+1. Matches real search intent (not assumed keywords)
+2. Answers the buyer's actual questions
+3. Differentiates from competitors
+4. Is SIMPLE - not over-engineered with rules
 
-- @docs/titles_descriptions_independent_research/Product Listing Optimization Research.md
-- @docs/titles_descriptions_independent_research/compass_artifact_wf-f630d2a3-044d-4d0c-87af-8f3f823e6bc9_text_markdown.md
-- @docs/titles_descriptions_independent_research/Youtube-video-transcript.md
-- @docs/titles_descriptions_independent_research/Product Title & Description Optimization for Revenue & Ad Efficiency.docx.md
+### Phase 4: Write Better Descriptions
+Rewrite the shower basket description (SKU: BSK-275LA) using your new approach.
+Then score it against the old one using REAL metrics:
+- Does it contain the search terms people actually use?
+- Does it answer the top 3 buyer questions?
+- Would YOU click on this?
 
-Key insights from this research:
-- 95% of buying decisions are emotional (System 1), then rationalized (System 2)
-- Descriptions should reduce cognitive load and uncertainty
-- Match search intent, not just include keywords
-- Answer the 3 questions buyers have before purchasing
+## Important Constraints
+- Use REAL DATA from Google Ads and competitor research
+- Don't assume you know what people search - verify it
+- Prioritize clarity over keyword density
+- The description should make sense to a HUMAN first
 
-### 3. Get Real Search Data
-Use the Google Ads MCP to find what people ACTUALLY search for:
+## Files to Read
+- CLAUDE.md (project context)
+- src/feedops/pipeline/prompts.py (current prompt instructions)
+- data/finish-metadata.json (finish descriptions)
+- dashboard_data/lifestyle-eval-candidate/google-patch-BSK-275LA.json (current output)
 
-Customer ID: 6253381786
-
-Query the shopping_performance_view for:
-- Search terms that led to shower basket/caddy purchases
-- Search terms for paper towel holders
-- Search terms for towel bars
-
-Identify the top 10-20 search queries by conversions for each category.
-
-### 4. Compare Generated vs. Real Search Intent
-- Does the generated description use the actual search terms naturally?
-- Would it surface for those queries?
-- Does it answer the questions a buyer has?
-
-### 5. Evaluate the Current Prompt Philosophy
-The current prompt (src/feedops/pipeline/prompts.py) has ~15 mechanical rules for Google descriptions:
-- "First sentence: product type + ONE key dimension + material"
-- "Keep each sentence under 80 characters"
-- "Include natural synonyms shoppers search"
-- etc.
-
-Questions to answer:
-- Do these rules create compliance-seeking behavior that produces robotic output?
-- Does the prompt make the LLM think about buyer intent, or just follow formatting rules?
-- Should we add MORE rules or FEWER rules?
-- Should we include the research documents in the prompt, or keep it simple?
-
-### 6. Provide Final Recommendation
-After your investigation, provide:
-
-1. **Diagnosis**: What's actually wrong with the current approach?
-
-2. **Recommended Prompt Changes**: The exact text to replace in prompts.py (lines 136-152) that will produce better descriptions. Consider:
-   - Intent-first thinking (what would a buyer search?)
-   - Fewer mechanical rules, more strategic thinking
-   - Whether to include research insights or keep it simple
-
-3. **Scoring Changes**: Any changes needed to src/feedops/quality/scoring.py to reward better descriptions
-
-4. **Test Plan**: How to validate the changes work (regenerate BSK-275LA and compare)
-
-## CONSTRAINTS
-
-- Don't assume the current approach is good just because it scores well
-- Be critical and evidence-based
-- Use real search data, not assumptions about what people search
-- The goal is descriptions that CONVERT, not descriptions that pass internal checklists
-
-## PROJECT CONTEXT
-
-Read @CLAUDE.md for full project context including:
-- MCP server defaults (Google Ads customer ID: 6253381786)
-- File locations
-- How to run the pipeline
+## Key Question to Answer
+Are we optimizing for the wrong thing? Should descriptions be about
+"attribute density for algorithm matching" or about "answering what
+the buyer actually wants to know"?
 ```
 
 ---
 
-## After Running This Investigation
+## Why This Prompt Works
 
-The new chat should produce:
-1. Evidence-based diagnosis of what's wrong
-2. Specific prompt text changes for prompts.py
-3. Any scoring changes for scoring.py
-4. A test plan to validate improvements
+1. **Action-first**: Uses Google Ads MCP and Apify to get REAL data, not assumptions
+2. **Clear phases**: Understand → Analyze → Create → Write is a natural discovery flow
+3. **Real metrics**: "Does it contain the search terms people actually use?" beats internal scoring
+4. **Not overloaded**: Lets the chat discover fresh insights rather than biasing it with prior conclusions
+5. **The right question**: "Are we optimizing for the wrong thing?" cuts to the core issue
 
-Then you can review their recommendations and decide what to implement.
+## Additional Research (Optional)
+
+If the new chat wants deeper context, these research documents exist in `docs/titles_descriptions_independent_research/`:
+- `Product Listing Optimization Research.md`
+- `Youtube-video-transcript.md`
+- `compass_artifact_wf-f630d2a3-044d-4d0c-87af-8f3f823e6bc9_text_markdown.md`
+
+But the chat should prioritize REAL DATA over reading old research.
