@@ -62,32 +62,60 @@ interface ApprovalRecord {
   notes: string | null
 }
 
-async function getSkuData(sku: string) {
+/**
+ * Normalize SKU format for database queries.
+ * URLs use hyphens (DMF-2-2X) but database uses slashes (DMF-2/2X).
+ * Pattern: SKU-dimension format like NS-5-16 → NS-5/16
+ */
+function normalizeSkuForDb(urlSku: string): string {
+  // Match pattern: letters/numbers-letters/numbers-NUMBER (where last segment is dimension)
+  // Examples: DMF-2-2X, NS-5-16, WP-2-16-GAL, RW-24U-12
+  return urlSku.replace(/-(\d+[A-Z]*)(-|$)/g, '/$1$2')
+}
+
+async function getSkuData(urlSku: string) {
   const supabase = await createClient()
-  
-  // Get content for all platforms
-  const { data: content, error: contentError } = await supabase
-    .from('generated_content')
-    .select('*')
-    .eq('master_sku', sku)
-    .order('platform')
-    .order('content_type')
+
+  // Try URL SKU first, then normalized version (handles DMF-2-2X → DMF-2/2X)
+  const normalizedSku = normalizeSkuForDb(urlSku)
+  const skusToTry = urlSku !== normalizedSku ? [urlSku, normalizedSku] : [urlSku]
+
+  // Get content for all platforms - try both SKU formats
+  let content = null
+  let contentError = null
+  for (const sku of skusToTry) {
+    const result = await supabase
+      .from('generated_content')
+      .select('*')
+      .eq('master_sku', sku)
+      .order('platform')
+      .order('content_type')
+    if (result.data && result.data.length > 0) {
+      content = result.data
+      break
+    }
+    contentError = result.error
+  }
+  const effectiveSku = content && content.length > 0 ? content[0].master_sku : urlSku
   
   if (contentError) {
     console.error('Error fetching content:', contentError)
   }
-  
+
+  // Use effectiveSku for remaining queries (the SKU format that worked)
+  const sku = effectiveSku
+
   // Get images
   const { data: images, error: imagesError } = await supabase
     .from('generated_images')
     .select('*')
     .eq('master_sku', sku)
     .order('variation_index')
-  
+
   if (imagesError) {
     console.error('Error fetching images:', imagesError)
   }
-  
+
   // Get approval status
   const { data: approval, error: approvalError } = await supabase
     .from('sku_approvals')
