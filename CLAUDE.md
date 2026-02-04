@@ -73,16 +73,27 @@ uv pip install -e ".[dev]"
 PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 ```
 
-## Historical docs archive
+## Generated content storage
 
-Historical planning files, investigation artifacts, and archived evaluation data are preserved in:
+**IMPORTANT**: Generated content (titles, descriptions, images) must now be stored in Supabase, not in git.
+
+- `dashboard_data/` is empty (only README.md) - all evaluation data archived
+- Dashboard must read from Supabase `generated_content` and `generated_images` tables
+- Use regeneration API to create new content
+
+## Historical archive
+
+All previous data (14,000+ generated files, evaluation data, research docs) preserved in:
 
 - **Branch**: `archive/full-snapshot-2026-02-03`
 - **Tag**: `backup/pre-dashboard-cleanup-2026-02-03`
 
-To access archived files:
+To restore archived content:
 
 ```bash
-git show archive/full-snapshot-2026-02-03:docs/plans/
-git checkout archive/full-snapshot-2026-02-03 -- docs/titles_descriptions_independent_research/
+# View what's in the archive
+git show archive/full-snapshot-2026-02-03:dashboard_data/
+
+# Restore specific files
+git checkout archive/full-snapshot-2026-02-03 -- dashboard_data/batch-40sku-20260130-144146/
 ```
