@@ -1,9 +1,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { ApifyClient } from 'apify-client'
 
 /**
  * POST /api/competitors/scrape
- * Create a scrape job and return Apify actor configuration
+ * Create a scrape job and start Apify run directly
  *
  * Body:
  * - category: Product category
@@ -74,7 +75,7 @@ const CATEGORY_URLS: Record<string, Record<string, string>> = {
 // Apify actor configurations
 function getApifyConfig(
   source: string,
-  jobType: string,
+  _jobType: string,
   category: string,
   searchQuery?: string
 ) {
@@ -168,6 +169,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check for Apify API token
+    const apifyToken = process.env.APIFY_API_TOKEN
+    if (!apifyToken) {
+      return NextResponse.json(
+        { error: 'APIFY_API_TOKEN not configured. Please add it to environment variables.' },
+        { status: 500 }
+      )
+    }
+
     // Get Apify configuration
     const apifyConfig = getApifyConfig(source, jobType, category, searchQuery)
     if (!apifyConfig) {
@@ -179,15 +189,17 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient()
 
-    // Create job record
+    // Create job record first
+    const searchQueryValue = searchQuery || (jobType === 'serp' ? SERP_QUERIES[category]?.join(', ') : null)
     const { data: job, error: jobError } = await supabase
       .from('competitor_scrape_jobs')
       .insert({
         category,
         job_type: jobType,
         source,
-        search_query: searchQuery || (jobType === 'serp' ? SERP_QUERIES[category]?.join(', ') : null),
-        status: 'pending',
+        search_query: searchQueryValue,
+        status: 'running',
+        started_at: new Date().toISOString(),
       })
       .select()
       .single()
@@ -200,12 +212,44 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      job,
-      apifyConfig,
-      message: `Created ${jobType} scrape job for "${category}" from ${source}`,
-    })
+    // Start Apify run
+    const client = new ApifyClient({ token: apifyToken })
+
+    try {
+      const run = await client.actor(apifyConfig.actor).start(apifyConfig.input)
+
+      // Update job with Apify run ID
+      await supabase
+        .from('competitor_scrape_jobs')
+        .update({
+          apify_run_id: run.id,
+          apify_dataset_id: run.defaultDatasetId,
+        })
+        .eq('id', job.id)
+
+      return NextResponse.json({
+        success: true,
+        job: {
+          ...job,
+          apify_run_id: run.id,
+          apify_dataset_id: run.defaultDatasetId,
+        },
+        apifyConfig,
+        message: `Started ${jobType} scrape for "${category}" from ${source}. Run ID: ${run.id}`,
+      })
+    } catch (apifyError) {
+      // Mark job as failed if Apify call fails
+      await supabase
+        .from('competitor_scrape_jobs')
+        .update({
+          status: 'failed',
+          error_message: apifyError instanceof Error ? apifyError.message : 'Apify call failed',
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', job.id)
+
+      throw apifyError
+    }
   } catch (error) {
     console.error('Scrape API error:', error)
     return NextResponse.json(
@@ -227,8 +271,12 @@ export async function GET(request: NextRequest) {
   const wayfairUrl = CATEGORY_URLS.wayfair[category]
   const homedepotUrl = CATEGORY_URLS.homedepot[category]
 
+  // Check if Apify is configured
+  const apifyConfigured = !!process.env.APIFY_API_TOKEN
+
   return NextResponse.json({
     category,
+    apifyConfigured,
     available: {
       serp: {
         google: {

@@ -95,12 +95,56 @@ export default function CompetitorsPage() {
     fetchData()
   }, [fetchData])
 
+  const pollJobStatus = useCallback(async (jobId: string, jobSource: string) => {
+    const maxAttempts = 60 // 5 minutes with 5 second intervals
+    let attempts = 0
+
+    const poll = async () => {
+      attempts++
+      try {
+        const res = await fetch(`/api/competitors/scrape/${jobId}`)
+        const data = await res.json()
+
+        if (data.status === 'completed') {
+          setScrapeStatus(`Completed! ${data.message}`)
+          setScraping((prev) => ({ ...prev, [jobSource]: false }))
+          fetchData()
+          setTimeout(() => setScrapeStatus(null), 5000)
+          return
+        }
+
+        if (data.status === 'failed') {
+          setError(data.message || 'Scrape failed')
+          setScrapeStatus(null)
+          setScraping((prev) => ({ ...prev, [jobSource]: false }))
+          return
+        }
+
+        // Still running
+        setScrapeStatus(data.message || `Running... (${attempts * 5}s)`)
+
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 5000) // Poll every 5 seconds
+        } else {
+          setScrapeStatus('Scrape is taking longer than expected. Check Recent Jobs for status.')
+          setScraping((prev) => ({ ...prev, [jobSource]: false }))
+        }
+      } catch {
+        setError('Error checking job status')
+        setScraping((prev) => ({ ...prev, [jobSource]: false }))
+      }
+    }
+
+    // Start polling after initial delay
+    setTimeout(poll, 3000)
+  }, [fetchData])
+
   const startScrape = async (jobSource: string, jobType: 'serp' | 'marketplace') => {
     setScraping((prev) => ({ ...prev, [jobSource]: true }))
     setScrapeStatus(`Starting ${jobSource} scrape...`)
 
     try {
-      // 1. Create scrape job
+      // Start scrape job (now calls Apify directly)
       const createRes = await fetch('/api/competitors/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -116,32 +160,14 @@ export default function CompetitorsPage() {
         throw new Error(errorData.error || 'Failed to create job')
       }
 
-      const { job, apifyConfig } = await createRes.json()
-      setScrapeStatus(`Job created. Apify actor: ${apifyConfig.actor}`)
+      const { job, message } = await createRes.json()
+      setScrapeStatus(message || 'Scrape started, waiting for results...')
 
-      // Note: In a full implementation, you would call the Apify MCP tool here
-      // and then ingest the results. For now, we'll show the configuration
-      // that would be used.
-
-      console.log('Apify configuration for manual execution:', {
-        jobId: job.id,
-        actor: apifyConfig.actor,
-        input: apifyConfig.input,
-      })
-
-      setScrapeStatus(
-        `Job ${job.id} created. Use Apify MCP tool with actor "${apifyConfig.actor}" to run the scrape.`
-      )
-
-      // Refresh data after a short delay
-      setTimeout(() => {
-        fetchData()
-        setScrapeStatus(null)
-      }, 2000)
+      // Start polling for job completion
+      pollJobStatus(job.id, jobSource)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Scrape failed')
       setScrapeStatus(null)
-    } finally {
       setScraping((prev) => ({ ...prev, [jobSource]: false }))
     }
   }

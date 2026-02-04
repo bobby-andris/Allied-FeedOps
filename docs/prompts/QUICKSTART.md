@@ -11,16 +11,20 @@
 4. **Prompt 14** → Search Query Insights
 5. **Prompt 18** → Keyword Gap Analysis
 
-### Phase 3: Infrastructure for Heavy Processing
-6. **Prompt 09** → GCP Cloud Run Setup
+### Phase 3: Fix Critical Quality Issues
+6. **Prompt 19** → Fix Description Generation Quality (enriches prompt data)
+7. **Prompt 20** → Enhance SKU Review Page (product images + lifestyle approval)
 
-### Phase 4: Future-Proofing & ROI
-7. **Prompt 15** → Agentic Commerce (UCP)
-8. **Prompt 12** → A/B Testing Dashboard
-9. **Prompt 16** → Multi-Variant Images
+### Phase 4: Infrastructure for Heavy Processing
+8. **Prompt 09** → GCP Cloud Run Setup
 
-### Phase 5: Final Audit (ALWAYS LAST)
-10. **Prompt 11** → Production Readiness Audit
+### Phase 5: Future-Proofing & ROI
+9. **Prompt 15** → Agentic Commerce (UCP)
+10. **Prompt 12** → A/B Testing Dashboard
+11. **Prompt 16** → Multi-Variant Images
+
+### Phase 6: Final Audit (ALWAYS LAST)
+12. **Prompt 11** → Production Readiness Audit
 
 After each prompt, run the **Verification & Completion Prompt** below.
 
@@ -374,6 +378,84 @@ Generate a summary report of all findings with:
 Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done. Use the systematic-debugging skill if issues are found.
 
 Do NOT commit changes until I've reviewed the findings.
+```
+
+---
+
+## Quick Start: Prompt 19 (Fix Description Generation Quality)
+
+**When to run:** Priority 2 - After content quality prompts, before Cloud Run
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to fix the poor quality descriptions being generated for Google and Bing. Please enter plan mode and use the prompt at docs/prompts/19-fix-description-generation-quality.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Regenerate API: dashboard/src/app/api/regenerate/route.ts
+- Python pipeline prompts: src/feedops/pipeline/prompts.py
+
+The Problem:
+The dashboard's regeneration passes only 5 basic fields (master_sku, product_title, category, finish, dimensions) to the LLM. The Python pipeline builds a rich evidence table with product specs, features, bullets, images, keywords, and collection context. That's why Shopify descriptions are good but Google/Bing are robotic.
+
+Goals:
+1. Use Playwright MCP to inspect current "Prompt used" section on review page
+2. Create product_catalog table with rich product data
+3. Build TypeScript evidence table builder (port from Python)
+4. Update regenerate API to pass comprehensive context
+5. Add product image (vision) support to regeneration
+6. Include current content as context for improvement
+7. Add variant-specific finish context for Google/Bing
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 20 (Enhance SKU Review Page)
+
+**When to run:** Priority 2 - After Prompt 19
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to enhance the SKU review page with product images and better lifestyle image approval. Please enter plan mode and use the prompt at docs/prompts/20-enhance-sku-review-page.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Review page: dashboard/src/components/review/SkuReviewClient.tsx
+
+Two Critical Fixes:
+
+1. ADD PRODUCT HERO IMAGE
+   - Reviewers can't see the product they're reviewing
+   - Need to display the product's main image prominently
+   - Add zoom/enlarge capability
+   - Show variant-specific images when a finish is selected
+
+2. ENHANCE LIFESTYLE IMAGE APPROVAL
+   - Current section is minimal and only shows when images exist
+   - Need clear separation of master SKU vs variant-level images
+   - Add approval workflow (approve/reject with reasons)
+   - Add "select for publishing" functionality
+   - Track approval status at correct level (master vs variant)
+
+Goals:
+1. Create ProductHeroImage.tsx component
+2. Create enhanced LifestyleImageReview.tsx component
+3. Create ImageApprovalCard.tsx for individual image cards
+4. Add image approval API endpoints
+5. Update SkuReviewClient to include new components
+6. Add database schema for image approval tracking
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
+Do NOT commit changes until the full implementation is complete and verified.
 ```
 
 ---
