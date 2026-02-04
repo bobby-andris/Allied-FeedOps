@@ -2,20 +2,35 @@
  * Variant Content Generation Utilities
  *
  * Functions to generate variant-specific titles and descriptions
- * by combining base templates with finish names.
+ * by applying finish-specific data to base templates.
+ *
+ * IMPORTANT: Base templates should either:
+ * 1. Use {FINISH_NAME} and {FINISH_DESCRIPTION} placeholders (preferred)
+ * 2. Be finish-agnostic (no finish mentioned)
+ *
+ * If a base template contains a hardcoded finish name, these functions
+ * will detect and replace it with the target finish.
  */
 
+import {
+  getFinishData,
+  getAllFinishNames,
+  PLACEHOLDERS,
+  type FinishData,
+} from './finish-data'
+
 /**
- * Generate a variant-specific title by appending finish name to base title.
+ * Generate a variant-specific title from a base template.
+ *
+ * Handles three cases:
+ * 1. Template has {FINISH_NAME} placeholder → replace it
+ * 2. Template has a different finish name → replace it
+ * 3. Template has no finish → append finish name
  *
  * @param baseTitle - The master SKU title template
- * @param finishName - The finish name (e.g., "Antique Brass", "Matte Black")
+ * @param finishName - The target finish name (e.g., "Fire Engine Red")
  * @param platform - Target platform ('google' | 'bing')
- * @returns Variant-specific title with finish name
- *
- * @example
- * generateVariantTitle("18-Inch Paper Towel Holder", "Antique Brass", "google")
- * // Returns: "18-Inch Paper Towel Holder - Antique Brass"
+ * @returns Variant-specific title with correct finish
  */
 export function generateVariantTitle(
   baseTitle: string | null,
@@ -26,90 +41,200 @@ export function generateVariantTitle(
     return finishName
   }
 
-  // Clean up the base title
-  const cleanBase = baseTitle.trim()
+  let result = baseTitle.trim()
 
-  // Check if finish name is already in the title (avoid duplication)
-  if (cleanBase.toLowerCase().includes(finishName.toLowerCase())) {
-    return cleanBase
+  // Case 1: Replace placeholder if present
+  if (result.includes(PLACEHOLDERS.FINISH_NAME)) {
+    return result.replace(new RegExp(escapeRegex(PLACEHOLDERS.FINISH_NAME), 'g'), finishName)
   }
 
-  // Format based on platform preference
-  // Google: Use dash separator for clean structured data
-  // Bing: Use "in" for more natural language
+  // Case 2: Check if target finish is already in title (exact match)
+  if (result.toLowerCase().includes(finishName.toLowerCase())) {
+    return result
+  }
+
+  // Case 3: Check if a DIFFERENT finish name is in the title → replace it
+  const allFinishes = getAllFinishNames()
+  for (const existingFinish of allFinishes) {
+    if (result.toLowerCase().includes(existingFinish.toLowerCase())) {
+      // Replace the existing finish with the new one (case-preserving)
+      const regex = new RegExp(escapeRegex(existingFinish), 'gi')
+      return result.replace(regex, finishName)
+    }
+  }
+
+  // Case 4: No finish in title - append based on platform style
   if (platform === 'bing') {
-    return `${cleanBase} in ${finishName}`
+    return `${result} in ${finishName}`
   }
-
-  return `${cleanBase} - ${finishName}`
+  return `${result} - ${finishName}`
 }
 
 /**
- * Generate a variant-specific description by inserting finish name naturally.
+ * Generate a variant-specific description from a base template.
+ *
+ * Handles three cases:
+ * 1. Template has placeholders → replace them with finish data
+ * 2. Template has a different finish name/description → replace them
+ * 3. Template has no finish → insert finish naturally
  *
  * @param baseDescription - The master SKU description template
- * @param finishName - The finish name (e.g., "Antique Brass", "Matte Black")
- * @returns Variant-specific description with finish name integrated
- *
- * @example
- * generateVariantDescription(
- *   "This elegant paper towel holder adds style to your kitchen.",
- *   "Antique Brass"
- * )
- * // Returns: "This elegant paper towel holder in Antique Brass adds style to your kitchen."
+ * @param finishName - The target finish name (e.g., "Fire Engine Red")
+ * @returns Variant-specific description with correct finish
  */
 export function generateVariantDescription(
   baseDescription: string | null,
   finishName: string
 ): string {
   if (!baseDescription) {
+    const finishData = getFinishData(finishName)
+    if (finishData) {
+      return `Available in ${finishName}, which ${finishData.description}.`
+    }
     return `Available in ${finishName} finish.`
   }
 
-  const cleanDesc = baseDescription.trim()
+  let result = baseDescription.trim()
+  const finishData = getFinishData(finishName)
 
-  // Check if finish name is already in the description (avoid duplication)
-  if (cleanDesc.toLowerCase().includes(finishName.toLowerCase())) {
-    return cleanDesc
+  // Case 1: Replace placeholders if present
+  const hasPlaceholder =
+    result.includes(PLACEHOLDERS.FINISH_NAME) ||
+    result.includes(PLACEHOLDERS.FINISH_DESCRIPTION)
+
+  if (hasPlaceholder) {
+    result = result.replace(
+      new RegExp(escapeRegex(PLACEHOLDERS.FINISH_NAME), 'g'),
+      finishName
+    )
+
+    if (finishData) {
+      // Replace {FINISH_DESCRIPTION} with the full sentence
+      const finishDescSentence = `${finishName} ${finishData.description}`
+      result = result.replace(
+        new RegExp(escapeRegex(PLACEHOLDERS.FINISH_DESCRIPTION), 'g'),
+        finishDescSentence
+      )
+    } else {
+      // Remove placeholder if no finish data
+      result = result.replace(
+        new RegExp(escapeRegex(PLACEHOLDERS.FINISH_DESCRIPTION) + '\\.?\\s*', 'g'),
+        ''
+      )
+    }
+
+    return result.trim()
   }
 
-  // Strategy 1: Insert after first product mention
-  // Look for common product words and insert finish after them
+  // Case 2: Check if target finish is already correctly in description
+  if (result.toLowerCase().includes(finishName.toLowerCase())) {
+    return result
+  }
+
+  // Case 3: Check for and replace any existing finish name and its description
+  const allFinishes = getAllFinishNames()
+  let foundExistingFinish = false
+
+  for (const existingFinish of allFinishes) {
+    if (result.toLowerCase().includes(existingFinish.toLowerCase())) {
+      foundExistingFinish = true
+      const existingData = getFinishData(existingFinish)
+
+      // Replace the finish name
+      const finishRegex = new RegExp(escapeRegex(existingFinish), 'gi')
+      result = result.replace(finishRegex, finishName)
+
+      // If there's a finish description pattern, replace it too
+      // Pattern: "which features/offers/brings/delivers/etc..."
+      if (existingData && finishData) {
+        // Replace the old finish description with the new one
+        const oldDesc = existingData.description
+        const newDesc = finishData.description
+
+        // Try to replace the description if it exists
+        if (result.toLowerCase().includes(oldDesc.toLowerCase().substring(0, 30))) {
+          const descRegex = new RegExp(escapeRegex(oldDesc), 'gi')
+          result = result.replace(descRegex, newDesc)
+        }
+      }
+
+      break // Only replace the first found finish
+    }
+  }
+
+  if (foundExistingFinish) {
+    return result
+  }
+
+  // Case 4: No finish in description - insert naturally
+  return insertFinishInDescription(result, finishName, finishData)
+}
+
+/**
+ * Insert finish name naturally into a description that has no finish mention.
+ */
+function insertFinishInDescription(
+  description: string,
+  finishName: string,
+  finishData: FinishData | null
+): string {
+  // Strategy 1: Look for "available in" phrase and insert after
+  const availableInMatch = description.match(/available in\s+/i)
+  if (availableInMatch && availableInMatch.index !== undefined) {
+    const insertPos = availableInMatch.index + availableInMatch[0].length
+    const before = description.slice(0, insertPos)
+    const after = description.slice(insertPos)
+
+    if (finishData) {
+      return `${before}${finishName}, which ${finishData.description}. ${after}`.trim()
+    }
+    return `${before}${finishName}. ${after}`.trim()
+  }
+
+  // Strategy 2: Insert after first product mention
   const productPatterns = [
-    /\b(towel bar|towel holder|paper towel holder|soap dish|robe hook|shelf|basket|ring|grab bar|mirror)\b/i,
+    /\b(towel bar|towel holder|paper towel holder|soap dish|robe hook|shelf|basket|ring|grab bar|mirror|cabinet pull|toilet paper holder|tissue holder)\b/i,
   ]
 
   for (const pattern of productPatterns) {
-    const match = cleanDesc.match(pattern)
+    const match = description.match(pattern)
     if (match && match.index !== undefined) {
       const insertPosition = match.index + match[0].length
-      const before = cleanDesc.slice(0, insertPosition)
-      const after = cleanDesc.slice(insertPosition)
+      const before = description.slice(0, insertPosition)
+      const after = description.slice(insertPosition)
 
-      // Don't insert if there's already a color/finish word immediately after
+      // Don't insert if there's already a preposition
       if (!/^\s*(in|with|featuring)\s/i.test(after)) {
         return `${before} in ${finishName}${after}`
       }
     }
   }
 
-  // Strategy 2: Prepend finish context if no good insertion point found
-  // Only if description doesn't start with a finish-related phrase
-  if (!/^(this|the|our|a|an)\s/i.test(cleanDesc)) {
-    return `${finishName} finish. ${cleanDesc}`
-  }
-
-  // Strategy 3: Insert "in {finish}" after "This" at the start
-  if (/^this\s/i.test(cleanDesc)) {
-    return cleanDesc.replace(/^(this)\s/i, `$1 ${finishName} `)
+  // Strategy 3: Prepend if description starts with article
+  if (/^(this|the|our|a|an)\s/i.test(description)) {
+    return description.replace(/^(this|the|our|a|an)\s/i, `$1 ${finishName} `)
   }
 
   // Fallback: Append finish info at end
-  const endsWithPunctuation = /[.!?]$/.test(cleanDesc)
-  if (endsWithPunctuation) {
-    return `${cleanDesc} Available in ${finishName}.`
+  const endsWithPunctuation = /[.!?]$/.test(description)
+  if (finishData) {
+    if (endsWithPunctuation) {
+      return `${description} Available in ${finishName}, which ${finishData.description}.`
+    }
+    return `${description}. Available in ${finishName}, which ${finishData.description}.`
   }
-  return `${cleanDesc}. Available in ${finishName}.`
+
+  if (endsWithPunctuation) {
+    return `${description} Available in ${finishName}.`
+  }
+  return `${description}. Available in ${finishName}.`
+}
+
+/**
+ * Escape special regex characters in a string
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 /**
@@ -127,10 +252,37 @@ export function truncateForPreview(text: string | null, maxLength: number = 60):
 export function normalizeFinishName(finish: string | null): string {
   if (!finish) return 'Unknown Finish'
 
-  // Already formatted nicely
+  // Already formatted nicely (has space)
   if (finish.includes(' ')) return finish
 
-  // Handle codes like "ABR" -> check if we should expand
-  // For now, just return as-is since we usually have finish_name
+  // Try to look up by code
+  const finishData = getFinishData(finish)
+  if (finishData) {
+    return finishData.name
+  }
+
   return finish
+}
+
+/**
+ * Check if a base template uses placeholders (preferred format)
+ */
+export function templateUsesPlaceholders(template: string): boolean {
+  return (
+    template.includes(PLACEHOLDERS.FINISH_NAME) ||
+    template.includes(PLACEHOLDERS.FINISH_DESCRIPTION)
+  )
+}
+
+/**
+ * Check if a base template has a hardcoded finish (problematic format)
+ */
+export function templateHasHardcodedFinish(template: string): string | null {
+  const lowerTemplate = template.toLowerCase()
+  for (const finishName of getAllFinishNames()) {
+    if (lowerTemplate.includes(finishName.toLowerCase())) {
+      return finishName
+    }
+  }
+  return null
 }

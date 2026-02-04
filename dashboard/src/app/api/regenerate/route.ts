@@ -81,13 +81,24 @@ PLATFORM CONTEXT:
 - Google/Bing (variant): One specific finish. This is the customer's FIRST impression. Make them want to click.
 - Shopify (master): All finishes on one page. Customer already clicked. Help them choose and buy.
 
+VARIANT TEMPLATE RULE (CRITICAL - READ CAREFULLY):
+You are generating a BASE TEMPLATE that will be used for ALL 28 finish variants.
+- DO NOT include any specific finish name (like "Antique Brass", "Matte Black", etc.) in the output
+- Instead, use these EXACT placeholders where finish should appear:
+  - {FINISH_NAME} - where the finish name goes (e.g., "Available in {FINISH_NAME}")
+  - {FINISH_DESCRIPTION} - where a finish description sentence goes (optional)
+- The system will replace these placeholders with the actual finish for each variant
+- Example CORRECT title: "Guest Towel Holder Stand, 11-Inch Countertop Solid Brass, {FINISH_NAME}, Allied Brass"
+- Example WRONG title: "Antique Brass Guest Towel Holder Stand, 11-Inch..." (has hardcoded finish!)
+
 CRITICAL RULES:
 - Never invent specifications not in the product data
 - Every factual claim must be traceable to the provided evidence table
 - "Allied Brass" should be the final segment in titles
 - No ALL CAPS, no promotional language like "Premium", "Luxury", "Best"
 - Write for a human who's about to spend $80 and wants to feel good about it
-- When an image is provided, use it to verify product details but don't describe the image directly`
+- When an image is provided, use it to verify product details but don't describe the image directly
+- NEVER include a specific finish name - always use {FINISH_NAME} placeholder`
 
 /**
  * Build enhanced prompt using evidence table
@@ -99,33 +110,40 @@ function buildEnhancedPrompt(
 ): string {
   const platformContext: Record<string, Record<string, string>> = {
     google: {
-      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end.',
-      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Weave the finish naturally. Include material quality and dimensions. Plain text only, 600-800 characters target.',
+      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, {FINISH_NAME} placeholder, and "Allied Brass" at end. Example: "Guest Towel Holder Stand, 11-Inch Solid Brass, {FINISH_NAME}, Allied Brass"',
+      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Use {FINISH_NAME} placeholder where finish should appear, and optionally {FINISH_DESCRIPTION} for finish details. Include material quality and dimensions. Plain text only, 600-800 characters target.',
     },
     bing: {
-      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end.',
-      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text only, 700-1000 characters target.',
+      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Use {FINISH_NAME} placeholder and include "Allied Brass" at end.',
+      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Use {FINISH_NAME} placeholder where finish should appear. Include specific dimensions and materials. Plain text only, 700-1000 characters target.',
     },
     shopify: {
-      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying.',
-      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. Include trust signals. HTML format with <p> and <ul><li> bullets.',
+      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying. Do NOT include finish name (Shopify shows all finishes).',
+      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. Include trust signals. HTML format with <p> and <ul><li> bullets. Do NOT include a specific finish name.',
     },
   }
 
   const context = platformContext[platform]?.[contentType] || ''
 
-  return `Generate a ${contentType} for this product.
+  return `Generate a ${contentType} TEMPLATE for this product that works for ALL 28 finish variants.
 
 CONTEXT: ${context}
 
 ${evidenceMarkdown}
+
+CRITICAL TEMPLATE RULES:
+- For Google/Bing: Use {FINISH_NAME} placeholder where the finish name should appear
+- For Google/Bing: Optionally use {FINISH_DESCRIPTION} where a finish description sentence should go
+- For Shopify: Do NOT include any finish name (the page shows all finishes)
+- NEVER include a specific finish name like "Antique Brass", "Matte Black", etc.
+- The system will replace placeholders with actual finish data for each variant
 
 Remember:
 - Write for a human who's about to spend $80 and wants to feel good about it
 - Every factual claim must be traceable to the evidence table above
 - Weave keywords naturally, don't list them
 
-Respond with ONLY the ${contentType} text, no additional explanation or formatting.`
+Respond with ONLY the ${contentType} template text, no additional explanation or formatting.`
 }
 
 /**
@@ -139,14 +157,14 @@ function buildEnhancedFeedbackPrompt(
   feedback: string
 ): string {
   const platformContext: Record<string, string> = {
-    google: 'Google Shopping - first impression, make them want to click',
-    bing: 'Bing Shopping - include natural product synonyms',
-    shopify: 'Shopify - customer already clicked, convince them to buy',
+    google: 'Google Shopping - first impression, make them want to click. Use {FINISH_NAME} placeholder.',
+    bing: 'Bing Shopping - include natural product synonyms. Use {FINISH_NAME} placeholder.',
+    shopify: 'Shopify - customer already clicked, convince them to buy. Do NOT include specific finish names.',
   }
 
   const context = platformContext[platform] || platform
 
-  return `You are improving a product ${contentType} based on reviewer feedback.
+  return `You are improving a product ${contentType} TEMPLATE based on reviewer feedback.
 
 PLATFORM: ${context}
 
@@ -158,16 +176,22 @@ ${feedback}
 
 ${evidenceMarkdown}
 
+CRITICAL TEMPLATE RULES:
+- For Google/Bing: Use {FINISH_NAME} placeholder where finish should appear (NOT a specific finish like "Antique Brass")
+- For Google/Bing: Optionally use {FINISH_DESCRIPTION} for finish description
+- For Shopify: Do NOT include any finish name
+- This template will be used for ALL 28 finish variants
+
 Remember the buyer questions you're answering:
 - "Will this look good in MY bathroom?"
 - "Will this match my other fixtures?"
 - "Is this actually better than the $20 Amazon option?"
 - "Will this last? Is it quality?"
 
-Generate an improved ${contentType} that addresses the feedback while answering these buyer questions.
+Generate an improved ${contentType} template that addresses the feedback while answering these buyer questions.
 Every factual claim must be traceable to the evidence table above.
 
-Respond with ONLY the improved ${contentType} text, no additional explanation or formatting.`
+Respond with ONLY the improved ${contentType} template text, no additional explanation or formatting.`
 }
 
 /**
@@ -180,31 +204,35 @@ function buildSimplePrompt(
 ): string {
   const platformContext: Record<string, Record<string, string>> = {
     google: {
-      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end.',
-      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Weave the finish naturally. Plain text only.',
+      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, {FINISH_NAME} placeholder, and "Allied Brass" at end.',
+      description: 'Google Shopping description - write for a human scanning Shopping ads. Use {FINISH_NAME} placeholder where finish should appear. Plain text only.',
     },
     bing: {
-      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end.',
-      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Plain text only.',
+      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Use {FINISH_NAME} placeholder and include "Allied Brass" at end.',
+      description: 'Bing Shopping description - write for humans, include product synonyms naturally. Use {FINISH_NAME} placeholder. Plain text only.',
     },
     shopify: {
-      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying.',
-      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets.',
+      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying. Do NOT include finish name.',
+      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets. Do NOT include specific finish names.',
     },
   }
 
   const context = platformContext[platform]?.[contentType] || ''
 
-  return `Generate a ${contentType} for this product.
+  return `Generate a ${contentType} TEMPLATE for this product that works for ALL 28 finish variants.
 
 CONTEXT: ${context}
 
 PRODUCT DATA:
 ${JSON.stringify(productData, null, 2)}
 
+CRITICAL:
+- For Google/Bing: Use {FINISH_NAME} placeholder (NOT a specific finish like "Antique Brass")
+- For Shopify: Do NOT include any finish name
+
 Remember: Write for a human who's about to spend $80 and wants to feel good about it.
 
-Respond with ONLY the ${contentType} text, no additional explanation or formatting.`
+Respond with ONLY the ${contentType} template text, no additional explanation or formatting.`
 }
 
 /**
@@ -218,14 +246,14 @@ function buildSimpleFeedbackPrompt(
   feedback: string
 ): string {
   const platformContext: Record<string, string> = {
-    google: 'Google Shopping - first impression, make them want to click',
-    bing: 'Bing Shopping - include natural product synonyms',
-    shopify: 'Shopify - customer already clicked, convince them to buy',
+    google: 'Google Shopping - first impression, make them want to click. Use {FINISH_NAME} placeholder.',
+    bing: 'Bing Shopping - include natural product synonyms. Use {FINISH_NAME} placeholder.',
+    shopify: 'Shopify - customer already clicked, convince them to buy. Do NOT include specific finish names.',
   }
 
   const context = platformContext[platform] || platform
 
-  return `You are improving a product ${contentType} based on reviewer feedback.
+  return `You are improving a product ${contentType} TEMPLATE based on reviewer feedback.
 
 PLATFORM: ${context}
 
@@ -238,15 +266,20 @@ ${feedback}
 PRODUCT DATA:
 ${JSON.stringify(productData, null, 2)}
 
+CRITICAL:
+- For Google/Bing: Use {FINISH_NAME} placeholder (NOT a specific finish like "Antique Brass")
+- For Shopify: Do NOT include any finish name
+- This template will be used for ALL 28 finish variants
+
 Remember the buyer questions you're answering:
 - "Will this look good in MY bathroom?"
 - "Will this match my other fixtures?"
 - "Is this actually better than the $20 Amazon option?"
 - "Will this last? Is it quality?"
 
-Generate an improved ${contentType} that addresses the feedback while answering these buyer questions.
+Generate an improved ${contentType} template that addresses the feedback while answering these buyer questions.
 
-Respond with ONLY the improved ${contentType} text, no additional explanation or formatting.`
+Respond with ONLY the improved ${contentType} template text, no additional explanation or formatting.`
 }
 
 type SupabaseErrLike = {
