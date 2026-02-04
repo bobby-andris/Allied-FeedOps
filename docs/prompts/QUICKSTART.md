@@ -406,15 +406,19 @@ Run these checks and report results:
 
 ## 2. VISUAL INSPECTION WITH PLAYWRIGHT
 
-Use the Playwright MCP server to visually verify the implementation:
+First, ensure the local dev server is running: `cd dashboard && npm run dev`
 
-1. Navigate to https://allied-feed-ops.vercel.app/login
+Use the Playwright MCP server to visually verify the implementation on localhost:
+
+1. Navigate to http://localhost:3000/login
 2. Take a screenshot of the login page
 3. Navigate to each page that was modified/created in this implementation
 4. Take screenshots of each page
 5. Report any visual issues, broken layouts, or missing elements
 
-If Playwright can't launch (browser already running), use WebFetch to verify pages load without errors.
+Note: We test locally because changes aren't on production until after we push.
+
+If Playwright can't launch (browser already running), verify the build passes and manually describe what was implemented.
 
 ## 3. GIT STATUS & DIFF REVIEW
 
