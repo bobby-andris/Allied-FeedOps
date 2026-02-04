@@ -35,10 +35,14 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Public routes that don't require auth
-  const publicRoutes = ['/login', '/api']
-  const isPublicRoute = publicRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
+  // - /login is always public
+  // - /api GET requests are public (health checks, read-only queries)
+  // - /api POST/PATCH/DELETE require authentication
+  const isLoginPage = request.nextUrl.pathname.startsWith('/login')
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api')
+  const isReadOnlyMethod = request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS'
+
+  const isPublicRoute = isLoginPage || (isApiRoute && isReadOnlyMethod)
 
   // If not logged in and trying to access protected route, redirect to login
   if (!user && !isPublicRoute) {
