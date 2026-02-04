@@ -45,6 +45,7 @@
   - 09: Competitor intelligence (`/competitors` page, SERP analysis, marketplace scraping via Apify MCP)
   - 19: Evidence table for rich product context (product_catalog table, evidence builder, vision support)
   - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection)
+  - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
 
 ## Supabase schema (tables we rely on)
 
@@ -57,6 +58,8 @@
 - `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
 - `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
 - `product_catalog` (75,770 variants with full product data for evidence table - narrative_copy, bullets, dimensions, images)
+- `generated_content` (title/description content with baseline_content, candidate_content, quality_score per platform)
+- `regeneration_history` (prompt audit trail with system_prompt, user_prompt, model_version, prompt_hash)
 - `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking)
 - `lifestyle_image_selections` (audit trail for image selection decisions)
 
@@ -95,6 +98,8 @@ GMC offer IDs:
 - Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard)
 - Image approval API: `dashboard/src/app/api/review/images/approve/route.ts`
 - Image selection API: `dashboard/src/app/api/review/images/select/route.ts`
+- Variant approvals API: `dashboard/src/app/api/variants/approvals/route.ts`, `/bulk/route.ts`
+- Variant content utilities: `dashboard/src/lib/variant-content.ts` (generates variant titles/descriptions from base template)
 
 ## Run locally
 

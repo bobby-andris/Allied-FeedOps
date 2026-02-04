@@ -5,6 +5,21 @@ Allied FeedOps is the internal tooling that generates, reviews, and publishes **
 - Microsoft (Bing) Merchant Center
 - Shopify (storefront product content)
 
+## Primary Interface
+
+The **Next.js Dashboard** at `https://allied-feed-ops.vercel.app` is the primary interface for:
+- Reviewing and approving content (`/review`, `/review/[sku]`)
+- Generating new content (`/generate`)
+- Managing batches (`/batches`)
+- Competitor intelligence (`/competitors`)
+- Performance tracking (`/performance`)
+
+For dashboard setup and local development, see the [CLAUDE.md](./CLAUDE.md) file.
+
+## Python Pipeline (Legacy)
+
+The Python pipeline below is still available for batch processing and CLI operations.
+
 This repo is built around a **Master SKU → many variants (finishes/options)** model. The “shippable unit” on shopping platforms is the **variant offerId/item_id**, so review and publishing are **variant-first** where possible.
 
 ## Core Concepts
@@ -13,16 +28,14 @@ This repo is built around a **Master SKU → many variants (finishes/options)** 
 - **Master SKU**: the parent identifier you optimize (for example `CL-41-18`).
 - **Variant**: the purchasable option (finish/size/etc). In patch JSON, each variant includes `_meta.finish` and `_meta.option_sku` (and its own `offerId`).
 
-### Baseline vs Candidate
-The Streamlit dashboard compares:
-- **Original (Live)**: current Shopify content
-- **Baseline (Previous)**: previous patch exports (used for comparison)
-- **Candidate (New)**: newly generated patch exports
+### Current (Live) vs Candidate
+The Next.js dashboard compares:
+- **Current (Live)**: actual content from Shopify (`product_catalog.title`, `product_catalog.narrative_copy`)
+- **Candidate**: AI-generated content stored in `generated_content.candidate_content`
 
-By default:
-- Baseline exports: `dashboard_data/lifestyle-eval/`
-- Candidate exports: `dashboard_data/lifestyle-eval-candidate/`
-- Reports live under each exports dir at `reports/`
+The Python pipeline (Streamlit) uses different terminology:
+- **Baseline**: previous patch exports in `dashboard_data/lifestyle-eval/`
+- **Candidate**: newly generated patch exports in `dashboard_data/lifestyle-eval-candidate/`
 
 Defaults are defined in `src/feedops/cli/defaults.py`.
 
