@@ -352,7 +352,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ==================== BUILD PROMPT WITH EVIDENCE ====================
-    let userPrompt: string
+    let userPrompt = '' // Will be assigned below
     let imageUrl: string | null = null
     let useEnhancedPrompt = false
 
@@ -438,14 +438,14 @@ export async function POST(request: NextRequest) {
     // Add vision support for descriptions when image URL is available
     const shouldUseVision = USE_VISION && imageUrl && content_type === 'description'
 
-    if (shouldUseVision) {
+    if (shouldUseVision && imageUrl) {
       // Build multimodal message with text and image
       const contentParts: ChatCompletionContentPart[] = [
         { type: 'text', text: userPrompt },
         {
           type: 'image_url',
           image_url: {
-            url: imageUrl,
+            url: imageUrl, // imageUrl is guaranteed non-null here
             detail: 'low', // Use low detail to reduce token cost (~85 tokens)
           },
         },

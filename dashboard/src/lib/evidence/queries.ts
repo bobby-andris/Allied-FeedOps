@@ -3,7 +3,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Evidence, ProductCatalogRow, EvidenceContext, ProductEvidenceResult } from './types'
+import type { ProductCatalogRow, EvidenceContext, ProductEvidenceResult } from './types'
 import { buildEvidenceTable, formatEvidenceMarkdown } from './builder'
 
 /**
