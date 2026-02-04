@@ -2,23 +2,25 @@
 
 ## Execution Order
 
-### Phase 1: Core Dashboard (Complete First)
+### Phase 1: Core Dashboard Foundation
 1. **Prompt 10** → Dashboard Implementation (07 & 08)
-2. **Prompt 09** → GCP Cloud Run Setup
-3. **Prompt 11** → Production Readiness Audit
 
-### Phase 2: Content Quality Improvements (Priority)
-4. **Prompt 17** → Description Quality Analyzer
-5. **Prompt 13** → Competitor Intelligence Panel
-6. **Prompt 14** → Search Query Insights
-7. **Prompt 18** → Keyword Gap Analysis
+### Phase 2: Content Quality Improvements (Dashboard-Only, No Infrastructure Needed)
+2. **Prompt 17** → Description Quality Analyzer
+3. **Prompt 13** → Competitor Intelligence Panel
+4. **Prompt 14** → Search Query Insights
+5. **Prompt 18** → Keyword Gap Analysis
 
-### Phase 3: Future-Proofing
-8. **Prompt 15** → Agentic Commerce (UCP)
+### Phase 3: Infrastructure for Heavy Processing
+6. **Prompt 09** → GCP Cloud Run Setup
 
-### Phase 4: ROI & Coverage
-9. **Prompt 12** → A/B Testing Dashboard
-10. **Prompt 16** → Multi-Variant Images
+### Phase 4: Future-Proofing & ROI
+7. **Prompt 15** → Agentic Commerce (UCP)
+8. **Prompt 12** → A/B Testing Dashboard
+9. **Prompt 16** → Multi-Variant Images
+
+### Phase 5: Final Audit (ALWAYS LAST)
+10. **Prompt 11** → Production Readiness Audit
 
 After each prompt, run the **Verification & Completion Prompt** below.
 
@@ -53,75 +55,6 @@ Do NOT commit changes until the full implementation is complete and verified.
 
 ---
 
-## Quick Start: Prompt 09 (GCP Cloud Run Setup)
-
-**When to run:** After Prompt 10 - sets up infrastructure for batch generation
-
-**Copy and paste into a new Claude Code chat:**
-
-```
-I need to set up GCP Cloud Run for the FeedOps Python pipeline. Please enter plan mode and use the prompt at docs/prompts/09-gcp-cloud-run-setup.md as your guide.
-
-Key context:
-- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
-- Python pipeline: /src/feedops/
-- Dashboard: /dashboard (needs to call Cloud Run)
-- Supabase project: qezuszwufortkiutlhym
-
-Goals:
-1. Install and configure gcloud-mcp and cloud-run-mcp servers in Claude Code
-2. Create Dockerfile for Python pipeline
-3. Create FastAPI entry point (src/feedops/api/main.py)
-4. Apply database migrations for generation_jobs tables
-5. Document deployment commands (don't actually deploy without my approval)
-
-Important:
-- Do NOT store secrets in code - use environment variables or Secret Manager
-- The FastAPI server should expose /health, /optimize-sku, /regenerate, /batch-optimize
-- Test container locally with Docker before documenting Cloud Run deployment
-
-Use the brainstorming skill for architecture decisions. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
-
-Do NOT commit changes until the full implementation is complete and verified.
-```
-
----
-
-## Quick Start: Prompt 11 (Production Readiness Audit)
-
-**When to run:** After Prompts 09 and 10 - final verification before production
-
-**Copy and paste into a new Claude Code chat:**
-
-```
-I need to run a production readiness audit on the FeedOps dashboard. Please enter plan mode and use the prompt at docs/prompts/11-production-readiness-audit.md as your guide.
-
-Key context:
-- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
-- Dashboard: /dashboard (Next.js 14+)
-- Live URL: https://allied-feed-ops.vercel.app
-- Supabase project: qezuszwufortkiutlhym
-
-Goals:
-1. Security audit (auth, env vars, input validation, CORS)
-2. Performance audit (bundle size, query optimization, caching)
-3. Error handling audit (boundaries, logging, monitoring)
-4. Accessibility audit (WCAG, responsive design)
-5. Manual QA checklist verification
-6. Documentation completeness check
-
-Use the systematic-debugging skill if issues are found. Use parallel subagents for independent audit areas. Create a task list to track findings.
-
-Generate a summary report of all findings with:
-- Critical issues (must fix)
-- Warnings (should fix)
-- Recommendations (nice to have)
-
-Do NOT commit changes until I've reviewed the findings.
-```
-
----
-
 ## Quick Start: Prompt 17 (Description Quality Analyzer)
 
 **When to run:** Priority 1 - Real-time feedback on description quality
@@ -151,6 +84,8 @@ The analyzer should score:
 - Format Adherence (character limits, structure)
 - Brand Voice (confident, premium-appropriate)
 - Factual Accuracy (claims traceable to product data)
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
 
 Do NOT commit changes until the full implementation is complete and verified.
 ```
@@ -187,6 +122,8 @@ Use the Apify MCP tools to:
 - Configure and run scrapers for bathroom fixtures
 - Store results in competitor_listings table
 
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
 Do NOT commit changes until the full implementation is complete and verified.
 ```
 
@@ -220,6 +157,8 @@ SELECT search_term_view.search_term, metrics.impressions, metrics.clicks, metric
 FROM search_term_view
 WHERE segments.date DURING LAST_30_DAYS AND campaign.advertising_channel_type = 'SHOPPING'
 
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
 Do NOT commit changes until the full implementation is complete and verified.
 ```
 
@@ -252,6 +191,42 @@ The scoring algorithm should:
 - Identify SKUs where high-volume queries aren't in titles
 - Prioritize optimization by opportunity size
 - Provide specific keywords to add per SKU
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 09 (GCP Cloud Run Setup)
+
+**When to run:** After content quality prompts - sets up infrastructure for batch generation
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to set up GCP Cloud Run for the FeedOps Python pipeline. Please enter plan mode and use the prompt at docs/prompts/09-gcp-cloud-run-setup.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Python pipeline: /src/feedops/
+- Dashboard: /dashboard (needs to call Cloud Run)
+- Supabase project: qezuszwufortkiutlhym
+
+Goals:
+1. Install and configure gcloud-mcp and cloud-run-mcp servers in Claude Code
+2. Create Dockerfile for Python pipeline
+3. Create FastAPI entry point (src/feedops/api/main.py)
+4. Apply database migrations for generation_jobs tables
+5. Document deployment commands (don't actually deploy without my approval)
+
+Important:
+- Do NOT store secrets in code - use environment variables or Secret Manager
+- The FastAPI server should expose /health, /optimize-sku, /regenerate, /batch-optimize
+- Test container locally with Docker before documenting Cloud Run deployment
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
 
 Do NOT commit changes until the full implementation is complete and verified.
 ```
@@ -288,6 +263,8 @@ This enables AI agents (ChatGPT, Gemini, Copilot, Perplexity) to:
 - Read detailed product information
 - Complete purchases on behalf of users
 
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
 Do NOT commit changes until the full implementation is complete and verified.
 ```
 
@@ -321,6 +298,8 @@ The dashboard should:
 - Track baseline vs post-optimization metrics (CTR, CVR, ROAS)
 - Calculate lift percentage with statistical significance
 - Show overall program ROI estimation
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
 
 Do NOT commit changes until the full implementation is complete and verified.
 ```
@@ -357,7 +336,44 @@ The generator should:
 - Upload to GCS with CDN URLs
 - Push to Shopify variant media via GraphQL
 
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+
 Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 11 (Production Readiness Audit)
+
+**When to run:** ALWAYS LAST - Final verification before production
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to run a production readiness audit on the FeedOps dashboard. Please enter plan mode and use the prompt at docs/prompts/11-production-readiness-audit.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Live URL: https://allied-feed-ops.vercel.app
+- Supabase project: qezuszwufortkiutlhym
+
+Goals:
+1. Security audit (auth, env vars, input validation, CORS)
+2. Performance audit (bundle size, query optimization, caching)
+3. Error handling audit (boundaries, logging, monitoring)
+4. Accessibility audit (WCAG, responsive design)
+5. Manual QA checklist verification
+6. Documentation completeness check
+
+Generate a summary report of all findings with:
+- Critical issues (must fix)
+- Warnings (should fix)
+- Recommendations (nice to have)
+
+Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done. Use the systematic-debugging skill if issues are found.
+
+Do NOT commit changes until I've reviewed the findings.
 ```
 
 ---
