@@ -12,14 +12,22 @@ import type { GoogleSheetsRow, SheetColumnMap, PublishResult, Environment } from
 
 // Default column mapping for GMC supplemental feed
 // Column letters map to 0-indexed positions
+// Note: structured_title/structured_description are used for AI-generated content per GMC policy
 const DEFAULT_COLUMN_MAP: SheetColumnMap = {
   id: 0, // Column A - offer ID (GMC ID)
-  title: 1, // Column B - product title
-  description: 2, // Column C - product description
-  short_title: 3, // Column D - short title for Demand Gen
-  lifestyle_image_link: 4, // Column E - lifestyle image URL
-  custom_label_4: 5, // Column F - FeedOps tracking label
+  title: 1, // Column B - product title (standard)
+  description: 2, // Column C - product description (standard)
+  structured_title: 3, // Column D - structured title (AI-generated)
+  structured_description: 4, // Column E - structured description (AI-generated)
+  digital_source_type: 5, // Column F - 'trained_algorithmic_media' for AI content
+  short_title: 6, // Column G - short title for Demand Gen
+  lifestyle_image_link: 7, // Column H - lifestyle image URL
+  custom_label_4: 8, // Column I - FeedOps tracking label
 }
+
+// Check if we should use structured-only mode (omit standard title/description)
+// When true, GMC will use structured_title/structured_description exclusively
+const USE_STRUCTURED_ONLY = process.env.FEEDOPS_GMC_STRUCTURED_ONLY === '1'
 
 /**
  * Get authenticated Google Sheets client using service account credentials.
@@ -169,6 +177,9 @@ function rowDataToValues(
     ['id', rowData.id],
     ['title', rowData.title],
     ['description', rowData.description],
+    ['structured_title', rowData.structured_title],
+    ['structured_description', rowData.structured_description],
+    ['digital_source_type', rowData.digital_source_type],
     ['short_title', rowData.short_title],
     ['lifestyle_image_link', rowData.lifestyle_image_link],
     ['custom_label_4', rowData.custom_label_4],
@@ -377,10 +388,21 @@ export async function publishToGoogleSheets(
     for (const offerId of offerIds) {
       result.total_variants++
 
+      // Build row data per GMC AI content disclosure policy:
+      // - Always set structured_title/structured_description for AI-generated content
+      // - Set digital_source_type to indicate AI-generated content
+      // - If FEEDOPS_GMC_STRUCTURED_ONLY=1, omit standard title/description
+      //   (otherwise GMC ignores structured fields when standard fields are present)
       const rowData: GoogleSheetsRow = {
         id: offerId,
-        title,
-        description,
+        // Standard fields - omit if structured-only mode
+        title: USE_STRUCTURED_ONLY ? undefined : title,
+        description: USE_STRUCTURED_ONLY ? undefined : description,
+        // Structured fields - always set for AI-generated content
+        structured_title: title,
+        structured_description: description,
+        digital_source_type: 'trained_algorithmic_media',
+        // Other fields
         custom_label_4: trackingLabel,
         lifestyle_image_link: imageUrl,
       }
