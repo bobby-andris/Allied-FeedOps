@@ -15,6 +15,7 @@ import { VariantSelector } from "@/components/review/VariantSelector"
 import { VariantApprovalGrid } from "@/components/review/VariantApprovalGrid"
 import { RegenerateButton } from "@/components/review/RegenerateButton"
 import { RegenerationHistory } from "@/components/review/RegenerationHistory"
+import { QualityAnalyzer } from "@/components/review/QualityAnalyzer"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -255,19 +256,19 @@ function ContentComparison({
   )
 }
 
-function PlatformContent({ 
-  platform, 
+function PlatformContent({
+  platform,
   content,
   sku,
   finish
-}: { 
+}: {
   platform: string
   content: ContentRecord[]
   sku: string
   finish: string | null
 }) {
   const { title, description } = getContentByPlatform(content, platform)
-  
+
   if (!title && !description) {
     return (
       <Card>
@@ -277,33 +278,45 @@ function PlatformContent({
       </Card>
     )
   }
-  
+
   return (
-    <div className="space-y-6">
-      {title && (
-        <ContentComparison
-          label="Title"
-          baseline={title.baseline_content}
-          candidate={title.candidate_content}
-          score={title.quality_score}
-          sku={sku}
-          finish={finish}
-          type="title"
+    <div className="grid grid-cols-[1fr_320px] gap-6">
+      {/* Left: Content comparison cards */}
+      <div className="space-y-6">
+        {title && (
+          <ContentComparison
+            label="Title"
+            baseline={title.baseline_content}
+            candidate={title.candidate_content}
+            score={title.quality_score}
+            sku={sku}
+            finish={finish}
+            type="title"
+            platform={platform as 'google' | 'bing' | 'shopify'}
+          />
+        )}
+        {description && (
+          <ContentComparison
+            label="Description"
+            baseline={description.baseline_content}
+            candidate={description.candidate_content}
+            score={description.quality_score}
+            sku={sku}
+            finish={finish}
+            type="description"
+            platform={platform as 'google' | 'bing' | 'shopify'}
+          />
+        )}
+      </div>
+
+      {/* Right: Quality Analyzer sidebar */}
+      <div className="sticky top-4 self-start">
+        <QualityAnalyzer
+          title={title?.candidate_content || ''}
+          description={description?.candidate_content || ''}
           platform={platform as 'google' | 'bing' | 'shopify'}
         />
-      )}
-      {description && (
-        <ContentComparison
-          label="Description"
-          baseline={description.baseline_content}
-          candidate={description.candidate_content}
-          score={description.quality_score}
-          sku={sku}
-          finish={finish}
-          type="description"
-          platform={platform as 'google' | 'bing' | 'shopify'}
-        />
-      )}
+      </div>
     </div>
   )
 }
