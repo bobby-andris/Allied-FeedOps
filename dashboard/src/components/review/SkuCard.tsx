@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { QualityScore } from '@/components/shared/QualityScore'
 import { Check, X } from 'lucide-react'
+import { skuToUrlPath } from '@/lib/sku-utils'
 
 interface SkuCardProps {
   sku: string
@@ -76,7 +77,7 @@ export function SkuCard({
             {score !== undefined && score !== null && (
               <QualityScore score={score} />
             )}
-            <Link href={`/review/${sku}`}>
+            <Link href={`/review/${skuToUrlPath(sku)}`}>
               <Button variant={status === 'approved' ? 'outline' : 'default'}>
                 {status === 'approved' ? 'View' : 'Review'}
               </Button>

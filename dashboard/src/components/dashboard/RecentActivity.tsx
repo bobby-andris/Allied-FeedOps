@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from 'date-fns'
 import { CheckCircle, XCircle, Upload, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
+import { skuToUrlPath } from '@/lib/sku-utils'
 
 interface Activity {
   type: string
@@ -58,7 +59,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
           <div className="flex-1 min-w-0">
             <p className="truncate">
               <Link
-                href={`/review/${activity.sku}`}
+                href={`/review/${skuToUrlPath(activity.sku)}`}
                 className="font-medium hover:underline"
               >
                 {activity.sku}

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { skuToUrlPath } from "@/lib/sku-utils"
 
 interface SkuWithContent {
   master_sku: string
@@ -188,7 +189,7 @@ export default async function ReviewPage() {
                           </div>
                         </div>
                       )}
-                      <Link href={`/review/${sku.master_sku}`}>
+                      <Link href={`/review/${skuToUrlPath(sku.master_sku)}`}>
                         <Button>Review</Button>
                       </Link>
                     </div>
@@ -218,7 +219,7 @@ export default async function ReviewPage() {
                       </CardTitle>
                       <CardDescription>{sku.content_count} content items</CardDescription>
                     </div>
-                    <Link href={`/review/${sku.master_sku}`}>
+                    <Link href={`/review/${skuToUrlPath(sku.master_sku)}`}>
                       <Button variant="outline">View Details</Button>
                     </Link>
                   </div>
@@ -247,7 +248,7 @@ export default async function ReviewPage() {
                       </CardTitle>
                       <CardDescription>{sku.content_count} content items</CardDescription>
                     </div>
-                    <Link href={`/review/${sku.master_sku}`}>
+                    <Link href={`/review/${skuToUrlPath(sku.master_sku)}`}>
                       <Button>Review</Button>
                     </Link>
                   </div>
@@ -275,7 +276,7 @@ export default async function ReviewPage() {
                         {sku.avg_quality_score}
                       </div>
                     )}
-                    <Link href={`/review/${sku.master_sku}`}>
+                    <Link href={`/review/${skuToUrlPath(sku.master_sku)}`}>
                       <Button variant={sku.approval_status === 'approved' ? 'outline' : 'default'}>
                         {sku.approval_status === 'approved' ? 'View' : 'Review'}
                       </Button>
