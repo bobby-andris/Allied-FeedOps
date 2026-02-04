@@ -10,13 +10,15 @@ import Link from "next/link"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 import { QualityScore } from "@/components/shared/QualityScore"
 import { ApprovalActions } from "@/components/review/ApprovalActions"
-import { ImageGallery } from "@/components/review/ImageGallery"
 import { VariantSelector } from "@/components/review/VariantSelector"
 import { VariantApprovalGrid } from "@/components/review/VariantApprovalGrid"
 import { RegenerateButton } from "@/components/review/RegenerateButton"
 import { RegenerationHistory } from "@/components/review/RegenerationHistory"
 import { QualityAnalyzer } from "@/components/review/QualityAnalyzer"
+import { ProductHeroImage } from "@/components/review/ProductHeroImage"
+import { LifestyleImageReview } from "@/components/review/LifestyleImageReview"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 import {
   Collapsible,
   CollapsibleContent,
@@ -41,8 +43,31 @@ interface ImageRecord {
   variation_index: number
   image_url: string | null
   thumbnail_url: string | null
+  prompt: string | null
   score: number | null
-  selected: boolean
+  // Selection tracking
+  ai_selected: boolean
+  user_selected: boolean
+  use_for_master: boolean
+  // Approval tracking
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
+  // Variant association
+  finish: string | null
+  finish_code: string | null
+  // GMC tracking
+  gmc_pushed_at: string | null
+  gmc_offer_id: string | null
+  created_at: string
+}
+
+interface ProductImageData {
+  mainImageUrl: string | null
+  additionalImages: (string | null)[]
+  shopifyProductUrl: string | null
+  variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
 interface ApprovalRecord {
@@ -159,6 +184,7 @@ interface SkuReviewClientProps {
   approval: ApprovalRecord | null
   variants: VariantIndex[]
   variantApprovals: VariantApproval[]
+  productImages: ProductImageData | null
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -328,8 +354,10 @@ export function SkuReviewClient({
   approval,
   variants,
   variantApprovals,
+  productImages,
 }: SkuReviewClientProps) {
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
+  const router = useRouter()
   
   // Get unique platforms and calculate overall score
   const platforms = [...new Set(content.map(c => c.platform))]
@@ -385,6 +413,27 @@ export function SkuReviewClient({
           </div>
         </div>
       </div>
+
+      {/* Product Hero Image */}
+      {productImages && (
+        <div className="mb-6">
+          <ProductHeroImage
+            mainImageUrl={
+              selectedFinish && productImages.variantImages[selectedFinish]
+                ? productImages.variantImages[selectedFinish].mainImageUrl
+                : productImages.mainImageUrl
+            }
+            additionalImages={
+              selectedFinish && productImages.variantImages[selectedFinish]
+                ? productImages.variantImages[selectedFinish].additionalImages
+                : productImages.additionalImages
+            }
+            productTitle={`SKU ${sku}`}
+            finish={selectedFinish}
+            shopifyProductUrl={productImages.shopifyProductUrl}
+          />
+        </div>
+      )}
 
       {/* Variant Selector */}
       {hasVariants && (
@@ -442,27 +491,16 @@ export function SkuReviewClient({
       </Tabs>
 
       {/* Lifestyle Images Section */}
-      {images && images.length > 0 && (
-        <>
-          <Separator className="my-8" />
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Lifestyle Images</CardTitle>
-                  <CardDescription>
-                    {images.length} image variation(s) available - Click to enlarge and select
-                  </CardDescription>
-                </div>
-                <ApprovalActions sku={sku} finish={selectedFinish} type="image" size="sm" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ImageGallery images={images} sku={sku} />
-            </CardContent>
-          </Card>
-        </>
-      )}
+      <Separator className="my-8" />
+      <LifestyleImageReview
+        sku={sku}
+        images={images}
+        variants={variants
+          .filter(v => v.finish && v.finish_code)
+          .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+        selectedFinish={selectedFinish}
+        onRefresh={() => router.refresh()}
+      />
 
       {/* Approval Status */}
       {currentApproval && (

@@ -20,8 +20,31 @@ interface ImageRecord {
   variation_index: number
   image_url: string | null
   thumbnail_url: string | null
+  prompt: string | null
   score: number | null
-  selected: boolean
+  // Selection tracking
+  ai_selected: boolean
+  user_selected: boolean
+  use_for_master: boolean
+  // Approval tracking
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
+  // Variant association
+  finish: string | null
+  finish_code: string | null
+  // GMC tracking
+  gmc_pushed_at: string | null
+  gmc_offer_id: string | null
+  created_at: string
+}
+
+interface ProductImageData {
+  mainImageUrl: string | null
+  additionalImages: (string | null)[]
+  shopifyProductUrl: string | null
+  variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
 interface ApprovalRecord {
@@ -87,17 +110,81 @@ async function getSkuData(sku: string) {
     .select('*')
     .eq('master_sku', sku)
     .order('finish', { ascending: true })
-  
+
   if (variantApprovalsError) {
     console.error('Error fetching variant approvals:', variantApprovalsError)
   }
-  
+
+  // Get product images from product_catalog
+  const { data: productCatalog, error: productCatalogError } = await supabase
+    .from('product_catalog')
+    .select('finish_code, main_image_url, alt_image_1, alt_image_2, alt_image_3, alt_image_4')
+    .eq('master_sku', sku)
+    .order('position', { ascending: true })
+
+  if (productCatalogError) {
+    console.error('Error fetching product catalog:', productCatalogError)
+  }
+
+  // Get Shopify product ID from variant_index (if available)
+  const { data: variantForShopify } = await supabase
+    .from('variant_index')
+    .select('shopify_product_id')
+    .eq('master_sku', sku)
+    .not('shopify_product_id', 'is', null)
+    .limit(1)
+    .single()
+
+  // Build product images data structure
+  let productImages: ProductImageData | null = null
+  if (productCatalog && productCatalog.length > 0) {
+    const firstProduct = productCatalog[0]
+    const shopifyProductUrl = variantForShopify?.shopify_product_id
+      ? `https://admin.shopify.com/store/allied-brass/products/${variantForShopify.shopify_product_id}`
+      : null
+
+    // Build variant images map
+    const variantImagesMap: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }> = {}
+    for (const product of productCatalog) {
+      if (product.finish_code) {
+        variantImagesMap[product.finish_code] = {
+          mainImageUrl: product.main_image_url,
+          additionalImages: [
+            product.alt_image_1,
+            product.alt_image_2,
+            product.alt_image_3,
+            product.alt_image_4,
+          ],
+        }
+      }
+    }
+
+    productImages = {
+      mainImageUrl: firstProduct.main_image_url,
+      additionalImages: [
+        firstProduct.alt_image_1,
+        firstProduct.alt_image_2,
+        firstProduct.alt_image_3,
+        firstProduct.alt_image_4,
+      ],
+      shopifyProductUrl,
+      variantImages: variantImagesMap,
+    }
+  }
+
+  // Transform images to ensure approval_status has a valid value
+  const transformedImages: ImageRecord[] = (images || []).map(img => ({
+    ...img,
+    approval_status: (img.approval_status as 'pending' | 'approved' | 'rejected') || 'pending',
+  }))
+
   return {
     content: (content || []) as ContentRecord[],
-    images: (images || []) as ImageRecord[],
+    images: transformedImages,
     approval: approval as ApprovalRecord | null,
     variants: (variants || []) as VariantIndex[],
     variantApprovals: (variantApprovals || []) as VariantApproval[],
+    productImages,
   }
 }
 
@@ -107,8 +194,8 @@ export default async function SkuReviewPage({
   params: Promise<{ sku: string }>
 }) {
   const { sku } = await params
-  const { content, images, approval, variants, variantApprovals } = await getSkuData(sku)
-  
+  const { content, images, approval, variants, variantApprovals, productImages } = await getSkuData(sku)
+
   if (content.length === 0) {
     notFound()
   }
@@ -121,6 +208,7 @@ export default async function SkuReviewPage({
       approval={approval}
       variants={variants}
       variantApprovals={variantApprovals}
+      productImages={productImages}
     />
   )
 }

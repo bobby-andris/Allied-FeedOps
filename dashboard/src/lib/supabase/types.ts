@@ -107,10 +107,41 @@ export interface GeneratedImage {
   master_sku: string
   variation_index: number
   image_url: string | null
+  thumbnail_url: string | null
   prompt: string | null
+  generation_model: string | null
+  generation_timestamp: string | null
   score: number | null
-  selected: boolean
+  score_breakdown: Record<string, number> | null
+  // Selection tracking
+  ai_selected: boolean        // AI's recommendation based on scoring
+  user_selected: boolean      // User's actual choice for this variant
+  use_for_master: boolean     // If this variant image should also be used for master SKU
+  // Approval tracking
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
+  // Variant association
+  finish: string | null
+  finish_code: string | null
+  // GMC tracking
+  gmc_pushed_at: string | null
+  gmc_offer_id: string | null
   created_at: string
+}
+
+// Alias for enhanced usage in review components
+export type EnhancedImageRecord = GeneratedImage
+
+export interface LifestyleImageSelection {
+  id: string
+  master_sku: string
+  finish: string | null
+  selected_image_id: string | null
+  selection_reason: string | null
+  selected_by: string | null
+  selected_at: string
 }
 
 export interface PerformanceSnapshot {
