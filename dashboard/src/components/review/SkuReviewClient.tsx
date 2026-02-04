@@ -70,6 +70,12 @@ interface ProductImageData {
   variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
+// Current production content from product_catalog (what's live on Shopify)
+interface CurrentProductionContent {
+  title: string | null
+  description: string | null
+}
+
 interface ApprovalRecord {
   master_sku: string
   approval_status: string
@@ -185,6 +191,7 @@ interface SkuReviewClientProps {
   variants: VariantIndex[]
   variantApprovals: VariantApproval[]
   productImages: ProductImageData | null
+  currentProduction: CurrentProductionContent | null
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -195,18 +202,18 @@ function getContentByPlatform(content: ContentRecord[], platform: string) {
   }
 }
 
-function ContentComparison({ 
-  label, 
-  baseline, 
-  candidate, 
+function ContentComparison({
+  label,
+  currentLive,
+  candidate,
   score,
   sku,
   finish,
   type,
   platform
-}: { 
+}: {
   label: string
-  baseline: string | null
+  currentLive: string | null  // What's currently live on the website/feed
   candidate: string | null
   score: number | null
   sku: string
@@ -236,13 +243,13 @@ function ContentComparison({
       <CardContent>
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <div className="text-sm font-medium text-muted-foreground mb-2">Baseline</div>
+            <div className="text-sm font-medium text-muted-foreground mb-2">Current (Live)</div>
             <div className="p-4 rounded-lg bg-muted/50 border whitespace-pre-wrap min-h-[100px]">
-              {baseline || <span className="text-muted-foreground italic">No baseline content</span>}
+              {currentLive || <span className="text-muted-foreground italic">No current content found</span>}
             </div>
-            {baseline && (
+            {currentLive && (
               <div className="text-xs text-muted-foreground mt-2">
-                {baseline.length} characters
+                {currentLive.length} characters
               </div>
             )}
           </div>
@@ -268,7 +275,7 @@ function ContentComparison({
             currentCandidate={candidate}
           />
         </div>
-        
+
         {/* Regeneration History */}
         <div className="mt-4 pt-4 border-t">
           <RegenerationHistory
@@ -286,12 +293,14 @@ function PlatformContent({
   platform,
   content,
   sku,
-  finish
+  finish,
+  currentProduction
 }: {
   platform: string
   content: ContentRecord[]
   sku: string
   finish: string | null
+  currentProduction: CurrentProductionContent | null
 }) {
   const { title, description } = getContentByPlatform(content, platform)
 
@@ -312,7 +321,7 @@ function PlatformContent({
         {title && (
           <ContentComparison
             label="Title"
-            baseline={title.baseline_content}
+            currentLive={currentProduction?.title || null}
             candidate={title.candidate_content}
             score={title.quality_score}
             sku={sku}
@@ -324,7 +333,7 @@ function PlatformContent({
         {description && (
           <ContentComparison
             label="Description"
-            baseline={description.baseline_content}
+            currentLive={currentProduction?.description || null}
             candidate={description.candidate_content}
             score={description.quality_score}
             sku={sku}
@@ -355,6 +364,7 @@ export function SkuReviewClient({
   variants,
   variantApprovals,
   productImages,
+  currentProduction,
 }: SkuReviewClientProps) {
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
   const router = useRouter()
@@ -473,19 +483,19 @@ export function SkuReviewClient({
 
         {platforms.includes('google') && (
           <TabsContent value="google" className="space-y-6">
-            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} />
+            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
           </TabsContent>
         )}
 
         {platforms.includes('bing') && (
           <TabsContent value="bing" className="space-y-6">
-            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} />
+            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
           </TabsContent>
         )}
 
         {platforms.includes('shopify') && (
           <TabsContent value="shopify" className="space-y-6">
-            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} />
+            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
           </TabsContent>
         )}
       </Tabs>

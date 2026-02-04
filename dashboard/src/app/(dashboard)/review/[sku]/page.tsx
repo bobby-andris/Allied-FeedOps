@@ -47,6 +47,12 @@ interface ProductImageData {
   variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
+// Current production content from product_catalog (what's live on Shopify)
+interface CurrentProductionContent {
+  title: string | null
+  description: string | null  // narrative_copy from product_catalog
+}
+
 interface ApprovalRecord {
   master_sku: string
   approval_status: string
@@ -115,10 +121,10 @@ async function getSkuData(sku: string) {
     console.error('Error fetching variant approvals:', variantApprovalsError)
   }
 
-  // Get product images from product_catalog
+  // Get product images and current production content from product_catalog
   const { data: productCatalog, error: productCatalogError } = await supabase
     .from('product_catalog')
-    .select('finish_code, main_image_url, alt_image_1, alt_image_2, alt_image_3, alt_image_4')
+    .select('finish_code, main_image_url, alt_image_1, alt_image_2, alt_image_3, alt_image_4, title, narrative_copy')
     .eq('master_sku', sku)
     .order('position', { ascending: true })
 
@@ -135,8 +141,9 @@ async function getSkuData(sku: string) {
     .limit(1)
     .single()
 
-  // Build product images data structure
+  // Build product images data structure and current production content
   let productImages: ProductImageData | null = null
+  let currentProduction: CurrentProductionContent | null = null
   if (productCatalog && productCatalog.length > 0) {
     const firstProduct = productCatalog[0]
     const shopifyProductUrl = variantForShopify?.shopify_product_id
@@ -170,6 +177,12 @@ async function getSkuData(sku: string) {
       shopifyProductUrl,
       variantImages: variantImagesMap,
     }
+
+    // Current production content (what's live on Shopify)
+    currentProduction = {
+      title: firstProduct.title,
+      description: firstProduct.narrative_copy,
+    }
   }
 
   // Transform images to ensure approval_status has a valid value
@@ -185,6 +198,7 @@ async function getSkuData(sku: string) {
     variants: (variants || []) as VariantIndex[],
     variantApprovals: (variantApprovals || []) as VariantApproval[],
     productImages,
+    currentProduction,
   }
 }
 
@@ -194,7 +208,7 @@ export default async function SkuReviewPage({
   params: Promise<{ sku: string }>
 }) {
   const { sku } = await params
-  const { content, images, approval, variants, variantApprovals, productImages } = await getSkuData(sku)
+  const { content, images, approval, variants, variantApprovals, productImages, currentProduction } = await getSkuData(sku)
 
   if (content.length === 0) {
     notFound()
@@ -209,6 +223,7 @@ export default async function SkuReviewPage({
       variants={variants}
       variantApprovals={variantApprovals}
       productImages={productImages}
+      currentProduction={currentProduction}
     />
   )
 }
