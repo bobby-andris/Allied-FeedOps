@@ -120,6 +120,11 @@ export async function GET(request: NextRequest) {
         avgPosition: Math.round(stats.avgPosition * 10) / 10,
       }))
 
+    // 6. Get the most recent search query used (from completed SERP jobs)
+    const latestSerpJob = (recentJobs || []).find(
+      j => j.job_type === 'serp' && j.status === 'completed' && j.search_query
+    )
+
     return NextResponse.json({
       listings: listings || [],
       patterns: patterns || [],
@@ -128,6 +133,7 @@ export async function GET(request: NextRequest) {
       domainStats: sortedDomains,
       lastScraped: listings?.[0]?.scraped_at || null,
       totalListings: listings?.length || 0,
+      searchQuery: latestSerpJob?.search_query || null,
     })
   } catch (error) {
     console.error('Competitors API error:', error)

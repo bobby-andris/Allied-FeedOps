@@ -49,6 +49,7 @@ interface CompetitorData {
   domainStats: { domain: string; count: number; avgPosition: number }[]
   lastScraped: string | null
   totalListings: number
+  searchQuery: string | null
 }
 
 export default function CompetitorsPage() {
@@ -281,6 +282,21 @@ export default function CompetitorsPage() {
         ) : (
           <>
             <TabsContent value="serp" className="space-y-6">
+              {/* Search Query Display */}
+              {data?.searchQuery && (
+                <Card className="bg-muted/50">
+                  <CardContent className="py-3">
+                    <div className="flex items-center gap-3">
+                      <Search className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <span className="text-sm text-muted-foreground">Search query used: </span>
+                        <span className="font-medium">{data.searchQuery}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <div className="grid grid-cols-3 gap-6">
                 {/* SERP Overview */}
                 <div className="col-span-1 space-y-4">
@@ -413,32 +429,40 @@ export default function CompetitorsPage() {
             <CardTitle className="text-sm">Recent Scrape Jobs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {data.recentJobs.slice(0, 5).map((job) => (
                 <div
                   key={job.id}
-                  className="flex items-center justify-between text-sm"
+                  className="border-b border-muted pb-2 last:border-0 last:pb-0"
                 >
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        job.status === 'completed'
-                          ? 'default'
-                          : job.status === 'failed'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                    >
-                      {job.status}
-                    </Badge>
-                    <span className="text-muted-foreground">
-                      {job.source} ({job.job_type})
-                    </span>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          job.status === 'completed'
+                            ? 'default'
+                            : job.status === 'failed'
+                              ? 'destructive'
+                              : 'secondary'
+                        }
+                      >
+                        {job.status}
+                      </Badge>
+                      <span className="text-muted-foreground">
+                        {job.source} ({job.job_type})
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {job.listings_count} listings •{' '}
+                      {new Date(job.created_at).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {job.listings_count} listings •{' '}
-                    {new Date(job.created_at).toLocaleDateString()}
-                  </div>
+                  {job.search_query && (
+                    <div className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
+                      <Search className="h-3 w-3" />
+                      <span className="truncate max-w-md">{job.search_query}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
