@@ -30,14 +30,11 @@ export function RegenerateButton({
   const [isRegenerating, setIsRegenerating] = useState(false)
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
 
-  const handleSimpleRegenerate = async () => {
-    if (!currentContent) {
-      toast.error('No content to regenerate')
-      return
-    }
+  const isInitialGeneration = !currentContent
 
+  const handleSimpleRegenerate = async () => {
     setIsRegenerating(true)
-    toast.info('Regenerating with latest model...')
+    toast.info(isInitialGeneration ? 'Generating content...' : 'Regenerating with latest model...')
 
     try {
       const response = await fetch('/api/regenerate', {
@@ -62,8 +59,8 @@ export function RegenerateButton({
         throw new Error((data.error || 'Failed to regenerate') + extra)
       }
 
-      toast.success(`${contentType === 'title' ? 'Title' : 'Description'} regenerated successfully`)
-      
+      toast.success(`${contentType === 'title' ? 'Title' : 'Description'} ${isInitialGeneration ? 'generated' : 'regenerated'} successfully`)
+
       // Trigger parent refresh
       onRegenerate?.()
       
@@ -78,11 +75,6 @@ export function RegenerateButton({
   }
 
   const handleFeedbackRegenerate = async (feedback: string, feedbackType?: string) => {
-    if (!currentContent) {
-      toast.error('No content to regenerate')
-      return
-    }
-
     setIsRegenerating(true)
     toast.info('Regenerating with feedback...')
 
@@ -137,7 +129,7 @@ export function RegenerateButton({
           <Button
             variant="outline"
             size="sm"
-            disabled={isRegenerating || !currentContent}
+            disabled={isRegenerating}
             className="gap-1"
           >
             {isRegenerating ? (
@@ -145,7 +137,7 @@ export function RegenerateButton({
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
-            Regenerate
+            {isInitialGeneration ? 'Generate' : 'Regenerate'}
             <ChevronDown className="h-3 w-3" />
           </Button>
         </DropdownMenuTrigger>
@@ -155,12 +147,12 @@ export function RegenerateButton({
             disabled={isRegenerating}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Regenerate
-            <span className="text-xs text-muted-foreground ml-2">Same prompt</span>
+            {isInitialGeneration ? 'Generate' : 'Regenerate'}
+            <span className="text-xs text-muted-foreground ml-2">{isInitialGeneration ? 'Create new' : 'Same prompt'}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setFeedbackModalOpen(true)}
-            disabled={isRegenerating}
+            disabled={isRegenerating || isInitialGeneration}
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Regenerate with Feedback
