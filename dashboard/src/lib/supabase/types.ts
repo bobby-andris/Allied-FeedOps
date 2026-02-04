@@ -66,8 +66,37 @@ export interface GeneratedContent {
   baseline_content: string | null
   candidate_content: string | null
   quality_score: number | null
+  version: number
+  is_current: boolean
   created_at: string
   updated_at: string
+}
+
+export type FeedbackPreset = 
+  | 'shorter' 
+  | 'longer' 
+  | 'more_specific' 
+  | 'different_angle' 
+  | 'more_keywords' 
+  | 'less_promotional' 
+  | 'better_hook'
+
+export interface RegenerationHistory {
+  id: string
+  master_sku: string
+  content_type: 'title' | 'description'
+  platform: 'google' | 'bing' | 'shopify'
+  mode: 'simple' | 'with_feedback'
+  feedback_text: string | null
+  feedback_preset: FeedbackPreset | null
+  previous_content: string | null
+  new_content: string | null
+  model_version: string | null
+  quality_score_before: number | null
+  quality_score_after: number | null
+  created_at: string
+  created_by: string | null
+  generated_content_id: string | null
 }
 
 export interface GeneratedImage {
@@ -174,6 +203,11 @@ export interface Database {
         Row: VariantIndex
         Insert: Omit<VariantIndex, 'id'>
         Update: Partial<Omit<VariantIndex, 'id'>>
+      }
+      regeneration_history: {
+        Row: RegenerationHistory
+        Insert: Omit<RegenerationHistory, 'id' | 'created_at'>
+        Update: Partial<Omit<RegenerationHistory, 'id' | 'created_at'>>
       }
     }
   }

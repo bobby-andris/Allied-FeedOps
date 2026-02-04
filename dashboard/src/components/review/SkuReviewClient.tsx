@@ -13,6 +13,8 @@ import { ApprovalActions } from "@/components/review/ApprovalActions"
 import { ImageGallery } from "@/components/review/ImageGallery"
 import { VariantSelector } from "@/components/review/VariantSelector"
 import { VariantApprovalGrid } from "@/components/review/VariantApprovalGrid"
+import { RegenerateButton } from "@/components/review/RegenerateButton"
+import { RegenerationHistory } from "@/components/review/RegenerationHistory"
 import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
 
 interface ContentRecord {
@@ -69,7 +71,8 @@ function ContentComparison({
   score,
   sku,
   finish,
-  type
+  type,
+  platform
 }: { 
   label: string
   baseline: string | null
@@ -78,6 +81,7 @@ function ContentComparison({
   sku: string
   finish: string | null
   type: 'title' | 'description'
+  platform: 'google' | 'bing' | 'shopify'
 }) {
   return (
     <Card>
@@ -87,7 +91,15 @@ function ContentComparison({
             <CardTitle>{label}</CardTitle>
             {score !== null && <QualityScore score={score} size="sm" />}
           </div>
-          <ApprovalActions sku={sku} finish={finish} type={type} size="sm" />
+          <div className="flex items-center gap-2">
+            <RegenerateButton
+              sku={sku}
+              contentType={type}
+              platform={platform}
+              currentContent={candidate}
+            />
+            <ApprovalActions sku={sku} finish={finish} type={type} size="sm" />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -114,6 +126,15 @@ function ContentComparison({
               </div>
             )}
           </div>
+        </div>
+        
+        {/* Regeneration History */}
+        <div className="mt-4 pt-4 border-t">
+          <RegenerationHistory
+            sku={sku}
+            contentType={type}
+            platform={platform}
+          />
         </div>
       </CardContent>
     </Card>
@@ -154,6 +175,7 @@ function PlatformContent({
           sku={sku}
           finish={finish}
           type="title"
+          platform={platform as 'google' | 'bing' | 'shopify'}
         />
       )}
       {description && (
@@ -165,6 +187,7 @@ function PlatformContent({
           sku={sku}
           finish={finish}
           type="description"
+          platform={platform as 'google' | 'bing' | 'shopify'}
         />
       )}
     </div>
