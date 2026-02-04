@@ -27,9 +27,9 @@ interface ImageRecord {
 interface ApprovalRecord {
   master_sku: string
   approval_status: string
-  title_approved: boolean | null
-  description_approved: boolean | null
-  image_approved: boolean | null
+  title_approved: number | null  // 1 = approved, 0 = rejected, null = not reviewed
+  description_approved: number | null
+  image_approved: number | null
   notes: string | null
 }
 

@@ -1,15 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { FeedbackPreset } from '@/lib/supabase/types'
+import { createAdminClient } from '@/lib/supabase/admin'
+import crypto from 'node:crypto'
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Model to use for generation
-const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-4o'
+// Model to use for generation (default aligns with Python backend)
+const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
 
 // Feedback preset descriptions
 const FEEDBACK_PRESETS: Record<FeedbackPreset, string> = {
@@ -145,6 +146,35 @@ Generate an improved ${contentType} that addresses the feedback while answering 
 Respond with ONLY the improved ${contentType} text, no additional explanation or formatting.`
 }
 
+type SupabaseErrLike = {
+  code?: string | null
+  message?: string
+  details?: string | null
+  hint?: string | null
+}
+
+function logSupabaseError(context: string, err: SupabaseErrLike | null | undefined) {
+  if (!err) return
+  console.error(context, {
+    code: err.code ?? null,
+    message: err.message ?? 'Unknown error',
+    details: err.details ?? null,
+    hint: err.hint ?? null,
+  })
+}
+
+function errorResponse(
+  status: number,
+  payload: { error: string; code?: string | null; details?: string | null; hint?: string | null; step?: string }
+) {
+  // Never leak DB internals in production responses.
+  const isProd = process.env.NODE_ENV === 'production'
+  if (isProd) {
+    return NextResponse.json({ error: payload.error }, { status })
+  }
+  return NextResponse.json(payload, { status })
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Validate OpenAI API key
@@ -173,7 +203,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
+
+    // Quick schema sanity check (migration 004 must be applied)
+    const schemaCheck = await supabase
+      .from('generated_content')
+      .select('id,version,is_current')
+      .limit(1)
+
+    if (schemaCheck.error) {
+      logSupabaseError('Supabase schema check failed (generated_content)', schemaCheck.error)
+      return errorResponse(500, {
+        error:
+          'Supabase schema is out of date for regeneration (run migration 004_regeneration_history.sql)',
+        code: schemaCheck.error.code ?? null,
+        details: schemaCheck.error.message ?? null,
+        hint: schemaCheck.error.hint ?? null,
+        step: 'schema_check_generated_content',
+      })
+    }
 
     // Get product data from variant_index
     const { data: variantData, error: variantError } = await supabase
@@ -181,21 +229,24 @@ export async function POST(request: NextRequest) {
       .select('*')
       .eq('master_sku', master_sku)
       .limit(1)
-      .single()
+      .maybeSingle()
 
-    if (variantError && variantError.code !== 'PGRST116') {
-      console.error('Failed to fetch variant data:', variantError)
+    if (variantError) {
+      logSupabaseError('Failed to fetch variant data', variantError)
     }
 
     // Get current content for comparison (needed for history logging)
-    const { data: currentContentData } = await supabase
+    const { data: currentContentData, error: currentContentError } = await supabase
       .from('generated_content')
       .select('*')
       .eq('master_sku', master_sku)
       .eq('platform', platform)
       .eq('content_type', content_type)
-      .eq('is_current', true)
-      .single()
+      .maybeSingle()
+
+    if (currentContentError) {
+      logSupabaseError('Failed to fetch current generated content', currentContentError)
+    }
 
     // Build product data object for prompt
     const productData = {
@@ -226,7 +277,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const promptHash = crypto
+      .createHash('sha256')
+      .update(`${SYSTEM_PROMPT}\n\n${userPrompt}`, 'utf8')
+      .digest('hex')
+
     // Call OpenAI
+    const tokenParams = MODEL.startsWith('gpt-5')
+      ? ({ max_completion_tokens: content_type === 'title' ? 200 : 1000 } as const)
+      : ({ max_tokens: content_type === 'title' ? 200 : 1000 } as const)
+
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: [
@@ -234,7 +294,8 @@ export async function POST(request: NextRequest) {
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.7,
-      max_tokens: content_type === 'title' ? 200 : 1000,
+      stream: false,
+      ...tokenParams,
     })
 
     const newContent = completion.choices[0]?.message?.content?.trim()
@@ -247,39 +308,71 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current version number
-    const currentVersion = currentContentData?.version || 0
+    const currentVersion = currentContentData?.version ?? 0
 
-    // Mark current content as not current
+    // Update-in-place when row exists (table has UNIQUE(master_sku, platform, content_type))
+    let savedContentId: string | null = null
+    let nextVersion = currentVersion + 1
+
     if (currentContentData) {
-      await supabase
+      const { data: updated, error: updateError } = await supabase
         .from('generated_content')
-        .update({ is_current: false })
+        .update({
+          candidate_content: newContent,
+          version: nextVersion,
+          is_current: true,
+          generation_model: MODEL,
+          generation_prompt_hash: promptHash,
+          generation_timestamp: new Date().toISOString(),
+        })
         .eq('id', currentContentData.id)
-    }
+        .select('id')
+        .single()
 
-    // Insert or update generated content with new version
-    const { data: newContentRecord, error: insertError } = await supabase
-      .from('generated_content')
-      .upsert({
-        master_sku,
-        platform,
-        content_type,
-        candidate_content: newContent,
-        baseline_content: currentContentData?.baseline_content,
-        version: currentVersion + 1,
-        is_current: true,
-      }, {
-        onConflict: 'master_sku,platform,content_type',
-      })
-      .select()
-      .single()
+      if (updateError) {
+        logSupabaseError('Failed to update generated_content', updateError)
+        return errorResponse(500, {
+          error: 'Failed to save generated content',
+          code: updateError.code ?? null,
+          details: updateError.message ?? null,
+          hint: updateError.hint ?? null,
+          step: 'generated_content_update',
+        })
+      }
 
-    if (insertError) {
-      console.error('Failed to save generated content:', insertError)
-      return NextResponse.json(
-        { error: 'Failed to save generated content' },
-        { status: 500 }
-      )
+      savedContentId = updated?.id ?? null
+    } else {
+      // First-time insert for this SKU/platform/content_type
+      nextVersion = 1
+      const { data: inserted, error: insertError } = await supabase
+        .from('generated_content')
+        .insert({
+          master_sku,
+          platform,
+          content_type,
+          candidate_content: newContent,
+          baseline_content: null,
+          version: nextVersion,
+          is_current: true,
+          generation_model: MODEL,
+          generation_prompt_hash: promptHash,
+          generation_timestamp: new Date().toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (insertError) {
+        logSupabaseError('Failed to insert generated_content', insertError)
+        return errorResponse(500, {
+          error: 'Failed to save generated content',
+          code: insertError.code ?? null,
+          details: insertError.message ?? null,
+          hint: insertError.hint ?? null,
+          step: 'generated_content_insert',
+        })
+      }
+
+      savedContentId = inserted?.id ?? null
     }
 
     // Log to regeneration history
@@ -295,28 +388,37 @@ export async function POST(request: NextRequest) {
         previous_content: currentContentData?.candidate_content || null,
         new_content: newContent,
         model_version: MODEL,
+        system_prompt: SYSTEM_PROMPT,
+        user_prompt: userPrompt,
+        prompt_hash: promptHash,
         quality_score_before: currentContentData?.quality_score || null,
-        generated_content_id: newContentRecord?.id,
+        generated_content_id: savedContentId,
       })
 
     if (historyError) {
-      console.error('Failed to log regeneration history:', historyError)
-      // Don't fail the request, just log the error
+      logSupabaseError('Failed to log regeneration history', historyError)
+      return errorResponse(500, {
+        error: 'Failed to save regeneration history',
+        code: historyError.code ?? null,
+        details: historyError.message ?? null,
+        hint: historyError.hint ?? null,
+        step: 'regeneration_history_insert',
+      })
     }
 
     return NextResponse.json({
       success: true,
       content: newContent,
-      version: currentVersion + 1,
+      version: nextVersion,
       mode,
       model: MODEL,
-      generated_content_id: newContentRecord?.id,
+      generated_content_id: savedContentId,
     })
   } catch (error) {
     console.error('Regeneration error:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    )
+    return errorResponse(500, {
+      error: error instanceof Error ? error.message : 'Internal server error',
+      step: 'unhandled_exception',
+    })
   }
 }

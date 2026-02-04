@@ -23,9 +23,10 @@ interface VariantApprovalGridProps {
   variantApprovals: VariantApproval[]
   masterApproval: {
     approval_status: string
-    title_approved: boolean | null
-    description_approved: boolean | null
-    image_approved: boolean | null
+    // Newer schema uses boolean; keep backwards compatibility for older 0/1 data.
+    title_approved: boolean | number | null
+    description_approved: boolean | number | null
+    image_approved: boolean | number | null
   } | null
   onVariantSelect?: (finish: string) => void
 }

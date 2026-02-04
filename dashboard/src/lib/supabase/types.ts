@@ -92,6 +92,9 @@ export interface RegenerationHistory {
   previous_content: string | null
   new_content: string | null
   model_version: string | null
+  system_prompt: string | null
+  user_prompt: string | null
+  prompt_hash: string | null
   quality_score_before: number | null
   quality_score_after: number | null
   created_at: string

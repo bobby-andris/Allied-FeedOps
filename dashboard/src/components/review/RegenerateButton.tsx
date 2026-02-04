@@ -54,7 +54,12 @@ export function RegenerateButton({
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to regenerate')
+        const isProd = process.env.NODE_ENV === 'production'
+        const extra =
+          !isProd && (data?.code || data?.details || data?.step)
+            ? ` (code=${data?.code ?? 'n/a'} step=${data?.step ?? 'n/a'} details=${data?.details ?? 'n/a'})`
+            : ''
+        throw new Error((data.error || 'Failed to regenerate') + extra)
       }
 
       toast.success(`${contentType === 'title' ? 'Title' : 'Description'} regenerated successfully`)
@@ -101,7 +106,12 @@ export function RegenerateButton({
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to regenerate')
+        const isProd = process.env.NODE_ENV === 'production'
+        const extra =
+          !isProd && (data?.code || data?.details || data?.step)
+            ? ` (code=${data?.code ?? 'n/a'} step=${data?.step ?? 'n/a'} details=${data?.details ?? 'n/a'})`
+            : ''
+        throw new Error((data.error || 'Failed to regenerate') + extra)
       }
 
       toast.success(`${contentType === 'title' ? 'Title' : 'Description'} regenerated with feedback`)

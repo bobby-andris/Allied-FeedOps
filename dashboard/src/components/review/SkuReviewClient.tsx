@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronRight, Code2, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 import { QualityScore } from "@/components/shared/QualityScore"
@@ -15,7 +15,13 @@ import { VariantSelector } from "@/components/review/VariantSelector"
 import { VariantApprovalGrid } from "@/components/review/VariantApprovalGrid"
 import { RegenerateButton } from "@/components/review/RegenerateButton"
 import { RegenerationHistory } from "@/components/review/RegenerationHistory"
-import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
+import { Button } from "@/components/ui/button"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { RegenerationHistory as RegenerationHistoryType, VariantIndex, VariantApproval } from "@/lib/supabase/types"
 
 interface ContentRecord {
   id: string
@@ -41,10 +47,108 @@ interface ImageRecord {
 interface ApprovalRecord {
   master_sku: string
   approval_status: string
-  title_approved: boolean | null
-  description_approved: boolean | null
-  image_approved: boolean | null
+  // Can be boolean (newer DB) or 0/1 (older codepaths)
+  title_approved: boolean | number | null
+  description_approved: boolean | number | null
+  image_approved: boolean | number | null
   notes: string | null
+}
+
+function PromptUsed({
+  sku,
+  contentType,
+  platform,
+  currentCandidate,
+}: {
+  sku: string
+  contentType: 'title' | 'description'
+  platform: 'google' | 'bing' | 'shopify'
+  currentCandidate: string | null
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState<RegenerationHistoryType[]>([])
+
+  const matchingEntry = useMemo(() => {
+    if (history.length === 0) return null
+    if (currentCandidate) {
+      const match = history.find(h => h.new_content === currentCandidate)
+      if (match) return match
+    }
+    return history[0]
+  }, [history, currentCandidate])
+
+  useEffect(() => {
+    if (!isOpen) return
+    ;(async () => {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams({
+          sku,
+          content_type: contentType,
+          platform,
+          limit: '20',
+        })
+        const res = await fetch(`/api/regenerate/history?${params}`)
+        const data = await res.json()
+        if (!res.ok) throw new Error(data?.error || 'Failed to load prompt')
+        setHistory(data?.history || [])
+      } catch {
+        setHistory([])
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [isOpen, sku, contentType, platform])
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" size="sm" className="gap-2 w-full justify-start">
+          {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <Code2 className="h-4 w-4" />
+          Prompt used
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2">
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm">Generation Prompt</CardTitle>
+          </CardHeader>
+          <CardContent className="py-0 pb-4 space-y-3">
+            {loading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : !matchingEntry ? (
+              <p className="text-sm text-muted-foreground py-2">
+                No stored prompt found for this content yet. Regenerate once to capture it.
+              </p>
+            ) : (
+              <>
+                <div className="text-xs text-muted-foreground">
+                  {matchingEntry.model_version ? `Model: ${matchingEntry.model_version}` : null}
+                  {matchingEntry.prompt_hash ? ` • Hash: ${matchingEntry.prompt_hash.slice(0, 10)}…` : null}
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground mb-1">System prompt</div>
+                  <pre className="text-xs whitespace-pre-wrap rounded-lg border bg-muted/40 p-3 max-h-64 overflow-auto">
+                    {matchingEntry.system_prompt || '—'}
+                  </pre>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground mb-1">User prompt</div>
+                  <pre className="text-xs whitespace-pre-wrap rounded-lg border bg-muted/40 p-3 max-h-64 overflow-auto">
+                    {matchingEntry.user_prompt || '—'}
+                  </pre>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </CollapsibleContent>
+    </Collapsible>
+  )
 }
 
 interface SkuReviewClientProps {
@@ -126,6 +230,16 @@ function ContentComparison({
               </div>
             )}
           </div>
+        </div>
+
+        {/* Prompt used */}
+        <div className="mt-4 pt-4 border-t">
+          <PromptUsed
+            sku={sku}
+            contentType={type}
+            platform={platform}
+            currentCandidate={candidate}
+          />
         </div>
         
         {/* Regeneration History */}
