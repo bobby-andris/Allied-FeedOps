@@ -193,6 +193,7 @@ interface SkuReviewClientProps {
   variantApprovals: VariantApproval[]
   productImages: ProductImageData | null
   currentProduction: CurrentProductionContent | null
+  variantCurrentContent: Record<string, { title: string | null; description: string | null }>
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -366,6 +367,7 @@ export function SkuReviewClient({
   variantApprovals,
   productImages,
   currentProduction,
+  variantCurrentContent,
 }: SkuReviewClientProps) {
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
   const router = useRouter()
@@ -493,9 +495,10 @@ export function SkuReviewClient({
                 baseTitle={getContentByPlatform(content, 'google').title?.candidate_content || null}
                 baseDescription={getContentByPlatform(content, 'google').description?.candidate_content || null}
                 variants={variants
-                  .filter(v => v.finish && v.finish_code)
-                  .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+                  .filter(v => v.finish && v.finish_code && v.option_sku)
+                  .map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
                 variantApprovals={variantApprovals}
+                variantCurrentContent={variantCurrentContent}
                 onApprovalChange={() => router.refresh()}
               />
             )}
@@ -513,9 +516,10 @@ export function SkuReviewClient({
                 baseTitle={getContentByPlatform(content, 'bing').title?.candidate_content || null}
                 baseDescription={getContentByPlatform(content, 'bing').description?.candidate_content || null}
                 variants={variants
-                  .filter(v => v.finish && v.finish_code)
-                  .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+                  .filter(v => v.finish && v.finish_code && v.option_sku)
+                  .map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
                 variantApprovals={variantApprovals}
+                variantCurrentContent={variantCurrentContent}
                 onApprovalChange={() => router.refresh()}
               />
             )}

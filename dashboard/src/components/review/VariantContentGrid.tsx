@@ -6,27 +6,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Check, X, Clock, Loader2, CheckCircle2, XCircle } from "lucide-react"
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { Check, X, Clock, Loader2, CheckCircle2, XCircle, ChevronDown, ChevronRight } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { VariantApproval } from "@/lib/supabase/types"
 import {
   generateVariantTitle,
   generateVariantDescription,
-  truncateForPreview,
 } from "@/lib/variant-content"
 
 interface VariantContentGridProps {
@@ -34,8 +24,9 @@ interface VariantContentGridProps {
   platform: 'google' | 'bing'
   baseTitle: string | null
   baseDescription: string | null
-  variants: Array<{ finish: string; finish_code: string }>
+  variants: Array<{ option_sku: string; finish: string; finish_code: string }>
   variantApprovals: VariantApproval[]
+  variantCurrentContent: Record<string, { title: string | null; description: string | null }>
   onApprovalChange: () => void
 }
 
@@ -46,14 +37,16 @@ export function VariantContentGrid({
   baseDescription,
   variants,
   variantApprovals,
+  variantCurrentContent,
   onApprovalChange,
 }: VariantContentGridProps) {
-  const [selectedFinishes, setSelectedFinishes] = useState<Set<string>>(new Set())
+  const [selectedVariants, setSelectedVariants] = useState<Set<string>>(new Set())
+  const [expandedVariants, setExpandedVariants] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
   const [bulkAction, setBulkAction] = useState<'approve' | 'reject' | null>(null)
   const router = useRouter()
 
-  // Create approval lookup map
+  // Create approval lookup map by finish
   const approvalMap = useMemo(() => {
     const map = new Map<string, VariantApproval>()
     variantApprovals.forEach(va => {
@@ -71,33 +64,48 @@ export function VariantContentGrid({
     return { total, approved, rejected, pending }
   }, [variants, variantApprovals])
 
-  // Handle select all toggle
+  // Toggle selection
+  const toggleSelection = (optionSku: string) => {
+    const newSelected = new Set(selectedVariants)
+    if (newSelected.has(optionSku)) {
+      newSelected.delete(optionSku)
+    } else {
+      newSelected.add(optionSku)
+    }
+    setSelectedVariants(newSelected)
+  }
+
+  // Select all / none
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedFinishes(new Set(variants.map(v => v.finish)))
+      setSelectedVariants(new Set(variants.map(v => v.option_sku)))
     } else {
-      setSelectedFinishes(new Set())
+      setSelectedVariants(new Set())
     }
   }
 
-  // Handle individual checkbox toggle
-  const handleSelectOne = (finish: string, checked: boolean) => {
-    const newSelected = new Set(selectedFinishes)
-    if (checked) {
-      newSelected.add(finish)
+  // Toggle expanded
+  const toggleExpanded = (optionSku: string) => {
+    const newExpanded = new Set(expandedVariants)
+    if (newExpanded.has(optionSku)) {
+      newExpanded.delete(optionSku)
     } else {
-      newSelected.delete(finish)
+      newExpanded.add(optionSku)
     }
-    setSelectedFinishes(newSelected)
+    setExpandedVariants(newExpanded)
   }
 
-  // Check if all are selected
-  const allSelected = variants.length > 0 && selectedFinishes.size === variants.length
-  const someSelected = selectedFinishes.size > 0 && selectedFinishes.size < variants.length
+  // Expand all / collapse all
+  const expandAll = () => setExpandedVariants(new Set(variants.map(v => v.option_sku)))
+  const collapseAll = () => setExpandedVariants(new Set())
 
-  // Bulk approve selected variants
-  const handleBulkApprove = async () => {
-    if (selectedFinishes.size === 0) {
+  // Check states
+  const allSelected = variants.length > 0 && selectedVariants.size === variants.length
+  const someSelected = selectedVariants.size > 0 && selectedVariants.size < variants.length
+
+  // Bulk approve
+  const handleBulkApprove = async (finishes: string[]) => {
+    if (finishes.length === 0) {
       toast.error('No variants selected')
       return
     }
@@ -110,22 +118,17 @@ export function VariantContentGrid({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           master_sku: sku,
-          finish_codes: variants
-            .filter(v => selectedFinishes.has(v.finish))
-            .map(v => v.finish_code),
-          finishes: Array.from(selectedFinishes),
+          finishes,
           action: 'approve',
           title_approved: true,
           description_approved: true,
         }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to approve variants')
-      }
+      if (!response.ok) throw new Error('Failed to approve variants')
 
-      toast.success(`Approved ${selectedFinishes.size} variant(s)`)
-      setSelectedFinishes(new Set())
+      toast.success(`Approved ${finishes.length} variant(s)`)
+      setSelectedVariants(new Set())
       router.refresh()
       onApprovalChange()
     } catch (error) {
@@ -137,9 +140,9 @@ export function VariantContentGrid({
     }
   }
 
-  // Bulk reject selected variants
-  const handleBulkReject = async () => {
-    if (selectedFinishes.size === 0) {
+  // Bulk reject
+  const handleBulkReject = async (finishes: string[]) => {
+    if (finishes.length === 0) {
       toast.error('No variants selected')
       return
     }
@@ -152,22 +155,17 @@ export function VariantContentGrid({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           master_sku: sku,
-          finish_codes: variants
-            .filter(v => selectedFinishes.has(v.finish))
-            .map(v => v.finish_code),
-          finishes: Array.from(selectedFinishes),
+          finishes,
           action: 'reject',
           title_approved: false,
           description_approved: false,
         }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to reject variants')
-      }
+      if (!response.ok) throw new Error('Failed to reject variants')
 
-      toast.success(`Rejected ${selectedFinishes.size} variant(s)`)
-      setSelectedFinishes(new Set())
+      toast.success(`Rejected ${finishes.length} variant(s)`)
+      setSelectedVariants(new Set())
       router.refresh()
       onApprovalChange()
     } catch (error) {
@@ -179,41 +177,14 @@ export function VariantContentGrid({
     }
   }
 
-  // Approve all variants
-  const handleApproveAll = async () => {
-    setLoading(true)
-    setBulkAction('approve')
-    try {
-      const response = await fetch('/api/variants/approvals/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          master_sku: sku,
-          finish_codes: variants.map(v => v.finish_code),
-          finishes: variants.map(v => v.finish),
-          action: 'approve',
-          title_approved: true,
-          description_approved: true,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to approve all variants')
-      }
-
-      toast.success(`Approved all ${variants.length} variants`)
-      router.refresh()
-      onApprovalChange()
-    } catch (error) {
-      console.error('Error approving all:', error)
-      toast.error('Failed to approve all variants')
-    } finally {
-      setLoading(false)
-      setBulkAction(null)
-    }
+  // Get selected finishes
+  const getSelectedFinishes = () => {
+    return variants
+      .filter(v => selectedVariants.has(v.option_sku))
+      .map(v => v.finish)
   }
 
-  // Get status badge for a variant
+  // Get status badge
   const getStatusBadge = (approval: VariantApproval | undefined) => {
     const status = approval?.approval_status
     switch (status) {
@@ -241,16 +212,16 @@ export function VariantContentGrid({
     }
   }
 
-  // Get row background color based on status
-  const getRowClassName = (approval: VariantApproval | undefined) => {
+  // Get row style based on status
+  const getRowStyle = (approval: VariantApproval | undefined) => {
     const status = approval?.approval_status
     switch (status) {
       case 'approved':
-        return 'bg-green-50/50 hover:bg-green-50 border-l-4 border-l-green-500'
+        return 'border-l-4 border-l-green-500 bg-green-50/30'
       case 'rejected':
-        return 'bg-red-50/50 hover:bg-red-50 border-l-4 border-l-red-500'
+        return 'border-l-4 border-l-red-500 bg-red-50/30'
       default:
-        return 'hover:bg-muted/50 border-l-4 border-l-gray-300'
+        return 'border-l-4 border-l-gray-300 bg-white'
     }
   }
 
@@ -290,12 +261,18 @@ export function VariantContentGrid({
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            {selectedFinishes.size > 0 && (
+            <Button variant="outline" size="sm" onClick={expandAll}>
+              Expand All
+            </Button>
+            <Button variant="outline" size="sm" onClick={collapseAll}>
+              Collapse All
+            </Button>
+            {selectedVariants.size > 0 ? (
               <>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleBulkReject}
+                  onClick={() => handleBulkReject(getSelectedFinishes())}
                   disabled={loading}
                   className="text-red-600 hover:text-red-700"
                 >
@@ -304,11 +281,11 @@ export function VariantContentGrid({
                   ) : (
                     <XCircle className="h-4 w-4 mr-2" />
                   )}
-                  Reject Selected ({selectedFinishes.size})
+                  Reject ({selectedVariants.size})
                 </Button>
                 <Button
                   size="sm"
-                  onClick={handleBulkApprove}
+                  onClick={() => handleBulkApprove(getSelectedFinishes())}
                   disabled={loading}
                   className="bg-green-600 hover:bg-green-700"
                 >
@@ -317,14 +294,13 @@ export function VariantContentGrid({
                   ) : (
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                   )}
-                  Approve Selected ({selectedFinishes.size})
+                  Approve ({selectedVariants.size})
                 </Button>
               </>
-            )}
-            {selectedFinishes.size === 0 && (
+            ) : (
               <Button
                 size="sm"
-                onClick={handleApproveAll}
+                onClick={() => handleBulkApprove(variants.map(v => v.finish))}
                 disabled={loading}
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -339,100 +315,131 @@ export function VariantContentGrid({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {/* Base content preview */}
-        <div className="mb-4 p-3 bg-muted/50 rounded-lg text-sm">
-          <div className="font-medium text-muted-foreground mb-1">Base Template</div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-xs text-muted-foreground">Title: </span>
-              <span className="text-foreground">{truncateForPreview(baseTitle, 80) || 'N/A'}</span>
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground">Description: </span>
-              <span className="text-foreground">{truncateForPreview(baseDescription, 80) || 'N/A'}</span>
-            </div>
-          </div>
+      <CardContent className="space-y-2">
+        {/* Select All row */}
+        <div className="flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
+          <Checkbox
+            checked={allSelected}
+            ref={(el) => {
+              if (el) {
+                (el as HTMLButtonElement & { indeterminate?: boolean }).indeterminate = someSelected
+              }
+            }}
+            onCheckedChange={handleSelectAll}
+            aria-label="Select all variants"
+          />
+          <span className="text-sm font-medium">Select All</span>
         </div>
 
-        <TooltipProvider>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={allSelected}
-                    ref={(el) => {
-                      if (el) {
-                        // Set indeterminate state for "some selected"
-                        (el as HTMLButtonElement & { indeterminate?: boolean }).indeterminate = someSelected
-                      }
-                    }}
-                    onCheckedChange={handleSelectAll}
-                    aria-label="Select all variants"
-                  />
-                </TableHead>
-                <TableHead className="w-40">Finish</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-28 text-center">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {variants.map((variant) => {
-                const approval = approvalMap.get(variant.finish)
-                const variantTitle = generateVariantTitle(baseTitle, variant.finish, platform)
-                const variantDesc = generateVariantDescription(baseDescription, variant.finish)
-                const isSelected = selectedFinishes.has(variant.finish)
+        {/* Variant accordions */}
+        {variants.map((variant) => {
+          const approval = approvalMap.get(variant.finish)
+          const isExpanded = expandedVariants.has(variant.option_sku)
+          const isSelected = selectedVariants.has(variant.option_sku)
+          const currentContent = variantCurrentContent[variant.option_sku] || { title: null, description: null }
+          const candidateTitle = generateVariantTitle(baseTitle, variant.finish, platform)
+          const candidateDescription = generateVariantDescription(baseDescription, variant.finish)
 
-                return (
-                  <TableRow
-                    key={variant.finish_code}
-                    className={getRowClassName(approval)}
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) => handleSelectOne(variant.finish, checked as boolean)}
-                        aria-label={`Select ${variant.finish}`}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {variant.finish}
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-help text-sm">
-                            {truncateForPreview(variantTitle, 50)}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-md">
-                          <p className="text-sm">{variantTitle}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-help text-sm text-muted-foreground">
-                            {truncateForPreview(variantDesc, 60)}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-lg">
-                          <p className="text-sm">{variantDesc}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getStatusBadge(approval)}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TooltipProvider>
+          return (
+            <Collapsible
+              key={variant.option_sku}
+              open={isExpanded}
+              onOpenChange={() => toggleExpanded(variant.option_sku)}
+            >
+              <div className={`rounded-lg ${getRowStyle(approval)}`}>
+                {/* Collapsed header */}
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleSelection(variant.option_sku)}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Select ${variant.finish}`}
+                  />
+                  <CollapsibleTrigger asChild>
+                    <button className="flex-1 flex items-center gap-3 text-left hover:bg-muted/30 rounded px-2 py-1 -ml-2">
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-medium">{variant.finish}</div>
+                        <div className="text-xs text-muted-foreground">{variant.option_sku}</div>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+                  {getStatusBadge(approval)}
+                </div>
+
+                {/* Expanded content */}
+                <CollapsibleContent>
+                  <div className="px-4 pb-4 pt-2 space-y-4 border-t">
+                    {/* Title comparison */}
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Title</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground mb-1">Current (Live)</div>
+                          <div className="p-3 rounded-lg bg-muted/50 border text-sm min-h-[60px]">
+                            {currentContent.title || <span className="text-muted-foreground italic">No current title</span>}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground mb-1">Candidate (New)</div>
+                          <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-sm min-h-[60px]">
+                            {candidateTitle}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Description comparison */}
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Description</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground mb-1">Current (Live)</div>
+                          <div className="p-3 rounded-lg bg-muted/50 border text-sm min-h-[100px] whitespace-pre-wrap">
+                            {currentContent.description || <span className="text-muted-foreground italic">No current description</span>}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground mb-1">Candidate (New)</div>
+                          <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-sm min-h-[100px] whitespace-pre-wrap">
+                            {candidateDescription}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick approve/reject for this variant */}
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkReject([variant.finish])}
+                        disabled={loading}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleBulkApprove([variant.finish])}
+                        disabled={loading}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          )
+        })}
       </CardContent>
     </Card>
   )

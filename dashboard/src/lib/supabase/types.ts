@@ -180,13 +180,18 @@ export interface PerformanceBaseline {
 
 export interface VariantIndex {
   id: string
-  gmc_offer_id: string
+  option_sku: string        // Unique variant SKU (e.g., "1051-ABR")
+  gmc_offer_id: string      // GMC offer ID for Google Merchant Center
   master_sku: string
   shopify_product_id: string | null
   shopify_variant_id: string | null
-  finish: string | null
-  finish_code: string | null
+  finish: string | null     // Finish name (e.g., "Antique Brass")
+  finish_code: string | null // Finish code (e.g., "ABR")
   dimensions: string | null
+  product_title: string | null
+  product_category: string | null
+  created_at: string
+  updated_at: string
 }
 
 // Batch Generation Jobs (for multi-SKU generation from /generate page)
