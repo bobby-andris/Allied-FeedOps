@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import type { ChatCompletionMessageParam, ChatCompletionContentPart } from 'openai/resources/chat/completions'
 import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getProductEvidence, productExistsInCatalog } from '@/lib/evidence'
 import crypto from 'node:crypto'
 
 // Lazy-initialize OpenAI client (avoid build-time instantiation)
@@ -20,6 +22,9 @@ function getOpenAIClient(): OpenAI {
 
 // Model to use for generation (default aligns with Python backend)
 const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
+
+// Whether to use vision for descriptions (default: true)
+const USE_VISION = process.env.FEEDOPS_USE_VISION !== '0'
 
 // Feedback preset descriptions
 const FEEDBACK_PRESETS: Record<FeedbackPreset, string> = {
@@ -41,6 +46,7 @@ interface RegenerateRequest {
     current_content: string
     user_feedback: string
     feedback_type?: FeedbackPreset
+    finish?: string // Optional finish for variant-specific regeneration
   }
   options?: {
     num_candidates?: number
@@ -77,17 +83,102 @@ PLATFORM CONTEXT:
 
 CRITICAL RULES:
 - Never invent specifications not in the product data
-- Every factual claim must be traceable to the provided data
+- Every factual claim must be traceable to the provided evidence table
 - "Allied Brass" should be the final segment in titles
 - No ALL CAPS, no promotional language like "Premium", "Luxury", "Best"
-- Write for a human who's about to spend $80 and wants to feel good about it`
+- Write for a human who's about to spend $80 and wants to feel good about it
+- When an image is provided, use it to verify product details but don't describe the image directly`
 
+/**
+ * Build enhanced prompt using evidence table
+ */
+function buildEnhancedPrompt(
+  contentType: 'title' | 'description',
+  platform: string,
+  evidenceMarkdown: string
+): string {
+  const platformContext: Record<string, Record<string, string>> = {
+    google: {
+      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end.',
+      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Weave the finish naturally. Include material quality and dimensions. Plain text only, 600-800 characters target.',
+    },
+    bing: {
+      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end.',
+      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text only, 700-1000 characters target.',
+    },
+    shopify: {
+      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying.',
+      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. Include trust signals. HTML format with <p> and <ul><li> bullets.',
+    },
+  }
+
+  const context = platformContext[platform]?.[contentType] || ''
+
+  return `Generate a ${contentType} for this product.
+
+CONTEXT: ${context}
+
+${evidenceMarkdown}
+
+Remember:
+- Write for a human who's about to spend $80 and wants to feel good about it
+- Every factual claim must be traceable to the evidence table above
+- Weave keywords naturally, don't list them
+
+Respond with ONLY the ${contentType} text, no additional explanation or formatting.`
+}
+
+/**
+ * Build enhanced feedback prompt using evidence table
+ */
+function buildEnhancedFeedbackPrompt(
+  contentType: 'title' | 'description',
+  platform: string,
+  evidenceMarkdown: string,
+  currentContent: string,
+  feedback: string
+): string {
+  const platformContext: Record<string, string> = {
+    google: 'Google Shopping - first impression, make them want to click',
+    bing: 'Bing Shopping - include natural product synonyms',
+    shopify: 'Shopify - customer already clicked, convince them to buy',
+  }
+
+  const context = platformContext[platform] || platform
+
+  return `You are improving a product ${contentType} based on reviewer feedback.
+
+PLATFORM: ${context}
+
+CURRENT ${contentType.toUpperCase()}:
+${currentContent}
+
+REVIEWER FEEDBACK:
+${feedback}
+
+${evidenceMarkdown}
+
+Remember the buyer questions you're answering:
+- "Will this look good in MY bathroom?"
+- "Will this match my other fixtures?"
+- "Is this actually better than the $20 Amazon option?"
+- "Will this last? Is it quality?"
+
+Generate an improved ${contentType} that addresses the feedback while answering these buyer questions.
+Every factual claim must be traceable to the evidence table above.
+
+Respond with ONLY the improved ${contentType} text, no additional explanation or formatting.`
+}
+
+/**
+ * Build simple prompt (fallback when catalog not available)
+ */
 function buildSimplePrompt(
   contentType: 'title' | 'description',
   platform: string,
   productData: Record<string, unknown>
 ): string {
-  const platformContext = {
+  const platformContext: Record<string, Record<string, string>> = {
     google: {
       title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end.',
       description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Weave the finish naturally. Plain text only.',
@@ -102,7 +193,7 @@ function buildSimplePrompt(
     },
   }
 
-  const context = platformContext[platform as keyof typeof platformContext]?.[contentType] || ''
+  const context = platformContext[platform]?.[contentType] || ''
 
   return `Generate a ${contentType} for this product.
 
@@ -116,20 +207,23 @@ Remember: Write for a human who's about to spend $80 and wants to feel good abou
 Respond with ONLY the ${contentType} text, no additional explanation or formatting.`
 }
 
-function buildFeedbackPrompt(
+/**
+ * Build simple feedback prompt (fallback)
+ */
+function buildSimpleFeedbackPrompt(
   contentType: 'title' | 'description',
   platform: string,
   productData: Record<string, unknown>,
   currentContent: string,
   feedback: string
 ): string {
-  const platformContext = {
+  const platformContext: Record<string, string> = {
     google: 'Google Shopping - first impression, make them want to click',
     bing: 'Bing Shopping - include natural product synonyms',
     shopify: 'Shopify - customer already clicked, convince them to buy',
   }
 
-  const context = platformContext[platform as keyof typeof platformContext] || platform
+  const context = platformContext[platform] || platform
 
   return `You are improving a product ${contentType} based on reviewer feedback.
 
@@ -232,7 +326,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Get product data from variant_index
+    // Get variant data for finish info
     const { data: variantData, error: variantError } = await supabase
       .from('variant_index')
       .select('*')
@@ -257,33 +351,78 @@ export async function POST(request: NextRequest) {
       logSupabaseError('Failed to fetch current generated content', currentContentError)
     }
 
-    // Build product data object for prompt
-    const productData = {
-      master_sku,
-      product_title: variantData?.product_title || master_sku,
-      product_category: variantData?.product_category || 'Bathroom Hardware',
-      finish: variantData?.finish,
-      finish_code: variantData?.finish_code,
-      dimensions: variantData?.dimensions,
+    // ==================== BUILD PROMPT WITH EVIDENCE ====================
+    let userPrompt: string
+    let imageUrl: string | null = null
+    let useEnhancedPrompt = false
+
+    // Check if product exists in catalog for enhanced evidence
+    const catalogExists = await productExistsInCatalog(supabase, master_sku)
+
+    if (catalogExists) {
+      try {
+        // Get finish code for variant-specific context
+        const finishCode = feedback?.finish || variantData?.finish_code || undefined
+
+        // Build rich evidence table from product_catalog
+        const evidenceResult = await getProductEvidence(supabase, master_sku, {
+          platform: platform as 'google' | 'bing' | 'shopify',
+          finish_code: finishCode,
+        })
+
+        imageUrl = evidenceResult.imageUrl
+        useEnhancedPrompt = true
+
+        if (mode === 'simple') {
+          userPrompt = buildEnhancedPrompt(content_type, platform, evidenceResult.markdown)
+        } else {
+          // Combine preset + custom feedback
+          const feedbackText = feedback!.feedback_type
+            ? `${FEEDBACK_PRESETS[feedback!.feedback_type]}. ${feedback!.user_feedback}`
+            : feedback!.user_feedback
+
+          userPrompt = buildEnhancedFeedbackPrompt(
+            content_type,
+            platform,
+            evidenceResult.markdown,
+            feedback!.current_content,
+            feedbackText
+          )
+        }
+
+        console.log(`Using enhanced prompt with evidence table for ${master_sku} (${platform}/${content_type})`)
+      } catch (evidenceError) {
+        console.warn('Failed to build evidence table, falling back to simple prompt:', evidenceError)
+        useEnhancedPrompt = false
+      }
     }
 
-    // Build prompt based on mode
-    let userPrompt: string
-    if (mode === 'simple') {
-      userPrompt = buildSimplePrompt(content_type, platform, productData)
-    } else {
-      // Combine preset + custom feedback
-      const feedbackText = feedback!.feedback_type
-        ? `${FEEDBACK_PRESETS[feedback!.feedback_type]}. ${feedback!.user_feedback}`
-        : feedback!.user_feedback
-      
-      userPrompt = buildFeedbackPrompt(
-        content_type,
-        platform,
-        productData,
-        feedback!.current_content,
-        feedbackText
-      )
+    // Fallback to simple prompt if catalog not available
+    if (!useEnhancedPrompt) {
+      const productData = {
+        master_sku,
+        product_title: variantData?.product_title || master_sku,
+        product_category: variantData?.product_category || 'Bathroom Hardware',
+        finish: variantData?.finish,
+        finish_code: variantData?.finish_code,
+        dimensions: variantData?.dimensions,
+      }
+
+      if (mode === 'simple') {
+        userPrompt = buildSimplePrompt(content_type, platform, productData)
+      } else {
+        const feedbackText = feedback!.feedback_type
+          ? `${FEEDBACK_PRESETS[feedback!.feedback_type]}. ${feedback!.user_feedback}`
+          : feedback!.user_feedback
+
+        userPrompt = buildSimpleFeedbackPrompt(
+          content_type,
+          platform,
+          productData,
+          feedback!.current_content,
+          feedbackText
+        )
+      }
     }
 
     const promptHash = crypto
@@ -291,17 +430,40 @@ export async function POST(request: NextRequest) {
       .update(`${SYSTEM_PROMPT}\n\n${userPrompt}`, 'utf8')
       .digest('hex')
 
-    // Call OpenAI
+    // ==================== BUILD MESSAGES WITH OPTIONAL VISION ====================
+    const messages: ChatCompletionMessageParam[] = [
+      { role: 'system', content: SYSTEM_PROMPT },
+    ]
+
+    // Add vision support for descriptions when image URL is available
+    const shouldUseVision = USE_VISION && imageUrl && content_type === 'description'
+
+    if (shouldUseVision) {
+      // Build multimodal message with text and image
+      const contentParts: ChatCompletionContentPart[] = [
+        { type: 'text', text: userPrompt },
+        {
+          type: 'image_url',
+          image_url: {
+            url: imageUrl,
+            detail: 'low', // Use low detail to reduce token cost (~85 tokens)
+          },
+        },
+      ]
+      messages.push({ role: 'user', content: contentParts })
+      console.log(`Using vision with image: ${imageUrl}`)
+    } else {
+      messages.push({ role: 'user', content: userPrompt })
+    }
+
+    // ==================== CALL OPENAI ====================
     const tokenParams = MODEL.startsWith('gpt-5')
       ? ({ max_completion_tokens: content_type === 'title' ? 200 : 1000 } as const)
       : ({ max_tokens: content_type === 'title' ? 200 : 1000 } as const)
 
     const completion = await getOpenAIClient().chat.completions.create({
       model: MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
+      messages,
       temperature: 0.7,
       stream: false,
       ...tokenParams,
@@ -316,10 +478,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get current version number
+    // ==================== SAVE TO DATABASE ====================
     const currentVersion = currentContentData?.version ?? 0
 
-    // Update-in-place when row exists (table has UNIQUE(master_sku, platform, content_type))
     let savedContentId: string | null = null
     let nextVersion = currentVersion + 1
 
@@ -351,7 +512,6 @@ export async function POST(request: NextRequest) {
 
       savedContentId = updated?.id ?? null
     } else {
-      // First-time insert for this SKU/platform/content_type
       nextVersion = 1
       const { data: inserted, error: insertError } = await supabase
         .from('generated_content')
@@ -422,6 +582,8 @@ export async function POST(request: NextRequest) {
       mode,
       model: MODEL,
       generated_content_id: savedContentId,
+      used_evidence: useEnhancedPrompt,
+      used_vision: shouldUseVision,
     })
   } catch (error) {
     console.error('Regeneration error:', error)

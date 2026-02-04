@@ -192,6 +192,69 @@ export interface BatchGenerationJobSku {
 }
 
 // ============================================================================
+// Product Catalog Types (from Acatalog.csv)
+// ============================================================================
+
+export interface ProductCatalog {
+  id: number
+  master_sku: string
+  option_sku: string
+  core_sku: string | null
+  upc: string | null
+  gtin: string | null
+  gmc_id: string | null
+  amazon_asin: string | null
+  finish_name: string
+  finish_code: string
+  position: number | null
+  category: string
+  collection: string | null
+  title: string
+  narrative_copy: string | null
+  bullet_1: string | null
+  bullet_2: string | null
+  bullet_3: string | null
+  bullet_4: string | null
+  bullet_5: string | null
+  bullet_6: string | null
+  product_length: number | null
+  product_height: number | null
+  product_width: number | null
+  projection: number | null
+  product_weight: number | null
+  box_length: number | null
+  box_height: number | null
+  box_width: number | null
+  box_weight: number | null
+  installation_url: string | null
+  specification_url: string | null
+  main_image_filename: string | null
+  main_image_url: string | null
+  alt_image_1: string | null
+  alt_image_2: string | null
+  alt_image_3: string | null
+  alt_image_4: string | null
+  center_to_center: number | null
+  diameter: number | null
+  screw_size: string | null
+  mirror_height: number | null
+  mirror_width: number | null
+  thickness: number | null
+  weight_capacity: number | null
+  material: string | null
+  style: string | null
+  shape: string | null
+  orientation: string | null
+  tilting: string | null
+  mounting_type: string | null
+  assembly_required: boolean
+  item_number: string | null
+  included_items: string | null
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================================
 // Competitor Intelligence Types
 // ============================================================================
 
