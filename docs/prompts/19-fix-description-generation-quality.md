@@ -94,10 +94,75 @@ Examine what the Python pipeline passes:
 | Data Source | What's Available | Currently Used? |
 |-------------|------------------|-----------------|
 | `variant_index` table | Basic SKU mapping, dimensions, finish | ✅ Partially |
-| `Product Catalog.csv` | Full product specs, features, materials | ❌ No |
+| **`data/Acatalog.csv`** | **GOLDMINE: Full product specs, narrative copy, 6 bullets, images, PDFs** | ❌ No |
 | `generated_content` table | Baseline/current content | ❌ No |
-| Shopify API | Product images, metafields | ❌ No |
+| **Shopify Admin API** | Product images, metafields, variants, inventory | ❌ No |
+| **Google Merchant Center** | Current feed data, offer IDs, approval status | ❌ No |
 | Python `ParentSKU` model | Complete product data | ❌ Not accessible |
+
+## Available Data Sources (USE ALL OF THESE)
+
+### 1. PRIMARY: Allied Brass Product Catalog CSV (CRITICAL)
+
+**File:** `data/Acatalog.csv` (75,773 rows of rich product data)
+
+This CSV contains EVERYTHING needed for quality descriptions:
+
+| Column | Description | Use For |
+|--------|-------------|---------|
+| `MASTER SKU` | Master SKU identifier | Joining data |
+| `OPTION SKU` | Variant SKU (with finish code) | Variant identification |
+| `GMCID` | Google Merchant Center offer ID | `shopify_US_{product}_{variant}` |
+| `Finish Name`, `Code` | Full finish name and code | Finish context |
+| `Category` | Product category | Category guidance |
+| `Allied Brass Collection` | Collection name | Coordination messaging |
+| `Title` | Current product title | Baseline reference |
+| `Narraive Copy` | **FULL DESCRIPTION** | Baseline description! |
+| `Bullet 1-6` | Six feature bullets | Feature extraction |
+| `Length`, `Height`, `Width`, `Projection`, `Weight` | Dimensions | Specs |
+| `Main URL` | High-res product image URL | Vision input |
+| `Alternative 1-4` | Additional image URLs | Context |
+| `Installation` | Installation PDF URL | Trust signal |
+| `Specification` | Spec sheet PDF URL | Trust signal |
+| `Material`, `Style`, `Shape`, `Mounting type` | Product attributes | Description context |
+| `Included` | What's in the box | Feature |
+
+**Action:** Load this CSV into Supabase as `product_catalog` table.
+
+### 2. Shopify Admin API (via MCP)
+
+**IMPORTANT:** Use the `shopify-dev-mcp` server to look up Shopify Admin API documentation for:
+- Fetching product data: `products/{id}.json`
+- Getting variant details: `variants/{id}.json`
+- Retrieving metafields: `products/{id}/metafields.json`
+- Fetching product images: `products/{id}/images.json`
+
+```
+Use the shopify-dev-mcp tools:
+- introspect_graphql_schema - Understand available queries
+- learn_shopify_api - Look up REST/GraphQL endpoints
+- search_docs_chunks - Search Shopify documentation
+- fetch_full_docs - Get complete documentation pages
+```
+
+This is useful for:
+- Getting current live product data
+- Fetching high-resolution images
+- Accessing metafields not in CSV
+- Verifying data accuracy
+
+### 3. Google Merchant Center Data
+
+The GMC feed contains:
+- Current approved titles/descriptions
+- Offer approval status
+- Feed diagnostics
+- Product performance signals
+
+Access via:
+- Google Ads MCP for performance data
+- GMC API for feed status (if configured)
+- `variant_index.gmc_offer_id` for mapping
 
 ## Solution: Enrich Product Data for Dashboard Regeneration
 
@@ -114,32 +179,227 @@ Port the Python pipeline's evidence table logic to TypeScript:
 
 #### Database Schema Enhancement
 
+**Migration file:** `supabase/migrations/010_product_catalog.sql`
+
 ```sql
--- Add rich product data storage
-CREATE TABLE product_catalog (
+-- Product Catalog Table
+-- Loaded from data/Acatalog.csv - contains ALL product data needed for quality descriptions
+-- This is the PRIMARY source for regeneration context
+
+CREATE TABLE IF NOT EXISTS product_catalog (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  master_sku text NOT NULL UNIQUE,
-  current_title text,
-  current_description text,
-  main_image_url text,
-  additional_images text[], -- Array of image URLs
-  bullets text[], -- Product bullet points
-  features jsonb, -- Structured features
-  materials text,
-  warranty_info text,
-  collection_name text,
-  collection_context text,
-  design_style text,
-  competitive_edge text,
-  room_context text, -- 'bathroom' or 'kitchen'
-  specifications jsonb, -- Detailed specs
+
+  -- Identification (from CSV)
+  master_sku text NOT NULL,
+  option_sku text NOT NULL UNIQUE, -- Variant SKU with finish code
+  core_sku text,
+  upc text,
+  gtin text,
+  gmc_offer_id text, -- GMCID column: shopify_US_{product}_{variant}
+  amazon_asin text,
+
+  -- Finish information
+  finish_name text,
+  finish_code text,
+  finish_position integer, -- Display order
+
+  -- Product classification
   category text,
-  subcategory text,
+  collection_name text, -- "Allied Brass Collection" column
+
+  -- Current content (IMPORTANT: baseline for improvement)
+  current_title text, -- "Title" column
+  narrative_copy text, -- "Narraive Copy" column - FULL DESCRIPTION!
+
+  -- Feature bullets (6 columns in CSV)
+  bullet_1 text,
+  bullet_2 text,
+  bullet_3 text,
+  bullet_4 text,
+  bullet_5 text,
+  bullet_6 text,
+
+  -- Dimensions (product)
+  length numeric,
+  height numeric,
+  width numeric,
+  projection numeric,
+  weight numeric,
+
+  -- Dimensions (box/shipping)
+  box_length numeric,
+  box_height numeric,
+  box_width numeric,
+  box_weight numeric,
+
+  -- Documentation URLs
+  installation_pdf_url text,
+  specification_pdf_url text,
+
+  -- Image URLs
+  main_image_filename text,
+  main_image_url text,
+  alt_image_1_url text,
+  alt_image_2_url text,
+  alt_image_3_url text,
+  alt_image_4_url text,
+
+  -- Product specifications
+  center_to_center text,
+  diameter text,
+  screw_size text,
+  mirror_height text,
+  mirror_width text,
+  thickness text,
+  weight_capacity text,
+
+  -- Product attributes
+  material text,
+  style text,
+  shape text,
+  orientation text,
+  tilting text,
+  mounting_type text,
+  assembly_required boolean DEFAULT false,
+
+  -- Pricing (optional - may not want to store)
+  list_price numeric,
+  wholesale_price numeric,
+  map_price numeric,
+
+  -- What's included
+  included_items text,
+  item_number text,
+
+  -- Shopify IDs (extracted from GMCID)
+  shopify_product_id text GENERATED ALWAYS AS (
+    CASE
+      WHEN gmc_offer_id LIKE 'shopify_US_%'
+      THEN split_part(gmc_offer_id, '_', 3)
+      ELSE NULL
+    END
+  ) STORED,
+  shopify_variant_id text GENERATED ALWAYS AS (
+    CASE
+      WHEN gmc_offer_id LIKE 'shopify_US_%'
+      THEN split_part(gmc_offer_id, '_', 4)
+      ELSE NULL
+    END
+  ) STORED,
+
+  -- Timestamps
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX idx_product_catalog_sku ON product_catalog(master_sku);
+-- Indexes for common queries
+CREATE INDEX idx_product_catalog_master_sku ON product_catalog(master_sku);
+CREATE INDEX idx_product_catalog_option_sku ON product_catalog(option_sku);
+CREATE INDEX idx_product_catalog_gmc ON product_catalog(gmc_offer_id);
+CREATE INDEX idx_product_catalog_category ON product_catalog(category);
+CREATE INDEX idx_product_catalog_collection ON product_catalog(collection_name);
+CREATE INDEX idx_product_catalog_finish ON product_catalog(finish_code);
+CREATE INDEX idx_product_catalog_shopify ON product_catalog(shopify_product_id);
+
+-- RLS
+ALTER TABLE product_catalog ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all access" ON product_catalog FOR ALL USING (true);
+
+-- Update timestamp trigger
+DROP TRIGGER IF EXISTS update_product_catalog_updated_at ON product_catalog;
+CREATE TRIGGER update_product_catalog_updated_at
+    BEFORE UPDATE ON product_catalog
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+```
+
+#### CSV Import Script
+
+Create a script to load the CSV into Supabase:
+
+```typescript
+// scripts/import-product-catalog.ts
+
+import { parse } from 'csv-parse/sync'
+import { createClient } from '@supabase/supabase-js'
+import * as fs from 'fs'
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+async function importProductCatalog() {
+  const csvPath = 'data/Acatalog.csv'
+  const csv = fs.readFileSync(csvPath, 'utf-8')
+  const records = parse(csv, { columns: true, skip_empty_lines: true })
+
+  console.log(`Importing ${records.length} products...`)
+
+  // Batch insert for performance
+  const batchSize = 500
+  for (let i = 0; i < records.length; i += batchSize) {
+    const batch = records.slice(i, i + batchSize).map((row: any) => ({
+      master_sku: row['MASTER SKU'],
+      option_sku: row['OPTION SKU'],
+      core_sku: row['CoreSKU'],
+      upc: row['UPC'],
+      gtin: row['GTIN'],
+      gmc_offer_id: row['GMCID'],
+      amazon_asin: row['Amazon ASIN'],
+      finish_name: row['Finish Name'],
+      finish_code: row['Code'],
+      finish_position: parseInt(row['Position']) || null,
+      category: row['Category'],
+      collection_name: row['Allied Brass Collection'],
+      current_title: row['Title'],
+      narrative_copy: row['Narraive Copy'], // Note: typo in CSV column name
+      bullet_1: row['Bullet 1'],
+      bullet_2: row['Bullet 2'],
+      bullet_3: row['Bullet 3'],
+      bullet_4: row['Bullet 4'],
+      bullet_5: row['Bullet 5'],
+      bullet_6: row['Bullet 6'],
+      length: parseFloat(row['Length']) || null,
+      height: parseFloat(row['Height']) || null,
+      width: parseFloat(row['Width']) || null,
+      projection: parseFloat(row['Projection']) || null,
+      weight: parseFloat(row['Weight']) || null,
+      installation_pdf_url: row['Installation'],
+      specification_pdf_url: row['Specification'],
+      main_image_filename: row['Main'],
+      main_image_url: row['Main URL'],
+      alt_image_1_url: row['Alternative 1'],
+      alt_image_2_url: row['Alternative 2'],
+      alt_image_3_url: row['Alternative 3'],
+      alt_image_4_url: row['Alternative 4'],
+      material: row['Material'],
+      style: row['Style'],
+      shape: row['Shape'],
+      orientation: row['Orientation'],
+      tilting: row['Tilting'],
+      mounting_type: row['Mounting type'],
+      assembly_required: row['Assembly required']?.toLowerCase() === 'true',
+      weight_capacity: row['Weight capacity'],
+      included_items: row['Included'],
+      item_number: row['Item number'],
+    }))
+
+    const { error } = await supabase
+      .from('product_catalog')
+      .upsert(batch, { onConflict: 'option_sku' })
+
+    if (error) {
+      console.error(`Error at batch ${i}:`, error)
+    } else {
+      console.log(`Imported ${Math.min(i + batchSize, records.length)}/${records.length}`)
+    }
+  }
+
+  console.log('Import complete!')
+}
+
+importProductCatalog()
 ```
 
 #### Evidence Table Builder (TypeScript)
@@ -195,13 +455,114 @@ export interface EvidenceTable {
 export async function buildEvidenceTable(
   masterSku: string,
   platform: 'google' | 'bing' | 'shopify',
-  finish?: string
+  finishCode?: string
 ): Promise<EvidenceTable> {
-  // 1. Fetch from product_catalog table
-  // 2. Fetch current content from generated_content
-  // 3. Fetch finish metadata if variant
-  // 4. Build keyword list from search_queries (Prompt 14)
-  // Return comprehensive evidence
+  const supabase = await createClient()
+
+  // 1. Fetch from product_catalog table (loaded from Acatalog.csv)
+  let catalogQuery = supabase
+    .from('product_catalog')
+    .select('*')
+    .eq('master_sku', masterSku)
+
+  // For Google/Bing, get specific variant; for Shopify, get any row (master-level)
+  if (platform !== 'shopify' && finishCode) {
+    catalogQuery = catalogQuery.eq('finish_code', finishCode)
+  }
+
+  const { data: catalogData } = await catalogQuery.limit(1).single()
+
+  // 2. Fetch current generated content (if exists)
+  const { data: generatedContent } = await supabase
+    .from('generated_content')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .eq('platform', platform)
+
+  const currentTitle = generatedContent?.find(c => c.content_type === 'title')
+  const currentDesc = generatedContent?.find(c => c.content_type === 'description')
+
+  // 3. Fetch search query keywords (from Prompt 14, if available)
+  const { data: searchQueries } = await supabase
+    .from('search_queries')
+    .select('query_text, impressions')
+    .eq('master_sku', masterSku)
+    .order('impressions', { ascending: false })
+    .limit(10)
+
+  // 4. Build bullets array from CSV columns
+  const bullets = [
+    catalogData?.bullet_1,
+    catalogData?.bullet_2,
+    catalogData?.bullet_3,
+    catalogData?.bullet_4,
+    catalogData?.bullet_5,
+    catalogData?.bullet_6,
+  ].filter(Boolean) as string[]
+
+  // 5. Determine room context from category
+  const roomContext = catalogData?.category?.toLowerCase().includes('kitchen')
+    ? 'kitchen' as const
+    : 'bathroom' as const
+
+  // 6. Build dimensions string
+  const dimensions = catalogData
+    ? `${catalogData.length || ''}L x ${catalogData.height || ''}H x ${catalogData.width || ''}W`
+    : null
+
+  // 7. Get finish metadata
+  const finishMeta = getFinishMetadata(catalogData?.finish_name || '')
+
+  return {
+    master_sku: masterSku,
+    product_title: catalogData?.current_title || masterSku,
+    product_category: catalogData?.category || 'Bathroom Hardware',
+
+    // Current content - IMPORTANT for context
+    current_google_title: currentTitle?.candidate_content || null,
+    current_google_description: currentDesc?.candidate_content || null,
+    current_bing_title: null, // TODO: fetch if separate
+    current_bing_description: null,
+    current_shopify_description: catalogData?.narrative_copy || null, // From CSV!
+
+    // Variant info
+    finish: catalogData?.finish_name || null,
+    finish_code: catalogData?.finish_code || null,
+    finish_category: finishMeta.category,
+    finish_character: finishMeta.character,
+
+    // Product details from CSV
+    dimensions,
+    materials: catalogData?.material || 'Solid Brass',
+    mount_type: catalogData?.mounting_type || null,
+    weight_capacity: catalogData?.weight_capacity || null,
+
+    // Features from CSV bullets
+    bullets,
+    features: {
+      style: catalogData?.style || '',
+      shape: catalogData?.shape || '',
+      assembly: catalogData?.assembly_required ? 'Required' : 'Not required',
+      included: catalogData?.included_items || '',
+    },
+    warranty_info: 'Limited Lifetime Warranty', // Standard for Allied Brass
+
+    // Collection/design context
+    collection_name: catalogData?.collection_name || null,
+    collection_context: catalogData?.collection_name
+      ? `Part of the ${catalogData.collection_name} collection for coordinated design`
+      : null,
+    design_style: catalogData?.style || 'versatile',
+    competitive_edge: 'Solid brass construction outlasts die-cast zinc alternatives',
+    room_context: roomContext,
+
+    // Image URL for vision - HIGH RES from CSV!
+    main_image_url: catalogData?.main_image_url || null,
+
+    // Keywords from search queries (Prompt 14)
+    target_keywords: searchQueries?.map(q => q.query_text) || [],
+    keyword_intent: null,
+  }
 }
 
 export function formatEvidenceMarkdown(evidence: EvidenceTable): string {
