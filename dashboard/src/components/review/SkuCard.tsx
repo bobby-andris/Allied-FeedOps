@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { QualityScore } from '@/components/shared/QualityScore'
-import { Check, X, RotateCcw } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 
 interface SkuCardProps {
   sku: string

@@ -23,7 +23,7 @@ interface ApprovalControlsProps {
 
 export function ApprovalControls({
   sku,
-  currentStatus,
+  currentStatus: _currentStatus,
   titleApproved,
   descriptionApproved,
   imageApproved,

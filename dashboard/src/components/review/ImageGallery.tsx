@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, X, ChevronLeft, ChevronRight, ZoomIn, Loader2 } from "lucide-react"
+import { Check, ChevronLeft, ChevronRight, ZoomIn, Loader2 } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -99,8 +99,9 @@ export function ImageGallery({ images, sku }: ImageGalleryProps) {
             <div className="aspect-square bg-muted rounded flex items-center justify-center text-muted-foreground overflow-hidden relative group">
               {image.image_url ? (
                 <>
-                  <img 
-                    src={getImageUrl(image.image_url) || ''} 
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getImageUrl(image.image_url) || ''}
                     alt={`Variation ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
@@ -168,8 +169,9 @@ export function ImageGallery({ images, sku }: ImageGalleryProps) {
             {/* Image */}
             <div className="flex items-center justify-center bg-muted rounded-lg overflow-hidden" style={{ minHeight: '500px' }}>
               {selectedImage?.image_url ? (
-                <img 
-                  src={getImageUrl(selectedImage.image_url) || ''} 
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={getImageUrl(selectedImage.image_url) || ''}
                   alt={`Variation ${currentIndex + 1}`}
                   className="max-w-full max-h-[70vh] object-contain"
                 />
@@ -195,8 +197,9 @@ export function ImageGallery({ images, sku }: ImageGalleryProps) {
                 }`}
               >
                 {image.image_url ? (
-                  <img 
-                    src={getImageUrl(image.image_url) || ''} 
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={getImageUrl(image.image_url) || ''}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                   />

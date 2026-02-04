@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     // If excluding a specific batch, also get its SKUs and exclude them from the unavailable list
     // (so they still show as "available" for adding to that specific batch)
     if (excludeBatchId) {
-      assignedSkus = assignedSkus.filter(sku => {
+      assignedSkus = assignedSkus.filter(_sku => {
         // We'd need another query to check if this SKU is in the excluded batch
         // For simplicity, we'll handle this differently - get assignments for the excluded batch
         return true
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         .select('master_sku')
         .eq('batch_id', excludeBatchId)
 
-      const batchSkus = batchAssignments?.map(a => a.master_sku) || []
+      const _batchSkus = batchAssignments?.map(a => a.master_sku) || []
       
       // Remove these from assignedSkus so they don't get filtered out
       // Actually, we want to filter these OUT from available since they're already in the batch

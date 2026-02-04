@@ -210,7 +210,7 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
               {assignments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                    No SKUs in this batch yet. Click "Add SKUs" to get started.
+                    No SKUs in this batch yet. Click &quot;Add SKUs&quot; to get started.
                   </TableCell>
                 </TableRow>
               ) : (

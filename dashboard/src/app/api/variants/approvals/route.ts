@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ data })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ data: { ...data, approval_status: newStatus } })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -217,7 +217,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ data: { ...data, approval_status: newStatus } })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

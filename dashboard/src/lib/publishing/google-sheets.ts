@@ -8,7 +8,7 @@
  */
 
 import { google, sheets_v4 } from 'googleapis'
-import type { GoogleSheetsRow, SheetColumnMap, PublishResult, Environment } from './types'
+import type { GoogleSheetsRow, SheetColumnMap, Environment } from './types'
 
 // Default column mapping for GMC supplemental feed
 // Column letters map to 0-indexed positions

@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: RegenerateRequest = await request.json()
-    const { master_sku, content_type, platform, mode, feedback, options } = body
+    const { master_sku, content_type, platform, mode, feedback, options: _options } = body
 
     // Validate required fields
     if (!master_sku || !content_type || !platform || !mode) {

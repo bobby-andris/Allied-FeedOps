@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -54,22 +54,20 @@ export function RegenerationHistory({
   const [loading, setLoading] = useState(false)
   const [reverting, setReverting] = useState<string | null>(null)
 
-  const fetchHistory = async () => {
-    if (!isOpen) return // Don't fetch if closed
-    
+  const fetchHistory = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({ sku })
       if (contentType) params.append('content_type', contentType)
       if (platform) params.append('platform', platform)
-      
+
       const response = await fetch(`/api/regenerate/history?${params}`)
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch history')
       }
-      
+
       setHistory(data.history)
     } catch (error) {
       console.error('Failed to fetch history:', error)
@@ -77,14 +75,14 @@ export function RegenerationHistory({
     } finally {
       setLoading(false)
     }
-  }
+  }, [sku, contentType, platform])
 
   // Fetch history when opened
   useEffect(() => {
     if (isOpen) {
       fetchHistory()
     }
-  }, [isOpen, sku, contentType, platform])
+  }, [isOpen, fetchHistory])
 
   const handleRevert = async (entry: RegenerationHistoryType) => {
     if (!entry.previous_content) {

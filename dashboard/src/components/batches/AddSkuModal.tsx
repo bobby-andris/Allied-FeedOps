@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -34,18 +34,7 @@ export function AddSkuModal({ open, onOpenChange, batchId, onAdded }: AddSkuModa
   const [loadingSkus, setLoadingSkus] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch available SKUs when modal opens
-  useEffect(() => {
-    if (open) {
-      fetchAvailableSkus()
-    } else {
-      // Reset form when modal closes
-      setSelectedSkus([])
-      setError(null)
-    }
-  }, [open])
-
-  const fetchAvailableSkus = async () => {
+  const fetchAvailableSkus = useCallback(async () => {
     setLoadingSkus(true)
     try {
       // Use exclude_batch_id to not show SKUs already in this batch
@@ -59,7 +48,18 @@ export function AddSkuModal({ open, onOpenChange, batchId, onAdded }: AddSkuModa
     } finally {
       setLoadingSkus(false)
     }
-  }
+  }, [batchId])
+
+  // Fetch available SKUs when modal opens
+  useEffect(() => {
+    if (open) {
+      fetchAvailableSkus()
+    } else {
+      // Reset form when modal closes
+      setSelectedSkus([])
+      setError(null)
+    }
+  }, [open, fetchAvailableSkus])
 
   const handleSkuToggle = (sku: string, checked: boolean) => {
     if (checked) {

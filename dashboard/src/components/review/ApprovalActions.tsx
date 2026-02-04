@@ -14,7 +14,7 @@ interface ApprovalActionsProps {
   size?: 'sm' | 'default'
 }
 
-export function ApprovalActions({ sku, finish, type, currentApproval, size = 'default' }: ApprovalActionsProps) {
+export function ApprovalActions({ sku, finish, type, currentApproval: _currentApproval, size = 'default' }: ApprovalActionsProps) {
   const [loading, setLoading] = useState<'approve' | 'reject' | 'revision' | null>(null)
   const router = useRouter()
 

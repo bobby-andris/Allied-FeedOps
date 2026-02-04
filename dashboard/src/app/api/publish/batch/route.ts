@@ -6,7 +6,6 @@ import type {
   BatchPublishResult,
   PublishResult,
   Platform,
-  Environment,
   PublishEventInsert,
   VariantIndexRow,
   GeneratedContentRow,

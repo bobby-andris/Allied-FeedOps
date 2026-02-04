@@ -5,7 +5,7 @@
  * and adds environment tracking tags.
  */
 
-import type { Environment, PublishResult } from './types'
+import type { Environment } from './types'
 
 const SHOPIFY_API_VERSION = '2026-01'
 
