@@ -157,9 +157,11 @@ Goals:
 6. Track query coverage improvement over time
 
 The key GAQL query:
-SELECT search_term_view.search_term, metrics.impressions, metrics.clicks, metrics.conversions
+SELECT search_term_view.search_term, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, segments.product_item_id
 FROM search_term_view
 WHERE segments.date DURING LAST_30_DAYS AND campaign.advertising_channel_type = 'SHOPPING'
+
+Note: metrics.conversions_value gives revenue from conversions. segments.product_item_id gives the GMC offer ID for variant-level tracking.
 
 Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
 

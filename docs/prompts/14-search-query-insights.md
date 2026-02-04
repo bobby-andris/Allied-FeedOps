@@ -90,6 +90,7 @@ CREATE TABLE search_queries (
   impressions integer DEFAULT 0,
   clicks integer DEFAULT 0,
   conversions numeric DEFAULT 0,
+  conversion_value numeric DEFAULT 0, -- Revenue/value from conversions
   cost_micros bigint DEFAULT 0,
   ctr numeric GENERATED ALWAYS AS (
     CASE WHEN impressions > 0 THEN clicks::numeric / impressions ELSE 0 END
@@ -113,6 +114,7 @@ CREATE TABLE search_queries_by_master_sku (
   total_impressions integer DEFAULT 0,
   total_clicks integer DEFAULT 0,
   total_conversions numeric DEFAULT 0,
+  total_conversion_value numeric DEFAULT 0, -- Total revenue from conversions
   variant_count integer DEFAULT 1, -- how many variants triggered this query
   top_variant_finish text, -- which finish got most impressions for this query
   period_start date NOT NULL,
@@ -180,6 +182,7 @@ SELECT
   metrics.impressions,
   metrics.clicks,
   metrics.conversions,
+  metrics.conversions_value,
   metrics.cost_micros,
   segments.product_item_id
 FROM search_term_view
@@ -276,7 +279,7 @@ class SearchTermsClient:
 
         Returns list of dicts with:
         - search_term: The actual query text
-        - impressions, clicks, conversions, cost_micros: Metrics
+        - impressions, clicks, conversions, conversion_value, cost_micros: Metrics
         - gmc_offer_id: The GMC offer ID (variant identifier)
         - master_sku, finish, finish_code: Variant info from variant_index
         """
@@ -288,6 +291,7 @@ class SearchTermsClient:
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
+                metrics.conversions_value,
                 metrics.cost_micros,
                 segments.product_item_id
             FROM search_term_view
@@ -314,6 +318,7 @@ class SearchTermsClient:
                         'impressions': row.metrics.impressions,
                         'clicks': row.metrics.clicks,
                         'conversions': row.metrics.conversions,
+                        'conversion_value': row.metrics.conversions_value,
                         'cost_micros': row.metrics.cost_micros,
                         'gmc_offer_id': gmc_offer_id,
                         'master_sku': variant_info.get('master_sku'),
@@ -352,6 +357,7 @@ class SearchTermsClient:
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
+                metrics.conversions_value,
                 segments.product_item_id
             FROM search_term_view
             WHERE segments.date DURING LAST_{days}_DAYS
@@ -384,11 +390,13 @@ class SearchTermsClient:
                             'impressions': 0,
                             'clicks': 0,
                             'conversions': 0,
+                            'conversion_value': 0,
                             'variants': set()
                         }
                     aggregate[search_term]['impressions'] += row.metrics.impressions
                     aggregate[search_term]['clicks'] += row.metrics.clicks
                     aggregate[search_term]['conversions'] += row.metrics.conversions
+                    aggregate[search_term]['conversion_value'] += row.metrics.conversions_value
                     aggregate[search_term]['variants'].add(finish_code)
 
                     # Track by variant
@@ -400,12 +408,14 @@ class SearchTermsClient:
                             'impressions': 0,
                             'clicks': 0,
                             'conversions': 0,
+                            'conversion_value': 0,
                             'finish': variant_info.get('finish'),
                             'finish_code': finish_code
                         }
                     by_variant[finish_code][search_term]['impressions'] += row.metrics.impressions
                     by_variant[finish_code][search_term]['clicks'] += row.metrics.clicks
                     by_variant[finish_code][search_term]['conversions'] += row.metrics.conversions
+                    by_variant[finish_code][search_term]['conversion_value'] += row.metrics.conversions_value
 
         except GoogleAdsException as e:
             print(f"Google Ads API error: {e}")
@@ -449,7 +459,8 @@ class SearchTermsClient:
                 search_term_view.search_term,
                 metrics.impressions,
                 metrics.clicks,
-                metrics.conversions
+                metrics.conversions,
+                metrics.conversions_value
             FROM search_term_view
             WHERE segments.date DURING LAST_{days}_DAYS
                 AND campaign.advertising_channel_type = 'SHOPPING'
@@ -471,7 +482,8 @@ class SearchTermsClient:
                         'search_term': row.search_term_view.search_term,
                         'impressions': row.metrics.impressions,
                         'clicks': row.metrics.clicks,
-                        'conversions': row.metrics.conversions
+                        'conversions': row.metrics.conversions,
+                        'conversion_value': row.metrics.conversions_value
                     })
 
         except GoogleAdsException as e:
@@ -839,6 +851,7 @@ interface Query {
   impressions: number
   clicks: number
   conversions: number
+  conversion_value: number // Revenue/value from conversions
   ctr: number
   cvr: number
   // Variant info (for Google/Bing)
@@ -883,6 +896,7 @@ export function QueryTable({
           <TableHead className="text-right">Impressions</TableHead>
           <TableHead className="text-right">Clicks</TableHead>
           <TableHead className="text-right">CTR</TableHead>
+          <TableHead className="text-right">Conv. Value</TableHead>
           <TableHead className="text-center">In Title?</TableHead>
         </TableRow>
       </TableHeader>
@@ -923,6 +937,9 @@ export function QueryTable({
               </TableCell>
               <TableCell className="text-right">
                 {((query.ctr || 0) * 100).toFixed(2)}%
+              </TableCell>
+              <TableCell className="text-right">
+                ${(query.conversion_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </TableCell>
               <TableCell className="text-center">
                 {covered ? (
