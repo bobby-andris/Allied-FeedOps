@@ -124,9 +124,40 @@ Run the full suite:
 PYTHONPATH=./src .venv/bin/python -m pytest -q
 ```
 
+## Prompt Philosophy: Context Over Rules
+
+The LLM prompt system (`src/feedops/pipeline/prompts.py`) uses a **context-driven approach** rather than prescriptive rules. Instead of telling the LLM "write sentences in this pattern", we give it understanding and trust it to make good decisions.
+
+### The Core Insight
+
+Prescriptive rules like "FIRST SENTENCE PATTERN: [Dimension] [product] in [Finish]..." create robotic, templated output. Context-driven guidance produces descriptions that feel human-written and address real buyer questions.
+
+### What the Prompt Provides
+
+1. **WHO is searching** - Homeowners renovating, designers specifying, people replacing broken products
+2. **WHAT questions buyers have** - "Will this look good?", "Will it match?", "Is $80 worth it vs $20?"
+3. **WHAT makes Allied Brass worth it** - Style + function, 28 finishes, product innovations, solid brass durability
+4. **PLATFORM context** - Google/Bing variants (first impression, make them click) vs Shopify master (already clicked, help them buy)
+
+### Why It Works
+
+The LLM already knows how to write compelling copy. The old approach was **blocking** that knowledge with compliance rules. By providing context instead of constraints, we let the LLM:
+- Write different descriptions for different product types (grab bars focus on safety, shower baskets focus on drainage)
+- Weave finish names naturally instead of using robotic patterns
+- Answer the actual questions buyers have before spending $80
+
+### Example Output Difference
+
+**Old (rule-following):**
+> "This 18.75-inch wall-mounted shower basket is crafted from solid brass. Available in Antique Brass. Antique Brass features a softened, aged golden patina..."
+
+**New (context-driven):**
+> "This 18.75-inch shower basket in Antique Brass keeps bath essentials organized with vintage-inspired warmth. Ventilated solid brass wires drain quickly and resist rust..."
+
 ## Docs
 
 - Brand identity context: `docs/allied_brass_complete_brand_identity_v2 (4).md`
 - Platform guidelines: `docs/04-platform-guidelines.md`
 - Testing notes: `docs/testing-guide.md`
+- Prompt redesign plan: `.claude/plans/streamed-shimmying-dove.md`
 
