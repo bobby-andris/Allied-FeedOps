@@ -14,11 +14,12 @@
 - **Google Ads customer ID**: `6253381786`
 - **GA4 property**: Allied Brass — GA4 (Old)
 
-## What’s implemented (dashboard prompts)
+## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`06` (performance, batches, publishing, variant review, settings health, regeneration)
-- **Partially implemented**: `docs/prompts/07-dashboard-overview.md` (has `/api/stats`, but overview page still uses placeholder stats; charts/components not added)
-- **Not implemented yet**: `docs/prompts/08-sku-selection-generation.md` (no `/generate` page or `/api/sku-selection/*` routes yet)
+- **Implemented**: `docs/prompts/01`–`08`
+  - 01-06: performance, batches, publishing, variant review, settings health, regeneration
+  - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
+  - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
 
 ## Supabase schema (tables we rely on)
 
@@ -28,6 +29,7 @@
 - `publish_batches`, `batch_sku_assignments` (batch mgmt)
 - `publish_events` (audit log)
 - `performance_baselines`, `performance_snapshots` (performance)
+- `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
 
 **Column naming conventions (do not drift)**
 
@@ -54,6 +56,10 @@ GMC offer IDs:
 - Supabase query layer: `dashboard/src/lib/supabase/{queries.ts,types.ts}`
 - Publishing libs: `dashboard/src/lib/publishing/*`
 - Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (stores prompt history; model default aligns to `gpt-5.2`)
+- SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection algorithm)
+- SKU selection API: `dashboard/src/app/api/sku-selection/route.ts` (scored recommendations)
+- Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
+- Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
 
 ## Run locally
 
