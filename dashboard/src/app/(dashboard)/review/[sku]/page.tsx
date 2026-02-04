@@ -121,10 +121,10 @@ async function getSkuData(sku: string) {
     console.error('Error fetching variant approvals:', variantApprovalsError)
   }
 
-  // Get product images and current production content from product_catalog
+  // Get product images, current production content, and variants from product_catalog
   const { data: productCatalog, error: productCatalogError } = await supabase
     .from('product_catalog')
-    .select('finish_code, main_image_url, alt_image_1, alt_image_2, alt_image_3, alt_image_4, title, narrative_copy')
+    .select('finish_code, finish_name, main_image_url, alt_image_1, alt_image_2, alt_image_3, alt_image_4, title, narrative_copy')
     .eq('master_sku', sku)
     .order('position', { ascending: true })
 
@@ -191,11 +191,38 @@ async function getSkuData(sku: string) {
     approval_status: (img.approval_status as 'pending' | 'approved' | 'rejected') || 'pending',
   }))
 
+  // Build variants list: prefer variant_index, fallback to product_catalog
+  let finalVariants: VariantIndex[] = (variants || []) as VariantIndex[]
+
+  if (finalVariants.length === 0 && productCatalog && productCatalog.length > 0) {
+    // Build variants from product_catalog
+    const uniqueFinishes = new Map<string, { finish_name: string; finish_code: string }>()
+    for (const product of productCatalog) {
+      if (product.finish_name && product.finish_code && !uniqueFinishes.has(product.finish_code)) {
+        uniqueFinishes.set(product.finish_code, {
+          finish_name: product.finish_name,
+          finish_code: product.finish_code,
+        })
+      }
+    }
+
+    finalVariants = Array.from(uniqueFinishes.values()).map((f) => ({
+      id: `pc-${sku}-${f.finish_code}`, // Synthetic ID from product_catalog
+      master_sku: sku,
+      finish: f.finish_name,
+      finish_code: f.finish_code,
+      gmc_offer_id: '', // Required by type
+      shopify_product_id: null,
+      shopify_variant_id: null,
+      dimensions: null,
+    })) as VariantIndex[]
+  }
+
   return {
     content: (content || []) as ContentRecord[],
     images: transformedImages,
     approval: approval as ApprovalRecord | null,
-    variants: (variants || []) as VariantIndex[],
+    variants: finalVariants,
     variantApprovals: (variantApprovals || []) as VariantApproval[],
     productImages,
     currentProduction,

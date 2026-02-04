@@ -17,6 +17,7 @@ import { RegenerationHistory } from "@/components/review/RegenerationHistory"
 import { QualityAnalyzer } from "@/components/review/QualityAnalyzer"
 import { ProductHeroImage } from "@/components/review/ProductHeroImage"
 import { LifestyleImageReview } from "@/components/review/LifestyleImageReview"
+import { VariantContentGrid } from "@/components/review/VariantContentGrid"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import {
@@ -484,12 +485,40 @@ export function SkuReviewClient({
         {platforms.includes('google') && (
           <TabsContent value="google" className="space-y-6">
             <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
+            {/* All Variants Grid for Google */}
+            {hasVariants && (
+              <VariantContentGrid
+                sku={sku}
+                platform="google"
+                baseTitle={getContentByPlatform(content, 'google').title?.candidate_content || null}
+                baseDescription={getContentByPlatform(content, 'google').description?.candidate_content || null}
+                variants={variants
+                  .filter(v => v.finish && v.finish_code)
+                  .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+                variantApprovals={variantApprovals}
+                onApprovalChange={() => router.refresh()}
+              />
+            )}
           </TabsContent>
         )}
 
         {platforms.includes('bing') && (
           <TabsContent value="bing" className="space-y-6">
             <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
+            {/* All Variants Grid for Bing */}
+            {hasVariants && (
+              <VariantContentGrid
+                sku={sku}
+                platform="bing"
+                baseTitle={getContentByPlatform(content, 'bing').title?.candidate_content || null}
+                baseDescription={getContentByPlatform(content, 'bing').description?.candidate_content || null}
+                variants={variants
+                  .filter(v => v.finish && v.finish_code)
+                  .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+                variantApprovals={variantApprovals}
+                onApprovalChange={() => router.refresh()}
+              />
+            )}
           </TabsContent>
         )}
 
