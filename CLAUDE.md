@@ -38,12 +38,13 @@
 
 ## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`09`, `19`
+- **Implemented**: `docs/prompts/01`–`09`, `19`, `20`
   - 01-06: performance, batches, publishing, variant review, settings health, regeneration
   - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
   - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
   - 09: Competitor intelligence (`/competitors` page, SERP analysis, marketplace scraping via Apify MCP)
   - 19: Evidence table for rich product context (product_catalog table, evidence builder, vision support)
+  - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection)
 
 ## Supabase schema (tables we rely on)
 
@@ -56,6 +57,8 @@
 - `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
 - `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
 - `product_catalog` (75,770 variants with full product data for evidence table - narrative_copy, bullets, dimensions, images)
+- `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking)
+- `lifestyle_image_selections` (audit trail for image selection decisions)
 
 **Column naming conventions (do not drift)**
 
@@ -89,6 +92,9 @@ GMC offer IDs:
 - Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
 - Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
 - Pattern extraction: `dashboard/src/lib/competitors/pattern-extraction.ts`
+- Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard)
+- Image approval API: `dashboard/src/app/api/review/images/approve/route.ts`
+- Image selection API: `dashboard/src/app/api/review/images/select/route.ts`
 
 ## Run locally
 
