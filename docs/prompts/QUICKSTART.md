@@ -400,14 +400,34 @@ Key context:
 The Problem:
 The dashboard's regeneration passes only 5 basic fields (master_sku, product_title, category, finish, dimensions) to the LLM. The Python pipeline builds a rich evidence table with product specs, features, bullets, images, keywords, and collection context. That's why Shopify descriptions are good but Google/Bing are robotic.
 
+CRITICAL DATA SOURCES TO USE:
+
+1. PRIMARY - Product Catalog CSV (data/Acatalog.csv):
+   - 75,773 rows of rich product data
+   - Contains: narrative_copy (full descriptions!), 6 bullet points, high-res image URLs
+   - Has GMCID mapping, collection info, all specs
+   - LOAD THIS INTO SUPABASE as product_catalog table
+
+2. Shopify Dev MCP Server:
+   - Use shopify-dev-mcp tools to look up Shopify Admin API documentation
+   - introspect_graphql_schema, learn_shopify_api, search_docs_chunks
+   - For fetching live product data if needed
+
+3. Google Merchant Center:
+   - Current feed data via Google Ads MCP
+   - variant_index.gmc_offer_id for mapping
+
 Goals:
 1. Use Playwright MCP to inspect current "Prompt used" section on review page
-2. Create product_catalog table with rich product data
-3. Build TypeScript evidence table builder (port from Python)
-4. Update regenerate API to pass comprehensive context
-5. Add product image (vision) support to regeneration
-6. Include current content as context for improvement
-7. Add variant-specific finish context for Google/Bing
+2. Apply migration to create product_catalog table (migration 010)
+3. Import Acatalog.csv into Supabase (75K+ products)
+4. Build TypeScript evidence table builder that queries product_catalog
+5. Update regenerate API to pass comprehensive context including:
+   - narrative_copy (baseline description from CSV)
+   - All 6 bullet points
+   - High-res product image URL (for vision)
+   - Collection name, material, style, mounting type
+6. Add variant-specific finish context for Google/Bing
 
 Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
 
