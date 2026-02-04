@@ -4,10 +4,19 @@ import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import crypto from 'node:crypto'
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Lazy-initialize OpenAI client (avoid build-time instantiation)
+let _openai: OpenAI | null = null
+function getOpenAIClient(): OpenAI {
+  if (!_openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set')
+    }
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return _openai
+}
 
 // Model to use for generation (default aligns with Python backend)
 const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
@@ -287,7 +296,7 @@ export async function POST(request: NextRequest) {
       ? ({ max_completion_tokens: content_type === 'title' ? 200 : 1000 } as const)
       : ({ max_tokens: content_type === 'title' ? 200 : 1000 } as const)
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: MODEL,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
