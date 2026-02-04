@@ -16,10 +16,11 @@
 
 ## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`08`
+- **Implemented**: `docs/prompts/01`–`09`
   - 01-06: performance, batches, publishing, variant review, settings health, regeneration
   - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
   - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
+  - 09: Competitor intelligence (`/competitors` page, SERP analysis, marketplace scraping via Apify MCP)
 
 ## Supabase schema (tables we rely on)
 
@@ -30,6 +31,7 @@
 - `publish_events` (audit log)
 - `performance_baselines`, `performance_snapshots` (performance)
 - `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
+- `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
 
 **Column naming conventions (do not drift)**
 
@@ -60,6 +62,8 @@ GMC offer IDs:
 - SKU selection API: `dashboard/src/app/api/sku-selection/route.ts` (scored recommendations)
 - Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
 - Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
+- Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
+- Pattern extraction: `dashboard/src/lib/competitors/pattern-extraction.ts`
 
 ## Run locally
 

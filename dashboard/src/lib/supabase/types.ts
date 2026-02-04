@@ -191,6 +191,65 @@ export interface BatchGenerationJobSku {
   completed_at: string | null
 }
 
+// ============================================================================
+// Competitor Intelligence Types
+// ============================================================================
+
+export interface CompetitorScrapeJob {
+  id: string
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  job_type: 'serp' | 'marketplace'
+  category: string
+  source: 'google' | 'amazon' | 'wayfair' | 'homedepot'
+  search_query: string | null
+  apify_run_id: string | null
+  apify_dataset_id: string | null
+  listings_count: number
+  error_message: string | null
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+}
+
+export interface CompetitorListing {
+  id: string
+  source: string
+  source_type: 'serp' | 'marketplace'
+  source_url: string | null
+  domain: string | null
+  product_category: string
+  title: string
+  description: string | null
+  price: number | null
+  rating: number | null
+  review_count: number | null
+  brand: string | null
+  position: number | null
+  image_url: string | null
+  scraped_at: string
+  scrape_job_id: string | null
+  keywords_extracted: string[] | null
+}
+
+export type CompetitorPatternType =
+  | 'title_structure'
+  | 'keyword'
+  | 'benefit'
+  | 'trust_signal'
+  | 'competitor_brand'
+
+export interface CompetitorPattern {
+  id: string
+  category: string
+  pattern_type: CompetitorPatternType
+  pattern_value: string
+  frequency: number
+  avg_position: number | null
+  sources: string[] | null
+  example_titles: string[] | null
+  updated_at: string
+}
+
 // Database schema type
 export interface Database {
   public: {
