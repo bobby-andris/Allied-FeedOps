@@ -10,6 +10,7 @@ import {
   Settings,
   Home,
   LogOut,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -18,6 +19,7 @@ import type { User } from '@supabase/supabase-js'
 
 const navigation = [
   { name: 'Overview', href: '/', icon: Home },
+  { name: 'Generate', href: '/generate', icon: Sparkles },
   { name: 'Review Queue', href: '/review', icon: ClipboardList },
   { name: 'Batches', href: '/batches', icon: Layers },
   { name: 'Performance', href: '/performance', icon: BarChart3 },

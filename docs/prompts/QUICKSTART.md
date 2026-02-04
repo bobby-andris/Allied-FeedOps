@@ -2,9 +2,23 @@
 
 ## Execution Order
 
+### Phase 1: Core Dashboard (Complete First)
 1. **Prompt 10** → Dashboard Implementation (07 & 08)
 2. **Prompt 09** → GCP Cloud Run Setup
 3. **Prompt 11** → Production Readiness Audit
+
+### Phase 2: Content Quality Improvements (Priority)
+4. **Prompt 17** → Description Quality Analyzer
+5. **Prompt 13** → Competitor Intelligence Panel
+6. **Prompt 14** → Search Query Insights
+7. **Prompt 18** → Keyword Gap Analysis
+
+### Phase 3: Future-Proofing
+8. **Prompt 15** → Agentic Commerce (UCP)
+
+### Phase 4: ROI & Coverage
+9. **Prompt 12** → A/B Testing Dashboard
+10. **Prompt 16** → Multi-Variant Images
 
 After each prompt, run the **Verification & Completion Prompt** below.
 
@@ -104,6 +118,246 @@ Generate a summary report of all findings with:
 - Recommendations (nice to have)
 
 Do NOT commit changes until I've reviewed the findings.
+```
+
+---
+
+## Quick Start: Prompt 17 (Description Quality Analyzer)
+
+**When to run:** Priority 1 - Real-time feedback on description quality
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement the Description Quality Analyzer for the FeedOps dashboard. Please enter plan mode and use the prompt at docs/prompts/17-description-quality-analyzer.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Live URL: https://allied-feed-ops.vercel.app
+- Scoring dimensions are defined in AGENTS.md
+
+Goals:
+1. Create QualityAnalyzer.tsx component with 6 scoring dimensions
+2. Create quality-scoring.ts library with scoring logic
+3. Integrate analyzer into the SKU review page sidebar
+4. Add real-time updates as content changes
+5. Show issues, suggestions, and trust signal checklist
+
+The analyzer should score:
+- Specificity (concrete claims vs vague adjectives)
+- Benefit Coverage (benefits in first 150 chars)
+- Keyword Inclusion (target keywords in optimal positions)
+- Format Adherence (character limits, structure)
+- Brand Voice (confident, premium-appropriate)
+- Factual Accuracy (claims traceable to product data)
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 13 (Competitor Intelligence)
+
+**When to run:** Priority 1 - Learn from competitor content patterns
+
+**Prerequisites:** Apify MCP is configured
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement the Competitor Intelligence Panel for the FeedOps dashboard. Please enter plan mode and use the prompt at docs/prompts/13-competitor-intelligence.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Apify MCP: Configured and available
+- Supabase project: qezuszwufortkiutlhym
+
+Goals:
+1. Apply database migration for competitor tables
+2. Create /competitors page with category selector
+3. Integrate Apify MCP for scraping Amazon, Wayfair, Home Depot
+4. Build pattern extraction logic (title structure, keywords, benefits, trust signals)
+5. Show side-by-side comparison with our content
+6. Display winning patterns with frequency counts
+
+Use the Apify MCP tools to:
+- Search for appropriate scraper actors
+- Configure and run scrapers for bathroom fixtures
+- Store results in competitor_listings table
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 14 (Search Query Insights)
+
+**When to run:** Priority 1 - Match actual search behavior
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement the Search Query Insights dashboard for FeedOps. Please enter plan mode and use the prompt at docs/prompts/14-search-query-insights.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Google Ads customer ID: 6253381786
+- Existing integration: src/feedops/integrations/google_ads_performance.py
+
+Goals:
+1. Apply database migration for search_queries tables
+2. Create Python integration for search_term_view GAQL query
+3. Create /search-insights page with query table
+4. Build gap analysis component showing keyword coverage
+5. Integrate search data into content generation prompts
+6. Track query coverage improvement over time
+
+The key GAQL query:
+SELECT search_term_view.search_term, metrics.impressions, metrics.clicks, metrics.conversions
+FROM search_term_view
+WHERE segments.date DURING LAST_30_DAYS AND campaign.advertising_channel_type = 'SHOPPING'
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 18 (Keyword Gap Analysis)
+
+**When to run:** Priority 1 - Identify missing keywords and prioritize optimization
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement the Keyword Gap Analysis dashboard for FeedOps. Please enter plan mode and use the prompt at docs/prompts/18-keyword-gap-analysis.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Depends on: Search Query Insights (Prompt 14)
+
+Goals:
+1. Apply database migration for keyword_gaps tables
+2. Create gap scoring algorithm (impressions × coverage gap)
+3. Create /keyword-gaps page with opportunity ranking
+4. Build KeywordSuggestions component with recommended keywords
+5. Track gap closure progress over time
+6. Generate suggested title improvements
+
+The scoring algorithm should:
+- Compare our titles to actual search queries from Google Ads
+- Identify SKUs where high-volume queries aren't in titles
+- Prioritize optimization by opportunity size
+- Provide specific keywords to add per SKU
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 15 (Agentic Commerce - UCP)
+
+**When to run:** Priority 2 - Future-proof with AI agent discovery
+
+**Prerequisites:** Shopify Plus account required for Agentic Storefronts
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement Agentic Commerce (UCP) integration for FeedOps. Please enter plan mode and use the prompt at docs/prompts/15-agentic-commerce-ucp.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Shopify Plus required for full UCP features
+- UCP announced by Shopify + Google January 2026
+
+Goals:
+1. Document Shopify Plus Agentic Storefronts configuration
+2. Create /agents dashboard page for agent traffic monitoring
+3. Apply database migration for agent_sessions tracking
+4. Build product readiness scoring for agent discovery
+5. Create agent-optimized metafields structure
+6. Track agent traffic and conversion funnel
+
+This enables AI agents (ChatGPT, Gemini, Copilot, Perplexity) to:
+- Discover Allied Brass products programmatically
+- Read detailed product information
+- Complete purchases on behalf of users
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 12 (A/B Testing Dashboard)
+
+**When to run:** Priority 3 - Prove ROI of optimizations
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement the A/B Testing & Performance Attribution dashboard for FeedOps. Please enter plan mode and use the prompt at docs/prompts/12-ab-testing-dashboard.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Google Ads customer ID: 6253381786
+- Existing tables: performance_baselines, performance_snapshots
+
+Goals:
+1. Apply database migration for optimization_cohorts tables
+2. Create /ab-testing page with cohort management
+3. Build statistical significance calculator (two-proportion z-test)
+4. Create performance comparison table (before/after metrics)
+5. Visualize lift with confidence intervals
+6. Calculate aggregate program ROI
+
+The dashboard should:
+- Organize optimized SKUs into cohorts
+- Track baseline vs post-optimization metrics (CTR, CVR, ROAS)
+- Calculate lift percentage with statistical significance
+- Show overall program ROI estimation
+
+Do NOT commit changes until the full implementation is complete and verified.
+```
+
+---
+
+## Quick Start: Prompt 16 (Multi-Variant Images)
+
+**When to run:** Priority 4 - Complete product coverage with finish-specific images
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to implement Multi-Variant Lifestyle Image Generation for FeedOps. Please enter plan mode and use the prompt at docs/prompts/16-multi-variant-images.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Existing: src/feedops/pipeline/lifestyle_images.py
+- Allied Brass has 28 finish options
+
+Goals:
+1. Apply database migration for variant_images tables
+2. Create variant_lifestyle_images.py for multi-finish generation
+3. Create shopify_media_upload.py for Shopify GraphQL media API
+4. Create /images page for variant image management
+5. Generate finish-specific prompts with correct color descriptions
+6. Apply IPTC metadata to all generated images
+7. Push images to Shopify variant media
+
+The generator should:
+- Identify all finish variants for each master SKU
+- Generate lifestyle images showing each finish in context
+- Upload to GCS with CDN URLs
+- Push to Shopify variant media via GraphQL
+
+Do NOT commit changes until the full implementation is complete and verified.
 ```
 
 ---

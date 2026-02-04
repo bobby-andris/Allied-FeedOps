@@ -158,6 +158,39 @@ export interface VariantIndex {
   dimensions: string | null
 }
 
+// Batch Generation Jobs (for multi-SKU generation from /generate page)
+export interface BatchGenerationJob {
+  id: string
+  status: 'queued' | 'processing' | 'completed' | 'failed'
+  total_skus: number
+  completed_skus: number
+  failed_skus: number
+  options: {
+    titles: boolean
+    descriptions: boolean
+    images: boolean
+    platforms: ('google' | 'bing' | 'shopify')[]
+    num_candidates?: number
+  }
+  error_message: string | null
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+  created_by: string | null
+}
+
+export interface BatchGenerationJobSku {
+  id: string
+  job_id: string
+  master_sku: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  error_message: string | null
+  generated_content_ids: string[] | null
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+}
+
 // Database schema type
 export interface Database {
   public: {
@@ -211,6 +244,16 @@ export interface Database {
         Row: RegenerationHistory
         Insert: Omit<RegenerationHistory, 'id' | 'created_at'>
         Update: Partial<Omit<RegenerationHistory, 'id' | 'created_at'>>
+      }
+      batch_generation_jobs: {
+        Row: BatchGenerationJob
+        Insert: Omit<BatchGenerationJob, 'id' | 'created_at' | 'completed_skus' | 'failed_skus'>
+        Update: Partial<Omit<BatchGenerationJob, 'id' | 'created_at'>>
+      }
+      batch_generation_job_skus: {
+        Row: BatchGenerationJobSku
+        Insert: Omit<BatchGenerationJobSku, 'id' | 'created_at'>
+        Update: Partial<Omit<BatchGenerationJobSku, 'id' | 'created_at'>>
       }
     }
   }
