@@ -65,12 +65,12 @@ interface ApprovalRecord {
 /**
  * Normalize SKU format for database queries.
  * URLs use hyphens (DMF-2-2X) but database uses slashes (DMF-2/2X).
- * Pattern: SKU-dimension format like NS-5-16 → NS-5/16
+ * Pattern: Replace last hyphen-dimension segment like -16, -2X, -16-GAL → /16, /2X, /16-GAL
  */
 function normalizeSkuForDb(urlSku: string): string {
-  // Match pattern: letters/numbers-letters/numbers-NUMBER (where last segment is dimension)
-  // Examples: DMF-2-2X, NS-5-16, WP-2-16-GAL, RW-24U-12
-  return urlSku.replace(/-(\d+[A-Z]*)(-|$)/g, '/$1$2')
+  // Match: hyphen + digits + optional letters + optional suffix (like -GAL) at end
+  // Examples: DMF-2-2X → DMF-2/2X, NS-5-16 → NS-5/16, WP-2-16-GAL → WP-2/16-GAL
+  return urlSku.replace(/-(\d+[A-Z]*(?:-[A-Z]+)?)$/i, '/$1')
 }
 
 async function getSkuData(urlSku: string) {
