@@ -72,3 +72,17 @@ uv venv
 uv pip install -e ".[dev]"
 PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 ```
+
+## Historical docs archive
+
+Historical planning files, investigation artifacts, and archived evaluation data are preserved in:
+
+- **Branch**: `archive/full-snapshot-2026-02-03`
+- **Tag**: `backup/pre-dashboard-cleanup-2026-02-03`
+
+To access archived files:
+
+```bash
+git show archive/full-snapshot-2026-02-03:docs/plans/
+git checkout archive/full-snapshot-2026-02-03 -- docs/titles_descriptions_independent_research/
+```

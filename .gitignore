@@ -65,3 +65,12 @@ CODE_REVIEW_RESULTS.md
 LIFESTYLE_IMAGES_CONTEXT.md
 dashboard_data/lifestyle-eval-candidate/reports/pilot-selection-report-detailed.html
 dashboard_data/lifestyle-eval-candidate/reports/pilot-selection-report-detailed.pdf
+
+# Supabase temp files
+supabase/.temp/
+
+# Test output artifacts
+test_output/
+
+# Git bundle files (backup artifacts, not stored in repo)
+*.bundle
