@@ -49,6 +49,7 @@ export async function GET(request: Request) {
 
     // Build SKU metrics
     let skuMetrics: SkuMetrics[]
+    let usingSampleData = false
 
     if (isGoogleAdsConfigured()) {
       // Fetch real performance data from Google Ads
@@ -60,36 +61,44 @@ export async function GET(request: Request) {
 
       if (shopifyProductIds.length > 0) {
         const { startDate, endDate } = getDateRange('30d')
-        const performanceMap = await fetchShoppingPerformance(
-          shopifyProductIds,
-          startDate,
-          endDate
-        )
+        try {
+          const performanceMap = await fetchShoppingPerformance(
+            shopifyProductIds,
+            startDate,
+            endDate
+          )
 
-        skuMetrics = Array.from(skuMap.entries()).map(([master_sku, info]) => {
-          const perf = info.shopify_product_id
-            ? performanceMap.get(info.shopify_product_id)
-            : undefined
+          skuMetrics = Array.from(skuMap.entries()).map(([master_sku, info]) => {
+            const perf = info.shopify_product_id
+              ? performanceMap.get(info.shopify_product_id)
+              : undefined
 
-          return {
-            master_sku,
-            product_name: info.product_name,
-            category: info.category,
-            impressions: perf?.impressions || 0,
-            clicks: perf?.clicks || 0,
-            conversions: perf?.conversions || 0,
-            revenue: perf?.conversionValue || 0,
-            cost: perf?.cost || 0,
-            variant_count: info.variant_count,
-            already_optimized: optimizedSkus.has(master_sku),
-          }
-        })
+            return {
+              master_sku,
+              product_name: info.product_name,
+              category: info.category,
+              impressions: perf?.impressions || 0,
+              clicks: perf?.clicks || 0,
+              conversions: perf?.conversions || 0,
+              revenue: perf?.conversionValue || 0,
+              cost: perf?.cost || 0,
+              variant_count: info.variant_count,
+              already_optimized: optimizedSkus.has(master_sku),
+            }
+          })
+        } catch (googleAdsError) {
+          console.error('Google Ads API failed, falling back to sample data:', googleAdsError)
+          skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
+          usingSampleData = true
+        }
       } else {
         skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
+        usingSampleData = true
       }
     } else {
       // Generate sample data when Google Ads is not configured
       skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
+      usingSampleData = true
     }
 
     // Score and select SKUs
@@ -99,6 +108,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       ...selection,
       google_ads_configured: isGoogleAdsConfigured(),
+      using_sample_data: usingSampleData,
     })
   } catch (error) {
     console.error('SKU selection error:', error)
