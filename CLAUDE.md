@@ -25,6 +25,8 @@
 - **Analytics MCP** (`mcp__analytics-mcp__*`): Use for GA4 reporting.
 - **Context7 MCP** (`mcp__plugin_context7_context7__*`): Use to fetch up-to-date library documentation.
 - **Vercel MCP** (`mcp__vercel__*`): Use for deployment management and logs.
+- **GCloud MCP** (`mcp__gcloud__*`): Use for GCP operations via gcloud CLI.
+- **Cloud Run MCP** (`mcp__cloud-run__*`): Use for Cloud Run deployments and service management.
 
 **Skills** - Invoke with `Skill` tool for specialized workflows:
 
@@ -102,6 +104,37 @@ GMC offer IDs:
 - Variant approvals API: `dashboard/src/app/api/variants/approvals/route.ts`, `/bulk/route.ts`
 - Variant content utilities: `dashboard/src/lib/variant-content.ts` (generates variant titles/descriptions from base template)
 - Finish data: `dashboard/src/lib/finish-data.ts` (30 finish definitions with descriptions and categories)
+- Pipeline API: `src/feedops/api/main.py` (FastAPI endpoints for Cloud Run)
+- Pipeline client: `dashboard/src/lib/pipeline-client.ts` (TypeScript client for Cloud Run API)
+
+## Cloud Run Deployment
+
+**Service URL:** https://feedops-pipeline-623866089882.us-east1.run.app
+
+**Endpoints:**
+- `GET /health` - Health check with Supabase status
+- `POST /optimize-sku` - Single SKU content generation
+- `POST /regenerate` - Content regeneration with feedback
+- `POST /batch-optimize` - Batch job creation
+- `GET /batch-status/{job_id}` - Batch job progress
+
+**Secrets in GCP Secret Manager:**
+- `feedops-openai-api-key`
+- `feedops-supabase-url`
+- `feedops-supabase-key`
+
+**Service Accounts:**
+- Build: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
+- Runtime: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
+
+**Deploy command:**
+```bash
+gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --region=us-east1 \
+  --set-secrets="OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest" \
+  --service-account=profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com \
+  --build-service-account=projects/bobbys-project-346400/serviceAccounts/profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com \
+  --allow-unauthenticated --memory=2Gi --cpu=2 --timeout=900 --max-instances=10
+```
 
 ## Run locally
 
