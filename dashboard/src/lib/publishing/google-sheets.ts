@@ -321,6 +321,17 @@ export interface PublishToGoogleSheetsResult {
 }
 
 /**
+ * A variant with its own expanded title and description.
+ * Used for per-variant publishing where {FINISH_NAME} has been replaced.
+ */
+export interface ExpandedVariantRow {
+  gmc_offer_id: string
+  title: string
+  description: string
+  image_url?: string
+}
+
+/**
  * Publish content to Google Sheets supplemental feed for a single SKU.
  *
  * For each offer ID provided, this function:
@@ -408,6 +419,130 @@ export async function publishToGoogleSheets(
       }
 
       const existingRow = existingIds.get(offerId)
+      if (existingRow !== undefined) {
+        rowsToUpdate.push({ rowNum: existingRow, data: rowData })
+      } else {
+        rowsToAppend.push(rowData)
+      }
+    }
+
+    // Execute updates
+    if (rowsToUpdate.length > 0) {
+      const updated = await updateRows(
+        sheets,
+        spreadsheetId,
+        rowsToUpdate,
+        columnMap,
+        numColumns,
+        sheetName
+      )
+      result.updated_count = updated
+    }
+
+    // Execute appends
+    if (rowsToAppend.length > 0) {
+      const appended = await appendRows(
+        sheets,
+        spreadsheetId,
+        rowsToAppend,
+        columnMap,
+        numColumns,
+        sheetName
+      )
+      result.appended_count = appended
+    }
+
+    result.success = true
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    result.errors.push(`Google Sheets API error: ${message}`)
+  }
+
+  return result
+}
+
+/**
+ * Publish expanded variants to Google Sheets supplemental feed.
+ *
+ * Unlike publishToGoogleSheets, this function accepts variants that have already
+ * been expanded (each with their own unique title and description).
+ *
+ * This is the preferred method for publishing when using {FINISH_NAME} templates
+ * since each variant gets its own finish-specific content.
+ */
+export async function publishExpandedVariantsToGoogleSheets(
+  variants: ExpandedVariantRow[],
+  environment: Environment,
+  sheetName?: string
+): Promise<PublishToGoogleSheetsResult> {
+  const result: PublishToGoogleSheetsResult = {
+    success: false,
+    updated_count: 0,
+    appended_count: 0,
+    total_variants: 0,
+    errors: [],
+    offer_ids: variants.map((v) => v.gmc_offer_id),
+  }
+
+  if (variants.length === 0) {
+    result.errors.push('No variants provided')
+    return result
+  }
+
+  const trackingLabel = `feedops-${environment}`
+
+  try {
+    const sheets = await getGoogleSheetsClient()
+    const spreadsheetId = getSpreadsheetId()
+
+    // Get existing IDs from the sheet
+    const existingIds = await getExistingIds(sheets, spreadsheetId, sheetName)
+
+    // Get column headers and build mapping
+    const headers = await getColumnHeaders(sheets, spreadsheetId, sheetName)
+    let columnMap = buildColumnMap(headers)
+    let numColumns = headers.length
+
+    // Ensure lifestyle_image_link column exists
+    const ensured = await ensureLifestyleImageColumn(
+      sheets,
+      spreadsheetId,
+      columnMap,
+      numColumns,
+      sheetName
+    )
+    columnMap = ensured.columnMap
+    numColumns = ensured.numColumns
+
+    // Check for required columns
+    if (columnMap.id === undefined) {
+      result.errors.push("Required column 'id' not found in sheet headers")
+      return result
+    }
+
+    // Build rows from variants - each variant has its OWN title/description
+    const rowsToUpdate: Array<{ rowNum: number; data: GoogleSheetsRow }> = []
+    const rowsToAppend: GoogleSheetsRow[] = []
+
+    for (const variant of variants) {
+      result.total_variants++
+
+      // Build row data per GMC AI content disclosure policy
+      const rowData: GoogleSheetsRow = {
+        id: variant.gmc_offer_id,
+        // Standard fields - omit if structured-only mode
+        title: USE_STRUCTURED_ONLY ? undefined : variant.title,
+        description: USE_STRUCTURED_ONLY ? undefined : variant.description,
+        // Structured fields - always set for AI-generated content
+        structured_title: variant.title,
+        structured_description: variant.description,
+        digital_source_type: 'trained_algorithmic_media',
+        // Other fields
+        custom_label_4: trackingLabel,
+        lifestyle_image_link: variant.image_url,
+      }
+
+      const existingRow = existingIds.get(variant.gmc_offer_id)
       if (existingRow !== undefined) {
         rowsToUpdate.push({ rowNum: existingRow, data: rowData })
       } else {

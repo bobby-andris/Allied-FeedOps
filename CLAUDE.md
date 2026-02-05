@@ -69,12 +69,12 @@
 - `variant_approvals` (per-finish approvals)
 - `variant_index` (maps `master_sku` ⇄ `gmc_offer_id`, finish info)
 - `publish_batches`, `batch_sku_assignments` (batch mgmt)
-- `publish_events` (audit log)
+- `publish_events` (audit log with content snapshots: `published_title`, `published_description`, `variant_count`, `content_version` for rollback)
 - `performance_baselines`, `performance_snapshots` (performance)
 - `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
 - `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
 - `product_catalog` (75,770 variants with full product data for evidence table - narrative_copy, bullets, dimensions, images)
-- `generated_content` (title/description content with baseline_content, candidate_content, quality_score per platform)
+- `generated_content` (title/description content with baseline_content, candidate_content, **approved_content**, quality_score per platform; **approved_at**, **approved_version** for publishing locks)
 - `regeneration_history` (prompt audit trail with system_prompt, user_prompt, model_version, prompt_hash)
 - `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking)
 - `lifestyle_image_selections` (audit trail for image selection decisions)
@@ -122,6 +122,7 @@ GMC offer IDs:
 - Image selection API: `dashboard/src/app/api/review/images/select/route.ts`
 - Variant approvals API: `dashboard/src/app/api/variants/approvals/route.ts`, `/bulk/route.ts`
 - Variant content utilities: `dashboard/src/lib/variant-content.ts` (generates variant titles/descriptions from base template)
+- Variant expansion for publishing: `dashboard/src/lib/publishing/expand-variants.ts` (expands `{FINISH_NAME}` templates to 28 unique variants)
 - Finish data: `dashboard/src/lib/finish-data.ts` (30 finish definitions; 28 used for content generation, excludes Military Camo and Red White and Blue)
 - Pipeline API: `src/feedops/api/main.py` (FastAPI endpoints for Cloud Run)
 - Pipeline client: `dashboard/src/lib/pipeline-client.ts` (TypeScript client for Cloud Run API)
@@ -204,6 +205,19 @@ uv venv
 uv pip install -e ".[dev]"
 PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 ```
+
+## Publishing Workflow
+
+**Approval → Publishing flow:**
+
+1. **Content Generation**: Regeneration API stores templates in `generated_content.candidate_content` with `{FINISH_NAME}` placeholder
+2. **Approval**: When content is approved, `candidate_content` → `approved_content` (immutable snapshot with `approved_at`, `approved_version`)
+3. **Publishing**: Batch publish reads `approved_content`, validates `sku_approvals.approval_status = 'approved'`
+4. **Variant Expansion**: For Google/Bing, `expand-variants.ts` replaces `{FINISH_NAME}` per variant using `variant_finish_sentences` table
+5. **Google Sheets**: Updates existing rows (by `gmc_offer_id`) or appends new rows - prevents duplicate entries
+6. **Audit Trail**: `publish_events` stores content snapshots (`published_title`, `published_description`) for rollback capability
+
+**Key constraint**: Content cannot be published unless approved. Regenerating content after approval does NOT change what will be published (uses `approved_content`, not `candidate_content`).
 
 ## Generated content storage
 

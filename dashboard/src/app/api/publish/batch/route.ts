@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { publishToGoogleSheets } from '@/lib/publishing/google-sheets'
+import { publishExpandedVariantsToGoogleSheets } from '@/lib/publishing/google-sheets'
 import { publishToShopify } from '@/lib/publishing/shopify'
+import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
 import type {
   BatchPublishRequest,
   BatchPublishResult,
@@ -8,16 +9,18 @@ import type {
   Platform,
   PublishEventInsert,
   VariantIndexRow,
-  GeneratedContentRow,
 } from '@/lib/publishing/types'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface SkuContent {
   master_sku: string
+  approval_status?: string
   google_title?: string
   google_description?: string
+  google_version?: number
   shopify_title?: string
   shopify_description?: string
+  shopify_version?: number
   offer_ids: string[]
   shopify_product_id?: string
 }
@@ -111,15 +114,30 @@ export async function POST(request: NextRequest) {
       .update({ status: 'executing', updated_at: new Date().toISOString() })
       .eq('batch_id', batch_id)
 
-    // 2. Get content for each SKU from generated_content
+    // 2. Get APPROVED content for each SKU (not candidate_content)
     const { data: contentData, error: contentError } = await supabase
       .from('generated_content')
-      .select('master_sku, platform, content_type, candidate_content')
+      .select('master_sku, platform, content_type, approved_content, approved_version')
       .in('master_sku', skuList)
 
     if (contentError) {
       console.error('Error fetching generated content:', contentError)
     }
+
+    // 2b. Get approval status for each SKU
+    const { data: approvalData, error: approvalError } = await supabase
+      .from('sku_approvals')
+      .select('master_sku, approval_status')
+      .in('master_sku', skuList)
+
+    if (approvalError) {
+      console.error('Error fetching approvals:', approvalError)
+    }
+
+    const approvalMap = new Map<string, string>()
+    approvalData?.forEach((a) => {
+      approvalMap.set(a.master_sku, a.approval_status)
+    })
 
     // 3. Get variant index data (offer IDs and Shopify product IDs)
     const { data: variantData, error: variantError } = await supabase
@@ -134,31 +152,34 @@ export async function POST(request: NextRequest) {
     // Build content map for each SKU
     const skuContentMap = new Map<string, SkuContent>()
 
-    // Initialize with SKUs
+    // Initialize with SKUs and approval status
     for (const sku of skuList) {
       skuContentMap.set(sku, {
         master_sku: sku,
+        approval_status: approvalMap.get(sku),
         offer_ids: [],
       })
     }
 
-    // Add content data
+    // Add APPROVED content data (not candidate_content!)
     if (contentData) {
-      for (const row of contentData as GeneratedContentRow[]) {
+      for (const row of contentData as { master_sku: string; platform: string; content_type: string; approved_content: string | null; approved_version: number | null }[]) {
         const content = skuContentMap.get(row.master_sku)
         if (!content) continue
 
         if (row.content_type === 'title') {
           if (row.platform === 'google') {
-            content.google_title = row.candidate_content || undefined
+            content.google_title = row.approved_content || undefined
+            content.google_version = row.approved_version || undefined
           } else if (row.platform === 'shopify') {
-            content.shopify_title = row.candidate_content || undefined
+            content.shopify_title = row.approved_content || undefined
+            content.shopify_version = row.approved_version || undefined
           }
         } else if (row.content_type === 'description') {
           if (row.platform === 'google') {
-            content.google_description = row.candidate_content || undefined
+            content.google_description = row.approved_content || undefined
           } else if (row.platform === 'shopify') {
-            content.shopify_description = row.candidate_content || undefined
+            content.shopify_description = row.approved_content || undefined
           }
         }
       }
@@ -194,12 +215,32 @@ export async function POST(request: NextRequest) {
         const title = content.google_title
         const description = content.google_description
 
-        if (!title || !description) {
+        // Check approval status first
+        if (content.approval_status !== 'approved') {
           const result: PublishResult = {
             success: false,
             master_sku: sku,
             platform: 'google',
-            error: 'Missing title or description for Google',
+            error: `SKU not approved (status: ${content.approval_status || 'not found'})`,
+          }
+          results.push(result)
+          failedCount++
+
+          await logPublishEvent(supabase, {
+            master_sku: sku,
+            platform: 'google',
+            environment,
+            action: 'publish',
+            status: 'failed',
+            error_message: `SKU not approved (status: ${content.approval_status || 'not found'})`,
+            batch_id,
+          })
+        } else if (!title || !description) {
+          const result: PublishResult = {
+            success: false,
+            master_sku: sku,
+            platform: 'google',
+            error: 'Missing approved title or description for Google',
           }
           results.push(result)
           failedCount++
@@ -211,7 +252,7 @@ export async function POST(request: NextRequest) {
             environment,
             action: 'publish',
             status: 'failed',
-            error_message: 'Missing title or description',
+            error_message: 'Missing approved title or description',
             batch_id,
           })
         } else if (content.offer_ids.length === 0) {
@@ -235,10 +276,21 @@ export async function POST(request: NextRequest) {
           })
         } else {
           try {
-            const googleResult = await publishToGoogleSheets(
-              content.offer_ids,
-              title,
-              description,
+            // Expand templates for each variant (replaces {FINISH_NAME} with actual finish)
+            const expandedVariants = await expandVariantsForPublish({
+              master_sku: sku,
+              platform: 'google',
+              approved_title: title,
+              approved_description: description,
+            })
+
+            // Publish expanded variants - each with unique title/description
+            const googleResult = await publishExpandedVariantsToGoogleSheets(
+              expandedVariants.map((v) => ({
+                gmc_offer_id: v.gmc_offer_id,
+                title: v.title,
+                description: v.description,
+              })),
               environment
             )
 
@@ -251,6 +303,7 @@ export async function POST(request: NextRequest) {
                 updated_count: googleResult.updated_count,
                 appended_count: googleResult.appended_count,
                 offer_ids: content.offer_ids,
+                variant_count: expandedVariants.length,
               },
             }
             results.push(result)
@@ -269,6 +322,11 @@ export async function POST(request: NextRequest) {
               status: googleResult.success ? 'success' : 'failed',
               error_message: googleResult.success ? undefined : googleResult.errors.join('; '),
               batch_id,
+              // Include content snapshot for rollback capability
+              published_title: title,
+              published_description: description,
+              variant_count: expandedVariants.length,
+              content_version: content.google_version,
             })
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error)
@@ -299,12 +357,13 @@ export async function POST(request: NextRequest) {
         const title = content.shopify_title || content.google_title
         const description = content.shopify_description || content.google_description
 
-        if (!title || !description) {
+        // Check approval status first
+        if (content.approval_status !== 'approved') {
           const result: PublishResult = {
             success: false,
             master_sku: sku,
             platform: 'shopify',
-            error: 'Missing title or description for Shopify',
+            error: `SKU not approved (status: ${content.approval_status || 'not found'})`,
           }
           results.push(result)
           failedCount++
@@ -315,7 +374,26 @@ export async function POST(request: NextRequest) {
             environment,
             action: 'publish',
             status: 'failed',
-            error_message: 'Missing title or description',
+            error_message: `SKU not approved (status: ${content.approval_status || 'not found'})`,
+            batch_id,
+          })
+        } else if (!title || !description) {
+          const result: PublishResult = {
+            success: false,
+            master_sku: sku,
+            platform: 'shopify',
+            error: 'Missing approved title or description for Shopify',
+          }
+          results.push(result)
+          failedCount++
+
+          await logPublishEvent(supabase, {
+            master_sku: sku,
+            platform: 'shopify',
+            environment,
+            action: 'publish',
+            status: 'failed',
+            error_message: 'Missing approved title or description',
             batch_id,
           })
         } else if (!content.shopify_product_id) {
@@ -371,6 +449,10 @@ export async function POST(request: NextRequest) {
               status: shopifyResult.success ? 'success' : 'failed',
               error_message: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
               batch_id,
+              // Include content snapshot for rollback capability
+              published_title: title,
+              published_description: description,
+              content_version: content.shopify_version,
             })
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error)

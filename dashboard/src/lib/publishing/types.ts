@@ -141,4 +141,9 @@ export interface PublishEventInsert {
   batch_id?: string
   product_category?: string
   product_collection?: string
+  // Content snapshot for rollback (added in migration 021)
+  published_title?: string
+  published_description?: string
+  variant_count?: number
+  content_version?: number
 }
