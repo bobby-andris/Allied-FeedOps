@@ -72,6 +72,7 @@ These rules prevent disapprovals and “AI text” compliance issues. If any rul
 For Google/Bing variant content:
 - **Base content** is finish-agnostic (no specific finish mentioned)
 - **Finish sentences** describe the relationship between THIS product and each finish
+- **28 finishes** for content generation (excludes Military Camo and Red White and Blue)
 - Good: "The warm, aged patina of Antique Brass complements this traditional Carolina design"
 - Bad: "Antique Brass makes a bold statement" (generic, could apply to any product)
 
@@ -86,6 +87,13 @@ For Google/Bing variant content:
 ```
 [Primary Query Phrase] + [Key Dimension] + [Variant Differentiator] + [Brand]
 ```
+
+**For Google/Bing Variant Titles** (finish-first for variant content):
+```
+{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
+```
+
+**Why finish-first for variants?** Finish name provides immediate visual/style context and matches high-intent queries like "unlacquered brass towel bar".
 
 **Why?** People don't search for "Allied Brass towel bar" - they search for "bathroom towel bar wall mount 24 inch". Put what they search for FIRST.
 
