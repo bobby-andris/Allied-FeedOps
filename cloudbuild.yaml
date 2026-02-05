@@ -1,0 +1,65 @@
+# Cloud Build configuration for FeedOps Pipeline
+# Triggered on push to master branch
+
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:$COMMIT_SHA'
+      - '-t'
+      - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:latest'
+      - '.'
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'feedops-pipeline'
+      - '--image'
+      - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:$COMMIT_SHA'
+      - '--region'
+      - 'us-east1'
+      - '--set-secrets'
+      - 'OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest'
+      - '--service-account'
+      - 'profit-pilot-runtime@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--timeout'
+      - '900'
+      - '--max-instances'
+      - '10'
+
+# Store images in Artifact Registry
+images:
+  - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:$COMMIT_SHA'
+  - 'us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:latest'
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Substitutions (can be overridden)
+substitutions:
+  _REGION: us-east1
+
+# Timeout for the entire build
+timeout: '1200s'
