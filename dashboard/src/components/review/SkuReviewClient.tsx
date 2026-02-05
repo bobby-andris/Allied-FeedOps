@@ -17,6 +17,7 @@ import { RegenerationHistory } from "@/components/review/RegenerationHistory"
 import { QualityAnalyzer } from "@/components/review/QualityAnalyzer"
 import { ProductHeroImage } from "@/components/review/ProductHeroImage"
 import { LifestyleImageReview } from "@/components/review/LifestyleImageReview"
+import { SearchInsightsSummary } from "@/components/review/SearchInsightsSummary"
 import { VariantContentGrid } from "@/components/review/VariantContentGrid"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -209,6 +210,22 @@ function getContentByPlatform(content: ContentRecord[], platform: string) {
   }
 }
 
+/**
+ * Preview content by substituting {FINISH_NAME} with a sample finish.
+ * Returns both the preview text and whether the content is a template.
+ */
+function previewWithSampleFinish(content: string | null): { preview: string | null; isTemplate: boolean } {
+  if (!content) return { preview: null, isTemplate: false }
+  const isTemplate = content.includes('{FINISH_NAME}')
+  if (isTemplate) {
+    return {
+      preview: content.replace(/\{FINISH_NAME\}/g, 'Polished Chrome'),
+      isTemplate: true
+    }
+  }
+  return { preview: content, isTemplate: false }
+}
+
 function ContentComparison({
   label,
   currentLive,
@@ -228,6 +245,9 @@ function ContentComparison({
   type: 'title' | 'description'
   platform: 'google' | 'bing' | 'shopify'
 }) {
+  // Preview candidate with sample finish substituted
+  const { preview: candidatePreview, isTemplate } = previewWithSampleFinish(candidate)
+
   return (
     <Card>
       <CardHeader>
@@ -235,6 +255,11 @@ function ContentComparison({
           <div className="flex items-center gap-3">
             <CardTitle>{label}</CardTitle>
             {score !== null && <QualityScore score={score} size="sm" />}
+            {isTemplate && (
+              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+                Template
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <RegenerateButton
@@ -246,6 +271,11 @@ function ContentComparison({
             <ApprovalActions sku={sku} finish={finish} type={type} size="sm" />
           </div>
         </div>
+        {isTemplate && (
+          <CardDescription className="text-xs mt-1">
+            Preview shows &quot;Polished Chrome&quot; as sample finish. Actual finish name will be substituted for each variant.
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-6">
@@ -261,13 +291,15 @@ function ContentComparison({
             )}
           </div>
           <div>
-            <div className="text-sm font-medium text-muted-foreground mb-2">Candidate</div>
+            <div className="text-sm font-medium text-muted-foreground mb-2">
+              Candidate {isTemplate && <span className="text-purple-600 dark:text-purple-400">(Preview)</span>}
+            </div>
             <div className="p-4 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 whitespace-pre-wrap min-h-[100px]">
-              {candidate || <span className="text-muted-foreground italic">No candidate content</span>}
+              {candidatePreview || <span className="text-muted-foreground italic">No candidate content</span>}
             </div>
             {candidate && (
               <div className="text-xs text-muted-foreground mt-2">
-                {candidate.length} characters
+                {candidate.length} characters{isTemplate && ' (template)'}
               </div>
             )}
           </div>
@@ -456,7 +488,7 @@ export function SkuReviewClient({
 
       {/* Variant Selector */}
       {hasVariants && (
-        <div className="mb-6">
+        <div className="mb-6 pb-4 border-b">
           <VariantSelector
             variants={variants}
             variantApprovals={variantApprovals}
@@ -468,7 +500,7 @@ export function SkuReviewClient({
       )}
 
       {/* Platform Tabs */}
-      <Tabs defaultValue={platforms[0] || 'google'} className="space-y-6">
+      <Tabs defaultValue={platforms.includes('google') ? 'google' : platforms[0] || 'google'} className="space-y-6">
         <TabsList>
           {platforms.includes('google') && (
             <TabsTrigger value="google">
@@ -492,6 +524,13 @@ export function SkuReviewClient({
 
         {platforms.includes('google') && (
           <TabsContent value="google" className="space-y-6">
+            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <PlatformBadge platform="google" />
+              <span className="font-medium">Google Shopping Content</span>
+              <span className="text-sm text-muted-foreground ml-auto">
+                Template uses &#123;FINISH_NAME&#125; for 28 variants
+              </span>
+            </div>
             <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
             {/* All Variants Grid for Google */}
             {hasVariants && (
@@ -514,6 +553,13 @@ export function SkuReviewClient({
 
         {platforms.includes('bing') && (
           <TabsContent value="bing" className="space-y-6">
+            <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+              <PlatformBadge platform="bing" />
+              <span className="font-medium">Bing Shopping Content</span>
+              <span className="text-sm text-muted-foreground ml-auto">
+                Template uses &#123;FINISH_NAME&#125; for 28 variants
+              </span>
+            </div>
             <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
             {/* All Variants Grid for Bing */}
             {hasVariants && (
@@ -536,6 +582,13 @@ export function SkuReviewClient({
 
         {platforms.includes('shopify') && (
           <TabsContent value="shopify" className="space-y-6">
+            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <PlatformBadge platform="shopify" />
+              <span className="font-medium">Shopify Product Page</span>
+              <span className="text-sm text-muted-foreground ml-auto">
+                No finish placeholder - content applies to all variants
+              </span>
+            </div>
             <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
           </TabsContent>
         )}
@@ -551,6 +604,14 @@ export function SkuReviewClient({
           .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
         selectedFinish={selectedFinish}
         onRefresh={() => router.refresh()}
+      />
+
+      {/* Search Insights */}
+      <Separator className="my-8" />
+      <SearchInsightsSummary
+        sku={sku}
+        currentTitle={getContentByPlatform(content, 'google').title?.candidate_content ?? undefined}
+        selectedFinish={selectedFinish}
       />
 
       {/* Approval Status */}

@@ -3,6 +3,10 @@ import re
 from feedops.models import ParentSKU
 from feedops.integrations.keyword_bank import get_external_keywords
 from feedops.integrations.google_ads import fetch_master_sku_keywords
+from feedops.integrations.search_query_insights import (
+    fetch_search_queries_for_master_sku,
+    format_search_queries_for_evidence,
+)
 # Import Evidence from enrichment to avoid duplication
 from feedops.pipeline.enrichment import Evidence, enrich_product
 from feedops.pipeline.collection_descriptions import is_known_collection_name
@@ -274,6 +278,16 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
                 value=", ".join(filtered),
                 source="keyword_intent_master",
             ))
+
+    # Search query insights: actual search terms customers use (from Google Ads)
+    try:
+        search_queries = fetch_search_queries_for_master_sku(parent_sku.master_sku)
+        if search_queries:
+            search_evidence = format_search_queries_for_evidence(search_queries, "master")
+            evidence.extend(search_evidence)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to fetch search queries: {e}")
 
     # On-the-fly enrichment: design context, functional features, competitive positioning
     enrichment = enrich_product(parent_sku)

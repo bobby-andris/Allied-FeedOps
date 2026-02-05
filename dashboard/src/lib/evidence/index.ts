@@ -40,3 +40,12 @@ export {
   productExistsInCatalog,
   getFinishCodeFromVariantIndex,
 } from './queries'
+
+// Search query insights
+export {
+  getSearchQueriesForMasterSku,
+  getSearchQueriesForVariant,
+  formatSearchQueriesForEvidence,
+  getSearchInsightsForSku,
+} from './search-queries'
+export type { SearchQueryInsight, VariantSearchQuery } from './search-queries'

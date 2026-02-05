@@ -5,6 +5,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ProductCatalogRow, EvidenceContext, ProductEvidenceResult } from './types'
 import { buildEvidenceTable, formatEvidenceMarkdown } from './builder'
+import {
+  getSearchQueriesForMasterSku,
+  getSearchQueriesForVariant,
+  formatSearchQueriesForEvidence,
+} from './search-queries'
 
 /**
  * Get product evidence from product_catalog table
@@ -35,7 +40,28 @@ export async function getProductEvidence(
     throw new Error(`Product not found in catalog: ${masterSku}`)
   }
 
-  const evidence = buildEvidenceTable(rows as ProductCatalogRow[], context)
+  let evidence = buildEvidenceTable(rows as ProductCatalogRow[], context)
+
+  // Add search query insights (actual search terms customers use)
+  const searchQueries = await getSearchQueriesForMasterSku(supabase, masterSku).catch(() => [])
+  if (searchQueries.length > 0) {
+    const searchEvidence = formatSearchQueriesForEvidence(searchQueries, 'master')
+    evidence = [...evidence, ...searchEvidence]
+  }
+
+  // For variant-specific contexts (Google/Bing), also add variant queries
+  if (context.finish_code && (context.platform === 'google' || context.platform === 'bing')) {
+    const variantQueries = await getSearchQueriesForVariant(
+      supabase,
+      masterSku,
+      context.finish_code
+    ).catch(() => [])
+    if (variantQueries.length > 0) {
+      const variantEvidence = formatSearchQueriesForEvidence(variantQueries, 'variant')
+      evidence = [...evidence, ...variantEvidence]
+    }
+  }
+
   const markdown = formatEvidenceMarkdown(evidence)
 
   // Extract image URL from evidence
