@@ -53,11 +53,12 @@
 
 ## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`09`, `19`, `20`
+- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`
   - 01-06: performance, batches, publishing, variant review, settings health, regeneration
   - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
   - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
   - 09: Competitor intelligence (`/competitors` page, SERP analysis, marketplace scraping via Apify MCP)
+  - 14: Search query insights (`/search-insights` page, Google Ads search terms + Keyword Planner enrichment, variant-level tracking)
   - 19: Evidence table for rich product context (product_catalog table, evidence builder, vision support)
   - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection)
   - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
@@ -79,6 +80,10 @@
 - `lifestyle_image_selections` (audit trail for image selection decisions)
 - `variant_finish_sentences` (product+finish tailored sentences for Google/Bing variant content generation)
 - `prompt_templates` (versioned system prompts with gold standard examples, category guidance, platform rules)
+- `search_queries` (variant-level search terms with GMC offer ID mapping, Keyword Planner metrics)
+- `search_queries_by_master_sku` (aggregated search data by master SKU)
+- `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
+- `search_query_sync_jobs` (sync job tracking for Google Ads search term imports)
 
 **Column naming conventions (do not drift)**
 
@@ -122,6 +127,10 @@ GMC offer IDs:
 - Pipeline client: `dashboard/src/lib/pipeline-client.ts` (TypeScript client for Cloud Run API)
 - Prompt loader: `dashboard/src/lib/prompts/loader.ts` (loads gold standard examples from Supabase)
 - Python prompt loader: `src/feedops/api/prompt_loader.py` (Python equivalent with fallback prompts)
+- Search insights page: `dashboard/src/app/(dashboard)/search-insights/page.tsx`
+- Search insights API: `dashboard/src/app/api/search-insights/*.ts` (sync triggers, job status)
+- Search insights components: `dashboard/src/components/search-insights/*.tsx` (QueryTable, FinishInsights, GapAnalysis)
+- Python search terms client: `src/feedops/integrations/google_ads_search_terms.py` (SearchTermsClient, KeywordPlannerClient)
 
 ## Cloud Run Deployment
 

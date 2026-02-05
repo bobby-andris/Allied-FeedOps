@@ -12,6 +12,7 @@ import {
   LogOut,
   Sparkles,
   Eye,
+  Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Competitors', href: '/competitors', icon: Eye },
   { name: 'Batches', href: '/batches', icon: Layers },
   { name: 'Performance', href: '/performance', icon: BarChart3 },
+  { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

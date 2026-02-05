@@ -2,7 +2,7 @@
 
 ## Objective
 
-Build a keyword gap analysis tool that systematically identifies which SKUs are missing important keywords, prioritizes optimization work by opportunity size, and provides specific keyword recommendations.
+Build a keyword gap analysis tool that systematically identifies which SKUs are missing important keywords, prioritizes optimization work by opportunity size using Keyword Planner search volume data, and provides specific keyword recommendations informed by Merchant API product performance.
 
 ## Problem Statement
 
@@ -11,21 +11,173 @@ We don't systematically identify keyword gaps, leading to:
 - No visibility into which SKUs have the biggest opportunity
 - Titles that miss high-volume search terms
 - Inefficient use of optimization resources
+- No market context (search volume, competition) for prioritization
+- Disconnection between GMC feed data and keyword analysis
+
+## MCP Tools & Agents
+
+### Required MCP Servers
+
+**Merchant API MCP** (`mcp__merchant-api-devdocs__*`):
+- `query_mapi_docs` - Query Merchant API documentation
+- `find_mapi_code_sample` - Find code samples for implementation
+
+Use the Merchant API MCP to:
+- Pull `product_performance_view` for actual clicks/impressions by offer_id
+- Query `product_view` for current title/description in GMC feed
+- Get `price_competitiveness_product_view` for pricing context
+- Identify `click_potential` - Google's estimate of performance potential
+
+**Google Ads MCP** (`mcp__google-ads-mcp__*`):
+- `search` - Execute GAQL queries for search terms and Keyword Planner data
+
+### Agent for Setup
+
+**merchant-integrator agent**: Use this agent (via Task tool with `subagent_type: merchant-integrator`) when:
+- Setting up Merchant API integration for keyword analysis
+- Migrating from Content API to Merchant API
+- Implementing product performance queries
+
+Example invocation:
+```
+Task tool: {
+  subagent_type: "merchant-integrator",
+  prompt: "Set up Merchant API to fetch product titles and click potential for keyword gap analysis"
+}
+```
 
 ## Solution Overview
 
 Build a keyword gap analyzer that:
 1. Compares our titles to actual search queries from Google Ads
-2. Identifies SKUs where high-volume queries aren't in titles
-3. Prioritizes optimization by opportunity size (impressions × gap)
-4. Shows specific keywords to add per SKU
-5. Tracks gap closure progress over time
+2. **Enriches with Keyword Planner** - adds search volume, competition, CPC data
+3. **Syncs with Merchant API** - correlates with GMC feed data and click_potential
+4. Identifies SKUs where high-volume queries aren't in titles
+5. Prioritizes optimization by **opportunity score** = volume × (100 - competition) × gap
+6. Shows specific keywords to add per SKU with ROI estimates
+7. Tracks gap closure progress over time
 
 ## Prerequisites
 
 - Google Ads search term data (from Prompt 14)
 - Generated content stored in Supabase
 - Existing title/description data for SKUs
+- **Keyword Planner API access** (same Google Ads credentials)
+- **Merchant API access** (use merchant-integrator agent to set up)
+
+## Keyword Planner Integration
+
+### Enriching Gap Analysis with Search Volume
+
+```python
+from feedops.integrations.google_ads_search_terms import KeywordPlannerClient
+
+def enrich_gaps_with_volume(gaps: list[dict]) -> list[dict]:
+    """
+    Add Keyword Planner metrics to identified keyword gaps.
+
+    This transforms gaps from "missing keyword X" to
+    "missing keyword X which has 5,000 monthly searches and LOW competition"
+    """
+    kp_client = KeywordPlannerClient()
+
+    keywords = [g['keyword'] for g in gaps]
+    metrics = kp_client.get_historical_metrics(keywords)
+
+    for gap in gaps:
+        kw = gap['keyword']
+        if kw in metrics:
+            gap['avg_monthly_searches'] = metrics[kw]['avg_monthly_searches']
+            gap['competition'] = metrics[kw]['competition']
+            gap['competition_index'] = metrics[kw]['competition_index']
+            gap['low_cpc_micros'] = metrics[kw]['low_cpc_micros']
+            gap['high_cpc_micros'] = metrics[kw]['high_cpc_micros']
+
+            # Calculate opportunity score
+            # Higher volume + lower competition = bigger opportunity
+            volume_factor = min(gap['avg_monthly_searches'] / 1000, 10)  # Cap at 10x
+            competition_factor = (100 - gap['competition_index']) / 100
+            gap['opportunity_score'] = gap['gap_score'] * volume_factor * competition_factor
+
+    return gaps
+
+
+def discover_keyword_opportunities(
+    existing_keywords: list[str],
+    product_url: str = None
+) -> list[dict]:
+    """
+    Use Keyword Planner to discover keywords we're not targeting.
+
+    Seeds the generator with our existing high-performing keywords
+    and/or product page URL to find related opportunities.
+    """
+    kp_client = KeywordPlannerClient()
+
+    # Get ideas from our existing keywords and product pages
+    ideas = kp_client.generate_keyword_ideas(
+        seed_keywords=existing_keywords[:10],  # Use top 10
+        seed_url=product_url
+    )
+
+    # Filter to ideas with good volume and low competition
+    opportunities = [
+        idea for idea in ideas
+        if idea['avg_monthly_searches'] >= 100
+        and idea['competition_index'] < 70
+        and idea['keyword'] not in existing_keywords
+    ]
+
+    return sorted(opportunities, key=lambda x: x['avg_monthly_searches'], reverse=True)
+```
+
+### Merchant API Integration for Gap Context
+
+```python
+class MerchantAPIGapAnalyzer:
+    """
+    Use Merchant API to add context to keyword gap analysis.
+
+    Correlates gaps with:
+    - Current GMC feed title/description
+    - Click potential (Google's performance estimate)
+    - Price competitiveness
+    """
+
+    def get_product_context(self, offer_ids: list[str]) -> dict:
+        """
+        Fetch product context from Merchant API.
+
+        Query: product_view
+        Returns: title, click_potential, status by offer_id
+        """
+        query = """
+            SELECT
+                id,
+                offer_id,
+                title,
+                click_potential,
+                aggregated_reporting_context_status
+            FROM product_view
+        """
+        # Execute via Merchant API
+        pass
+
+    def prioritize_by_click_potential(self, gaps: list[dict]) -> list[dict]:
+        """
+        Re-prioritize gaps by Google's click_potential signal.
+
+        Products with HIGH click_potential that have keyword gaps
+        should be prioritized - they have untapped potential.
+        """
+        for gap in gaps:
+            if gap.get('click_potential') == 'HIGH':
+                gap['opportunity_score'] *= 1.5  # 50% boost
+            elif gap.get('click_potential') == 'LOW':
+                gap['opportunity_score'] *= 0.7  # 30% reduction
+
+        return sorted(gaps, key=lambda x: x['opportunity_score'], reverse=True)
+```
 
 ## Files to Create
 
@@ -45,15 +197,23 @@ Build a keyword gap analyzer that:
 ## Database Schema
 
 ```sql
--- Track keyword gaps per SKU
+-- Track keyword gaps per SKU with Keyword Planner enrichment
 CREATE TABLE keyword_gaps (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   master_sku text NOT NULL,
   keyword text NOT NULL,
-  monthly_volume integer DEFAULT 0, -- estimated search volume
+  -- Search volume from Keyword Planner
+  monthly_volume integer DEFAULT 0, -- avg_monthly_searches from KP
   our_impressions integer DEFAULT 0, -- impressions we got for this keyword
+  -- Position in our content
   in_title boolean DEFAULT false,
   in_description boolean DEFAULT false,
+  -- Keyword Planner competition data
+  competition text CHECK (competition IN ('LOW', 'MEDIUM', 'HIGH', 'UNSPECIFIED')),
+  competition_index integer CHECK (competition_index BETWEEN 0 AND 100),
+  low_cpc_micros bigint, -- 20th percentile top-of-page bid
+  high_cpc_micros bigint, -- 80th percentile top-of-page bid
+  -- Calculated scores
   gap_score numeric GENERATED ALWAYS AS (
     CASE
       WHEN in_title THEN 0
@@ -61,19 +221,34 @@ CREATE TABLE keyword_gaps (
       ELSE monthly_volume
     END
   ) STORED,
+  -- Opportunity score factors in competition
+  -- Higher volume + lower competition = bigger opportunity
+  opportunity_score numeric GENERATED ALWAYS AS (
+    CASE
+      WHEN in_title THEN 0
+      ELSE (monthly_volume * (100 - COALESCE(competition_index, 50)) / 100)
+    END
+  ) STORED,
   updated_at timestamptz DEFAULT now(),
   UNIQUE(master_sku, keyword)
 );
 
--- SKU-level opportunity scores
+-- SKU-level opportunity scores with Merchant API context
 CREATE TABLE sku_opportunity_scores (
   master_sku text PRIMARY KEY,
   total_gap_score numeric DEFAULT 0,
+  total_opportunity_score numeric DEFAULT 0, -- New: factors in competition
   keywords_missing integer DEFAULT 0,
   keywords_covered integer DEFAULT 0,
   coverage_percent numeric DEFAULT 0,
   estimated_ctr_lift numeric DEFAULT 0,
+  -- Merchant API context
+  gmc_click_potential text, -- From Merchant API: HIGH, MEDIUM, LOW
+  gmc_current_title text, -- Current title in GMC feed
+  gmc_status text, -- ELIGIBLE, NOT_ELIGIBLE_OR_DISAPPROVED
+  -- Priority calculation
   priority_rank integer,
+  priority_rank_by_opportunity integer, -- Rank by opportunity_score (competition-adjusted)
   last_calculated timestamptz DEFAULT now()
 );
 
@@ -101,11 +276,18 @@ CREATE INDEX idx_sku_opportunity_rank ON sku_opportunity_scores(priority_rank);
 
 export interface KeywordGap {
   keyword: string
-  monthlyVolume: number
+  monthlyVolume: number // From Keyword Planner
   ourImpressions: number
   inTitle: boolean
   inDescription: boolean
+  // Keyword Planner enrichment
+  competition: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNSPECIFIED'
+  competitionIndex: number // 0-100
+  lowCpcMicros: number
+  highCpcMicros: number
+  // Calculated scores
   gapScore: number
+  opportunityScore: number // Factors in competition
   priority: 'high' | 'medium' | 'low'
 }
 
@@ -113,11 +295,17 @@ export interface SkuOpportunity {
   masterSku: string
   currentTitle: string
   totalGapScore: number
+  totalOpportunityScore: number // Competition-adjusted
   keywordsMissing: number
   keywordsCovered: number
   coveragePercent: number
   estimatedCtrLift: number
   priorityRank: number
+  priorityRankByOpportunity: number // Rank by opportunity score
+  // Merchant API context
+  gmcClickPotential?: 'HIGH' | 'MEDIUM' | 'LOW'
+  gmcCurrentTitle?: string
+  gmcStatus?: string
   topGaps: KeywordGap[]
 }
 
@@ -155,6 +343,48 @@ export function calculateGapScore(
   }
 
   return Math.round(score)
+}
+
+/**
+ * Calculate opportunity score that factors in competition.
+ *
+ * Opportunity = Volume × (100 - Competition) / 100
+ *
+ * A high-volume, low-competition keyword is a bigger opportunity
+ * than a high-volume, high-competition keyword.
+ */
+export function calculateOpportunityScore(
+  gapScore: number,
+  competitionIndex: number = 50, // Default to medium
+  gmcClickPotential?: 'HIGH' | 'MEDIUM' | 'LOW'
+): number {
+  // Base opportunity from gap score adjusted for competition
+  let score = gapScore * ((100 - competitionIndex) / 100)
+
+  // Boost for products Google thinks have untapped potential
+  if (gmcClickPotential === 'HIGH') {
+    score *= 1.5 // 50% boost
+  } else if (gmcClickPotential === 'LOW') {
+    score *= 0.7 // 30% reduction
+  }
+
+  return Math.round(score)
+}
+
+/**
+ * Calculate estimated CPC from Keyword Planner bid ranges.
+ */
+export function estimateCpc(
+  lowCpcMicros: number,
+  highCpcMicros: number
+): { low: number; high: number; avg: number } {
+  const low = lowCpcMicros / 1_000_000
+  const high = highCpcMicros / 1_000_000
+  return {
+    low,
+    high,
+    avg: (low + high) / 2
+  }
 }
 
 /**
@@ -893,11 +1123,92 @@ export default function KeywordGapsPage() {
 5. [ ] Integration with content generation (gaps inform prompts)
 6. [ ] Run analysis button processes all pilot SKUs
 7. [ ] Export functionality for optimization queue
+8. [ ] **Keyword Planner enrichment** - search volume and competition shown
+9. [ ] **Opportunity score** - factors in competition, not just volume
+10. [ ] **Competition badges** - LOW/MEDIUM/HIGH indicators in UI
+11. [ ] **CPC estimates** - bid ranges shown for ROI context
+12. [ ] **Merchant API integration** - click_potential influences priority
+13. [ ] **GMC title sync** - shows current GMC feed title for comparison
+14. [ ] **Keyword discovery** - "Find Related Keywords" using Keyword Planner
+
+## UI Enhancements
+
+### Enhanced GapTable with Keyword Planner Data
+
+```tsx
+// Add to GapTable.tsx
+<TableHead className="text-right">Search Volume</TableHead>
+<TableHead>Competition</TableHead>
+<TableHead className="text-right">Est. CPC</TableHead>
+<TableHead className="text-right">Opportunity</TableHead>
+
+// In table body
+<TableCell className="text-right font-mono">
+  {gap.avg_monthly_searches?.toLocaleString() || 'N/A'}
+</TableCell>
+<TableCell>
+  <Badge
+    variant={
+      gap.competition === 'LOW' ? 'default' :
+      gap.competition === 'MEDIUM' ? 'secondary' :
+      'destructive'
+    }
+  >
+    {gap.competition || 'N/A'}
+  </Badge>
+</TableCell>
+<TableCell className="text-right">
+  ${(gap.high_cpc_micros / 1_000_000).toFixed(2)}
+</TableCell>
+<TableCell className="text-right font-mono text-green-600">
+  {gap.opportunity_score?.toLocaleString()}
+</TableCell>
+```
+
+### Click Potential Indicator
+
+```tsx
+// Show Merchant API click_potential in SkuOpportunity cards
+{opportunity.gmc_click_potential === 'HIGH' && (
+  <Badge className="bg-green-100 text-green-800">
+    High Click Potential
+  </Badge>
+)}
+```
+
+### Keyword Discovery Panel
+
+```tsx
+// New component for discovering related keywords
+<Card>
+  <CardHeader>
+    <CardTitle>Discover Related Keywords</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <Button onClick={() => discoverKeywords(sku)}>
+      <Search className="h-4 w-4 mr-2" />
+      Find Opportunities
+    </Button>
+    {discoveredKeywords.map(kw => (
+      <div key={kw.keyword} className="flex justify-between">
+        <span>{kw.keyword}</span>
+        <span>{kw.avg_monthly_searches}/mo</span>
+        <Badge>{kw.competition}</Badge>
+      </div>
+    ))}
+  </CardContent>
+</Card>
+```
 
 ## Future Enhancements
 
 - Auto-generate title variations with missing keywords
 - A/B test keyword-optimized vs original titles
-- Competitor keyword comparison
-- Seasonal keyword opportunities
+- Competitor keyword comparison (via SiteSeed with competitor URLs)
+- Seasonal keyword opportunities (monthly_searches trend analysis)
 - Category-level gap analysis
+- **ROI calculator** - estimate revenue lift from closing gaps
+- **Batch keyword enrichment** - process all gaps with Keyword Planner
+- **Auto-refresh** - monthly Keyword Planner data refresh (metrics update monthly)
+- **Click potential tracking** - monitor changes in Google's click_potential signal
+- **Price competitiveness correlation** - do pricing gaps affect keyword gaps?

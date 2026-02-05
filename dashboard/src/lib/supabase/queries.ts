@@ -1,5 +1,18 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { SkuApproval, PublishBatch, GeneratedContent, VariantIndex, VariantApproval } from './types'
+import {
+  SkuApproval,
+  PublishBatch,
+  GeneratedContent,
+  VariantIndex,
+  VariantApproval,
+  SearchQuery,
+  SearchQueryByMasterSku,
+  SearchQuerySyncJob,
+  KeywordMetrics,
+  KeywordCoverageVariant,
+  KeywordCoverageMaster,
+  FinishSearchPattern,
+} from './types'
 
 // Use generic SupabaseClient until we have generated types
 type Client = SupabaseClient
@@ -409,8 +422,354 @@ export async function getPublishedSkus(client: Client, environment: 'staging' | 
     .eq('status', 'success')
 
   if (error) throw error
-  
+
   // Deduplicate
   const uniqueSkus = [...new Set(data?.map((row: { master_sku: string }) => row.master_sku))]
   return uniqueSkus
+}
+
+// ============================================================================
+// Search Query Insights
+// ============================================================================
+
+export interface SearchQueryFilters {
+  masterSku?: string
+  finishCode?: string
+  platform?: 'google' | 'bing' | 'shopify'
+  view?: 'aggregate' | 'variant'
+  periodStart?: string
+  periodEnd?: string
+  minImpressions?: number
+  limit?: number
+  offset?: number
+}
+
+/**
+ * Get search queries for a specific SKU with optional finish filter.
+ * Returns variant-level data for Google/Bing or aggregated for Shopify.
+ */
+export async function getSearchQueriesForSku(
+  client: Client,
+  filters: SearchQueryFilters
+) {
+  const { masterSku, finishCode, view = 'aggregate', limit = 100, offset = 0 } = filters
+
+  if (!masterSku) {
+    // Return top queries across all SKUs
+    const { data, error } = await client
+      .from('search_queries')
+      .select('*')
+      .order('impressions', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+    return { queries: data as SearchQuery[], viewType: 'all' }
+  }
+
+  if (view === 'aggregate') {
+    // Aggregated view: all variants combined
+    const { data, error } = await client
+      .from('search_queries_by_master_sku')
+      .select('*')
+      .eq('master_sku', masterSku)
+      .order('total_impressions', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) throw error
+    return { queries: data as SearchQueryByMasterSku[], viewType: 'aggregate' }
+  }
+
+  // Variant-specific view
+  let query = client
+    .from('search_queries')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .order('impressions', { ascending: false })
+
+  if (finishCode) {
+    query = query.eq('finish_code', finishCode)
+  }
+
+  const { data, error } = await query.range(offset, offset + limit - 1)
+
+  if (error) throw error
+  return { queries: data as SearchQuery[], viewType: 'variant' }
+}
+
+/**
+ * Get aggregated queries for a master SKU (combined across all variants).
+ */
+export async function getAggregatedQueries(
+  client: Client,
+  masterSku: string,
+  limit = 100
+) {
+  const { data, error } = await client
+    .from('search_queries_by_master_sku')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .order('total_impressions', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  return data as SearchQueryByMasterSku[]
+}
+
+/**
+ * Get search queries by variant (specific finish).
+ */
+export async function getSearchQueriesByVariant(
+  client: Client,
+  masterSku: string,
+  finishCode?: string,
+  limit = 100
+) {
+  let query = client
+    .from('search_queries')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .order('impressions', { ascending: false })
+
+  if (finishCode) {
+    query = query.eq('finish_code', finishCode)
+  }
+
+  const { data, error } = await query.limit(limit)
+
+  if (error) throw error
+  return data as SearchQuery[]
+}
+
+/**
+ * Get variant breakdown summary for a master SKU.
+ * Returns counts of queries per finish.
+ */
+export async function getVariantBreakdown(client: Client, masterSku: string) {
+  const { data, error } = await client
+    .from('search_queries')
+    .select('finish_code, finish')
+    .eq('master_sku', masterSku)
+
+  if (error) throw error
+
+  // Count queries per finish
+  const breakdown: Record<string, { finish: string; count: number; totalImpressions: number }> = {}
+
+  data?.forEach((row) => {
+    if (row.finish_code) {
+      if (!breakdown[row.finish_code]) {
+        breakdown[row.finish_code] = {
+          finish: row.finish || row.finish_code,
+          count: 0,
+          totalImpressions: 0,
+        }
+      }
+      breakdown[row.finish_code].count++
+    }
+  })
+
+  return breakdown
+}
+
+/**
+ * Get keyword coverage for a SKU (which keywords are in titles/descriptions).
+ */
+export async function getKeywordCoverage(
+  client: Client,
+  masterSku: string,
+  platform: 'google' | 'bing' | 'shopify'
+) {
+  if (platform === 'shopify') {
+    // Shopify uses master-level coverage
+    const { data, error } = await client
+      .from('keyword_coverage_master')
+      .select('*')
+      .eq('master_sku', masterSku)
+      .order('query_volume', { ascending: false })
+
+    if (error) throw error
+    return data as KeywordCoverageMaster[]
+  }
+
+  // Google/Bing use variant-level coverage
+  const { data, error } = await client
+    .from('keyword_coverage_variant')
+    .select('*')
+    .eq('master_sku', masterSku)
+    .order('query_volume', { ascending: false })
+
+  if (error) throw error
+  return data as KeywordCoverageVariant[]
+}
+
+/**
+ * Get keyword gaps (high-volume keywords not in title).
+ */
+export async function getKeywordGaps(
+  client: Client,
+  masterSku: string,
+  platform: 'google' | 'bing' | 'shopify',
+  limit = 20
+) {
+  const table = platform === 'shopify' ? 'keyword_coverage_master' : 'keyword_coverage_variant'
+
+  const { data, error } = await client
+    .from(table)
+    .select('*')
+    .eq('master_sku', masterSku)
+    .eq('in_title', false)
+    .gt('query_volume', 0)
+    .order('query_volume', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  return data
+}
+
+/**
+ * Get finish-specific search patterns.
+ */
+export async function getFinishSearchPatterns(
+  client: Client,
+  options: { finishCode?: string; category?: string; limit?: number } = {}
+) {
+  const { finishCode, category, limit = 50 } = options
+
+  let query = client
+    .from('finish_search_patterns')
+    .select('*')
+    .order('total_impressions', { ascending: false })
+
+  if (finishCode) {
+    query = query.eq('finish_code', finishCode)
+  }
+
+  if (category) {
+    query = query.eq('category', category)
+  }
+
+  const { data, error } = await query.limit(limit)
+
+  if (error) throw error
+  return data as FinishSearchPattern[]
+}
+
+/**
+ * Get cached keyword metrics from Keyword Planner.
+ */
+export async function getKeywordMetrics(client: Client, keywords: string[]) {
+  if (keywords.length === 0) return []
+
+  const { data, error } = await client
+    .from('keyword_metrics')
+    .select('*')
+    .in('keyword', keywords)
+
+  if (error) throw error
+  return data as KeywordMetrics[]
+}
+
+/**
+ * Get sync job status.
+ */
+export async function getSyncJobStatus(client: Client, jobId: string) {
+  const { data, error } = await client
+    .from('search_query_sync_jobs')
+    .select('*')
+    .eq('id', jobId)
+    .single()
+
+  if (error) throw error
+  return data as SearchQuerySyncJob
+}
+
+/**
+ * Get recent sync jobs.
+ */
+export async function getRecentSyncJobs(client: Client, limit = 10) {
+  const { data, error } = await client
+    .from('search_query_sync_jobs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  return data as SearchQuerySyncJob[]
+}
+
+/**
+ * Get last successful sync timestamp.
+ */
+export async function getLastSyncTimestamp(client: Client) {
+  const { data, error } = await client
+    .from('search_query_sync_jobs')
+    .select('completed_at')
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (error && error.code !== 'PGRST116') throw error
+  return data?.completed_at as string | null
+}
+
+/**
+ * Get search query insights summary stats for a SKU.
+ */
+export async function getSearchInsightsSummary(client: Client, masterSku: string) {
+  // Get total queries count
+  const { count: totalQueries, error: countError } = await client
+    .from('search_queries')
+    .select('*', { count: 'exact', head: true })
+    .eq('master_sku', masterSku)
+
+  if (countError) throw countError
+
+  // Get aggregated metrics
+  const { data: queries } = await client
+    .from('search_queries')
+    .select('impressions, clicks, conversions, conversion_value, avg_monthly_searches')
+    .eq('master_sku', masterSku)
+
+  const totals = queries?.reduce(
+    (acc, q) => ({
+      impressions: acc.impressions + (q.impressions || 0),
+      clicks: acc.clicks + (q.clicks || 0),
+      conversions: acc.conversions + (q.conversions || 0),
+      conversionValue: acc.conversionValue + (q.conversion_value || 0),
+      totalSearchVolume: acc.totalSearchVolume + (q.avg_monthly_searches || 0),
+    }),
+    { impressions: 0, clicks: 0, conversions: 0, conversionValue: 0, totalSearchVolume: 0 }
+  ) || { impressions: 0, clicks: 0, conversions: 0, conversionValue: 0, totalSearchVolume: 0 }
+
+  // Get keyword coverage
+  const { count: gapsCount } = await client
+    .from('keyword_coverage_variant')
+    .select('*', { count: 'exact', head: true })
+    .eq('master_sku', masterSku)
+    .eq('in_title', false)
+    .gt('query_volume', 0)
+
+  const { count: coveredCount } = await client
+    .from('keyword_coverage_variant')
+    .select('*', { count: 'exact', head: true })
+    .eq('master_sku', masterSku)
+    .eq('in_title', true)
+
+  const coveragePercent = (coveredCount || 0) + (gapsCount || 0) > 0
+    ? ((coveredCount || 0) / ((coveredCount || 0) + (gapsCount || 0))) * 100
+    : 0
+
+  return {
+    totalQueries: totalQueries || 0,
+    totalImpressions: totals.impressions,
+    totalClicks: totals.clicks,
+    totalConversions: totals.conversions,
+    totalConversionValue: totals.conversionValue,
+    totalSearchVolume: totals.totalSearchVolume,
+    keywordsInTitle: coveredCount || 0,
+    keywordsNotInTitle: gapsCount || 0,
+    coveragePercent,
+    ctr: totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0,
+  }
 }

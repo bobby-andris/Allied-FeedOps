@@ -56,6 +56,11 @@ export interface PublishEvent {
   published_at: string
   batch_id: string | null
   error_message: string | null
+  // Content snapshot for rollback (added in migration 021)
+  published_title: string | null
+  published_description: string | null
+  variant_count: number | null
+  content_version: number | null
 }
 
 export interface GeneratedContent {
@@ -70,6 +75,10 @@ export interface GeneratedContent {
   is_current: boolean
   created_at: string
   updated_at: string
+  // Approval tracking (added in migration 021)
+  approved_content: string | null
+  approved_at: string | null
+  approved_version: number | null
 }
 
 export type FeedbackPreset = 
@@ -346,6 +355,133 @@ export interface CompetitorPattern {
   avg_position: number | null
   sources: string[] | null
   example_titles: string[] | null
+  updated_at: string
+}
+
+// ============================================================================
+// Search Query Insights Types
+// ============================================================================
+
+export interface SearchQuerySyncJob {
+  id: string
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  job_type: 'search_terms' | 'keyword_planner' | 'full_sync'
+  days_lookback: number
+  limit_results: number
+  enrich_with_keyword_planner: boolean
+  queries_fetched: number
+  queries_enriched: number
+  error_message: string | null
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+}
+
+export type CompetitionLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'UNSPECIFIED'
+
+export interface SearchQuery {
+  id: string
+  query_text: string
+  campaign_id: string | null
+  // Variant-level identification
+  gmc_offer_id: string | null
+  master_sku: string | null
+  finish: string | null
+  finish_code: string | null
+  shopify_variant_id: string | null
+  // Google Ads metrics
+  impressions: number
+  clicks: number
+  conversions: number
+  conversion_value: number
+  cost_micros: number
+  ctr: number       // computed
+  cvr: number       // computed
+  // Keyword Planner metrics
+  avg_monthly_searches: number | null
+  competition: CompetitionLevel | null
+  competition_index: number | null
+  low_cpc_micros: number | null
+  high_cpc_micros: number | null
+  keyword_metrics_updated_at: string | null
+  // Time tracking
+  period_start: string
+  period_end: string
+  fetched_at: string
+  sync_job_id: string | null
+}
+
+export interface SearchQueryByMasterSku {
+  id: string
+  master_sku: string
+  query_text: string
+  // Aggregated metrics
+  total_impressions: number
+  total_clicks: number
+  total_conversions: number
+  total_conversion_value: number
+  variant_count: number
+  top_variant_finish: string | null
+  top_variant_finish_code: string | null
+  // Keyword Planner metrics
+  avg_monthly_searches: number | null
+  competition: CompetitionLevel | null
+  competition_index: number | null
+  // Time tracking
+  period_start: string
+  period_end: string
+  updated_at: string
+}
+
+export interface KeywordMetrics {
+  keyword: string
+  avg_monthly_searches: number | null
+  competition: CompetitionLevel | null
+  competition_index: number | null
+  low_cpc_micros: number | null
+  high_cpc_micros: number | null
+  monthly_searches: Array<{
+    year: number
+    month: number
+    searches: number
+  }> | null
+  updated_at: string
+}
+
+export interface KeywordCoverageVariant {
+  id: string
+  master_sku: string
+  finish: string
+  finish_code: string | null
+  gmc_offer_id: string | null
+  keyword: string
+  in_title: boolean
+  in_description: boolean
+  query_volume: number
+  avg_monthly_searches: number | null
+  updated_at: string
+}
+
+export interface KeywordCoverageMaster {
+  id: string
+  master_sku: string
+  keyword: string
+  in_title: boolean
+  in_description: boolean
+  query_volume: number
+  avg_monthly_searches: number | null
+  updated_at: string
+}
+
+export interface FinishSearchPattern {
+  id: string
+  finish: string
+  finish_code: string
+  pattern_keyword: string
+  total_impressions: number
+  total_clicks: number
+  query_count: number
+  category: string | null
   updated_at: string
 }
 

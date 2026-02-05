@@ -52,6 +52,10 @@ app = FastAPI(
     version=API_VERSION,
 )
 
+# Include search insights router
+from feedops.api.search_insights import router as search_insights_router
+app.include_router(search_insights_router)
+
 
 # =============================================================================
 # Request/Response Models (Pydantic v2)

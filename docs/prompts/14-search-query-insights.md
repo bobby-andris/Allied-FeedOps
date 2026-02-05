@@ -2,7 +2,7 @@
 
 ## Objective
 
-Build a search query insights dashboard that pulls actual search terms from Google Ads, identifies high-value queries, and feeds this data into content generation to ensure titles/descriptions match real search behavior.
+Build a search query insights dashboard that pulls actual search terms from Google Ads, enriches them with Keyword Planner search volume data, syncs with GMC product data via the Merchant API, and feeds this intelligence into content generation to ensure titles/descriptions match real search behavior.
 
 ## Problem Statement
 
@@ -11,6 +11,39 @@ We guess what people search for. We don't use ACTUAL search query data from Goog
 - Missing high-intent search terms that drive conversions
 - Content that doesn't match how customers actually search
 - No visibility into query-to-content alignment
+- No search volume context for prioritization
+- Disconnection between GMC feed data and search insights
+
+## MCP Tools & Agents
+
+### Required MCP Servers
+
+**Merchant API MCP** (`mcp__merchant-api-devdocs__*`):
+- `query_mapi_docs` - Query Merchant API documentation
+- `find_mapi_code_sample` - Find code samples for implementation
+
+Use the Merchant API MCP to:
+- Pull `product_performance_view` for impressions/clicks by offer_id
+- Query `product_view` for current product attributes and status
+- Get product data quality issues
+
+**Google Ads MCP** (`mcp__google-ads-mcp__*`):
+- `search` - Execute GAQL queries for search terms
+
+### Agent for Setup
+
+**merchant-integrator agent**: Use this agent (via Task tool with `subagent_type: merchant-integrator`) when:
+- Migrating from Content API for Shopping to Merchant API
+- Setting up new Merchant API integrations
+- Implementing product performance queries
+
+Example invocation:
+```
+Task tool: {
+  subagent_type: "merchant-integrator",
+  prompt: "Set up Merchant API integration for product performance reporting"
+}
+```
 
 ## Critical: Platform-Specific Content Architecture
 
@@ -55,6 +88,95 @@ Build a search query insights system that:
 - Google Ads customer ID: 6253381786
 - Existing integration: `src/feedops/integrations/google_ads_performance.py`
 - `variant_index` table with GMC offer ID mappings
+- Merchant API access (use `merchant-integrator` agent to set up)
+- Keyword Planner API access (same Google Ads credentials)
+
+## API Integration Architecture
+
+### Data Sources
+
+1. **Google Ads Search Terms** (what people actually searched)
+   - Source: `search_term_view` via GAQL
+   - Data: actual queries, impressions, clicks, conversions by variant
+
+2. **Keyword Planner** (search volume context)
+   - Source: `KeywordPlanIdeaService.GenerateKeywordHistoricalMetrics`
+   - Data: avg monthly searches, competition level/index, CPC ranges
+   - Use to prioritize which search terms to optimize for
+
+3. **Merchant API** (product feed data)
+   - Source: `product_performance_view`, `product_view`
+   - Data: product attributes, performance by offer_id, data issues
+   - Use to correlate search terms with current feed content
+
+### Merchant API Queries (via MCP)
+
+```sql
+-- Get product performance metrics
+SELECT
+  offer_id,
+  clicks,
+  impressions,
+  click_through_rate
+FROM product_performance_view
+WHERE date BETWEEN '2025-01-01' AND '2025-01-31'
+
+-- Get product attributes for content comparison
+SELECT
+  id,
+  offer_id,
+  title,
+  aggregated_reporting_context_status,
+  item_issues
+FROM product_view
+WHERE aggregated_reporting_context_status = 'ELIGIBLE'
+```
+
+### Keyword Planner Integration
+
+```python
+# Get search volume for discovered search terms
+from google.ads.googleads.client import GoogleAdsClient
+
+def get_keyword_metrics(client, customer_id, keywords: list[str]) -> dict:
+    """
+    Fetch historical metrics for keywords from Keyword Planner.
+
+    Returns dict mapping keyword -> {
+        avg_monthly_searches: int,
+        competition: str (LOW/MEDIUM/HIGH),
+        competition_index: int (0-100),
+        low_top_of_page_bid_micros: int,
+        high_top_of_page_bid_micros: int
+    }
+    """
+    keyword_plan_idea_service = client.get_service("KeywordPlanIdeaService")
+
+    request = client.get_type("GenerateKeywordHistoricalMetricsRequest")
+    request.customer_id = customer_id
+    request.keywords.extend(keywords)
+    request.language = "languageConstants/1000"  # English
+    request.geo_target_constants.append("geoTargetConstants/2840")  # USA
+    request.keyword_plan_network = (
+        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH
+    )
+
+    response = keyword_plan_idea_service.generate_keyword_historical_metrics(
+        request=request
+    )
+
+    results = {}
+    for result in response.results:
+        metrics = result.keyword_metrics
+        results[result.text] = {
+            'avg_monthly_searches': metrics.avg_monthly_searches,
+            'competition': metrics.competition.name,
+            'competition_index': metrics.competition_index,
+            'low_cpc_micros': metrics.low_top_of_page_bid_micros,
+            'high_cpc_micros': metrics.high_top_of_page_bid_micros
+        }
+    return results
+```
 
 ## Files to Create
 
@@ -76,6 +198,7 @@ Build a search query insights system that:
 
 ```sql
 -- Store search query data from Google Ads at VARIANT level
+-- Enhanced with Keyword Planner metrics for prioritization
 CREATE TABLE search_queries (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   query_text text NOT NULL,
@@ -86,7 +209,7 @@ CREATE TABLE search_queries (
   finish text, -- e.g., 'Polished Chrome'
   finish_code text, -- e.g., 'PC'
   shopify_variant_id text,
-  -- Metrics
+  -- Google Ads Metrics (actual performance)
   impressions integer DEFAULT 0,
   clicks integer DEFAULT 0,
   conversions numeric DEFAULT 0,
@@ -98,11 +221,31 @@ CREATE TABLE search_queries (
   cvr numeric GENERATED ALWAYS AS (
     CASE WHEN clicks > 0 THEN conversions / clicks ELSE 0 END
   ) STORED,
+  -- Keyword Planner Metrics (market context)
+  avg_monthly_searches integer, -- From Keyword Planner
+  competition text CHECK (competition IN ('LOW', 'MEDIUM', 'HIGH', 'UNSPECIFIED')),
+  competition_index integer CHECK (competition_index BETWEEN 0 AND 100),
+  low_cpc_micros bigint, -- 20th percentile top-of-page bid
+  high_cpc_micros bigint, -- 80th percentile top-of-page bid
+  keyword_metrics_updated_at timestamptz,
   -- Time tracking
   period_start date NOT NULL,
   period_end date NOT NULL,
   fetched_at timestamptz DEFAULT now(),
   UNIQUE(query_text, gmc_offer_id, period_start, period_end)
+);
+
+-- Keyword-level metrics (aggregated from Keyword Planner, not variant-specific)
+CREATE TABLE keyword_metrics (
+  keyword text PRIMARY KEY,
+  avg_monthly_searches integer,
+  competition text CHECK (competition IN ('LOW', 'MEDIUM', 'HIGH', 'UNSPECIFIED')),
+  competition_index integer CHECK (competition_index BETWEEN 0 AND 100),
+  low_cpc_micros bigint,
+  high_cpc_micros bigint,
+  -- Monthly search volume breakdown (last 12 months)
+  monthly_searches jsonb, -- [{month: '2025-01', searches: 1200}, ...]
+  updated_at timestamptz DEFAULT now()
 );
 
 -- Aggregated view: queries per master SKU (across all variants)
@@ -206,6 +349,116 @@ import re
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timedelta
 from feedops.db import get_supabase_client
+
+
+class KeywordPlannerClient:
+    """Fetches keyword metrics from Google Ads Keyword Planner."""
+
+    def __init__(self):
+        self.customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID', '6253381786')
+        self.client = GoogleAdsClient.load_from_env()
+
+    def get_historical_metrics(
+        self,
+        keywords: List[str],
+        language_id: str = "1000",  # English
+        geo_target_id: str = "2840"  # USA
+    ) -> Dict[str, Dict]:
+        """
+        Fetch historical metrics for keywords from Keyword Planner.
+
+        Returns dict mapping keyword -> metrics
+        """
+        service = self.client.get_service("KeywordPlanIdeaService")
+
+        request = self.client.get_type("GenerateKeywordHistoricalMetricsRequest")
+        request.customer_id = self.customer_id
+        request.keywords.extend(keywords)
+        request.language = f"languageConstants/{language_id}"
+        request.geo_target_constants.append(f"geoTargetConstants/{geo_target_id}")
+        request.keyword_plan_network = (
+            self.client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH
+        )
+
+        try:
+            response = service.generate_keyword_historical_metrics(request=request)
+
+            results = {}
+            for result in response.results:
+                metrics = result.keyword_metrics
+                results[result.text] = {
+                    'avg_monthly_searches': metrics.avg_monthly_searches or 0,
+                    'competition': metrics.competition.name,
+                    'competition_index': metrics.competition_index or 0,
+                    'low_cpc_micros': metrics.low_top_of_page_bid_micros or 0,
+                    'high_cpc_micros': metrics.high_top_of_page_bid_micros or 0,
+                    'monthly_searches': [
+                        {
+                            'year': m.year,
+                            'month': m.month,
+                            'searches': m.monthly_searches or 0
+                        }
+                        for m in metrics.monthly_search_volumes
+                    ]
+                }
+            return results
+
+        except GoogleAdsException as e:
+            print(f"Keyword Planner API error: {e}")
+            raise
+
+    def generate_keyword_ideas(
+        self,
+        seed_keywords: List[str] = None,
+        seed_url: str = None,
+        language_id: str = "1000",
+        geo_target_id: str = "2840"
+    ) -> List[Dict]:
+        """
+        Generate keyword ideas from seeds (keywords or URL).
+
+        Useful for discovering related search terms we might be missing.
+        """
+        service = self.client.get_service("KeywordPlanIdeaService")
+
+        request = self.client.get_type("GenerateKeywordIdeasRequest")
+        request.customer_id = self.customer_id
+        request.language = f"languageConstants/{language_id}"
+        request.geo_target_constants.append(f"geoTargetConstants/{geo_target_id}")
+        request.keyword_plan_network = (
+            self.client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH
+        )
+
+        if seed_keywords and seed_url:
+            request.keyword_and_url_seed.keywords.extend(seed_keywords)
+            request.keyword_and_url_seed.url = seed_url
+        elif seed_keywords:
+            request.keyword_seed.keywords.extend(seed_keywords)
+        elif seed_url:
+            request.url_seed.url = seed_url
+        else:
+            raise ValueError("Must provide seed_keywords or seed_url")
+
+        try:
+            response = service.generate_keyword_ideas(request=request)
+
+            ideas = []
+            for idea in response.results:
+                metrics = idea.keyword_idea_metrics
+                ideas.append({
+                    'keyword': idea.text,
+                    'avg_monthly_searches': metrics.avg_monthly_searches or 0,
+                    'competition': metrics.competition.name,
+                    'competition_index': metrics.competition_index or 0,
+                    'low_cpc_micros': metrics.low_top_of_page_bid_micros or 0,
+                    'high_cpc_micros': metrics.high_top_of_page_bid_micros or 0
+                })
+            return ideas
+
+        except GoogleAdsException as e:
+            print(f"Keyword Planner API error: {e}")
+            raise
+
 
 class SearchTermsClient:
     """Fetches search term data from Google Ads Shopping campaigns with variant-level tracking."""
@@ -531,6 +784,137 @@ class SearchTermsClient:
                         })
 
         return finish_specific
+
+    def enrich_with_keyword_metrics(
+        self,
+        search_terms: List[Dict],
+        batch_size: int = 100
+    ) -> List[Dict]:
+        """
+        Enrich search terms with Keyword Planner metrics.
+
+        Adds avg_monthly_searches, competition, competition_index, etc.
+        to each search term for prioritization.
+        """
+        kp_client = KeywordPlannerClient()
+
+        # Extract unique keywords
+        keywords = list(set(term['search_term'] for term in search_terms))
+
+        # Fetch in batches (Keyword Planner has rate limits)
+        all_metrics = {}
+        for i in range(0, len(keywords), batch_size):
+            batch = keywords[i:i + batch_size]
+            metrics = kp_client.get_historical_metrics(batch)
+            all_metrics.update(metrics)
+
+        # Enrich search terms
+        for term in search_terms:
+            keyword = term['search_term']
+            if keyword in all_metrics:
+                term.update({
+                    'avg_monthly_searches': all_metrics[keyword]['avg_monthly_searches'],
+                    'competition': all_metrics[keyword]['competition'],
+                    'competition_index': all_metrics[keyword]['competition_index'],
+                    'low_cpc_micros': all_metrics[keyword]['low_cpc_micros'],
+                    'high_cpc_micros': all_metrics[keyword]['high_cpc_micros']
+                })
+
+        return search_terms
+
+
+class MerchantAPIClient:
+    """
+    Client for Google Merchant API to fetch product data and performance.
+
+    Note: Use the merchant-integrator agent to set up authentication and
+    query the mcp__merchant-api-devdocs__query_mapi_docs for implementation details.
+    """
+
+    def __init__(self, merchant_id: str):
+        self.merchant_id = merchant_id
+        # Authentication setup - use merchant-integrator agent
+
+    def get_product_performance(
+        self,
+        start_date: str,
+        end_date: str,
+        offer_ids: List[str] = None
+    ) -> List[Dict]:
+        """
+        Fetch product performance metrics from Merchant API.
+
+        Query: product_performance_view
+        Returns: impressions, clicks, ctr by offer_id
+        """
+        query = f"""
+            SELECT
+                offer_id,
+                clicks,
+                impressions,
+                click_through_rate
+            FROM product_performance_view
+            WHERE date BETWEEN '{start_date}' AND '{end_date}'
+        """
+
+        if offer_ids:
+            offer_filter = ", ".join(f"'{oid}'" for oid in offer_ids)
+            query += f" AND offer_id IN ({offer_filter})"
+
+        # Execute via Merchant API reports.search
+        # Implementation details: use mcp__merchant-api-devdocs__find_mapi_code_sample
+        pass
+
+    def get_product_attributes(
+        self,
+        offer_ids: List[str] = None
+    ) -> List[Dict]:
+        """
+        Fetch current product attributes from Merchant API.
+
+        Query: product_view
+        Returns: title, description, status, issues by offer_id
+        """
+        query = """
+            SELECT
+                id,
+                offer_id,
+                title,
+                aggregated_reporting_context_status,
+                item_issues
+            FROM product_view
+        """
+
+        if offer_ids:
+            offer_filter = ", ".join(f"'{oid}'" for oid in offer_ids)
+            query += f" WHERE offer_id IN ({offer_filter})"
+
+        # Execute via Merchant API reports.search
+        pass
+
+    def get_price_competitiveness(
+        self,
+        offer_ids: List[str] = None
+    ) -> List[Dict]:
+        """
+        Fetch price competitiveness data.
+
+        Query: price_competitiveness_product_view
+        Returns: our price vs benchmark price by offer_id
+        """
+        query = """
+            SELECT
+                id,
+                offer_id,
+                price,
+                benchmark_price,
+                report_country_code
+            FROM price_competitiveness_product_view
+            WHERE report_country_code = 'US'
+        """
+
+        # Execute via Merchant API reports.search
+        pass
 ```
 
 ## API Implementation
@@ -1188,6 +1572,37 @@ NOT:
 5. [ ] Finish-specific search patterns identified
 6. [ ] Gap analysis works at variant level for Google/Bing
 7. [ ] Integration with content generation includes variant context
+8. [ ] **Keyword Planner metrics** fetched and stored for search terms
+9. [ ] **Search volume prioritization** - high-volume keywords highlighted
+10. [ ] **Competition level indicators** shown in UI (LOW/MEDIUM/HIGH)
+11. [ ] **Merchant API integration** - product performance synced with search data
+12. [ ] **Price competitiveness** data available for context
+
+## Keyword Planner Dashboard Features
+
+### Search Volume Column
+Add avg_monthly_searches to query tables to prioritize optimization:
+- High volume (>1000/mo) - Priority optimization
+- Medium volume (100-1000/mo) - Secondary focus
+- Low volume (<100/mo) - Consider for long-tail
+
+### Competition Indicators
+Show competition level badges:
+- LOW (0-33) - Easy to rank, lower CPCs
+- MEDIUM (34-66) - Moderate competition
+- HIGH (67-100) - Competitive, higher CPCs
+
+### CPC Estimates
+Show estimated CPC ranges to help prioritize:
+- Low bid (20th percentile)
+- High bid (80th percentile)
+- Use for ROI calculations
+
+### Keyword Discovery
+Add "Discover Related Keywords" button that uses Keyword Planner to:
+- Generate ideas from existing high-performing keywords
+- Identify keywords competitors rank for but we don't
+- Find long-tail variations with good volume
 
 ## Future Enhancements
 
@@ -1196,3 +1611,7 @@ NOT:
 - Suggest finish-specific keyword additions
 - Track query trends by variant over time
 - Auto-generate variant-specific title variations
+- **Keyword opportunity scoring** - combine search volume × (100 - competition_index) × CVR
+- **Seasonal trend analysis** - identify keywords with seasonal volume spikes
+- **Competitor keyword gap** - keywords they rank for that we don't (via SiteSeed)
+- **Auto-refresh Keyword Planner data** monthly (metrics only refresh monthly)
