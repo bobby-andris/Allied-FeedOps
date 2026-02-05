@@ -14,6 +14,14 @@
 - **Google Ads customer ID**: `6253381786`
 - **GA4 property**: Allied Brass — GA4 (Old)
 
+### Google Ads API Capabilities
+
+- **Search Terms**: `search_term_view` - actual queries triggering ads
+- **Keyword Planner**: `KeywordPlanIdeaService` - search volume, competition, CPC estimates
+  - `GenerateKeywordHistoricalMetrics` - get avg monthly searches, competition index (0-100), CPC ranges
+  - `GenerateKeywordIdeas` - discover related keywords from seeds (keywords, URLs, sites)
+  - Rate limited - cache results (metrics update monthly)
+
 ## Available MCP Servers & Skills (use these!)
 
 **MCP Servers** - Use these for database operations, external APIs, and browser automation:
@@ -21,12 +29,17 @@
 - **Supabase MCP** (`mcp__supabase__*`): Use for direct database queries, migrations, and schema inspection. Prefer `mcp__supabase__execute_sql` for quick queries instead of writing scripts. Available tools: `execute_sql`, `apply_migration`, `list_tables`, `get_project`, etc.
 - **Playwright MCP** (`mcp__plugin_playwright_playwright__*`): Use for visual verification, UI testing, and screenshots. Tools: `browser_navigate`, `browser_take_screenshot`, `browser_click`, `browser_snapshot`, etc.
 - **Apify MCP** (`mcp__Apify__*`): Use for web scraping, competitor analysis, and data extraction. Search actors first with `search-actors`.
-- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Use for Ads data queries.
+- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Use for Ads data queries and Keyword Planner.
+- **Merchant API MCP** (`mcp__merchant-api-devdocs__*`): Use for GMC product data, performance metrics, and feed management. Tools: `query_mapi_docs` (documentation), `find_mapi_code_sample` (code examples). Queries: `product_performance_view`, `product_view`, `price_competitiveness_product_view`.
 - **Analytics MCP** (`mcp__analytics-mcp__*`): Use for GA4 reporting.
 - **Context7 MCP** (`mcp__plugin_context7_context7__*`): Use to fetch up-to-date library documentation.
 - **Vercel MCP** (`mcp__vercel__*`): Use for deployment management and logs.
 - **GCloud MCP** (`mcp__gcloud__*`): Use for GCP operations via gcloud CLI.
 - **Cloud Run MCP** (`mcp__cloud-run__*`): Use for Cloud Run deployments and service management.
+
+**Agents** - Use via Task tool with `subagent_type`:
+
+- **merchant-integrator**: Use when migrating from Content API for Shopping to Merchant API, or implementing new Google Merchant API features. Handles authentication setup and integration patterns.
 
 **Skills** - Invoke with `Skill` tool for specialized workflows:
 
@@ -135,6 +148,32 @@ gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --
   --build-service-account=projects/bobbys-project-346400/serviceAccounts/profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com \
   --allow-unauthenticated --memory=2Gi --cpu=2 --timeout=900 --max-instances=10
 ```
+
+### CI/CD Setup (One-Time)
+
+The `cloudbuild.yaml` is configured for automatic deployments. Complete these steps to enable:
+
+1. **Authorize GitHub Connection** (required):
+   Visit: https://console.cloud.google.com/cloud-build/triggers/connect?project=bobbys-project-346400
+   - Select "GitHub (Cloud Build GitHub App)"
+   - Authorize access to `bobby-andris/Allied-FeedOps` repository
+
+2. **Create the trigger** (after authorization):
+   ```bash
+   gcloud builds triggers create github \
+     --name="feedops-pipeline-deploy" \
+     --repository="projects/bobbys-project-346400/locations/us-east1/connections/feedops-github-connection/repositories/Allied-FeedOps" \
+     --branch-pattern="^master$" \
+     --build-config="cloudbuild.yaml" \
+     --project=bobbys-project-346400 \
+     --region=us-east1
+   ```
+
+3. **Set Vercel environment variable** (for dashboard):
+   In Vercel Dashboard → Project Settings → Environment Variables:
+   - Name: `FEEDOPS_PIPELINE_URL`
+   - Value: `https://feedops-pipeline-623866089882.us-east1.run.app`
+   - Environments: Production, Preview, Development
 
 ## Run locally
 
