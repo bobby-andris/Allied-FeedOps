@@ -67,6 +67,14 @@ These rules prevent disapprovals and “AI text” compliance issues. If any rul
 - **Bing/Microsoft Shopping**: Favor clarity and literal matching; avoid keyword stuffing in titles.
 - **Shopify On-Site**: Optimize for readability and trust first; keep the on-page title concise when possible (SEO title can be shorter than the product title).
 
+### Variant Content Generation
+
+For Google/Bing variant content:
+- **Base content** is finish-agnostic (no specific finish mentioned)
+- **Finish sentences** describe the relationship between THIS product and each finish
+- Good: "The warm, aged patina of Antique Brass complements this traditional Carolina design"
+- Bad: "Antique Brass makes a bold statement" (generic, could apply to any product)
+
 ### Title Structure Formula (Brand Recognition Based)
 
 **For Well-Known Brands** (Nike, Apple, Samsung):

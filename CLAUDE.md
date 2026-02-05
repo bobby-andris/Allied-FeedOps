@@ -62,6 +62,7 @@
 - `regeneration_history` (prompt audit trail with system_prompt, user_prompt, model_version, prompt_hash)
 - `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking)
 - `lifestyle_image_selections` (audit trail for image selection decisions)
+- `variant_finish_sentences` (product+finish tailored sentences for Google/Bing variant content generation)
 
 **Column naming conventions (do not drift)**
 
@@ -100,6 +101,7 @@ GMC offer IDs:
 - Image selection API: `dashboard/src/app/api/review/images/select/route.ts`
 - Variant approvals API: `dashboard/src/app/api/variants/approvals/route.ts`, `/bulk/route.ts`
 - Variant content utilities: `dashboard/src/lib/variant-content.ts` (generates variant titles/descriptions from base template)
+- Finish data: `dashboard/src/lib/finish-data.ts` (30 finish definitions with descriptions and categories)
 
 ## Run locally
 

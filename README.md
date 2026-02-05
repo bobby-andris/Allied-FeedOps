@@ -167,6 +167,14 @@ The LLM already knows how to write compelling copy. The old approach was **block
 **New (context-driven):**
 > "This 18.75-inch shower basket in Antique Brass keeps bath essentials organized with vintage-inspired warmth. Ventilated solid brass wires drain quickly and resist rust..."
 
+### TypeScript Dashboard Content Generation
+
+The Next.js dashboard has its own content generation system at `dashboard/src/app/api/regenerate/route.ts`. For Google/Bing, it generates:
+1. **Base content** - Finish-agnostic title/description
+2. **Finish sentences** - 28 product+finish tailored sentences stored in `variant_finish_sentences`
+
+Variant content is composed at display-time by combining base content with finish-specific sentences. See `docs/prompts/21-unify-content-generation-methodology.md` for methodology comparison with Python.
+
 ## Docs
 
 - Brand identity context: `docs/allied_brass_complete_brand_identity_v2 (4).md`
