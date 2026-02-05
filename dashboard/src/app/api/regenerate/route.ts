@@ -4,6 +4,12 @@ import type { ChatCompletionMessageParam, ChatCompletionContentPart } from 'open
 import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getProductEvidence, productExistsInCatalog } from '@/lib/evidence'
+import {
+  loadActivePromptTemplate,
+  formatGoldStandardExamples,
+  getCategoryGuidance,
+  type PromptTemplate,
+} from '@/lib/prompts/loader'
 import crypto from 'node:crypto'
 
 // Lazy-initialize OpenAI client (avoid build-time instantiation)
@@ -23,7 +29,8 @@ function getOpenAIClient(): OpenAI {
 // Model to use for generation (default aligns with Python backend)
 const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
 
-// All 28 Allied Brass finishes with their character for product+finish tailored sentences
+// 28 Allied Brass finishes for product+finish tailored sentences
+// EXCLUDES: Military Camo and Red White and Blue (specialty/novelty finishes)
 const FINISH_LIST = [
   'Antique Brass',
   'Antique Bronze',
@@ -40,13 +47,11 @@ const FINISH_LIST = [
   'Matte Gray',
   'Matte White',
   'Mediterranean Blue',
-  'Military Camo',
   'Oil Rubbed Bronze',
   'Pink',
   'Polished Brass',
   'Polished Chrome',
   'Polished Nickel',
-  'Red White and Blue',
   'Satin Brass',
   'Satin Chrome',
   'Satin Nickel',
@@ -57,14 +62,14 @@ const FINISH_LIST = [
   'Venetian Bronze',
 ] as const
 
-// Finish reference for LLM prompt (grouped by character)
+// Finish reference for LLM prompt (grouped by character) - 28 finishes
 const FINISH_REFERENCE = `FINISH REFERENCE (28 finishes with their character):
 Traditional Warm: Antique Brass (aged patina), Antique Bronze (deep brown), Antique Copper (burnished copper), Oil Rubbed Bronze (copper highlights), Polished Brass (mirror gold), Satin Brass (brushed gold), Spanish Gold (Old World gold), Unlacquered Brass (living patina), Venetian Bronze (golden highlights)
 Traditional Cool: Antique Pewter (silvery gray)
 Transitional: Brushed Bronze (warm matte), Polished Chrome (bright reflective), Polished Nickel (warm silver), Satin Chrome (brushed silver), Satin Nickel (warm brushed)
 Contemporary Neutral: Matte Black (smooth non-reflective), Matte Gray (soft neutral), Matte White (clean crisp)
 Statement Colors: Fire Engine Red (bold vibrant), Flat Troll Blue (matte playful), Glokzin Teal (coastal), Golden Yellow (sunny), Lavender (calming purple), Mediterranean Blue (deep sea), Pink (soft feminine), Sea Foam Green (coastal fresh)
-Statement Other: Autumn Sparkle (shimmer), Military Camo (pattern), Red White and Blue (patriotic), Shaded Beige (warm earth)`
+Statement Other: Autumn Sparkle (shimmer), Shaded Beige (warm earth)`
 
 // Whether to use vision for descriptions (default: true)
 const USE_VISION = process.env.FEEDOPS_USE_VISION !== '0'
@@ -96,49 +101,52 @@ interface RegenerateRequest {
   }
 }
 
-// Context-driven system prompt (matches Python backend philosophy)
-const SYSTEM_PROMPT = `You are a product content writer for Allied Brass bathroom and kitchen hardware.
-Create content that helps buyers understand why this product is worth it.
+// Fallback system prompt (used when prompt_templates not available)
+const FALLBACK_SYSTEM_PROMPT = `You are an expert e-commerce content writer for Allied Brass bathroom hardware. Generate titles and descriptions that connect with the TRUE WHY behind customer searches.
 
-BEFORE YOU WRITE, THINK ABOUT WHO IS READING THIS:
+## Core Principles
 
-1. WHO IS SEARCHING FOR THIS PRODUCT?
-- A homeowner renovating a bathroom who wants it to look intentional, not like an afterthought
-- A designer specifying fixtures for a client who expects quality
-- Someone replacing a broken/ugly product who wants an upgrade, not just a replacement
+### The TRUE WHY Framework
+Every product search begins with a motivation deeper than the product itself:
+- Surface need → Behavioral consequence → Daily frustration → Our solution
+- "I need a grab bar" → "I refuse to make my bathroom look like a hospital"
+- "I need a shower caddy" → "I'm tired of bottles on the floor and ugly plastic caddies"
 
-2. WHAT QUESTIONS DO THEY HAVE BEFORE SPENDING $80+?
-- "Will this look good in MY bathroom?" → Help them visualize it
-- "Will this match my other fixtures?" → Address finish coordination
-- "Is this actually better than the $20 Amazon option?" → Explain the value
-- "Will this last? Is it quality?" → Provide trust signals (material, warranty)
+### When to Apply TRUE WHY (and When NOT To)
+- Apply when a clear pain point exists that drives the purchase decision
+- DON'T FORCE IT for standard products without dramatic pain points
+- A simple towel bar doesn't need manufactured drama—focus on quality and craftsmanship
 
-3. WHAT MAKES ALLIED BRASS WORTH IT?
-- Style without sacrifice: You don't have to choose between "looks good" and "works well"
-- Personalization: 28 finishes to match any bathroom vision
-- Innovation: Rollerless TP holders, retractable rods, decorative grab bars, ventilated baskets
-- Durability: Solid brass outlasts plastic and die-cast that crack and corrode
-- Coordination: Match everything across 42+ collections
+### Title Structure (Google/Bing)
+{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
 
-PLATFORM CONTEXT:
-- Google/Bing (variant): Base content + 28 finish-specific sentences. Make them want to click.
-- Shopify (master): All finishes on one page. Customer already clicked. Help them choose and buy.
+- Lead with finish (search relevance, immediate style context)
+- Collection before brand (coordination buyers, not brand recognition)
+- Include differentiating features ("Space-Saving", "No Spring", "Rust Proof")
 
-CONTENT STRUCTURE:
-For Google/Bing descriptions, you will generate:
-1. A BASE DESCRIPTION - finish-agnostic, describes the product
-2. FINISH SENTENCES - 28 product-specific sentences, one per finish, describing how each finish relates to THIS product
+### Shopify Titles
+- NO {FINISH_NAME} placeholder (user already viewing specific variant)
+- NO "Allied Brass" (user already on the site)
+- Match the product catalog title style
 
-For titles and Shopify, generate simple content without specific finish names.
+### Descriptions
+- Open with the TRUE WHY when one exists naturally
+- For standard products, open with quality/craftsmanship positioning
+- Include {FINISH_SENTENCE} placeholder for Google/Bing (inserted after first sentence)
+- Shopify descriptions are finish-agnostic (no placeholders)
 
-CRITICAL RULES:
-- Never invent specifications not in the product data
-- Every factual claim must be traceable to the provided evidence table
-- "Allied Brass" should be the final segment in titles
-- No ALL CAPS, no promotional language like "Premium", "Luxury", "Best"
-- Write for a human who's about to spend $80 and wants to feel good about it
-- When an image is provided, use it to verify product details but don't describe the image directly
-- Base content should NOT include specific finish names (finish is added at display time)`
+## Finish Sentences
+Generate 28 product-specific finish sentences. EXCLUDE:
+- Military Camo
+- Red White and Blue
+
+Each sentence should describe how THAT finish enhances THIS specific product.
+
+## Guardrails
+- NEVER invent specifications not in the evidence table
+- NO banned words: luxurious, premium, exclusive, unique (unless describing a genuinely unique feature)
+- NO ALL CAPS or promotional language
+- Claims must trace to evidence (product data, bullets, narrative copy)`
 
 /**
  * Build enhanced prompt using evidence table
@@ -146,24 +154,50 @@ CRITICAL RULES:
 function buildEnhancedPrompt(
   contentType: 'title' | 'description',
   platform: string,
-  evidenceMarkdown: string
+  evidenceMarkdown: string,
+  promptTemplate?: PromptTemplate | null,
+  productCategory?: string
 ): { prompt: string; requiresJson: boolean } {
+  // Updated context with TRUE WHY approach and new title structure
   const platformContext: Record<string, Record<string, string>> = {
     google: {
-      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end. Do NOT include specific finish names.',
-      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Include material quality and dimensions. Plain text only, 600-800 characters target.',
+      title: 'Google Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Lead with finish placeholder for search relevance. Make them want to click.',
+      description: 'Google Shopping description - Open with the TRUE WHY (the customer\'s deeper motivation). Write for a human scanning Shopping ads. Include material quality and dimensions. Plain text, 600-800 characters.',
     },
     bing: {
-      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end. Do NOT include specific finish names.',
-      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text only, 700-1000 characters target.',
+      title: 'Bing Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Include natural product synonyms. Make them want to click.',
+      description: 'Bing Shopping description - Open with the TRUE WHY. Include product synonyms naturally (towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text, 700-1000 characters.',
     },
     shopify: {
-      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying. Do NOT include finish name (Shopify shows all finishes).',
-      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. Include trust signals. HTML format with <p> and <ul><li> bullets. Do NOT include a specific finish name.',
+      title: 'Shopify product title (H1) - NO finish name, NO "Allied Brass". Customer already clicked. Match product catalog title style.',
+      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets. Do NOT include specific finish names.',
     },
   }
 
   const context = platformContext[platform]?.[contentType] || ''
+
+  // Add gold standard examples if available
+  let examplesSection = ''
+  if (promptTemplate && contentType) {
+    const examples = formatGoldStandardExamples(
+      promptTemplate,
+      platform as 'google' | 'bing' | 'shopify',
+      contentType,
+      3 // Include 3 examples
+    )
+    if (examples) {
+      examplesSection = `\n\nGOLD STANDARD EXAMPLES (learn from these):\n${examples}\n`
+    }
+  }
+
+  // Add category guidance if available
+  let categoryGuidanceSection = ''
+  if (promptTemplate && productCategory) {
+    const guidance = getCategoryGuidance(promptTemplate, productCategory)
+    if (guidance) {
+      categoryGuidanceSection = `\n\nCATEGORY-SPECIFIC GUIDANCE for ${productCategory}:\n${guidance}\n`
+    }
+  }
 
   // For Google/Bing descriptions, request JSON with finish_sentences
   const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
@@ -173,6 +207,7 @@ function buildEnhancedPrompt(
 FINISH SENTENCES (CRITICAL - YOU MUST INCLUDE THESE):
 In addition to the base description, generate 28 finish-specific sentences - one for each finish.
 Each sentence should describe how THAT FINISH relates to THIS SPECIFIC PRODUCT.
+DO NOT include Military Camo or Red White and Blue (specialty finishes excluded).
 
 Consider the relationship:
 - Product's collection style (from evidence: collection, design_style)
@@ -196,13 +231,14 @@ BAD finish sentences (generic, could apply to any product):
       prompt: `Generate content for this product. You MUST respond with valid JSON.
 
 CONTEXT: ${context}
-
+${examplesSection}${categoryGuidanceSection}
 ${evidenceMarkdown}
 
 ${finishSentencesInstructions}
 
 Remember:
-- Write for a human who's about to spend $80 and wants to feel good about it
+- Open with the TRUE WHY (customer's deeper motivation) when one exists naturally
+- For standard products without dramatic pain points, focus on quality/craftsmanship
 - Every factual claim must be traceable to the evidence table above
 - The base description should NOT include any specific finish name
 - Each finish_sentence should relate the specific finish to THIS product
@@ -213,7 +249,7 @@ Respond with this EXACT JSON structure (no markdown, no code blocks):
   "finish_sentences": {
     "Antique Brass": "One sentence relating Antique Brass to this product...",
     "Antique Bronze": "One sentence relating Antique Bronze to this product...",
-    ... (all 28 finishes)
+    ... (all 28 finishes - exclude Military Camo and Red White and Blue)
   }
 }`,
       requiresJson: true,
@@ -225,13 +261,13 @@ Respond with this EXACT JSON structure (no markdown, no code blocks):
     prompt: `Generate a ${contentType} for this product.
 
 CONTEXT: ${context}
-
+${examplesSection}${categoryGuidanceSection}
 ${evidenceMarkdown}
 
 CRITICAL RULES:
-- Do NOT include any specific finish name like "Antique Brass", "Matte Black", etc.
-- For titles, finish will be inserted automatically at display time
-- For Shopify descriptions, the page shows all finishes - do not mention a specific one
+- For Google/Bing titles: Use {FINISH_NAME} placeholder at the START, followed by product/specs, then collection, then "Allied Brass"
+- For Shopify titles: NO finish placeholder, NO "Allied Brass"
+- Do NOT include any actual finish name like "Antique Brass", "Matte Black", etc.
 
 Remember:
 - Write for a human who's about to spend $80 and wants to feel good about it
@@ -512,6 +548,22 @@ export async function POST(request: NextRequest) {
       logSupabaseError('Failed to fetch current generated content', currentContentError)
     }
 
+    // ==================== LOAD PROMPT TEMPLATE ====================
+    let promptTemplate: PromptTemplate | null = null
+    let systemPrompt = FALLBACK_SYSTEM_PROMPT
+
+    try {
+      promptTemplate = await loadActivePromptTemplate(supabase)
+      if (promptTemplate) {
+        systemPrompt = promptTemplate.system_prompt
+        console.log(`Loaded prompt template: ${promptTemplate.name} v${promptTemplate.version}`)
+      } else {
+        console.log('No active prompt template, using fallback system prompt')
+      }
+    } catch (templateError) {
+      console.warn('Failed to load prompt template:', templateError)
+    }
+
     // ==================== BUILD PROMPT WITH EVIDENCE ====================
     let userPrompt = '' // Will be assigned below
     let imageUrl: string | null = null
@@ -536,7 +588,15 @@ export async function POST(request: NextRequest) {
         useEnhancedPrompt = true
 
         if (mode === 'simple') {
-          const result = buildEnhancedPrompt(content_type, platform, evidenceResult.markdown)
+          // Get product category for category-specific guidance
+          const productCategory = variantData?.product_category || undefined
+          const result = buildEnhancedPrompt(
+            content_type,
+            platform,
+            evidenceResult.markdown,
+            promptTemplate,
+            productCategory
+          )
           userPrompt = result.prompt
           requiresJson = result.requiresJson
         } else {
@@ -597,12 +657,12 @@ export async function POST(request: NextRequest) {
 
     const promptHash = crypto
       .createHash('sha256')
-      .update(`${SYSTEM_PROMPT}\n\n${userPrompt}`, 'utf8')
+      .update(`${systemPrompt}\n\n${userPrompt}`, 'utf8')
       .digest('hex')
 
     // ==================== BUILD MESSAGES WITH OPTIONAL VISION ====================
     const messages: ChatCompletionMessageParam[] = [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: systemPrompt },
     ]
 
     // Add vision support for descriptions when image URL is available
@@ -765,7 +825,7 @@ export async function POST(request: NextRequest) {
         previous_content: currentContentData?.candidate_content || null,
         new_content: newContent,
         model_version: MODEL,
-        system_prompt: SYSTEM_PROMPT,
+        system_prompt: systemPrompt,
         user_prompt: userPrompt,
         prompt_hash: promptHash,
         quality_score_before: currentContentData?.quality_score || null,

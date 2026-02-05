@@ -26,9 +26,14 @@ from feedops.api.supabase_loader import (
     get_product_catalog_count,
     load_parent_sku_from_supabase,
 )
+from feedops.api.prompt_loader import (
+    get_system_prompt,
+    get_category_guidance,
+    format_gold_standard_examples,
+    get_finish_list,
+)
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
-from feedops.pipeline.prompts import SYSTEM_PROMPT
 from feedops.providers import get_provider
 
 # Configure logging
@@ -253,7 +258,7 @@ Return as plain text, not JSON.
                 response = await provider.generate(
                     prompt=user_prompt,
                     schema=simple_schema,
-                    system_prompt=SYSTEM_PROMPT,
+                    system_prompt=get_system_prompt(),
                 )
 
                 content = response.get("content", "").strip()
@@ -343,7 +348,7 @@ Return as plain text, not JSON.
         response = await provider.generate(
             prompt=user_prompt,
             schema=simple_schema,
-            system_prompt=SYSTEM_PROMPT,
+            system_prompt=get_system_prompt(),
         )
 
         content = response.get("content", "").strip()
@@ -351,8 +356,9 @@ Return as plain text, not JSON.
         # Save to regeneration_history
         try:
             supabase = get_client()
+            system_prompt = get_system_prompt()
             prompt_hash = hashlib.sha256(
-                (SYSTEM_PROMPT + user_prompt).encode()
+                (system_prompt + user_prompt).encode()
             ).hexdigest()[:16]
 
             supabase.table("regeneration_history").insert(
@@ -364,7 +370,7 @@ Return as plain text, not JSON.
                     "feedback_text": request.feedback,
                     "new_content": content,
                     "model_version": provider.name,
-                    "system_prompt": SYSTEM_PROMPT[:5000],  # Truncate for DB
+                    "system_prompt": system_prompt[:5000],  # Truncate for DB
                     "user_prompt": user_prompt[:5000],
                     "prompt_hash": prompt_hash,
                 }
@@ -567,7 +573,7 @@ Return as plain text, not JSON.
                     response = await provider.generate(
                         prompt=user_prompt,
                         schema=simple_schema,
-                        system_prompt=SYSTEM_PROMPT,
+                        system_prompt=get_system_prompt(),
                     )
 
                     content = response.get("content", "").strip()
