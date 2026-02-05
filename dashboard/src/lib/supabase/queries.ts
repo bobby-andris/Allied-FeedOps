@@ -304,6 +304,38 @@ export async function getGeneratedImages(client: Client, masterSku: string) {
   return data
 }
 
+/**
+ * Get product+finish tailored sentences for variant content generation.
+ * These are LLM-generated sentences that describe how each finish relates to the specific product.
+ *
+ * @param client - Supabase client
+ * @param masterSku - The master SKU
+ * @param platform - 'google' or 'bing'
+ * @returns Object mapping finish names to product-specific sentences, or null if not found
+ */
+export async function getFinishSentences(
+  client: Client,
+  masterSku: string,
+  platform: 'google' | 'bing'
+): Promise<Record<string, string> | null> {
+  const { data, error } = await client
+    .from('variant_finish_sentences')
+    .select('finish_sentences')
+    .eq('master_sku', masterSku)
+    .eq('platform', platform)
+    .single()
+
+  if (error) {
+    // PGRST116 = row not found (not an error, just no data)
+    if (error.code !== 'PGRST116') {
+      console.error('Error fetching finish sentences:', error)
+    }
+    return null
+  }
+
+  return data?.finish_sentences as Record<string, string> || null
+}
+
 // Performance Queries
 export async function getPerformanceSnapshots(
   client: Client,

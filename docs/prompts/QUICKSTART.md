@@ -17,14 +17,15 @@
 
 ### Phase 4: Infrastructure for Heavy Processing
 8. **Prompt 09** → GCP Cloud Run Setup
+9. **Prompt 21** → Unify TypeScript & Python Methodology (CRITICAL)
 
 ### Phase 5: Future-Proofing & ROI
-9. **Prompt 15** → Agentic Commerce (UCP)
-10. **Prompt 12** → A/B Testing Dashboard
-11. **Prompt 16** → Multi-Variant Images
+10. **Prompt 15** → Agentic Commerce (UCP)
+11. **Prompt 12** → A/B Testing Dashboard
+12. **Prompt 16** → Multi-Variant Images
 
 ### Phase 6: Final Audit (ALWAYS LAST)
-12. **Prompt 11** → Production Readiness Audit
+13. **Prompt 11** → Production Readiness Audit
 
 After each prompt, run the **Verification & Completion Prompt** below.
 
@@ -714,6 +715,64 @@ Review the current state of CLAUDE.md, README.md, and AGENTS.md. Based on the re
    - Current scoring rubrics
 
 Make minimal, focused updates. Don't rewrite sections that are already accurate. Show me the proposed changes before committing.
+```
+
+---
+
+## Quick Start: Prompt 21 (Unify Content Generation Methodology)
+
+**When to run:** After Prompt 09 (Cloud Run) - CRITICAL for consistency
+
+**Prerequisites:** Cloud Run deployed (if choosing Option B - Python as source of truth)
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to unify the TypeScript and Python content generation methodologies to ensure consistency. Please enter plan mode and use the prompt at docs/prompts/21-unify-content-generation-methodology.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- TypeScript regeneration: dashboard/src/app/api/regenerate/route.ts
+- Python prompts: src/feedops/pipeline/prompts.py
+- Recent TypeScript enhancements: variant_finish_sentences, evidence table builder
+
+The Problem:
+TypeScript (dashboard) and Python (batch) use DIFFERENT prompts and methodologies. This causes inconsistency between:
+- Real-time dashboard regeneration
+- Batch generation for publishing
+
+Goals:
+1. Document BOTH methodologies in detail (prompts, data, output format)
+2. Create side-by-side comparison matrix
+3. Identify strengths of each approach
+4. Decide on architecture (TypeScript as truth, Python as truth, or hybrid)
+5. Implement unified methodology
+6. Verify consistency (same SKU → same output regardless of system)
+
+Recent TypeScript enhancements to preserve:
+- finish_sentences table for variant-specific content
+- Evidence table builder with product_catalog data
+- Vision support for product images
+
+Python strengths to consider:
+- Comprehensive 302-line SYSTEM_PROMPT with P0/P1/P2 priorities
+- Structured JSON output with claims tracing
+- Self-scoring (6 dimensions)
+- Category-specific guidance
+- Explicit examples and anti-patterns
+
+**REQUIRED WORKFLOW (superpowers skills):**
+
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---

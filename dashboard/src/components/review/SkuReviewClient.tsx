@@ -194,6 +194,11 @@ interface SkuReviewClientProps {
   productImages: ProductImageData | null
   currentProduction: CurrentProductionContent | null
   variantCurrentContent: Record<string, { title: string | null; description: string | null }>
+  /** Product+finish tailored sentences for Google and Bing */
+  finishSentences?: {
+    google: Record<string, string> | null
+    bing: Record<string, string> | null
+  }
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -368,6 +373,7 @@ export function SkuReviewClient({
   productImages,
   currentProduction,
   variantCurrentContent,
+  finishSentences,
 }: SkuReviewClientProps) {
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
   const router = useRouter()
@@ -499,6 +505,7 @@ export function SkuReviewClient({
                   .map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
                 variantApprovals={variantApprovals}
                 variantCurrentContent={variantCurrentContent}
+                finishSentences={finishSentences?.google}
                 onApprovalChange={() => router.refresh()}
               />
             )}
@@ -520,6 +527,7 @@ export function SkuReviewClient({
                   .map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
                 variantApprovals={variantApprovals}
                 variantCurrentContent={variantCurrentContent}
+                finishSentences={finishSentences?.bing}
                 onApprovalChange={() => router.refresh()}
               />
             )}

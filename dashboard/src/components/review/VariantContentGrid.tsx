@@ -27,6 +27,8 @@ interface VariantContentGridProps {
   variants: Array<{ option_sku: string; finish: string; finish_code: string }>
   variantApprovals: VariantApproval[]
   variantCurrentContent: Record<string, { title: string | null; description: string | null }>
+  /** Optional product+finish tailored sentences (from variant_finish_sentences table) */
+  finishSentences?: Record<string, string> | null
   onApprovalChange: () => void
 }
 
@@ -38,6 +40,7 @@ export function VariantContentGrid({
   variants,
   variantApprovals,
   variantCurrentContent,
+  finishSentences,
   onApprovalChange,
 }: VariantContentGridProps) {
   const [selectedVariants, setSelectedVariants] = useState<Set<string>>(new Set())
@@ -338,7 +341,11 @@ export function VariantContentGrid({
           const isSelected = selectedVariants.has(variant.option_sku)
           const currentContent = variantCurrentContent[variant.option_sku] || { title: null, description: null }
           const candidateTitle = generateVariantTitle(baseTitle, variant.finish, platform)
-          const candidateDescription = generateVariantDescription(baseDescription, variant.finish)
+          const candidateDescription = generateVariantDescription(
+            baseDescription,
+            variant.finish,
+            finishSentences || undefined
+          )
 
           return (
             <Collapsible

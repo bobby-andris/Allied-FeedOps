@@ -226,6 +226,21 @@ async function getSkuData(urlSku: string) {
     }
   }
 
+  // Get finish sentences for Google and Bing (product+finish tailored content)
+  const { data: googleFinishSentences } = await supabase
+    .from('variant_finish_sentences')
+    .select('finish_sentences')
+    .eq('master_sku', sku)
+    .eq('platform', 'google')
+    .single()
+
+  const { data: bingFinishSentences } = await supabase
+    .from('variant_finish_sentences')
+    .select('finish_sentences')
+    .eq('master_sku', sku)
+    .eq('platform', 'bing')
+    .single()
+
   // Transform images to ensure approval_status has a valid value
   const transformedImages: ImageRecord[] = (images || []).map(img => ({
     ...img,
@@ -241,6 +256,10 @@ async function getSkuData(urlSku: string) {
     productImages,
     currentProduction,
     variantCurrentContent,
+    finishSentences: {
+      google: googleFinishSentences?.finish_sentences as Record<string, string> | null || null,
+      bing: bingFinishSentences?.finish_sentences as Record<string, string> | null || null,
+    },
   }
 }
 
@@ -250,7 +269,7 @@ export default async function SkuReviewPage({
   params: Promise<{ sku: string }>
 }) {
   const { sku } = await params
-  const { content, images, approval, variants, variantApprovals, productImages, currentProduction, variantCurrentContent } = await getSkuData(sku)
+  const { content, images, approval, variants, variantApprovals, productImages, currentProduction, variantCurrentContent, finishSentences } = await getSkuData(sku)
 
   if (content.length === 0) {
     notFound()
@@ -267,6 +286,7 @@ export default async function SkuReviewPage({
       productImages={productImages}
       currentProduction={currentProduction}
       variantCurrentContent={variantCurrentContent}
+      finishSentences={finishSentences}
     />
   )
 }

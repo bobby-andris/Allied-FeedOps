@@ -23,6 +23,49 @@ function getOpenAIClient(): OpenAI {
 // Model to use for generation (default aligns with Python backend)
 const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
 
+// All 28 Allied Brass finishes with their character for product+finish tailored sentences
+const FINISH_LIST = [
+  'Antique Brass',
+  'Antique Bronze',
+  'Antique Copper',
+  'Antique Pewter',
+  'Autumn Sparkle',
+  'Brushed Bronze',
+  'Fire Engine Red',
+  'Flat Troll Blue',
+  'Glokzin Teal',
+  'Golden Yellow',
+  'Lavender',
+  'Matte Black',
+  'Matte Gray',
+  'Matte White',
+  'Mediterranean Blue',
+  'Military Camo',
+  'Oil Rubbed Bronze',
+  'Pink',
+  'Polished Brass',
+  'Polished Chrome',
+  'Polished Nickel',
+  'Red White and Blue',
+  'Satin Brass',
+  'Satin Chrome',
+  'Satin Nickel',
+  'Sea Foam Green',
+  'Shaded Beige',
+  'Spanish Gold',
+  'Unlacquered Brass',
+  'Venetian Bronze',
+] as const
+
+// Finish reference for LLM prompt (grouped by character)
+const FINISH_REFERENCE = `FINISH REFERENCE (28 finishes with their character):
+Traditional Warm: Antique Brass (aged patina), Antique Bronze (deep brown), Antique Copper (burnished copper), Oil Rubbed Bronze (copper highlights), Polished Brass (mirror gold), Satin Brass (brushed gold), Spanish Gold (Old World gold), Unlacquered Brass (living patina), Venetian Bronze (golden highlights)
+Traditional Cool: Antique Pewter (silvery gray)
+Transitional: Brushed Bronze (warm matte), Polished Chrome (bright reflective), Polished Nickel (warm silver), Satin Chrome (brushed silver), Satin Nickel (warm brushed)
+Contemporary Neutral: Matte Black (smooth non-reflective), Matte Gray (soft neutral), Matte White (clean crisp)
+Statement Colors: Fire Engine Red (bold vibrant), Flat Troll Blue (matte playful), Glokzin Teal (coastal), Golden Yellow (sunny), Lavender (calming purple), Mediterranean Blue (deep sea), Pink (soft feminine), Sea Foam Green (coastal fresh)
+Statement Other: Autumn Sparkle (shimmer), Military Camo (pattern), Red White and Blue (patriotic), Shaded Beige (warm earth)`
+
 // Whether to use vision for descriptions (default: true)
 const USE_VISION = process.env.FEEDOPS_USE_VISION !== '0'
 
@@ -78,18 +121,15 @@ BEFORE YOU WRITE, THINK ABOUT WHO IS READING THIS:
 - Coordination: Match everything across 42+ collections
 
 PLATFORM CONTEXT:
-- Google/Bing (variant): One specific finish. This is the customer's FIRST impression. Make them want to click.
+- Google/Bing (variant): Base content + 28 finish-specific sentences. Make them want to click.
 - Shopify (master): All finishes on one page. Customer already clicked. Help them choose and buy.
 
-VARIANT TEMPLATE RULE (CRITICAL - READ CAREFULLY):
-You are generating a BASE TEMPLATE that will be used for ALL 28 finish variants.
-- DO NOT include any specific finish name (like "Antique Brass", "Matte Black", etc.) in the output
-- Instead, use these EXACT placeholders where finish should appear:
-  - {FINISH_NAME} - where the finish name goes (e.g., "Available in {FINISH_NAME}")
-  - {FINISH_DESCRIPTION} - where a finish description sentence goes (optional)
-- The system will replace these placeholders with the actual finish for each variant
-- Example CORRECT title: "Guest Towel Holder Stand, 11-Inch Countertop Solid Brass, {FINISH_NAME}, Allied Brass"
-- Example WRONG title: "Antique Brass Guest Towel Holder Stand, 11-Inch..." (has hardcoded finish!)
+CONTENT STRUCTURE:
+For Google/Bing descriptions, you will generate:
+1. A BASE DESCRIPTION - finish-agnostic, describes the product
+2. FINISH SENTENCES - 28 product-specific sentences, one per finish, describing how each finish relates to THIS product
+
+For titles and Shopify, generate simple content without specific finish names.
 
 CRITICAL RULES:
 - Never invent specifications not in the product data
@@ -98,7 +138,7 @@ CRITICAL RULES:
 - No ALL CAPS, no promotional language like "Premium", "Luxury", "Best"
 - Write for a human who's about to spend $80 and wants to feel good about it
 - When an image is provided, use it to verify product details but don't describe the image directly
-- NEVER include a specific finish name - always use {FINISH_NAME} placeholder`
+- Base content should NOT include specific finish names (finish is added at display time)`
 
 /**
  * Build enhanced prompt using evidence table
@@ -107,15 +147,15 @@ function buildEnhancedPrompt(
   contentType: 'title' | 'description',
   platform: string,
   evidenceMarkdown: string
-): string {
+): { prompt: string; requiresJson: boolean } {
   const platformContext: Record<string, Record<string, string>> = {
     google: {
-      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, {FINISH_NAME} placeholder, and "Allied Brass" at end. Example: "Guest Towel Holder Stand, 11-Inch Solid Brass, {FINISH_NAME}, Allied Brass"',
-      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Use {FINISH_NAME} placeholder where finish should appear, and optionally {FINISH_DESCRIPTION} for finish details. Include material quality and dimensions. Plain text only, 600-800 characters target.',
+      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end. Do NOT include specific finish names.',
+      description: 'Google Shopping description - write for a human scanning Shopping ads. Answer their questions about this product. Include material quality and dimensions. Plain text only, 600-800 characters target.',
     },
     bing: {
-      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Use {FINISH_NAME} placeholder and include "Allied Brass" at end.',
-      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Use {FINISH_NAME} placeholder where finish should appear. Include specific dimensions and materials. Plain text only, 700-1000 characters target.',
+      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end. Do NOT include specific finish names.',
+      description: 'Bing Shopping description - write for humans, include product synonyms naturally (e.g., towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text only, 700-1000 characters target.',
     },
     shopify: {
       title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying. Do NOT include finish name (Shopify shows all finishes).',
@@ -125,25 +165,82 @@ function buildEnhancedPrompt(
 
   const context = platformContext[platform]?.[contentType] || ''
 
-  return `Generate a ${contentType} TEMPLATE for this product that works for ALL 28 finish variants.
+  // For Google/Bing descriptions, request JSON with finish_sentences
+  const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
+
+  if (isVariantDescription) {
+    const finishSentencesInstructions = `
+FINISH SENTENCES (CRITICAL - YOU MUST INCLUDE THESE):
+In addition to the base description, generate 28 finish-specific sentences - one for each finish.
+Each sentence should describe how THAT FINISH relates to THIS SPECIFIC PRODUCT.
+
+Consider the relationship:
+- Product's collection style (from evidence: collection, design_style)
+- Finish's character (see finish reference below)
+- Complement vs contrast: Does this finish reinforce the product's style or add unexpected interest?
+- The story: Why would a shopper choose THIS finish for THIS product?
+
+${FINISH_REFERENCE}
+
+GOOD finish sentences (product-specific, mention the product):
+- Traditional collection + Antique Brass: "The warm, aged patina of Antique Brass brings vintage warmth to this classic design."
+- Traditional collection + Fire Engine Red: "Fire Engine Red transforms this traditional piece into an unexpected focal point."
+- Contemporary collection + Matte Black: "Matte Black emphasizes the clean, modern lines of this design."
+
+BAD finish sentences (generic, could apply to any product):
+- "Fire Engine Red makes a bold statement." (no product reference)
+- "Antique Brass features aged golden tones." (describes finish, not relationship)
+- "Available in Polished Chrome." (not a sentence about relationship)`
+
+    return {
+      prompt: `Generate content for this product. You MUST respond with valid JSON.
 
 CONTEXT: ${context}
 
 ${evidenceMarkdown}
 
-CRITICAL TEMPLATE RULES:
-- For Google/Bing: Use {FINISH_NAME} placeholder where the finish name should appear
-- For Google/Bing: Optionally use {FINISH_DESCRIPTION} where a finish description sentence should go
-- For Shopify: Do NOT include any finish name (the page shows all finishes)
-- NEVER include a specific finish name like "Antique Brass", "Matte Black", etc.
-- The system will replace placeholders with actual finish data for each variant
+${finishSentencesInstructions}
+
+Remember:
+- Write for a human who's about to spend $80 and wants to feel good about it
+- Every factual claim must be traceable to the evidence table above
+- The base description should NOT include any specific finish name
+- Each finish_sentence should relate the specific finish to THIS product
+
+Respond with this EXACT JSON structure (no markdown, no code blocks):
+{
+  "content": "The base description text here (no finish names)...",
+  "finish_sentences": {
+    "Antique Brass": "One sentence relating Antique Brass to this product...",
+    "Antique Bronze": "One sentence relating Antique Bronze to this product...",
+    ... (all 28 finishes)
+  }
+}`,
+      requiresJson: true,
+    }
+  }
+
+  // For titles and Shopify, use simple text response
+  return {
+    prompt: `Generate a ${contentType} for this product.
+
+CONTEXT: ${context}
+
+${evidenceMarkdown}
+
+CRITICAL RULES:
+- Do NOT include any specific finish name like "Antique Brass", "Matte Black", etc.
+- For titles, finish will be inserted automatically at display time
+- For Shopify descriptions, the page shows all finishes - do not mention a specific one
 
 Remember:
 - Write for a human who's about to spend $80 and wants to feel good about it
 - Every factual claim must be traceable to the evidence table above
 - Weave keywords naturally, don't list them
 
-Respond with ONLY the ${contentType} template text, no additional explanation or formatting.`
+Respond with ONLY the ${contentType} text, no additional explanation or formatting.`,
+    requiresJson: false,
+  }
 }
 
 /**
@@ -201,15 +298,15 @@ function buildSimplePrompt(
   contentType: 'title' | 'description',
   platform: string,
   productData: Record<string, unknown>
-): string {
+): { prompt: string; requiresJson: boolean } {
   const platformContext: Record<string, Record<string, string>> = {
     google: {
-      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, {FINISH_NAME} placeholder, and "Allied Brass" at end.',
-      description: 'Google Shopping description - write for a human scanning Shopping ads. Use {FINISH_NAME} placeholder where finish should appear. Plain text only.',
+      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end.',
+      description: 'Google Shopping description - write for a human scanning Shopping ads. Plain text only.',
     },
     bing: {
-      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Use {FINISH_NAME} placeholder and include "Allied Brass" at end.',
-      description: 'Bing Shopping description - write for humans, include product synonyms naturally. Use {FINISH_NAME} placeholder. Plain text only.',
+      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end.',
+      description: 'Bing Shopping description - write for humans, include product synonyms naturally. Plain text only.',
     },
     shopify: {
       title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying. Do NOT include finish name.',
@@ -219,7 +316,37 @@ function buildSimplePrompt(
 
   const context = platformContext[platform]?.[contentType] || ''
 
-  return `Generate a ${contentType} TEMPLATE for this product that works for ALL 28 finish variants.
+  // For Google/Bing descriptions, request JSON with finish_sentences
+  const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
+
+  if (isVariantDescription) {
+    return {
+      prompt: `Generate content for this product. You MUST respond with valid JSON.
+
+CONTEXT: ${context}
+
+PRODUCT DATA:
+${JSON.stringify(productData, null, 2)}
+
+${FINISH_REFERENCE}
+
+Generate a base description (no specific finish names) and 28 finish-specific sentences.
+Each finish sentence should relate the finish to THIS product.
+
+Respond with this EXACT JSON structure (no markdown, no code blocks):
+{
+  "content": "The base description text here (no finish names)...",
+  "finish_sentences": {
+    "Antique Brass": "One sentence relating Antique Brass to this product...",
+    ... (all 28 finishes)
+  }
+}`,
+      requiresJson: true,
+    }
+  }
+
+  return {
+    prompt: `Generate a ${contentType} for this product.
 
 CONTEXT: ${context}
 
@@ -227,12 +354,13 @@ PRODUCT DATA:
 ${JSON.stringify(productData, null, 2)}
 
 CRITICAL:
-- For Google/Bing: Use {FINISH_NAME} placeholder (NOT a specific finish like "Antique Brass")
-- For Shopify: Do NOT include any finish name
+- Do NOT include any specific finish name like "Antique Brass", "Matte Black", etc.
 
 Remember: Write for a human who's about to spend $80 and wants to feel good about it.
 
-Respond with ONLY the ${contentType} template text, no additional explanation or formatting.`
+Respond with ONLY the ${contentType} text, no additional explanation or formatting.`,
+    requiresJson: false,
+  }
 }
 
 /**
@@ -388,6 +516,7 @@ export async function POST(request: NextRequest) {
     let userPrompt = '' // Will be assigned below
     let imageUrl: string | null = null
     let useEnhancedPrompt = false
+    let requiresJson = false // True for Google/Bing descriptions (finish_sentences)
 
     // Check if product exists in catalog for enhanced evidence
     const catalogExists = await productExistsInCatalog(supabase, master_sku)
@@ -407,7 +536,9 @@ export async function POST(request: NextRequest) {
         useEnhancedPrompt = true
 
         if (mode === 'simple') {
-          userPrompt = buildEnhancedPrompt(content_type, platform, evidenceResult.markdown)
+          const result = buildEnhancedPrompt(content_type, platform, evidenceResult.markdown)
+          userPrompt = result.prompt
+          requiresJson = result.requiresJson
         } else {
           // Combine preset + custom feedback
           const feedbackText = feedback!.feedback_type
@@ -421,6 +552,8 @@ export async function POST(request: NextRequest) {
             feedback!.current_content,
             feedbackText
           )
+          // Feedback mode doesn't use JSON (simpler flow)
+          requiresJson = false
         }
 
         console.log(`Using enhanced prompt with evidence table for ${master_sku} (${platform}/${content_type})`)
@@ -442,7 +575,9 @@ export async function POST(request: NextRequest) {
       }
 
       if (mode === 'simple') {
-        userPrompt = buildSimplePrompt(content_type, platform, productData)
+        const result = buildSimplePrompt(content_type, platform, productData)
+        userPrompt = result.prompt
+        requiresJson = result.requiresJson
       } else {
         const feedbackText = feedback!.feedback_type
           ? `${FEEDBACK_PRESETS[feedback!.feedback_type]}. ${feedback!.user_feedback}`
@@ -455,6 +590,8 @@ export async function POST(request: NextRequest) {
           feedback!.current_content,
           feedbackText
         )
+        // Feedback mode doesn't use JSON
+        requiresJson = false
       }
     }
 
@@ -490,25 +627,63 @@ export async function POST(request: NextRequest) {
     }
 
     // ==================== CALL OPENAI ====================
+    // JSON mode needs more tokens for finish_sentences (28 entries)
+    const maxTokens = requiresJson ? 4000 : (content_type === 'title' ? 200 : 1000)
     const tokenParams = MODEL.startsWith('gpt-5')
-      ? ({ max_completion_tokens: content_type === 'title' ? 200 : 1000 } as const)
-      : ({ max_tokens: content_type === 'title' ? 200 : 1000 } as const)
+      ? ({ max_completion_tokens: maxTokens } as const)
+      : ({ max_tokens: maxTokens } as const)
 
     const completion = await getOpenAIClient().chat.completions.create({
       model: MODEL,
       messages,
       temperature: 0.7,
       stream: false,
+      ...(requiresJson ? { response_format: { type: 'json_object' as const } } : {}),
       ...tokenParams,
     })
 
-    const newContent = completion.choices[0]?.message?.content?.trim()
+    const rawResponse = completion.choices[0]?.message?.content?.trim()
 
-    if (!newContent) {
+    if (!rawResponse) {
       return NextResponse.json(
         { error: 'No content generated from OpenAI' },
         { status: 500 }
       )
+    }
+
+    // Parse response based on mode
+    let newContent: string
+    let finishSentences: Record<string, string> | null = null
+
+    if (requiresJson) {
+      try {
+        const parsed = JSON.parse(rawResponse)
+        newContent = parsed.content?.trim()
+        finishSentences = parsed.finish_sentences || null
+
+        if (!newContent) {
+          return NextResponse.json(
+            { error: 'Invalid JSON response: missing content field' },
+            { status: 500 }
+          )
+        }
+
+        // Validate finish_sentences has all 28 finishes
+        if (finishSentences) {
+          const missingFinishes = FINISH_LIST.filter(f => !finishSentences![f])
+          if (missingFinishes.length > 0) {
+            console.warn(`Missing finish sentences for: ${missingFinishes.join(', ')}`)
+          }
+        }
+
+        console.log(`Parsed JSON response with ${finishSentences ? Object.keys(finishSentences).length : 0} finish sentences`)
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', parseError)
+        // Fallback: use raw response as content (best effort)
+        newContent = rawResponse
+      }
+    } else {
+      newContent = rawResponse
     }
 
     // ==================== SAVE TO DATABASE ====================
@@ -608,6 +783,32 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Save finish_sentences to separate table (for Google/Bing descriptions only)
+    let finishSentencesSaved = false
+    if (finishSentences && Object.keys(finishSentences).length > 0 && (platform === 'google' || platform === 'bing')) {
+      // Upsert finish sentences (insert or update on conflict)
+      const { error: finishError } = await supabase
+        .from('variant_finish_sentences')
+        .upsert(
+          {
+            master_sku,
+            platform,
+            finish_sentences: finishSentences,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'master_sku,platform' }
+        )
+
+      if (finishError) {
+        logSupabaseError('Failed to save finish sentences', finishError)
+        // Non-fatal: log but continue (content was saved successfully)
+        console.warn('Finish sentences not saved, but content was saved successfully')
+      } else {
+        finishSentencesSaved = true
+        console.log(`Saved ${Object.keys(finishSentences).length} finish sentences for ${master_sku}/${platform}`)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       content: newContent,
@@ -617,6 +818,8 @@ export async function POST(request: NextRequest) {
       generated_content_id: savedContentId,
       used_evidence: useEnhancedPrompt,
       used_vision: shouldUseVision,
+      finish_sentences_count: finishSentences ? Object.keys(finishSentences).length : 0,
+      finish_sentences_saved: finishSentencesSaved,
     })
   } catch (error) {
     console.error('Regeneration error:', error)

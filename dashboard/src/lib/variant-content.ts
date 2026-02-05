@@ -2,14 +2,18 @@
  * Variant Content Generation Utilities
  *
  * Functions to generate variant-specific titles and descriptions
- * by applying finish-specific data to base templates.
+ * by combining base templates with finish-specific content.
  *
- * IMPORTANT: Base templates should either:
- * 1. Use {FINISH_NAME} and {FINISH_DESCRIPTION} placeholders (preferred)
- * 2. Be finish-agnostic (no finish mentioned)
+ * NEW APPROACH (preferred):
+ * - Base description is finish-agnostic
+ * - Product-specific finish sentences are stored in variant_finish_sentences table
+ * - Sentences describe the relationship between THIS product and each finish
+ * - E.g., "The warm patina of Antique Brass complements this traditional Carolina design."
  *
- * If a base template contains a hardcoded finish name, these functions
- * will detect and replace it with the target finish.
+ * LEGACY FALLBACK (for content without finish sentences):
+ * - Uses {FINISH_NAME} and {FINISH_DESCRIPTION} placeholders
+ * - Or detects and replaces hardcoded finish names
+ * - Falls back to generic finish descriptions from finish-data.ts
  */
 
 import {
@@ -73,20 +77,29 @@ export function generateVariantTitle(
 /**
  * Generate a variant-specific description from a base template.
  *
- * Handles three cases:
- * 1. Template has placeholders → replace them with finish data
- * 2. Template has a different finish name/description → replace them
- * 3. Template has no finish → insert finish naturally
+ * Priority order:
+ * 1. If finishSentences provided → use product-specific finish sentence
+ * 2. If template has placeholders → replace them with finish data
+ * 3. If template has a different finish name → replace it
+ * 4. If template has no finish → insert finish naturally
  *
  * @param baseDescription - The master SKU description template
  * @param finishName - The target finish name (e.g., "Fire Engine Red")
+ * @param finishSentences - Optional product-specific finish sentences (from variant_finish_sentences table)
  * @returns Variant-specific description with correct finish
  */
 export function generateVariantDescription(
   baseDescription: string | null,
-  finishName: string
+  finishName: string,
+  finishSentences?: Record<string, string>
 ): string {
+  // Handle missing base description
   if (!baseDescription) {
+    // Use finish sentence if available
+    if (finishSentences?.[finishName]) {
+      return finishSentences[finishName]
+    }
+    // Fallback to generic finish data
     const finishData = getFinishData(finishName)
     if (finishData) {
       return `Available in ${finishName}, which ${finishData.description}.`
@@ -94,6 +107,37 @@ export function generateVariantDescription(
     return `Available in ${finishName} finish.`
   }
 
+  let result = baseDescription.trim()
+
+  // Priority 1: Use product-specific finish sentence if available
+  if (finishSentences?.[finishName]) {
+    const finishSentence = finishSentences[finishName]
+
+    // Insert finish sentence after first sentence
+    // "This towel bar features solid brass. [FINISH SENTENCE]. Backed by..."
+    const firstPeriodMatch = result.search(/(?<!\d)\.(?!\d)/)
+    if (firstPeriodMatch > 0) {
+      const before = result.slice(0, firstPeriodMatch + 1)
+      const after = result.slice(firstPeriodMatch + 1)
+      // Add space before finish sentence, and ensure proper spacing after
+      return `${before} ${finishSentence}${after.startsWith(' ') ? after : ' ' + after}`.trim()
+    }
+    // No period found - append finish sentence
+    return `${result} ${finishSentence}`.trim()
+  }
+
+  // Fallback to generic logic for legacy content
+  return generateVariantDescriptionGeneric(baseDescription, finishName)
+}
+
+/**
+ * Generic variant description generation (fallback when no finish sentences available).
+ * Handles placeholders and hardcoded finish replacement.
+ */
+function generateVariantDescriptionGeneric(
+  baseDescription: string,
+  finishName: string
+): string {
   let result = baseDescription.trim()
   const finishData = getFinishData(finishName)
 
