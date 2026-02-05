@@ -431,18 +431,19 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
+        # Use shopping_performance_view with segments.search_term for Shopping-specific search terms
+        # This resource properly supports product_item_id unlike search_term_view
         query = f"""
             SELECT
-                search_term_view.search_term,
+                segments.search_term,
+                segments.product_item_id,
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
                 metrics.conversions_value,
-                metrics.cost_micros,
-                segments.product_item_id
-            FROM search_term_view
+                metrics.cost_micros
+            FROM shopping_performance_view
             WHERE segments.date DURING LAST_{days}_DAYS
-                AND campaign.advertising_channel_type = 'SHOPPING'
             ORDER BY metrics.impressions DESC
             LIMIT {limit}
         """
@@ -457,11 +458,12 @@ class SearchTermsClient:
                 for row in batch.results:
                     row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
 
-                    gmc_offer_id = row_dict.get("segments", {}).get("product_item_id")
+                    segments = row_dict.get("segments", {}) or {}
+                    gmc_offer_id = segments.get("product_item_id")
                     variant_info = self.get_variant_info(gmc_offer_id) if gmc_offer_id else {}
 
                     metrics = row_dict.get("metrics", {}) or {}
-                    search_term = row_dict.get("search_term_view", {}).get("search_term")
+                    search_term = segments.get("search_term")
 
                     if not search_term:
                         continue
@@ -509,20 +511,19 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
-        # Match any variant of this product
+        # Match any variant of this product using shopping_performance_view
         offer_pattern = f"shopify_us_{shopify_product_id}_%"
 
         query = f"""
             SELECT
-                search_term_view.search_term,
+                segments.search_term,
+                segments.product_item_id,
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
-                metrics.conversions_value,
-                segments.product_item_id
-            FROM search_term_view
+                metrics.conversions_value
+            FROM shopping_performance_view
             WHERE segments.date DURING LAST_{days}_DAYS
-                AND campaign.advertising_channel_type = 'SHOPPING'
                 AND segments.product_item_id LIKE '{offer_pattern}'
             ORDER BY metrics.impressions DESC
             LIMIT 500
@@ -540,11 +541,12 @@ class SearchTermsClient:
                 for row in batch.results:
                     row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
 
-                    search_term = row_dict.get("search_term_view", {}).get("search_term")
+                    segments = row_dict.get("segments", {}) or {}
+                    search_term = segments.get("search_term")
                     if not search_term:
                         continue
 
-                    gmc_offer_id = row_dict.get("segments", {}).get("product_item_id")
+                    gmc_offer_id = segments.get("product_item_id")
                     variant_info = self.get_variant_info(gmc_offer_id)
                     finish_code = variant_info.get("finish_code") or "UNKNOWN"
 
