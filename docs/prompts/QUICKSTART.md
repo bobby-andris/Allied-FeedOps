@@ -255,6 +255,11 @@ Do NOT commit changes until the full implementation is verified with passing tes
 
 **When to run:** After content quality prompts - sets up infrastructure for batch generation
 
+**Prerequisites:**
+- GCP project with billing enabled
+- `gcloud` CLI installed
+- Docker installed
+
 **Copy and paste into a new Claude Code chat:**
 
 ```
@@ -265,18 +270,35 @@ Key context:
 - Python pipeline: /src/feedops/
 - Dashboard: /dashboard (needs to call Cloud Run)
 - Supabase project: qezuszwufortkiutlhym
+- Existing migration: supabase/migrations/006_batch_generation_jobs.sql (already applied)
+
+CRITICAL - Use Context7 MCP for Documentation:
+Before writing any FastAPI or GCP code, use the Context7 MCP server to fetch current documentation:
+- mcp__plugin_context7_context7__resolve-library-id("fastapi")
+- mcp__plugin_context7_context7__resolve-library-id("google-cloud-run")
+- mcp__plugin_context7_context7__query-docs(library_id, "async endpoints")
+- mcp__plugin_context7_context7__query-docs(library_id, "deployment")
 
 Goals:
 1. Install and configure gcloud-mcp and cloud-run-mcp servers in Claude Code
-2. Create Dockerfile for Python pipeline
-3. Create FastAPI entry point (src/feedops/api/main.py)
-4. Apply database migrations for generation_jobs tables
-5. Document deployment commands (don't actually deploy without my approval)
+2. Create Dockerfile for Python pipeline (include data/ directory for catalog)
+3. Create FastAPI entry point (src/feedops/api/main.py) with proper Pydantic v2 models
+4. Create TypeScript client (dashboard/src/lib/pipeline-client.ts)
+5. Test container locally with Docker before Cloud Run deployment
+6. Document deployment commands (don't actually deploy without my approval)
+
+Endpoints to expose:
+- GET / - API info
+- GET /health - Health check with catalog + Supabase status
+- POST /optimize-sku - Single SKU optimization
+- POST /regenerate - Content regeneration with feedback
+- POST /batch-optimize - Batch job creation
+- GET /batch-status/{job_id} - Batch job progress
 
 Important:
-- Do NOT store secrets in code - use environment variables or Secret Manager
-- The FastAPI server should expose /health, /optimize-sku, /regenerate, /batch-optimize
-- Test container locally with Docker before documenting Cloud Run deployment
+- Do NOT store secrets in code - use Secret Manager
+- Use existing batch_generation_jobs table (migration 006)
+- Match Python function signatures exactly (optimize_parent_sku needs catalog_path)
 
 **REQUIRED WORKFLOW (superpowers skills):**
 
