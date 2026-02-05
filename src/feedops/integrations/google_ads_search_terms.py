@@ -431,19 +431,20 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
-        # Use shopping_performance_view with segments.search_term for Shopping-specific search terms
-        # This resource properly supports product_item_id unlike search_term_view
+        # Use search_term_view for Shopping campaign search terms
+        # Note: This resource doesn't support product_item_id segmentation,
+        # so we get campaign-level search terms and match to products via post-processing
         query = f"""
             SELECT
-                segments.search_term,
-                segments.product_item_id,
+                search_term_view.search_term,
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
                 metrics.conversions_value,
                 metrics.cost_micros
-            FROM shopping_performance_view
+            FROM search_term_view
             WHERE segments.date DURING LAST_{days}_DAYS
+                AND campaign.advertising_channel_type = 'SHOPPING'
             ORDER BY metrics.impressions DESC
             LIMIT {limit}
         """
@@ -458,12 +459,12 @@ class SearchTermsClient:
                 for row in batch.results:
                     row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
 
-                    segments = row_dict.get("segments", {}) or {}
-                    gmc_offer_id = segments.get("product_item_id")
-                    variant_info = self.get_variant_info(gmc_offer_id) if gmc_offer_id else {}
+                    # No product_item_id available from search_term_view
+                    gmc_offer_id = None
+                    variant_info = {}
 
                     metrics = row_dict.get("metrics", {}) or {}
-                    search_term = segments.get("search_term")
+                    search_term = row_dict.get("search_term_view", {}).get("search_term")
 
                     if not search_term:
                         continue
@@ -511,20 +512,28 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
-        # Match any variant of this product using shopping_performance_view
+        # Note: Google Ads API doesn't support both search_term and product_item_id
+        # in the same query. This function is now deprecated and returns empty results.
+        # Use fetch_search_terms() for search term data at the campaign level.
+        logger.warning(
+            f"get_terms_for_master_sku is deprecated due to API limitations. "
+            f"Use fetch_search_terms() and match via variant_index table."
+        )
+        return {"aggregate": [], "by_variant": {}}
+
+        # Legacy code below kept for reference but won't execute
         offer_pattern = f"shopify_us_{shopify_product_id}_%"
 
         query = f"""
             SELECT
-                segments.search_term,
-                segments.product_item_id,
+                search_term_view.search_term,
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
                 metrics.conversions_value
-            FROM shopping_performance_view
+            FROM search_term_view
             WHERE segments.date DURING LAST_{days}_DAYS
-                AND segments.product_item_id LIKE '{offer_pattern}'
+                AND campaign.advertising_channel_type = 'SHOPPING'
             ORDER BY metrics.impressions DESC
             LIMIT 500
         """
@@ -541,12 +550,11 @@ class SearchTermsClient:
                 for row in batch.results:
                     row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
 
-                    segments = row_dict.get("segments", {}) or {}
-                    search_term = segments.get("search_term")
+                    search_term = row_dict.get("search_term_view", {}).get("search_term")
                     if not search_term:
                         continue
 
-                    gmc_offer_id = segments.get("product_item_id")
+                    gmc_offer_id = None  # Not available from search_term_view
                     variant_info = self.get_variant_info(gmc_offer_id)
                     finish_code = variant_info.get("finish_code") or "UNKNOWN"
 
