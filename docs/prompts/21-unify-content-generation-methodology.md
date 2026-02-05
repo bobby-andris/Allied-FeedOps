@@ -15,75 +15,90 @@ We have TWO systems generating product content with DIFFERENT methodologies:
 
 **Risk**: If methodologies diverge, batch-generated content (Python) will differ from dashboard-regenerated content (TypeScript), causing inconsistency and confusion.
 
-## Phase 1: Document Current TypeScript Methodology
+## Phase 1: Review TypeScript Methodology Documentation
 
-### 1.1 Read and Document TypeScript Implementation
+### 1.1 TypeScript Methodology Document
 
-Files to analyze:
-```
-dashboard/src/app/api/regenerate/route.ts      # Main regeneration logic
-dashboard/src/lib/evidence.ts                   # Evidence table builder
-dashboard/src/lib/variant-content.ts            # Variant content expansion
-dashboard/src/lib/supabase/queries.ts           # Data queries including finish_sentences
-```
+**IMPORTANT**: A comprehensive TypeScript methodology document already exists:
 
-Document for each file:
-- What data is fetched/used
-- How prompts are constructed
-- What the output format is
-- How finish/variant handling works
+📄 **`docs/typescript-content-generation-methodology.md`**
 
-### 1.2 Document TypeScript Prompt Structure
+This document covers:
+- Core philosophy (context over rules)
+- Two-stage architecture (LLM generation + display-time composition)
+- Full regeneration API flow with code examples
+- System prompt and platform-specific prompts
+- Vision support implementation
+- Finish sentences JSON structure
+- Display-time variant content composition
+- Database schema (generated_content, variant_finish_sentences, regeneration_history)
+- 30 finish definitions and categories
+- Example outputs
 
-Extract and document:
-1. **SYSTEM_PROMPT** - The full system prompt text
-2. **User prompt construction** - How the dynamic prompt is built
-3. **Evidence table format** - What product data is included
-4. **Finish sentences** - How variant-specific content is generated
-5. **Platform context** - Google/Bing/Shopify differences
+### 1.2 Key TypeScript Innovations to Understand
 
-### 1.3 Document Recent Enhancements
+Before proceeding, ensure you understand these TypeScript innovations:
 
-From the user's recent changes:
-- `variant_finish_sentences` table schema
-- How finish sentences are stored and retrieved
-- How variant content is expanded from master template
+1. **Finish Sentences Table** - Stores 28 product+finish tailored sentences per SKU/platform
+2. **Display-Time Composition** - Base content + finish sentence inserted after first sentence
+3. **JSON Mode for Descriptions** - Google/Bing descriptions return `{ content, finish_sentences }`
+4. **Context-Driven Prompts** - WHO/WHY/WHAT questions instead of rigid rules
 
-## Phase 2: Document Current Python Methodology
+### 1.3 Read the Document
 
-### 2.1 Read and Document Python Implementation
-
-Files to analyze:
-```
-src/feedops/pipeline/prompts.py                 # SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
-src/feedops/pipeline/generator.py               # Candidate generation logic
-src/feedops/pipeline/prompt_builder.py          # Evidence table construction
-src/feedops/pipeline/optimize.py                # Full optimization pipeline
-src/feedops/db/evidence_tables.py               # Product data assembly (if exists)
+```bash
+# Read the full TypeScript methodology
+cat docs/typescript-content-generation-methodology.md
 ```
 
-Document for each file:
-- What data is fetched/used
-- How prompts are constructed
-- What the output format is (JSON schema)
-- How finish/variant handling works
+Take notes on:
+- What you like about this approach
+- What seems missing compared to Python
+- Potential issues or improvements
 
-### 2.2 Document Python Prompt Structure
+## Phase 2: Review Python Methodology Documentation
 
-Extract and document:
-1. **SYSTEM_PROMPT** - The full system prompt text (~302 lines)
-2. **CANDIDATE_SCHEMA** - JSON schema for structured output
-3. **USER_PROMPT_TEMPLATE** - Dynamic prompt template
-4. **FINISH_CONTEXT_TEMPLATE** - Variant-specific generation
-5. **_CATEGORY_GUIDANCE** - Category-specific hints
-6. **build_category_guidance()** - How category hints are selected
+### 2.1 Python Methodology Document
 
-### 2.3 Document Python Scoring System
+**IMPORTANT**: A comprehensive Python methodology document already exists:
 
-The Python implementation includes self-scoring:
-- 6 scoring dimensions (specificity, benefit_coverage, etc.)
-- Scoring checklist for each dimension
-- Claims tracing (source_field, source_value)
+📄 **`docs/python-content-generation-methodology.md`**
+
+This document covers:
+- Architecture overview (prompts.py, generator.py, evidence.py, optimize.py)
+- Full SYSTEM_PROMPT (~302 lines) with P0/P1/P2 priority rules
+- CANDIDATE_SCHEMA JSON structure
+- Evidence table building
+- Keyword placement plan
+- Category-specific guidance
+- Finish injection (FINISH_CONTEXT_TEMPLATE)
+- Self-scoring rubric (6 dimensions)
+- Claims tracing
+- Output processing and validation
+- File-based patch generation
+
+### 2.2 Key Python Strengths to Understand
+
+Before proceeding, ensure you understand these Python strengths:
+
+1. **Comprehensive Rules** - P0 (must follow), P1 (scored), P2 (nice to have)
+2. **Good/Bad Examples** - 4 good examples, 5+ anti-patterns with explanations
+3. **Self-Scoring** - LLM rates itself on 6 dimensions with checklists
+4. **Claims Tracing** - Every factual claim maps to source_field + source_value
+5. **Category Guidance** - Different prompts for towel storage, safety/ADA, niche/functional
+6. **Structured JSON Output** - All platforms generated in one call
+
+### 2.3 Read the Document
+
+```bash
+# Read the full Python methodology
+cat docs/python-content-generation-methodology.md
+```
+
+Take notes on:
+- What you like about this approach
+- What seems overly complex or rigid
+- Features that should be ported to TypeScript
 
 ## Phase 3: Side-by-Side Comparison
 
