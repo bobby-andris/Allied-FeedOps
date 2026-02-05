@@ -16,7 +16,8 @@
 
 ### Google Ads API Capabilities
 
-- **Search Terms**: `search_term_view` - actual queries triggering ads
+- **Search Terms**: `search_term_view` - actual queries triggering Shopping ads
+  - Note: Cannot get `product_item_id` in same query - product matching done via post-processing
 - **Keyword Planner**: `KeywordPlanIdeaService` - search volume, competition, CPC estimates
   - `GenerateKeywordHistoricalMetrics` - get avg monthly searches, competition index (0-100), CPC ranges
   - `GenerateKeywordIdeas` - discover related keywords from seeds (keywords, URLs, sites)
@@ -149,6 +150,11 @@ GMC offer IDs:
 - `feedops-openai-api-key`
 - `feedops-supabase-url`
 - `feedops-supabase-key`
+- `feedops-google-ads-developer-token`
+- `feedops-google-ads-client-id`
+- `feedops-google-ads-client-secret`
+- `feedops-google-ads-refresh-token`
+- `feedops-google-ads-login-customer-id`
 
 **Service Accounts:**
 - Build: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
