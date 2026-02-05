@@ -211,17 +211,28 @@ function getContentByPlatform(content: ContentRecord[], platform: string) {
 }
 
 /**
- * Preview content by substituting {FINISH_NAME} with a sample finish.
+ * Preview content by substituting placeholders with sample values.
+ * - {FINISH_NAME} → "Polished Chrome"
+ * - {FINISH_SENTENCE} → sample finish sentence
  * Returns both the preview text and whether the content is a template.
  */
 function previewWithSampleFinish(content: string | null): { preview: string | null; isTemplate: boolean } {
   if (!content) return { preview: null, isTemplate: false }
-  const isTemplate = content.includes('{FINISH_NAME}')
+
+  const hasFinishName = content.includes('{FINISH_NAME}')
+  const hasFinishSentence = content.includes('{FINISH_SENTENCE}')
+  const isTemplate = hasFinishName || hasFinishSentence
+
   if (isTemplate) {
-    return {
-      preview: content.replace(/\{FINISH_NAME\}/g, 'Polished Chrome'),
-      isTemplate: true
+    let preview = content
+    if (hasFinishName) {
+      preview = preview.replace(/\{FINISH_NAME\}/g, 'Polished Chrome')
     }
+    if (hasFinishSentence) {
+      // Use a sample sentence that describes how a finish relates to the product
+      preview = preview.replace(/\{FINISH_SENTENCE\}/g, 'Polished Chrome offers timeless versatility with a bright, reflective surface that matches most fixtures.')
+    }
+    return { preview, isTemplate: true }
   }
   return { preview: content, isTemplate: false }
 }
