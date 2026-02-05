@@ -85,7 +85,7 @@ export function VariantSelector({
         onValueChange={(value) => onSelect(value === 'all' ? null : value)}
         className="w-full"
       >
-        <TabsList className="flex flex-wrap h-auto gap-1 p-1 bg-muted/50">
+        <TabsList className="flex overflow-x-auto gap-1 p-1 bg-muted/50 max-w-full scrollbar-thin">
           <TabsTrigger 
             value="all" 
             className="flex items-center gap-1.5 data-[state=active]:bg-background"
