@@ -52,9 +52,18 @@ Goals:
 3. Verify all prompts 01-08 are correctly implemented
 4. Ensure build passes and no TypeScript errors
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -89,9 +98,18 @@ The analyzer should score:
 - Brand Voice (confident, premium-appropriate)
 - Factual Accuracy (claims traceable to product data)
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -126,9 +144,18 @@ Use the Apify MCP tools to:
 - Configure and run scrapers for bathroom fixtures
 - Store results in competitor_listings table
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -163,9 +190,18 @@ WHERE segments.date DURING LAST_30_DAYS AND campaign.advertising_channel_type = 
 
 Note: metrics.conversions_value gives revenue from conversions. segments.product_item_id gives the GMC offer ID for variant-level tracking.
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -198,9 +234,18 @@ The scoring algorithm should:
 - Prioritize optimization by opportunity size
 - Provide specific keywords to add per SKU
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -232,9 +277,18 @@ Important:
 - The FastAPI server should expose /health, /optimize-sku, /regenerate, /batch-optimize
 - Test container locally with Docker before documenting Cloud Run deployment
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -269,9 +323,18 @@ This enables AI agents (ChatGPT, Gemini, Copilot, Perplexity) to:
 - Read detailed product information
 - Complete purchases on behalf of users
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -305,9 +368,18 @@ The dashboard should:
 - Calculate lift percentage with statistical significance
 - Show overall program ROI estimation
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -342,9 +414,18 @@ The generator should:
 - Upload to GCS with CDN URLs
 - Push to Shopify variant media via GraphQL
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -377,7 +458,16 @@ Generate a summary report of all findings with:
 - Warnings (should fix)
 - Recommendations (nice to have)
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done. Use the systematic-debugging skill if issues are found.
+**REQUIRED WORKFLOW (superpowers skills):**
+
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any issues found: `/superpowers:systematic-debugging` - investigate before proposing fixes
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
 
 Do NOT commit changes until I've reviewed the findings.
 ```
@@ -431,9 +521,18 @@ Goals:
    - Collection name, material, style, mounting type
 6. Add variant-specific finish context for Google/Bing
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
@@ -475,9 +574,18 @@ Goals:
 5. Update SkuReviewClient to include new components
 6. Add database schema for image approval tracking
 
-Use the brainstorming skill before implementation decisions. Use parallel subagents where appropriate. Create a task list to track progress. Use the verification-before-completion skill before claiming any task is done.
+**REQUIRED WORKFLOW (superpowers skills):**
 
-Do NOT commit changes until the full implementation is complete and verified.
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
 ```
 
 ---
