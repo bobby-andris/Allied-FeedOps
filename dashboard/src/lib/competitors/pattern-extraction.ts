@@ -278,13 +278,24 @@ export function normalizeApifyData(
 ): ListingData[] {
   switch (source) {
     case 'google':
-      return rawData.map((item, index) => ({
-        title: String(item.title || ''),
-        description: item.description ? String(item.description) : null,
-        source: 'google',
-        position: typeof item.position === 'number' ? item.position : index + 1,
-        domain: item.url ? extractDomain(String(item.url)) : null,
-      }))
+      // Google SERP scraper returns search pages, each with an organicResults array
+      // Flatten all organic results from all search pages
+      const allOrganicResults: ListingData[] = []
+      for (const page of rawData) {
+        const organicResults = page.organicResults as Array<Record<string, unknown>> | undefined
+        if (organicResults && Array.isArray(organicResults)) {
+          for (const result of organicResults) {
+            allOrganicResults.push({
+              title: String(result.title || ''),
+              description: result.description ? String(result.description) : null,
+              source: 'google',
+              position: typeof result.position === 'number' ? result.position : allOrganicResults.length + 1,
+              domain: result.url ? extractDomain(String(result.url)) : null,
+            })
+          }
+        }
+      }
+      return allOrganicResults
 
     case 'amazon':
       return rawData.map((item, index) => ({

@@ -230,12 +230,25 @@ async function ingestResults(
   // Normalize the raw Apify data
   const normalizedListings = normalizeApifyData(job.source, listings)
 
+  // For Google SERP, we need to flatten the raw organic results to match normalized data
+  let flattenedRawListings: Record<string, unknown>[] = listings
+  if (job.source === 'google') {
+    flattenedRawListings = []
+    for (const page of listings) {
+      const organicResults = page.organicResults as Array<Record<string, unknown>> | undefined
+      if (organicResults && Array.isArray(organicResults)) {
+        flattenedRawListings.push(...organicResults)
+      }
+    }
+  }
+
   // Prepare listings for insert/upsert
   const listingsToInsert = normalizedListings.map((listing, index) => {
+    const rawListing = flattenedRawListings[index]
     // For SERP results, extract domain from URL in raw data
     let domain = listing.domain
-    if (job.job_type === 'serp' && listings[index]) {
-      const rawUrl = listings[index].url || listings[index].link
+    if (job.job_type === 'serp' && rawListing) {
+      const rawUrl = rawListing.url || rawListing.link
       if (rawUrl && typeof rawUrl === 'string') {
         domain = extractDomain(rawUrl)
       }
@@ -244,17 +257,17 @@ async function ingestResults(
     return {
       source: job.source,
       source_type: job.job_type,
-      source_url: (listings[index]?.url || listings[index]?.link || null) as string | null,
+      source_url: (rawListing?.url || rawListing?.link || null) as string | null,
       domain,
       product_category: job.category,
       title: listing.title,
       description: listing.description,
-      price: parsePrice(listings[index]?.price),
-      rating: parseFloat(String(listings[index]?.rating || '0')) || null,
-      review_count: parseInt(String(listings[index]?.reviewsCount || listings[index]?.reviewCount || listings[index]?.reviews || '0'), 10) || null,
+      price: parsePrice(rawListing?.price),
+      rating: parseFloat(String(rawListing?.rating || '0')) || null,
+      review_count: parseInt(String(rawListing?.reviewsCount || rawListing?.reviewCount || rawListing?.reviews || '0'), 10) || null,
       brand: listing.brand || extractBrandFromTitle(listing.title),
       position: listing.position,
-      image_url: (listings[index]?.image || listings[index]?.imageUrl || listings[index]?.thumbnail || null) as string | null,
+      image_url: (rawListing?.image || rawListing?.imageUrl || rawListing?.thumbnail || null) as string | null,
       scrape_job_id: job.id,
       keywords_extracted: extractKeywordsFromText(listing.title + ' ' + (listing.description || '')),
     }
