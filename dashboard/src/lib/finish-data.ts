@@ -305,4 +305,5 @@ export function replaceFinishName(text: string, newFinishName: string): string {
 export const PLACEHOLDERS = {
   FINISH_NAME: '{FINISH_NAME}',
   FINISH_DESCRIPTION: '{FINISH_DESCRIPTION}',
+  FINISH_SENTENCE: '{FINISH_SENTENCE}',
 } as const

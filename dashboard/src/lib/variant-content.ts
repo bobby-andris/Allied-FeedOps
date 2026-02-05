@@ -78,8 +78,8 @@ export function generateVariantTitle(
  * Generate a variant-specific description from a base template.
  *
  * Priority order:
- * 1. If finishSentences provided → use product-specific finish sentence
- * 2. If template has placeholders → replace them with finish data
+ * 1. If template has {FINISH_SENTENCE} placeholder → replace with product-specific sentence
+ * 2. If template has {FINISH_NAME}/{FINISH_DESCRIPTION} placeholders → replace them
  * 3. If template has a different finish name → replace it
  * 4. If template has no finish → insert finish naturally
  *
@@ -107,9 +107,47 @@ export function generateVariantDescription(
     return `Available in ${finishName} finish.`
   }
 
-  const result = baseDescription.trim()
+  let result = baseDescription.trim()
 
-  // Priority 1: Use product-specific finish sentence if available
+  // Priority 1: Replace {FINISH_SENTENCE} placeholder if present
+  if (result.includes(PLACEHOLDERS.FINISH_SENTENCE)) {
+    const finishSentence = finishSentences?.[finishName]
+    if (finishSentence) {
+      // Replace placeholder with product-specific finish sentence
+      result = result.replace(new RegExp(escapeRegex(PLACEHOLDERS.FINISH_SENTENCE), 'g'), finishSentence)
+    } else {
+      // Fallback: use generic finish description if no specific sentence available
+      const finishData = getFinishData(finishName)
+      const fallbackSentence = finishData
+        ? `${finishName} ${finishData.description}.`
+        : `Available in ${finishName} finish.`
+      result = result.replace(new RegExp(escapeRegex(PLACEHOLDERS.FINISH_SENTENCE), 'g'), fallbackSentence)
+    }
+  }
+
+  // Also replace {FINISH_NAME} if present
+  if (result.includes(PLACEHOLDERS.FINISH_NAME)) {
+    result = result.replace(new RegExp(escapeRegex(PLACEHOLDERS.FINISH_NAME), 'g'), finishName)
+  }
+
+  // Also replace {FINISH_DESCRIPTION} if present
+  if (result.includes(PLACEHOLDERS.FINISH_DESCRIPTION)) {
+    const finishData = getFinishData(finishName)
+    if (finishData) {
+      const finishDescSentence = `${finishName} ${finishData.description}`
+      result = result.replace(new RegExp(escapeRegex(PLACEHOLDERS.FINISH_DESCRIPTION), 'g'), finishDescSentence)
+    } else {
+      // Remove placeholder if no finish data
+      result = result.replace(new RegExp(escapeRegex(PLACEHOLDERS.FINISH_DESCRIPTION) + '\\.?\\s*', 'g'), '')
+    }
+  }
+
+  // If any placeholders were replaced, return the result
+  if (result !== baseDescription.trim()) {
+    return result.trim()
+  }
+
+  // Priority 2: If we have finish sentences but no placeholders, insert after first sentence
   if (finishSentences?.[finishName]) {
     const finishSentence = finishSentences[finishName]
 
