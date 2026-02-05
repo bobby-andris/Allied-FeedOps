@@ -110,14 +110,15 @@ GMC offer IDs:
 - Supabase query layer: `dashboard/src/lib/supabase/{queries.ts,types.ts}`
 - Publishing libs: `dashboard/src/lib/publishing/*`
 - Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (stores prompt history; model default aligns to `gpt-5.2`)
-- Evidence table builder: `dashboard/src/lib/evidence/*` (builds rich product context for LLM prompts)
+- Evidence table builder: `dashboard/src/lib/evidence/*` (builds rich product context for LLM prompts, includes search query insights)
+- Search query evidence: `src/feedops/integrations/search_query_insights.py` (Python) and `dashboard/src/lib/evidence/search-queries.ts` (TypeScript)
 - SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection algorithm)
 - SKU selection API: `dashboard/src/app/api/sku-selection/route.ts` (scored recommendations)
 - Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
 - Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
 - Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
 - Pattern extraction: `dashboard/src/lib/competitors/pattern-extraction.ts`
-- Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard)
+- Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard, SearchInsightsSummary)
 - Image approval API: `dashboard/src/app/api/review/images/approve/route.ts`
 - Image selection API: `dashboard/src/app/api/review/images/select/route.ts`
 - Variant approvals API: `dashboard/src/app/api/variants/approvals/route.ts`, `/bulk/route.ts`
