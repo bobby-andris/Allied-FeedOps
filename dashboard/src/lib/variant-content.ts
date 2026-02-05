@@ -45,7 +45,7 @@ export function generateVariantTitle(
     return finishName
   }
 
-  let result = baseTitle.trim()
+  const result = baseTitle.trim()
 
   // Case 1: Replace placeholder if present
   if (result.includes(PLACEHOLDERS.FINISH_NAME)) {
@@ -107,7 +107,7 @@ export function generateVariantDescription(
     return `Available in ${finishName} finish.`
   }
 
-  let result = baseDescription.trim()
+  const result = baseDescription.trim()
 
   // Priority 1: Use product-specific finish sentence if available
   if (finishSentences?.[finishName]) {

@@ -74,3 +74,4 @@ test_output/
 
 # Git bundle files (backup artifacts, not stored in repo)
 *.bundle
+.mcp.json

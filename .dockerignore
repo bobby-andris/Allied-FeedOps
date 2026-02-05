@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+
+# Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+.eggs
+*.egg
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+# Environment files (secrets)
+.env
+.env.*
+.env.local
+
+# Node/Dashboard (separate deployment)
+node_modules
+dashboard/
+.next
+
+# Tests and docs (not needed in production)
+tests/
+docs/
+*.md
+!README.md
+
+# Data files (product data comes from Supabase)
+data/
+
+# Supabase config (migrations not needed at runtime)
+supabase/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.bundle
+test_output/
+reports/
+exports/

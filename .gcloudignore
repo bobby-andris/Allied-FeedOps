@@ -1,0 +1,64 @@
+# Include .gitignore patterns
+#!include:.gitignore
+
+# Git
+.git
+.gitignore
+
+# Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+.eggs
+*.egg
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+# Environment files (secrets)
+.env
+.env.*
+.env.local
+.env.vercel
+
+# Node/Dashboard (separate deployment on Vercel)
+node_modules
+dashboard/
+.next
+
+# Tests and docs (not needed in production)
+tests/
+docs/
+*.md
+
+# Data files (product data comes from Supabase - THIS IS KEY!)
+data/
+
+# Supabase config (migrations not needed at runtime)
+supabase/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.bundle
+test_output/
+reports/
+exports/
+
+# Credentials (don't upload to Cloud Build!)
+creds/

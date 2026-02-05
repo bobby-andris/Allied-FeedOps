@@ -13,5 +13,10 @@ python-dotenv>=1.0
 typer>=0.9
 rich>=13.0
 scipy>=1.10
-bingads>=14.0
+bingads>=13.0
 supabase>=2.0
+
+# FastAPI for Cloud Run deployment
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
