@@ -360,7 +360,7 @@ export async function regenerateContent(
       { role: 'system', content: systemPrompt },
     ]
 
-    const shouldUseVision = USE_VISION && imageUrl && contentType === 'description'
+    const shouldUseVision = Boolean(USE_VISION && imageUrl && contentType === 'description')
 
     if (shouldUseVision && imageUrl) {
       const contentParts: ChatCompletionContentPart[] = [
