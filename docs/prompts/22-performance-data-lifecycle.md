@@ -29,6 +29,60 @@ Fully investigate how performance data flows through Allied-FeedOps, document th
 
 ---
 
+## CRITICAL PREREQUISITE: Fix Search Insights Sync
+
+**The "Sync Data" button fails with:** `[Errno 2] No such file or directory: '/root/google-ads.yaml'`
+
+### Root Cause
+The Cloud Run service (`feedops-pipeline`) is missing Google Ads credentials. The Python client in `src/feedops/integrations/google_ads_search_terms.py` tries:
+1. Load from environment variables (`GOOGLE_ADS_*`)
+2. If missing, falls back to YAML file (which doesn't exist in Cloud Run container)
+
+### Fix Required
+Add Google Ads credentials to GCP Secret Manager and update the Cloud Run deploy command.
+
+**Step 1: Create secrets in GCP Secret Manager**
+```bash
+# Create each secret (run these with actual values from Vercel dashboard)
+echo -n "YOUR_DEVELOPER_TOKEN" | gcloud secrets create feedops-google-ads-developer-token --data-file=- --project=bobbys-project-346400
+echo -n "YOUR_CLIENT_ID" | gcloud secrets create feedops-google-ads-client-id --data-file=- --project=bobbys-project-346400
+echo -n "YOUR_CLIENT_SECRET" | gcloud secrets create feedops-google-ads-client-secret --data-file=- --project=bobbys-project-346400
+echo -n "YOUR_REFRESH_TOKEN" | gcloud secrets create feedops-google-ads-refresh-token --data-file=- --project=bobbys-project-346400
+
+# These are already known:
+echo -n "6253381786" | gcloud secrets create feedops-google-ads-customer-id --data-file=- --project=bobbys-project-346400
+echo -n "7338022535" | gcloud secrets create feedops-google-ads-login-customer-id --data-file=- --project=bobbys-project-346400
+```
+
+**Step 2: Grant runtime service account access**
+```bash
+gcloud secrets add-iam-policy-binding feedops-google-ads-developer-token \
+  --member="serviceAccount:profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=bobbys-project-346400
+
+# Repeat for all 6 secrets
+```
+
+**Step 3: Redeploy Cloud Run with new secrets**
+Update `CLAUDE.md` and deploy:
+```bash
+gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --region=us-east1 \
+  --set-secrets="OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=feedops-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=feedops-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=feedops-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=feedops-google-ads-refresh-token:latest,GOOGLE_ADS_CUSTOMER_ID=feedops-google-ads-customer-id:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=feedops-google-ads-login-customer-id:latest" \
+  --service-account=profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com \
+  --build-service-account=projects/bobbys-project-346400/serviceAccounts/profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com \
+  --allow-unauthenticated --memory=2Gi --cpu=2 --timeout=900 --max-instances=10
+```
+
+**Step 4: Verify** - After deploy, click "Sync Data" on Search Insights page - should start syncing.
+
+### Files Involved
+- `src/feedops/integrations/google_ads_search_terms.py` - `_load_client()` function (lines 32-70)
+- `src/feedops/api/search_insights.py` - Sync endpoint
+- `dashboard/src/app/api/search-insights/sync/route.ts` - Dashboard calls Cloud Run
+
+---
+
 ## Phase 0: Investigation (Plan Mode)
 
 **Before writing ANY code, complete this investigation using the tools above.**

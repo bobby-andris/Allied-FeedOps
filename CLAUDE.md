@@ -145,6 +145,10 @@ GMC offer IDs:
 - `POST /regenerate` - Content regeneration with feedback
 - `POST /batch-optimize` - Batch job creation
 - `GET /batch-status/{job_id}` - Batch job progress
+- `POST /search-insights/sync` - Sync search terms from Google Ads (used by Search Insights page)
+- `GET /search-insights/sync/{job_id}` - Get sync job status
+- `POST /search-insights/enrich` - Enrich keywords with Keyword Planner data
+- `GET /search-insights/terms` - Query stored search terms
 
 **Secrets in GCP Secret Manager:**
 - `feedops-openai-api-key`
@@ -163,10 +167,24 @@ GMC offer IDs:
 **Deploy command:**
 ```bash
 gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --region=us-east1 \
-  --set-secrets="OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest" \
+  --set-secrets="OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=feedops-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=feedops-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=feedops-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=feedops-google-ads-refresh-token:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=feedops-google-ads-login-customer-id:latest" \
+  --set-env-vars="GOOGLE_ADS_CUSTOMER_ID=6253381786" \
   --service-account=profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com \
   --build-service-account=projects/bobbys-project-346400/serviceAccounts/profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com \
   --allow-unauthenticated --memory=2Gi --cpu=2 --timeout=900 --max-instances=10
+```
+
+**To add the Google Ads secrets (one-time setup):**
+```bash
+# Get values from Vercel dashboard environment variables and create secrets
+# GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_CLIENT_ID, GOOGLE_ADS_CLIENT_SECRET, GOOGLE_ADS_REFRESH_TOKEN
+# Then grant access to runtime service account:
+for secret in feedops-google-ads-developer-token feedops-google-ads-client-id feedops-google-ads-client-secret feedops-google-ads-refresh-token feedops-google-ads-login-customer-id; do
+  gcloud secrets add-iam-policy-binding $secret \
+    --member="serviceAccount:profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com" \
+    --role="roles/secretmanager.secretAccessor" \
+    --project=bobbys-project-346400
+done
 ```
 
 ### CI/CD Setup (One-Time)
