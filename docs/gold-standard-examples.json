@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "description": "10 gold standard SKUs for few-shot learning in content generation prompts - TRUE WHY approach",
+  "description": "10 gold standard SKUs for few-shot learning in content generation prompts - BALANCED approach (quality-first default, pain-point when natural)",
   "selection_criteria": {
     "category_spread": "Mix of volume + differentiation",
     "custom_label_0_diversity": "Different collections within same product types",
@@ -33,7 +33,7 @@
         "bing_title": "{FINISH_NAME} 24 Inch Solid Brass Towel Bar - Wall Mounted - Astor Place - Allied Brass",
         "shopify_title": "Astor Place Collection 24 Inch Towel Bar",
         "google_description": "A towel bar should look as good as the rest of your bathroom. This 24-inch bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional Astor Place detailing that coordinates with quality fixtures. Concealed mounting hardware provides clean installation, and the wall-mounted design keeps floor space clear. {FINISH_SENTENCE} Hand-polished designer finishes ensure this towel bar matches your existing bathroom hardware.",
-        "bing_description": "A towel bar should look as good as the rest of your bathroom. This 24-inch bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional Astor Place detailing that coordinates with quality fixtures. Concealed mounting hardware provides clean installation, and the wall-mounted design keeps floor space clear. {FINISH_SENTENCE} Hand-polished designer finishes ensure this towel bar matches your existing bathroom hardware.",
+        "bing_description": "A towel rack should look as good as the rest of your bathroom hardware. This 24-inch towel bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional Astor Place detailing that coordinates with quality fixtures. Concealed mounting hardware provides clean installation, and the wall-mounted towel holder keeps floor space clear. {FINISH_SENTENCE} Hand-polished designer finishes ensure this bathroom towel bar matches your existing accessories. Limited lifetime warranty included.",
         "shopify_description": "A towel bar should look as good as the rest of your bathroom. This 24-inch bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional Astor Place detailing that coordinates with quality fixtures. Concealed mounting hardware provides clean installation, and the wall-mounted design keeps floor space clear. Hand-polished designer finishes ensure this towel bar matches your existing bathroom hardware.",
         "finish_sentences": {
           "Antique Brass": "The Antique Brass finish adds an aged golden patina that enhances the traditional Astor Place detailing.",
@@ -65,7 +65,7 @@
           "Unlacquered Brass": "Unlacquered Brass develops a unique living patina that adds character over time.",
           "Venetian Bronze": "Venetian Bronze combines deep bronze with golden highlights for a warm, European feel."
         },
-        "why_it_works": "Don't force a dramatic pain point where none exists. This is simply a well-made towel bar—customers want quality that looks substantial and coordinates with their fixtures. Title leads with finish (search relevance), includes key specs, places collection before brand. Description focuses on craftsmanship (solid brass vs hollow tubing) without manufacturing drama."
+        "why_it_works": "BALANCED APPROACH: Quality-first opening is correct here — a standard towel bar has no dramatic pain point. Description focuses on craftsmanship (solid brass vs hollow tubing) without manufacturing drama. Title leads with finish (search relevance), includes key specs, places collection before brand. Bing version uses synonyms naturally across sentences (towel bar, towel rack, towel holder) instead of stacking them in parentheses. Shopify title has NO Allied Brass, NO finish name."
       }
     },
     {
@@ -91,7 +91,7 @@
         "bing_title": "{FINISH_NAME} Towel Bar with Hooks 24 Inch - Space-Saving Dual Function - Dottingham - Allied Brass",
         "shopify_title": "Dottingham Collection 24 Inch Towel Bar with Integrated Hooks",
         "google_description": "Small bathrooms mean tough choices: towel bar OR robe hooks, bath towels OR hand towels dripping on the doorknob. This dual-function fixture ends the compromise with a 24-inch bar for bath towels plus integrated end hooks for robes, hand towels, or items that need to air out—all in one wall-mounted fixture. The Dottingham Collection design blends contemporary clean lines with traditional dotted accents. Solid brass construction handles the weight of wet towels without sagging. {FINISH_SENTENCE} Concealed mounting hardware keeps the installation clean.",
-        "bing_description": "Small bathrooms mean tough choices: towel bar OR robe hooks, bath towels OR hand towels dripping on the doorknob. This dual-function fixture ends the compromise with a 24-inch bar for bath towels plus integrated end hooks for robes, hand towels, or items that need to air out—all in one wall-mounted fixture. The Dottingham Collection design blends contemporary clean lines with traditional dotted accents. Solid brass construction handles the weight of wet towels without sagging. {FINISH_SENTENCE} Concealed mounting hardware keeps the installation clean.",
+        "bing_description": "Small bathrooms force compromises between a towel rack and robe hooks, but this dual-function towel bar with integrated hooks handles both. The 24-inch wall-mounted bar holds bath towels while the end hooks keep robes, hand towels, or damp items ready to air out. The Dottingham Collection design combines clean contemporary lines with traditional dotted detailing. Solid brass construction supports the weight of wet towels without sagging. {FINISH_SENTENCE} Concealed screw mounting hardware keeps the finished look tidy. Limited lifetime warranty.",
         "shopify_description": "Small bathrooms mean tough choices: towel bar OR robe hooks, bath towels OR hand towels dripping on the doorknob. This dual-function fixture ends the compromise with a 24-inch bar for bath towels plus integrated end hooks for robes, hand towels, or items that need to air out—all in one wall-mounted fixture. The Dottingham Collection design blends contemporary clean lines with traditional dotted accents. Solid brass construction handles the weight of wet towels without sagging. Concealed mounting hardware keeps the installation clean.",
         "finish_sentences": {
           "Antique Brass": "The aged golden patina of Antique Brass highlights the Dottingham's dotted detail work.",
@@ -149,7 +149,7 @@
         "bing_title": "{FINISH_NAME} Decorative ADA Grab Bar 24 Inch - Stylish Safety Rail - Cube Design - Allied Brass",
         "shopify_title": "Cube Design Smooth Grab Bar - 24 Inch",
         "google_description": "Most grab bars look institutional—they scream 'hospital bathroom' and ruin the aesthetic you've worked to create. This Cube Design bar delivers ADA-compliant safety support with contemporary geometric styling that actually enhances your bathroom decor instead of detracting from it. The smooth 1-3/8 inch diameter bar is sized for a secure grip in tub, shower, or toilet areas. Solid brass construction withstands daily use in wet environments. {FINISH_SENTENCE} Concealed mounting hardware maintains the sleek appearance while ensuring secure installation.",
-        "bing_description": "Most grab bars look institutional—they scream 'hospital bathroom' and ruin the aesthetic you've worked to create. This Cube Design bar delivers ADA-compliant safety support with contemporary geometric styling that actually enhances your bathroom decor instead of detracting from it. The smooth 1-3/8 inch diameter bar is sized for a secure grip in tub, shower, or toilet areas. Solid brass construction withstands daily use in wet environments. {FINISH_SENTENCE} Concealed mounting hardware maintains the sleek appearance while ensuring secure installation.",
+        "bing_description": "Most safety grab bars scream 'hospital bathroom' and ruin the look you've worked to create. This decorative ADA grab bar from the Cube Design collection delivers stylish safety support with contemporary geometric styling that enhances your bathroom instead of detracting from it. The smooth 1-3/8 inch diameter safety rail is sized for a secure grip near the tub, shower, or toilet. Solid brass construction withstands daily use in wet environments. {FINISH_SENTENCE} Concealed screw mounting hardware maintains the sleek appearance. Limited lifetime warranty.",
         "shopify_description": "Most grab bars look institutional—they scream 'hospital bathroom' and ruin the aesthetic you've worked to create. This Cube Design bar delivers ADA-compliant safety support with contemporary geometric styling that actually enhances your bathroom decor instead of detracting from it. The smooth 1-3/8 inch diameter bar is sized for a secure grip in tub, shower, or toilet areas. Solid brass construction withstands daily use in wet environments. Concealed mounting hardware maintains the sleek appearance while ensuring secure installation.",
         "finish_sentences": {
           "Antique Brass": "Antique Brass softens the contemporary Cube Design with warm, aged golden tones.",
@@ -181,7 +181,7 @@
           "Unlacquered Brass": "Unlacquered Brass develops unique patina while providing reliable daily support.",
           "Venetian Bronze": "Venetian Bronze adds warm European character to the geometric Cube design."
         },
-        "why_it_works": "Opens with the TRUE WHY: 'Most grab bars look institutional.' The customer needs safety but REFUSES to make their bathroom look like a hospital. 'Decorative' in the title captures the search intent for stylish grab bars. Description validates the aesthetic concern first, then delivers on safety requirements. This is both/and, not either/or."
+        "why_it_works": "BALANCED APPROACH: Pain-point opening is correct here because grab bars have a natural frustration (institutional look). Opens with 'Most grab bars look institutional' — validates the aesthetic concern, then delivers safety. 'Decorative' in title captures search intent. Bing version uses synonyms naturally across sentences (safety grab bar, decorative ADA grab bar, safety rail) without parenthetical dumps."
       }
     },
     {

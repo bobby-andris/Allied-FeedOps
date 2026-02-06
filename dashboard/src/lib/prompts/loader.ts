@@ -163,12 +163,9 @@ Why it works: ${content.why_it_works}`
   return formattedExamples.join('\n\n')
 }
 
-/**
- * Build enhanced system prompt using template
- */
-export function buildSystemPromptFromTemplate(template: PromptTemplate): string {
-  return template.system_prompt
-}
+// NOTE: buildSystemPromptFromTemplate was removed.
+// The system prompt now lives in code at @/lib/regeneration/prompts.ts (SYSTEM_PROMPT).
+// This loader only provides gold standard examples and category guidance from the DB.
 
 /**
  * Get excluded finishes from platform rules

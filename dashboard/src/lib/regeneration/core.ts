@@ -12,6 +12,15 @@ import {
   getCategoryGuidance,
   type PromptTemplate,
 } from '@/lib/prompts/loader'
+import {
+  SYSTEM_PROMPT,
+  FINISH_LIST,
+  FINISH_REFERENCE,
+  PLATFORM_CONTEXT,
+  SIMPLE_PLATFORM_CONTEXT,
+  getFinishSentenceInstructions,
+  validateGeneratedContent,
+} from '@/lib/regeneration/prompts'
 import crypto from 'node:crypto'
 
 // Lazy-initialize OpenAI client
@@ -34,54 +43,8 @@ export const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
 // Whether to use vision for descriptions
 const USE_VISION = process.env.FEEDOPS_USE_VISION !== '0'
 
-// 28 Allied Brass finishes for product+finish tailored sentences
-const FINISH_LIST = [
-  'Antique Brass', 'Antique Bronze', 'Antique Copper', 'Antique Pewter',
-  'Autumn Sparkle', 'Brushed Bronze', 'Fire Engine Red', 'Flat Troll Blue',
-  'Glokzin Teal', 'Golden Yellow', 'Lavender', 'Matte Black', 'Matte Gray',
-  'Matte White', 'Mediterranean Blue', 'Oil Rubbed Bronze', 'Pink',
-  'Polished Brass', 'Polished Chrome', 'Polished Nickel', 'Satin Brass',
-  'Satin Chrome', 'Satin Nickel', 'Sea Foam Green', 'Shaded Beige',
-  'Spanish Gold', 'Unlacquered Brass', 'Venetian Bronze',
-] as const
-
-// Finish reference for LLM prompt
-const FINISH_REFERENCE = `FINISH REFERENCE (28 finishes with their character):
-Traditional Warm: Antique Brass (aged patina), Antique Bronze (deep brown), Antique Copper (burnished copper), Oil Rubbed Bronze (copper highlights), Polished Brass (mirror gold), Satin Brass (brushed gold), Spanish Gold (Old World gold), Unlacquered Brass (living patina), Venetian Bronze (golden highlights)
-Traditional Cool: Antique Pewter (silvery gray)
-Transitional: Brushed Bronze (warm matte), Polished Chrome (bright reflective), Polished Nickel (warm silver), Satin Chrome (brushed silver), Satin Nickel (warm brushed)
-Contemporary Neutral: Matte Black (smooth non-reflective), Matte Gray (soft neutral), Matte White (clean crisp)
-Statement Colors: Fire Engine Red (bold vibrant), Flat Troll Blue (matte playful), Glokzin Teal (coastal), Golden Yellow (sunny), Lavender (calming purple), Mediterranean Blue (deep sea), Pink (soft feminine), Sea Foam Green (coastal fresh)
-Statement Other: Autumn Sparkle (shimmer), Shaded Beige (warm earth)`
-
-// Fallback system prompt
-const FALLBACK_SYSTEM_PROMPT = `You are an expert e-commerce content writer for Allied Brass bathroom hardware. Generate titles and descriptions that balance quality messaging with customer motivation.
-
-## Core Principles
-
-### Title Structure (Google/Bing)
-{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
-
-- Lead with finish (search relevance, immediate style context)
-- Collection before brand (coordination buyers, not brand recognition)
-- Include differentiating features ("Space-Saving", "No Spring", "Rust Proof")
-
-### Shopify Titles
-- NO {FINISH_NAME} placeholder (user already viewing specific variant)
-- NO "Allied Brass" (user already on the site)
-- Match the product catalog title style
-
-### Descriptions
-- Open with the TRUE WHY (customer's deeper motivation) when one exists naturally
-- For standard products without dramatic pain points, focus on quality/craftsmanship
-- Include {FINISH_SENTENCE} placeholder for Google/Bing descriptions
-- Shopify descriptions are finish-agnostic (no placeholders)
-
-## Guardrails
-- NEVER invent specifications not in the evidence table
-- NO banned words: luxurious, premium, exclusive, unique
-- NO ALL CAPS or promotional language
-- Claims must trace to evidence`
+// FINISH_LIST, FINISH_REFERENCE, SYSTEM_PROMPT, and PLATFORM_CONTEXT
+// are imported from @/lib/regeneration/prompts (single source of truth)
 
 export type Platform = 'google' | 'bing' | 'shopify'
 export type ContentType = 'title' | 'description'
@@ -107,22 +70,7 @@ function buildEnhancedPrompt(
   promptTemplate?: PromptTemplate | null,
   productCategory?: string
 ): { prompt: string; requiresJson: boolean } {
-  const platformContext: Record<string, Record<string, string>> = {
-    google: {
-      title: 'Google Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Lead with finish placeholder for search relevance.',
-      description: 'Google Shopping description - Open with the TRUE WHY. Plain text, 600-800 characters.',
-    },
-    bing: {
-      title: 'Bing Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Include natural product synonyms.',
-      description: 'Bing Shopping description - Open with the TRUE WHY. Include product synonyms naturally. Plain text, 700-1000 characters.',
-    },
-    shopify: {
-      title: 'Shopify product title (H1) - NO finish name, NO "Allied Brass". Customer already clicked.',
-      description: 'Shopify description - customer already clicked, convince them to buy. Mention 28 finishes. HTML format with <p> and <ul><li>. Do NOT include specific finish names or "Allied Brass".',
-    },
-  }
-
-  const context = platformContext[platform]?.[contentType] || ''
+  const context = PLATFORM_CONTEXT[platform]?.[contentType] || ''
 
   // Add gold standard examples if available
   let examplesSection = ''
@@ -158,12 +106,13 @@ CONTEXT: ${context}
 ${examplesSection}${categoryGuidanceSection}
 ${evidenceMarkdown}
 
-FINISH SENTENCES (CRITICAL):
-Generate 28 finish-specific sentences - one for each finish.
-Each sentence should describe how THAT FINISH relates to THIS SPECIFIC PRODUCT.
-DO NOT include Military Camo or Red White and Blue.
+${getFinishSentenceInstructions()}
 
-${FINISH_REFERENCE}
+Remember:
+- Assess first: pain-point opening only when a natural frustration exists, otherwise quality/craftsmanship
+- Every factual claim must be traceable to the evidence table above
+- The base description must NOT include any specific finish name — finish content goes ONLY in finish_sentences
+- Each finish_sentence should relate the specific finish to THIS product
 
 Respond with this EXACT JSON structure (no markdown, no code blocks):
 {
@@ -203,22 +152,7 @@ function buildSimplePrompt(
   platform: Platform,
   productData: Record<string, unknown>
 ): { prompt: string; requiresJson: boolean } {
-  const platformContext: Record<string, Record<string, string>> = {
-    google: {
-      title: 'Google Shopping title - {FINISH_NAME} [Product] [Specs] - [Collection] - Allied Brass',
-      description: 'Google Shopping description - Plain text only.',
-    },
-    bing: {
-      title: 'Bing Shopping title - {FINISH_NAME} [Product] [Specs] - [Collection] - Allied Brass',
-      description: 'Bing Shopping description - Plain text only.',
-    },
-    shopify: {
-      title: 'Shopify product title - NO finish name, NO "Allied Brass".',
-      description: 'Shopify description - HTML format. NO "Allied Brass", NO specific finish names.',
-    },
-  }
-
-  const context = platformContext[platform]?.[contentType] || ''
+  const context = SIMPLE_PLATFORM_CONTEXT[platform]?.[contentType] || ''
   const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
 
   if (isVariantDescription) {
@@ -289,17 +223,15 @@ export async function regenerateContent(
       .eq('content_type', contentType)
       .maybeSingle()
 
-    // Load prompt template
+    // System prompt comes from code (single source of truth).
+    // DB template provides gold standard examples + category guidance only.
+    const systemPrompt = SYSTEM_PROMPT
     let promptTemplate: PromptTemplate | null = null
-    let systemPrompt = FALLBACK_SYSTEM_PROMPT
 
     try {
       promptTemplate = await loadActivePromptTemplate(supabase)
-      if (promptTemplate) {
-        systemPrompt = promptTemplate.system_prompt
-      }
     } catch {
-      // Use fallback
+      // Examples/guidance not available — system prompt still works
     }
 
     // Build prompt with evidence
@@ -423,6 +355,58 @@ export async function regenerateContent(
       }
     } else {
       newContent = rawResponse
+    }
+
+    // Validate and auto-retry on violations
+    const violations = validateGeneratedContent(newContent, platform, contentType)
+
+    if (violations.length > 0) {
+      console.warn(`Validation violations for ${masterSku}/${platform}/${contentType}: ${violations.join('; ')}`)
+
+      const retryInstruction = `VIOLATION — your previous response broke these rules:\n${violations.map(v => `- ${v}`).join('\n')}\n\nFix these violations in your new response.`
+
+      const retryMessages: ChatCompletionMessageParam[] = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+        { role: 'assistant', content: requiresJson ? rawResponse : newContent },
+        { role: 'user', content: retryInstruction },
+      ]
+
+      try {
+        const retryCompletion = await getOpenAIClient().chat.completions.create({
+          model: MODEL,
+          messages: retryMessages,
+          temperature: 0.5,
+          stream: false,
+          ...(requiresJson ? { response_format: { type: 'json_object' as const } } : {}),
+          ...tokenParams,
+        })
+
+        const retryResponse = retryCompletion.choices[0]?.message?.content?.trim()
+
+        if (retryResponse) {
+          if (requiresJson) {
+            try {
+              const parsed = JSON.parse(retryResponse)
+              if (parsed.content?.trim()) {
+                newContent = parsed.content.trim()
+                finishSentences = parsed.finish_sentences || finishSentences
+              }
+            } catch {
+              // Keep original if retry parse fails
+            }
+          } else {
+            newContent = retryResponse
+          }
+
+          const retryViolations = validateGeneratedContent(newContent, platform, contentType)
+          if (retryViolations.length === 0) {
+            console.log('Auto-retry fixed validation violations')
+          }
+        }
+      } catch {
+        // Keep original content on retry failure
+      }
     }
 
     // Save to database

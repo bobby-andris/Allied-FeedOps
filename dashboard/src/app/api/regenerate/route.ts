@@ -10,6 +10,16 @@ import {
   getCategoryGuidance,
   type PromptTemplate,
 } from '@/lib/prompts/loader'
+import {
+  SYSTEM_PROMPT,
+  FINISH_LIST,
+  FINISH_REFERENCE,
+  PLATFORM_CONTEXT,
+  SIMPLE_PLATFORM_CONTEXT,
+  FEEDBACK_PLATFORM_CONTEXT,
+  getFinishSentenceInstructions,
+  validateGeneratedContent,
+} from '@/lib/regeneration/prompts'
 import crypto from 'node:crypto'
 
 // Lazy-initialize OpenAI client (avoid build-time instantiation)
@@ -29,47 +39,8 @@ function getOpenAIClient(): OpenAI {
 // Model to use for generation (default aligns with Python backend)
 const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
 
-// 28 Allied Brass finishes for product+finish tailored sentences
-// EXCLUDES: Military Camo and Red White and Blue (specialty/novelty finishes)
-const FINISH_LIST = [
-  'Antique Brass',
-  'Antique Bronze',
-  'Antique Copper',
-  'Antique Pewter',
-  'Autumn Sparkle',
-  'Brushed Bronze',
-  'Fire Engine Red',
-  'Flat Troll Blue',
-  'Glokzin Teal',
-  'Golden Yellow',
-  'Lavender',
-  'Matte Black',
-  'Matte Gray',
-  'Matte White',
-  'Mediterranean Blue',
-  'Oil Rubbed Bronze',
-  'Pink',
-  'Polished Brass',
-  'Polished Chrome',
-  'Polished Nickel',
-  'Satin Brass',
-  'Satin Chrome',
-  'Satin Nickel',
-  'Sea Foam Green',
-  'Shaded Beige',
-  'Spanish Gold',
-  'Unlacquered Brass',
-  'Venetian Bronze',
-] as const
-
-// Finish reference for LLM prompt (grouped by character) - 28 finishes
-const FINISH_REFERENCE = `FINISH REFERENCE (28 finishes with their character):
-Traditional Warm: Antique Brass (aged patina), Antique Bronze (deep brown), Antique Copper (burnished copper), Oil Rubbed Bronze (copper highlights), Polished Brass (mirror gold), Satin Brass (brushed gold), Spanish Gold (Old World gold), Unlacquered Brass (living patina), Venetian Bronze (golden highlights)
-Traditional Cool: Antique Pewter (silvery gray)
-Transitional: Brushed Bronze (warm matte), Polished Chrome (bright reflective), Polished Nickel (warm silver), Satin Chrome (brushed silver), Satin Nickel (warm brushed)
-Contemporary Neutral: Matte Black (smooth non-reflective), Matte Gray (soft neutral), Matte White (clean crisp)
-Statement Colors: Fire Engine Red (bold vibrant), Flat Troll Blue (matte playful), Glokzin Teal (coastal), Golden Yellow (sunny), Lavender (calming purple), Mediterranean Blue (deep sea), Pink (soft feminine), Sea Foam Green (coastal fresh)
-Statement Other: Autumn Sparkle (shimmer), Shaded Beige (warm earth)`
+// FINISH_LIST, FINISH_REFERENCE, SYSTEM_PROMPT, and PLATFORM_CONTEXT
+// are imported from @/lib/regeneration/prompts (single source of truth)
 
 // Whether to use vision for descriptions (default: true)
 const USE_VISION = process.env.FEEDOPS_USE_VISION !== '0'
@@ -101,71 +72,8 @@ interface RegenerateRequest {
   }
 }
 
-// Fallback system prompt (used when prompt_templates not available)
-const FALLBACK_SYSTEM_PROMPT = `You are an expert e-commerce content writer for Allied Brass bathroom hardware. Generate titles and descriptions that balance quality messaging with customer motivation.
-
-## Core Principles
-
-### BALANCED APPROACH (CRITICAL)
-NOT every product needs emotional drama. Choose the right approach:
-
-**Quality-First (DEFAULT for standard products):**
-- Standard towel bars, robe hooks, basic fixtures
-- Open with craftsmanship, materials, design details
-- "This 24-inch bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional detailing that coordinates with quality fixtures."
-
-**Pain-Point-First (ONLY when obvious frustration exists):**
-- Grab bars (institutional look), rollerless TP holders (spring hassle), space-saving combos
-- Open with the problem, then the solution
-- "Safety grab bars don't have to look institutional..."
-
-### When to Apply Pain-Point Messaging
-ONLY for products with clear, natural frustrations:
-- Grab bars → "I refuse to make my bathroom look like a hospital"
-- Rollerless TP holders → "Empty rolls sit there because springs are a hassle"
-- Shower caddies → "Bottles scattered on the floor, ugly plastic caddies"
-- Space-saving combos → "One wall spot, two needs"
-
-### When NOT to Apply (Use Quality-First Instead)
-- Standard towel bars → Just want a quality bar that looks good
-- Basic robe hooks → No hidden frustration, just a well-made hook
-- Simple shelves → Quality and design fit, not emotional drama
-- Standard TP holders → Unless rollerless, no dramatic pain point
-
-DO NOT manufacture drama where none exists. Authenticity matters.
-
-### Title Structure (Google/Bing)
-{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
-
-- Lead with finish (search relevance, immediate style context)
-- Collection before brand (coordination buyers, not brand recognition)
-- Include differentiating features ("Space-Saving", "No Spring", "Rust Proof")
-
-### Shopify Titles
-- NO {FINISH_NAME} placeholder (user already viewing specific variant)
-- NO "Allied Brass" (user already on the site)
-- Match the product catalog title style
-
-### Descriptions
-- ASSESS FIRST: Does this product have a natural pain point?
-- If YES: Open with the problem, then solution
-- If NO: Open with quality, craftsmanship, and design fit
-- Include {FINISH_SENTENCE} placeholder for Google/Bing (inserted after first sentence)
-- Shopify descriptions are finish-agnostic (no placeholders)
-
-## Finish Sentences
-Generate 28 product-specific finish sentences. EXCLUDE:
-- Military Camo
-- Red White and Blue
-
-Each sentence should describe how THAT finish enhances THIS specific product.
-
-## Guardrails
-- NEVER invent specifications not in the evidence table
-- NO banned words: luxurious, premium, exclusive, unique (unless describing a genuinely unique feature)
-- NO ALL CAPS or promotional language
-- Claims must trace to evidence (product data, bullets, narrative copy)
-- DO NOT over-dramatize standard products`
+// System prompt is imported from @/lib/regeneration/prompts (SYSTEM_PROMPT)
+// No longer using a fallback — code is the single source of truth
 
 /**
  * Build enhanced prompt using evidence table
@@ -177,23 +85,7 @@ function buildEnhancedPrompt(
   promptTemplate?: PromptTemplate | null,
   productCategory?: string
 ): { prompt: string; requiresJson: boolean } {
-  // Updated context with TRUE WHY approach and new title structure
-  const platformContext: Record<string, Record<string, string>> = {
-    google: {
-      title: 'Google Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Lead with finish placeholder for search relevance. Make them want to click.',
-      description: 'Google Shopping description - Open with the TRUE WHY (the customer\'s deeper motivation). Write for a human scanning Shopping ads. Include material quality and dimensions. Plain text, 600-800 characters.',
-    },
-    bing: {
-      title: 'Bing Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Include natural product synonyms. Make them want to click.',
-      description: 'Bing Shopping description - Open with the TRUE WHY. Include product synonyms naturally (towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text, 700-1000 characters.',
-    },
-    shopify: {
-      title: 'Shopify product title (H1) - NO finish name, NO "Allied Brass". Customer already clicked. Create a clear, descriptive title that highlights the product\'s key benefit or differentiator. Use collection name. Do NOT just copy the existing title - create something fresh.',
-      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets. Do NOT include specific finish names.',
-    },
-  }
-
-  const context = platformContext[platform]?.[contentType] || ''
+  const context = PLATFORM_CONTEXT[platform]?.[contentType] || ''
 
   // Add gold standard examples if available
   let examplesSection = ''
@@ -222,30 +114,6 @@ function buildEnhancedPrompt(
   const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
 
   if (isVariantDescription) {
-    const finishSentencesInstructions = `
-FINISH SENTENCES (CRITICAL - YOU MUST INCLUDE THESE):
-In addition to the base description, generate 28 finish-specific sentences - one for each finish.
-Each sentence should describe how THAT FINISH relates to THIS SPECIFIC PRODUCT.
-DO NOT include Military Camo or Red White and Blue (specialty finishes excluded).
-
-Consider the relationship:
-- Product's collection style (from evidence: collection, design_style)
-- Finish's character (see finish reference below)
-- Complement vs contrast: Does this finish reinforce the product's style or add unexpected interest?
-- The story: Why would a shopper choose THIS finish for THIS product?
-
-${FINISH_REFERENCE}
-
-GOOD finish sentences (product-specific, mention the product):
-- Traditional collection + Antique Brass: "The warm, aged patina of Antique Brass brings vintage warmth to this classic design."
-- Traditional collection + Fire Engine Red: "Fire Engine Red transforms this traditional piece into an unexpected focal point."
-- Contemporary collection + Matte Black: "Matte Black emphasizes the clean, modern lines of this design."
-
-BAD finish sentences (generic, could apply to any product):
-- "Fire Engine Red makes a bold statement." (no product reference)
-- "Antique Brass features aged golden tones." (describes finish, not relationship)
-- "Available in Polished Chrome." (not a sentence about relationship)`
-
     return {
       prompt: `Generate content for this product. You MUST respond with valid JSON.
 
@@ -253,13 +121,12 @@ CONTEXT: ${context}
 ${examplesSection}${categoryGuidanceSection}
 ${evidenceMarkdown}
 
-${finishSentencesInstructions}
+${getFinishSentenceInstructions()}
 
 Remember:
-- Open with the TRUE WHY (customer's deeper motivation) when one exists naturally
-- For standard products without dramatic pain points, focus on quality/craftsmanship
+- Assess first: pain-point opening only when a natural frustration exists, otherwise quality/craftsmanship
 - Every factual claim must be traceable to the evidence table above
-- The base description should NOT include any specific finish name
+- The base description must NOT include any specific finish name — finish content goes ONLY in finish_sentences
 - Each finish_sentence should relate the specific finish to THIS product
 
 Respond with this EXACT JSON structure (no markdown, no code blocks):
@@ -308,13 +175,7 @@ function buildEnhancedFeedbackPrompt(
   currentContent: string,
   feedback: string
 ): string {
-  const platformContext: Record<string, string> = {
-    google: 'Google Shopping - first impression, make them want to click. Use {FINISH_NAME} placeholder.',
-    bing: 'Bing Shopping - include natural product synonyms. Use {FINISH_NAME} placeholder.',
-    shopify: 'Shopify - customer already clicked, convince them to buy. Do NOT include specific finish names.',
-  }
-
-  const context = platformContext[platform] || platform
+  const context = FEEDBACK_PLATFORM_CONTEXT[platform] || platform
 
   return `You are improving a product ${contentType} TEMPLATE based on reviewer feedback.
 
@@ -354,22 +215,7 @@ function buildSimplePrompt(
   platform: string,
   productData: Record<string, unknown>
 ): { prompt: string; requiresJson: boolean } {
-  const platformContext: Record<string, Record<string, string>> = {
-    google: {
-      title: 'Google Shopping title - this is their first impression. Make them want to click. Include product type, key dimension, and "Allied Brass" at end.',
-      description: 'Google Shopping description - write for a human scanning Shopping ads. Plain text only.',
-    },
-    bing: {
-      title: 'Bing Shopping title - include natural product synonyms. Make them want to click. Include "Allied Brass" at end.',
-      description: 'Bing Shopping description - write for humans, include product synonyms naturally. Plain text only.',
-    },
-    shopify: {
-      title: 'Shopify product title (H1) - customer already clicked. Help them feel confident about buying. Do NOT include finish name.',
-      description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets. Do NOT include specific finish names.',
-    },
-  }
-
-  const context = platformContext[platform]?.[contentType] || ''
+  const context = SIMPLE_PLATFORM_CONTEXT[platform]?.[contentType] || ''
 
   // For Google/Bing descriptions, request JSON with finish_sentences
   const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
@@ -428,13 +274,7 @@ function buildSimpleFeedbackPrompt(
   currentContent: string,
   feedback: string
 ): string {
-  const platformContext: Record<string, string> = {
-    google: 'Google Shopping - first impression, make them want to click. Use {FINISH_NAME} placeholder.',
-    bing: 'Bing Shopping - include natural product synonyms. Use {FINISH_NAME} placeholder.',
-    shopify: 'Shopify - customer already clicked, convince them to buy. Do NOT include specific finish names.',
-  }
-
-  const context = platformContext[platform] || platform
+  const context = FEEDBACK_PLATFORM_CONTEXT[platform] || platform
 
   return `You are improving a product ${contentType} TEMPLATE based on reviewer feedback.
 
@@ -568,19 +408,18 @@ export async function POST(request: NextRequest) {
     }
 
     // ==================== LOAD PROMPT TEMPLATE ====================
+    // System prompt comes from code (single source of truth).
+    // DB template provides gold standard examples + category guidance only.
+    const systemPrompt = SYSTEM_PROMPT
     let promptTemplate: PromptTemplate | null = null
-    let systemPrompt = FALLBACK_SYSTEM_PROMPT
 
     try {
       promptTemplate = await loadActivePromptTemplate(supabase)
       if (promptTemplate) {
-        systemPrompt = promptTemplate.system_prompt
-        console.log(`Loaded prompt template: ${promptTemplate.name} v${promptTemplate.version}`)
-      } else {
-        console.log('No active prompt template, using fallback system prompt')
+        console.log(`Loaded examples/guidance from template: ${promptTemplate.name} v${promptTemplate.version}`)
       }
     } catch (templateError) {
-      console.warn('Failed to load prompt template:', templateError)
+      console.warn('Failed to load prompt template for examples:', templateError)
     }
 
     // ==================== BUILD PROMPT WITH EVIDENCE ====================
@@ -763,6 +602,61 @@ export async function POST(request: NextRequest) {
       }
     } else {
       newContent = rawResponse
+    }
+
+    // ==================== VALIDATE & AUTO-RETRY ====================
+    const violations = validateGeneratedContent(newContent, platform, content_type)
+
+    if (violations.length > 0) {
+      console.warn(`Validation violations for ${master_sku}/${platform}/${content_type}: ${violations.join('; ')}`)
+
+      // Auto-retry once with violation feedback
+      const retryInstruction = `VIOLATION — your previous response broke these rules:\n${violations.map(v => `- ${v}`).join('\n')}\n\nFix these violations in your new response. This is critical.`
+
+      const retryMessages: ChatCompletionMessageParam[] = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+        { role: 'assistant', content: requiresJson ? rawResponse : newContent },
+        { role: 'user', content: retryInstruction },
+      ]
+
+      try {
+        const retryCompletion = await getOpenAIClient().chat.completions.create({
+          model: MODEL,
+          messages: retryMessages,
+          temperature: 0.5, // Lower temp for correction
+          stream: false,
+          ...(requiresJson ? { response_format: { type: 'json_object' as const } } : {}),
+          ...tokenParams,
+        })
+
+        const retryResponse = retryCompletion.choices[0]?.message?.content?.trim()
+
+        if (retryResponse) {
+          if (requiresJson) {
+            try {
+              const parsed = JSON.parse(retryResponse)
+              if (parsed.content?.trim()) {
+                newContent = parsed.content.trim()
+                finishSentences = parsed.finish_sentences || finishSentences
+              }
+            } catch {
+              // Keep original if retry parse fails
+            }
+          } else {
+            newContent = retryResponse
+          }
+
+          const retryViolations = validateGeneratedContent(newContent, platform, content_type)
+          if (retryViolations.length > 0) {
+            console.warn(`Retry still has violations: ${retryViolations.join('; ')}`)
+          } else {
+            console.log('Auto-retry fixed validation violations')
+          }
+        }
+      } catch (retryError) {
+        console.warn('Auto-retry failed, using original content:', retryError)
+      }
     }
 
     // ==================== SAVE TO DATABASE ====================

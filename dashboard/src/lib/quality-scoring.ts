@@ -10,6 +10,8 @@
  * - Extended Zone (71-150 chars): High - expands query eligibility
  */
 
+import { FINISH_LIST } from '@/lib/regeneration/prompts'
+
 // ============================================================================
 // Constants (ported from Python)
 // ============================================================================
@@ -682,9 +684,52 @@ export function analyzeContent(
   )
 
   // Calculate composite: (ctr + cvr + voice + readability) / 40 * 100
-  const compositeScore = Math.round(
+  let compositeScore = Math.round(
     (titleResult.score + descResult.score + voiceResult.score + readabilityResult.score) / 40 * 100
   )
+
+  // ==================== HARD VIOLATION PENALTIES ====================
+  // These catch platform-specific rule violations that individual scorers miss.
+
+  // Shopify title must not contain "Allied Brass"
+  if (platform === 'shopify' && title.toLowerCase().includes('allied brass')) {
+    compositeScore = Math.max(0, compositeScore - 30)
+    issues.push('Shopify title contains "Allied Brass" (must be removed)')
+  }
+
+  // Shopify title must not contain specific finish names
+  if (platform === 'shopify') {
+    for (const finish of FINISH_LIST) {
+      if (title.includes(finish)) {
+        compositeScore = Math.max(0, compositeScore - 30)
+        issues.push(`Shopify title contains finish name "${finish}" (must be removed)`)
+        break
+      }
+    }
+  }
+
+  // Title too short to be useful
+  if (title.length < 30) {
+    compositeScore = 0
+    issues.push(`Title too short (${title.length} chars, minimum 30)`)
+  }
+
+  // Title is just brand name or SKU
+  if (title.trim().toLowerCase() === 'allied brass' || /^[A-Z0-9\-/]+$/.test(title.trim())) {
+    compositeScore = 0
+    issues.push('Title is just a brand name or SKU, not a descriptive product title')
+  }
+
+  // Google/Bing base description with hardcoded finish name (should use placeholder)
+  if (platform !== 'shopify' && description) {
+    for (const finish of FINISH_LIST) {
+      if (description.includes(finish) && !description.includes('{FINISH_')) {
+        compositeScore = Math.max(0, compositeScore - 20)
+        issues.push(`Description contains hardcoded finish name "${finish}" (should use {FINISH_SENTENCE} placeholder)`)
+        break
+      }
+    }
+  }
 
   return {
     ctrProxy: titleResult.score,
