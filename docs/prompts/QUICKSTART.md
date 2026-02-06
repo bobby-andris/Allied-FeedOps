@@ -19,13 +19,16 @@
 8. **Prompt 09** → GCP Cloud Run Setup
 9. **Prompt 21** → Unify TypeScript & Python Methodology (CRITICAL)
 
-### Phase 5: Future-Proofing & ROI
-10. **Prompt 15** → Agentic Commerce (UCP)
-11. **Prompt 12** → A/B Testing Dashboard
-12. **Prompt 16** → Multi-Variant Images
+### Phase 5: Performance Monitoring
+10. **Prompt 22** → Performance Data Lifecycle (FIX Search Insights sync first!)
 
-### Phase 6: Final Audit (ALWAYS LAST)
-13. **Prompt 11** → Production Readiness Audit
+### Phase 6: Future-Proofing & ROI
+11. **Prompt 15** → Agentic Commerce (UCP)
+12. **Prompt 12** → A/B Testing Dashboard
+13. **Prompt 16** → Multi-Variant Images
+
+### Phase 7: Final Audit (ALWAYS LAST)
+14. **Prompt 11** → Production Readiness Audit
 
 After each prompt, run the **Verification & Completion Prompt** below.
 
@@ -165,6 +168,10 @@ Do NOT commit changes until the full implementation is verified with passing tes
 
 **When to run:** Priority 1 - Match actual search behavior
 
+**Prerequisites:**
+- Google Ads API credentials configured
+- Merchant API MCP available (`mcp__merchant-api-devdocs__*`)
+
 **Copy and paste into a new Claude Code chat:**
 
 ```
@@ -176,20 +183,37 @@ Key context:
 - Google Ads customer ID: 6253381786
 - Existing integration: src/feedops/integrations/google_ads_performance.py
 
-Goals:
-1. Apply database migration for search_queries tables
-2. Create Python integration for search_term_view GAQL query
-3. Create /search-insights page with query table
-4. Build gap analysis component showing keyword coverage
-5. Integrate search data into content generation prompts
-6. Track query coverage improvement over time
+MCP Tools to Use:
+- **Merchant API MCP** (`mcp__merchant-api-devdocs__*`): Query GMC product data
+  - `query_mapi_docs` for documentation
+  - `find_mapi_code_sample` for code examples
+- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Execute GAQL queries
+- **merchant-integrator agent**: Use via Task tool for Merchant API setup
 
-The key GAQL query:
+Goals:
+1. Apply database migration for search_queries tables (with Keyword Planner fields)
+2. Create Python integration for search_term_view GAQL query
+3. Create KeywordPlannerClient for search volume enrichment
+4. Create /search-insights page with query table + volume/competition columns
+5. Build gap analysis component showing keyword coverage
+6. Integrate Merchant API for product performance correlation
+7. Track query coverage improvement over time
+
+Key APIs:
+
+1. Google Ads Search Terms (actual queries):
 SELECT search_term_view.search_term, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, segments.product_item_id
 FROM search_term_view
 WHERE segments.date DURING LAST_30_DAYS AND campaign.advertising_channel_type = 'SHOPPING'
 
-Note: metrics.conversions_value gives revenue from conversions. segments.product_item_id gives the GMC offer ID for variant-level tracking.
+2. Keyword Planner (search volume context):
+- GenerateKeywordHistoricalMetrics: avg_monthly_searches, competition_index (0-100), CPC ranges
+- GenerateKeywordIdeas: discover related keywords from seeds
+- Rate limited - cache results (metrics update monthly)
+
+3. Merchant API (product feed data):
+SELECT offer_id, clicks, impressions, click_through_rate FROM product_performance_view
+SELECT id, offer_id, title, aggregated_reporting_context_status FROM product_view
 
 **REQUIRED WORKFLOW (superpowers skills):**
 
@@ -211,6 +235,10 @@ Do NOT commit changes until the full implementation is verified with passing tes
 
 **When to run:** Priority 1 - Identify missing keywords and prioritize optimization
 
+**Prerequisites:**
+- Search Query Insights (Prompt 14) implemented
+- Merchant API MCP available (`mcp__merchant-api-devdocs__*`)
+
 **Copy and paste into a new Claude Code chat:**
 
 ```
@@ -221,19 +249,36 @@ Key context:
 - Dashboard: /dashboard (Next.js 14+)
 - Depends on: Search Query Insights (Prompt 14)
 
-Goals:
-1. Apply database migration for keyword_gaps tables
-2. Create gap scoring algorithm (impressions × coverage gap)
-3. Create /keyword-gaps page with opportunity ranking
-4. Build KeywordSuggestions component with recommended keywords
-5. Track gap closure progress over time
-6. Generate suggested title improvements
+MCP Tools to Use:
+- **Merchant API MCP** (`mcp__merchant-api-devdocs__*`): Query GMC product data
+  - Get current titles from product_view
+  - Get click_potential for prioritization
+- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Keyword Planner data
+- **merchant-integrator agent**: Use via Task tool for Merchant API setup
 
-The scoring algorithm should:
-- Compare our titles to actual search queries from Google Ads
-- Identify SKUs where high-volume queries aren't in titles
-- Prioritize optimization by opportunity size
-- Provide specific keywords to add per SKU
+Goals:
+1. Apply database migration for keyword_gaps tables (with competition fields)
+2. Create gap scoring algorithm with opportunity_score (factors in competition)
+3. Create KeywordPlannerClient integration for search volume enrichment
+4. Create /keyword-gaps page with opportunity ranking + competition badges
+5. Build KeywordSuggestions component with volume/competition context
+6. Add "Discover Related Keywords" using Keyword Planner GenerateKeywordIdeas
+7. Integrate Merchant API click_potential for prioritization
+8. Track gap closure progress over time
+
+Key Scoring Formula:
+- gap_score = monthly_volume × (1 if not in title, 0.3 if in description only)
+- opportunity_score = gap_score × ((100 - competition_index) / 100)
+- Boost 50% if Merchant API click_potential = 'HIGH'
+
+Keyword Planner Integration:
+- Enrich gaps with: avg_monthly_searches, competition (LOW/MEDIUM/HIGH), competition_index (0-100)
+- Show CPC estimates (low_top_of_page_bid, high_top_of_page_bid) for ROI context
+- Cache results - metrics only update monthly
+
+Merchant API Integration:
+- Query product_view for: title, click_potential, aggregated_reporting_context_status
+- Products with HIGH click_potential + keyword gaps = top priority
 
 **REQUIRED WORKFLOW (superpowers skills):**
 
@@ -790,6 +835,66 @@ Python strengths to consider:
 3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
 4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
 5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
+```
+
+---
+
+## Quick Start: Prompt 22 (Performance Data Lifecycle)
+
+**When to run:** After Search Insights sync is fixed - investigates and implements performance monitoring
+
+**Prerequisites:**
+- Google Ads credentials configured in Cloud Run (see CRITICAL PREREQUISITE section in prompt)
+- Search Insights "Sync Data" button works without error
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to investigate and implement the performance data lifecycle for FeedOps. Please enter plan mode and use the prompt at docs/prompts/22-performance-data-lifecycle.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Cloud Run service: https://feedops-pipeline-623866089882.us-east1.run.app
+- Google Ads customer ID: 6253381786
+
+CRITICAL PREREQUISITE - FIX SEARCH INSIGHTS SYNC FIRST:
+The "Sync Data" button on Search Insights page fails with:
+"[Errno 2] No such file or directory: '/root/google-ads.yaml'"
+
+This is because Cloud Run is missing Google Ads credentials. The prompt contains full instructions to:
+1. Create Google Ads secrets in GCP Secret Manager
+2. Grant runtime service account access
+3. Redeploy Cloud Run with updated --set-secrets
+
+Do NOT proceed with performance investigation until Search Insights sync works.
+
+MCP Tools to Use:
+- **Supabase MCP** (`mcp__supabase__execute_sql`): Query tables directly
+- **Vercel MCP** (`mcp__vercel__get_runtime_logs`): Debug API issues
+- **Playwright MCP** (`mcp__plugin_playwright_playwright__*`): Visual verification
+- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Test API queries
+
+Goals:
+1. FIX Cloud Run Google Ads credentials (critical prerequisite)
+2. Verify Search Insights sync works
+3. Investigate performance data tables (performance_baselines, performance_snapshots)
+4. Determine if baseline capture happens before publishing
+5. Determine if snapshots are being scheduled
+6. Design and implement complete performance monitoring lifecycle
+
+**REQUIRED WORKFLOW (superpowers skills):**
+
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. FOR the search insights sync issue: `/superpowers:systematic-debugging` - root cause already documented in prompt
+3. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+4. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+5. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
 6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
 
 Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
