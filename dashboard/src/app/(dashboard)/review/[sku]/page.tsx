@@ -63,24 +63,55 @@ interface ApprovalRecord {
 }
 
 /**
- * Normalize SKU format for database queries.
- * URLs use hyphens (DMF-2-2X) but database uses slashes (DMF-2/2X).
- * Pattern: Replace last hyphen-dimension segment like -16, -2X, -16-GAL → /16, /2X, /16-GAL
+ * Generate all possible SKU formats to try when looking up in the database.
+ *
+ * Problem: SKUs in the database may use slashes (WP-2/16-GAL) or hyphens (920D-6),
+ * while URLs must use hyphens (slashes are path separators).
+ *
+ * Solution: Generate multiple candidate formats and try each one.
+ *
+ * @param urlSku The SKU as it appears in the URL (hyphens only)
+ * @returns Array of possible database formats to try
  */
-function normalizeSkuForDb(urlSku: string): string {
-  // Match: hyphen + digits + optional letters + optional suffix (like -GAL) at end
-  // Examples: DMF-2-2X → DMF-2/2X, NS-5-16 → NS-5/16, WP-2-16-GAL → WP-2/16-GAL
-  return urlSku.replace(/-(\d+[A-Z]*(?:-[A-Z]+)?)$/i, '/$1')
+function getSkuCandidates(urlSku: string): string[] {
+  const candidates: string[] = []
+
+  // 1. URL-decode in case of %2F encoding
+  const decoded = decodeURIComponent(urlSku)
+
+  // 2. Add the decoded URL SKU as-is (might match directly)
+  candidates.push(decoded)
+
+  // 3. Try replacing last hyphen-before-dimension with slash
+  // Pattern: -16, -2X, -16-GAL → /16, /2X, /16-GAL
+  const normalizedLast = decoded.replace(/-(\d+[A-Z]*(?:-[A-Z]+)?)$/i, '/$1')
+  if (normalizedLast !== decoded) {
+    candidates.push(normalizedLast)
+  }
+
+  // 4. Try replacing the second-to-last hyphen-digit segment (for patterns like WP-2-16-GAL where the 2 is a model number)
+  // This handles cases like WP-2-16-GAL where we need WP-2/16-GAL
+  const twoPartMatch = decoded.match(/^(.+?)-(\d+)-(\d+[A-Z]*(?:-[A-Z]+)?)$/i)
+  if (twoPartMatch) {
+    candidates.push(`${twoPartMatch[1]}-${twoPartMatch[2]}/${twoPartMatch[3]}`)
+  }
+
+  // 5. If the SKU has a slash already (from decoding), also try the hyphen version
+  if (decoded.includes('/')) {
+    candidates.push(decoded.replace(/\//g, '-'))
+  }
+
+  // Remove duplicates while preserving order
+  return [...new Set(candidates)]
 }
 
 async function getSkuData(urlSku: string) {
   const supabase = await createClient()
 
-  // Try URL SKU first, then normalized version (handles DMF-2-2X → DMF-2/2X)
-  const normalizedSku = normalizeSkuForDb(urlSku)
-  const skusToTry = urlSku !== normalizedSku ? [urlSku, normalizedSku] : [urlSku]
+  // Generate all possible SKU formats to try
+  const skusToTry = getSkuCandidates(urlSku)
 
-  // Get content for all platforms - try both SKU formats
+  // Get content for all platforms - try each SKU format until we find a match
   let content = null
   let contentError = null
   for (const sku of skusToTry) {

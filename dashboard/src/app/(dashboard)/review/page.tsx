@@ -8,6 +8,7 @@ import { Search, Filter } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { skuToUrlPath } from "@/lib/sku-utils"
+import { BatchRegenerateButton } from "@/components/review/BatchRegenerateButton"
 
 interface SkuWithContent {
   master_sku: string
@@ -109,11 +110,14 @@ export default async function ReviewPage() {
   
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Review Queue</h1>
-        <p className="text-muted-foreground">
-          Review and approve generated content for {skus.length} product SKUs
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Review Queue</h1>
+          <p className="text-muted-foreground">
+            Review and approve generated content for {skus.length} product SKUs
+          </p>
+        </div>
+        <BatchRegenerateButton totalSkus={skus.length} />
       </div>
 
       {/* Filters */}
