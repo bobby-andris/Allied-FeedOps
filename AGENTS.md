@@ -4,6 +4,38 @@
 
 **CRITICAL**: All product content MUST be grounded in actual product data. Never invent features, specifications, or benefits not present in the source data.
 
+## Content Generation Architecture
+
+### BALANCED Approach (Quality-First Default)
+
+The system prompt uses a **BALANCED** approach — NOT every product needs emotional drama:
+
+- **Quality-First (DEFAULT)**: Standard products (towel bars, hooks, shelves) — open with craftsmanship, materials, design
+- **Pain-Point-First (ONLY when natural)**: Grab bars (institutional look), rollerless TP holders (spring hassle), shower caddies (scattered bottles)
+
+**DO NOT** manufacture drama where none exists. Authenticity matters.
+
+### Single Source of Truth
+
+- **System prompt**: Lives in code at `dashboard/src/lib/regeneration/prompts.ts` (git-versioned, code-reviewed)
+- **Gold standard examples + category guidance**: Lives in Supabase `prompt_templates` table (data, not logic)
+- The DB's `system_prompt` column is **ignored** — code is authoritative
+
+### Post-Generation Validation
+
+Generated content is validated against hard rules before saving:
+- Shopify titles: no "Allied Brass", no finish names
+- All titles: minimum 30 chars, must not be just a SKU or brand name
+- Google/Bing descriptions: no hardcoded finish names in base content
+
+Violations trigger an **auto-retry** with the violation highlighted. Quality scoring applies hard penalties for violations that slip through.
+
+### Bing Synonym Integration
+
+Bing descriptions should use product synonyms **across different sentences** naturally:
+- GOOD: "This wall-mounted towel bar keeps towels organized." ...later... "The solid brass rack coordinates with..."
+- BAD: "towel bar (towel rack / towel holder)" or "16-inch / 16in / 16 inches"
+
 ## Platform Policy Guardrails (2026)
 
 These rules prevent disapprovals and “AI text” compliance issues. If any rule conflicts with conversion copy, **policy wins**.

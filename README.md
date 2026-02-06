@@ -137,39 +137,23 @@ Run the full suite:
 PYTHONPATH=./src .venv/bin/python -m pytest -q
 ```
 
-## Prompt Philosophy: Context Over Rules
+## Content Generation: BALANCED Approach
 
-The LLM prompt system (`src/feedops/pipeline/prompts.py`) uses a **context-driven approach** rather than prescriptive rules. Instead of telling the LLM "write sentences in this pattern", we give it understanding and trust it to make good decisions.
+The content generation system uses a **BALANCED approach** — quality-first as the default, with pain-point messaging only when a natural frustration exists.
 
-### The Core Insight
+### Single Source of Truth
 
-Prescriptive rules like "FIRST SENTENCE PATTERN: [Dimension] [product] in [Finish]..." create robotic, templated output. Context-driven guidance produces descriptions that feel human-written and address real buyer questions.
+The system prompt lives in code at `dashboard/src/lib/regeneration/prompts.ts` (git-versioned, code-reviewed). The Supabase `prompt_templates` table provides gold standard examples and category guidance (data), but the system prompt in the DB is **ignored** — code is authoritative.
 
-### What the Prompt Provides
+### How It Works
 
-1. **WHO is searching** - Homeowners renovating, designers specifying, people replacing broken products
-2. **WHAT questions buyers have** - "Will this look good?", "Will it match?", "Is $80 worth it vs $20?"
-3. **WHAT makes Allied Brass worth it** - Style + function, 28 finishes, product innovations, solid brass durability
-4. **PLATFORM context** - Google/Bing variants (first impression, make them click) vs Shopify master (already clicked, help them buy)
-
-### Why It Works
-
-The LLM already knows how to write compelling copy. The old approach was **blocking** that knowledge with compliance rules. By providing context instead of constraints, we let the LLM:
-- Write different descriptions for different product types (grab bars focus on safety, shower baskets focus on drainage)
-- Weave finish names naturally instead of using robotic patterns
-- Answer the actual questions buyers have before spending $80
-
-### Example Output Difference
-
-**Old (rule-following):**
-> "This 18.75-inch wall-mounted shower basket is crafted from solid brass. Available in Antique Brass. Antique Brass features a softened, aged golden patina..."
-
-**New (context-driven):**
-> "This 18.75-inch shower basket in Antique Brass keeps bath essentials organized with vintage-inspired warmth. Ventilated solid brass wires drain quickly and resist rust..."
+1. **Quality-First (DEFAULT)**: Standard products open with craftsmanship, materials, and design details
+2. **Pain-Point-First (ONLY when natural)**: Grab bars, rollerless TP holders, shower caddies — open with the problem, then the solution
+3. **Post-generation validation**: Content is checked against hard rules (no "Allied Brass" in Shopify titles, no hardcoded finish names in Google/Bing descriptions, etc.) with auto-retry on violations
 
 ### TypeScript Dashboard Content Generation
 
-The Next.js dashboard has its own content generation system at `dashboard/src/app/api/regenerate/route.ts`. For Google/Bing, it generates:
+The Next.js dashboard generates content via `dashboard/src/app/api/regenerate/route.ts` (single-SKU with feedback support) and `dashboard/src/lib/regeneration/core.ts` (shared logic for batch + single-SKU). For Google/Bing, it generates:
 1. **Base content** - Finish-agnostic title/description
 2. **Finish sentences** - 28 product+finish tailored sentences stored in `variant_finish_sentences`
 

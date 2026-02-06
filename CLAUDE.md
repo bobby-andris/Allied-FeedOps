@@ -80,7 +80,7 @@
 - `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking)
 - `lifestyle_image_selections` (audit trail for image selection decisions)
 - `variant_finish_sentences` (product+finish tailored sentences for Google/Bing variant content generation)
-- `prompt_templates` (versioned system prompts with gold standard examples, category guidance, platform rules)
+- `prompt_templates` (gold standard examples + category guidance; system prompt lives in code, DB `system_prompt` column is ignored)
 - `search_queries` (variant-level search terms with GMC offer ID mapping, Keyword Planner metrics)
 - `search_queries_by_master_sku` (aggregated search data by master SKU)
 - `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
@@ -110,7 +110,9 @@ GMC offer IDs:
 - API routes: `dashboard/src/app/api/**`
 - Supabase query layer: `dashboard/src/lib/supabase/{queries.ts,types.ts}`
 - Publishing libs: `dashboard/src/lib/publishing/*`
-- Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (stores prompt history; model default aligns to `gpt-5.2`)
+- Regeneration prompts (SINGLE SOURCE OF TRUTH): `dashboard/src/lib/regeneration/prompts.ts` (system prompt, finish list, platform context, validation)
+- Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (single-SKU generation with feedback; model default `gpt-5.2`)
+- Regeneration core: `dashboard/src/lib/regeneration/core.ts` (shared generation logic for batch + single-SKU)
 - Evidence table builder: `dashboard/src/lib/evidence/*` (builds rich product context for LLM prompts, includes search query insights)
 - Search query evidence: `src/feedops/integrations/search_query_insights.py` (Python) and `dashboard/src/lib/evidence/search-queries.ts` (TypeScript)
 - SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection algorithm)
@@ -128,7 +130,7 @@ GMC offer IDs:
 - Finish data: `dashboard/src/lib/finish-data.ts` (30 finish definitions; 28 used for content generation, excludes Military Camo and Red White and Blue)
 - Pipeline API: `src/feedops/api/main.py` (FastAPI endpoints for Cloud Run)
 - Pipeline client: `dashboard/src/lib/pipeline-client.ts` (TypeScript client for Cloud Run API)
-- Prompt loader: `dashboard/src/lib/prompts/loader.ts` (loads gold standard examples from Supabase)
+- Prompt loader: `dashboard/src/lib/prompts/loader.ts` (loads gold standard examples + category guidance from Supabase; system prompt is NOT loaded from DB)
 - Python prompt loader: `src/feedops/api/prompt_loader.py` (Python equivalent with fallback prompts)
 - Search insights page: `dashboard/src/app/(dashboard)/search-insights/page.tsx`
 - Search insights API: `dashboard/src/app/api/search-insights/*.ts` (sync triggers, job status)
