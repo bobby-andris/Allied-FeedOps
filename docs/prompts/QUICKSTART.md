@@ -26,13 +26,19 @@
     - Performance baseline capture + post-publish snapshots
     - SKU selection prioritization based on performance data
 
+### Phase 5b: Publishing Enhancements
+11. **Prompt 23** → Structured Content, Lifestyle Images & Shopify Strategy
+    - GMC AI content disclosure (`structured_title` / `structured_description`)
+    - Lifestyle image publishing to `lifestyle_image_link` column
+    - Shopify variant vs master SKU strategy documentation
+
 ### Phase 6: Future-Proofing & ROI
-11. **Prompt 15** → Agentic Commerce (UCP)
-12. **Prompt 12** → A/B Testing Dashboard
-13. **Prompt 16** → Multi-Variant Images
+12. **Prompt 15** → Agentic Commerce (UCP)
+13. **Prompt 12** → A/B Testing Dashboard
+14. **Prompt 16** → Multi-Variant Images
 
 ### Phase 7: Final Audit (ALWAYS LAST)
-14. **Prompt 11** → Production Readiness Audit
+15. **Prompt 11** → Production Readiness Audit
 
 After each prompt, run the **Verification & Completion Prompt** below.
 
@@ -928,6 +934,82 @@ Boost priority for:
 4. FOR each feature: `/superpowers:test-driven-development` - write tests first
 5. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run in parallel
 6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands
+
+Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
+
+Do NOT commit changes until the full implementation is verified with passing tests and builds.
+```
+
+---
+
+## Quick Start: Prompt 23 (Publishing Enhancements — Structured Content, Lifestyle Images & Shopify Strategy)
+
+**When to run:** After Prompt 22 — enhances the publishing pipeline with GMC compliance, lifestyle images, and Shopify strategy
+
+**Prerequisites:**
+- CI/CD is operational (Cloud Build trigger + Vercel auto-deploy on push to master)
+- All GCP secrets already configured (see CLAUDE.md — DO NOT recreate)
+- Publishing pipeline working (Prompts 01-06 implemented)
+- Lifestyle image approval workflow implemented (Prompt 20)
+
+**Copy and paste into a new Claude Code chat:**
+
+```
+I need to enhance the publishing pipeline with structured content, lifestyle images, and Shopify strategy. Please enter plan mode and use the prompt at docs/prompts/23-publishing-enhancements.md as your guide.
+
+Key context:
+- Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
+- Dashboard: /dashboard (Next.js 14+)
+- Google Sheets supplemental feed: 11 columns (A:id through K:custom_label_4), ~59,589 rows
+- Offer ID format: shopify_US_{product_id}_{variant_id} (uppercase US)
+- Publishing code: dashboard/src/lib/publishing/
+
+IMPORTANT: CI/CD is fully operational. All secrets exist. DO NOT:
+- Create new GCP secrets (all 8 already exist)
+- Create Cloud Build triggers (already exists)
+- Run manual deploys (CI/CD handles this)
+
+CRITICAL SAFETY: The `buildColumnMap` function in google-sheets.ts builds the column map PURELY from sheet headers (no defaults). A recent data corruption bug was caused by hardcoded defaults. Do NOT reintroduce default column positions.
+
+## THREE TASKS
+
+**Task 1: Add structured_title / structured_description to Google Sheets**
+- Add two columns at the END of the sheet (after column K)
+- Use compound format: `trained_algorithmic_media:"content text"`
+- Enable structured-only mode (FEEDOPS_GMC_STRUCTURED_ONLY=1) — omit plain title/description
+- Use ensureLifestyleImageColumn() as a pattern for ensureStructuredColumns()
+- GoogleSheetsRow type already has the fields — just need compound format builder
+
+**Task 2: Wire lifestyle image publishing to Google Sheets**
+- During publish, query `generated_images` for approved images (approval_status='approved')
+- If use_for_master=true, apply same image URL to all variants
+- Pass image_url through expand-variants → publish routes → Google Sheets
+- ensureLifestyleImageColumn() already handles adding the column
+- lifestyle_image_link is a real GMC attribute — does NOT require Shopify publishing
+
+**Task 3: Document Shopify variant vs master SKU strategy**
+- Research Shopify data model (product-level vs variant-level content)
+- Decide: keep product-level only (Option A), use metafields (Option B), or SEO fields (Option C)
+- Research image publishing via productCreateMedia or productAppendImages mutations
+- Document the decided strategy in CLAUDE.md
+
+## FILES TO MODIFY
+
+- dashboard/src/lib/publishing/google-sheets.ts — ensureStructuredColumns(), compound format in rowDataToValues()
+- dashboard/src/lib/publishing/types.ts — Update types if needed for compound format
+- dashboard/src/lib/publishing/expand-variants.ts — Add image URL lookup
+- dashboard/src/app/api/publish/sku/route.ts — Pass image URLs through
+- dashboard/src/app/api/publish/batch/route.ts — Pass image URLs through
+- CLAUDE.md — Document Shopify strategy
+
+## REQUIRED WORKFLOW (superpowers skills)
+
+1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
+2. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
+3. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
+4. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
+5. FOR any bugs found: `/superpowers:systematic-debugging` - investigate before fixing
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
 
 Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
 
