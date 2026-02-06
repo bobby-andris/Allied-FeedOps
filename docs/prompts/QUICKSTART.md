@@ -19,8 +19,12 @@
 8. **Prompt 09** → GCP Cloud Run Setup
 9. **Prompt 21** → Unify TypeScript & Python Methodology (CRITICAL)
 
-### Phase 5: Performance Monitoring
-10. **Prompt 22** → Performance Data Lifecycle (verify Search Insights sync works first)
+### Phase 5: Search Insights & Performance Monitoring
+10. **Prompt 22** → Search Insights & Performance Data Lifecycle
+    - Review page Insight Cards (search queries, performance, quality scoring)
+    - Evidence table integration (keywords in LLM prompts)
+    - Performance baseline capture + post-publish snapshots
+    - SKU selection prioritization based on performance data
 
 ### Phase 6: Future-Proofing & ROI
 11. **Prompt 15** → Agentic Commerce (UCP)
@@ -844,56 +848,86 @@ Do NOT commit changes until the full implementation is verified with passing tes
 
 ---
 
-## Quick Start: Prompt 22 (Performance Data Lifecycle)
+## Quick Start: Prompt 22 (Search Insights & Performance Data Lifecycle)
 
-**When to run:** After CI/CD is operational - investigates and implements performance monitoring
+**When to run:** After CI/CD is operational - implements the complete data lifecycle from search queries through content generation and review
 
 **Prerequisites:**
 - CI/CD is operational (Cloud Build trigger + Vercel auto-deploy on push to master)
 - All GCP secrets already configured (see CLAUDE.md - DO NOT recreate)
+- Prompt 14 (Search Query Insights) implemented
 
 **Copy and paste into a new Claude Code chat:**
 
 ```
-I need to investigate and implement the performance data lifecycle for FeedOps. Please enter plan mode and use the prompt at docs/prompts/22-performance-data-lifecycle.md as your guide.
+I need to implement the complete Search Insights & Performance Data Lifecycle for FeedOps. Please enter plan mode and use the prompt at docs/prompts/22-performance-data-lifecycle.md as your guide.
 
 Key context:
 - Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
 - Dashboard: /dashboard (Next.js 14+)
 - Cloud Run service: https://feedops-pipeline-623866089882.us-east1.run.app
 - Google Ads customer ID: 6253381786
+- Scoring rubric: See AGENTS.md for 6-dimension content quality scoring
 
 IMPORTANT: CI/CD is fully operational. All secrets exist. DO NOT:
 - Create new GCP secrets (all 8 already exist)
 - Create Cloud Build triggers (already exists)
 - Run manual deploys (CI/CD handles this)
 
-Step 0 - Verify Search Insights works:
-1. Navigate to https://allied-feed-ops.vercel.app/search-insights
-2. Click "Sync Data" - should start syncing
-3. If it fails, use systematic-debugging to investigate
+## THE GOAL: Closed-Loop Data System
 
-MCP Tools to Use:
+1. **Search data** → informs what keywords to include in content
+2. **Performance data** → measures how well content performs after publishing
+3. **Review page** → surfaces both to help reviewers make decisions
+4. **Content generation** → automatically incorporates high-value keywords
+
+## PHASES TO IMPLEMENT
+
+**Phase 1: Review Page Insight Cards** (use `frontend-design` skill)
+Create 3 collapsible cards in the Review page sidebar:
+- SearchInsightsCard: Top queries, keyword gaps, volume data
+- PerformanceCard: CTR, impressions, baseline vs current comparison
+- ContentQualityCard: 6-dimension scoring from AGENTS.md
+
+Design system:
+- Status colors: emerald-500 (good), amber-500 (warning), red-500 (critical)
+- Collapsed by default with key metric visible
+- Status indicator dot showing health at a glance
+
+**Phase 2: Evidence Table Integration**
+Verify search query data flows into LLM prompts:
+- Top queries with volume
+- Keyword gaps explicitly called out
+- "PRIORITIZE including X in title" recommendations
+
+**Phase 3: Performance Baseline Capture**
+Before publishing: capture 30-day baseline metrics
+Store in: performance_baselines table
+
+**Phase 4: Post-Publish Snapshots**
+After publishing: periodic snapshot capture
+Store in: performance_snapshots table
+Start with manual API endpoint, add cron later
+
+**Phase 5: SKU Selection Prioritization**
+Boost priority for:
+- High-traffic, low-CTR products (need optimization most)
+- Products with declining performance
+
+## MCP Tools to Use
 - **Supabase MCP** (`mcp__supabase__execute_sql`): Query tables directly
 - **Vercel MCP** (`mcp__vercel__get_runtime_logs`): Debug API issues
 - **Playwright MCP** (`mcp__plugin_playwright_playwright__*`): Visual verification
 - **Google Ads MCP** (`mcp__google-ads-mcp__*`): Test API queries
 
-Goals:
-1. Verify Search Insights sync works (Step 0)
-2. Investigate performance data tables (performance_baselines, performance_snapshots)
-3. Determine if baseline capture happens before publishing
-4. Determine if snapshots are being scheduled
-5. Design and implement complete performance monitoring lifecycle
-
-**REQUIRED WORKFLOW (superpowers skills):**
+## REQUIRED WORKFLOW (superpowers skills)
 
 1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
-2. FOR any issues found: `/superpowers:systematic-debugging` - investigate before fixing
-3. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
-4. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
-5. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
-6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands, show evidence
+2. FOR Review Page UI: `/frontend-design` - implement the Insight Cards with proper design system
+3. FOR any issues found: `/superpowers:systematic-debugging` - investigate before fixing
+4. FOR each feature: `/superpowers:test-driven-development` - write tests first
+5. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run in parallel
+6. BEFORE claiming done: `/superpowers:verification-before-completion` - run verification commands
 
 Use `TaskCreate` to build a task list from the plan. Use `TaskUpdate` to mark tasks in_progress and completed.
 
