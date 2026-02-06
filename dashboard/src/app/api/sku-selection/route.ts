@@ -88,7 +88,9 @@ export async function GET(request: Request) {
             }
           })
         } catch (googleAdsError) {
-          const errorMsg = googleAdsError instanceof Error ? googleAdsError.message : String(googleAdsError)
+          const errorMsg = googleAdsError instanceof Error
+            ? googleAdsError.message
+            : JSON.stringify(googleAdsError, null, 2)
           console.error('Google Ads API failed, falling back to sample data:', errorMsg)
           googleAdsErrorMessage = errorMsg
           skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
