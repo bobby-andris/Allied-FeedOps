@@ -1,5 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
+
+const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
 
 interface GenerateRequest {
   skus: string[]
@@ -46,67 +47,41 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createAdminClient()
-
-    // Create batch job record
-    const { data: job, error: jobError } = await supabase
-      .from('batch_generation_jobs')
-      .insert({
-        status: 'queued',
-        total_skus: skus.length,
-        options: options,
-      })
-      .select()
-      .single()
-
-    if (jobError) {
-      console.error('Failed to create batch job:', jobError)
+    if (!PIPELINE_URL) {
       return NextResponse.json(
-        { error: 'Failed to create generation job' },
-        { status: 500 }
+        { error: 'Content generation pipeline is not configured (FEEDOPS_PIPELINE_URL not set)' },
+        { status: 503 }
       )
     }
 
-    // Insert SKU records
-    const skuRecords = skus.map((sku) => ({
-      job_id: job.id,
-      master_sku: sku,
-      status: 'pending' as const,
-    }))
+    // Call Cloud Run's batch-optimize endpoint
+    // Cloud Run creates job records and processes SKUs in the background
+    const response = await fetch(`${PIPELINE_URL}/batch-optimize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        skus,
+        num_candidates: options.num_candidates ?? 1,
+        dry_run: false,
+      }),
+    })
 
-    const { error: skuError } = await supabase
-      .from('batch_generation_job_skus')
-      .insert(skuRecords)
-
-    if (skuError) {
-      console.error('Failed to create batch job SKUs:', skuError)
-      // Clean up the job
-      await supabase.from('batch_generation_jobs').delete().eq('id', job.id)
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}))
+      console.error('Cloud Run batch-optimize failed:', response.status, errorBody)
       return NextResponse.json(
-        { error: 'Failed to queue SKUs for generation' },
-        { status: 500 }
+        { error: errorBody.detail || 'Failed to start content generation pipeline' },
+        { status: response.status }
       )
     }
 
-    // Calculate estimated time based on options
-    let contentTypesCount = 0
-    if (options.titles) contentTypesCount++
-    if (options.descriptions) contentTypesCount++
-    if (options.images) contentTypesCount += 2 // Images take longer
-
-    const estimatedMinutes = Math.ceil(
-      (skus.length * contentTypesCount * options.platforms.length * 0.5) / 60
-    ) + 1
-
-    // TODO: In production, trigger Cloud Run job or background worker here
-    // For now, the job stays in 'queued' status
+    const result = await response.json()
 
     return NextResponse.json({
       success: true,
-      job_id: job.id,
-      status: 'queued',
-      total_skus: skus.length,
-      estimated_minutes: Math.max(estimatedMinutes, 1),
+      job_id: result.job_id,
+      status: result.status,
+      total_skus: result.total_skus,
     })
   } catch (error) {
     console.error('Generation API error:', error)
