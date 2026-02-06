@@ -135,8 +135,8 @@ ${examplesSection}${categoryGuidanceSection}
 ${evidenceMarkdown}
 
 CRITICAL RULES:
-- For Google/Bing titles: Use {FINISH_NAME} placeholder at the START, then product/specs, then collection, then "Allied Brass"
-- For Shopify titles: NO finish placeholder, NO "Allied Brass" anywhere in the title
+- For Google/Bing titles: Use {FINISH_NAME} placeholder at the START, then product/specs, then "[Collection Name] Collection", then "Allied Brass". ALWAYS append "Collection" after the collection name.
+- For Shopify titles: Must be the inner core of the Google/Bing title — same product, same specs, minus {FINISH_NAME} and "Allied Brass". Structure: [Collection Name] Collection [Product] [Key Specs] - [Differentiator]. ALWAYS append "Collection" after the collection name.
 - For Shopify descriptions: NO "Allied Brass", NO specific finish names
 
 Respond with ONLY the ${contentType} text, no additional explanation.`,

@@ -47,10 +47,11 @@ interface ProductImageData {
   variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
-// Current production content from product_catalog (what's live on Shopify)
-interface CurrentProductionContent {
-  title: string | null
-  description: string | null  // narrative_copy from product_catalog
+// Per-platform "current" content for comparison display
+// - Shopify: from product_catalog (what's actually live on Shopify)
+// - Google/Bing: from baseline_content in generated_content (previous generation)
+interface CurrentContentByPlatform {
+  [platform: string]: { title: string | null; description: string | null }
 }
 
 interface ApprovalRecord {
@@ -202,7 +203,7 @@ async function getSkuData(urlSku: string) {
 
   // Build product images data structure and current production content
   let productImages: ProductImageData | null = null
-  let currentProduction: CurrentProductionContent | null = null
+  const currentContentByPlatform: CurrentContentByPlatform = {}
   if (productCatalog && productCatalog.length > 0) {
     const firstProduct = productCatalog[0]
     const shopifyProductUrl = variantForShopify?.shopify_product_id
@@ -237,8 +238,8 @@ async function getSkuData(urlSku: string) {
       variantImages: variantImagesMap,
     }
 
-    // Current production content (what's live on Shopify)
-    currentProduction = {
+    // Shopify: use product_catalog data (what's actually live on Shopify)
+    currentContentByPlatform['shopify'] = {
       title: firstProduct.title,
       description: firstProduct.narrative_copy,
     }
@@ -252,6 +253,21 @@ async function getSkuData(urlSku: string) {
         variantCurrentContent[product.option_sku] = {
           title: product.title,
           description: product.narrative_copy,
+        }
+      }
+    }
+  }
+
+  // Google/Bing: use baseline_content from generated_content (previous generation)
+  if (content && content.length > 0) {
+    for (const platform of ['google', 'bing']) {
+      const platformRecords = (content as ContentRecord[]).filter(c => c.platform === platform)
+      const titleBaseline = platformRecords.find(c => c.content_type === 'title')?.baseline_content || null
+      const descBaseline = platformRecords.find(c => c.content_type === 'description')?.baseline_content || null
+      if (titleBaseline || descBaseline) {
+        currentContentByPlatform[platform] = {
+          title: titleBaseline,
+          description: descBaseline,
         }
       }
     }
@@ -285,7 +301,7 @@ async function getSkuData(urlSku: string) {
     variants: (variants || []) as VariantIndex[],
     variantApprovals: (variantApprovals || []) as VariantApproval[],
     productImages,
-    currentProduction,
+    currentContentByPlatform,
     variantCurrentContent,
     finishSentences: {
       google: googleFinishSentences?.finish_sentences as Record<string, string> | null || null,
@@ -300,7 +316,7 @@ export default async function SkuReviewPage({
   params: Promise<{ sku: string }>
 }) {
   const { sku } = await params
-  const { content, images, approval, variants, variantApprovals, productImages, currentProduction, variantCurrentContent, finishSentences } = await getSkuData(sku)
+  const { content, images, approval, variants, variantApprovals, productImages, currentContentByPlatform, variantCurrentContent, finishSentences } = await getSkuData(sku)
 
   if (content.length === 0) {
     notFound()
@@ -315,7 +331,7 @@ export default async function SkuReviewPage({
       variants={variants}
       variantApprovals={variantApprovals}
       productImages={productImages}
-      currentProduction={currentProduction}
+      currentContentByPlatform={currentContentByPlatform}
       variantCurrentContent={variantCurrentContent}
       finishSentences={finishSentences}
     />

@@ -73,10 +73,11 @@ interface ProductImageData {
   variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
-// Current production content from product_catalog (what's live on Shopify)
-interface CurrentProductionContent {
-  title: string | null
-  description: string | null
+// Per-platform "current" content
+// - Shopify: from product_catalog (what's actually live on Shopify)
+// - Google/Bing: from baseline_content (previous generation)
+interface CurrentContentByPlatform {
+  [platform: string]: { title: string | null; description: string | null }
 }
 
 interface ApprovalRecord {
@@ -194,7 +195,7 @@ interface SkuReviewClientProps {
   variants: VariantIndex[]
   variantApprovals: VariantApproval[]
   productImages: ProductImageData | null
-  currentProduction: CurrentProductionContent | null
+  currentContentByPlatform: CurrentContentByPlatform
   variantCurrentContent: Record<string, { title: string | null; description: string | null }>
   /** Product+finish tailored sentences for Google and Bing */
   finishSentences?: {
@@ -241,6 +242,7 @@ function previewWithSampleFinish(content: string | null): { preview: string | nu
 function ContentComparison({
   label,
   currentLive,
+  liveLabel,
   candidate,
   score,
   sku,
@@ -249,7 +251,8 @@ function ContentComparison({
   platform
 }: {
   label: string
-  currentLive: string | null  // What's currently live on the website/feed
+  currentLive: string | null
+  liveLabel: string
   candidate: string | null
   score: number | null
   sku: string
@@ -292,7 +295,7 @@ function ContentComparison({
       <CardContent>
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <div className="text-sm font-medium text-muted-foreground mb-2">Current (Live)</div>
+            <div className="text-sm font-medium text-muted-foreground mb-2">{liveLabel}</div>
             <div className="p-4 rounded-lg bg-muted/50 border whitespace-pre-wrap min-h-[100px]">
               {currentLive || <span className="text-muted-foreground italic">No current content found</span>}
             </div>
@@ -345,13 +348,15 @@ function PlatformContent({
   content,
   sku,
   finish,
-  currentProduction
+  currentContent,
+  liveLabel,
 }: {
   platform: string
   content: ContentRecord[]
   sku: string
   finish: string | null
-  currentProduction: CurrentProductionContent | null
+  currentContent: { title: string | null; description: string | null } | undefined
+  liveLabel: string
 }) {
   const { title, description } = getContentByPlatform(content, platform)
 
@@ -372,7 +377,8 @@ function PlatformContent({
         {title && (
           <ContentComparison
             label="Title"
-            currentLive={currentProduction?.title || null}
+            currentLive={currentContent?.title || null}
+            liveLabel={liveLabel}
             candidate={title.candidate_content}
             score={title.quality_score}
             sku={sku}
@@ -384,7 +390,8 @@ function PlatformContent({
         {description && (
           <ContentComparison
             label="Description"
-            currentLive={currentProduction?.description || null}
+            currentLive={currentContent?.description || null}
+            liveLabel={liveLabel}
             candidate={description.candidate_content}
             score={description.quality_score}
             sku={sku}
@@ -415,7 +422,7 @@ export function SkuReviewClient({
   variants,
   variantApprovals,
   productImages,
-  currentProduction,
+  currentContentByPlatform,
   variantCurrentContent,
   finishSentences,
 }: SkuReviewClientProps) {
@@ -549,7 +556,7 @@ export function SkuReviewClient({
                 Template uses &#123;FINISH_NAME&#125; for 28 variants
               </span>
             </div>
-            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
+            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['google']} liveLabel="Previous Version" />
             {/* All Variants Grid for Google */}
             {hasVariants && (
               <VariantContentGrid
@@ -578,7 +585,7 @@ export function SkuReviewClient({
                 Template uses &#123;FINISH_NAME&#125; for 28 variants
               </span>
             </div>
-            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
+            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['bing']} liveLabel="Previous Version" />
             {/* All Variants Grid for Bing */}
             {hasVariants && (
               <VariantContentGrid
@@ -607,7 +614,7 @@ export function SkuReviewClient({
                 No finish placeholder - content applies to all variants
               </span>
             </div>
-            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentProduction={currentProduction} />
+            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['shopify']} liveLabel="Current (Live)" />
           </TabsContent>
         )}
       </Tabs>

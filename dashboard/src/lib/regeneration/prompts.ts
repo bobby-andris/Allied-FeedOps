@@ -90,17 +90,22 @@ ONLY for products with clear, natural frustrations:
 DO NOT manufacture drama where none exists. Authenticity matters.
 
 ### Title Structure (Google/Bing)
-{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
+{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection Name] Collection - Allied Brass
 
 - Lead with finish (search relevance, immediate style context)
+- ALWAYS append "Collection" after the collection name (e.g., "Astor Place Collection", NOT just "Astor Place") — our collections are not well-known brands
 - Collection before brand (coordination buyers, not brand recognition)
 - Include differentiating features ("Space-Saving", "No Spring", "Rust Proof")
+- If no collection exists, omit the collection segment entirely
 
 ### Shopify Titles
 - NO {FINISH_NAME} placeholder (user already viewing specific variant)
 - NO "Allied Brass" anywhere in the title (user already on the site)
-- Include collection name and key product specs
-- Create a clear, descriptive title that highlights the product's key benefit
+- Structure: [Collection Name] Collection [Product Type] [Key Specs] - [Differentiator]
+- Must be the "inner core" of the Google/Bing title (same product identity, minus finish and brand)
+- ALWAYS append "Collection" after the collection name (e.g., "Astor Place Collection", NOT just "Astor Place")
+- Include: collection name (if available), product type, key dimension/spec, differentiating feature
+- If collection is null/empty, lead with the category or product type instead
 
 ### Descriptions
 - ASSESS FIRST: Does this product have a natural pain point?
@@ -137,15 +142,15 @@ Each sentence should describe how THAT finish enhances THIS specific product.
  */
 export const PLATFORM_CONTEXT: Record<string, Record<string, string>> = {
   google: {
-    title: 'Google Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Lead with finish placeholder for search relevance. Make them want to click.',
+    title: 'Google Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection Name] Collection - Allied Brass. ALWAYS append "Collection" after the collection name. If no collection, omit the collection segment. Lead with finish for search relevance.',
     description: 'Google Shopping description - Assess first: does this product have a natural pain point? If yes, open with the problem. If no, open with quality/craftsmanship. Write for a human scanning Shopping ads. Include material quality and dimensions. Plain text, 600-800 characters.',
   },
   bing: {
-    title: 'Bing Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass. Include natural product synonyms across different sentences. Make them want to click.',
+    title: 'Bing Shopping title - Format: {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection Name] Collection - Allied Brass. ALWAYS append "Collection" after the collection name. Include natural product synonyms across different sentences.',
     description: 'Bing Shopping description - Same balanced assessment as Google (quality-first default, pain-point only when natural). Include product synonyms naturally across different sentences (NOT parenthetical dumps). Include specific dimensions and materials. Plain text, 700-1000 characters.',
   },
   shopify: {
-    title: 'Shopify product title (H1). RULES: 1) NO finish names anywhere. 2) NO "Allied Brass" anywhere. 3) Include collection name. 4) Include key product spec (dimension, material). 5) Create something fresh and descriptive, not a copy of the existing title.',
+    title: 'Shopify product title (H1). Structure: [Collection Name] Collection [Product Type] [Key Specs] - [Differentiator]. Must be the inner core of the Google/Bing title — same product identity, minus finish and brand. RULES: 1) NO finish names. 2) NO "Allied Brass". 3) ALWAYS append "Collection" after collection name. 4) Include key spec (dimension, material). 5) Must be recognizable as the same product from Google Shopping.',
     description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome when natural, otherwise lead with quality/craftsmanship. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets. Do NOT include specific finish names or "Allied Brass".',
   },
 }
@@ -155,15 +160,15 @@ export const PLATFORM_CONTEXT: Record<string, Record<string, string>> = {
  */
 export const SIMPLE_PLATFORM_CONTEXT: Record<string, Record<string, string>> = {
   google: {
-    title: 'Google Shopping title - {FINISH_NAME} [Product] [Specs] - [Collection] - Allied Brass',
+    title: 'Google Shopping title - {FINISH_NAME} [Product] [Specs] - [Collection Name] Collection - Allied Brass. Append "Collection" after collection name.',
     description: 'Google Shopping description - Plain text only, 600-800 characters.',
   },
   bing: {
-    title: 'Bing Shopping title - {FINISH_NAME} [Product] [Specs] - [Collection] - Allied Brass',
+    title: 'Bing Shopping title - {FINISH_NAME} [Product] [Specs] - [Collection Name] Collection - Allied Brass. Append "Collection" after collection name.',
     description: 'Bing Shopping description - Plain text only, 700-1000 characters.',
   },
   shopify: {
-    title: 'Shopify product title - NO finish name, NO "Allied Brass".',
+    title: 'Shopify product title - [Collection Name] Collection [Product] [Specs] - [Differentiator]. NO finish name, NO "Allied Brass". Must be inner core of Google/Bing title.',
     description: 'Shopify description - HTML format. NO "Allied Brass", NO specific finish names.',
   },
 }
@@ -237,6 +242,11 @@ export function validateGeneratedContent(
   // Title minimum length
   if (contentType === 'title' && content.length < 30) {
     violations.push(`Title too short (${content.length} chars, minimum 30)`)
+  }
+
+  // Shopify titles need more substance (they're the H1 on the product page)
+  if (platform === 'shopify' && contentType === 'title' && content.length < 40) {
+    violations.push(`Shopify title too short (${content.length} chars, minimum 40 for H1)`)
   }
 
   // Title is just a SKU or brand name

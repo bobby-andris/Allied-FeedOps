@@ -6,7 +6,7 @@
     "custom_label_0_diversity": "Different collections within same product types",
     "design_styles": ["Traditional", "Contemporary", "Transitional"]
   },
-  "title_structure": "{FINISH_NAME} [Product] [Specs] - [Collection] - Allied Brass",
+  "title_structure": "{FINISH_NAME} [Product] [Specs] - [Collection Name] Collection - Allied Brass",
   "finish_count": 28,
   "excluded_finishes": ["Military Camo", "Red White and Blue"],
   "examples": [
@@ -29,8 +29,8 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} 24 Inch Solid Brass Towel Bar - Wall Mounted - Astor Place - Allied Brass",
-        "bing_title": "{FINISH_NAME} 24 Inch Solid Brass Towel Bar - Wall Mounted - Astor Place - Allied Brass",
+        "google_title": "{FINISH_NAME} 24 Inch Solid Brass Towel Bar - Wall Mounted - Astor Place Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} 24 Inch Solid Brass Towel Bar - Wall Mounted - Astor Place Collection - Allied Brass",
         "shopify_title": "Astor Place Collection 24 Inch Towel Bar",
         "google_description": "A towel bar should look as good as the rest of your bathroom. This 24-inch bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional Astor Place detailing that coordinates with quality fixtures. Concealed mounting hardware provides clean installation, and the wall-mounted design keeps floor space clear. {FINISH_SENTENCE} Hand-polished designer finishes ensure this towel bar matches your existing bathroom hardware.",
         "bing_description": "A towel rack should look as good as the rest of your bathroom hardware. This 24-inch towel bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional Astor Place detailing that coordinates with quality fixtures. Concealed mounting hardware provides clean installation, and the wall-mounted towel holder keeps floor space clear. {FINISH_SENTENCE} Hand-polished designer finishes ensure this bathroom towel bar matches your existing accessories. Limited lifetime warranty included.",
@@ -65,7 +65,7 @@
           "Unlacquered Brass": "Unlacquered Brass develops a unique living patina that adds character over time.",
           "Venetian Bronze": "Venetian Bronze combines deep bronze with golden highlights for a warm, European feel."
         },
-        "why_it_works": "BALANCED APPROACH: Quality-first opening is correct here — a standard towel bar has no dramatic pain point. Description focuses on craftsmanship (solid brass vs hollow tubing) without manufacturing drama. Title leads with finish (search relevance), includes key specs, places collection before brand. Bing version uses synonyms naturally across sentences (towel bar, towel rack, towel holder) instead of stacking them in parentheses. Shopify title has NO Allied Brass, NO finish name."
+        "why_it_works": "BALANCED APPROACH: Quality-first opening is correct here — a standard towel bar has no dramatic pain point. Description focuses on craftsmanship (solid brass vs hollow tubing) without manufacturing drama. Title leads with finish (search relevance), includes key specs, places collection before brand. Bing version uses synonyms naturally across sentences (towel bar, towel rack, towel holder) instead of stacking them in parentheses. Shopify title has NO Allied Brass, NO finish name. Shopify title is the inner core of Google title — same product identity (24 Inch Towel Bar, Astor Place Collection), minus finish and brand."
       }
     },
     {
@@ -87,8 +87,8 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Towel Bar with Hooks 24 Inch - Space-Saving Dual Function - Dottingham - Allied Brass",
-        "bing_title": "{FINISH_NAME} Towel Bar with Hooks 24 Inch - Space-Saving Dual Function - Dottingham - Allied Brass",
+        "google_title": "{FINISH_NAME} Towel Bar with Hooks 24 Inch - Space-Saving Dual Function - Dottingham Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Towel Bar with Hooks 24 Inch - Space-Saving Dual Function - Dottingham Collection - Allied Brass",
         "shopify_title": "Dottingham Collection 24 Inch Towel Bar with Integrated Hooks",
         "google_description": "Small bathrooms mean tough choices: towel bar OR robe hooks, bath towels OR hand towels dripping on the doorknob. This dual-function fixture ends the compromise with a 24-inch bar for bath towels plus integrated end hooks for robes, hand towels, or items that need to air out—all in one wall-mounted fixture. The Dottingham Collection design blends contemporary clean lines with traditional dotted accents. Solid brass construction handles the weight of wet towels without sagging. {FINISH_SENTENCE} Concealed mounting hardware keeps the installation clean.",
         "bing_description": "Small bathrooms force compromises between a towel rack and robe hooks, but this dual-function towel bar with integrated hooks handles both. The 24-inch wall-mounted bar holds bath towels while the end hooks keep robes, hand towels, or damp items ready to air out. The Dottingham Collection design combines clean contemporary lines with traditional dotted detailing. Solid brass construction supports the weight of wet towels without sagging. {FINISH_SENTENCE} Concealed screw mounting hardware keeps the finished look tidy. Limited lifetime warranty.",
@@ -145,9 +145,9 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Decorative ADA Grab Bar 24 Inch - Stylish Safety Rail - Cube Design - Allied Brass",
-        "bing_title": "{FINISH_NAME} Decorative ADA Grab Bar 24 Inch - Stylish Safety Rail - Cube Design - Allied Brass",
-        "shopify_title": "Cube Design Smooth Grab Bar - 24 Inch",
+        "google_title": "{FINISH_NAME} Decorative ADA Grab Bar 24 Inch - Stylish Safety Rail - Cube Design Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Decorative ADA Grab Bar 24 Inch - Stylish Safety Rail - Cube Design Collection - Allied Brass",
+        "shopify_title": "Cube Design Collection Smooth Grab Bar - 24 Inch",
         "google_description": "Most grab bars look institutional—they scream 'hospital bathroom' and ruin the aesthetic you've worked to create. This Cube Design bar delivers ADA-compliant safety support with contemporary geometric styling that actually enhances your bathroom decor instead of detracting from it. The smooth 1-3/8 inch diameter bar is sized for a secure grip in tub, shower, or toilet areas. Solid brass construction withstands daily use in wet environments. {FINISH_SENTENCE} Concealed mounting hardware maintains the sleek appearance while ensuring secure installation.",
         "bing_description": "Most safety grab bars scream 'hospital bathroom' and ruin the look you've worked to create. This decorative ADA grab bar from the Cube Design collection delivers stylish safety support with contemporary geometric styling that enhances your bathroom instead of detracting from it. The smooth 1-3/8 inch diameter safety rail is sized for a secure grip near the tub, shower, or toilet. Solid brass construction withstands daily use in wet environments. {FINISH_SENTENCE} Concealed screw mounting hardware maintains the sleek appearance. Limited lifetime warranty.",
         "shopify_description": "Most grab bars look institutional—they scream 'hospital bathroom' and ruin the aesthetic you've worked to create. This Cube Design bar delivers ADA-compliant safety support with contemporary geometric styling that actually enhances your bathroom decor instead of detracting from it. The smooth 1-3/8 inch diameter bar is sized for a secure grip in tub, shower, or toilet areas. Solid brass construction withstands daily use in wet environments. Concealed mounting hardware maintains the sleek appearance while ensuring secure installation.",
@@ -203,8 +203,8 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Rollerless Toilet Paper Holder - No Spring to Break - Fresno - Allied Brass",
-        "bing_title": "{FINISH_NAME} Rollerless Toilet Paper Holder - No Spring to Break - Fresno - Allied Brass",
+        "google_title": "{FINISH_NAME} Rollerless Toilet Paper Holder - No Spring to Break - Fresno Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Rollerless Toilet Paper Holder - No Spring to Break - Fresno Collection - Allied Brass",
         "shopify_title": "Fresno Collection Rollerless Toilet Paper Holder",
         "google_description": "Empty toilet paper rolls sit there because replacing them is a hassle. Wrestling with stuck springs, fighting broken plastic—everyone leaves it for 'someone else.' This rollerless design changes that. Gravity-pivoting pegs make changing the roll so effortless there's no excuse not to do it: lift the empty roll out, set the new one in place, done. The Fresno Collection brings traditional styling with decorative detailing. Solid brass construction means no plastic parts to crack or springs to stick. {FINISH_SENTENCE} Concealed mounting hardware keeps the installation clean.",
         "bing_description": "Empty toilet paper rolls sit there because replacing them is a hassle. Wrestling with stuck springs, fighting broken plastic—everyone leaves it for 'someone else.' This rollerless design changes that. Gravity-pivoting pegs make changing the roll so effortless there's no excuse not to do it: lift the empty roll out, set the new one in place, done. The Fresno Collection brings traditional styling with decorative detailing. Solid brass construction means no plastic parts to crack or springs to stick. {FINISH_SENTENCE} Concealed mounting hardware keeps the installation clean.",
@@ -261,9 +261,9 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Toilet Paper Holder with Glass Shelf - Phone Shelf Built In - Carolina - Allied Brass",
-        "bing_title": "{FINISH_NAME} Toilet Paper Holder with Glass Shelf - Phone Shelf Built In - Carolina - Allied Brass",
-        "shopify_title": "Carolina Two Post Toilet Paper Holder with Glass Shelf",
+        "google_title": "{FINISH_NAME} Toilet Paper Holder with Glass Shelf - Phone Shelf Built In - Carolina Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Toilet Paper Holder with Glass Shelf - Phone Shelf Built In - Carolina Collection - Allied Brass",
+        "shopify_title": "Carolina Collection Two Post Toilet Paper Holder with Glass Shelf",
         "google_description": "Your phone needs somewhere to go in the bathroom—not balanced on the toilet tank where it could fall, not stuffed in a pocket, not set on the floor. This toilet paper holder includes a 5x8 inch tempered glass shelf sized perfectly for phones, glasses, or small items. The Carolina Collection design uses two-post traditional styling that fits classic bathroom decor. Solid brass posts and hardware provide lasting durability. The compact shelf size fits the space above most toilets without overhanging. {FINISH_SENTENCE} Concealed mounting hardware and easy roll loading complete the thoughtful design.",
         "bing_description": "Your phone needs somewhere to go in the bathroom—not balanced on the toilet tank where it could fall, not stuffed in a pocket, not set on the floor. This toilet paper holder includes a 5x8 inch tempered glass shelf sized perfectly for phones, glasses, or small items. The Carolina Collection design uses two-post traditional styling that fits classic bathroom decor. Solid brass posts and hardware provide lasting durability. The compact shelf size fits the space above most toilets without overhanging. {FINISH_SENTENCE} Concealed mounting hardware and easy roll loading complete the thoughtful design.",
         "shopify_description": "Your phone needs somewhere to go in the bathroom—not balanced on the toilet tank where it could fall, not stuffed in a pocket, not set on the floor. This toilet paper holder includes a 5x8 inch tempered glass shelf sized perfectly for phones, glasses, or small items. The Carolina Collection design uses two-post traditional styling that fits classic bathroom decor. Solid brass posts and hardware provide lasting durability. The compact shelf size fits the space above most toilets without overhanging. Concealed mounting hardware and easy roll loading complete the thoughtful design.",
@@ -319,8 +319,8 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Frameless Wall Mirror 21x26 Inch - Rail Mounted Design - Carolina - Allied Brass",
-        "bing_title": "{FINISH_NAME} Frameless Wall Mirror 21x26 Inch - Rail Mounted Design - Carolina - Allied Brass",
+        "google_title": "{FINISH_NAME} Frameless Wall Mirror 21x26 Inch - Rail Mounted Design - Carolina Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Frameless Wall Mirror 21x26 Inch - Rail Mounted Design - Carolina Collection - Allied Brass",
         "shopify_title": "Carolina Collection Rectangular Frameless Rail Mounted Mirror",
         "google_description": "Standard framed mirrors disappear into the background—functional but forgettable. This frameless mirror makes a statement with decorative solid brass rails that turn a bathroom necessity into a design feature. The 21x26 inch beveled edge glass provides depth and light reflection without a bulky border. Suitable for bathroom, hallway, bedroom, or entryway placement. The Carolina Collection rails allow this mirror to work with traditional, rustic, contemporary, or eclectic decor depending on your finish choice. {FINISH_SENTENCE} Concealed mounting hardware ensures clean wall installation.",
         "bing_description": "Standard framed mirrors disappear into the background—functional but forgettable. This frameless mirror makes a statement with decorative solid brass rails that turn a bathroom necessity into a design feature. The 21x26 inch beveled edge glass provides depth and light reflection without a bulky border. Suitable for bathroom, hallway, bedroom, or entryway placement. The Carolina Collection rails allow this mirror to work with traditional, rustic, contemporary, or eclectic decor depending on your finish choice. {FINISH_SENTENCE} Concealed mounting hardware ensures clean wall installation.",
@@ -377,8 +377,8 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Makeup Mirror 8 Inch 3X Magnification - Wall Mount Swivel - Retro Dot - Allied Brass",
-        "bing_title": "{FINISH_NAME} Makeup Mirror 8 Inch 3X Magnification - Wall Mount Swivel - Retro Dot - Allied Brass",
+        "google_title": "{FINISH_NAME} Makeup Mirror 8 Inch 3X Magnification - Wall Mount Swivel - Retro Dot Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Makeup Mirror 8 Inch 3X Magnification - Wall Mount Swivel - Retro Dot Collection - Allied Brass",
         "shopify_title": "Retro Dot Collection Wall Mounted Swivel Make-Up Mirror 8 Inch Diameter with 3X Magnification",
         "google_description": "Stop hunching over the sink trying to see detail in your bathroom mirror. This wall-mounted 8-inch mirror positions at eye level and swivels to follow you, keeping both hands free for makeup application or shaving. The double-faced mirror provides 3X magnification on one side for detail work and a standard view on the reverse for full-face viewing—flip between them without moving. The Retro Dot Collection features dotted detailing on the solid brass arm and frame. {FINISH_SENTENCE} Wall mounting keeps your counter space clear.",
         "bing_description": "Stop hunching over the sink trying to see detail in your bathroom mirror. This wall-mounted 8-inch mirror positions at eye level and swivels to follow you, keeping both hands free for makeup application or shaving. The double-faced mirror provides 3X magnification on one side for detail work and a standard view on the reverse for full-face viewing—flip between them without moving. The Retro Dot Collection features dotted detailing on the solid brass arm and frame. {FINISH_SENTENCE} Wall mounting keeps your counter space clear.",
@@ -435,9 +435,9 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Glass Shelf with Towel Bar 22 Inch - 2-in-1 Space Saver - Astor Place - Allied Brass",
-        "bing_title": "{FINISH_NAME} Glass Shelf with Towel Bar 22 Inch - 2-in-1 Space Saver - Astor Place - Allied Brass",
-        "shopify_title": "Astor Place 22 Inch Glass Vanity Shelf with Integrated Towel Bar",
+        "google_title": "{FINISH_NAME} Glass Shelf with Towel Bar 22 Inch - 2-in-1 Space Saver - Astor Place Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Glass Shelf with Towel Bar 22 Inch - 2-in-1 Space Saver - Astor Place Collection - Allied Brass",
+        "shopify_title": "Astor Place Collection 22 Inch Glass Vanity Shelf with Integrated Towel Bar",
         "google_description": "When you only have one spot on the wall, make it count. This combination fixture gives you a 22-inch tempered glass shelf for toiletries above an integrated towel bar below—storage and towel hanging in one footprint. The 3/8-inch thick glass with beveled edges ensures strength and safety. Solid brass brackets and towel bar from the Astor Place Collection feature traditional detailing. Position above your vanity for toiletries with a hand towel below, or anywhere additional storage and towel hanging is needed. {FINISH_SENTENCE} Concealed mounting hardware provides clean installation.",
         "bing_description": "When you only have one spot on the wall, make it count. This combination fixture gives you a 22-inch tempered glass shelf for toiletries above an integrated towel bar below—storage and towel hanging in one footprint. The 3/8-inch thick glass with beveled edges ensures strength and safety. Solid brass brackets and towel bar from the Astor Place Collection feature traditional detailing. Position above your vanity for toiletries with a hand towel below, or anywhere additional storage and towel hanging is needed. {FINISH_SENTENCE} Concealed mounting hardware provides clean installation.",
         "shopify_description": "When you only have one spot on the wall, make it count. This combination fixture gives you a 22-inch tempered glass shelf for toiletries above an integrated towel bar below—storage and towel hanging in one footprint. The 3/8-inch thick glass with beveled edges ensures strength and safety. Solid brass brackets and towel bar from the Astor Place Collection feature traditional detailing. Position above your vanity for toiletries with a hand towel below, or anywhere additional storage and towel hanging is needed. Concealed mounting hardware provides clean installation.",
@@ -551,9 +551,9 @@
         ]
       },
       "gold_standard_content": {
-        "google_title": "{FINISH_NAME} Retractable Wall Hook - Push Back When Not in Use - Carolina - Allied Brass",
-        "bing_title": "{FINISH_NAME} Retractable Wall Hook - Push Back When Not in Use - Carolina - Allied Brass",
-        "shopify_title": "Carolina Retractable Wall Hook",
+        "google_title": "{FINISH_NAME} Retractable Wall Hook - Push Back When Not in Use - Carolina Collection - Allied Brass",
+        "bing_title": "{FINISH_NAME} Retractable Wall Hook - Push Back When Not in Use - Carolina Collection - Allied Brass",
+        "shopify_title": "Carolina Collection Retractable Wall Hook",
         "google_description": "Wall hooks that stick out all the time catch on sleeves, look cluttered, and never match the clean aesthetic you're going for. This retractable hook extends 2.5 inches when you need it and pushes back flush when you don't. The Carolina Collection design holds up to 15 pounds for coats, robes, towels, and bags. Toggle bolt installation works with standard interior walls without needing to find a stud. The knob tip can be replaced with your own cabinet knob to match existing hardware. {FINISH_SENTENCE} Solid brass construction ensures the retractable mechanism operates reliably over time.",
         "bing_description": "Wall hooks that stick out all the time catch on sleeves, look cluttered, and never match the clean aesthetic you're going for. This retractable hook extends 2.5 inches when you need it and pushes back flush when you don't. The Carolina Collection design holds up to 15 pounds for coats, robes, towels, and bags. Toggle bolt installation works with standard interior walls without needing to find a stud. The knob tip can be replaced with your own cabinet knob to match existing hardware. {FINISH_SENTENCE} Solid brass construction ensures the retractable mechanism operates reliably over time.",
         "shopify_description": "Wall hooks that stick out all the time catch on sleeves, look cluttered, and never match the clean aesthetic you're going for. This retractable hook extends 2.5 inches when you need it and pushes back flush when you don't. The Carolina Collection design holds up to 15 pounds for coats, robes, towels, and bags. Toggle bolt installation works with standard interior walls without needing to find a stud. The knob tip can be replaced with your own cabinet knob to match existing hardware. Solid brass construction ensures the retractable mechanism operates reliably over time.",

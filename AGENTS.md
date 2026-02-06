@@ -122,8 +122,16 @@ For Google/Bing variant content:
 
 **For Google/Bing Variant Titles** (finish-first for variant content):
 ```
-{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
+{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection Name] Collection - Allied Brass
 ```
+
+**For Shopify Titles** (inner core of Google/Bing title):
+```
+[Collection Name] Collection [Product Type] [Key Specs] - [Differentiator]
+```
+- NO `{FINISH_NAME}`, NO "Allied Brass"
+- ALWAYS append "Collection" after the collection name
+- If no collection exists, omit the collection segment
 
 **Why finish-first for variants?** Finish name provides immediate visual/style context and matches high-intent queries like "unlacquered brass towel bar".
 

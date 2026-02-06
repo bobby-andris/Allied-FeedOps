@@ -149,7 +149,8 @@ The system prompt lives in code at `dashboard/src/lib/regeneration/prompts.ts` (
 
 1. **Quality-First (DEFAULT)**: Standard products open with craftsmanship, materials, and design details
 2. **Pain-Point-First (ONLY when natural)**: Grab bars, rollerless TP holders, shower caddies — open with the problem, then the solution
-3. **Post-generation validation**: Content is checked against hard rules (no "Allied Brass" in Shopify titles, no hardcoded finish names in Google/Bing descriptions, etc.) with auto-retry on violations
+3. **Cross-platform title consistency**: Shopify titles are the "inner core" of Google/Bing titles (same product identity, minus finish and brand). Collection names always include "Collection" suffix (e.g., "Astor Place Collection", not just "Astor Place")
+4. **Post-generation validation**: Content is checked against hard rules (no "Allied Brass" in Shopify titles, no hardcoded finish names in Google/Bing descriptions, Shopify titles min 40 chars, etc.) with auto-retry on violations
 
 ### TypeScript Dashboard Content Generation
 

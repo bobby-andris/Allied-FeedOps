@@ -61,8 +61,9 @@
   - 09: Competitor intelligence (`/competitors` page, SERP analysis, marketplace scraping via Apify MCP)
   - 14: Search query insights (`/search-insights` page, Google Ads search terms + Keyword Planner enrichment, variant-level tracking)
   - 19: Evidence table for rich product context (product_catalog table, evidence builder, vision support)
-  - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection)
+  - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection, per-platform current content comparison)
   - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
+- **Next up**: `docs/prompts/23` — Publishing enhancements (structured title/description, lifestyle images, Shopify strategy)
 
 ## Supabase schema (tables we rely on)
 
@@ -99,6 +100,12 @@
 - **AI text compliance**: prefer `structured_title` / `structured_description` with `digital_source_type=trained_algorithmic_media`.
 - **Structured-only mode**: when `FEEDOPS_GMC_STRUCTURED_ONLY=1`, omit standard `title`/`description` so Google does not ignore structured fields.
 
+## Future TODOs
+
+- **Switch to `structured_title`/`structured_description` for GMC**: Google recommends AI-generated content use `structured_title` and `structured_description` attributes (compound format: `trained_algorithmic_media:"content text"`). Currently we write to plain `title`/`description` columns. Need to: add `structured_title` and `structured_description` columns to the supplemental feed sheet, enable `FEEDOPS_GMC_STRUCTURED_ONLY=1`, and stop writing plain title/description for AI content. See GMC product data spec for details.
+- **Lifestyle image publishing**: The Google Sheets code supports a `lifestyle_image_link` column (auto-creates if missing), but the SKU and batch publish routes do NOT pass image URLs through. Need to: query `generated_images` for approved lifestyle images during publish, pass `image_url` to the Google Sheets function, and implement Shopify image publishing via the `productCreateMedia` GraphQL mutation.
+- **Shopify variant vs master SKU strategy**: Currently Shopify publish updates the product-level title/description (master SKU). Shopify variants are finish-specific but variant-level title/description is limited in Shopify's data model. Need to decide: use metafields for variant content? Update variant option names? Leave as product-level only?
+
 ## Offer ID format (Google / Ads joins)
 
 GMC offer IDs:
@@ -110,7 +117,8 @@ GMC offer IDs:
 - API routes: `dashboard/src/app/api/**`
 - Supabase query layer: `dashboard/src/lib/supabase/{queries.ts,types.ts}`
 - Publishing libs: `dashboard/src/lib/publishing/*`
-- Regeneration prompts (SINGLE SOURCE OF TRUTH): `dashboard/src/lib/regeneration/prompts.ts` (system prompt, finish list, platform context, validation)
+- Regeneration prompts (SINGLE SOURCE OF TRUTH): `dashboard/src/lib/regeneration/prompts.ts` (system prompt, finish list, platform context, validation). Title structure: Google/Bing = `{FINISH_NAME} [Product] [Specs] - [Collection Name] Collection - Allied Brass`; Shopify = inner core (no finish, no brand, "Collection" suffix required)
+- Gold standard examples: `docs/gold-standard-examples.json` (10 examples with cross-platform title consistency)
 - Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (single-SKU generation with feedback; model default `gpt-5.2`)
 - Regeneration core: `dashboard/src/lib/regeneration/core.ts` (shared generation logic for batch + single-SKU)
 - Evidence table builder: `dashboard/src/lib/evidence/*` (builds rich product context for LLM prompts, includes search query insights)
