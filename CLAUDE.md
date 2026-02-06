@@ -102,7 +102,7 @@
 ## Offer ID format (Google / Ads joins)
 
 GMC offer IDs:
-`shopify_us_{shopify_product_id}_{shopify_variant_id}` (note lowercase `us`)
+`shopify_US_{shopify_product_id}_{shopify_variant_id}` (note uppercase `US`)
 
 ## Key dashboard locations
 
@@ -135,7 +135,24 @@ GMC offer IDs:
 - Search insights components: `dashboard/src/components/search-insights/*.tsx` (QueryTable, FinishInsights, GapAnalysis)
 - Python search terms client: `src/feedops/integrations/google_ads_search_terms.py` (SearchTermsClient, KeywordPlannerClient)
 
-## Cloud Run Deployment
+## Deployment & CI/CD (ALREADY FULLY CONFIGURED — DO NOT RE-CREATE)
+
+**IMPORTANT: All deployment infrastructure is already set up and working. DO NOT:**
+- Create new GCP secrets (they already exist)
+- Create new Cloud Build triggers (already exists)
+- Run manual `gcloud run deploy` commands (CI/CD handles this automatically)
+- Set up GitHub connections (already authorized)
+
+### How Deployment Works
+
+**Two auto-deploy pipelines — both trigger on push to `master`:**
+
+1. **Cloud Run (Python pipeline)**: Push to master → Cloud Build trigger `feedops-pipeline-deploy` → builds Docker image → deploys to Cloud Run automatically
+2. **Vercel (Next.js dashboard)**: Push to master → Vercel auto-deploys automatically
+
+**You do NOT need to deploy manually. Just push to master and both services update.**
+
+### Cloud Run Service
 
 **Service URL:** https://feedops-pipeline-623866089882.us-east1.run.app
 
@@ -150,7 +167,20 @@ GMC offer IDs:
 - `POST /search-insights/enrich` - Enrich keywords with Keyword Planner data
 - `GET /search-insights/terms` - Query stored search terms
 
-**Secrets in GCP Secret Manager:**
+### Cloud Build Trigger (ALREADY EXISTS)
+
+- **Name**: `feedops-pipeline-deploy`
+- **Source**: `bobby-andris/Allied-FeedOps` → branch `^master$`
+- **Config**: `cloudbuild.yaml`
+- **Build SA**: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
+- **Runtime SA**: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
+
+To check build status: `gcloud builds list --project=bobbys-project-346400 --limit=5`
+
+### GCP Secrets (ALL ALREADY CREATED AND BOUND)
+
+All secrets below already exist in Secret Manager and are already bound to the runtime service account. Do NOT try to create or re-create them:
+
 - `feedops-openai-api-key`
 - `feedops-supabase-url`
 - `feedops-supabase-key`
@@ -160,11 +190,9 @@ GMC offer IDs:
 - `feedops-google-ads-refresh-token`
 - `feedops-google-ads-login-customer-id`
 
-**Service Accounts:**
-- Build: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
-- Runtime: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
+### Manual Deploy (ONLY if CI/CD is broken)
 
-**Deploy command:**
+Only use this as a last resort if the Cloud Build trigger is not working:
 ```bash
 gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --region=us-east1 \
   --set-secrets="OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=feedops-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=feedops-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=feedops-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=feedops-google-ads-refresh-token:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=feedops-google-ads-login-customer-id:latest" \
@@ -173,45 +201,6 @@ gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --
   --build-service-account=projects/bobbys-project-346400/serviceAccounts/profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com \
   --allow-unauthenticated --memory=2Gi --cpu=2 --timeout=900 --max-instances=10
 ```
-
-**To add the Google Ads secrets (one-time setup):**
-```bash
-# Get values from Vercel dashboard environment variables and create secrets
-# GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_CLIENT_ID, GOOGLE_ADS_CLIENT_SECRET, GOOGLE_ADS_REFRESH_TOKEN
-# Then grant access to runtime service account:
-for secret in feedops-google-ads-developer-token feedops-google-ads-client-id feedops-google-ads-client-secret feedops-google-ads-refresh-token feedops-google-ads-login-customer-id; do
-  gcloud secrets add-iam-policy-binding $secret \
-    --member="serviceAccount:profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com" \
-    --role="roles/secretmanager.secretAccessor" \
-    --project=bobbys-project-346400
-done
-```
-
-### CI/CD Setup (One-Time)
-
-The `cloudbuild.yaml` is configured for automatic deployments. Complete these steps to enable:
-
-1. **Authorize GitHub Connection** (required):
-   Visit: https://console.cloud.google.com/cloud-build/triggers/connect?project=bobbys-project-346400
-   - Select "GitHub (Cloud Build GitHub App)"
-   - Authorize access to `bobby-andris/Allied-FeedOps` repository
-
-2. **Create the trigger** (after authorization):
-   ```bash
-   gcloud builds triggers create github \
-     --name="feedops-pipeline-deploy" \
-     --repository="projects/bobbys-project-346400/locations/us-east1/connections/feedops-github-connection/repositories/Allied-FeedOps" \
-     --branch-pattern="^master$" \
-     --build-config="cloudbuild.yaml" \
-     --project=bobbys-project-346400 \
-     --region=us-east1
-   ```
-
-3. **Set Vercel environment variable** (for dashboard):
-   In Vercel Dashboard → Project Settings → Environment Variables:
-   - Name: `FEEDOPS_PIPELINE_URL`
-   - Value: `https://feedops-pipeline-623866089882.us-east1.run.app`
-   - Environments: Production, Preview, Development
 
 ## Run locally
 
