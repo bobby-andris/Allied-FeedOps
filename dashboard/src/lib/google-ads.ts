@@ -118,9 +118,11 @@ export function getDateRange(range: string): { startDate: string; endDate: strin
 
 /**
  * Fetch shopping performance metrics for products matching the given Shopify product IDs.
- * 
- * Uses LIKE query to match all variants: shopify_US_{productId}_%
- * 
+ *
+ * Queries all shopping performance data for the date range, then filters in memory
+ * to match products. This approach handles large numbers of products efficiently
+ * without building massive WHERE clauses.
+ *
  * @param shopifyProductIds - Array of Shopify product IDs (e.g., ['4545063682180'])
  * @param startDate - Start date in YYYY-MM-DD format
  * @param endDate - End date in YYYY-MM-DD format
@@ -138,17 +140,16 @@ export async function fetchShoppingPerformance(
   const customer = getCustomer()
   const results = new Map<string, ProductPerformance>()
 
+  // Create a Set for O(1) lookup of requested product IDs
+  const requestedProductIds = new Set(shopifyProductIds)
+
   // Initialize results for all requested product IDs
   for (const productId of shopifyProductIds) {
     results.set(productId, createEmptyPerformance(productId))
   }
 
-  // Build GAQL query with LIKE conditions for each product ID
-  // Offer ID format: shopify_US_{shopify_product_id}_{variant_id}
-  const likeConditions = shopifyProductIds
-    .map(id => `segments.product_item_id LIKE '%${escapeGaqlString(id)}%'`)
-    .join(' OR ')
-
+  // Query all shopping performance data for the date range
+  // Filter by shopify_ prefix to only get Shopify products, then filter in memory
   const query = `
     SELECT
       segments.product_item_id,
@@ -161,7 +162,7 @@ export async function fetchShoppingPerformance(
       metrics.cost_micros
     FROM shopping_performance_view
     WHERE
-      (${likeConditions})
+      segments.product_item_id LIKE 'shopify_%'
       AND segments.date BETWEEN '${startDate}' AND '${endDate}'
     ORDER BY segments.product_item_id, segments.date
   `
@@ -179,7 +180,9 @@ export async function fetchShoppingPerformance(
 
       // Extract Shopify product ID from offer ID (shopify_US_{productId}_{variantId})
       const shopifyProductId = extractShopifyProductId(productItemId)
-      if (!shopifyProductId || !shopifyProductIds.includes(shopifyProductId)) {
+
+      // Skip if not in our requested set (O(1) lookup)
+      if (!shopifyProductId || !requestedProductIds.has(shopifyProductId)) {
         continue
       }
 
