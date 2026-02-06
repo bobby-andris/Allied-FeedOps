@@ -20,7 +20,7 @@
 9. **Prompt 21** → Unify TypeScript & Python Methodology (CRITICAL)
 
 ### Phase 5: Performance Monitoring
-10. **Prompt 22** → Performance Data Lifecycle (FIX Search Insights sync first!)
+10. **Prompt 22** → Performance Data Lifecycle (verify Search Insights sync works first)
 
 ### Phase 6: Future-Proofing & ROI
 11. **Prompt 15** → Agentic Commerce (UCP)
@@ -846,11 +846,11 @@ Do NOT commit changes until the full implementation is verified with passing tes
 
 ## Quick Start: Prompt 22 (Performance Data Lifecycle)
 
-**When to run:** After Search Insights sync is fixed - investigates and implements performance monitoring
+**When to run:** After CI/CD is operational - investigates and implements performance monitoring
 
 **Prerequisites:**
-- Google Ads credentials configured in Cloud Run (see CRITICAL PREREQUISITE section in prompt)
-- Search Insights "Sync Data" button works without error
+- CI/CD is operational (Cloud Build trigger + Vercel auto-deploy on push to master)
+- All GCP secrets already configured (see CLAUDE.md - DO NOT recreate)
 
 **Copy and paste into a new Claude Code chat:**
 
@@ -863,16 +863,15 @@ Key context:
 - Cloud Run service: https://feedops-pipeline-623866089882.us-east1.run.app
 - Google Ads customer ID: 6253381786
 
-CRITICAL PREREQUISITE - FIX SEARCH INSIGHTS SYNC FIRST:
-The "Sync Data" button on Search Insights page fails with:
-"[Errno 2] No such file or directory: '/root/google-ads.yaml'"
+IMPORTANT: CI/CD is fully operational. All secrets exist. DO NOT:
+- Create new GCP secrets (all 8 already exist)
+- Create Cloud Build triggers (already exists)
+- Run manual deploys (CI/CD handles this)
 
-This is because Cloud Run is missing Google Ads credentials. The prompt contains full instructions to:
-1. Create Google Ads secrets in GCP Secret Manager
-2. Grant runtime service account access
-3. Redeploy Cloud Run with updated --set-secrets
-
-Do NOT proceed with performance investigation until Search Insights sync works.
+Step 0 - Verify Search Insights works:
+1. Navigate to https://allied-feed-ops.vercel.app/search-insights
+2. Click "Sync Data" - should start syncing
+3. If it fails, use systematic-debugging to investigate
 
 MCP Tools to Use:
 - **Supabase MCP** (`mcp__supabase__execute_sql`): Query tables directly
@@ -881,17 +880,16 @@ MCP Tools to Use:
 - **Google Ads MCP** (`mcp__google-ads-mcp__*`): Test API queries
 
 Goals:
-1. FIX Cloud Run Google Ads credentials (critical prerequisite)
-2. Verify Search Insights sync works
-3. Investigate performance data tables (performance_baselines, performance_snapshots)
-4. Determine if baseline capture happens before publishing
-5. Determine if snapshots are being scheduled
-6. Design and implement complete performance monitoring lifecycle
+1. Verify Search Insights sync works (Step 0)
+2. Investigate performance data tables (performance_baselines, performance_snapshots)
+3. Determine if baseline capture happens before publishing
+4. Determine if snapshots are being scheduled
+5. Design and implement complete performance monitoring lifecycle
 
 **REQUIRED WORKFLOW (superpowers skills):**
 
 1. BEFORE any implementation decisions: `/superpowers:brainstorming` - explore requirements and design
-2. FOR the search insights sync issue: `/superpowers:systematic-debugging` - root cause already documented in prompt
+2. FOR any issues found: `/superpowers:systematic-debugging` - investigate before fixing
 3. BEFORE writing any code: `/superpowers:writing-plans` - create step-by-step implementation plan
 4. FOR each feature/bugfix: `/superpowers:test-driven-development` - write tests first
 5. FOR independent tasks: `/superpowers:dispatching-parallel-agents` - run 2+ tasks in parallel
