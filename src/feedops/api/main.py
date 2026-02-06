@@ -251,7 +251,7 @@ Target platform: {platform}
 Content type to generate: {content_type}
 
 Generate only the {content_type} for {platform}.
-Return as plain text, not JSON.
+Return your response as JSON: {{"content": "your generated {content_type} here"}}
 """
                 simple_schema = {
                     "type": "object",
@@ -338,11 +338,8 @@ Content type to generate: {request.content_type}
 
 Generate only the {request.content_type} for {request.platform}.
 {"Include the finish '" + request.finish_code + "' in the content." if request.finish_code else ""}
-Return as plain text, not JSON.
+Return your response as JSON: {{"content": "your generated {request.content_type} here"}}
 """
-
-        # Call LLM - provider.generate expects schema, but we want plain text
-        # Use a simple schema that just extracts text
         simple_schema = {
             "type": "object",
             "properties": {"content": {"type": "string"}},
@@ -566,7 +563,7 @@ Target platform: {platform}
 Content type to generate: {content_type}
 
 Generate only the {content_type} for {platform}.
-Return as plain text, not JSON.
+Return your response as JSON: {{"content": "your generated {content_type} here"}}
 """
                     simple_schema = {
                         "type": "object",
