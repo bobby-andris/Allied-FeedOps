@@ -188,7 +188,7 @@ function buildEnhancedPrompt(
       description: 'Bing Shopping description - Open with the TRUE WHY. Include product synonyms naturally (towel bar/rack, shower basket/caddy). Include specific dimensions and materials. Plain text, 700-1000 characters.',
     },
     shopify: {
-      title: 'Shopify product title (H1) - NO finish name, NO "Allied Brass". Customer already clicked. Match product catalog title style.',
+      title: 'Shopify product title (H1) - NO finish name, NO "Allied Brass". Customer already clicked. Create a clear, descriptive title that highlights the product\'s key benefit or differentiator. Use collection name. Do NOT just copy the existing title - create something fresh.',
       description: 'Shopify description - customer already clicked, now convince them to add to cart. Open with their problem or desired outcome. Mention 28 finishes as a benefit. HTML format with <p> and <ul><li> bullets. Do NOT include specific finish names.',
     },
   }
