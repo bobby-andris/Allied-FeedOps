@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
@@ -119,22 +123,22 @@ export function PublishButton({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Rocket className="h-4 w-4" />
           Publish
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80" align="end">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Publish to Production</h4>
-            <p className="text-sm text-muted-foreground">
-              Push approved content to selected platforms
-            </p>
-          </div>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Publish to Production</DialogTitle>
+          <DialogDescription>
+            Push approved content for SKU {sku} to selected platforms
+          </DialogDescription>
+        </DialogHeader>
 
+        <div className="grid gap-4 py-4">
           {/* Environment selector */}
           <div className="space-y-2">
             <Label>Environment</Label>
@@ -228,17 +232,17 @@ export function PublishButton({
               </div>
               {results.some((r) => r.details?.variant_count) && (
                 <p className="text-xs text-muted-foreground">
-                  {results.find((r) => r.details?.variant_count)?.details?.variant_count} variants updated
+                  {String(results.find((r) => r.details?.variant_count)?.details?.variant_count)} variants updated
                 </p>
               )}
             </div>
           )}
+        </div>
 
-          {/* Publish button */}
+        <DialogFooter>
           <Button
             onClick={handlePublish}
             disabled={loading || platforms.length === 0}
-            className="w-full"
           >
             {loading ? (
               <>
@@ -252,8 +256,8 @@ export function PublishButton({
               </>
             )}
           </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

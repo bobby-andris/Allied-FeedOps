@@ -191,8 +191,8 @@ export async function POST(request: NextRequest) {
             action: 'publish',
             status: googleResult.success ? 'success' : 'failed',
             error_message: googleResult.success ? undefined : googleResult.errors.join('; '),
-            published_title: validation.title,
-            published_description: validation.description,
+            published_title: validation.title ?? undefined,
+            published_description: validation.description ?? undefined,
             variant_count: expandedVariants.length,
           })
         } catch (error) {
@@ -284,8 +284,8 @@ export async function POST(request: NextRequest) {
             action: 'publish',
             status: shopifyResult.success ? 'success' : 'failed',
             error_message: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
-            published_title: shopifyTitle,
-            published_description: shopifyDescription,
+            published_title: shopifyTitle ?? undefined,
+            published_description: shopifyDescription ?? undefined,
           })
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
