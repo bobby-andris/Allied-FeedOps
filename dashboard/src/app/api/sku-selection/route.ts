@@ -50,6 +50,7 @@ export async function GET(request: Request) {
     // Build SKU metrics
     let skuMetrics: SkuMetrics[]
     let usingSampleData = false
+    let googleAdsErrorMessage: string | null = null
 
     if (isGoogleAdsConfigured()) {
       // Fetch real performance data from Google Ads
@@ -87,7 +88,9 @@ export async function GET(request: Request) {
             }
           })
         } catch (googleAdsError) {
-          console.error('Google Ads API failed, falling back to sample data:', googleAdsError)
+          const errorMsg = googleAdsError instanceof Error ? googleAdsError.message : String(googleAdsError)
+          console.error('Google Ads API failed, falling back to sample data:', errorMsg)
+          googleAdsErrorMessage = errorMsg
           skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
           usingSampleData = true
         }
@@ -109,6 +112,7 @@ export async function GET(request: Request) {
       ...selection,
       google_ads_configured: isGoogleAdsConfigured(),
       using_sample_data: usingSampleData,
+      google_ads_error: googleAdsErrorMessage,
     })
   } catch (error) {
     console.error('SKU selection error:', error)
