@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { regenerateContent as coreRegenerate, type Platform, type ContentType } from '@/lib/regeneration/core'
 
 /**
  * Batch Regeneration API
  *
  * Triggers regeneration for multiple SKUs across all platforms and content types.
- * This is a long-running operation that processes SKUs sequentially to avoid
- * overwhelming the OpenAI API.
+ * Uses the extracted core regeneration logic directly for efficiency.
  *
  * POST /api/regenerate/batch
  * Body: { skus?: string[], all?: boolean }
@@ -18,8 +18,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 interface BatchRegenerateRequest {
   skus?: string[]
   all?: boolean
-  platforms?: ('google' | 'bing' | 'shopify')[]
-  content_types?: ('title' | 'description')[]
+  platforms?: Platform[]
+  content_types?: ContentType[]
 }
 
 interface RegenerateResult {
@@ -27,63 +27,19 @@ interface RegenerateResult {
   platform: string
   content_type: string
   success: boolean
+  content?: string
+  version?: number
   error?: string
 }
 
-const PLATFORMS = ['google', 'bing', 'shopify'] as const
-const CONTENT_TYPES = ['title', 'description'] as const
+const PLATFORMS: Platform[] = ['google', 'bing', 'shopify']
+const CONTENT_TYPES: ContentType[] = ['title', 'description']
 
 // Rate limiting: wait between API calls to avoid overwhelming OpenAI
-const DELAY_BETWEEN_CALLS_MS = 1000
+const DELAY_BETWEEN_CALLS_MS = 500
 
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-async function regenerateContent(
-  baseUrl: string,
-  sku: string,
-  platform: 'google' | 'bing' | 'shopify',
-  contentType: 'title' | 'description'
-): Promise<RegenerateResult> {
-  try {
-    const response = await fetch(`${baseUrl}/api/regenerate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        master_sku: sku,
-        platform,
-        content_type: contentType,
-        mode: 'simple',
-      }),
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      return {
-        sku,
-        platform,
-        content_type: contentType,
-        success: false,
-        error: errorData.error || `HTTP ${response.status}`,
-      }
-    }
-
-    return {
-      sku,
-      platform,
-      content_type: contentType,
-      success: true,
-    }
-  } catch (error) {
-    return {
-      sku,
-      platform,
-      content_type: contentType,
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -135,12 +91,9 @@ export async function POST(request: NextRequest) {
     // Calculate total operations
     const totalOperations = targetSkus.length * targetPlatforms.length * targetContentTypes.length
 
-    // Get base URL for internal API calls
-    const baseUrl = request.nextUrl.origin
-
     console.log(`Starting batch regeneration: ${targetSkus.length} SKUs, ${totalOperations} total operations`)
 
-    // Process all SKUs
+    // Process all SKUs using core regeneration logic directly
     const results: RegenerateResult[] = []
     let completed = 0
     let successful = 0
@@ -149,15 +102,37 @@ export async function POST(request: NextRequest) {
     for (const sku of targetSkus) {
       for (const platform of targetPlatforms) {
         for (const contentType of targetContentTypes) {
-          const result = await regenerateContent(baseUrl, sku, platform, contentType)
-          results.push(result)
+          try {
+            const result = await coreRegenerate(supabase, sku, platform, contentType)
 
-          completed++
-          if (result.success) {
-            successful++
-          } else {
+            results.push({
+              sku,
+              platform,
+              content_type: contentType,
+              success: result.success,
+              content: result.content,
+              version: result.version,
+              error: result.error,
+            })
+
+            completed++
+            if (result.success) {
+              successful++
+            } else {
+              failed++
+              console.error(`Failed: ${sku}/${platform}/${contentType}: ${result.error}`)
+            }
+          } catch (error) {
+            results.push({
+              sku,
+              platform,
+              content_type: contentType,
+              success: false,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            })
+            completed++
             failed++
-            console.error(`Failed: ${sku}/${platform}/${contentType}: ${result.error}`)
+            console.error(`Error: ${sku}/${platform}/${contentType}: ${error}`)
           }
 
           // Log progress every 10 operations

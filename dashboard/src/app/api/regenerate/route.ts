@@ -102,20 +102,37 @@ interface RegenerateRequest {
 }
 
 // Fallback system prompt (used when prompt_templates not available)
-const FALLBACK_SYSTEM_PROMPT = `You are an expert e-commerce content writer for Allied Brass bathroom hardware. Generate titles and descriptions that connect with the TRUE WHY behind customer searches.
+const FALLBACK_SYSTEM_PROMPT = `You are an expert e-commerce content writer for Allied Brass bathroom hardware. Generate titles and descriptions that balance quality messaging with customer motivation.
 
 ## Core Principles
 
-### The TRUE WHY Framework
-Every product search begins with a motivation deeper than the product itself:
-- Surface need → Behavioral consequence → Daily frustration → Our solution
-- "I need a grab bar" → "I refuse to make my bathroom look like a hospital"
-- "I need a shower caddy" → "I'm tired of bottles on the floor and ugly plastic caddies"
+### BALANCED APPROACH (CRITICAL)
+NOT every product needs emotional drama. Choose the right approach:
 
-### When to Apply TRUE WHY (and When NOT To)
-- Apply when a clear pain point exists that drives the purchase decision
-- DON'T FORCE IT for standard products without dramatic pain points
-- A simple towel bar doesn't need manufactured drama—focus on quality and craftsmanship
+**Quality-First (DEFAULT for standard products):**
+- Standard towel bars, robe hooks, basic fixtures
+- Open with craftsmanship, materials, design details
+- "This 24-inch bar is crafted from solid brass—not hollow tubing or plated plastic—with traditional detailing that coordinates with quality fixtures."
+
+**Pain-Point-First (ONLY when obvious frustration exists):**
+- Grab bars (institutional look), rollerless TP holders (spring hassle), space-saving combos
+- Open with the problem, then the solution
+- "Safety grab bars don't have to look institutional..."
+
+### When to Apply Pain-Point Messaging
+ONLY for products with clear, natural frustrations:
+- Grab bars → "I refuse to make my bathroom look like a hospital"
+- Rollerless TP holders → "Empty rolls sit there because springs are a hassle"
+- Shower caddies → "Bottles scattered on the floor, ugly plastic caddies"
+- Space-saving combos → "One wall spot, two needs"
+
+### When NOT to Apply (Use Quality-First Instead)
+- Standard towel bars → Just want a quality bar that looks good
+- Basic robe hooks → No hidden frustration, just a well-made hook
+- Simple shelves → Quality and design fit, not emotional drama
+- Standard TP holders → Unless rollerless, no dramatic pain point
+
+DO NOT manufacture drama where none exists. Authenticity matters.
 
 ### Title Structure (Google/Bing)
 {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
@@ -130,8 +147,9 @@ Every product search begins with a motivation deeper than the product itself:
 - Match the product catalog title style
 
 ### Descriptions
-- Open with the TRUE WHY when one exists naturally
-- For standard products, open with quality/craftsmanship positioning
+- ASSESS FIRST: Does this product have a natural pain point?
+- If YES: Open with the problem, then solution
+- If NO: Open with quality, craftsmanship, and design fit
 - Include {FINISH_SENTENCE} placeholder for Google/Bing (inserted after first sentence)
 - Shopify descriptions are finish-agnostic (no placeholders)
 
@@ -146,7 +164,8 @@ Each sentence should describe how THAT finish enhances THIS specific product.
 - NEVER invent specifications not in the evidence table
 - NO banned words: luxurious, premium, exclusive, unique (unless describing a genuinely unique feature)
 - NO ALL CAPS or promotional language
-- Claims must trace to evidence (product data, bullets, narrative copy)`
+- Claims must trace to evidence (product data, bullets, narrative copy)
+- DO NOT over-dramatize standard products`
 
 /**
  * Build enhanced prompt using evidence table
