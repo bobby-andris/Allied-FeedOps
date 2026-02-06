@@ -19,6 +19,7 @@ import { ProductHeroImage } from "@/components/review/ProductHeroImage"
 import { LifestyleImageReview } from "@/components/review/LifestyleImageReview"
 import { SearchInsightsSummary } from "@/components/review/SearchInsightsSummary"
 import { VariantContentGrid } from "@/components/review/VariantContentGrid"
+import { PublishButton } from "@/components/review/PublishButton"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import {
@@ -472,6 +473,12 @@ export function SkuReviewClient({
           <div className="flex items-center gap-4">
             {avgScore !== null && <QualityScore score={avgScore} size="lg" />}
             <ApprovalActions sku={sku} finish={selectedFinish} type="all" />
+            <PublishButton
+              sku={sku}
+              approvalStatus={currentStatus}
+              hasGoogleContent={platforms.includes('google')}
+              hasShopifyContent={platforms.includes('shopify')}
+            />
           </div>
         </div>
       </div>
