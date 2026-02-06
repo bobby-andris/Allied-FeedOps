@@ -9,6 +9,7 @@ supporting variant-level granularity via GMC offer IDs.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -413,12 +414,120 @@ class SearchTermsClient:
 
         return {"master_sku": None, "finish": None, "finish_code": None, "shopify_variant_id": None}
 
+    def _fetch_shopping_campaigns(self) -> list[str]:
+        """Fetch all Shopping campaign IDs.
+
+        Returns:
+            List of campaign resource names
+        """
+        from google.protobuf.json_format import MessageToDict
+
+        ga_service = self.client.get_service("GoogleAdsService")
+
+        query = """
+            SELECT
+                campaign.resource_name,
+                campaign.id,
+                campaign.name
+            FROM campaign
+            WHERE campaign.advertising_channel_type = 'SHOPPING'
+                AND campaign.status = 'ENABLED'
+        """
+
+        campaigns = []
+        try:
+            stream = ga_service.search_stream(
+                customer_id=self.customer_id, query=query
+            )
+
+            for batch in stream:
+                for row in batch.results:
+                    row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
+                    campaign = row_dict.get("campaign", {}) or {}
+                    resource_name = campaign.get("resource_name")
+                    if resource_name:
+                        campaigns.append(resource_name)
+                        logger.info(f"Found Shopping campaign: {campaign.get('name')} ({campaign.get('id')})")
+
+        except Exception as e:
+            logger.warning(f"Error fetching shopping campaigns: {e}")
+
+        return campaigns
+
+    def _fetch_campaign_products(self, days: int = 30) -> dict[str, list[str]]:
+        """Fetch product item_ids grouped by campaign.
+
+        Uses shopping_performance_view to get products that have had impressions,
+        grouped by campaign. This is more reliable than shopping_product which
+        has strict filter requirements.
+
+        Returns:
+            Dict mapping campaign.id -> list of item_ids in that campaign
+        """
+        from google.protobuf.json_format import MessageToDict
+
+        ga_service = self.client.get_service("GoogleAdsService")
+
+        # Use shopping_performance_view to get products with impressions by campaign
+        # Note: Must SELECT campaign.advertising_channel_type when filtering by it
+        query = f"""
+            SELECT
+                segments.product_item_id,
+                campaign.id,
+                campaign.name,
+                campaign.advertising_channel_type,
+                metrics.impressions
+            FROM shopping_performance_view
+            WHERE segments.date DURING LAST_{days}_DAYS
+                AND campaign.advertising_channel_type = 'SHOPPING'
+                AND metrics.impressions > 0
+            ORDER BY metrics.impressions DESC
+            LIMIT 50000
+        """
+
+        campaign_products: dict[str, list[str]] = defaultdict(list)
+        seen_products: set[tuple[str, str]] = set()  # (campaign_id, item_id)
+
+        try:
+            stream = ga_service.search_stream(
+                customer_id=self.customer_id, query=query
+            )
+
+            for batch in stream:
+                for row in batch.results:
+                    row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
+
+                    segments = row_dict.get("segments", {}) or {}
+                    campaign = row_dict.get("campaign", {}) or {}
+
+                    item_id = segments.get("product_item_id")
+                    campaign_id = str(campaign.get("id", ""))
+
+                    if item_id and campaign_id:
+                        # Deduplicate
+                        key = (campaign_id, item_id)
+                        if key not in seen_products:
+                            seen_products.add(key)
+                            campaign_products[campaign_id].append(item_id)
+
+            logger.info(f"Found {len(seen_products)} unique product-campaign combinations across {len(campaign_products)} campaigns")
+
+        except Exception as e:
+            logger.warning(f"Error fetching campaign products: {e}")
+
+        return dict(campaign_products)
+
     def fetch_search_terms(
         self,
         days: int = 30,
         limit: int = 1000,
     ) -> list[dict]:
         """Fetch search terms from Shopping campaigns WITH variant-level tracking.
+
+        Strategy:
+        1. Fetch products by campaign from shopping_performance_view
+        2. Fetch search terms with campaign.id from search_term_view
+        3. Join via campaign to associate search terms with products
 
         Args:
             days: Number of days to look back
@@ -431,12 +540,18 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
-        # Use search_term_view for Shopping campaign search terms
-        # Note: This resource doesn't support product_item_id segmentation,
-        # so we get campaign-level search terms and match to products via post-processing
+        # Step 1: Fetch products grouped by campaign
+        logger.info("Fetching products by campaign...")
+        campaign_products = self._fetch_campaign_products(days)
+        logger.info(f"Found products across {len(campaign_products)} campaigns")
+
+        # Step 2: Fetch search terms with campaign.id
         query = f"""
             SELECT
                 search_term_view.search_term,
+                campaign.id,
+                campaign.name,
+                ad_group.id,
                 metrics.impressions,
                 metrics.clicks,
                 metrics.conversions,
@@ -459,15 +574,28 @@ class SearchTermsClient:
                 for row in batch.results:
                     row_dict = MessageToDict(row._pb, preserving_proto_field_name=True)
 
-                    # No product_item_id available from search_term_view
-                    gmc_offer_id = None
-                    variant_info = {}
-
                     metrics = row_dict.get("metrics", {}) or {}
                     search_term = row_dict.get("search_term_view", {}).get("search_term")
+                    campaign_data = row_dict.get("campaign", {}) or {}
+                    ad_group_data = row_dict.get("ad_group", {}) or {}
+
+                    campaign_id = str(campaign_data.get("id", ""))
+                    ad_group_id = ad_group_data.get("id")
 
                     if not search_term:
                         continue
+
+                    # Step 3: Find products in this campaign
+                    item_ids = campaign_products.get(campaign_id, [])
+
+                    # If we have products, look up variant info for the first one
+                    gmc_offer_id = None
+                    variant_info = {}
+
+                    if item_ids:
+                        # item_id format is already the GMC offer ID
+                        gmc_offer_id = item_ids[0]
+                        variant_info = self.get_variant_info(gmc_offer_id)
 
                     results.append({
                         "search_term": search_term,
@@ -476,6 +604,9 @@ class SearchTermsClient:
                         "conversions": float(metrics.get("conversions", 0) or 0),
                         "conversion_value": float(metrics.get("conversions_value", 0) or 0),
                         "cost_micros": int(metrics.get("cost_micros", 0) or 0),
+                        "campaign_id": campaign_id,
+                        "ad_group_id": ad_group_id,
+                        "item_ids": item_ids[:10],  # Include up to 10 item_ids for context
                         "gmc_offer_id": gmc_offer_id,
                         "master_sku": variant_info.get("master_sku"),
                         "finish": variant_info.get("finish"),
@@ -752,25 +883,50 @@ class SearchTermsClient:
         if not search_terms:
             return 0
 
-        rows = []
+        # Deduplicate by (query_text, gmc_offer_id) - aggregate metrics
+        # The same search term can appear across multiple ad_groups
+        deduped: dict[tuple[str, str | None], dict] = {}
+
         for term in search_terms:
-            rows.append({
-                "query_text": term["search_term"],
-                "gmc_offer_id": term.get("gmc_offer_id"),
-                "master_sku": term.get("master_sku"),
-                "finish": term.get("finish"),
-                "finish_code": term.get("finish_code"),
-                "shopify_variant_id": term.get("shopify_variant_id"),
-                "impressions": term.get("impressions", 0),
-                "clicks": term.get("clicks", 0),
-                "conversions": term.get("conversions", 0),
-                "conversion_value": term.get("conversion_value", 0),
-                "cost_micros": term.get("cost_micros", 0),
-                "period_start": period_start.isoformat(),
-                "period_end": period_end.isoformat(),
-                "sync_job_id": sync_job_id,
-                "fetched_at": datetime.utcnow().isoformat(),
-            })
+            query_text = term["search_term"]
+            gmc_offer_id = term.get("gmc_offer_id")
+            key = (query_text, gmc_offer_id)
+
+            if key not in deduped:
+                # Serialize item_ids list to JSON for storage
+                item_ids = term.get("item_ids", [])
+                item_ids_json = json.dumps(item_ids) if item_ids else None
+
+                deduped[key] = {
+                    "query_text": query_text,
+                    "gmc_offer_id": gmc_offer_id,
+                    "master_sku": term.get("master_sku"),
+                    "finish": term.get("finish"),
+                    "finish_code": term.get("finish_code"),
+                    "shopify_variant_id": term.get("shopify_variant_id"),
+                    "campaign_id": term.get("campaign_id"),
+                    "ad_group_id": term.get("ad_group_id"),
+                    "item_ids": item_ids_json,
+                    "impressions": term.get("impressions", 0),
+                    "clicks": term.get("clicks", 0),
+                    "conversions": term.get("conversions", 0),
+                    "conversion_value": term.get("conversion_value", 0),
+                    "cost_micros": term.get("cost_micros", 0),
+                    "period_start": period_start.isoformat(),
+                    "period_end": period_end.isoformat(),
+                    "sync_job_id": sync_job_id,
+                    "fetched_at": datetime.utcnow().isoformat(),
+                }
+            else:
+                # Aggregate metrics for duplicate entries
+                deduped[key]["impressions"] += term.get("impressions", 0)
+                deduped[key]["clicks"] += term.get("clicks", 0)
+                deduped[key]["conversions"] += term.get("conversions", 0)
+                deduped[key]["conversion_value"] += term.get("conversion_value", 0)
+                deduped[key]["cost_micros"] += term.get("cost_micros", 0)
+
+        rows = list(deduped.values())
+        logger.info(f"Deduped {len(search_terms)} search terms to {len(rows)} unique entries")
 
         try:
             result = self.supabase.table("search_queries").upsert(

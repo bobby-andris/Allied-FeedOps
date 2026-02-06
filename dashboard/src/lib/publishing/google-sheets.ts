@@ -10,19 +10,21 @@
 import { google, sheets_v4 } from 'googleapis'
 import type { GoogleSheetsRow, SheetColumnMap, Environment } from './types'
 
-// Default column mapping for GMC supplemental feed
-// Column letters map to 0-indexed positions
-// Note: structured_title/structured_description are used for AI-generated content per GMC policy
-const DEFAULT_COLUMN_MAP: SheetColumnMap = {
-  id: 0, // Column A - offer ID (GMC ID)
-  title: 1, // Column B - product title (standard)
-  description: 2, // Column C - product description (standard)
-  structured_title: 3, // Column D - structured title (AI-generated)
-  structured_description: 4, // Column E - structured description (AI-generated)
-  digital_source_type: 5, // Column F - 'trained_algorithmic_media' for AI content
-  short_title: 6, // Column G - short title for Demand Gen
-  lifestyle_image_link: 7, // Column H - lifestyle image URL
-  custom_label_4: 8, // Column I - FeedOps tracking label
+// DOCUMENTATION ONLY — not used at runtime. The actual column mapping is built
+// dynamically from sheet headers via buildColumnMap(). These positions reflect the
+// *intended* layout but may not match the real sheet. Writing to default positions
+// without verifying against actual headers caused data corruption (see git blame).
+//
+// Actual production sheet (as of 2026-02-06):
+//   A:id  B:mpn  C:product_type  D:pattern  E:custom_label_0  F:custom_label_1
+//   G:custom_label_2  H:title  I:google_product_category  J:description  K:custom_label_4
+//
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _REFERENCE_COLUMN_MAP: SheetColumnMap = {
+  id: 0,
+  title: 7,
+  description: 9,
+  custom_label_4: 10,
 }
 
 // Check if we should use structured-only mode (omit standard title/description)
@@ -113,18 +115,39 @@ export async function getColumnHeaders(
 }
 
 /**
- * Build column name to index mapping from headers.
+ * Convert a 0-based column index to Excel-style letter notation.
+ * Handles multi-letter columns beyond Z (e.g., 26 → AA, 27 → AB).
+ */
+function columnIndexToLetter(index: number): string {
+  let letter = ''
+  let col = index
+  while (col >= 0) {
+    letter = String.fromCharCode(65 + (col % 26)) + letter
+    col = Math.floor(col / 26) - 1
+  }
+  return letter
+}
+
+/**
+ * Build column name to index mapping from actual sheet headers.
+ *
+ * IMPORTANT: This builds the map ONLY from headers present in the sheet.
+ * Columns not found in the sheet will have undefined indices and will be
+ * safely skipped during writes. This prevents writing to wrong columns
+ * when the sheet layout doesn't match hardcoded assumptions.
  */
 export function buildColumnMap(headers: string[]): SheetColumnMap {
-  const columnMap: SheetColumnMap = { ...DEFAULT_COLUMN_MAP }
+  const columnMap: Record<string, number | undefined> = {}
 
   headers.forEach((header, idx) => {
     // Normalize header names (lowercase, strip whitespace, replace spaces with underscores)
     const normalized = header.trim().toLowerCase().replace(/\s+/g, '_')
-    columnMap[normalized] = idx
+    if (normalized) {
+      columnMap[normalized] = idx
+    }
   })
 
-  return columnMap
+  return columnMap as SheetColumnMap
 }
 
 /**
@@ -138,7 +161,7 @@ export async function getExistingIds(
   idColumn: number = 0
 ): Promise<Map<string, number>> {
   // Get the ID column letter (A = 0, B = 1, etc.)
-  const columnLetter = String.fromCharCode(65 + idColumn)
+  const columnLetter = columnIndexToLetter(idColumn)
   const range = sheetName
     ? `${sheetName}!${columnLetter}:${columnLetter}`
     : `${columnLetter}:${columnLetter}`
@@ -217,7 +240,7 @@ async function updateRows(
     // Update each cell individually to preserve existing values in other columns
     for (let colIdx = 0; colIdx < values.length; colIdx++) {
       if (values[colIdx] !== undefined) {
-        const columnLetter = String.fromCharCode(65 + colIdx)
+        const columnLetter = columnIndexToLetter(colIdx)
         const range = sheetName
           ? `${sheetName}!${columnLetter}${rowNum}`
           : `${columnLetter}${rowNum}`
@@ -293,7 +316,7 @@ async function ensureLifestyleImageColumn(
 
   // Add the column header
   const newColIdx = numColumns
-  const columnLetter = String.fromCharCode(65 + newColIdx)
+  const columnLetter = columnIndexToLetter(newColIdx)
   const range = sheetName ? `${sheetName}!${columnLetter}1` : `${columnLetter}1`
 
   await sheets.spreadsheets.values.update({
@@ -391,6 +414,19 @@ export async function publishToGoogleSheets(
       result.errors.push("Required column 'id' not found in sheet headers")
       return result
     }
+
+    // Log column mapping for debugging
+    console.log('[publishToGoogleSheets] Column mapping from sheet headers:', {
+      id: columnMap.id,
+      title: columnMap.title,
+      description: columnMap.description,
+      structured_title: columnMap.structured_title,
+      structured_description: columnMap.structured_description,
+      digital_source_type: columnMap.digital_source_type,
+      lifestyle_image_link: columnMap.lifestyle_image_link,
+      custom_label_4: columnMap.custom_label_4,
+      numColumns,
+    })
 
     // Build rows from offer IDs
     const rowsToUpdate: Array<{ rowNum: number; data: GoogleSheetsRow }> = []
@@ -519,6 +555,20 @@ export async function publishExpandedVariantsToGoogleSheets(
       result.errors.push("Required column 'id' not found in sheet headers")
       return result
     }
+
+    // Log column mapping for debugging
+    console.log('[publishExpandedVariants] Column mapping from sheet headers:', {
+      id: columnMap.id,
+      title: columnMap.title,
+      description: columnMap.description,
+      structured_title: columnMap.structured_title,
+      structured_description: columnMap.structured_description,
+      digital_source_type: columnMap.digital_source_type,
+      lifestyle_image_link: columnMap.lifestyle_image_link,
+      custom_label_4: columnMap.custom_label_4,
+      numColumns,
+      totalVariants: variants.length,
+    })
 
     // Build rows from variants - each variant has its OWN title/description
     const rowsToUpdate: Array<{ rowNum: number; data: GoogleSheetsRow }> = []
