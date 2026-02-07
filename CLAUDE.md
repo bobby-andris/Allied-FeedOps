@@ -102,6 +102,9 @@
 - `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
 - `search_query_sync_jobs` (sync job tracking for Google Ads search term imports)
 
+**Foreign key constraints (delete order matters)**
+- `regeneration_history.generated_content_id` → `generated_content.id` (delete from regeneration_history first)
+
 **Image Storage:**
 
 - Supabase Storage bucket `lifestyle-images` for temporary hosting during review/approval workflow
@@ -130,8 +133,8 @@
 ## Future TODOs
 
 - **Switch to `structured_title`/`structured_description` for GMC**: Google recommends AI-generated content use `structured_title` and `structured_description` attributes (compound format: `trained_algorithmic_media:"content text"`). Currently we write to plain `title`/`description` columns. Need to: add `structured_title` and `structured_description` columns to the supplemental feed sheet, enable `FEEDOPS_GMC_STRUCTURED_ONLY=1`, and stop writing plain title/description for AI content. See GMC product data spec for details.
-- **Lifestyle image publishing**: The Google Sheets code supports a `lifestyle_image_link` column (auto-creates if missing), but the SKU and batch publish routes do NOT pass image URLs through. Need to: query `generated_images` for approved lifestyle images during publish, pass `image_url` to the Google Sheets function, and implement Shopify image publishing via the `productCreateMedia` GraphQL mutation.
-- **Shopify variant vs master SKU strategy**: Currently Shopify publish updates the product-level title/description (master SKU). Shopify variants are finish-specific but variant-level title/description is limited in Shopify's data model. Need to decide: use metafields for variant content? Update variant option names? Leave as product-level only?
+- **Lifestyle image publishing to Google Sheets**: The Google Sheets code supports a `lifestyle_image_link` column (auto-creates if missing), but the SKU and batch publish routes do NOT pass image URLs through. Need to: query `generated_images` for approved lifestyle images during publish, pass `image_url` to the Google Sheets function.
+- **Lifestyle image publishing to Shopify**: Implement image publishing via `productCreateMedia` and `productVariantAppendMedia` GraphQL mutations. Strategy documented in "Shopify Publishing Strategy" section above - upload images to Shopify, assign to specific variants, migrate URLs to Shopify CDN.
 
 ## Offer ID format (Google / Ads joins)
 
@@ -183,6 +186,28 @@ GMC offer IDs:
 - Components that render Card internally (SearchInsightsCard, PerformanceCard, ContentQualityCard) should NOT be wrapped in Card - causes double borders and render issues
 - Use `grid-cols-1 lg:grid-cols-2` for 50/50 split at ≥1024px breakpoint (mobile stacks, desktop side-by-side)
 - Components self-render Cards - don't wrap in additional Card components
+
+**TypeScript configuration:**
+
+- `dashboard/tsconfig.json`: Excludes `scripts/` directory from type checking (utility scripts, not Next.js app)
+- `ContentRecord` interface: Duplicated in `page.tsx` and `SkuReviewClient.tsx` - must match exactly (includes `generation_model: string | null`)
+- Optional chaining with strict types: Use `?.property ?? null` when component expects `string | null` (not `string | null | undefined`)
+
+## SKU Format Handling (Critical)
+
+**Database formats (inconsistent)**
+- Canonical format (from `product_catalog`): slash separators (e.g., `WP-2/16-GAL`, `DMF-2/2X`)
+- Some records use hyphen-only format (e.g., `920D-6`, `DMF-2-2X`)
+- **Always prioritize slash-format when querying** - see `getSkuCandidates` in `dashboard/src/lib/sku-utils.ts`
+
+**URL format**
+- URLs use hyphens only (slashes are path separators): `/review/DMF-2-2X`
+- Conversion: `skuToUrlPath` replaces `/` → `-`
+- Reverse: `getSkuCandidates` generates multiple candidates, tries slash-format first
+
+**Preventing duplicates**
+- Regeneration code should preserve database format (not convert to URL format)
+- If duplicates exist, `getSkuCandidates` prioritization ensures canonical match first
 
 ## Deployment & CI/CD (ALREADY FULLY CONFIGURED — DO NOT RE-CREATE)
 
@@ -268,6 +293,12 @@ npm run build  # Build for production (from dashboard/, not repo root)
 npm run lint  # Run ESLint
 ```
 
+**Before deploying dashboard changes:**
+```bash
+npm run build  # Verify TypeScript compilation succeeds
+```
+This catches type errors that would fail Vercel deployment.
+
 ### Testing
 
 **Build verification**: `npm run build` (from dashboard/, not repo root)
@@ -332,6 +363,57 @@ git checkout archive/full-snapshot-2026-02-03 -- dashboard_data/batch-40sku-2026
 6. **Audit Trail**: `publish_events` stores content snapshots (`published_title`, `published_description`) for rollback capability
 
 **Key constraint**: Content cannot be published unless approved. Regenerating content after approval does NOT change what will be published (uses `approved_content`, not `candidate_content`).
+
+### Shopify Publishing Strategy
+
+**Variant Content Approach: Product-Level Only**
+
+Shopify products have title/description at the product level only. Variants (e.g., "Polished Brass", "Antique Bronze") have SKU, price, and options but NO variant-specific title/description fields in Shopify's core data model.
+
+**Decision**: Use product-level content only (current implementation)
+- Updates product-level title/description via `productUpdate` GraphQL mutation
+- Strips `{FINISH_NAME}` placeholder since content is not variant-specific
+- Falls back to Google content if Shopify-specific content not available
+- Aligns with Shopify's design philosophy (variants are options, not separate products)
+- Requires no custom theme development
+
+**Why not variant-specific content?**
+- Shopify variants share the same product page URL (no separate SEO)
+- Default themes don't display variant metafields
+- Customers select finish from dropdown, expect consistent product description
+- Variant-specific content is already used effectively for Google/Bing feeds
+
+**Alternative considered but rejected**: Store finish-specific content in metafields (e.g., `feedops.variant_title`) to enable custom storefront display. Rejected because it adds complexity without clear benefit for default Shopify storefront UX.
+
+**Lifestyle Image Publishing Strategy**
+
+Unlike text content, visual differentiation matters for finishes. Customers expect to see the actual finish color/texture in product photos.
+
+**Implementation**:
+1. **Upload to Shopify**: Use `productCreateMedia` mutation to upload approved lifestyle image from `generated_images` table
+   - Provides Shopify media ID and CDN URL
+2. **Variant Assignment**: Use `productVariantAppendMedia` mutation to associate media with specific finish variant
+   - Enables finish-specific image display (e.g., Polished Brass lifestyle image only shows for Polished Brass variant)
+   - Links without duplicating files
+3. **CDN Migration**: Update `generated_images.image_url` with Shopify CDN URL and mark as published with `gmc_pushed_at` timestamp
+4. **Cleanup**: Optionally delete from Supabase Storage bucket after successful Shopify migration
+
+**Why variant-specific images?**
+- Customers need to see the actual finish they're selecting
+- Native Shopify support via `productVariantAppendMedia`
+- Better UX: selecting "Antique Bronze" shows bronze product images
+- Already generating finish-specific lifestyle images in the pipeline
+
+**GraphQL mutations used**:
+- `productUpdate` - Update product-level title/description
+- `productCreateMedia` - Upload lifestyle images to Shopify
+- `productVariantAppendMedia` - Associate images with specific variants
+- `tagsAdd` - Add environment tracking tags (feedops-staging, feedops-production)
+
+**Files**:
+- Publishing: `dashboard/src/lib/publishing/shopify.ts`
+- API route: `dashboard/src/app/api/publish/sku/route.ts`
+- Storage helpers: `dashboard/src/lib/storage/upload-lifestyle-image.ts`
 
 ## Generated content storage
 
