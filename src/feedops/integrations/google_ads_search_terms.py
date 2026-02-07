@@ -890,11 +890,22 @@ class SearchTermsClient:
         for term in search_terms:
             query_text = term["search_term"]
             gmc_offer_id = term.get("gmc_offer_id")
+
+            # Normalize offer ID case to uppercase (shopify_us_ → shopify_US_)
+            if gmc_offer_id:
+                gmc_offer_id = re.sub(r'^shopify_us_', 'shopify_US_', gmc_offer_id, flags=re.IGNORECASE)
+
             key = (query_text, gmc_offer_id)
 
             if key not in deduped:
-                # Serialize item_ids list to JSON for storage
+                # Normalize case for all item_ids in the array
                 item_ids = term.get("item_ids", [])
+                if item_ids:
+                    item_ids = [
+                        re.sub(r'^shopify_us_', 'shopify_US_', offer_id, flags=re.IGNORECASE)
+                        for offer_id in item_ids
+                    ]
+                # Store as JSON string for JSONB column (Supabase expects string)
                 item_ids_json = json.dumps(item_ids) if item_ids else None
 
                 deduped[key] = {

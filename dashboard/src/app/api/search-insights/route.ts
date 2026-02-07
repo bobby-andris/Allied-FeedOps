@@ -101,9 +101,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (viewType === 'variant' && masterSku) {
-      // Variant-specific view
+      // Variant-specific view using LATERAL join to expand item_ids array
       let query = supabase
-        .from('search_queries')
+        .from('search_queries_expanded')
         .select('*')
         .eq('master_sku', masterSku)
         .order('impressions', { ascending: false })
@@ -148,11 +148,12 @@ export async function GET(request: NextRequest) {
         byFinish[finish].totalClicks += q.clicks || 0
       })
 
-      // Get available finishes for dropdown
+      // Get available finishes for dropdown from variant_index
       const { data: availableFinishes } = await supabase
-        .from('search_queries')
+        .from('variant_index')
         .select('finish_code, finish')
         .eq('master_sku', masterSku)
+        .order('finish_code')
 
       const uniqueFinishes = Array.from(
         new Map(
@@ -171,8 +172,8 @@ export async function GET(request: NextRequest) {
         byFinish,
         availableFinishes: uniqueFinishes,
         note: finishCode
-          ? `Showing queries that triggered the ${finishCode} variant specifically`
-          : 'Showing queries broken down by finish variant',
+          ? `Campaign-level queries from campaigns that served the ${finishCode} variant. Metrics (impressions/clicks) are campaign totals, not per-variant. Google Ads API does not provide variant-level breakdown for search queries.`
+          : 'Campaign-level queries grouped by finish variant. Metrics show total campaign performance across all variants. These variants were active in the same campaigns, but individual variant metrics are not available from Google Ads API.',
       })
     }
 

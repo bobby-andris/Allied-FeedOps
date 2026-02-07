@@ -119,6 +119,14 @@ export function QueryTable({
 
   return (
     <TooltipProvider>
+      {viewType === 'variant' && (
+        <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            <strong>Note:</strong> Metrics (impressions/clicks/CTR) are campaign-level totals, not per-variant.
+            These variants were active in the same campaigns, but Google Ads API does not provide per-variant breakdowns for search queries.
+          </p>
+        </div>
+      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -181,8 +189,8 @@ export function QueryTable({
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            This query triggered {query.variant_count || 1} different
-                            finish variants
+                            {query.variant_count || 1} variants were active in campaigns
+                            associated with this query
                           </TooltipContent>
                         </Tooltip>
                       </TableCell>
