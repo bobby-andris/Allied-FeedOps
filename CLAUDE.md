@@ -28,6 +28,8 @@
 **MCP Servers** - Use these for database operations, external APIs, and browser automation:
 
 - **Supabase MCP** (`mcp__supabase__*`): Use for direct database queries, migrations, and schema inspection. Prefer `mcp__supabase__execute_sql` for quick queries instead of writing scripts. Available tools: `execute_sql`, `apply_migration`, `list_tables`, `get_project`, etc.
+  - Use `execute_sql` with `information_schema.columns` to inspect table schemas before implementing features
+  - Example: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'performance_baselines'`
 - **Playwright MCP** (`mcp__plugin_playwright_playwright__*`): Use for visual verification, UI testing, and screenshots. Tools: `browser_navigate`, `browser_take_screenshot`, `browser_click`, `browser_snapshot`, etc.
 - **Apify MCP** (`mcp__Apify__*`): Use for web scraping, competitor analysis, and data extraction. Search actors first with `search-actors`.
 - **Google Ads MCP** (`mcp__google-ads-mcp__*`): Use for Ads data queries and Keyword Planner.
@@ -54,7 +56,7 @@
 
 ## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`
+- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`, `22`
   - 01-06: performance, batches, publishing, variant review, settings health, regeneration
   - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
   - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
@@ -63,6 +65,7 @@
   - 19: Evidence table for rich product context (product_catalog table, evidence builder, vision support)
   - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection, per-platform current content comparison)
   - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
+  - 22: Performance data lifecycle (baseline capture before publish, snapshot API for post-publish tracking, performance-based SKU prioritization)
 - **Next up**: `docs/prompts/23` — Publishing enhancements (structured title/description, lifestyle images, Shopify strategy)
 
 ## Supabase schema (tables we rely on)
@@ -72,7 +75,8 @@
 - `variant_index` (maps `master_sku` ⇄ `gmc_offer_id`, finish info)
 - `publish_batches`, `batch_sku_assignments` (batch mgmt)
 - `publish_events` (audit log with content snapshots: `published_title`, `published_description`, `variant_count`, `content_version` for rollback)
-- `performance_baselines`, `performance_snapshots` (performance)
+- `performance_baselines` (30-day pre-publish metrics: avg impressions/clicks/CTR/CVR/conversions/cost/ROAS per master_sku + platform)
+- `performance_snapshots` (post-publish metrics with days_since_publish tracking, linked to publish_event_id)
 - `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
 - `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
 - `product_catalog` (75,770 variants with full product data for evidence table - narrative_copy, bullets, dimensions, images)
@@ -117,6 +121,7 @@ GMC offer IDs:
 - API routes: `dashboard/src/app/api/**`
 - Supabase query layer: `dashboard/src/lib/supabase/{queries.ts,types.ts}`
 - Publishing libs: `dashboard/src/lib/publishing/*`
+- Performance tracking: `dashboard/src/lib/baseline-capture.ts` (pre-publish baseline), `dashboard/src/app/api/performance/capture-snapshot/route.ts` (post-publish snapshots)
 - Regeneration prompts (SINGLE SOURCE OF TRUTH): `dashboard/src/lib/regeneration/prompts.ts` (system prompt, finish list, platform context, validation). Title structure: Google/Bing = `{FINISH_NAME} [Product] [Specs] - [Collection Name] Collection - Allied Brass`; Shopify = inner core (no finish, no brand, "Collection" suffix required)
 - Gold standard examples: `docs/gold-standard-examples.json` (10 examples with cross-platform title consistency)
 - Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (single-SKU generation with feedback; model default `gpt-5.2`)
@@ -125,6 +130,7 @@ GMC offer IDs:
 - Search query evidence: `src/feedops/integrations/search_query_insights.py` (Python) and `dashboard/src/lib/evidence/search-queries.ts` (TypeScript)
 - SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection algorithm)
 - SKU selection API: `dashboard/src/app/api/sku-selection/route.ts` (scored recommendations)
+- SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection with performance boosting: 1.5x for high-traffic low-CTR, 1.3x for declining performance, 1.4x for below-baseline)
 - Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
 - Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
 - Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
@@ -221,6 +227,12 @@ cd dashboard
 npm install
 npm run dev
 ```
+
+### Testing
+
+**Build verification**: `npm run build` (from repo root, not `cd dashboard`)
+- No vitest configured yet - use build as integration test
+- TypeScript compilation errors will fail build
 
 ### Python (pipeline/tests still in repo)
 
