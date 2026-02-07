@@ -36,6 +36,7 @@ interface ContentRecord {
   baseline_content: string | null
   candidate_content: string | null
   quality_score: number | null
+  generation_model: string | null
   created_at: string
 }
 
@@ -230,6 +231,43 @@ function ApprovalStatusBanner({ approval, titleScore, descScore }: {
   )
 }
 
+// Badge showing which pipeline generated the content
+function GenerationSourceBadge({
+  generationModel
+}: {
+  generationModel: string | null
+}) {
+  if (!generationModel) return null
+
+  const isAgentPipeline = generationModel.includes('6-agent-pipeline')
+
+  return (
+    <span className={`
+      inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
+      ${isAgentPipeline
+        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+      }
+    `}>
+      {isAgentPipeline ? (
+        <>
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+          </svg>
+          6-Agent Pipeline
+        </>
+      ) : (
+        <>
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/>
+          </svg>
+          Cloud Run
+        </>
+      )}
+    </span>
+  )
+}
+
 export function SkuReviewClient({
   sku,
   content,
@@ -272,7 +310,12 @@ export function SkuReviewClient({
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">{masterSku}</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold">{masterSku}</h1>
+                  <GenerationSourceBadge generationModel={
+                    content.find(c => c.content_type === 'title')?.generation_model
+                  } />
+                </div>
                 <p className="text-sm text-muted-foreground">Content Review</p>
               </div>
             </div>
