@@ -11,7 +11,211 @@ This prompt covers the complete data lifecycle from search queries and performan
 
 ---
 
-## Mode & Skills
+## 🚀 QUICKSTART: Agent Team Implementation (RECOMMENDED)
+
+**This task is IDEAL for agent teams** - 5 independent work streams with minimal dependencies.
+
+**IMPORTANT: Agent teammates have FULL ACCESS to all your plugins, skills, and MCP servers.** Each teammate can use superpowers skills, frontend-design, typescript-lsp, code-simplifier, Supabase MCP, Vercel MCP, Playwright MCP, etc.
+
+### Prerequisites
+
+1. **Restart Claude Code** if you just enabled agent teams:
+   ```bash
+   exit  # Exit current session
+   claude  # Start new session
+   ```
+
+2. **Verify agent teams enabled:**
+   - Agent teams require `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `~/.claude/settings.json`
+   - After restart, Claude can create teams
+
+### Spawn the Optimized Agent Team
+
+**Copy and paste this prompt into your new Claude Code session:**
+
+```
+Create an agent team to fix Search Insights and implement Prompt 22 (Performance Data Lifecycle).
+
+Read docs/prompts/22-performance-data-lifecycle.md for full context.
+
+IMPORTANT: All teammates have access to the full plugin ecosystem including:
+- All superpowers skills (systematic-debugging, TDD, verification, etc.)
+- All plugins (frontend-design, typescript-lsp, playwright, greptile, code-simplifier, claude-md-management)
+- All MCP servers (Supabase, Vercel, Google Ads, Playwright, Context7, Shopify Dev, Cloud Run, GCloud, Analytics)
+
+## TEAM STRUCTURE (5 teammates)
+
+### Teammate 1: Search Insights Debugger
+**Require plan approval:** No (debugging doesn't need planning)
+
+**Skills (MUST invoke in order):**
+1. superpowers:systematic-debugging (FIRST - diagnose before fixing)
+2. superpowers:verification-before-completion (LAST - verify fix works)
+
+**Key Plugins:** greptile (codebase search), playwright (visual verification), typescript-lsp
+
+**Key MCP Servers:**
+- Vercel: mcp__vercel__get_runtime_logs, mcp__vercel__list_deployments, mcp__vercel__get_deployment
+- Cloud Run: mcp__cloud-run__get_service_log, mcp__cloud-run__list_services
+- GCloud: mcp__gcloud__run_gcloud_command (check builds: gcloud builds list --project=bobbys-project-346400 --limit=5)
+- Supabase: mcp__supabase__execute_sql, mcp__supabase__list_tables
+- Google Ads: mcp__google-ads-mcp__search
+- Playwright: mcp__plugin_playwright_playwright__browser_navigate, browser_take_screenshot
+
+**Task:** Fix the current Search Insights page error showing in the dashboard screenshot.
+
+WORKFLOW:
+1. FIRST: Invoke superpowers:systematic-debugging skill
+2. Use Vercel MCP to check production error logs
+3. Use Cloud Run MCP to check service logs
+4. Use GCloud MCP to verify latest build succeeded
+5. Use Supabase MCP to verify search_queries table has data
+6. Use Google Ads MCP to test search_term_view query works
+7. Use greptile to find all Search Insights code paths
+8. Fix the root cause (likely API endpoint, data sync, or error handling)
+9. Use Playwright MCP to visually verify the fix on localhost
+10. LAST: Invoke superpowers:verification-before-completion
+
+### Teammate 2: SearchInsightsCard Component
+**Require plan approval:** Yes
+
+**Skills (MUST invoke in order):**
+1. frontend-design (FIRST - production-grade UI, not generic AI components)
+2. superpowers:test-driven-development (write tests before implementation)
+3. superpowers:verification-before-completion (LAST - verify component works)
+
+**Key Plugins:** frontend-design (CRITICAL), typescript-lsp, playwright, code-simplifier
+
+**Key MCP Servers:**
+- Supabase: mcp__supabase__execute_sql (query search_queries_by_master_sku for test data)
+- Context7: mcp__plugin_context7_context7__query-docs (React/Next.js patterns)
+- Playwright: mcp__plugin_playwright_playwright__browser_take_screenshot
+- Shopify Dev: mcp__shopify-dev-mcp__search_docs_chunks (if needed for Shopify integration)
+
+**Task:** Build SearchInsightsCard.tsx - collapsible card showing top queries, keyword gaps, search volume.
+
+See Phase 1 spec in docs/prompts/22-performance-data-lifecycle.md for exact mockup and requirements.
+
+**File:** dashboard/src/components/review/SearchInsightsCard.tsx
+
+### Teammate 3: PerformanceCard Component
+**Require plan approval:** Yes
+
+**Skills (MUST invoke in order):**
+1. frontend-design (FIRST - production-grade UI)
+2. superpowers:test-driven-development
+3. superpowers:verification-before-completion (LAST)
+
+**Key Plugins:** frontend-design (CRITICAL), typescript-lsp, playwright, code-simplifier
+
+**Key MCP Servers:**
+- Supabase: mcp__supabase__execute_sql (query performance_baselines, performance_snapshots)
+- Google Ads: mcp__google-ads-mcp__search (test live performance queries)
+- Analytics: mcp__analytics-mcp__run_report (GA4 data if needed)
+- Context7: mcp__plugin_context7_context7__query-docs (React patterns)
+- Playwright: mcp__plugin_playwright_playwright__browser_take_screenshot
+
+**Task:** Build PerformanceCard.tsx - collapsible card showing CTR, impressions, baseline comparison.
+
+See Phase 1 spec in docs/prompts/22-performance-data-lifecycle.md for exact mockup and requirements.
+
+**File:** dashboard/src/components/review/PerformanceCard.tsx
+
+### Teammate 4: ContentQualityCard Component
+**Require plan approval:** Yes
+
+**Skills (MUST invoke in order):**
+1. frontend-design (FIRST - production-grade UI)
+2. superpowers:test-driven-development
+3. superpowers:verification-before-completion (LAST)
+
+**Key Plugins:** frontend-design (CRITICAL), typescript-lsp, playwright, code-simplifier
+
+**Key MCP Servers:**
+- Supabase: mcp__supabase__execute_sql (query generated_content for test data)
+- Context7: mcp__plugin_context7_context7__query-docs (React patterns)
+- Playwright: mcp__plugin_playwright_playwright__browser_take_screenshot
+
+**Task:** Build ContentQualityCard.tsx - collapsible card showing 6-dimension quality scoring.
+
+Scoring dimensions from AGENTS.md: Specificity, Benefit Coverage, Keyword Inclusion, Format Adherence, Brand Voice, Factual Accuracy.
+
+See Phase 1 spec in docs/prompts/22-performance-data-lifecycle.md for exact mockup and requirements.
+
+**Files:**
+- dashboard/src/components/review/ContentQualityCard.tsx
+- dashboard/src/lib/quality-scoring.ts (create if doesn't exist)
+
+### Teammate 5: Performance Backend APIs
+**Require plan approval:** Yes
+
+**Skills (MUST invoke in order):**
+1. superpowers:brainstorming (FIRST - design API approach)
+2. superpowers:test-driven-development (write tests before implementation)
+3. code-simplifier (invoke if code gets complex)
+4. superpowers:verification-before-completion (LAST)
+
+**Key Plugins:** typescript-lsp, greptile (find existing patterns), code-simplifier, context7
+
+**Key MCP Servers:**
+- Supabase: mcp__supabase__execute_sql (test database writes), mcp__supabase__list_tables
+- Google Ads: mcp__google-ads-mcp__search (test performance queries)
+- Context7: mcp__plugin_context7_context7__query-docs (Next.js API routes, FastAPI patterns)
+- Vercel: mcp__vercel__get_runtime_logs (debug API issues)
+- Cloud Run: mcp__cloud-run__get_service_log (if touching Python pipeline)
+
+**Task:** Implement Phases 3-4 from Prompt 22:
+- Phase 3: captureBaseline() function - captures 30-day performance before publishing
+- Phase 4: POST /api/performance/capture-snapshot endpoint - periodic snapshots after publishing
+
+**Files:**
+- dashboard/src/lib/google-ads.ts (add captureBaseline function)
+- dashboard/src/lib/publishing/batch-publish.ts (integrate baseline capture)
+- dashboard/src/app/api/performance/capture-snapshot/route.ts (create new)
+
+## TEAM COORDINATION
+
+**Dependencies:**
+- Teammates 2-4 are fully independent (different React component files)
+- Teammate 2 may need to wait for Teammate 1 if sync is broken (data availability)
+- Teammate 5 is fully independent of all frontend work
+- All teammates should use superpowers:verification-before-completion BEFORE claiming done
+
+**After All Teammates Complete:**
+The lead will integrate their work:
+1. Read all 3 card components (SearchInsightsCard, PerformanceCard, ContentQualityCard)
+2. Integrate into dashboard/src/components/review/SkuReviewClient.tsx sidebar
+3. Run build verification: cd dashboard && npm run build
+4. Use Playwright MCP to screenshot full review page on localhost
+5. Invoke claude-md-management:revise-claude-md to update CLAUDE.md with learnings
+6. Create git commit with all changes (include Co-Authored-By for all teammates)
+
+## EXPECTED OUTCOME
+
+**Timeline:**
+- Sequential implementation: ~8-10 hours
+- With agent team: ~2-3 hours
+- Parallelization savings: 60-70% faster
+
+**Deliverables:**
+- ✅ Search Insights sync error fixed and verified
+- ✅ 3 new collapsible insight cards in review page sidebar
+- ✅ Backend APIs for performance baseline + snapshot capture
+- ✅ All components visually verified with Playwright screenshots
+- ✅ Production-grade UI (thanks to frontend-design skill)
+- ✅ Full test coverage (thanks to TDD skill)
+- ✅ Clean, simple code (thanks to code-simplifier)
+- ✅ Updated CLAUDE.md documentation
+
+**Display Mode:**
+Use split pane mode if tmux or iTerm2 is available for better visibility of all teammates.
+```
+
+**After spawning, monitor teammates and integrate their work when complete.**
+
+---
+
+## Mode & Skills (If NOT Using Agent Teams)
 
 **Recommended Mode:** Plan Mode (`/plan`)
 
@@ -21,6 +225,14 @@ This prompt covers the complete data lifecycle from search queries and performan
 3. `frontend-design` - When implementing the Review page UI components
 4. `superpowers:test-driven-development` - Before implementing each phase
 5. `superpowers:verification-before-completion` - Before claiming any phase complete
+6. `claude-md-management:revise-claude-md` - After completion to update CLAUDE.md
+
+**Plugins to Use:**
+- `frontend-design` - Production-grade UI components
+- `typescript-lsp` - Real-time type checking
+- `playwright` - Visual verification
+- `greptile` - Fast codebase search
+- `code-simplifier` - Refactor complex code
 
 **MCP Servers to Use:**
 - `mcp__supabase__execute_sql` - Query/inspect Supabase tables directly
@@ -28,6 +240,7 @@ This prompt covers the complete data lifecycle from search queries and performan
 - `mcp__google-ads-mcp__search` - Test Google Ads API queries
 - `mcp__vercel__get_runtime_logs` - Debug API issues in production
 - `mcp__plugin_playwright_playwright__*` - Visual verification of dashboard pages
+- `mcp__plugin_context7_context7__query-docs` - Fetch latest library docs
 
 **Agents to Consider:**
 - `Explore` agent - For thorough codebase investigation
