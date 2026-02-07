@@ -37,37 +37,49 @@ export function urlPathToSku(urlPath: string): string {
  * Use this when looking up a SKU in the database - try each candidate
  * until you find a match.
  *
+ * IMPORTANT: Slash-format candidates are prioritized first, as that's the
+ * canonical format in product_catalog. This prevents matching incorrect
+ * hyphen-format duplicates that may exist in the database.
+ *
  * @param urlSku The SKU as it appears in the URL (hyphens only)
- * @returns Array of possible database formats to try
+ * @returns Array of possible database formats to try, prioritized by likelihood
  */
 export function getSkuCandidates(urlSku: string): string[] {
-  const candidates: string[] = []
+  const slashCandidates: string[] = []
+  const hyphenCandidates: string[] = []
 
   // 1. URL-decode in case of %2F encoding
   const decoded = decodeURIComponent(urlSku)
 
-  // 2. Add the decoded URL SKU as-is (might match directly, e.g., 920D-6)
-  candidates.push(decoded)
-
-  // 3. Try replacing last hyphen-before-dimension with slash
-  // Pattern: -16, -2X, -16-GAL → /16, /2X, /16-GAL
-  const normalizedLast = decoded.replace(/-(\d+[A-Z]*(?:-[A-Z]+)?)$/i, '/$1')
-  if (normalizedLast !== decoded) {
-    candidates.push(normalizedLast)
-  }
-
-  // 4. Try replacing the second-to-last hyphen-digit segment
-  // This handles cases like WP-2-16-GAL where we need WP-2/16-GAL
-  const twoPartMatch = decoded.match(/^(.+?)-(\d+)-(\d+[A-Z]*(?:-[A-Z]+)?)$/i)
-  if (twoPartMatch) {
-    candidates.push(`${twoPartMatch[1]}-${twoPartMatch[2]}/${twoPartMatch[3]}`)
-  }
-
-  // 5. If the SKU has a slash already (from decoding), also try the hyphen version
+  // If already has slash (from URL decoding), prioritize it
   if (decoded.includes('/')) {
-    candidates.push(decoded.replace(/\//g, '-'))
+    slashCandidates.push(decoded)
+    hyphenCandidates.push(decoded.replace(/\//g, '-'))
+  } else {
+    // Try converting hyphens to slashes (these are more likely to be correct)
+
+    // 2. Try replacing last hyphen-before-dimension with slash
+    // Pattern: -16, -2X, -16-GAL → /16, /2X, /16-GAL
+    const normalizedLast = decoded.replace(/-(\d+[A-Z]*(?:-[A-Z]+)?)$/i, '/$1')
+    if (normalizedLast !== decoded) {
+      slashCandidates.push(normalizedLast)
+    }
+
+    // 3. Try replacing the second-to-last hyphen-digit segment
+    // This handles cases like WP-2-16-GAL where we need WP-2/16-GAL
+    // Also handles DMF-2-2X → DMF-2/2X
+    const twoPartMatch = decoded.match(/^(.+?)-(\d+)-(\d+[A-Z]*(?:-[A-Z]+)?)$/i)
+    if (twoPartMatch) {
+      slashCandidates.push(`${twoPartMatch[1]}-${twoPartMatch[2]}/${twoPartMatch[3]}`)
+    }
+
+    // 4. Add the decoded URL SKU as-is last (might match hyphens-only SKUs like 920D-6)
+    hyphenCandidates.push(decoded)
   }
+
+  // Return slash candidates first (canonical format), then hyphen fallbacks
+  const allCandidates = [...slashCandidates, ...hyphenCandidates]
 
   // Remove duplicates while preserving order
-  return [...new Set(candidates)]
+  return [...new Set(allCandidates)]
 }
