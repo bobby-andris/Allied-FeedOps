@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, ChevronDown, ChevronRight, Code2, Loader2 } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronRight, Code2, Loader2, Sparkles, TrendingUp, Activity } from "lucide-react"
 import Link from "next/link"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 import { QualityScore } from "@/components/shared/QualityScore"
@@ -49,19 +49,15 @@ interface ImageRecord {
   thumbnail_url: string | null
   prompt: string | null
   score: number | null
-  // Selection tracking
   ai_selected: boolean
   user_selected: boolean
   use_for_master: boolean
-  // Approval tracking
   approval_status: 'pending' | 'approved' | 'rejected'
   approved_by: string | null
   approved_at: string | null
   rejection_reason: string | null
-  // Variant association
   finish: string | null
   finish_code: string | null
-  // GMC tracking
   gmc_pushed_at: string | null
   gmc_offer_id: string | null
   created_at: string
@@ -74,9 +70,6 @@ interface ProductImageData {
   variantImages: Record<string, { mainImageUrl: string | null; additionalImages: (string | null)[] }>
 }
 
-// Per-platform "current" content
-// - Shopify: from product_catalog (what's actually live on Shopify)
-// - Google/Bing: from baseline_content (previous generation)
 interface CurrentContentByPlatform {
   [platform: string]: { title: string | null; description: string | null }
 }
@@ -84,7 +77,6 @@ interface CurrentContentByPlatform {
 interface ApprovalRecord {
   master_sku: string
   approval_status: string
-  // Can be boolean (newer DB) or 0/1 (older codepaths)
   title_approved: boolean | number | null
   description_approved: boolean | number | null
   image_approved: boolean | number | null
@@ -141,41 +133,41 @@ function PromptUsed({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2 w-full justify-start">
+        <Button variant="ghost" size="sm" className="gap-2 w-full justify-start hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors">
           {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           <Code2 className="h-4 w-4" />
-          Prompt used
+          <span className="text-sm font-medium">Prompt used</span>
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="mt-2">
-        <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm">Generation Prompt</CardTitle>
+      <CollapsibleContent className="mt-3">
+        <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-zinc-50/50 to-zinc-100/30 dark:from-zinc-900/50 dark:to-zinc-800/30">
+          <CardHeader className="py-4 px-5">
+            <CardTitle className="text-sm font-semibold tracking-tight">Generation Prompt</CardTitle>
           </CardHeader>
-          <CardContent className="py-0 pb-4 space-y-3">
+          <CardContent className="py-0 pb-5 px-5 space-y-4">
             {loading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
               </div>
             ) : !matchingEntry ? (
-              <p className="text-sm text-muted-foreground py-2">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 py-3 italic">
                 No stored prompt found for this content yet. Regenerate once to capture it.
               </p>
             ) : (
               <>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
                   {matchingEntry.model_version ? `Model: ${matchingEntry.model_version}` : null}
                   {matchingEntry.prompt_hash ? ` • Hash: ${matchingEntry.prompt_hash.slice(0, 10)}…` : null}
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-muted-foreground mb-1">System prompt</div>
-                  <pre className="text-xs whitespace-pre-wrap rounded-lg border bg-muted/40 p-3 max-h-64 overflow-auto">
+                  <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-2 uppercase tracking-wide">System prompt</div>
+                  <pre className="text-xs whitespace-pre-wrap rounded-lg border border-zinc-200/60 dark:border-zinc-700/60 bg-white/60 dark:bg-zinc-900/60 p-4 max-h-64 overflow-auto font-mono leading-relaxed">
                     {matchingEntry.system_prompt || '—'}
                   </pre>
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-muted-foreground mb-1">User prompt</div>
-                  <pre className="text-xs whitespace-pre-wrap rounded-lg border bg-muted/40 p-3 max-h-64 overflow-auto">
+                  <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-2 uppercase tracking-wide">User prompt</div>
+                  <pre className="text-xs whitespace-pre-wrap rounded-lg border border-zinc-200/60 dark:border-zinc-700/60 bg-white/60 dark:bg-zinc-900/60 p-4 max-h-64 overflow-auto font-mono leading-relaxed">
                     {matchingEntry.user_prompt || '—'}
                   </pre>
                 </div>
@@ -198,7 +190,6 @@ interface SkuReviewClientProps {
   productImages: ProductImageData | null
   currentContentByPlatform: CurrentContentByPlatform
   variantCurrentContent: Record<string, { title: string | null; description: string | null }>
-  /** Product+finish tailored sentences for Google and Bing */
   finishSentences?: {
     google: Record<string, string> | null
     bing: Record<string, string> | null
@@ -213,12 +204,6 @@ function getContentByPlatform(content: ContentRecord[], platform: string) {
   }
 }
 
-/**
- * Preview content by substituting placeholders with sample values.
- * - {FINISH_NAME} → "Polished Chrome"
- * - {FINISH_SENTENCE} → sample finish sentence
- * Returns both the preview text and whether the content is a template.
- */
 function previewWithSampleFinish(content: string | null): { preview: string | null; isTemplate: boolean } {
   if (!content) return { preview: null, isTemplate: false }
 
@@ -232,7 +217,6 @@ function previewWithSampleFinish(content: string | null): { preview: string | nu
       preview = preview.replace(/\{FINISH_NAME\}/g, 'Polished Chrome')
     }
     if (hasFinishSentence) {
-      // Use a sample sentence that describes how a finish relates to the product
       preview = preview.replace(/\{FINISH_SENTENCE\}/g, 'Polished Chrome offers timeless versatility with a bright, reflective surface that matches most fixtures.')
     }
     return { preview, isTemplate: true }
@@ -261,18 +245,22 @@ function ContentComparison({
   type: 'title' | 'description'
   platform: 'google' | 'bing' | 'shopify'
 }) {
-  // Preview candidate with sample finish substituted
   const { preview: candidatePreview, isTemplate } = previewWithSampleFinish(candidate)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    setIsVisible(true)
+  }, [])
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className={`border-zinc-200/60 dark:border-zinc-700/60 overflow-hidden transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <CardHeader className="bg-gradient-to-r from-zinc-50/80 via-white/50 to-zinc-50/80 dark:from-zinc-900/80 dark:via-zinc-900/50 dark:to-zinc-900/80 border-b border-zinc-200/60 dark:border-zinc-700/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CardTitle>{label}</CardTitle>
+            <CardTitle className="text-xl font-serif tracking-tight">{label}</CardTitle>
             {score !== null && <QualityScore score={score} size="sm" />}
             {isTemplate && (
-              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+              <Badge variant="outline" className="bg-violet-50 text-violet-700 border-violet-300/60 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700/60 font-medium">
                 Template
               </Badge>
             )}
@@ -288,41 +276,44 @@ function ContentComparison({
           </div>
         </div>
         {isTemplate && (
-          <CardDescription className="text-xs mt-1">
+          <CardDescription className="text-xs mt-2 text-zinc-600 dark:text-zinc-400">
             Preview shows &quot;Polished Chrome&quot; as sample finish. Actual finish name will be substituted for each variant.
           </CardDescription>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <div className="grid grid-cols-2 gap-6">
-          <div>
-            <div className="text-sm font-medium text-muted-foreground mb-2">{liveLabel}</div>
-            <div className="p-4 rounded-lg bg-muted/50 border whitespace-pre-wrap min-h-[100px]">
-              {currentLive || <span className="text-muted-foreground italic">No current content found</span>}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">{liveLabel}</div>
+              {currentLive && (
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                  {currentLive.length} chars
+                </div>
+              )}
             </div>
-            {currentLive && (
-              <div className="text-xs text-muted-foreground mt-2">
-                {currentLive.length} characters
-              </div>
-            )}
+            <div className="p-5 rounded-xl bg-zinc-100/60 border border-zinc-200/60 dark:bg-zinc-800/60 dark:border-zinc-700/60 whitespace-pre-wrap min-h-[120px] leading-relaxed shadow-sm">
+              {currentLive || <span className="text-zinc-400 dark:text-zinc-500 italic">No current content found</span>}
+            </div>
           </div>
-          <div>
-            <div className="text-sm font-medium text-muted-foreground mb-2">
-              Candidate {isTemplate && <span className="text-purple-600 dark:text-purple-400">(Preview)</span>}
-            </div>
-            <div className="p-4 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 whitespace-pre-wrap min-h-[100px]">
-              {candidatePreview || <span className="text-muted-foreground italic">No candidate content</span>}
-            </div>
-            {candidate && (
-              <div className="text-xs text-muted-foreground mt-2">
-                {candidate.length} characters{isTemplate && ' (template)'}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">
+                Candidate {isTemplate && <span className="text-violet-600 dark:text-violet-400 normal-case">(Preview)</span>}
               </div>
-            )}
+              {candidate && (
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                  {candidate.length} chars{isTemplate && ' (tmpl)'}
+                </div>
+              )}
+            </div>
+            <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-200/60 dark:from-emerald-900/20 dark:to-teal-900/20 dark:border-emerald-700/60 whitespace-pre-wrap min-h-[120px] leading-relaxed shadow-sm">
+              {candidatePreview || <span className="text-zinc-400 dark:text-zinc-500 italic">No candidate content</span>}
+            </div>
           </div>
         </div>
 
-        {/* Prompt used */}
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-6 pt-6 border-t border-zinc-200/60 dark:border-zinc-700/60">
           <PromptUsed
             sku={sku}
             contentType={type}
@@ -331,8 +322,7 @@ function ContentComparison({
           />
         </div>
 
-        {/* Regeneration History */}
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-4 pt-4 border-t border-zinc-200/60 dark:border-zinc-700/60">
           <RegenerationHistory
             sku={sku}
             contentType={type}
@@ -363,18 +353,17 @@ function PlatformContent({
 
   if (!title && !description) {
     return (
-      <Card>
-        <CardContent className="p-8 text-center text-muted-foreground">
-          No {platform} content found for this SKU
+      <Card className="border-zinc-200/60 dark:border-zinc-700/60">
+        <CardContent className="p-12 text-center text-zinc-400 dark:text-zinc-500">
+          <p className="text-sm italic">No {platform} content found for this SKU</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="grid grid-cols-[1fr_320px] gap-6">
-      {/* Left: Content comparison cards */}
-      <div className="space-y-6">
+    <div className="grid grid-cols-[1fr_340px] gap-8">
+      <div className="space-y-8">
         {title && (
           <ContentComparison
             label="Title"
@@ -403,24 +392,55 @@ function PlatformContent({
         )}
       </div>
 
-      {/* Right: Insight Cards sidebar */}
-      <div className="sticky top-4 self-start space-y-4">
-        <SearchInsightsCard
-          masterSku={sku}
-          currentTitle={title?.candidate_content ?? undefined}
-          currentDescription={description?.candidate_content ?? undefined}
-        />
-        <PerformanceCard
-          sku={sku}
-          platform={platform as 'google' | 'bing' | 'shopify'}
-        />
-        <ContentQualityCard
-          title={title?.candidate_content || ''}
-          description={description?.candidate_content || ''}
-          platform={platform as 'google' | 'bing' | 'shopify'}
-          masterSku={sku}
-        />
-      </div>
+      {/* Insights sidebar */}
+      <aside className="space-y-6">
+        <div className="sticky top-6 space-y-6">
+          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-blue-50/40 via-indigo-50/30 to-violet-50/40 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-violet-950/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                Search Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SearchInsightsCard
+                masterSku={sku}
+                currentTitle={title?.candidate_content ?? undefined}
+                currentDescription={description?.candidate_content ?? undefined}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-emerald-50/40 via-teal-50/30 to-cyan-50/40 dark:from-emerald-950/20 dark:via-teal-950/20 dark:to-cyan-950/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PerformanceCard sku={sku} platform={platform as 'google' | 'bing' | 'shopify'} />
+            </CardContent>
+          </Card>
+
+          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-amber-50/40 via-orange-50/30 to-rose-50/40 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-rose-950/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Activity className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                Content Quality
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ContentQualityCard
+                title={title?.candidate_content || ''}
+                description={description?.candidate_content || ''}
+                platform={platform as 'google' | 'bing' | 'shopify'}
+                masterSku={sku}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </aside>
     </div>
   )
 }
@@ -437,271 +457,194 @@ export function SkuReviewClient({
   variantCurrentContent,
   finishSentences,
 }: SkuReviewClientProps) {
-  const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
   const router = useRouter()
-  
-  // Get unique platforms and calculate overall score
-  const platforms = [...new Set(content.map(c => c.platform))]
-  const scores = content.filter(c => c.quality_score !== null).map(c => c.quality_score!)
-  const avgScore = scores.length > 0 
-    ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) 
-    : null
+  const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'bing' | 'shopify'>('google')
+  const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
 
-  // Get the current approval based on selected finish
-  const currentApproval = selectedFinish
-    ? variantApprovals.find(va => va.finish === selectedFinish)
-    : approval
+  const masterSku = content[0]?.master_sku || sku
+  const hasGoogleContent = content.some(c => c.platform === 'google')
+  const hasBingContent = content.some(c => c.platform === 'bing')
+  const hasShopifyContent = content.some(c => c.platform === 'shopify')
 
-  // Get current approval status for display
-  const currentStatus = currentApproval?.approval_status || 'pending'
-
-  // Determine if we should show variant selector
-  const hasVariants = variants.length > 0
+  const liveLabel = selectedPlatform === 'shopify' ? 'Current (Shopify)' : 'Previous generation'
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100/50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950/50">
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&display=swap');
+
+        .font-serif {
+          font-family: 'Crimson Pro', Georgia, serif;
+        }
+
+        @keyframes grain {
+          0%, 100% { transform: translate(0, 0); }
+          10% { transform: translate(-5%, -10%); }
+          20% { transform: translate(-15%, 5%); }
+          30% { transform: translate(7%, -25%); }
+          40% { transform: translate(-5%, 25%); }
+          50% { transform: translate(-15%, 10%); }
+          60% { transform: translate(15%, 0%); }
+          70% { transform: translate(0%, 15%); }
+          80% { transform: translate(3%, 35%); }
+          90% { transform: translate(-10%, 10%); }
+        }
+
+        .grain::before {
+          content: '';
+          position: fixed;
+          top: -50%;
+          left: -50%;
+          right: -50%;
+          bottom: -50%;
+          width: 200%;
+          height: 200%;
+          background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.05"/></svg>');
+          animation: grain 8s steps(10) infinite;
+          pointer-events: none;
+          z-index: 1;
+        }
+      `}</style>
+
+      <div className="grain" />
+
       {/* Header */}
-      <div className="mb-8">
-        <Link 
-          href="/review" 
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Review Queue
-        </Link>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              SKU {sku}
-              <Badge variant={currentStatus === 'approved' ? 'default' : 'secondary'}>
-                {currentStatus}
-              </Badge>
-              {selectedFinish && (
-                <Badge variant="outline" className="font-normal">
-                  {selectedFinish}
-                </Badge>
-              )}
-            </h1>
-            <p className="text-muted-foreground">
-              {content.length} content items across {platforms.length} platform(s)
-              {hasVariants && ` | ${variants.length} variants`}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {avgScore !== null && <QualityScore score={avgScore} size="lg" />}
-            <ApprovalActions sku={sku} finish={selectedFinish} type="all" />
-            <PublishButton
-              sku={sku}
-              approvalStatus={currentStatus}
-              hasGoogleContent={platforms.includes('google')}
-              hasShopifyContent={platforms.includes('shopify')}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Product Hero Image */}
-      {productImages && (
-        <div className="mb-6">
-          <ProductHeroImage
-            mainImageUrl={
-              selectedFinish && productImages.variantImages[selectedFinish]
-                ? productImages.variantImages[selectedFinish].mainImageUrl
-                : productImages.mainImageUrl
-            }
-            additionalImages={
-              selectedFinish && productImages.variantImages[selectedFinish]
-                ? productImages.variantImages[selectedFinish].additionalImages
-                : productImages.additionalImages
-            }
-            productTitle={`SKU ${sku}`}
-            finish={selectedFinish}
-            shopifyProductUrl={productImages.shopifyProductUrl}
-          />
-        </div>
-      )}
-
-      {/* Variant Selector */}
-      {hasVariants && (
-        <div className="mb-6 pb-4 border-b">
-          <VariantSelector
-            variants={variants}
-            variantApprovals={variantApprovals}
-            masterApprovalStatus={approval?.approval_status}
-            selectedFinish={selectedFinish}
-            onSelect={setSelectedFinish}
-          />
-        </div>
-      )}
-
-      {/* Platform Tabs */}
-      <Tabs defaultValue={platforms.includes('google') ? 'google' : platforms[0] || 'google'} className="space-y-6">
-        <TabsList>
-          {platforms.includes('google') && (
-            <TabsTrigger value="google">
-              <PlatformBadge platform="google" className="mr-2" />
-              Google
-            </TabsTrigger>
-          )}
-          {platforms.includes('bing') && (
-            <TabsTrigger value="bing">
-              <PlatformBadge platform="bing" className="mr-2" />
-              Bing
-            </TabsTrigger>
-          )}
-          {platforms.includes('shopify') && (
-            <TabsTrigger value="shopify">
-              <PlatformBadge platform="shopify" className="mr-2" />
-              Shopify
-            </TabsTrigger>
-          )}
-        </TabsList>
-
-        {platforms.includes('google') && (
-          <TabsContent value="google" className="space-y-6">
-            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <PlatformBadge platform="google" />
-              <span className="font-medium">Google Shopping Content</span>
-              <span className="text-sm text-muted-foreground ml-auto">
-                Template uses &#123;FINISH_NAME&#125; for 28 variants
-              </span>
-            </div>
-            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['google']} liveLabel="Previous Version" />
-            {/* All Variants Grid for Google */}
-            {hasVariants && (
-              <VariantContentGrid
-                sku={sku}
-                platform="google"
-                baseTitle={getContentByPlatform(content, 'google').title?.candidate_content || null}
-                baseDescription={getContentByPlatform(content, 'google').description?.candidate_content || null}
-                variants={variants
-                  .filter(v => v.finish && v.finish_code && v.option_sku)
-                  .map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
-                variantApprovals={variantApprovals}
-                variantCurrentContent={variantCurrentContent}
-                finishSentences={finishSentences?.google}
-                onApprovalChange={() => router.refresh()}
-              />
-            )}
-          </TabsContent>
-        )}
-
-        {platforms.includes('bing') && (
-          <TabsContent value="bing" className="space-y-6">
-            <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-              <PlatformBadge platform="bing" />
-              <span className="font-medium">Bing Shopping Content</span>
-              <span className="text-sm text-muted-foreground ml-auto">
-                Template uses &#123;FINISH_NAME&#125; for 28 variants
-              </span>
-            </div>
-            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['bing']} liveLabel="Previous Version" />
-            {/* All Variants Grid for Bing */}
-            {hasVariants && (
-              <VariantContentGrid
-                sku={sku}
-                platform="bing"
-                baseTitle={getContentByPlatform(content, 'bing').title?.candidate_content || null}
-                baseDescription={getContentByPlatform(content, 'bing').description?.candidate_content || null}
-                variants={variants
-                  .filter(v => v.finish && v.finish_code && v.option_sku)
-                  .map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
-                variantApprovals={variantApprovals}
-                variantCurrentContent={variantCurrentContent}
-                finishSentences={finishSentences?.bing}
-                onApprovalChange={() => router.refresh()}
-              />
-            )}
-          </TabsContent>
-        )}
-
-        {platforms.includes('shopify') && (
-          <TabsContent value="shopify" className="space-y-6">
-            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <PlatformBadge platform="shopify" />
-              <span className="font-medium">Shopify Product Page</span>
-              <span className="text-sm text-muted-foreground ml-auto">
-                No finish placeholder - content applies to all variants
-              </span>
-            </div>
-            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['shopify']} liveLabel="Current (Live)" />
-          </TabsContent>
-        )}
-      </Tabs>
-
-      {/* Lifestyle Images Section */}
-      <Separator className="my-8" />
-      <LifestyleImageReview
-        sku={sku}
-        images={images}
-        variants={variants
-          .filter(v => v.finish && v.finish_code)
-          .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
-        selectedFinish={selectedFinish}
-        onRefresh={() => router.refresh()}
-      />
-
-      {/* Approval Status */}
-      {currentApproval && (
-        <>
-          <Separator className="my-8" />
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Approval Status
-                {selectedFinish && (
-                  <span className="font-normal text-muted-foreground ml-2">
-                    ({selectedFinish})
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Title:</span>
-                  {(currentApproval.title_approved === true || currentApproval.title_approved === 1) && <Badge className="bg-green-100 text-green-800">Approved</Badge>}
-                  {(currentApproval.title_approved === false || currentApproval.title_approved === 0) && <Badge className="bg-red-100 text-red-800">Rejected</Badge>}
-                  {currentApproval.title_approved === null && <Badge variant="secondary">Pending</Badge>}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Description:</span>
-                  {(currentApproval.description_approved === true || currentApproval.description_approved === 1) && <Badge className="bg-green-100 text-green-800">Approved</Badge>}
-                  {(currentApproval.description_approved === false || currentApproval.description_approved === 0) && <Badge className="bg-red-100 text-red-800">Rejected</Badge>}
-                  {currentApproval.description_approved === null && <Badge variant="secondary">Pending</Badge>}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Image:</span>
-                  {(currentApproval.image_approved === true || currentApproval.image_approved === 1) && <Badge className="bg-green-100 text-green-800">Approved</Badge>}
-                  {(currentApproval.image_approved === false || currentApproval.image_approved === 0) && <Badge className="bg-red-100 text-red-800">Rejected</Badge>}
-                  {currentApproval.image_approved === null && <Badge variant="secondary">Pending</Badge>}
-                </div>
+      <header className="sticky top-0 z-50 border-b border-zinc-200/60 dark:border-zinc-700/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60">
+        <div className="container mx-auto px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="gap-2 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back</span>
+              </Button>
+              <div>
+                <h1 className="text-3xl font-serif font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {masterSku}
+                </h1>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Content Review & Optimization</p>
               </div>
-              {currentApproval.notes && (
-                <div className="mt-4 p-4 bg-muted rounded-lg">
-                  <div className="text-sm font-medium mb-1">Notes</div>
-                  <p className="text-sm text-muted-foreground">{currentApproval.notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+            </div>
+            <div className="flex items-center gap-3">
+              <PublishButton sku={masterSku} approvalStatus={approval?.approval_status || 'pending'} />
+            </div>
+          </div>
+        </div>
+      </header>
 
-      {/* Variant Approval Grid */}
-      {hasVariants && (
-        <>
-          <Separator className="my-8" />
-          <VariantApprovalGrid
-            sku={sku}
-            variants={variants}
-            variantApprovals={variantApprovals}
-            masterApproval={approval}
-            onVariantSelect={setSelectedFinish}
-          />
-        </>
-      )}
+      <main className="container mx-auto px-6 py-8 relative z-10">
+        {/* Product images section */}
+        {productImages && (
+          <section className="mb-10">
+            <div className="grid grid-cols-2 gap-8">
+              <ProductHeroImage
+                mainImageUrl={productImages.mainImageUrl}
+                additionalImages={productImages.additionalImages}
+                productTitle={masterSku}
+                shopifyProductUrl={productImages.shopifyProductUrl}
+              />
+              <LifestyleImageReview
+                sku={masterSku}
+                images={images}
+                variants={variants.filter(v => v.finish && v.finish_code).map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+                selectedFinish={selectedFinish}
+                onRefresh={() => router.refresh()}
+              />
+            </div>
+          </section>
+        )}
+
+        {/* Platform content tabs */}
+        <section className="mb-10">
+          <Tabs value={selectedPlatform} onValueChange={(v) => setSelectedPlatform(v as 'google' | 'bing' | 'shopify')} className="w-full">
+            <TabsList className="bg-zinc-100/60 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/60 p-1.5">
+              {hasGoogleContent && (
+                <TabsTrigger value="google" className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm transition-all">
+                  <PlatformBadge platform="google" className="text-sm" />
+                </TabsTrigger>
+              )}
+              {hasBingContent && (
+                <TabsTrigger value="bing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm transition-all">
+                  <PlatformBadge platform="bing" className="text-sm" />
+                </TabsTrigger>
+              )}
+              {hasShopifyContent && (
+                <TabsTrigger value="shopify" className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm transition-all">
+                  <PlatformBadge platform="shopify" className="text-sm" />
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            {hasGoogleContent && (
+              <TabsContent value="google" className="mt-8">
+                <PlatformContent
+                  platform="google"
+                  content={content}
+                  sku={masterSku}
+                  finish={selectedFinish}
+                  currentContent={currentContentByPlatform['google']}
+                  liveLabel={liveLabel}
+                />
+              </TabsContent>
+            )}
+            {hasBingContent && (
+              <TabsContent value="bing" className="mt-8">
+                <PlatformContent
+                  platform="bing"
+                  content={content}
+                  sku={masterSku}
+                  finish={selectedFinish}
+                  currentContent={currentContentByPlatform['bing']}
+                  liveLabel={liveLabel}
+                />
+              </TabsContent>
+            )}
+            {hasShopifyContent && (
+              <TabsContent value="shopify" className="mt-8">
+                <PlatformContent
+                  platform="shopify"
+                  content={content}
+                  sku={masterSku}
+                  finish={selectedFinish}
+                  currentContent={currentContentByPlatform['shopify']}
+                  liveLabel={liveLabel}
+                />
+              </TabsContent>
+            )}
+          </Tabs>
+        </section>
+
+        {/* Variant content section - only for Google and Bing */}
+        {variants && variants.length > 0 && (selectedPlatform === 'google' || selectedPlatform === 'bing') && (
+          <section className="mb-10">
+            <Card className="border-zinc-200/60 dark:border-zinc-700/60 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-zinc-50/80 via-white/50 to-zinc-50/80 dark:from-zinc-900/80 dark:via-zinc-900/50 dark:to-zinc-900/80 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                <CardTitle className="text-2xl font-serif font-bold tracking-tight">Variant Content</CardTitle>
+                <CardDescription className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Review and approve content for all {variants.length} product finishes
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <VariantContentGrid
+                  sku={masterSku}
+                  platform={selectedPlatform}
+                  baseTitle={getContentByPlatform(content, selectedPlatform).title?.candidate_content || null}
+                  baseDescription={getContentByPlatform(content, selectedPlatform).description?.candidate_content || null}
+                  variants={variants.filter(v => v.option_sku && v.finish && v.finish_code).map(v => ({ option_sku: v.option_sku!, finish: v.finish!, finish_code: v.finish_code! }))}
+                  variantApprovals={variantApprovals}
+                  variantCurrentContent={variantCurrentContent}
+                  finishSentences={finishSentences?.[selectedPlatform] || null}
+                  onApprovalChange={() => router.refresh()}
+                />
+              </CardContent>
+            </Card>
+          </section>
+        )}
+      </main>
     </div>
   )
 }

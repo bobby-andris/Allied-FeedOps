@@ -1,0 +1,1456 @@
+
+ ▐▛███▜▌   Claude Code v2.1.31
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/Documents/GitHub/Allied-FeedOps
+
+❯ /clear 
+  ⎿  (no content)
+
+❯ please update prompts 14 and 18 to use the new mcp server for merchant    
+  api and the agent associated with setting this up and then make any       
+  improvements/updates to the prompt you think are necessary. Also please   
+  look at this link to explore potential keyword planner tools to provide   
+  even more insights and data to our dashboard and model https://developers 
+  .google.com/google-ads/api/docs/keyword-planning/overview                 
+                                                                            
+  ensure that you are monitoring your context usage when using mcp tools to 
+   ensure we do not exceed the context. Dont be shy about using the tools   
+  but also be smart                                                         
+
+⏺ I'll update prompts 14 and 18 to use the Merchant API MCP server and agent,
+  and explore the Keyword Planner API for dashboard integration opportunities.
+  Let me start by reading the current prompts.
+
+⏺ Read 2 files (ctrl+o to expand)
+
+⏺ Fetch(https://developers.google.com/google-ads/api/docs/keyword-planning/overv
+       iew)
+  ⎿  Error: Sibling tool call errored
+
+⏺ Let me find the correct prompt file paths.
+
+⏺ Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Now let me read the actual prompts and fetch the Keyword Planner API
+  documentation.
+
+⏺ Read 2 files (ctrl+o to expand)
+
+⏺ Fetch(https://developers.google.com/google-ads/api/docs/keyword-planning/overv
+       iew)
+  ⎿  Received 287.1KB (200 OK)
+
+⏺ Now let me search for the Merchant API MCP tools and get more details on the
+  Keyword Planner API to understand what additional capabilities we can add.
+
+⏺ Fetch(https://developers.google.com/google-ads/api/docs/keyword-planning/gener
+       ate-keyword-ideas)
+  ⎿  Received 391.5KB (200 OK)
+
+⏺ Let me query the Merchant API docs to understand the product data
+  capabilities.
+
+⏺ merchant-api-devdocs - query_mapi_docs (MCP)(query: "product data feed
+                                              products list performance metrics
+                                              search terms")
+  ⎿  ⚠ Large MCP response (~10.7k tokens), this can fill up context quickly
+  ⎿  {
+       "results": [
+         {
+     … +729 lines (ctrl+o to expand)
+
+⏺ Fetch(https://developers.google.com/google-ads/api/docs/keyword-planning/gener
+       ate-historical-metrics)
+  ⎿  Received 383.1KB (200 OK)
+
+⏺ Now I have all the information I need. Let me update both prompts to
+  incorporate:
+
+  1. Merchant API MCP server for GMC product data and performance metrics
+  2. merchant-integrator agent for API setup
+  3. Keyword Planner API for search volume and competition data
+  4. General improvements
+
+⏺ Update(docs/prompts/14-search-query-insights.md)
+  ⎿  Added 34 lines, removed 1 line
+      2  
+      3  ## Objective
+      4  
+      5 -Build a search query insights dashboard that pulls actual search
+        - terms from Google Ads, identifies high-value queries, and feeds
+        - this data into content generation to ensure titles/descriptions
+        - match real search behavior.                                    
+      5 +Build a search query insights dashboard that pulls actual search
+        + terms from Google Ads, enriches them with Keyword Planner searc
+        +h volume data, syncs with GMC product data via the Merchant API,
+        + and feeds this intelligence into content generation to ensure t
+        +itles/descriptions match real search behavior.                  
+      6  
+      7  ## Problem Statement
+      8  
+     ...
+      11  - Missing high-intent search terms that drive conversions
+      12  - Content that doesn't match how customers actually search
+      13  - No visibility into query-to-content alignment
+      14 +- No search volume context for prioritization                  
+      15 +- Disconnection between GMC feed data and search insights      
+      16  
+      17 +## MCP Tools & Agents                                          
+      18 +                                                               
+      19 +### Required MCP Servers                                       
+      20 +                                                               
+      21 +**Merchant API MCP** (`mcp__merchant-api-devdocs__*`):         
+      22 +- `query_mapi_docs` - Query Merchant API documentation         
+      23 +- `find_mapi_code_sample` - Find code samples for implementatio
+         +n                                                              
+      24 +                                                               
+      25 +Use the Merchant API MCP to:                                   
+      26 +- Pull `product_performance_view` for impressions/clicks by off
+         +er_id                                                          
+      27 +- Query `product_view` for current product attributes and statu
+         +s                                                              
+      28 +- Get product data quality issues                              
+      29 +                                                               
+      30 +**Google Ads MCP** (`mcp__google-ads-mcp__*`):                 
+      31 +- `search` - Execute GAQL queries for search terms             
+      32 +                                                               
+      33 +### Agent for Setup                                            
+      34 +                                                               
+      35 +**merchant-integrator agent**: Use this agent (via Task tool wi
+         +th `subagent_type: merchant-integrator`) when:                 
+      36 +- Migrating from Content API for Shopping to Merchant API      
+      37 +- Setting up new Merchant API integrations                     
+      38 +- Implementing product performance queries                     
+      39 +                                                               
+      40 +Example invocation:                                            
+      41 +```                                                            
+      42 +Task tool: {                                                   
+      43 +  subagent_type: "merchant-integrator",                        
+      44 +  prompt: "Set up Merchant API integration for product performa
+         +nce reporting"                                                 
+      45 +}                                                              
+      46 +```                                                            
+      47 +                                                               
+      48  ## Critical: Platform-Specific Content Architecture
+      49  
+      50  **IMPORTANT**: Understand how content is served on each platfor
+          m:
+
+⏺ Update(docs/prompts/14-search-query-insights.md)
+  ⎿  Added 89 lines
+       88  - Google Ads customer ID: 6253381786
+       89  - Existing integration: `src/feedops/integrations/google_ads_p
+           erformance.py`
+       90  - `variant_index` table with GMC offer ID mappings
+       91 +- Merchant API access (use `merchant-integrator` agent to set 
+          +up)                                                           
+       92 +- Keyword Planner API access (same Google Ads credentials)    
+       93  
+       94 +## API Integration Architecture                               
+       95 +                                                              
+       96 +### Data Sources                                              
+       97 +                                                              
+       98 +1. **Google Ads Search Terms** (what people actually searched)
+       99 +   - Source: `search_term_view` via GAQL                      
+      100 +   - Data: actual queries, impressions, clicks, conversions by
+          + variant                                                      
+      101 +                                                              
+      102 +2. **Keyword Planner** (search volume context)                
+      103 +   - Source: `KeywordPlanIdeaService.GenerateKeywordHistorical
+          +Metrics`                                                      
+      104 +   - Data: avg monthly searches, competition level/index, CPC 
+          +ranges                                                        
+      105 +   - Use to prioritize which search terms to optimize for     
+      106 +                                                              
+      107 +3. **Merchant API** (product feed data)                       
+      108 +   - Source: `product_performance_view`, `product_view`       
+      109 +   - Data: product attributes, performance by offer_id, data i
+          +ssues                                                         
+      110 +   - Use to correlate search terms with current feed content  
+      111 +                                                              
+      112 +### Merchant API Queries (via MCP)                            
+      113 +                                                              
+      114 +```sql                                                        
+      115 +-- Get product performance metrics                            
+      116 +SELECT                                                        
+      117 +  offer_id,                                                   
+      118 +  clicks,                                                     
+      119 +  impressions,                                                
+      120 +  click_through_rate                                          
+      121 +FROM product_performance_view                                 
+      122 +WHERE date BETWEEN '2025-01-01' AND '2025-01-31'              
+      123 +                                                              
+      124 +-- Get product attributes for content comparison              
+      125 +SELECT                                                        
+      126 +  id,                                                         
+      127 +  offer_id,                                                   
+      128 +  title,                                                      
+      129 +  aggregated_reporting_context_status,                        
+      130 +  item_issues                                                 
+      131 +FROM product_view                                             
+      132 +WHERE aggregated_reporting_context_status = 'ELIGIBLE'        
+      133 +```                                                           
+      134 +                                                              
+      135 +### Keyword Planner Integration                               
+      136 +                                                              
+      137 +```python                                                     
+      138 +# Get search volume for discovered search terms               
+      139 +from google.ads.googleads.client import GoogleAdsClient       
+      140 +                                                              
+      141 +def get_keyword_metrics(client, customer_id, keywords: list[st
+          +r]) -> dict:                                                  
+      142 +    """                                                       
+      143 +    Fetch historical metrics for keywords from Keyword Planner
+          +.                                                             
+      144 +                                                              
+      145 +    Returns dict mapping keyword -> {                         
+      146 +        avg_monthly_searches: int,                            
+      147 +        competition: str (LOW/MEDIUM/HIGH),                   
+      148 +        competition_index: int (0-100),                       
+      149 +        low_top_of_page_bid_micros: int,                      
+      150 +        high_top_of_page_bid_micros: int                      
+      151 +    }                                                         
+      152 +    """                                                       
+      153 +    keyword_plan_idea_service = client.get_service("KeywordPla
+          +nIdeaService")                                                
+      154 +                                                              
+      155 +    request = client.get_type("GenerateKeywordHistoricalMetric
+          +sRequest")                                                    
+      156 +    request.customer_id = customer_id                         
+      157 +    request.keywords.extend(keywords)                         
+      158 +    request.language = "languageConstants/1000"  # English    
+      159 +    request.geo_target_constants.append("geoTargetConstants/28
+          +40")  # USA                                                   
+      160 +    request.keyword_plan_network = (                          
+      161 +        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH     
+      162 +    )                                                         
+      163 +                                                              
+      164 +    response = keyword_plan_idea_service.generate_keyword_hist
+          +orical_metrics(                                               
+      165 +        request=request                                       
+      166 +    )                                                         
+      167 +                                                              
+      168 +    results = {}                                              
+      169 +    for result in response.results:                           
+      170 +        metrics = result.keyword_metrics                      
+      171 +        results[result.text] = {                              
+      172 +            'avg_monthly_searches': metrics.avg_monthly_search
+          +es,                                                           
+      173 +            'competition': metrics.competition.name,          
+      174 +            'competition_index': metrics.competition_index,   
+      175 +            'low_cpc_micros': metrics.low_top_of_page_bid_micr
+          +os,                                                           
+      176 +            'high_cpc_micros': metrics.high_top_of_page_bid_mi
+          +cros                                                          
+      177 +        }                                                     
+      178 +    return results                                            
+      179 +```                                                           
+      180 +                                                              
+      181  ## Files to Create
+      182  
+      183  ### Dashboard Components
+
+⏺ Update(docs/prompts/14-search-query-insights.md)
+  ⎿  Added 22 lines, removed 1 line
+      198  
+      199  ```sql
+      200  -- Store search query data from Google Ads at VARIANT level
+      201 +-- Enhanced with Keyword Planner metrics for prioritization   
+      202  CREATE TABLE search_queries (
+      203    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+      204    query_text text NOT NULL,
+     ...
+      209    finish text, -- e.g., 'Polished Chrome'
+      210    finish_code text, -- e.g., 'PC'
+      211    shopify_variant_id text,
+      211 -  -- Metrics                                                  
+      212 +  -- Google Ads Metrics (actual performance)                  
+      213    impressions integer DEFAULT 0,
+      214    clicks integer DEFAULT 0,
+      215    conversions numeric DEFAULT 0,
+     ...
+      221    cvr numeric GENERATED ALWAYS AS (
+      222      CASE WHEN clicks > 0 THEN conversions / clicks ELSE 0 END
+      223    ) STORED,
+      224 +  -- Keyword Planner Metrics (market context)                 
+      225 +  avg_monthly_searches integer, -- From Keyword Planner       
+      226 +  competition text CHECK (competition IN ('LOW', 'MEDIUM', 'HI
+          +GH', 'UNSPECIFIED')),                                         
+      227 +  competition_index integer CHECK (competition_index BETWEEN 0
+          + AND 100),                                                    
+      228 +  low_cpc_micros bigint, -- 20th percentile top-of-page bid   
+      229 +  high_cpc_micros bigint, -- 80th percentile top-of-page bid  
+      230 +  keyword_metrics_updated_at timestamptz,                     
+      231    -- Time tracking
+      232    period_start date NOT NULL,
+      233    period_end date NOT NULL,
+     ...
+      235    UNIQUE(query_text, gmc_offer_id, period_start, period_end)
+      236  );
+      237  
+      238 +-- Keyword-level metrics (aggregated from Keyword Planner, not
+          + variant-specific)                                            
+      239 +CREATE TABLE keyword_metrics (                                
+      240 +  keyword text PRIMARY KEY,                                   
+      241 +  avg_monthly_searches integer,                               
+      242 +  competition text CHECK (competition IN ('LOW', 'MEDIUM', 'HI
+          +GH', 'UNSPECIFIED')),                                         
+      243 +  competition_index integer CHECK (competition_index BETWEEN 0
+          + AND 100),                                                    
+      244 +  low_cpc_micros bigint,                                      
+      245 +  high_cpc_micros bigint,                                     
+      246 +  -- Monthly search volume breakdown (last 12 months)         
+      247 +  monthly_searches jsonb, -- [{month: '2025-01', searches: 120
+          +0}, ...]                                                      
+      248 +  updated_at timestamptz DEFAULT now()                        
+      249 +);                                                            
+      250 +                                                              
+      251  -- Aggregated view: queries per master SKU (across all variant
+           s)
+      252  CREATE TABLE search_queries_by_master_sku (
+      253    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+⏺ Update(docs/prompts/14-search-query-insights.md)
+  ⎿  Added 110 lines
+      350  from datetime import datetime, timedelta
+      351  from feedops.db import get_supabase_client
+      352  
+      353 +                                                              
+      354 +class KeywordPlannerClient:                                   
+      355 +    """Fetches keyword metrics from Google Ads Keyword Planner
+          +."""                                                          
+      356 +                                                              
+      357 +    def __init__(self):                                       
+      358 +        self.customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID',
+          + '6253381786')                                                
+      359 +        self.client = GoogleAdsClient.load_from_env()         
+      360 +                                                              
+      361 +    def get_historical_metrics(                               
+      362 +        self,                                                 
+      363 +        keywords: List[str],                                  
+      364 +        language_id: str = "1000",  # English                 
+      365 +        geo_target_id: str = "2840"  # USA                    
+      366 +    ) -> Dict[str, Dict]:                                     
+      367 +        """                                                   
+      368 +        Fetch historical metrics for keywords from Keyword Pla
+          +nner.                                                         
+      369 +                                                              
+      370 +        Returns dict mapping keyword -> metrics               
+      371 +        """                                                   
+      372 +        service = self.client.get_service("KeywordPlanIdeaServ
+          +ice")                                                         
+      373 +                                                              
+      374 +        request = self.client.get_type("GenerateKeywordHistori
+          +calMetricsRequest")                                           
+      375 +        request.customer_id = self.customer_id                
+      376 +        request.keywords.extend(keywords)                     
+      377 +        request.language = f"languageConstants/{language_id}" 
+      378 +        request.geo_target_constants.append(f"geoTargetConstan
+          +ts/{geo_target_id}")                                          
+      379 +        request.keyword_plan_network = (                      
+      380 +            self.client.enums.KeywordPlanNetworkEnum.GOOGLE_SE
+          +ARCH                                                          
+      381 +        )                                                     
+      382 +                                                              
+      383 +        try:                                                  
+      384 +            response = service.generate_keyword_historical_met
+          +rics(request=request)                                         
+      385 +                                                              
+      386 +            results = {}                                      
+      387 +            for result in response.results:                   
+      388 +                metrics = result.keyword_metrics              
+      389 +                results[result.text] = {                      
+      390 +                    'avg_monthly_searches': metrics.avg_monthl
+          +y_searches or 0,                                              
+      391 +                    'competition': metrics.competition.name,  
+      392 +                    'competition_index': metrics.competition_i
+          +ndex or 0,                                                    
+      393 +                    'low_cpc_micros': metrics.low_top_of_page_
+          +bid_micros or 0,                                              
+      394 +                    'high_cpc_micros': metrics.high_top_of_pag
+          +e_bid_micros or 0,                                            
+      395 +                    'monthly_searches': [                     
+      396 +                        {                                     
+      397 +                            'year': m.year,                   
+      398 +                            'month': m.month,                 
+      399 +                            'searches': m.monthly_searches or 
+          +0                                                             
+      400 +                        }                                     
+      401 +                        for m in metrics.monthly_search_volume
+          +s                                                             
+      402 +                    ]                                         
+      403 +                }                                             
+      404 +            return results                                    
+      405 +                                                              
+      406 +        except GoogleAdsException as e:                       
+      407 +            print(f"Keyword Planner API error: {e}")          
+      408 +            raise                                             
+      409 +                                                              
+      410 +    def generate_keyword_ideas(                               
+      411 +        self,                                                 
+      412 +        seed_keywords: List[str] = None,                      
+      413 +        seed_url: str = None,                                 
+      414 +        language_id: str = "1000",                            
+      415 +        geo_target_id: str = "2840"                           
+      416 +    ) -> List[Dict]:                                          
+      417 +        """                                                   
+      418 +        Generate keyword ideas from seeds (keywords or URL).  
+      419 +                                                              
+      420 +        Useful for discovering related search terms we might b
+          +e missing.                                                    
+      421 +        """                                                   
+      422 +        service = self.client.get_service("KeywordPlanIdeaServ
+          +ice")                                                         
+      423 +                                                              
+      424 +        request = self.client.get_type("GenerateKeywordIdeasRe
+          +quest")                                                       
+      425 +        request.customer_id = self.customer_id                
+      426 +        request.language = f"languageConstants/{language_id}" 
+      427 +        request.geo_target_constants.append(f"geoTargetConstan
+          +ts/{geo_target_id}")                                          
+      428 +        request.keyword_plan_network = (                      
+      429 +            self.client.enums.KeywordPlanNetworkEnum.GOOGLE_SE
+          +ARCH                                                          
+      430 +        )                                                     
+      431 +                                                              
+      432 +        if seed_keywords and seed_url:                        
+      433 +            request.keyword_and_url_seed.keywords.extend(seed_
+          +keywords)                                                     
+      434 +            request.keyword_and_url_seed.url = seed_url       
+      435 +        elif seed_keywords:                                   
+      436 +            request.keyword_seed.keywords.extend(seed_keywords
+          +)                                                             
+      437 +        elif seed_url:                                        
+      438 +            request.url_seed.url = seed_url                   
+      439 +        else:                                                 
+      440 +            raise ValueError("Must provide seed_keywords or se
+          +ed_url")                                                      
+      441 +                                                              
+      442 +        try:                                                  
+      443 +            response = service.generate_keyword_ideas(request=
+          +request)                                                      
+      444 +                                                              
+      445 +            ideas = []                                        
+      446 +            for idea in response.results:                     
+      447 +                metrics = idea.keyword_idea_metrics           
+      448 +                ideas.append({                                
+      449 +                    'keyword': idea.text,                     
+      450 +                    'avg_monthly_searches': metrics.avg_monthl
+          +y_searches or 0,                                              
+      451 +                    'competition': metrics.competition.name,  
+      452 +                    'competition_index': metrics.competition_i
+          +ndex or 0,                                                    
+      453 +                    'low_cpc_micros': metrics.low_top_of_page_
+          +bid_micros or 0,                                              
+      454 +                    'high_cpc_micros': metrics.high_top_of_pag
+          +e_bid_micros or 0                                             
+      455 +                })                                            
+      456 +            return ideas                                      
+      457 +                                                              
+      458 +        except GoogleAdsException as e:                       
+      459 +            print(f"Keyword Planner API error: {e}")          
+      460 +            raise                                             
+      461 +                                                              
+      462 +                                                              
+      463  class SearchTermsClient:
+      464      """Fetches search term data from Google Ads Shopping campa
+           igns with variant-level tracking."""
+      465  
+
+⏺ Update(docs/prompts/14-search-query-insights.md)
+  ⎿  Added 131 lines
+      784                          })
+      785  
+      786          return finish_specific
+      787 +                                                              
+      788 +    def enrich_with_keyword_metrics(                          
+      789 +        self,                                                 
+      790 +        search_terms: List[Dict],                             
+      791 +        batch_size: int = 100                                 
+      792 +    ) -> List[Dict]:                                          
+      793 +        """                                                   
+      794 +        Enrich search terms with Keyword Planner metrics.     
+      795 +                                                              
+      796 +        Adds avg_monthly_searches, competition, competition_in
+          +dex, etc.                                                     
+      797 +        to each search term for prioritization.               
+      798 +        """                                                   
+      799 +        kp_client = KeywordPlannerClient()                    
+      800 +                                                              
+      801 +        # Extract unique keywords                             
+      802 +        keywords = list(set(term['search_term'] for term in se
+          +arch_terms))                                                  
+      803 +                                                              
+      804 +        # Fetch in batches (Keyword Planner has rate limits)  
+      805 +        all_metrics = {}                                      
+      806 +        for i in range(0, len(keywords), batch_size):         
+      807 +            batch = keywords[i:i + batch_size]                
+      808 +            metrics = kp_client.get_historical_metrics(batch) 
+      809 +            all_metrics.update(metrics)                       
+      810 +                                                              
+      811 +        # Enrich search terms                                 
+      812 +        for term in search_terms:                             
+      813 +            keyword = term['search_term']                     
+      814 +            if keyword in all_metrics:                        
+      815 +                term.update({                                 
+      816 +                    'avg_monthly_searches': all_metrics[keywor
+          +d]['avg_monthly_searches'],                                   
+      817 +                    'competition': all_metrics[keyword]['compe
+          +tition'],                                                     
+      818 +                    'competition_index': all_metrics[keyword][
+          +'competition_index'],                                         
+      819 +                    'low_cpc_micros': all_metrics[keyword]['lo
+          +w_cpc_micros'],                                               
+      820 +                    'high_cpc_micros': all_metrics[keyword]['h
+          +igh_cpc_micros']                                              
+      821 +                })                                            
+      822 +                                                              
+      823 +        return search_terms                                   
+      824 +                                                              
+      825 +                                                              
+      826 +class MerchantAPIClient:                                      
+      827 +    """                                                       
+      828 +    Client for Google Merchant API to fetch product data and p
+          +erformance.                                                   
+      829 +                                                              
+      830 +    Note: Use the merchant-integrator agent to set up authenti
+          +cation and                                                    
+      831 +    query the mcp__merchant-api-devdocs__query_mapi_docs for i
+          +mplementation details.                                        
+      832 +    """                                                       
+      833 +                                                              
+      834 +    def __init__(self, merchant_id: str):                     
+      835 +        self.merchant_id = merchant_id                        
+      836 +        # Authentication setup - use merchant-integrator agent
+      837 +                                                              
+      838 +    def get_product_performance(                              
+      839 +        self,                                                 
+      840 +        start_date: str,                                      
+      841 +        end_date: str,                                        
+      842 +        offer_ids: List[str] = None                           
+      843 +    ) -> List[Dict]:                                          
+      844 +        """                                                   
+      845 +        Fetch product performance metrics from Merchant API.  
+      846 +                                                              
+      847 +        Query: product_performance_view                       
+      848 +        Returns: impressions, clicks, ctr by offer_id         
+      849 +        """                                                   
+      850 +        query = f"""                                          
+      851 +            SELECT                                            
+      852 +                offer_id,                                     
+      853 +                clicks,                                       
+      854 +                impressions,                                  
+      855 +                click_through_rate                            
+      856 +            FROM product_performance_view                     
+      857 +            WHERE date BETWEEN '{start_date}' AND '{end_date}'
+      858 +        """                                                   
+      859 +                                                              
+      860 +        if offer_ids:                                         
+      861 +            offer_filter = ", ".join(f"'{oid}'" for oid in off
+          +er_ids)                                                       
+      862 +            query += f" AND offer_id IN ({offer_filter})"     
+      863 +                                                              
+      864 +        # Execute via Merchant API reports.search             
+      865 +        # Implementation details: use mcp__merchant-api-devdoc
+          +s__find_mapi_code_sample                                      
+      866 +        pass                                                  
+      867 +                                                              
+      868 +    def get_product_attributes(                               
+      869 +        self,                                                 
+      870 +        offer_ids: List[str] = None                           
+      871 +    ) -> List[Dict]:                                          
+      872 +        """                                                   
+      873 +        Fetch current product attributes from Merchant API.   
+      874 +                                                              
+      875 +        Query: product_view                                   
+      876 +        Returns: title, description, status, issues by offer_i
+          +d                                                             
+      877 +        """                                                   
+      878 +        query = """                                           
+      879 +            SELECT                                            
+      880 +                id,                                           
+      881 +                offer_id,                                     
+      882 +                title,                                        
+      883 +                aggregated_reporting_context_status,          
+      884 +                item_issues                                   
+      885 +            FROM product_view                                 
+      886 +        """                                                   
+      887 +                                                              
+      888 +        if offer_ids:                                         
+      889 +            offer_filter = ", ".join(f"'{oid}'" for oid in off
+          +er_ids)                                                       
+      890 +            query += f" WHERE offer_id IN ({offer_filter})"   
+      891 +                                                              
+      892 +        # Execute via Merchant API reports.search             
+      893 +        pass                                                  
+      894 +                                                              
+      895 +    def get_price_competitiveness(                            
+      896 +        self,                                                 
+      897 +        offer_ids: List[str] = None                           
+      898 +    ) -> List[Dict]:                                          
+      899 +        """                                                   
+      900 +        Fetch price competitiveness data.                     
+      901 +                                                              
+      902 +        Query: price_competitiveness_product_view             
+      903 +        Returns: our price vs benchmark price by offer_id     
+      904 +        """                                                   
+      905 +        query = """                                           
+      906 +            SELECT                                            
+      907 +                id,                                           
+      908 +                offer_id,                                     
+      909 +                price,                                        
+      910 +                benchmark_price,                              
+      911 +                report_country_code                           
+      912 +            FROM price_competitiveness_product_view           
+      913 +            WHERE report_country_code = 'US'                  
+      914 +        """                                                   
+      915 +                                                              
+      916 +        # Execute via Merchant API reports.search             
+      917 +        pass                                                  
+      918  ```
+      919  
+      920  ## API Implementation
+
+⏺ Update(docs/prompts/14-search-query-insights.md)
+  ⎿  Added 35 lines
+      1572  5. [ ] Finish-specific search patterns identified
+      1573  6. [ ] Gap analysis works at variant level for Google/Bing
+      1574  7. [ ] Integration with content generation includes variant c
+            ontext
+      1575 +8. [ ] **Keyword Planner metrics** fetched and stored for sea
+           +rch terms                                                    
+      1576 +9. [ ] **Search volume prioritization** - high-volume keyword
+           +s highlighted                                                
+      1577 +10. [ ] **Competition level indicators** shown in UI (LOW/MED
+           +IUM/HIGH)                                                    
+      1578 +11. [ ] **Merchant API integration** - product performance sy
+           +nced with search data                                        
+      1579 +12. [ ] **Price competitiveness** data available for context 
+      1580  
+      1581 +## Keyword Planner Dashboard Features                        
+      1582 +                                                             
+      1583 +### Search Volume Column                                     
+      1584 +Add avg_monthly_searches to query tables to prioritize optimi
+           +zation:                                                      
+      1585 +- High volume (>1000/mo) - Priority optimization             
+      1586 +- Medium volume (100-1000/mo) - Secondary focus              
+      1587 +- Low volume (<100/mo) - Consider for long-tail              
+      1588 +                                                             
+      1589 +### Competition Indicators                                   
+      1590 +Show competition level badges:                               
+      1591 +- LOW (0-33) - Easy to rank, lower CPCs                      
+      1592 +- MEDIUM (34-66) - Moderate competition                      
+      1593 +- HIGH (67-100) - Competitive, higher CPCs                   
+      1594 +                                                             
+      1595 +### CPC Estimates                                            
+      1596 +Show estimated CPC ranges to help prioritize:                
+      1597 +- Low bid (20th percentile)                                  
+      1598 +- High bid (80th percentile)                                 
+      1599 +- Use for ROI calculations                                   
+      1600 +                                                             
+      1601 +### Keyword Discovery                                        
+      1602 +Add "Discover Related Keywords" button that uses Keyword Plan
+           +ner to:                                                      
+      1603 +- Generate ideas from existing high-performing keywords      
+      1604 +- Identify keywords competitors rank for but we don't        
+      1605 +- Find long-tail variations with good volume                 
+      1606 +                                                             
+      1607  ## Future Enhancements
+      1608  
+      1609  - Compare query patterns between finishes (e.g., "Does Antiqu
+            e Brass get more 'vintage' searches?")
+     ...
+      1611  - Suggest finish-specific keyword additions
+      1612  - Track query trends by variant over time
+      1613  - Auto-generate variant-specific title variations
+      1614 +- **Keyword opportunity scoring** - combine search volume × (
+           +100 - competition_index) × CVR                               
+      1615 +- **Seasonal trend analysis** - identify keywords with season
+           +al volume spikes                                             
+      1616 +- **Competitor keyword gap** - keywords they rank for that we
+           + don't (via SiteSeed)                                        
+      1617 +- **Auto-refresh Keyword Planner data** monthly (metrics only
+           + refresh monthly)                                            
+
+⏺ Now let me update Prompt 18 (keyword-gap-analysis.md) with the same
+  enhancements.
+
+⏺ Update(docs/prompts/18-keyword-gap-analysis.md)
+  ⎿  Added 157 lines, removed 5 lines
+      2  
+      3  ## Objective
+      4  
+      5 -Build a keyword gap analysis tool that systematically identifies
+        - which SKUs are missing important keywords, prioritizes optimiza
+        -tion work by opportunity size, and provides specific keyword rec
+        -ommendations.                                                   
+      5 +Build a keyword gap analysis tool that systematically identifies
+        + which SKUs are missing important keywords, prioritizes optimiza
+        +tion work by opportunity size using Keyword Planner search volum
+        +e data, and provides specific keyword recommendations informed b
+        +y Merchant API product performance.                             
+      6  
+      7  ## Problem Statement
+      8  
+     ...
+       11  - No visibility into which SKUs have the biggest opportunity
+       12  - Titles that miss high-volume search terms
+       13  - Inefficient use of optimization resources
+       14 +- No market context (search volume, competition) for prioritiz
+          +ation                                                         
+       15 +- Disconnection between GMC feed data and keyword analysis    
+       16  
+       17 +## MCP Tools & Agents                                         
+       18 +                                                              
+       19 +### Required MCP Servers                                      
+       20 +                                                              
+       21 +**Merchant API MCP** (`mcp__merchant-api-devdocs__*`):        
+       22 +- `query_mapi_docs` - Query Merchant API documentation        
+       23 +- `find_mapi_code_sample` - Find code samples for implementati
+          +on                                                            
+       24 +                                                              
+       25 +Use the Merchant API MCP to:                                  
+       26 +- Pull `product_performance_view` for actual clicks/impression
+          +s by offer_id                                                 
+       27 +- Query `product_view` for current title/description in GMC fe
+          +ed                                                            
+       28 +- Get `price_competitiveness_product_view` for pricing context
+       29 +- Identify `click_potential` - Google's estimate of performanc
+          +e potential                                                   
+       30 +                                                              
+       31 +**Google Ads MCP** (`mcp__google-ads-mcp__*`):                
+       32 +- `search` - Execute GAQL queries for search terms and Keyword
+          + Planner data                                                 
+       33 +                                                              
+       34 +### Agent for Setup                                           
+       35 +                                                              
+       36 +**merchant-integrator agent**: Use this agent (via Task tool w
+          +ith `subagent_type: merchant-integrator`) when:               
+       37 +- Setting up Merchant API integration for keyword analysis    
+       38 +- Migrating from Content API to Merchant API                  
+       39 +- Implementing product performance queries                    
+       40 +                                                              
+       41 +Example invocation:                                           
+       42 +```                                                           
+       43 +Task tool: {                                                  
+       44 +  subagent_type: "merchant-integrator",                       
+       45 +  prompt: "Set up Merchant API to fetch product titles and cli
+          +ck potential for keyword gap analysis"                        
+       46 +}                                                             
+       47 +```                                                           
+       48 +                                                              
+       49  ## Solution Overview
+       50  
+       51  Build a keyword gap analyzer that:
+       52  1. Compares our titles to actual search queries from Google Ad
+           s
+       19 -2. Identifies SKUs where high-volume queries aren't in titles 
+       20 -3. Prioritizes optimization by opportunity size (impressions ×
+          - gap)                                                         
+       21 -4. Shows specific keywords to add per SKU                     
+       22 -5. Tracks gap closure progress over time                      
+       53 +2. **Enriches with Keyword Planner** - adds search volume, com
+          +petition, CPC data                                            
+       54 +3. **Syncs with Merchant API** - correlates with GMC feed data
+          + and click_potential                                          
+       55 +4. Identifies SKUs where high-volume queries aren't in titles 
+       56 +5. Prioritizes optimization by **opportunity score** = volume 
+          +× (100 - competition) × gap                                   
+       57 +6. Shows specific keywords to add per SKU with ROI estimates  
+       58 +7. Tracks gap closure progress over time                      
+       59  
+       60  ## Prerequisites
+       61  
+       62  - Google Ads search term data (from Prompt 14)
+       63  - Generated content stored in Supabase
+       64  - Existing title/description data for SKUs
+       65 +- **Keyword Planner API access** (same Google Ads credentials)
+       66 +- **Merchant API access** (use merchant-integrator agent to se
+          +t up)                                                         
+       67  
+       68 +## Keyword Planner Integration                                
+       69 +                                                              
+       70 +### Enriching Gap Analysis with Search Volume                 
+       71 +                                                              
+       72 +```python                                                     
+       73 +from feedops.integrations.google_ads_search_terms import Keywo
+          +rdPlannerClient                                               
+       74 +                                                              
+       75 +def enrich_gaps_with_volume(gaps: list[dict]) -> list[dict]:  
+       76 +    """                                                       
+       77 +    Add Keyword Planner metrics to identified keyword gaps.   
+       78 +                                                              
+       79 +    This transforms gaps from "missing keyword X" to          
+       80 +    "missing keyword X which has 5,000 monthly searches and LO
+          +W competition"                                                
+       81 +    """                                                       
+       82 +    kp_client = KeywordPlannerClient()                        
+       83 +                                                              
+       84 +    keywords = [g['keyword'] for g in gaps]                   
+       85 +    metrics = kp_client.get_historical_metrics(keywords)      
+       86 +                                                              
+       87 +    for gap in gaps:                                          
+       88 +        kw = gap['keyword']                                   
+       89 +        if kw in metrics:                                     
+       90 +            gap['avg_monthly_searches'] = metrics[kw]['avg_mon
+          +thly_searches']                                               
+       91 +            gap['competition'] = metrics[kw]['competition']   
+       92 +            gap['competition_index'] = metrics[kw]['competitio
+          +n_index']                                                     
+       93 +            gap['low_cpc_micros'] = metrics[kw]['low_cpc_micro
+          +s']                                                           
+       94 +            gap['high_cpc_micros'] = metrics[kw]['high_cpc_mic
+          +ros']                                                         
+       95 +                                                              
+       96 +            # Calculate opportunity score                     
+       97 +            # Higher volume + lower competition = bigger oppor
+          +tunity                                                        
+       98 +            volume_factor = min(gap['avg_monthly_searches'] / 
+          +1000, 10)  # Cap at 10x                                       
+       99 +            competition_factor = (100 - gap['competition_index
+          +']) / 100                                                     
+      100 +            gap['opportunity_score'] = gap['gap_score'] * volu
+          +me_factor * competition_factor                                
+      101 +                                                              
+      102 +    return gaps                                               
+      103 +                                                              
+      104 +                                                              
+      105 +def discover_keyword_opportunities(                           
+      106 +    existing_keywords: list[str],                             
+      107 +    product_url: str = None                                   
+      108 +) -> list[dict]:                                              
+      109 +    """                                                       
+      110 +    Use Keyword Planner to discover keywords we're not targeti
+          +ng.                                                           
+      111 +                                                              
+      112 +    Seeds the generator with our existing high-performing keyw
+          +ords                                                          
+      113 +    and/or product page URL to find related opportunities.    
+      114 +    """                                                       
+      115 +    kp_client = KeywordPlannerClient()                        
+      116 +                                                              
+      117 +    # Get ideas from our existing keywords and product pages  
+      118 +    ideas = kp_client.generate_keyword_ideas(                 
+      119 +        seed_keywords=existing_keywords[:10],  # Use top 10   
+      120 +        seed_url=product_url                                  
+      121 +    )                                                         
+      122 +                                                              
+      123 +    # Filter to ideas with good volume and low competition    
+      124 +    opportunities = [                                         
+      125 +        idea for idea in ideas                                
+      126 +        if idea['avg_monthly_searches'] >= 100                
+      127 +        and idea['competition_index'] < 70                    
+      128 +        and idea['keyword'] not in existing_keywords          
+      129 +    ]                                                         
+      130 +                                                              
+      131 +    return sorted(opportunities, key=lambda x: x['avg_monthly_
+          +searches'], reverse=True)                                     
+      132 +```                                                           
+      133 +                                                              
+      134 +### Merchant API Integration for Gap Context                  
+      135 +                                                              
+      136 +```python                                                     
+      137 +class MerchantAPIGapAnalyzer:                                 
+      138 +    """                                                       
+      139 +    Use Merchant API to add context to keyword gap analysis.  
+      140 +                                                              
+      141 +    Correlates gaps with:                                     
+      142 +    - Current GMC feed title/description                      
+      143 +    - Click potential (Google's performance estimate)         
+      144 +    - Price competitiveness                                   
+      145 +    """                                                       
+      146 +                                                              
+      147 +    def get_product_context(self, offer_ids: list[str]) -> dic
+          +t:                                                            
+      148 +        """                                                   
+      149 +        Fetch product context from Merchant API.              
+      150 +                                                              
+      151 +        Query: product_view                                   
+      152 +        Returns: title, click_potential, status by offer_id   
+      153 +        """                                                   
+      154 +        query = """                                           
+      155 +            SELECT                                            
+      156 +                id,                                           
+      157 +                offer_id,                                     
+      158 +                title,                                        
+      159 +                click_potential,                              
+      160 +                aggregated_reporting_context_status           
+      161 +            FROM product_view                                 
+      162 +        """                                                   
+      163 +        # Execute via Merchant API                            
+      164 +        pass                                                  
+      165 +                                                              
+      166 +    def prioritize_by_click_potential(self, gaps: list[dict]) 
+          +-> list[dict]:                                                
+      167 +        """                                                   
+      168 +        Re-prioritize gaps by Google's click_potential signal.
+      169 +                                                              
+      170 +        Products with HIGH click_potential that have keyword g
+          +aps                                                           
+      171 +        should be prioritized - they have untapped potential. 
+      172 +        """                                                   
+      173 +        for gap in gaps:                                      
+      174 +            if gap.get('click_potential') == 'HIGH':          
+      175 +                gap['opportunity_score'] *= 1.5  # 50% boost  
+      176 +            elif gap.get('click_potential') == 'LOW':         
+      177 +                gap['opportunity_score'] *= 0.7  # 30% reducti
+          +on                                                            
+      178 +                                                              
+      179 +        return sorted(gaps, key=lambda x: x['opportunity_score
+          +'], reverse=True)                                             
+      180 +```                                                           
+      181 +                                                              
+      182  ## Files to Create
+      183  
+      184  ### Dashboard Components
+
+⏺ Update(docs/prompts/18-keyword-gap-analysis.md)
+  ⎿  Added 26 lines, removed 3 lines
+      197  ## Database Schema
+      198  
+      199  ```sql
+      200 --- Track keyword gaps per SKU                                 
+      200 +-- Track keyword gaps per SKU with Keyword Planner enrichment 
+      201  CREATE TABLE keyword_gaps (
+      202    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+      203    master_sku text NOT NULL,
+      204    keyword text NOT NULL,
+      205 -  monthly_volume integer DEFAULT 0, -- estimated search volume
+      205 +  -- Search volume from Keyword Planner                       
+      206 +  monthly_volume integer DEFAULT 0, -- avg_monthly_searches fr
+          +om KP                                                         
+      207    our_impressions integer DEFAULT 0, -- impressions we got for
+            this keyword
+      208 +  -- Position in our content                                  
+      209    in_title boolean DEFAULT false,
+      210    in_description boolean DEFAULT false,
+      211 +  -- Keyword Planner competition data                         
+      212 +  competition text CHECK (competition IN ('LOW', 'MEDIUM', 'HI
+          +GH', 'UNSPECIFIED')),                                         
+      213 +  competition_index integer CHECK (competition_index BETWEEN 0
+          + AND 100),                                                    
+      214 +  low_cpc_micros bigint, -- 20th percentile top-of-page bid   
+      215 +  high_cpc_micros bigint, -- 80th percentile top-of-page bid  
+      216 +  -- Calculated scores                                        
+      217    gap_score numeric GENERATED ALWAYS AS (
+      218      CASE
+      219        WHEN in_title THEN 0
+     ...
+      221        ELSE monthly_volume
+      222      END
+      223    ) STORED,
+      224 +  -- Opportunity score factors in competition                 
+      225 +  -- Higher volume + lower competition = bigger opportunity   
+      226 +  opportunity_score numeric GENERATED ALWAYS AS (             
+      227 +    CASE                                                      
+      228 +      WHEN in_title THEN 0                                    
+      229 +      ELSE (monthly_volume * (100 - COALESCE(competition_index
+          +, 50)) / 100)                                                 
+      230 +    END                                                       
+      231 +  ) STORED,                                                   
+      232    updated_at timestamptz DEFAULT now(),
+      233    UNIQUE(master_sku, keyword)
+      234  );
+      235  
+      220 --- SKU-level opportunity scores                               
+      236 +-- SKU-level opportunity scores with Merchant API context     
+      237  CREATE TABLE sku_opportunity_scores (
+      238    master_sku text PRIMARY KEY,
+      239    total_gap_score numeric DEFAULT 0,
+      240 +  total_opportunity_score numeric DEFAULT 0, -- New: factors i
+          +n competition                                                 
+      241    keywords_missing integer DEFAULT 0,
+      242    keywords_covered integer DEFAULT 0,
+      243    coverage_percent numeric DEFAULT 0,
+      244    estimated_ctr_lift numeric DEFAULT 0,
+      245 +  -- Merchant API context                                     
+      246 +  gmc_click_potential text, -- From Merchant API: HIGH, MEDIUM
+          +, LOW                                                         
+      247 +  gmc_current_title text, -- Current title in GMC feed        
+      248 +  gmc_status text, -- ELIGIBLE, NOT_ELIGIBLE_OR_DISAPPROVED   
+      249 +  -- Priority calculation                                     
+      250    priority_rank integer,
+      251 +  priority_rank_by_opportunity integer, -- Rank by opportunity
+          +_score (competition-adjusted)                                 
+      252    last_calculated timestamptz DEFAULT now()
+      253  );
+      254  
+
+⏺ Update(docs/prompts/18-keyword-gap-analysis.md)
+  ⎿  Added 56 lines, removed 1 line
+      276  
+      277  export interface KeywordGap {
+      278    keyword: string
+      279 -  monthlyVolume: number                                       
+      279 +  monthlyVolume: number // From Keyword Planner               
+      280    ourImpressions: number
+      281    inTitle: boolean
+      282    inDescription: boolean
+      283 +  // Keyword Planner enrichment                               
+      284 +  competition: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNSPECIFIED'      
+      285 +  competitionIndex: number // 0-100                           
+      286 +  lowCpcMicros: number                                        
+      287 +  highCpcMicros: number                                       
+      288 +  // Calculated scores                                        
+      289    gapScore: number
+      290 +  opportunityScore: number // Factors in competition          
+      291    priority: 'high' | 'medium' | 'low'
+      292  }
+      293  
+     ...
+      295    masterSku: string
+      296    currentTitle: string
+      297    totalGapScore: number
+      298 +  totalOpportunityScore: number // Competition-adjusted       
+      299    keywordsMissing: number
+      300    keywordsCovered: number
+      301    coveragePercent: number
+      302    estimatedCtrLift: number
+      303    priorityRank: number
+      304 +  priorityRankByOpportunity: number // Rank by opportunity sco
+          +re                                                            
+      305 +  // Merchant API context                                     
+      306 +  gmcClickPotential?: 'HIGH' | 'MEDIUM' | 'LOW'               
+      307 +  gmcCurrentTitle?: string                                    
+      308 +  gmcStatus?: string                                          
+      309    topGaps: KeywordGap[]
+      310  }
+      311  
+     ...
+      346  }
+      347  
+      348  /**
+      349 + * Calculate opportunity score that factors in competition.   
+      350 + *                                                            
+      351 + * Opportunity = Volume × (100 - Competition) / 100           
+      352 + *                                                            
+      353 + * A high-volume, low-competition keyword is a bigger opportun
+          +ity                                                           
+      354 + * than a high-volume, high-competition keyword.              
+      355 + */                                                           
+      356 +export function calculateOpportunityScore(                    
+      357 +  gapScore: number,                                           
+      358 +  competitionIndex: number = 50, // Default to medium         
+      359 +  gmcClickPotential?: 'HIGH' | 'MEDIUM' | 'LOW'               
+      360 +): number {                                                   
+      361 +  // Base opportunity from gap score adjusted for competition 
+      362 +  let score = gapScore * ((100 - competitionIndex) / 100)     
+      363 +                                                              
+      364 +  // Boost for products Google thinks have untapped potential 
+      365 +  if (gmcClickPotential === 'HIGH') {                         
+      366 +    score *= 1.5 // 50% boost                                 
+      367 +  } else if (gmcClickPotential === 'LOW') {                   
+      368 +    score *= 0.7 // 30% reduction                             
+      369 +  }                                                           
+      370 +                                                              
+      371 +  return Math.round(score)                                    
+      372 +}                                                             
+      373 +                                                              
+      374 +/**                                                           
+      375 + * Calculate estimated CPC from Keyword Planner bid ranges.   
+      376 + */                                                           
+      377 +export function estimateCpc(                                  
+      378 +  lowCpcMicros: number,                                       
+      379 +  highCpcMicros: number                                       
+      380 +): { low: number; high: number; avg: number } {               
+      381 +  const low = lowCpcMicros / 1_000_000                        
+      382 +  const high = highCpcMicros / 1_000_000                      
+      383 +  return {                                                    
+      384 +    low,                                                      
+      385 +    high,                                                     
+      386 +    avg: (low + high) / 2                                     
+      387 +  }                                                           
+      388 +}                                                             
+      389 +                                                              
+      390 +/**                                                           
+      391   * Analyze all keyword gaps for a SKU.
+      392   */
+      393  export function analyzeSkuGaps(
+
+⏺ Update(docs/prompts/18-keyword-gap-analysis.md)
+  ⎿  Added 83 lines, removed 2 lines
+      1123  5. [ ] Integration with content generation (gaps inform promp
+            ts)
+      1124  6. [ ] Run analysis button processes all pilot SKUs
+      1125  7. [ ] Export functionality for optimization queue
+      1126 +8. [ ] **Keyword Planner enrichment** - search volume and com
+           +petition shown                                               
+      1127 +9. [ ] **Opportunity score** - factors in competition, not ju
+           +st volume                                                    
+      1128 +10. [ ] **Competition badges** - LOW/MEDIUM/HIGH indicators i
+           +n UI                                                         
+      1129 +11. [ ] **CPC estimates** - bid ranges shown for ROI context 
+      1130 +12. [ ] **Merchant API integration** - click_potential influe
+           +nces priority                                                
+      1131 +13. [ ] **GMC title sync** - shows current GMC feed title for
+           + comparison                                                  
+      1132 +14. [ ] **Keyword discovery** - "Find Related Keywords" using
+           + Keyword Planner                                             
+      1133  
+      1134 +## UI Enhancements                                           
+      1135 +                                                             
+      1136 +### Enhanced GapTable with Keyword Planner Data              
+      1137 +                                                             
+      1138 +```tsx                                                       
+      1139 +// Add to GapTable.tsx                                       
+      1140 +<TableHead className="text-right">Search Volume</TableHead>  
+      1141 +<TableHead>Competition</TableHead>                           
+      1142 +<TableHead className="text-right">Est. CPC</TableHead>       
+      1143 +<TableHead className="text-right">Opportunity</TableHead>    
+      1144 +                                                             
+      1145 +// In table body                                             
+      1146 +<TableCell className="text-right font-mono">                 
+      1147 +  {gap.avg_monthly_searches?.toLocaleString() || 'N/A'}      
+      1148 +</TableCell>                                                 
+      1149 +<TableCell>                                                  
+      1150 +  <Badge                                                     
+      1151 +    variant={                                                
+      1152 +      gap.competition === 'LOW' ? 'default' :                
+      1153 +      gap.competition === 'MEDIUM' ? 'secondary' :           
+      1154 +      'destructive'                                          
+      1155 +    }                                                        
+      1156 +  >                                                          
+      1157 +    {gap.competition || 'N/A'}                               
+      1158 +  </Badge>                                                   
+      1159 +</TableCell>                                                 
+      1160 +<TableCell className="text-right">                           
+      1161 +  ${(gap.high_cpc_micros / 1_000_000).toFixed(2)}            
+      1162 +</TableCell>                                                 
+      1163 +<TableCell className="text-right font-mono text-green-600">  
+      1164 +  {gap.opportunity_score?.toLocaleString()}                  
+      1165 +</TableCell>                                                 
+      1166 +```                                                          
+      1167 +                                                             
+      1168 +### Click Potential Indicator                                
+      1169 +                                                             
+      1170 +```tsx                                                       
+      1171 +// Show Merchant API click_potential in SkuOpportunity cards 
+      1172 +{opportunity.gmc_click_potential === 'HIGH' && (             
+      1173 +  <Badge className="bg-green-100 text-green-800">            
+      1174 +    High Click Potential                                     
+      1175 +  </Badge>                                                   
+      1176 +)}                                                           
+      1177 +```                                                          
+      1178 +                                                             
+      1179 +### Keyword Discovery Panel                                  
+      1180 +                                                             
+      1181 +```tsx                                                       
+      1182 +// New component for discovering related keywords            
+      1183 +<Card>                                                       
+      1184 +  <CardHeader>                                               
+      1185 +    <CardTitle>Discover Related Keywords</CardTitle>         
+      1186 +  </CardHeader>                                              
+      1187 +  <CardContent>                                              
+      1188 +    <Button onClick={() => discoverKeywords(sku)}>           
+      1189 +      <Search className="h-4 w-4 mr-2" />                    
+      1190 +      Find Opportunities                                     
+      1191 +    </Button>                                                
+      1192 +    {discoveredKeywords.map(kw => (                          
+      1193 +      <div key={kw.keyword} className="flex justify-between">
+      1194 +        <span>{kw.keyword}</span>                            
+      1195 +        <span>{kw.avg_monthly_searches}/mo</span>            
+      1196 +        <Badge>{kw.competition}</Badge>                      
+      1197 +      </div>                                                 
+      1198 +    ))}                                                      
+      1199 +  </CardContent>                                             
+      1200 +</Card>                                                      
+      1201 +```                                                          
+      1202 +                                                             
+      1203  ## Future Enhancements
+      1204  
+      1205  - Auto-generate title variations with missing keywords
+      1206  - A/B test keyword-optimized vs original titles
+      1131 -- Competitor keyword comparison                              
+      1132 -- Seasonal keyword opportunities                             
+      1207 +- Competitor keyword comparison (via SiteSeed with competitor
+           + URLs)                                                       
+      1208 +- Seasonal keyword opportunities (monthly_searches trend anal
+           +ysis)                                                        
+      1209  - Category-level gap analysis
+      1210 +- **ROI calculator** - estimate revenue lift from closing gap
+           +s                                                            
+      1211 +- **Batch keyword enrichment** - process all gaps with Keywor
+           +d Planner                                                    
+      1212 +- **Auto-refresh** - monthly Keyword Planner data refresh (me
+           +trics update monthly)                                        
+      1213 +- **Click potential tracking** - monitor changes in Google's 
+           +click_potential signal                                       
+      1214 +- **Price competitiveness correlation** - do pricing gaps aff
+           +ect keyword gaps?                                            
+
+⏺ Let me also update CLAUDE.md to reference the new Keyword Planner capabilities
+   and merchant-integrator agent.
+
+⏺ Recalled 1 memory, wrote 2 memories (ctrl+o to expand)
+
+⏺ Let me update the memory file with these learnings and then provide a summary.
+
+⏺ Recalled 1 memory, wrote 1 memory (ctrl+o to expand)
+
+⏺ I've updated both prompts with the new MCP tools, agents, and Keyword Planner
+  integration. Here's a summary:
+
+  Updates to Prompt 14 (Search Query Insights)
+
+  New MCP/Agent References:
+  - Added Merchant API MCP (mcp__merchant-api-devdocs__*) for GMC product data
+  - Added merchant-integrator agent for setup guidance
+  - Added Google Ads MCP reference for GAQL queries
+
+  Keyword Planner Integration:
+  - KeywordPlannerClient class for fetching historical metrics
+  - generate_keyword_ideas() for discovering related keywords from seeds
+  - Database schema updated with search volume, competition index (0-100), CPC
+  ranges
+  - New keyword_metrics table for caching monthly Keyword Planner data
+
+  Merchant API Integration:
+  - MerchantAPIClient class for product performance and attributes
+  - Queries for product_performance_view, product_view,
+  price_competitiveness_product_view
+
+  Updates to Prompt 18 (Keyword Gap Analysis)
+
+  New MCP/Agent References:
+  - Same MCP tools and merchant-integrator agent
+  - Clear examples for agent invocation
+
+  Enhanced Gap Scoring:
+  - opportunity_score = volume × (100 - competition) / 100
+  - Factors in Google's click_potential from Merchant API
+  - Competition badges (LOW/MEDIUM/HIGH) in UI
+
+  New Features:
+  - enrich_gaps_with_volume() - adds Keyword Planner metrics to gaps
+  - discover_keyword_opportunities() - finds keywords we're not targeting
+  - prioritize_by_click_potential() - uses GMC signals for prioritization
+  - Enhanced database schema with competition data and opportunity scores
+
+  Updates to CLAUDE.md
+
+  - Added Merchant API MCP to the MCP Servers list
+  - Added merchant-integrator agent reference
+  - Added Keyword Planner capabilities section with API details
+
+  Key Keyword Planner Insights
+
+  From the API documentation:
+  - Search volume: Average monthly searches + monthly breakdown (12 months)
+  - Competition: Enum (LOW/MEDIUM/HIGH) + index (0-100 scale)
+  - CPC estimates: 20th and 80th percentile top-of-page bids
+  - Keyword ideas: Generate from seed keywords, URLs, or entire domains
+  (SiteSeed can return up to 250,000 ideas)
+  - Rate limits: More restrictive than other Google Ads APIs - cache results
+  since metrics only update monthly
+
+✻ Cogitated for 6m 5s
+
+❯ can you please update the quickstart prompts if any are needed? 
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Now let me update the Quick Start sections for Prompts 14 and 18 with the new
+  MCP tools and Keyword Planner integration.
+
+⏺ Update(docs/prompts/QUICKSTART.md)
+  ⎿  Added 28 lines, removed 7 lines
+      165  
+      166  **When to run:** Priority 1 - Match actual search behavior
+      167  
+      168 +**Prerequisites:**                                            
+      169 +- Google Ads API credentials configured                       
+      170 +- Merchant API MCP available (`mcp__merchant-api-devdocs__*`) 
+      171 +                                                              
+      172  **Copy and paste into a new Claude Code chat:**
+      173  
+      174  ```
+     ...
+      180  - Google Ads customer ID: 6253381786
+      181  - Existing integration: src/feedops/integrations/google_ads_pe
+           rformance.py
+      182  
+      183 +MCP Tools to Use:                                             
+      184 +- **Merchant API MCP** (`mcp__merchant-api-devdocs__*`): Query
+          + GMC product data                                             
+      185 +  - `query_mapi_docs` for documentation                       
+      186 +  - `find_mapi_code_sample` for code examples                 
+      187 +- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Execute GAQL 
+          +queries                                                       
+      188 +- **merchant-integrator agent**: Use via Task tool for Merchan
+          +t API setup                                                   
+      189 +                                                              
+      190  Goals:
+      180 -1. Apply database migration for search_queries tables         
+      191 +1. Apply database migration for search_queries tables (with Ke
+          +yword Planner fields)                                         
+      192  2. Create Python integration for search_term_view GAQL query
+      182 -3. Create /search-insights page with query table              
+      183 -4. Build gap analysis component showing keyword coverage      
+      184 -5. Integrate search data into content generation prompts      
+      185 -6. Track query coverage improvement over time                 
+      193 +3. Create KeywordPlannerClient for search volume enrichment   
+      194 +4. Create /search-insights page with query table + volume/comp
+          +etition columns                                               
+      195 +5. Build gap analysis component showing keyword coverage      
+      196 +6. Integrate Merchant API for product performance correlation 
+      197 +7. Track query coverage improvement over time                 
+      198  
+      187 -The key GAQL query:                                           
+      199 +Key APIs:                                                     
+      200 +                                                              
+      201 +1. Google Ads Search Terms (actual queries):                  
+      202  SELECT search_term_view.search_term, metrics.impressions, metr
+           ics.clicks, metrics.conversions, metrics.conversions_value, se
+           gments.product_item_id
+      203  FROM search_term_view
+      204  WHERE segments.date DURING LAST_30_DAYS AND campaign.advertisi
+           ng_channel_type = 'SHOPPING'
+      205  
+      192 -Note: metrics.conversions_value gives revenue from conversions
+          -. segments.product_item_id gives the GMC offer ID for variant-
+          -level tracking.                                               
+      206 +2. Keyword Planner (search volume context):                   
+      207 +- GenerateKeywordHistoricalMetrics: avg_monthly_searches, comp
+          +etition_index (0-100), CPC ranges                             
+      208 +- GenerateKeywordIdeas: discover related keywords from seeds  
+      209 +- Rate limited - cache results (metrics update monthly)       
+      210  
+      211 +3. Merchant API (product feed data):                          
+      212 +SELECT offer_id, clicks, impressions, click_through_rate FROM 
+          +product_performance_view                                      
+      213 +SELECT id, offer_id, title, aggregated_reporting_context_statu
+          +s FROM product_view                                           
+      214 +                                                              
+      215  **REQUIRED WORKFLOW (superpowers skills):**
+      216  
+      217  1. BEFORE any implementation decisions: `/superpowers:brainsto
+           rming` - explore requirements and design
+
+⏺ Update(docs/prompts/QUICKSTART.md)
+  ⎿  Added 32 lines, removed 11 lines
+      232  
+      233  **When to run:** Priority 1 - Identify missing keywords and pr
+           ioritize optimization
+      234  
+      235 +**Prerequisites:**                                            
+      236 +- Search Query Insights (Prompt 14) implemented               
+      237 +- Merchant API MCP available (`mcp__merchant-api-devdocs__*`) 
+      238 +                                                              
+      239  **Copy and paste into a new Claude Code chat:**
+      240  
+      241  ```
+     ...
+      246  - Dashboard: /dashboard (Next.js 14+)
+      247  - Depends on: Search Query Insights (Prompt 14)
+      248  
+      249 +MCP Tools to Use:                                             
+      250 +- **Merchant API MCP** (`mcp__merchant-api-devdocs__*`): Query
+          + GMC product data                                             
+      251 +  - Get current titles from product_view                      
+      252 +  - Get click_potential for prioritization                    
+      253 +- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Keyword Plann
+          +er data                                                       
+      254 +- **merchant-integrator agent**: Use via Task tool for Merchan
+          +t API setup                                                   
+      255 +                                                              
+      256  Goals:
+      246 -1. Apply database migration for keyword_gaps tables           
+      247 -2. Create gap scoring algorithm (impressions × coverage gap)  
+      248 -3. Create /keyword-gaps page with opportunity ranking         
+      249 -4. Build KeywordSuggestions component with recommended keyword
+          -s                                                             
+      250 -5. Track gap closure progress over time                       
+      251 -6. Generate suggested title improvements                      
+      257 +1. Apply database migration for keyword_gaps tables (with comp
+          +etition fields)                                               
+      258 +2. Create gap scoring algorithm with opportunity_score (factor
+          +s in competition)                                             
+      259 +3. Create KeywordPlannerClient integration for search volume e
+          +nrichment                                                     
+      260 +4. Create /keyword-gaps page with opportunity ranking + compet
+          +ition badges                                                  
+      261 +5. Build KeywordSuggestions component with volume/competition 
+          +context                                                       
+      262 +6. Add "Discover Related Keywords" using Keyword Planner Gener
+          +ateKeywordIdeas                                               
+      263 +7. Integrate Merchant API click_potential for prioritization  
+      264 +8. Track gap closure progress over time                       
+      265  
+      253 -The scoring algorithm should:                                 
+      254 -- Compare our titles to actual search queries from Google Ads 
+      255 -- Identify SKUs where high-volume queries aren't in titles    
+      256 -- Prioritize optimization by opportunity size                 
+      257 -- Provide specific keywords to add per SKU                    
+      266 +Key Scoring Formula:                                          
+      267 +- gap_score = monthly_volume × (1 if not in title, 0.3 if in d
+          +escription only)                                              
+      268 +- opportunity_score = gap_score × ((100 - competition_index) /
+          + 100)                                                         
+      269 +- Boost 50% if Merchant API click_potential = 'HIGH'          
+      270  
+      271 +Keyword Planner Integration:                                  
+      272 +- Enrich gaps with: avg_monthly_searches, competition (LOW/MED
+          +IUM/HIGH), competition_index (0-100)                          
+      273 +- Show CPC estimates (low_top_of_page_bid, high_top_of_page_bi
+          +d) for ROI context                                            
+      274 +- Cache results - metrics only update monthly                 
+      275 +                                                              
+      276 +Merchant API Integration:                                     
+      277 +- Query product_view for: title, click_potential, aggregated_r
+          +eporting_context_status                                       
+      278 +- Products with HIGH click_potential + keyword gaps = top prio
+          +rity                                                          
+      279 +                                                              
+      280  **REQUIRED WORKFLOW (superpowers skills):**
+      281  
+      282  1. BEFORE any implementation decisions: `/superpowers:brainsto
+           rming` - explore requirements and design
+
+⏺ I've updated the QUICKSTART.md with enhanced Quick Start sections for both
+  prompts. Here's a summary of all changes made:
+
+  Summary of Updates
+
+  Prompt 14 (Search Query Insights) - QUICKSTART.md
+
+  - Added Prerequisites section noting Merchant API MCP requirement
+  - Added MCP Tools to Use section with:
+    - Merchant API MCP for GMC product data
+    - Google Ads MCP for GAQL queries
+    - merchant-integrator agent reference
+  - Added KeywordPlannerClient as a goal
+  - Added search volume/competition columns to UI goals
+  - Added Key APIs section documenting all three data sources:
+    a. Google Ads Search Terms (actual queries)
+    b. Keyword Planner (search volume context)
+    c. Merchant API (product feed data)
+
+  Prompt 18 (Keyword Gap Analysis) - QUICKSTART.md
+
+  - Added Prerequisites noting Prompt 14 dependency and Merchant API MCP
+  - Added MCP Tools to Use section
+  - Added Key Scoring Formula section explaining:
+    - gap_score = volume × position factor
+    - opportunity_score = gap_score × competition adjustment
+    - click_potential boost
+  - Added Keyword Planner Integration details:
+    - Enrichment fields (volume, competition, CPC)
+    - Caching recommendation
+  - Added Merchant API Integration details:
+    - click_potential for prioritization
+    - Current titles from product_view
+  - Added "Discover Related Keywords" goal using GenerateKeywordIdeas
+
+  Files Modified
+
+  1. docs/prompts/14-search-query-insights.md - Major updates with MCP tools,
+  Keyword Planner, Merchant API
+  2. docs/prompts/18-keyword-gap-analysis.md - Major updates with MCP tools,
+  Keyword Planner, opportunity scoring
+  3. docs/prompts/QUICKSTART.md - Updated Quick Start sections for both prompts
+  4. CLAUDE.md - Added Merchant API MCP, merchant-integrator agent, Keyword
+  Planner capabilities
+  5. ~/.claude/projects/.../memory/MEMORY.md - Added learnings about Keyword
+  Planner and Merchant API
+
+✻ Cooked for 1m 12s

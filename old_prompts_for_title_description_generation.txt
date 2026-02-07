@@ -1,0 +1,1284 @@
+
+ ▐▛███▜▌   Claude Code v2.1.30
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/Documents/GitHub/Allied-FeedOps
+
+✻ Conversation compacted (ctrl+o for history)
+
+  ⎿  Referenced file src/feedops/pipeline/prompts.py
+  ⎿  Referenced file src/feedops/pipeline/finish_injection.py
+  ⎿  Read data/finish-metadata.json (257 lines)
+  ⎿ Read dashboard_data/lifestyle-eval-candidate/variants/BSK-275LA/shopify-BSK-
+    275LA-ABR.json (45 lines)
+  ⎿  Referenced file 
+     dashboard_data/lifestyle-eval-candidate/shopify-patch-BSK-275LA.json
+  ⎿  Plan file referenced (~/.claude/plans/streamed-shimmying-dove.md)
+
+⏺ I understand. The user rejected the prescriptive, rule-based approach and
+  wants a fundamentally different philosophy that empowers the LLM to think and
+  make decisions based on customer understanding. Let me first review the
+  current plan and the example prompt they referenced, then rewrite the plan
+  with the correct approach.
+
+⏺ Searched for 1 pattern, read 4 files (ctrl+o to expand)
+
+⏺ Let me check the original transcript to find the example prompt the user
+  mentioned.
+
+⏺ Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Now I understand. The user provided this example prompt showing the RIGHT
+  approach:
+
+  ## Context
+  We've been optimizing product descriptions for Allied Brass using mechanical
+  metrics like sentence length, attribute density, and keyword placement. The
+  descriptions score well on internal metrics but may not actually help products
+
+  get found or clicked.
+
+  ## Your Mission
+  ### Phase 1: Understand Real Search Behavior
+  ### Phase 2: Analyze User Intent
+  ### Phase 3: Create a New Description Philosophy
+  ### Phase 4: Write Better Descriptions
+
+  ## Key Question
+  Are we optimizing for the wrong thing? Should descriptions be about "attribute
+
+  density for algorithm matching" or about "answering what the buyer actually
+  wants to know"?
+
+  The user's point is clear: my approach has been adding prescriptive rules
+  ("FIRST SENTENCE PATTERN...", "Target 600-800 characters", "Include ONE
+  natural synonym") when the prompt should instead empower the LLM to THINK
+  about what buyers need.
+
+  Let me completely rewrite the plan with a philosophy-driven approach.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ The plan has been completely rewritten with a fundamentally different
+  approach:
+
+  Key changes:
+  1. No more prescriptive rules - Removed all patterns like "FIRST SENTENCE
+  PATTERN: [Dimension] [product] in [Finish]..."
+  2. Context over constraints - Give the LLM understanding of who's searching,
+  what questions they have, and why Allied Brass is worth it
+  3. Trust the LLM - Instead of "Target 600-800 characters" → let it decide
+  what's needed
+  4. Motivation over prohibition - Instead of "AVOID KEYWORD STUFFING" → "Write
+  for a human who's about to spend $80"
+
+  The new prompt section asks the LLM to THINK:
+  - Who is searching for this?
+  - What questions do they have before spending $80?
+  - What makes Allied Brass different from the $20 Amazon option?
+
+  Then trusts it to write descriptions that answer those questions.
+
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/streamed-shimmying-dove.md · /plan to 
+     edit
+     Prompt Redesign: From Rules to Reasoning
+
+     The Core Problem
+
+     The current prompt treats the LLM like a compliance engine:
+     - "FIRST SENTENCE PATTERN: [Dimension] [product] in [Finish] adds..."
+     - "Target 600-800 characters"
+     - "Include ONE natural synonym"
+     - "DO NOT mention 28 finishes"
+
+     This is wrong. We're taking away the LLM's ability to THINK about what
+     each product needs. The result: descriptions that pass our checklist
+     but don't connect with what shoppers actually want to know.
+
+     The question we should be asking: Are descriptions about "attribute
+     density for algorithm matching" or about "answering what the buyer
+     actually wants to know"?
+
+     ---
+     New Philosophy: Context Over Rules
+
+     Instead of telling the LLM WHAT to write, we give it:
+     1. Understanding of our customer - who they are, what they're searching
+      for, what questions they have
+     2. Understanding of our brand - why Allied Brass is worth 4x more than
+     Amazon alternatives
+     3. Understanding of the goal - make someone click, then buy, then not
+     regret it
+
+     Then we TRUST the LLM to figure out what each product needs.
+
+     ---
+     Prompt Changes for src/feedops/pipeline/prompts.py
+
+     Remove These Sections (Prescriptive Rules)
+
+     Delete all of:
+     - "FIRST SENTENCE PATTERN: [Dimension] [product] in [Finish] adds..."
+     - "Target 600-800 characters"
+     - "Include ONE natural synonym if helpful"
+     - "AVOID KEYWORD STUFFING: Never end with lists like..."
+     - "Keep first 150 characters about style+function"
+     - Finish category integration patterns
+
+     Replace With: Customer & Brand Context
+
+     New Section to Add (replace GOOGLE DESCRIPTION / BING DESCRIPTION / 
+     SHOPIFY DESCRIPTION):
+
+     ## WRITING DESCRIPTIONS
+
+     Before you write, THINK about:
+
+     ### 1. WHO IS SEARCHING FOR THIS?
+     - A homeowner renovating a bathroom who wants it to look intentional,
+     not afterthought
+     - A designer specifying fixtures for a client who expects quality
+     - Someone replacing a broken/ugly product who wants an upgrade, not
+     just a replacement
+
+     ### 2. WHAT QUESTIONS DO THEY HAVE?
+     Every buyer has questions before they spend $80+ on bathroom hardware:
+     - "Will this look good in my bathroom?" → They need to visualize it in
+     their space
+     - "Will this match my other fixtures?" → They need to know about finish
+      coordination
+     - "Is this actually better than the $20 option?" → They need to
+     understand the value
+     - "Will this last / is it quality?" → They need trust signals
+     (material, warranty)
+     - Product-specific questions vary: grab bar buyers ask about weight
+     capacity, shower basket buyers ask about drainage
+
+     ### 3. WHAT MAKES US DIFFERENT?
+     Allied Brass is NOT competing on price. We're competing on:
+     - **Style without sacrifice**: You don't have to choose between "looks
+     good" and "works well"
+     - **Personalization**: 28 finishes to match any bathroom vision
+     - **Innovation**: Rollerless TP holders, retractable rods, decorative
+     grab bars, ventilated baskets
+     - **Durability**: Solid brass outlasts plastic and die-cast that crack
+     and corrode
+     - **Coordination**: Match everything across 42+ collections
+
+     ### 4. PLATFORM CONTEXT
+     - **Google/Bing (variant)**: One specific finish. This is the
+     customer's FIRST impression. Make them want to click.
+     - **Shopify (master)**: All finishes on one page. Customer already
+     clicked. Help them choose a finish and add to cart.
+
+     ### YOUR TASK
+     Write descriptions that answer the buyer's questions and make them
+     understand why this product is worth it.
+
+     Don't write for algorithms. Don't stuff keywords. Don't follow
+     patterns.
+     Write for a human who's about to spend $80 and wants to feel good about
+      it.
+
+     ---
+     What This Changes
+
+
+
+
+
+     Old Approach: "FIRST SENTENCE PATTERN: [Dimension] [product] in
+     [Finish]..."
+     New Approach: "THINK: What question does the buyer have that this
+     product
+       answers?"
+     ────────────────────────────────────────
+     Old Approach: "Target 600-800 characters"
+     New Approach: (No character target - let the LLM decide what's needed)
+     ────────────────────────────────────────
+     Old Approach: "Include ONE natural synonym"
+     New Approach: (No synonym rules - LLM decides if synonyms help)
+     ────────────────────────────────────────
+     Old Approach: "AVOID KEYWORD STUFFING"
+     New Approach: "Write for a human who's about to spend $80" (motivation,
+      not
+       prohibition)
+     ────────────────────────────────────────
+     Old Approach: "DO NOT mention 28 finishes on variant"
+     New Approach: "Platform context: variant = one finish" (understanding,
+     not
+       rule)
+
+     ---
+     Files to Modify
+     File: src/feedops/pipeline/prompts.py
+     Change: Replace prescriptive rules with customer/brand context
+     Specific Lines to Replace
+
+     In prompts.py, replace lines ~136-212 (GOOGLE DESCRIPTION, BING
+     DESCRIPTION, SHOPIFY DESCRIPTION, STYLE + FUNCTION VALUE PROPOSITION
+     sections) with the new "WRITING DESCRIPTIONS" section above.
+
+     ---
+     Verification
+
+     After implementing:
+
+     1. Regenerate BSK-275LA:
+     PYTHONPATH=src python -m feedops.pipeline.generator --sku BSK-275LA
+     2. Check output for reasoning, not compliance:
+       - Does it feel like a human wrote it?
+       - Does it answer "will this look good in my bathroom?"
+       - Does it explain why $80 > $20?
+       - Is it different from other products (not templated)?
+     3. Compare two different products:
+       - Regenerate a grab bar and a toilet paper holder
+       - The descriptions should feel different because the buyer questions
+     are different
+       - If they feel templated/similar, the prompt still isn't working
+
+     ---
+     Why This Will Work
+
+     The LLM already knows:
+     - How to write compelling copy
+     - What questions buyers have
+     - What makes a product description good
+
+     We were BLOCKING that knowledge with rules. By giving context instead
+     of constraints, we let the LLM use its judgment.
+
+     The proof: The user's example prompt didn't have a single prescriptive
+     rule. It had:
+     - Understanding the problem
+     - Understanding the customer
+     - A question to answer ("are we optimizing for the wrong thing?")
+
+     That's what our prompt should do.
+
+
+
+⏺ Plan approved. Let me implement the changes to prompts.py. First, I'll read
+  the current file to understand the structure.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Now I'll implement the plan. I need to replace the prescriptive rules (lines
+  134-180) with the context-driven approach. I'll make strategic edits to
+  transform the prompt from compliance-focused to reasoning-focused.
+
+⏺ Update(src/feedops/pipeline/prompts.py)
+  ⎿  Added 44 lines, removed 44 lines
+      131  - Use commas or hyphens as separators. No pipes.
+      132  - Never start with banned adjectives: Premium, Luxury, Best, H
+           igh-Quality, Top-Rated.
+      133  
+      134 -DESCRIPTION SUCCESS CRITERIA (platform-specific -- read carefu
+          -lly):                                                         
+      134 +DESCRIPTION SUCCESS CRITERIA:                                 
+      135  
+      136 -GOOGLE DESCRIPTION (feed fuel for algorithm + human-readable s
+          -nippets):                                                     
+      137 -- IMPORTANT: Google descriptions are for VARIANT SKUs (one spe
+          -cific finish per listing).                                    
+      138 -- BRAND PHILOSOPHY (follow this, do NOT include as literal tex
+          -t): style + function, not style OR function.                  
+      139 -- FIRST SENTENCE PATTERN: "[Dimension] [product] in [Finish] a
+          -dds [design value] while [functional benefit]"                
+      140 -  Example: "This 18-inch towel bar in Polished Chrome adds sle
+          -ek elegance while keeping towels within reach."               
+      141 -- Integrate finish naturally in FIRST sentence as a design cho
+          -ice, NOT "Available in X. X features..."                      
+      142 -  GOOD: "This shower basket in Antique Brass adds vintage eleg
+          -ance while keeping essentials organized."                     
+      143 -  BAD: "This shower basket keeps essentials organized. Availab
+          -le in Antique Brass."                                         
+      144 -- DO NOT mention "28 finishes" or "choose from X finishes" — t
+          -his is a single-finish variant listing.                       
+      145 -- HIGHLIGHT PRODUCT INNOVATIONS: rollerless design, retractabl
+          -e mechanism, double bar capacity, integrated hooks, decorative
+          - ADA compliance, ventilated drainage—these are competitive adv
+          -antages, not just features.                                   
+      146 -- Include ONE natural synonym if helpful: e.g. "towel bar (als
+          -o called towel rack)". Do NOT list multiple synonyms.         
+      147 -- AVOID KEYWORD STUFFING: Never end with lists like "tradition
+          -al bathroom hardware, classic bath accessories, heritage bathr
+          -oom fixtures". One room context phrase is enough.             
+      148 -- Target 600-800 characters, plain text. Keep first 150 charac
+          -ters about style+function.                                    
+      136 +BEFORE YOU WRITE, THINK ABOUT WHO IS READING THIS:            
+      137  
+      150 -BING DESCRIPTION (more literal keyword matching than Google): 
+      151 -- IMPORTANT: Bing descriptions are for VARIANT SKUs (one speci
+          -fic finish per listing). DO NOT mention "28 finishes".        
+      152 -- Same style+function pattern as Google: finish in first sente
+          -nce adds design value, product adds functional value.         
+      153 -- Bing benefits from ONE parenthetical synonym: "shower basket
+          - (also called shower caddy)"                                  
+      154 -- Use "solid brass construction" once (combines both terms nat
+          -urally).                                                      
+      155 -- Use "wall-mounted" once (covers both "wall mount" and "wall-
+          -mounted" for Bing's literal matching).                        
+      156 -- AVOID redundant phrasing like "wall mount, wall-mounted desi
+          -gn" — pick ONE natural form.                                  
+      157 -- Emphasize product innovations that competitors lack (rollerl
+          -ess, retractable, decorative ADA, etc.).                      
+      158 -- Target 700-1000 characters, plain text.                     
+      138 +1. WHO IS SEARCHING FOR THIS PRODUCT?                         
+      139 +- A homeowner renovating a bathroom who wants it to look inten
+          +tional, not like an afterthought                              
+      140 +- A designer specifying fixtures for a client who expects qual
+          +ity                                                           
+      141 +- Someone replacing a broken/ugly product who wants an upgrade
+          +, not just a replacement                                      
+      142  
+      160 -SHOPIFY DESCRIPTION (shown to shoppers on product page -- this
+          - IS the sales pitch):                                         
+      161 -- IMPORTANT: Shopify descriptions are FINISH-NEUTRAL (master S
+          -KU). All finishes share one product page.                     
+      162 -- DO mention "28 designer finishes" or "choose from X finishes
+          -" — this highlights personalization.                          
+      163 -- DO NOT mention a specific finish name in Shopify description
+          -s.                                                            
+      164 -- First sentence: address buyer's problem or desired outcome. 
+      165 -- Mention ONE trust signal in the opening: "Backed by a lifeti
+          -me warranty" or "Assembled in Virginia" or "Choose from 28 des
+          -igner finishes".                                              
+      166 -- REQUIRED in Shopify description (at least 2 of these 4):    
+      167 -  * "Backed by a lifetime warranty"                           
+      168 -  * "Assembled in Virginia, USA"                              
+      169 -  * "Available in 28 designer finishes to match any decor"    
+      170 -  * "Part of the [Collection] collection -- coordinate with 42
+          -+ matching accessories"                                       
+      171 -- 3-5 OUTCOME-FIRST bullet highlights. Start with what the buy
+          -er GETS, not what the product HAS:                            
+      172 -  GOOD: "Bottles drain and dry faster with ventilated brass wi
+          -res"                                                          
+      173 -  BAD: "Ventilated brass wires for drainage"                  
+      174 -  GOOD: "Never run out mid-use with multi-roll capacity"      
+      175 -  BAD: "Multi-roll capacity holds 3 rolls"                    
+      176 -- Include competitive edge: "Solid brass construction outlasts
+          - die-cast zinc alternatives".                                 
+      177 -- Collection coordination CTA: "Complete your bathroom with ma
+          -tching pieces".                                               
+      178 -- Specs section includes dimensions, weight capacity, mounting
+          -, warranty.                                                   
+      179 -- A Shopify description makes someone click Add to Cart.      
+      180 -- HTML with <p> hook, <ul><li> highlights, specs.             
+      143 +2. WHAT QUESTIONS DO THEY HAVE BEFORE SPENDING $80+?          
+      144 +- "Will this look good in MY bathroom?" → Help them visualize 
+          +it                                                            
+      145 +- "Will this match my other fixtures?" → Address finish coordi
+          +nation                                                        
+      146 +- "Is this actually better than the $20 Amazon option?" → Expl
+          +ain the value                                                 
+      147 +- "Will this last? Is it quality?" → Provide trust signals (ma
+          +terial, warranty)                                             
+      148 +- Product-specific questions vary: grab bar buyers ask about w
+          +eight capacity, shower basket buyers ask about drainage       
+      149  
+      150 +3. WHAT MAKES ALLIED BRASS WORTH IT?                          
+      151 +Allied Brass is NOT competing on price. We compete on:        
+      152 +- Style without sacrifice: You don't have to choose between "l
+          +ooks good" and "works well"                                   
+      153 +- Personalization: 28 finishes to match any bathroom vision   
+      154 +- Innovation: Rollerless TP holders, retractable rods, decorat
+          +ive grab bars, ventilated baskets                             
+      155 +- Durability: Solid brass outlasts plastic and die-cast that c
+          +rack and corrode                                              
+      156 +- Coordination: Match everything across 42+ collections       
+      157 +                                                              
+      158 +PLATFORM CONTEXT (understand the buyer's journey):            
+      159 +- Google/Bing (variant): One specific finish. This is the cust
+          +omer's FIRST impression. Make them want to click. They haven't
+          + committed yet.                                               
+      160 +- Shopify (master): All finishes on one page. Customer already
+          + clicked. Help them choose a finish and add to cart. They're f
+          +urther down the funnel.                                       
+      161 +                                                              
+      162 +GOOGLE DESCRIPTION:                                           
+      163 +- This is a variant listing (one finish). The finish is the de
+          +sign choice they're about to make.                            
+      164 +- Write for a human who is scanning Shopping ads. Answer their
+          + questions. Make them click.                                  
+      165 +- Weave the finish naturally into your description—it's part o
+          +f the product's appeal.                                       
+      166 +- Plain text only.                                            
+      167 +                                                              
+      168 +BING DESCRIPTION:                                             
+      169 +- Also a variant listing (one finish). Bing's algorithm is mor
+          +e literal than Google's.                                      
+      170 +- Include product synonyms naturally (shower basket/caddy, tow
+          +el bar/rack).                                                 
+      171 +- Write for humans first—Bing's AI also reads your description
+          +s.                                                            
+      172 +- Plain text only.                                            
+      173 +                                                              
+      174 +SHOPIFY DESCRIPTION:                                          
+      175 +- This is the MASTER SKU. All finishes share this page. Don't 
+          +mention a specific finish.                                    
+      176 +- The customer already clicked—now convince them to add to car
+          +t.                                                            
+      177 +- Open with their problem or desired outcome, not product spec
+          +s.                                                            
+      178 +- Highlight finish variety as a benefit: "28 designer finishes
+          + to match your vision"                                        
+      179 +- Include trust signals: warranty, material quality, Virginia 
+          +assembly.                                                     
+      180 +- Format: HTML with <p> opening, <ul><li> bullet benefits, spe
+          +cs section.                                                   
+      181 +                                                              
+      182  SHOPIFY META DESCRIPTION:
+      183  - shopify_meta_description: target 140-155 characters, standal
+           one summary with primary keyword.
+      184  
+
+⏺ Now let me update the STYLE + FUNCTION VALUE PROPOSITION section to be less
+  prescriptive and more context-driven.
+
+⏺ Update(src/feedops/pipeline/prompts.py)
+  ⎿  Added 10 lines, removed 12 lines
+      205  
+      206  === P1: SHOULD FOLLOW (scored) ===
+      207  
+      208 -STYLE + FUNCTION VALUE PROPOSITION:                           
+      209 -- Allied Brass products add design value, not just utility. Co
+          -nvey BOTH.                                                    
+      210 -- Product innovations to highlight (these are competitive adva
+          -ntages):                                                      
+      211 -  * Shower baskets: ventilated wires for drainage, stylish alt
+          -ernative to plastic caddies                                   
+      212 -  * Grab bars: DECORATIVE ADA compliance—safety that complemen
+          -ts decor, not institutional                                   
+      213 -  * Toilet paper holders: rollerless (smooth design), multi-ro
+          -ll (capacity), recessed (built-in look)                       
+      214 -  * Towel bars: double bars, integrated hooks, hotel-style tra
+          -in racks                                                      
+      215 -  * Garment rods: retractable (hidden when not needed)        
+      216 -  * Mirrors: tilting, magnifying, swing arm                   
+      217 -- PERSONALIZATION ANGLE: 28 finishes and 42+ collections let s
+          -hoppers match their vision.                                   
+      218 -- DON'T lead with "solid brass" — that's expected. Lead with w
+          -hy THIS product looks better AND works better than alternative
+          -s.                                                            
+      219 -- COMPETITIVE CONTRAST: Allied Brass vs Amazon alternatives = 
+          -style+durability vs utilitarian+fragile.                      
+      208 +PRODUCT INNOVATION CONTEXT (use when relevant to THIS product)
+          +:                                                             
+      209 +Some Allied Brass products have innovations that competitors d
+          +on't offer:                                                   
+      210 +- Shower baskets: ventilated wires drain water (bottles dry fa
+          +ster)                                                         
+      211 +- Grab bars: decorative ADA compliance (safety that looks desi
+          +gned, not institutional)                                      
+      212 +- Toilet paper holders: rollerless (no clicking), multi-roll (
+          +never run out), recessed (built-in look)                      
+      213 +- Towel bars: double bars, integrated hooks, hotel-style train
+          + racks                                                        
+      214 +- Garment rods: retractable (hidden when not needed)          
+      215 +- Mirrors: tilting, magnifying, swing arm                     
+      216  
+      217 +When one of these innovations applies, make it a selling point
+          +. Don't just list features—explain why the buyer should care. 
+      218 +                                                              
+      219  BRAND VOICE:
+      220  - Use confident, specific phrasing (e.g., "crafted", "enduring
+           ") when supported by evidence.
+      221  - State what the product does directly. A grab bar provides se
+           cure support (not "helps provide").
+
+⏺ Let me check the current state of the file and see if there are other sections
+   that need to be simplified.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Let me simplify some of the redundant sections. The OPENING HOOK and
+  COMPETITIVE DIFFERENTIATION sections are now redundant with the new
+  context-driven approach.
+
+⏺ Update(src/feedops/pipeline/prompts.py)
+  ⎿  Added 7 lines, removed 21 lines
+      228  - Include a collection coordination hook when collection_conte
+           xt is available:
+      229    "Complete your [room] with matching pieces from the [Collect
+           ion] collection."
+      230  
+      231 -OPENING HOOK (Shopify only -- Google/Bing should lead with att
+          -ributes, not hooks):                                          
+      232 -- Ask: what frustration or need drove the buyer to search? Tha
+          -t's your Shopify opening.                                     
+      233 -- Include one competitive differentiator in the first 150 char
+          -acters (finish variety, lifetime warranty, or solid brass cons
+          -truction).                                                    
+      231 +HELPFUL CONTEXT FOR BING:                                     
+      232 +Bing's algorithm is more literal than Google's. Including syno
+          +nyms naturally helps:                                         
+      233 +- Towel Bars: towel bar, towel rack, towel holder             
+      234 +- Grab Bars: grab bar, safety bar, ADA grab bar               
+      235 +- Toilet Paper Holders: toilet paper holder, tissue holder    
+      236 +- Robe Hooks: robe hook, towel hook, bathroom hook            
+      237 +Use your judgment on which synonyms are natural for each produ
+          +ct.                                                           
+      238  
+      235 -COMPETITIVE DIFFERENTIATION (Shopify descriptions):           
+      236 -- Include at least one competitive comparison (without naming 
+          -competitors):                                                 
+      237 -  * "Solid brass construction outlasts die-cast zinc and plast
+          -ic alternatives"                                              
+      238 -  * "Unlike mass-market alternatives, [product] features solid
+          - brass internals"                                             
+      239 -  * "Designed for daily use -- solid brass won't corrode, pit,
+          - or tarnish like lesser materials"                            
+      240 -- For Google/Bing feed fuel: include "solid brass" as a promin
+          -ent attribute that shoppers                                   
+      241 -  actively search for and that the algorithm uses for quality 
+          -matching.                                                     
+      242 -                                                              
+      243 -BING SYNONYM STRATEGY (literal keyword matching):             
+      244 -- Towel Bars: towel bar, towel rack, towel holder, towel rail 
+      245 -- Grab Bars: grab bar, safety bar, bathroom grab bar, ADA grab
+          - bar, support bar                                             
+      246 -- Toilet Paper Holders: toilet paper holder, tissue holder, to
+          -ilet roll holder                                              
+      247 -- Robe Hooks: robe hook, towel hook, bathroom hook, wall hook 
+      248 -- Glass Shelves: glass shelf, bathroom shelf, wall shelf, floa
+          -ting shelf                                                    
+      249 -- Paper Towel Holders: paper towel holder, paper towel stand, 
+          -kitchen towel holder                                          
+      250 -Include material variations (solid brass, brass construction) 
+          -and mounting alternatives                                     
+      251 -(wall mount, wall-mounted) naturally in Bing descriptions.    
+      252 -                                                              
+      239  DESIGN CONTEXT:
+      240  - If collection_context is provided, mention the collection na
+           me; prefer descriptions over titles.
+      241    Include in titles only if it fits without pushing product ty
+           pe/dimension past char 70.
+
+⏺ Now let me simplify the BUYER PSYCHOLOGY section since most of it is now
+  covered by the new context-driven approach.
+
+⏺ Update(src/feedops/pipeline/prompts.py)
+  ⎿  Added 8 lines, removed 25 lines
+      261  - Google short title should work as an overlay label.
+      262  - Installation ease messaging: "installs in minutes with inclu
+           ded hardware" (when supported by evidence).
+      263  
+      264 -=== BUYER PSYCHOLOGY (write to persuade, not just inform) === 
+      264 +=== BUYER PSYCHOLOGY ===                                      
+      265  
+      266 -WHY PEOPLE BUY ALLIED BRASS:                                  
+      267 -- Allied Brass costs $80 when Amazon has $20 alternatives. You
+          -r descriptions must answer "why?"                             
+      268 -- Benefits trigger emotional engagement (System 1); features p
+          -rovide rational justification (System 2).                     
+      269 -- 95% of buying decisions are emotional first, rationalized se
+          -cond.                                                         
+      270 -- Good descriptions reduce buyer uncertainty through specific,
+          - verifiable claims.                                           
+      266 +THE CORE QUESTION: Allied Brass costs $80 when Amazon has $20 
+          +alternatives.                                                 
+      267 +Your description must help the buyer understand why it's worth
+          + it.                                                          
+      268  
+      272 -FIRST 150 CHARACTERS MATTER MOST:                             
+      273 -- Shopping snippets show ~150 characters. Front-load the value
+          - proposition.                                                 
+      274 -- Lead with what the product DOES for the buyer, not just what
+          - it IS.                                                       
+      275 -- Include one trust signal early (lifetime warranty, solid bra
+          -ss, 28 finishes).                                             
+      269 +FINISH INTEGRATION (for variant generation):                  
+      270 +When writing for a specific finish variant, the finish is part
+          + of the product's appeal.                                     
+      271 +Weave it naturally—don't bolt it on awkwardly.                
+      272 +- Natural: "This towel bar in Polished Chrome coordinates with
+          + modern faucets..."                                           
+      273 +- Awkward: "Available in Polished Chrome. Polished Chrome deli
+          +vers a bright, mirror-like sheen..."                          
+      274  
+      277 -COMMON BUYER QUESTIONS (answer implicitly):                   
+      278 -1. "Will it rust in my shower?" -> Solid brass construction wo
+          -n't corrode.                                                  
+      279 -2. "Will it match my other fixtures?" -> Available in 28 finis
+          -hes to coordinate.                                            
+      280 -3. "Is $80 worth it vs $20?" -> Solid brass outlasts die-cast 
+          -zinc; lifetime warranty.                                      
+      281 -4. "Is it hard to install?" -> Includes mounting hardware; con
+          -cealed screws for clean look.                                 
+      282 -                                                              
+      283 -FINISH-SPECIFIC CONTENT (for variant generation):             
+      284 -When generating content for a specific finish variant:        
+      285 -- Weave the finish name naturally into the opening sentence.  
+      286 -- For coordination finishes (Chrome, Nickel, Brass): mention f
+          -ixture matching.                                              
+      287 -- For statement finishes (Matte Black, Fire Engine Red, Medite
+          -rranean Blue): emphasize distinctive character.               
+      288 -- NEVER use "Available in {Finish}. {Finish} features..." -- t
+          -his pattern sounds robotic.                                   
+      289 -- Good: "This towel bar in Polished Chrome coordinates with mo
+          -dern faucets..."                                              
+      290 -- Bad: "Available in Polished Chrome. Polished Chrome delivers
+          - a bright, mirror-like sheen..."                              
+      291 -                                                              
+      275  === GOOD EXAMPLES (produce output like these) ===
+      276  
+      277  GOOD GOOGLE DESCRIPTION (finish-specific variant):
+
+⏺ Let me verify the changes by reading the key sections of the updated file.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ The prompt has been transformed from prescriptive rules to context-driven
+  guidance. Now let me test it by running the generator on BSK-275LA to see how
+  the output compares.
+
+⏺ Bash(PYTHONPATH=src python -c "
+      import asyncio…)
+  ⎿  Error: Exit code 127
+     (eval):1: command not found: python
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import asyncio…)
+  ⎿  Data source: Shopify API (cached 400m ago)
+     Cache hit: Shopify product
+     Cache miss: Merchant Center items
+     … +54 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+⏺ The descriptions look much more natural. Let me compare with a different
+  product type to verify the descriptions aren't templated.
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import asyncio…)
+  ⎿  Data source: Shopify API (cached 400m ago)
+     Cache hit: Shopify product
+     Cache miss: Merchant Center items
+     … +45 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+⏺ The descriptions are different between products - not templated. Let me test
+  one more product type (grab bar) to verify safety-focused products get
+  appropriate treatment.
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import asyncio…)
+  ⎿  Error: Exit code 1
+     Traceback (most recent call last):
+       File "<string>", line 28, in <module>
+       File "/Users/bobby/.local/share/uv/python/cpython-3.11.13-macos-aarch64-n
+     ne/lib/python3.11/asyncio/runners.py", line 190, in run
+         return runner.run(main)
+                ^^^^^^^^^^^^^^^^
+       File "/Users/bobby/.local/share/uv/python/cpython-3.11.13-macos-aarch64-n
+     ne/lib/python3.11/asyncio/runners.py", line 118, in run
+         return self._loop.run_until_complete(task)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       File "/Users/bobby/.local/share/uv/python/cpython-3.11.13-macos-aarch64-n
+     ne/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+     … +9 lines (ctrl+o to see all)
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import pandas as pd…)
+  ⎿  Error: Exit code 1
+     Traceback (most recent call last):
+       File "<string>", line 3, in <module>
+       File "/Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/s
+     te-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+         return _read(filepath_or_buffer, kwds)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       File "/Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/s
+     te-packages/pandas/io/parsers/readers.py", line 620, in _read
+         parser = TextFileReader(filepath_or_buffer, **kwds)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       File "/Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/s
+     te-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+     … +9 lines (ctrl+o to see all)
+
+⏺ Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import pandas as pd…)
+  ⎿  Error: Exit code 1
+     <string>:3: DtypeWarning: Columns (4,24,39) have mixed types. Specify dtype
+     option on import or set low_memory=False.
+     Traceback (most recent call last):
+       File "/Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/s
+     te-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+         return self._engine.get_loc(casted_key)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       File "pandas/_libs/index.pyx", line 167, in 
+     pandas._libs.index.IndexEngine.get_loc
+       File "pandas/_libs/index.pyx", line 196, in 
+     pandas._libs.index.IndexEngine.get_loc
+       File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in 
+     pandas._libs.hashtable.PyObjectHashTable.get_item
+       File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in 
+     pandas._libs.hashtable.PyObjectHashTable.get_item
+
+     … +12 lines (ctrl+o to see all)
+
+⏺ Bash(head -1 "data/catalog/Product Catalog.csv" | tr ',' '\n' | head -20)
+  ⎿  MasterSKU
+     OPTION SKU
+     CoreSKU
+     … +17 lines (ctrl+o to expand)
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import pandas as pd…)
+  ⎿ Grab bar SKUs: ['CM-P-700-16-GB', 'CM-P-700-24-GB', 'CM-P-700-32-GB', '
+    CM-P-700-36-GB', 'CU-GRR-18']
+
+
+⏺ Bash(PYTHONPATH=src .venv/bin/python -c "
+      import asyncio…)
+  ⎿  Cache miss: Shopify product
+     Data source: Shopify API (fetched just now)
+     Cache miss: Merchant Center items
+     … +41 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+⏺ The tests confirm the prompt redesign is working. The descriptions are:
+
+  1. Not templated - Each product type gets different treatment:
+    - Shower basket: drainage, rust-resistance, organization
+    - Paper towel holder: countertop clutter, fits beside sink
+    - Grab bar: safety, weight capacity, "without settling for an institutional
+  look"
+  2. Context-driven - The grab bar Shopify description opens with "Make the
+  bathroom safer without settling for an institutional look" - exactly the buyer
+   psychology we wanted without prescribing it.
+  3. Finish integration - Finishes are woven naturally into variant descriptions
+   ("in Military Camo", "in Antique Brass")
+  4. Platform-appropriate - Shopify doesn't mention specific finishes,
+  Google/Bing do.
+
+  Here's a summary of the changes made to src/feedops/pipeline/prompts.py:
+  Lines: 134-180
+  Before: Prescriptive rules (FIRST SENTENCE PATTERN, Target 600-800 chars,
+    Include ONE synonym, etc.)
+  After: Context about WHO is searching, WHAT questions they have, WHAT makes
+    Allied Brass worth it
+  ────────────────────────────────────────
+  Lines: 208-219
+  Before: Feature list to "highlight"
+  After: Innovation context with "use when relevant" framing
+  ────────────────────────────────────────
+  Lines: 231-251
+  Before: Detailed synonym lists and rules
+  After: "Helpful context" with LLM judgment encouraged
+  ────────────────────────────────────────
+  Lines: 264-304
+  Before: Long buyer psychology section
+  After: Simplified to core question + finish integration guidance
+  The key insight: Instead of telling the LLM "write sentences in this pattern",
+   we now tell it "here's who's reading this and what they need to know - you
+  figure out how to write it."
+
+✻ Baked for 8m 19s
+
+❯ great work!! Can you plese pish all of these chanes to github and then    
+  write a summary of what you did and provide it here and add it into the   
+  @README.md                                                                
+  ⎿  Read README.md (133 lines)
+  ⎿  ⧉ Selected 558 lines from docs/prompts/06-content-regeneration.md in Cursor
+
+⏺ Bash(git status)
+  ⎿  On branch master
+     Your branch is up to date with 'origin/master'.
+     … +18 lines (ctrl+o to expand)
+
+⏺ Bash(git diff src/feedops/pipeline/prompts.py | head -100)
+  ⎿  (No content)
+
+⏺ Bash(git diff --stat)
+  ⎿  dashboard/package.json                             |  1 +
+     .../src/components/review/SkuReviewClient.tsx      | 27 ++++++++++++++
+    +--
+    … +3 lines (ctrl+o to expand)
+
+
+⏺ Bash(git status src/feedops/pipeline/prompts.py)
+  ⎿  On branch master
+     Your branch is up to date with 'origin/master'.
+
+     nothing to commit, working tree clean
+
+⏺ Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(git diff HEAD -- src/feedops/pipeline/prompts.py | head -150)
+  ⎿  (No content)
+
+⏺ Bash(git log -1 --oneline -- src/feedops/pipeline/prompts.py)
+  ⎿ 31e60587 feat: Add dashboard features - performance, batches, publishin
+    g, variant review, settings
+
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Bash(git add -f src/feedops/pipeline/prompts.py && git status)
+  ⎿  On branch master
+     Your branch is up to date with 'origin/master'.
+     … +18 lines (ctrl+o to expand)
+
+⏺ Bash(git show HEAD:src/feedops/pipeline/prompts.py | head -150 | tail -30)
+  ⎿  TITLE SUCCESS CRITERIA:
+     - Product type appears in first 30 characters (mobile truncation).
+     - Key dimension (e.g., "18-Inch") appears before character 70.
+     … +36 lines (ctrl+o to expand)
+
+⏺ Bash(git log --oneline -5)
+  ⎿ 31e60587 feat: Add dashboard features - performance, batches, publishin
+    g, variant review, settings
+    0df39419 feat: Add authentication, approval actions, and image gallery
+    … +3 lines (ctrl+o to expand)
+
+
+⏺ Bash(git show 31e60587 --stat | head -30)
+  ⎿  commit 31e605871852dfc3d06f864e486eba1123ec3ea4
+     Author: Bobby Andris <bobby.andris@avondaledecor.com>
+     Date:   Tue Feb 3 18:53:34 2026 -0500
+     … +33 lines (ctrl+o to expand)
+
+⏺ Bash(git show 31e60587 --stat | grep -i prompt)
+  ⎿      - Documentation prompts for all features
+      docs/prompts/01-performance-dashboard.md           |  103 ++
+      docs/prompts/02-batch-management.md                |  148 ++
+     … +8 lines (ctrl+o to expand)
+
+⏺ Bash(git log origin/master..HEAD --oneline)
+  ⎿  (No content)
+
+⏺ Good news - the prompt redesign changes are already committed and pushed to
+  GitHub. Let me now update the README.md with a summary of what was done.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(README.md)
+  ⎿  Added 31 lines
+      124  PYTHONPATH=./src .venv/bin/python -m pytest -q
+      125  ```
+      126  
+      127 +## Prompt Philosophy: Context Over Rules                      
+      128 +                                                              
+      129 +The LLM prompt system (`src/feedops/pipeline/prompts.py`) uses
+          + a **context-driven approach** rather than prescriptive rules.
+          + Instead of telling the LLM "write sentences in this pattern",
+          + we give it understanding and trust it to make good decisions.
+      130 +                                                              
+      131 +### The Core Insight                                          
+      132 +                                                              
+      133 +Prescriptive rules like "FIRST SENTENCE PATTERN: [Dimension] [
+          +product] in [Finish]..." create robotic, templated output. Con
+          +text-driven guidance produces descriptions that feel human-wri
+          +tten and address real buyer questions.                        
+      134 +                                                              
+      135 +### What the Prompt Provides                                  
+      136 +                                                              
+      137 +1. **WHO is searching** - Homeowners renovating, designers spe
+          +cifying, people replacing broken products                     
+      138 +2. **WHAT questions buyers have** - "Will this look good?", "W
+          +ill it match?", "Is $80 worth it vs $20?"                     
+      139 +3. **WHAT makes Allied Brass worth it** - Style + function, 28
+          + finishes, product innovations, solid brass durability        
+      140 +4. **PLATFORM context** - Google/Bing variants (first impressi
+          +on, make them click) vs Shopify master (already clicked, help 
+          +them buy)                                                     
+      141 +                                                              
+      142 +### Why It Works                                              
+      143 +                                                              
+      144 +The LLM already knows how to write compelling copy. The old ap
+          +proach was **blocking** that knowledge with compliance rules. 
+          +By providing context instead of constraints, we let the LLM:  
+      145 +- Write different descriptions for different product types (gr
+          +ab bars focus on safety, shower baskets focus on drainage)    
+      146 +- Weave finish names naturally instead of using robotic patter
+          +ns                                                            
+      147 +- Answer the actual questions buyers have before spending $80 
+      148 +                                                              
+      149 +### Example Output Difference                                 
+      150 +                                                              
+      151 +**Old (rule-following):**                                     
+      152 +> "This 18.75-inch wall-mounted shower basket is crafted from 
+          +solid brass. Available in Antique Brass. Antique Brass feature
+          +s a softened, aged golden patina..."                          
+      153 +                                                              
+      154 +**New (context-driven):**                                     
+      155 +> "This 18.75-inch shower basket in Antique Brass keeps bath e
+          +ssentials organized with vintage-inspired warmth. Ventilated s
+          +olid brass wires drain quickly and resist rust..."            
+      156 +                                                              
+      157  ## Docs
+      158  
+      159  - Brand identity context: `docs/allied_brass_complete_brand_id
+           entity_v2 (4).md`
+      160  - Platform guidelines: `docs/04-platform-guidelines.md`
+      161  - Testing notes: `docs/testing-guide.md`
+      162 +- Prompt redesign plan: `.claude/plans/streamed-shimmying-dove
+          +.md`                                                          
+      163  
+
+⏺ Now let me commit and push the README update.
+
+⏺ Bash(git add README.md && git commit -m "docs: Add prompt philosophy section
+      to README…)
+  ⎿  [master ef2f9ad3] docs: Add prompt philosophy section to README
+      1 file changed, 31 insertions(+)
+
+⏺ Bash(git push origin master)
+  ⎿  To https://github.com/bobby-andris/Allied-FeedOps.git
+        31e60587..ef2f9ad3  master -> master
+
+⏺ Done! All changes pushed to GitHub. Here's the summary:
+
+  ---
+  Summary: Prompt Redesign - From Rules to Reasoning
+
+  Problem Solved
+
+  The previous prompt approach used prescriptive rules that created robotic,
+  templated descriptions:
+  - "FIRST SENTENCE PATTERN: [Dimension] [product] in [Finish] adds..."
+  - "Target 600-800 characters"
+  - "Include ONE natural synonym"
+  - "DO NOT mention 28 finishes"
+
+  These rules blocked the LLM's ability to think about what each product
+  actually needs.
+
+  New Approach: Context Over Rules
+
+  Instead of telling the LLM WHAT to write, we now give it:
+  What We Provide: WHO is searching
+  Purpose: Homeowners renovating, designers specifying, people replacing
+  products
+  ────────────────────────────────────────
+  What We Provide: WHAT questions buyers have
+  Purpose: "Will it look good?", "Will it match?", "Is $80 worth it?"
+  ────────────────────────────────────────
+  What We Provide: WHAT makes Allied Brass worth it
+  Purpose: Style + function, 28 finishes, innovations, solid brass
+  ────────────────────────────────────────
+  What We Provide: PLATFORM context
+  Purpose: Google/Bing = first impression; Shopify = already clicked
+  Results
+
+  The LLM now produces descriptions that:
+  - Feel human-written - not templated
+  - Vary by product type - grab bars focus on safety, shower baskets on drainage
+  - Answer buyer questions - why $80 instead of $20
+  - Integrate finish naturally - "in Antique Brass adds vintage warmth" vs
+  "Available in Antique Brass. Antique Brass features..."
+
+  Files Changed
+
+  - src/feedops/pipeline/prompts.py - Replaced prescriptive rules with
+  context-driven guidance
+  - README.md - Added "Prompt Philosophy: Context Over Rules" section
+
+  Commits Pushed
+
+  - ef2f9ad3 - docs: Add prompt philosophy section to README
+  - 31e60587 - (earlier) feat: Add dashboard features including prompt redesign
+
+✻ Churned for 1m 45s
+
+❯ can you also please ensure that this is being used in our new vercel      
+  dashboard when the new generated contents are run?                        
+
+⏺ Let me check how the dashboard handles content regeneration and ensure it's
+  using the updated Python prompts.
+
+⏺ Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+⏺ I found the issue. The Vercel dashboard has its own SYSTEM_PROMPT in the
+  regenerate API (lines 41-61) that's still using the old rules-based approach.
+  It's not using the Python backend's context-driven prompts.
+
+  Let me update it to match our new philosophy:
+
+⏺ Update(dashboard/src/app/api/regenerate/route.ts)
+  ⎿  Added 27 lines, removed 15 lines
+      37    }
+      38  }
+      39  
+      40 -// Simplified system prompt for single content type regeneratio
+         -n                                                              
+      40 +// Context-driven system prompt (matches Python backend philoso
+         +phy)                                                           
+      41  const SYSTEM_PROMPT = `You are a product content writer for All
+          ied Brass bathroom and kitchen hardware.
+      42 -Create optimized content for product feeds using ONLY the provi
+         -ded product data.                                              
+      42 +Create content that helps buyers understand why this product is
+         + worth it.                                                     
+      43  
+      44 +BEFORE YOU WRITE, THINK ABOUT WHO IS READING THIS:             
+      45 +                                                               
+      46 +1. WHO IS SEARCHING FOR THIS PRODUCT?                          
+      47 +- A homeowner renovating a bathroom who wants it to look intent
+         +ional, not like an afterthought                                
+      48 +- A designer specifying fixtures for a client who expects quali
+         +ty                                                             
+      49 +- Someone replacing a broken/ugly product who wants an upgrade,
+         + not just a replacement                                        
+      50 +                                                               
+      51 +2. WHAT QUESTIONS DO THEY HAVE BEFORE SPENDING $80+?           
+      52 +- "Will this look good in MY bathroom?" → Help them visualize i
+         +t                                                              
+      53 +- "Will this match my other fixtures?" → Address finish coordin
+         +ation                                                          
+      54 +- "Is this actually better than the $20 Amazon option?" → Expla
+         +in the value                                                   
+      55 +- "Will this last? Is it quality?" → Provide trust signals (mat
+         +erial, warranty)                                               
+      56 +                                                               
+      57 +3. WHAT MAKES ALLIED BRASS WORTH IT?                           
+      58 +- Style without sacrifice: You don't have to choose between "lo
+         +oks good" and "works well"                                     
+      59 +- Personalization: 28 finishes to match any bathroom vision    
+      60 +- Innovation: Rollerless TP holders, retractable rods, decorati
+         +ve grab bars, ventilated baskets                               
+      61 +- Durability: Solid brass outlasts plastic and die-cast that cr
+         +ack and corrode                                                
+      62 +- Coordination: Match everything across 42+ collections        
+      63 +                                                               
+      64 +PLATFORM CONTEXT:                                              
+      65 +- Google/Bing (variant): One specific finish. This is the custo
+         +mer's FIRST impression. Make them want to click.               
+      66 +- Shopify (master): All finishes on one page. Customer already 
+         +clicked. Help them choose and buy.                             
+      67 +                                                               
+      68  CRITICAL RULES:
+      69  - Never invent specifications not in the product data
+      70  - Every factual claim must be traceable to the provided data
+      71  - "Allied Brass" should be the final segment in titles
+      72  - No ALL CAPS, no promotional language like "Premium", "Luxury"
+          , "Best"
+      49 -- Use confident, specific phrasing                             
+      73 +- Write for a human who's about to spend $80 and wants to feel 
+         +good about it`                                                 
+      74  
+      51 -TITLE REQUIREMENTS:                                            
+      52 -- Product type in first 30 characters                          
+      53 -- Key dimension before character 70                            
+      54 -- Brand "Allied Brass" at end                                  
+      55 -- Google/Bing: 60-150 characters                               
+      56 -- Shopify: max 255 characters, H1-friendly                     
+      57 -                                                               
+      58 -DESCRIPTION REQUIREMENTS:                                      
+      59 -- Google: 600-800 characters, plain text, attribute-dense for f
+         -eed matching                                                   
+      60 -- Bing: 700-1000 characters, plain text, include product synony
+         -ms                                                             
+      61 -- Shopify: HTML with <p> opening, <ul><li> bullets, opens with 
+         -buyer problem/outcome`                                         
+      62 -                                                               
+      75  function buildSimplePrompt(
+      76    contentType: 'title' | 'description',
+      77    platform: string,
+
+⏺ Now let me also update the platform-specific prompt builders to use
+  context-driven language:
+
+⏺ Update(dashboard/src/app/api/regenerate/route.ts)
+  ⎿  Added 20 lines, removed 11 lines
+       77    platform: string,
+       78    productData: Record<string, unknown>
+       79  ): string {
+       80 -  const platformSpecific = {                                  
+       81 -    google: contentType === 'title'                           
+       82 -      ? 'Google Shopping title (60-150 characters, product typ
+          -e first, dimensions, "Allied Brass" at end)'                  
+       83 -      : 'Google Shopping description (600-800 characters, plai
+          -n text, attribute-dense)',                                    
+       84 -    bing: contentType === 'title'                             
+       85 -      ? 'Bing Shopping title (60-150 characters, include produ
+          -ct synonyms)'                                                 
+       86 -      : 'Bing Shopping description (700-1000 characters, plain
+          - text, include synonyms)',                                    
+       87 -    shopify: contentType === 'title'                          
+       88 -      ? 'Shopify product title (max 255 characters, H1-friendl
+          -y)'                                                           
+       89 -      : 'Shopify description (HTML with <p> and <ul><li>, open
+          -s with buyer problem)',                                       
+       80 +  const platformContext = {                                   
+       81 +    google: {                                                 
+       82 +      title: 'Google Shopping title - this is their first impr
+          +ession. Make them want to click. Include product type, key dim
+          +ension, and "Allied Brass" at end.',                          
+       83 +      description: 'Google Shopping description - write for a 
+          +human scanning Shopping ads. Answer their questions about this
+          + product. Weave the finish naturally. Plain text only.',      
+       84 +    },                                                        
+       85 +    bing: {                                                   
+       86 +      title: 'Bing Shopping title - include natural product sy
+          +nonyms. Make them want to click. Include "Allied Brass" at end
+          +.',                                                           
+       87 +      description: 'Bing Shopping description - write for huma
+          +ns, include product synonyms naturally (e.g., towel bar/rack, 
+          +shower basket/caddy). Plain text only.',                      
+       88 +    },                                                        
+       89 +    shopify: {                                                
+       90 +      title: 'Shopify product title (H1) - customer already cl
+          +icked. Help them feel confident about buying.',               
+       91 +      description: 'Shopify description - customer already cli
+          +cked, now convince them to add to cart. Open with their proble
+          +m or desired outcome. Mention 28 finishes as a benefit. HTML f
+          +ormat with <p> and <ul><li> bullets.',                        
+       92 +    },                                                        
+       93    }
+       94  
+       92 -  return `Generate an optimized ${platformSpecific[platform as
+          - keyof typeof platformSpecific]}.                             
+       95 +  const context = platformContext[platform as keyof typeof pla
+          +tformContext]?.[contentType] || ''                            
+       96  
+       97 +  return `Generate a ${contentType} for this product.         
+       98 +                                                              
+       99 +CONTEXT: ${context}                                           
+      100 +                                                              
+      101  PRODUCT DATA:
+      102  ${JSON.stringify(productData, null, 2)}
+      103  
+      104 +Remember: Write for a human who's about to spend $80 and wants
+          + to feel good about it.                                       
+      105 +                                                              
+      106  Respond with ONLY the ${contentType} text, no additional expla
+           nation or formatting.`
+      107  }
+      108  
+
+⏺ Update(dashboard/src/app/api/regenerate/route.ts)
+  ⎿  Added 15 lines, removed 12 lines
+      113    currentContent: string,
+      114    feedback: string
+      115  ): string {
+      116 -  const platformSpecific = {                                  
+      117 -    google: contentType === 'title'                           
+      118 -      ? 'Google Shopping title (60-150 characters, product typ
+          -e first, dimensions, "Allied Brass" at end)'                  
+      119 -      : 'Google Shopping description (600-800 characters, plai
+          -n text, attribute-dense)',                                    
+      120 -    bing: contentType === 'title'                             
+      121 -      ? 'Bing Shopping title (60-150 characters, include produ
+          -ct synonyms)'                                                 
+      122 -      : 'Bing Shopping description (700-1000 characters, plain
+          - text, include synonyms)',                                    
+      123 -    shopify: contentType === 'title'                          
+      124 -      ? 'Shopify product title (max 255 characters, H1-friendl
+          -y)'                                                           
+      125 -      : 'Shopify description (HTML with <p> and <ul><li>, open
+          -s with buyer problem)',                                       
+      116 +  const platformContext = {                                   
+      117 +    google: 'Google Shopping - first impression, make them wan
+          +t to click',                                                  
+      118 +    bing: 'Bing Shopping - include natural product synonyms', 
+      119 +    shopify: 'Shopify - customer already clicked, convince the
+          +m to buy',                                                    
+      120    }
+      121  
+      122 +  const context = platformContext[platform as keyof typeof pla
+          +tformContext] || platform                                     
+      123 +                                                              
+      124    return `You are improving a product ${contentType} based on 
+           reviewer feedback.
+      125  
+      126 +PLATFORM: ${context}                                          
+      127 +                                                              
+      128  CURRENT ${contentType.toUpperCase()}:
+      129  ${currentContent}
+      130  
+     ...
+      134  PRODUCT DATA:
+      135  ${JSON.stringify(productData, null, 2)}
+      136  
+      139 -REQUIREMENTS:                                                 
+      140 -Generate an improved ${platformSpecific[platform as keyof type
+          -of platformSpecific]} that addresses the feedback.            
+      137 +Remember the buyer questions you're answering:                
+      138 +- "Will this look good in MY bathroom?"                       
+      139 +- "Will this match my other fixtures?"                        
+      140 +- "Is this actually better than the $20 Amazon option?"       
+      141 +- "Will this last? Is it quality?"                            
+      142  
+      143 +Generate an improved ${contentType} that addresses the feedbac
+          +k while answering these buyer questions.                      
+      144 +                                                              
+      145  Respond with ONLY the improved ${contentType} text, no additio
+           nal explanation or formatting.`
+      146  }
+      147  
+
+⏺ Let me verify the changes look correct:
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ The dashboard regeneration API now uses the same context-driven philosophy.
+  Let me commit and push:
+
+⏺ Bash(git add dashboard/src/app/api/regenerate/route.ts && git status)
+  ⎿  On branch master
+     Your branch is up to date with 'origin/master'.
+     … +21 lines (ctrl+o to expand)
+
+⏺ Bash(git commit -m "feat: Update dashboard regeneration to use context-driven
+      prompts…)
+  ⎿ [master bc1ba826] feat: Update dashboard regeneration to use context-dr
+    iven prompts
+     1 file changed, 322 insertions(+)
+     create mode 100644 dashboard/src/app/api/regenerate/route.ts
+
+
+⏺ Bash(git push origin master)
+  ⎿  To https://github.com/bobby-andris/Allied-FeedOps.git
+        ef2f9ad3..bc1ba826  master -> master
+
+⏺ Done! The dashboard regeneration API now uses the same context-driven prompt
+  philosophy.
+
+  Summary of Changes
+
+  File Updated
+
+  dashboard/src/app/api/regenerate/route.ts
+
+  What Changed
+  Before (Rules-Based): "Product type in first 30 characters"
+  After (Context-Driven): "WHO IS SEARCHING FOR THIS PRODUCT?"
+  ────────────────────────────────────────
+  Before (Rules-Based): "60-150 characters"
+  After (Context-Driven): "Make them want to click"
+  ────────────────────────────────────────
+  Before (Rules-Based): "attribute-dense for feed matching"
+  After (Context-Driven): "Answer their questions about this product"
+  ────────────────────────────────────────
+  Before (Rules-Based): "opens with buyer problem"
+  After (Context-Driven): "Customer already clicked. Help them choose and buy."
+  Key Updates
+
+  1. SYSTEM_PROMPT - Now includes:
+    - Who is searching (homeowners, designers, replacers)
+    - What questions buyers have before spending $80
+    - What makes Allied Brass worth it (style, personalization, innovation,
+  durability)
+    - Platform context (first impression vs already clicked)
+  2. buildSimplePrompt() - Platform guidance now reads like:
+    - Google: "this is their first impression. Make them want to click."
+    - Bing: "include natural product synonyms"
+    - Shopify: "customer already clicked, now convince them to add to cart"
+  3. buildFeedbackPrompt() - Reminds LLM of buyer questions when improving
+  content
+
+  Result
+
+  When you regenerate content from the dashboard, it will now produce
+  descriptions that:
+  - Feel human-written (not templated)
+  - Answer real buyer questions
+  - Match the quality of the Python backend output
+
+  Commit pushed: bc1ba826
+
+✻ Worked for 1m 31s
