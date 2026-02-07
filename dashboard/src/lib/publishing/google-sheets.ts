@@ -356,6 +356,71 @@ async function ensureLifestyleImageColumn(
   }
 }
 
+/**
+ * Ensure structured_title and structured_description columns exist in the sheet.
+ * These columns are required for GMC AI content disclosure compliance.
+ *
+ * Adds both columns at the end of the sheet if they don't exist.
+ */
+async function ensureStructuredColumns(
+  sheets: sheets_v4.Sheets,
+  spreadsheetId: string,
+  columnMap: SheetColumnMap,
+  numColumns: number,
+  sheetName?: string
+): Promise<{ columnMap: SheetColumnMap; numColumns: number }> {
+  const needsStructuredTitle = columnMap.structured_title === undefined
+  const needsStructuredDescription = columnMap.structured_description === undefined
+
+  // If both columns exist, return unchanged
+  if (!needsStructuredTitle && !needsStructuredDescription) {
+    return { columnMap, numColumns }
+  }
+
+  // Build batch update for missing columns
+  const updates: { column: string; index: number }[] = []
+  let currentColIdx = numColumns
+
+  if (needsStructuredTitle) {
+    updates.push({ column: 'structured_title', index: currentColIdx })
+    currentColIdx++
+  }
+
+  if (needsStructuredDescription) {
+    updates.push({ column: 'structured_description', index: currentColIdx })
+    currentColIdx++
+  }
+
+  // Add column headers in batch
+  const data: sheets_v4.Schema$ValueRange[] = updates.map(({ column, index }) => {
+    const columnLetter = columnIndexToLetter(index)
+    const range = sheetName ? `${sheetName}!${columnLetter}1` : `${columnLetter}1`
+    return {
+      range,
+      values: [[column]],
+    }
+  })
+
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId,
+    requestBody: {
+      valueInputOption: 'RAW',
+      data,
+    },
+  })
+
+  // Update column map with new indices
+  const updatedColumnMap = { ...columnMap }
+  for (const { column, index } of updates) {
+    updatedColumnMap[column] = index
+  }
+
+  return {
+    columnMap: updatedColumnMap,
+    numColumns: currentColIdx,
+  }
+}
+
 export interface PublishToGoogleSheetsResult {
   success: boolean
   updated_count: number
@@ -431,6 +496,17 @@ export async function publishToGoogleSheets(
     columnMap = ensured.columnMap
     numColumns = ensured.numColumns
 
+    // Ensure structured columns exist
+    const ensuredStructured = await ensureStructuredColumns(
+      sheets,
+      spreadsheetId,
+      columnMap,
+      numColumns,
+      sheetName
+    )
+    columnMap = ensuredStructured.columnMap
+    numColumns = ensuredStructured.numColumns
+
     // Check for required columns
     if (columnMap.id === undefined) {
       result.errors.push("Required column 'id' not found in sheet headers")
@@ -444,7 +520,6 @@ export async function publishToGoogleSheets(
       description: columnMap.description,
       structured_title: columnMap.structured_title,
       structured_description: columnMap.structured_description,
-      digital_source_type: columnMap.digital_source_type,
       lifestyle_image_link: columnMap.lifestyle_image_link,
       custom_label_4: columnMap.custom_label_4,
       numColumns,
@@ -572,6 +647,17 @@ export async function publishExpandedVariantsToGoogleSheets(
     columnMap = ensured.columnMap
     numColumns = ensured.numColumns
 
+    // Ensure structured columns exist
+    const ensuredStructured = await ensureStructuredColumns(
+      sheets,
+      spreadsheetId,
+      columnMap,
+      numColumns,
+      sheetName
+    )
+    columnMap = ensuredStructured.columnMap
+    numColumns = ensuredStructured.numColumns
+
     // Check for required columns
     if (columnMap.id === undefined) {
       result.errors.push("Required column 'id' not found in sheet headers")
@@ -585,7 +671,6 @@ export async function publishExpandedVariantsToGoogleSheets(
       description: columnMap.description,
       structured_title: columnMap.structured_title,
       structured_description: columnMap.structured_description,
-      digital_source_type: columnMap.digital_source_type,
       lifestyle_image_link: columnMap.lifestyle_image_link,
       custom_label_4: columnMap.custom_label_4,
       numColumns,
