@@ -64,7 +64,54 @@ export function PerformanceCard({ sku, platform = 'google' }: PerformanceCardPro
     )
   }
 
-  // No data state
+  // If no current data but baseline exists, show baseline
+  if (!current && baseline) {
+    return (
+      <Card className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent pointer-events-none" />
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-serif flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              BASELINE (30d)
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                Pre-Publish
+              </span>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <div className="text-muted-foreground text-xs">Impressions</div>
+                <div className="font-semibold">{formatNumber(baseline.avg_impressions || 0)}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs">Clicks</div>
+                <div className="font-semibold">{formatNumber(baseline.avg_clicks || 0)}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs">CTR</div>
+                <div className="font-semibold">{formatPercentage(baseline.avg_ctr || 0)}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs">Conversions</div>
+                <div className="font-semibold">{formatNumber(baseline.avg_conversions || 0)}</div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground border-t pt-2">
+              Current baseline metrics. Post-publish tracking will begin after content is published.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // No data state (neither current nor baseline)
   if (!current) {
     return (
       <Card className="relative overflow-hidden">
@@ -90,9 +137,14 @@ export function PerformanceCard({ sku, platform = 'google' }: PerformanceCardPro
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No performance data available for this SKU.
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              No data yet. Performance tracking begins after first publish.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Check back 30 days after publishing to see metrics.
+            </p>
+          </div>
         </CardContent>
       </Card>
     )

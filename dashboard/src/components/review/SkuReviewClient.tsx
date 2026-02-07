@@ -299,43 +299,34 @@ export function SkuReviewClient({
 
           {/* Content */}
           <TabsContent value={selectedPlatform} className="mt-6 space-y-6">
-            {/* Insights - expanded by default, at top */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Search Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SearchInsightsCard
-                    masterSku={masterSku}
-                    currentTitle={title?.candidate_content ?? undefined}
-                    currentDescription={description?.candidate_content ?? undefined}
-                  />
-                </CardContent>
-              </Card>
+            {/* Row 1: Hero Image + Quality Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {productImages && (
+                <ProductHeroImage
+                  mainImageUrl={productImages.mainImageUrl}
+                  additionalImages={productImages.additionalImages}
+                  productTitle={masterSku}
+                  shopifyProductUrl={productImages.shopifyProductUrl}
+                />
+              )}
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PerformanceCard sku={masterSku} platform={selectedPlatform} />
-                </CardContent>
-              </Card>
+              <ContentQualityCard
+                title={title?.candidate_content || ''}
+                description={description?.candidate_content || ''}
+                platform={selectedPlatform}
+                masterSku={masterSku}
+              />
+            </div>
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Quality</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ContentQualityCard
-                    title={title?.candidate_content || ''}
-                    description={description?.candidate_content || ''}
-                    platform={selectedPlatform}
-                    masterSku={masterSku}
-                  />
-                </CardContent>
-              </Card>
+            {/* Row 2: Search Insights + Performance */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SearchInsightsCard
+                masterSku={masterSku}
+                currentTitle={title?.candidate_content ?? undefined}
+                currentDescription={description?.candidate_content ?? undefined}
+              />
+
+              <PerformanceCard sku={masterSku} platform={selectedPlatform} />
             </div>
 
             {/* Content blocks - vertical layout */}
@@ -395,29 +386,17 @@ export function SkuReviewClient({
               </details>
             )}
 
-            {/* Images - collapsed by default */}
-            {productImages && (
-              <details className="mt-8">
-                <summary className="cursor-pointer text-lg font-semibold mb-4">
-                  Product Images
-                </summary>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  <ProductHeroImage
-                    mainImageUrl={productImages.mainImageUrl}
-                    additionalImages={productImages.additionalImages}
-                    productTitle={masterSku}
-                    shopifyProductUrl={productImages.shopifyProductUrl}
-                  />
-                  <LifestyleImageReview
-                    sku={masterSku}
-                    images={images}
-                    variants={variants.filter(v => v.finish && v.finish_code).map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
-                    selectedFinish={null}
-                    onRefresh={() => router.refresh()}
-                  />
-                </div>
-              </details>
-            )}
+            {/* Lifestyle Images - expanded by default */}
+            <section className="mt-8">
+              <h3 className="text-lg font-semibold mb-4">Lifestyle Images</h3>
+              <LifestyleImageReview
+                sku={masterSku}
+                images={images}
+                variants={variants.filter(v => v.finish && v.finish_code).map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
+                selectedFinish={null}
+                onRefresh={() => router.refresh()}
+              />
+            </section>
           </TabsContent>
         </Tabs>
       </main>

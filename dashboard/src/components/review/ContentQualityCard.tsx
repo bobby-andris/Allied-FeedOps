@@ -28,7 +28,7 @@ export function ContentQualityCard({
   platform,
   masterSku,
 }: ContentQualityCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [analysis, setAnalysis] = useState<SixDimensionScore | null>(null)
 
   // Load expanded state from localStorage
@@ -37,6 +37,9 @@ export function ContentQualityCard({
     const stored = localStorage.getItem(key)
     if (stored !== null) {
       setIsExpanded(stored === 'true')
+    } else {
+      // Default to expanded if no stored preference
+      setIsExpanded(true)
     }
   }, [masterSku])
 

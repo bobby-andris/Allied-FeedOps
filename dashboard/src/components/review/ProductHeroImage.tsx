@@ -72,14 +72,15 @@ export function ProductHeroImage({
         <div className="relative">
           {/* Main Image with Zoom */}
           <div
-            className="relative aspect-square w-full max-w-md mx-auto cursor-zoom-in group"
+            className="relative w-full h-[250px] lg:h-[300px] mx-auto cursor-zoom-in group rounded-lg overflow-hidden bg-muted/30"
+            style={{ maxWidth: '600px' }}
             onClick={() => setShowZoom(true)}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentImage}
               alt={productTitle}
-              className="w-full h-full object-contain rounded-lg bg-muted/30"
+              className="w-full h-full object-contain"
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-lg">
               <ZoomIn className="h-8 w-8 text-white drop-shadow-lg" />

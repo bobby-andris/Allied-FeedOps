@@ -193,7 +193,7 @@ export function SearchInsightsCard({
   currentTitle,
   currentDescription,
 }: SearchInsightsCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [queries, setQueries] = useState<SearchQuery[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
