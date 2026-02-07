@@ -30,6 +30,56 @@ export interface ExpandVariantsOptions {
 }
 
 /**
+ * Query approved lifestyle images for a master SKU.
+ * Returns a map of finish_code -> image_url for variant-specific images,
+ * plus a master image URL if use_for_master is true.
+ *
+ * Strategy:
+ * - Fetch all approved images for the SKU
+ * - Build a map of finish-specific images (keyed by finish_code)
+ * - Extract master image (use_for_master = true) as fallback
+ */
+async function queryApprovedImages(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  master_sku: string
+): Promise<{
+  finishImages: Map<string, string>
+  masterImageUrl: string | null
+}> {
+  const { data: images, error } = await supabase
+    .from('generated_images')
+    .select('finish_code, image_url, use_for_master')
+    .eq('master_sku', master_sku)
+    .eq('approval_status', 'approved')
+
+  if (error) {
+    console.error('Error fetching approved images:', error)
+    return { finishImages: new Map(), masterImageUrl: null }
+  }
+
+  if (!images || images.length === 0) {
+    return { finishImages: new Map(), masterImageUrl: null }
+  }
+
+  const finishImages = new Map<string, string>()
+  let masterImageUrl: string | null = null
+
+  for (const img of images) {
+    // Extract master image (applies to all variants)
+    if (img.use_for_master && img.image_url) {
+      masterImageUrl = img.image_url
+    }
+
+    // Extract finish-specific images
+    if (img.finish_code && img.image_url && !img.use_for_master) {
+      finishImages.set(img.finish_code, img.image_url)
+    }
+  }
+
+  return { finishImages, masterImageUrl }
+}
+
+/**
  * Expand templates for all variants of a master SKU.
  *
  * For each variant (finish), replaces {FINISH_NAME} in the title
@@ -74,18 +124,29 @@ export async function expandVariantsForPublish(
 
   const finishSentences = (finishData?.finish_sentences as Record<string, string>) || {}
 
+  // Query approved lifestyle images for this SKU
+  const { finishImages, masterImageUrl } = await queryApprovedImages(supabase, master_sku)
+
   // Expand each variant
-  return variants.map((v) => ({
-    gmc_offer_id: v.gmc_offer_id,
-    finish: v.finish || 'Unknown',
-    finish_code: v.finish_code,
-    title: generateVariantTitle(approved_title, v.finish || 'Unknown', platform),
-    description: generateVariantDescription(
-      approved_description,
-      v.finish || 'Unknown',
-      finishSentences
-    ),
-  }))
+  return variants.map((v) => {
+    // Determine image URL: finish-specific takes precedence, then master fallback
+    const imageUrl = v.finish_code
+      ? finishImages.get(v.finish_code) || masterImageUrl || undefined
+      : masterImageUrl || undefined
+
+    return {
+      gmc_offer_id: v.gmc_offer_id,
+      finish: v.finish || 'Unknown',
+      finish_code: v.finish_code,
+      title: generateVariantTitle(approved_title, v.finish || 'Unknown', platform),
+      description: generateVariantDescription(
+        approved_description,
+        v.finish || 'Unknown',
+        finishSentences
+      ),
+      image_url: imageUrl,
+    }
+  })
 }
 
 /**

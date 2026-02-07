@@ -168,6 +168,7 @@ export async function POST(request: NextRequest) {
               gmc_offer_id: v.gmc_offer_id,
               title: v.title,
               description: v.description,
+              image_url: v.image_url,
             })),
             environment
           )
