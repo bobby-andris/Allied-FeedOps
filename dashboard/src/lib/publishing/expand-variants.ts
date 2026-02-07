@@ -30,14 +30,17 @@ export interface ExpandVariantsOptions {
 }
 
 /**
- * Query approved lifestyle images for a master SKU.
- * Returns a map of finish_code -> image_url for variant-specific images,
+ * Query approved lifestyle images for a master SKU that have been migrated to Shopify CDN.
+ * Returns a map of finish_code -> shopify_cdn_url for variant-specific images,
  * plus a master image URL if use_for_master is true.
  *
  * Strategy:
- * - Fetch all approved images for the SKU
+ * - Fetch all approved images for the SKU that have Shopify CDN URLs
  * - Build a map of finish-specific images (keyed by finish_code)
  * - Extract master image (use_for_master = true) as fallback
+ *
+ * IMPORTANT: Only images migrated to Shopify CDN are returned. Supabase Storage URLs
+ * are not published to Google Sheets - they're only for review workflow.
  */
 async function queryApprovedImages(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -48,9 +51,10 @@ async function queryApprovedImages(
 }> {
   const { data: images, error } = await supabase
     .from('generated_images')
-    .select('finish_code, image_url, use_for_master')
+    .select('finish_code, shopify_cdn_url, use_for_master')
     .eq('master_sku', master_sku)
     .eq('approval_status', 'approved')
+    .not('shopify_cdn_url', 'is', null)
 
   if (error) {
     console.error('Error fetching approved images:', error)
@@ -66,13 +70,13 @@ async function queryApprovedImages(
 
   for (const img of images) {
     // Extract master image (applies to all variants)
-    if (img.use_for_master && img.image_url) {
-      masterImageUrl = img.image_url
+    if (img.use_for_master && img.shopify_cdn_url) {
+      masterImageUrl = img.shopify_cdn_url
     }
 
     // Extract finish-specific images
-    if (img.finish_code && img.image_url && !img.use_for_master) {
-      finishImages.set(img.finish_code, img.image_url)
+    if (img.finish_code && img.shopify_cdn_url && !img.use_for_master) {
+      finishImages.set(img.finish_code, img.shopify_cdn_url)
     }
   }
 

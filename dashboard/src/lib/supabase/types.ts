@@ -176,6 +176,10 @@ export interface GeneratedImage {
   // GMC tracking
   gmc_pushed_at: string | null
   gmc_offer_id: string | null
+  // Shopify CDN tracking
+  shopify_media_id: string | null
+  shopify_cdn_url: string | null
+  migrated_to_shopify_at: string | null
   created_at: string
 }
 
