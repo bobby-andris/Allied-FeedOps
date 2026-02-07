@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { publishExpandedVariantsToGoogleSheets } from '@/lib/publishing/google-sheets'
 import { publishToShopify } from '@/lib/publishing/shopify'
 import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
+import { captureBaseline } from '@/lib/baseline-capture'
 import type {
   BatchPublishRequest,
   BatchPublishResult,
@@ -276,6 +277,15 @@ export async function POST(request: NextRequest) {
           })
         } else {
           try {
+            // Capture 30-day performance baseline BEFORE publishing (allows measuring lift)
+            try {
+              await captureBaseline(supabase, sku, 'google')
+              console.log(`Captured baseline for ${sku} before Google publish`)
+            } catch (baselineError) {
+              // Non-fatal: Log warning but continue with publish
+              console.warn(`Failed to capture baseline for ${sku}:`, baselineError)
+            }
+
             // Expand templates for each variant (replaces {FINISH_NAME} with actual finish)
             const expandedVariants = await expandVariantsForPublish({
               master_sku: sku,

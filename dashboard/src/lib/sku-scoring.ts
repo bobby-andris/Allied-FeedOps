@@ -20,6 +20,9 @@ export interface SkuMetrics {
   cost: number
   variant_count?: number
   already_optimized?: boolean
+  // Performance baseline fields (optional - for prioritization boosting)
+  baseline_ctr?: number
+  ctr_trend?: number  // Percentage change in CTR (e.g., -0.15 for 15% decline)
 }
 
 export interface ScoredSku extends SkuMetrics {
@@ -72,7 +75,11 @@ function getPercentile(value: number, sortedValues: number[]): number {
 function calculateOptimizationScore(
   impPct: number,
   cvrPct: number,
-  clicks: number
+  clicks: number,
+  impressions: number,
+  ctr: number,
+  baselineCtr?: number,
+  ctrTrend?: number
 ): number {
   // Penalize extremes, reward middle ground (more room to improve)
   const trafficScore = 100 - Math.abs(impPct - 50) * 2
@@ -84,9 +91,36 @@ function calculateOptimizationScore(
   // Slight bonus for higher impressions (more visible impact)
   const visibilityBonus = Math.min(impPct / 5, 10)
 
-  return Math.round(
+  let baseScore = Math.round(
     (trafficScore + conversionScore) / 2 + dataBonus + visibilityBonus
   )
+
+  // === PERFORMANCE-BASED PRIORITIZATION ===
+
+  // Boost priority for high-traffic, low-CTR products (need optimization most)
+  // Category average CTR for Shopping ads is typically 0.9-1.2%
+  const categoryAverageCtr = 1.0
+  if (impressions > 10000 && ctr < categoryAverageCtr * 0.8) {
+    // High traffic but CTR 20% below average = big opportunity
+    baseScore = Math.round(baseScore * 1.5)
+  }
+
+  // Boost for products with declining performance
+  if (ctrTrend !== undefined && ctrTrend < -0.1) {
+    // 10% or more decline in CTR = needs attention
+    baseScore = Math.round(baseScore * 1.3)
+  }
+
+  // Additional boost for products significantly below their own baseline
+  if (baselineCtr !== undefined && baselineCtr > 0) {
+    const ctrVsBaseline = (ctr - baselineCtr) / baselineCtr
+    if (ctrVsBaseline < -0.2) {
+      // CTR dropped 20% or more from baseline = urgent
+      baseScore = Math.round(baseScore * 1.4)
+    }
+  }
+
+  return Math.min(baseScore, 200) // Cap at 200 to prevent extreme scores
 }
 
 /**
@@ -152,7 +186,15 @@ export function scoreSkus(skus: SkuMetrics[]): ScoredSku[] {
     const impPct = getPercentile(sku.impressions, impressionPercentiles)
 
     const { tier, reason } = assignTier(cvrPct, impPct, revPct)
-    const score = calculateOptimizationScore(impPct, cvrPct, sku.clicks)
+    const score = calculateOptimizationScore(
+      impPct,
+      cvrPct,
+      sku.clicks,
+      sku.impressions,
+      sku.ctr,
+      sku.baseline_ctr,
+      sku.ctr_trend
+    )
 
     return {
       ...sku,
