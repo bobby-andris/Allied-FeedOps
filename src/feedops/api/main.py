@@ -10,6 +10,10 @@ Endpoints:
 - POST /regenerate - Content regeneration with feedback
 - POST /batch-optimize - Batch job creation
 - GET /batch-status/{job_id} - Batch job progress
+- POST /performance/capture-baseline - Capture performance baselines for SKUs
+- GET /performance/baseline/{master_sku} - Get baseline status for SKU
+- POST /search-insights/sync - Sync search terms from Google Ads
+- GET /search-insights/sync/{job_id} - Get search term sync status
 """
 
 from __future__ import annotations
@@ -55,6 +59,10 @@ app = FastAPI(
 # Include search insights router
 from feedops.api.search_insights import router as search_insights_router
 app.include_router(search_insights_router)
+
+# Include performance baseline router
+from feedops.api.performance_baseline import router as performance_baseline_router
+app.include_router(performance_baseline_router)
 
 
 # =============================================================================

@@ -284,6 +284,8 @@ GMC offer IDs:
 - `POST /regenerate` - Content regeneration with feedback
 - `POST /batch-optimize` - Batch job creation
 - `GET /batch-status/{job_id}` - Batch job progress
+- `POST /performance/capture-baseline` - Capture performance baselines for SKUs (used by automation helpers)
+- `GET /performance/baseline/{master_sku}` - Get baseline status for SKU
 - `POST /search-insights/sync` - Sync search terms from Google Ads (used by Search Insights page)
 - `GET /search-insights/sync/{job_id}` - Get sync job status
 - `POST /search-insights/enrich` - Enrich keywords with Keyword Planner data
