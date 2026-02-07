@@ -160,6 +160,69 @@ The Next.js dashboard generates content via `dashboard/src/app/api/regenerate/ro
 
 Variant content is composed at display-time by combining base content with finish-specific sentences. See `docs/prompts/21-unify-content-generation-methodology.md` for methodology comparison with Python.
 
+## 6-Agent Pipeline Content (Experimental)
+
+The 6-agent pipeline is an experimental content generation approach using persona-driven storytelling and adversarial review. It produces higher quality content than the default Cloud Run pipeline but takes 2x longer.
+
+### What Was Generated
+
+**Date:** 2026-02-07
+**SKUs:** 10 products (1016, 1024, 1024E, 102, 1020, 1026, MC-60, WP-1/16, 1020-3, 1025U)
+**Quality:** Average 87.2/100 (range: 82-98)
+**Gold Standard:** SKU 1020-3 scored 98/100
+
+### Pipeline Architecture
+
+**Stage 1: Storytelling Workshop** (3 agents, parallel)
+- Designer Persona - Engineering and material details
+- Contractor Persona - Installation volume and durability data
+- Homeowner Persona - Daily use patterns and emotional benefits
+
+**Stage 2: Content Court** (3 agents, sequential)
+- Synthesizer - Blends 3 perspectives into cohesive content
+- Prosecutor - Reviews for AI slop and generic phrases
+- Judge - Final quality scoring and approval
+
+### Backup & Restore
+
+The 6-agent pipeline content is backed up in git to prevent accidental loss during "Regenerate All" operations.
+
+**Backup Files:**
+- `6-agent-pipeline-content-backup.json` - Structured backup with all titles/descriptions
+- `restore-6-agent-content.sql` - One-click SQL restore script
+
+**How to Restore:**
+
+Via Supabase SQL Editor:
+```bash
+# 1. Open: https://supabase.com/dashboard/project/qezuszwufortkiutlhym/sql/new
+# 2. Copy contents of restore-6-agent-content.sql
+# 3. Execute
+# 4. Verify: All 10 SKUs will show purple "6-Agent Pipeline" badges
+```
+
+Or tell Claude: "restore the 6-agent content" to run via Supabase MCP.
+
+**Identifying Agent Content:**
+
+The review page (`/review/[sku]`) displays a badge next to the SKU name:
+- 🟣 **Purple "6-Agent Pipeline"** - High-quality agent-generated content
+- 🔵 **Blue "Cloud Run"** - Default pipeline content
+
+**Important:** Clicking "Regenerate" on agent-generated SKUs will overwrite with Cloud Run content. Restore from backup if needed.
+
+### When to Use 6-Agent Pipeline
+
+**Use for:**
+- High-value SKUs (top performers, new products)
+- Content requiring exceptional quality (gold standard examples)
+- Testing new content strategies
+
+**Use Cloud Run for:**
+- Bulk generation (50+ SKUs)
+- Lower-priority products
+- Speed over quality scenarios
+
 ## Docs
 
 - Brand identity context: `docs/allied_brass_complete_brand_identity_v2 (4).md`
