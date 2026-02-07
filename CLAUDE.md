@@ -38,6 +38,8 @@
 - **Supabase MCP** (`mcp__supabase__*`): Use for direct database queries, migrations, and schema inspection. Prefer `mcp__supabase__execute_sql` for quick queries instead of writing scripts. Available tools: `execute_sql`, `apply_migration`, `list_tables`, `get_project`, etc.
   - Use `execute_sql` with `information_schema.columns` to inspect table schemas before implementing features
   - Example: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'performance_baselines'`
+  - For quick data population, use `execute_sql` with INSERT statements directly (faster than writing migration scripts)
+  - Example: `INSERT INTO performance_baselines (...) VALUES (...) ON CONFLICT (master_sku, platform) DO UPDATE SET ...`
 - **Playwright MCP** (`mcp__plugin_playwright_playwright__*`): Use for visual verification, UI testing, and screenshots. Tools: `browser_navigate`, `browser_take_screenshot`, `browser_click`, `browser_snapshot`, etc.
 - **Apify MCP** (`mcp__Apify__*`): Use for web scraping, competitor analysis, and data extraction. Search actors first with `search-actors`.
 - **Google Ads MCP** (`mcp__google-ads-mcp__*`): Use for Ads data queries and Keyword Planner.
@@ -83,7 +85,7 @@
 - `variant_index` (maps `master_sku` ⇄ `gmc_offer_id`, finish info)
 - `publish_batches`, `batch_sku_assignments` (batch mgmt)
 - `publish_events` (audit log with content snapshots: `published_title`, `published_description`, `variant_count`, `content_version` for rollback)
-- `performance_baselines` (30-day pre-publish metrics: avg impressions/clicks/CTR/CVR/conversions/cost/ROAS per master_sku + platform)
+- `performance_baselines` (30-day pre-publish metrics: avg impressions/clicks/CTR/CVR/conversions/cost/ROAS per master_sku + platform; uses baseline_start_date/baseline_end_date, NOT period_days column)
 - `performance_snapshots` (post-publish metrics with days_since_publish tracking, linked to publish_event_id)
 - `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
 - `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
@@ -99,6 +101,12 @@
 - `search_queries_expanded` (view with LATERAL join expanding item_ids array to show all variant associations)
 - `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
 - `search_query_sync_jobs` (sync job tracking for Google Ads search term imports)
+
+**Image Storage:**
+
+- Supabase Storage bucket `lifestyle-images` for temporary hosting during review/approval workflow
+- Image lifecycle: Supabase Storage (review) → Shopify CDN (post-publish via productCreateMedia)
+- Helper functions in `dashboard/src/lib/storage/upload-lifestyle-image.ts` for upload and CDN migration
 
 **Column naming conventions (do not drift)**
 
@@ -151,6 +159,7 @@ GMC offer IDs:
 - SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection with performance boosting: 1.5x for high-traffic low-CTR, 1.3x for declining performance, 1.4x for below-baseline)
 - Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
 - Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
+- Image storage helpers: `dashboard/src/lib/storage/upload-lifestyle-image.ts` (uploadLifestyleImage, migrateToShopifyCdn, deleteFromStorage)
 - Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
 - Pattern extraction: `dashboard/src/lib/competitors/pattern-extraction.ts`
 - Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard, SearchInsightsSummary)
@@ -168,6 +177,12 @@ GMC offer IDs:
 - Search insights API: `dashboard/src/app/api/search-insights/*.ts` (sync triggers, job status)
 - Search insights components: `dashboard/src/components/search-insights/*.tsx` (QueryTable, FinishInsights, GapAnalysis)
 - Python search terms client: `src/feedops/integrations/google_ads_search_terms.py` (SearchTermsClient, KeywordPlannerClient)
+
+**Component patterns:**
+
+- Components that render Card internally (SearchInsightsCard, PerformanceCard, ContentQualityCard) should NOT be wrapped in Card - causes double borders and render issues
+- Use `grid-cols-1 lg:grid-cols-2` for 50/50 split at ≥1024px breakpoint (mobile stacks, desktop side-by-side)
+- Components self-render Cards - don't wrap in additional Card components
 
 ## Deployment & CI/CD (ALREADY FULLY CONFIGURED — DO NOT RE-CREATE)
 
