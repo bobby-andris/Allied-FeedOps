@@ -187,7 +187,21 @@ export async function getExistingIds(
 }
 
 /**
+ * Build GMC compound format for structured content fields.
+ * Format: trained_algorithmic_media:"content text"
+ *
+ * Properly escapes quotes in content text per GMC specification.
+ */
+function buildCompoundFormat(content: string): string {
+  // Escape any existing quotes in the content
+  const escapedContent = content.replace(/"/g, '\\"')
+  return `trained_algorithmic_media:"${escapedContent}"`
+}
+
+/**
  * Convert row data dict to an array of values in column order.
+ *
+ * For structured fields, builds compound format: trained_algorithmic_media:"content"
  */
 function rowDataToValues(
   rowData: GoogleSheetsRow,
