@@ -210,13 +210,21 @@ function rowDataToValues(
 ): (string | undefined)[] {
   const values: (string | undefined)[] = new Array(numColumns).fill(undefined)
 
+  // Build compound format for structured fields if present
+  const structuredTitle = rowData.structured_title
+    ? buildCompoundFormat(rowData.structured_title)
+    : undefined
+
+  const structuredDescription = rowData.structured_description
+    ? buildCompoundFormat(rowData.structured_description)
+    : undefined
+
   const entries: [keyof GoogleSheetsRow, string | undefined][] = [
     ['id', rowData.id],
     ['title', rowData.title],
     ['description', rowData.description],
-    ['structured_title', rowData.structured_title],
-    ['structured_description', rowData.structured_description],
-    ['digital_source_type', rowData.digital_source_type],
+    ['structured_title', structuredTitle],
+    ['structured_description', structuredDescription],
     ['short_title', rowData.short_title],
     ['lifestyle_image_link', rowData.lifestyle_image_link],
     ['custom_label_4', rowData.custom_label_4],
