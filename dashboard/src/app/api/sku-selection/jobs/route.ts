@@ -22,7 +22,7 @@ export async function GET() {
     // For each job, get the SKU list
     const jobIds = (jobs || []).map(j => j.id)
 
-    let skusByJob: Record<string, string[]> = {}
+    const skusByJob: Record<string, string[]> = {}
     if (jobIds.length > 0) {
       const { data: skuRecords } = await supabase
         .from('batch_generation_job_skus')

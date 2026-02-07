@@ -333,7 +333,7 @@ export function SkuReviewClient({
         />
 
         {/* Platform tabs */}
-        <Tabs value={selectedPlatform} onValueChange={(v) => setSelectedPlatform(v as any)} className="mt-6">
+        <Tabs value={selectedPlatform} onValueChange={(v) => setSelectedPlatform(v as 'google' | 'bing' | 'shopify')} className="mt-6">
           <TabsList>
             {hasGoogleContent && <TabsTrigger value="google"><PlatformBadge platform="google" /></TabsTrigger>}
             {hasBingContent && <TabsTrigger value="bing"><PlatformBadge platform="bing" /></TabsTrigger>}

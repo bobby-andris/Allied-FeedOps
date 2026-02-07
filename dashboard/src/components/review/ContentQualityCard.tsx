@@ -12,8 +12,8 @@
  * - Red (#ef4444): <70% "Major revision required"
  */
 
-import { useState, useEffect } from 'react'
-import { analyzeSixDimensions, type Platform, type SixDimensionScore } from '@/lib/quality-scoring'
+import { useState, useEffect, useMemo } from 'react'
+import { analyzeSixDimensions, type Platform } from '@/lib/quality-scoring'
 
 interface ContentQualityCardProps {
   title: string
@@ -28,20 +28,11 @@ export function ContentQualityCard({
   platform,
   masterSku,
 }: ContentQualityCardProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
-  const [analysis, setAnalysis] = useState<SixDimensionScore | null>(null)
-
-  // Load expanded state from localStorage
-  useEffect(() => {
+  const [isExpanded, setIsExpanded] = useState(() => {
     const key = `contentQualityCard:${masterSku}:expanded`
     const stored = localStorage.getItem(key)
-    if (stored !== null) {
-      setIsExpanded(stored === 'true')
-    } else {
-      // Default to expanded if no stored preference
-      setIsExpanded(true)
-    }
-  }, [masterSku])
+    return stored !== null ? stored === 'true' : true
+  })
 
   // Save expanded state to localStorage
   useEffect(() => {
@@ -49,12 +40,11 @@ export function ContentQualityCard({
     localStorage.setItem(key, String(isExpanded))
   }, [isExpanded, masterSku])
 
-  // Analyze content on mount or when props change
-  useEffect(() => {
+  const analysis = useMemo(() => {
     if (title && description) {
-      const result = analyzeSixDimensions(title, description, platform)
-      setAnalysis(result)
+      return analyzeSixDimensions(title, description, platform)
     }
+    return null
   }, [title, description, platform])
 
   if (!analysis) {

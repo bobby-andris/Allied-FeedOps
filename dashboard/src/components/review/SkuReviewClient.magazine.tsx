@@ -249,6 +249,7 @@ function ContentComparison({
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsVisible(true)
   }, [])
 
