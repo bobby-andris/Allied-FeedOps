@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ensureAllData } from '@/lib/data-collection/ensure-data'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
 
@@ -53,6 +55,20 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       )
     }
+
+    // Ensure data collection before batch generation (non-blocking, best-effort)
+    const adminClient = createAdminClient()
+    ensureAllData(skus, adminClient)
+      .then((result) => {
+        if (result.success) {
+          console.log(`Data collection triggered for ${skus.length} SKUs before batch generation`, result.details)
+        } else {
+          console.warn('Data collection failed (non-blocking):', result.error)
+        }
+      })
+      .catch((error) => {
+        console.warn('Data collection background task failed:', error)
+      })
 
     // Call Cloud Run's batch-optimize endpoint
     // Cloud Run creates job records and processes SKUs in the background

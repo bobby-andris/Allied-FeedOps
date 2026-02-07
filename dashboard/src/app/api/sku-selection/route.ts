@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { scoreSkus, selectSkus, type SkuMetrics } from '@/lib/sku-scoring'
 import { fetchShoppingPerformance, getDateRange, isGoogleAdsConfigured } from '@/lib/google-ads'
+import { ensureAllData } from '@/lib/data-collection/ensure-data'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(request: Request) {
   try {
@@ -109,6 +111,23 @@ export async function GET(request: Request) {
     // Score and select SKUs
     const scored = scoreSkus(skuMetrics)
     const selection = selectSkus(scored, count, excludeOptimized)
+
+    // Ensure data collection for selected SKUs (non-blocking, runs in background)
+    const selectedSkus = selection.recommended.map((s) => s.master_sku)
+    if (selectedSkus.length > 0) {
+      const adminClient = createAdminClient()
+      ensureAllData(selectedSkus, adminClient)
+        .then((result) => {
+          if (result.success) {
+            console.log(`Data collection triggered for ${selectedSkus.length} selected SKUs`, result.details)
+          } else {
+            console.warn('Data collection failed (non-blocking):', result.error)
+          }
+        })
+        .catch((error) => {
+          console.warn('Data collection background task failed:', error)
+        })
+    }
 
     return NextResponse.json({
       ...selection,

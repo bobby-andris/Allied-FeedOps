@@ -21,6 +21,7 @@ import {
   validateGeneratedContent,
 } from '@/lib/regeneration/prompts'
 import crypto from 'node:crypto'
+import { ensureSkuData } from '@/lib/data-collection/ensure-data'
 
 // Lazy-initialize OpenAI client (avoid build-time instantiation)
 let _openai: OpenAI | null = null
@@ -363,6 +364,17 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient()
+
+    // Ensure data collection before regeneration (non-blocking, best-effort)
+    ensureSkuData(master_sku, supabase)
+      .then((result) => {
+        if (result.success && result.details) {
+          console.log(`Data collection for ${master_sku}:`, result.details)
+        }
+      })
+      .catch((error) => {
+        console.warn('Background data collection failed:', error)
+      })
 
     // Quick schema sanity check (migration 004 must be applied)
     const schemaCheck = await supabase

@@ -1,0 +1,27 @@
+{
+  "name": "allied-feedops",
+  "version": "1.0.0",
+  "description": "Allied FeedOps is the internal tooling that generates, reviews, and publishes **platform-specific product title/description updates** for Allied Brass across: - Google Merchant Center / Performance Max - Microsoft (Bing) Merchant Center - Shopify (storefront product content)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobby-andris/Allied-FeedOps.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bobby-andris/Allied-FeedOps/issues"
+  },
+  "homepage": "https://github.com/bobby-andris/Allied-FeedOps#readme",
+  "dependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

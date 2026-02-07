@@ -6,15 +6,321 @@ This document contains feature ideas that are interesting but require additional
 
 ## Table of Contents
 
-1. [Vertex AI Search Integration](#1-vertex-ai-search-integration)
-2. [Image Variation A/B Testing](#2-image-variation-ab-testing)
-3. [Dynamic Pricing Insights](#3-dynamic-pricing-insights)
-4. [Auto-Sync to Shopify](#4-auto-sync-to-shopify)
-5. [Review/UGC Analysis](#5-reviewugc-analysis)
-6. [Google Ads Creative Suggestions](#6-google-ads-creative-suggestions)
-7. [Real-time Personalization](#7-real-time-personalization)
+1. [6-Agent Pipeline Dashboard Integration](#1-6-agent-pipeline-dashboard-integration)
+2. [6-Agent Pipeline: 4-Stage Expansion](#2-6-agent-pipeline-4-stage-expansion)
+3. [Variant-Level Persona Stories](#3-variant-level-persona-stories)
+4. [Agent Pipeline A/B Testing Infrastructure](#4-agent-pipeline-ab-testing-infrastructure)
+5. [Vertex AI Search Integration](#5-vertex-ai-search-integration)
+6. [Image Variation A/B Testing](#6-image-variation-ab-testing)
+7. [Dynamic Pricing Insights](#7-dynamic-pricing-insights)
+8. [Auto-Sync to Shopify](#8-auto-sync-to-shopify)
+9. [Review/UGC Analysis](#9-reviewugc-analysis)
+10. [Google Ads Creative Suggestions](#10-google-ads-creative-suggestions)
+11. [Real-time Personalization](#11-real-time-personalization)
 
 ---
+
+## 1. 6-Agent Pipeline Dashboard Integration
+
+### Overview
+Automate the 6-agent content pipeline so it can be triggered directly from the dashboard `/generate` page, rather than requiring manual Claude Code CLI team spawning.
+
+### Why Maybe
+- Complex agent orchestration requiring background job infrastructure
+- Needs careful error handling for agent failures
+- May require additional MCP servers or API endpoints
+- Dashboard integration adds UI/UX complexity
+
+### Current State
+**Implemented:** ✅ 6-agent pipeline (manual execution only)
+- Produces 87.2/100 avg quality (vs 75-80 for Cloud Run)
+- 100% first-pass approval rate
+- 0% AI slop in core content
+- Takes 2x longer than Cloud Run (~1 hour for 10 SKUs)
+
+See: `docs/prompts/24-six-agent-pipeline.md`
+
+### Prerequisites
+- Background job queue system (or leverage existing batch job infrastructure)
+- Agent team spawning API endpoint
+- Real-time progress updates for user
+- Proper error handling for agent failures
+
+### Potential Approach
+
+**Option 1: Job Queue Integration**
+```typescript
+// Add to /generate page
+<Button onClick={() => generateWithAgentPipeline(selectedSkus)}>
+  Generate with 6-Agent Pipeline (High Quality)
+</Button>
+
+// API endpoint: /api/agent-pipeline/generate
+POST /api/agent-pipeline/generate
+{
+  skus: ['1016', '1024', '1020'],
+  platform: 'google'
+}
+
+Response: { jobId: 'abc-123' }
+```
+
+**Option 2: Pipeline Selector in Regenerate UI**
+```typescript
+// Add dropdown to existing regenerate button
+<RegenerateButton
+  pipelineType="cloud-run" | "6-agent"
+  sku="1016"
+/>
+```
+
+### Technical Requirements
+- Spawn agent team via Task tool programmatically
+- Stream progress updates to dashboard
+- Store agent output in proper schema format (use helper function)
+- Set `generation_model = '6-agent-pipeline-gpt-4'` for tracking
+
+### UI Considerations
+- Show estimated time: "~6 minutes per SKU (high quality)"
+- Display progress: "Stage 1: Storytelling Workshop (2/3 agents complete)"
+- Compare estimated quality: "Expected quality: 85-95 (vs 75-80 for standard)"
+- Allow cancellation of long-running jobs
+
+### When to Consider
+- After proving ROI of agent pipeline (30-day CTR comparison)
+- When volume of high-quality content requests increases
+- If manual execution becomes a bottleneck
+
+### Effort Estimate
+**MEDIUM-HIGH** - 20-30 hours
+- Job queue infrastructure: 8-12 hours
+- Agent orchestration endpoint: 6-8 hours
+- UI integration: 4-6 hours
+- Testing and error handling: 4-6 hours
+
+---
+
+## 2. 6-Agent Pipeline: 4-Stage Expansion
+
+### Overview
+Expand the 6-agent pipeline from 2 stages to 4 stages by adding SEO Time Travel and Customer Reality Check agents.
+
+### Why Maybe
+- Adds complexity and execution time
+- Need to validate 2-stage pipeline ROI first
+- May hit diminishing returns on quality
+- Requires proving value of additional perspectives
+
+### Current State
+**Current Pipeline (2 Stages):**
+- Stage 1: Storytelling Workshop (Designer, Contractor, Homeowner)
+- Stage 2: Content Court (Synthesizer, Prosecutor, Judge)
+- Quality: 87.2/100 average
+
+**Proposed Pipeline (4 Stages):**
+- Stage 1: Storytelling Workshop (3 agents, parallel)
+- Stage 2: **SEO Time Travel** (1 agent, new)
+- Stage 3: **Customer Reality Check** (1 agent, new)
+- Stage 4: Content Court (3 agents, sequential)
+
+### New Agent: SEO Time Travel
+
+**Role:** Predict future algorithm changes and proactively optimize
+
+**Example Output:**
+> Based on Google's recent Core Updates emphasizing E-E-A-T and helpful content, I predict they'll devalue generic "premium quality" claims within 12 months. This content grounds claims in specific contractor install volumes (200+ units) and longevity data (7+ years, zero callbacks)—both strong E-E-A-T signals that should remain valuable as algorithms evolve.
+
+**Key Themes:**
+- Algorithm trend analysis
+- E-E-A-T signal strength
+- Future-proofing content
+- Search intent evolution
+
+### New Agent: Customer Reality Check
+
+**Role:** Test content against "angry customer" scenarios
+
+**Example Output:**
+> VULNERABILITY TEST - Bathroom renovation customer scenario:
+> "I just spent $15,000 renovating my bathroom and this $40 towel ring better not disappoint."
+>
+> PASS - Content directly addresses durability concerns with "7+ years, zero callbacks" and "commercial-grade engineering tested to 10 pounds." The solid brass vs. zinc comparison answers the quality question preemptively.
+
+**Key Themes:**
+- High-stakes purchase scenarios
+- Common objections
+- Quality skepticism
+- Competitor comparisons
+
+### Prerequisites
+- 2-stage pipeline ROI proven (>2x CTR improvement for 2x time)
+- Budget for longer execution (2-stage: 1 hour → 4-stage: 1.5-2 hours)
+- Ability to measure incremental quality improvements
+
+### Expected Benefits
+- Quality score increase: 87.2 → 90-95 average
+- Better long-term SEO resilience
+- Anticipate customer objections proactively
+- Stronger differentiation from competitors
+
+### When to Consider
+- After 30-day CTR data confirms 2-stage pipeline ROI
+- If top-performing SKUs need even higher quality
+- When creating gold standard examples for training
+
+### Effort Estimate
+**MEDIUM** - 12-16 hours
+- SEO Time Travel agent: 4-6 hours
+- Customer Reality Check agent: 4-6 hours
+- Integration and testing: 4-6 hours
+
+---
+
+## 3. Variant-Level Persona Stories
+
+### Overview
+Generate finish-specific persona stories to create better variant content, rather than just using finish sentences.
+
+### Why Maybe
+- 280 stories per 10 SKUs (10 SKUs × 28 finishes) = massive execution time
+- May not provide enough value over finish sentences
+- Finish differences are often cosmetic, not functional
+- Could confuse customers if finishes described too differently
+
+### Current State
+**Current Approach:**
+- Master SKU content with `{FINISH_NAME}` placeholder
+- 28 finish sentences stored in `variant_finish_sentences`
+- Variant content = base template + finish sentence at display time
+
+**Proposed Approach:**
+- Generate 28 full persona stories per finish
+- Synthesize finish-specific content for each variant
+- Store 280 content pieces (10 SKUs × 28 finishes)
+
+### Use Case Example
+
+**Current (Generic Finish Sentence):**
+> "Available in Polished Chrome for timeless elegance."
+
+**Variant Persona Story (Polished Chrome):**
+> The Polished Chrome finish shows fingerprints easily—I always warn customers about this upfront. It's gorgeous in powder rooms with low traffic, but for family bathrooms where kids touch everything, I recommend Oil Rubbed Bronze instead. The chrome plating is durable (ASTM B456 certified), but you'll be wiping it down daily if you have teenagers.
+
+### When It Matters
+**Finishes with functional differences:**
+- Oil Rubbed Bronze - Shows wear differently, patina over time
+- Matte Black - Hides fingerprints better than chrome
+- Unlacquered Brass - Develops natural patina, requires care
+
+**Finishes that are just cosmetic:**
+- Polished Chrome vs Polished Nickel - Functionally identical
+- Satin Chrome vs Satin Nickel - Just color preference
+
+### Potential Approach
+**Hybrid Model:**
+- Generate variant stories only for functionally different finishes (8-10 finishes)
+- Use generic finish sentences for cosmetic-only finishes (18-20 finishes)
+- Reduces execution time while adding value where it matters
+
+### Prerequisites
+- Finish characteristic database (fingerprint visibility, patina behavior, care requirements)
+- Execution time budget (280 stories = 4-6 hours with current pipeline)
+- Storage for 280+ content pieces per platform
+
+### When to Consider
+- After proving finish-specific content improves conversions
+- If customers frequently ask about finish differences
+- When building comprehensive finish comparison tools
+
+### Effort Estimate
+**HIGH** - 30-40 hours
+- Finish characteristic database: 8-12 hours
+- Agent prompt modifications: 6-8 hours
+- Storage schema changes: 4-6 hours
+- Execution time for all SKUs: 12-16 hours
+
+---
+
+## 4. Agent Pipeline A/B Testing Infrastructure
+
+### Overview
+Build infrastructure to properly measure ROI of 6-agent pipeline vs Cloud Run pipeline through controlled A/B testing.
+
+### Why Maybe
+- Requires attribution system (baseline capture already exists)
+- Need statistical significance calculator
+- Test duration must be long enough (30+ days)
+- Sample size limitations with low-traffic SKUs
+
+### Current State
+**Performance Tracking Exists:**
+- `performance_baselines` table (pre-publish metrics)
+- `performance_snapshots` table (post-publish tracking)
+- `publish_events` table (content version tracking)
+
+**Missing:**
+- Cohort assignment system
+- Statistical significance testing
+- ROI calculator
+- Automated test analysis
+
+### Potential Approach
+
+**Test Design:**
+```
+Cohort A: 10 SKUs with 6-agent content (already generated)
+Cohort B: 10 SKUs with Cloud Run content (regenerate all)
+Metric: CTR improvement (30-day comparison)
+Hypothesis: 6-agent content yields >2x CTR for 2x time investment
+```
+
+**Technical Requirements:**
+```typescript
+// Cohort tracking
+interface ABTest {
+  test_id: string
+  cohort_a_skus: string[]  // Agent pipeline
+  cohort_b_skus: string[]  // Cloud Run
+  start_date: string
+  end_date: string
+  hypothesis: string
+}
+
+// Analysis function
+function analyzeTest(testId: string) {
+  // Compare performance_snapshots for both cohorts
+  // Calculate statistical significance (t-test)
+  // Compute ROI: (CTR_improvement / time_investment)
+}
+```
+
+### Metrics to Track
+- **CTR improvement** (primary metric)
+- **Conversion rate** (secondary)
+- **Cost per conversion** (secondary)
+- **Quality score correlation** (does higher quality → higher CTR?)
+
+### Statistical Considerations
+- Minimum test duration: 30 days
+- Minimum sample size: 20 SKUs per cohort
+- Significance level: p < 0.05
+- Account for seasonality (compare same time periods)
+
+### When to Consider
+- After generating enough agent content for test cohort (20+ SKUs)
+- When baseline performance tracking is stable
+- Before investing in dashboard automation
+
+### Effort Estimate
+**MEDIUM** - 16-20 hours
+- Cohort assignment system: 4-6 hours
+- Statistical analysis tools: 6-8 hours
+- ROI calculator: 4-6 hours
+- Dashboard visualization: 4-6 hours
+
+---
+
+## 5. Vertex AI Search Integration
 
 ## 1. Vertex AI Search Integration
 

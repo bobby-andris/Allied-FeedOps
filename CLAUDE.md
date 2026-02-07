@@ -66,7 +66,7 @@
 
 ## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`, `22`, `23`
+- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`, `22`, `23`, `24`
   - 01-06: performance, batches, publishing, variant review, settings health, regeneration
   - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
   - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
@@ -77,6 +77,48 @@
   - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
   - 22: Performance data lifecycle (baseline capture before publish, snapshot API for post-publish tracking, performance-based SKU prioritization)
   - 23: Publishing enhancements (structured title/description columns in Google Sheets, Shopify CDN image lifecycle, image migration script)
+  - 24: Post-publish monitoring (`/monitoring` page, performance delta tracking, search query change detection, automated snapshot capture)
+
+
+## Content Generation Pipelines
+
+### Default: Cloud Run Pipeline
+- **Location:** `src/feedops/api/main.py` (FastAPI), Cloud Run service
+- **Quality:** ~75-80/100 average  
+- **Speed:** ~3 minutes per SKU
+- **Use for:** Bulk generation (50+ SKUs), speed over quality, default regenerate button
+
+### Experimental: 6-Agent Pipeline (Manual Execution)
+- **Status:** ✅ Implemented (manual spawning via Claude Code only, not in dashboard UI)
+- **Quality:** 87.2/100 average (range: 82-98), gold standard: 98/100
+- **Speed:** ~6 minutes per SKU (2x slower)
+- **Approval Rate:** 100% first-pass (0 revisions needed)
+- **AI Slop:** 0% in core content
+- **Use for:** High-value SKUs, gold standard examples, testing content strategies
+
+**Architecture:** 2-stage pipeline
+- **Stage 1:** Storytelling Workshop (Designer, Contractor, Homeowner personas - parallel)
+- **Stage 2:** Content Court (Synthesizer, Prosecutor, Judge - sequential)
+
+**Documentation:** See `docs/6-agent-pipeline.md` for full architecture and results
+
+**Backup & Restore:**
+- `6-agent-pipeline-content-backup.json` - Structured backup of 10 SKUs
+- `restore-6-agent-content.sql` - One-click SQL restore script
+- Helper: `dashboard/src/lib/agent-pipeline/insert-content.ts` (prevents format issues)
+
+**Pipeline Tracking:**
+- 🟣 Purple badge "6-Agent Pipeline" on `/review/[sku]` for agent content (`generation_model` contains "6-agent-pipeline")
+- 🔵 Blue badge "Cloud Run" for default pipeline content
+- Badge component: `dashboard/src/components/review/SkuReviewClient.tsx`
+
+**⚠️ Important:** Clicking "Regenerate" on review page uses Cloud Run pipeline and overwrites agent content. Restore from backup if needed: `restore-6-agent-content.sql` or tell Claude "restore the 6-agent content".
+
+**Future Enhancements:** See `docs/prompts/FUTURE-IDEAS.md`
+1. Dashboard integration (#1) - Add to /generate page UI
+2. 4-stage expansion (#2) - Add SEO Time Travel + Customer Reality Check agents
+3. Variant-level persona stories (#3) - Finish-specific content
+4. A/B testing infrastructure (#4) - Measure ROI vs Cloud Run
 
 ## Supabase schema (tables we rely on)
 
@@ -101,6 +143,7 @@
 - `search_queries_expanded` (view with LATERAL join expanding item_ids array to show all variant associations)
 - `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
 - `search_query_sync_jobs` (sync job tracking for Google Ads search term imports)
+- `search_query_snapshots` (historical snapshots of search query performance for post-publish monitoring and trend analysis)
 
 **Foreign key constraints (delete order matters)**
 - `regeneration_history.generated_content_id` → `generated_content.id` (delete from regeneration_history first)
@@ -156,6 +199,7 @@ GMC offer IDs:
 - Regeneration core: `dashboard/src/lib/regeneration/core.ts` (shared generation logic for batch + single-SKU)
 - Evidence table builder: `dashboard/src/lib/evidence/*` (builds rich product context for LLM prompts, includes search query insights)
 - Search query evidence: `src/feedops/integrations/search_query_insights.py` (Python) and `dashboard/src/lib/evidence/search-queries.ts` (TypeScript)
+- Data collection automation: `dashboard/src/lib/data-collection/ensure-data.ts` (automatic baseline and search query data collection before SKU operations)
 - SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection algorithm)
 - SKU selection API: `dashboard/src/app/api/sku-selection/route.ts` (scored recommendations)
 - SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection with performance boosting: 1.5x for high-traffic low-CTR, 1.3x for declining performance, 1.4x for below-baseline)
@@ -182,6 +226,8 @@ GMC offer IDs:
 - Search insights API: `dashboard/src/app/api/search-insights/*.ts` (sync triggers, job status)
 - Search insights components: `dashboard/src/components/search-insights/*.tsx` (QueryTable, FinishInsights, GapAnalysis)
 - Python search terms client: `src/feedops/integrations/google_ads_search_terms.py` (SearchTermsClient, KeywordPlannerClient)
+- Monitoring page: `dashboard/src/app/(dashboard)/monitoring/page.tsx` (post-publish performance and search query tracking)
+- Monitoring API: `dashboard/src/app/api/monitoring/*.ts` (performance-delta, search-delta, snapshot-capture)
 
 **Component patterns:**
 
@@ -333,6 +379,44 @@ cd dashboard && npm run build && npm run lint
 ```bash
 git checkout archive/full-snapshot-2026-02-03 -- dashboard_data/batch-40sku-20260130-144146/
 ```
+
+## Automated Data Collection
+
+**Overview**: SKU selection, regeneration, and batch generation APIs automatically trigger data collection to ensure rich evidence is available for content generation.
+
+**What's collected automatically:**
+
+1. **Performance Baselines** (pre-optimization):
+   - 30-day avg metrics (impressions, clicks, CTR, CVR, conversions, cost, ROAS)
+   - Captured via `ensureBaselineData()` if not already present (within last 60 days)
+   - Non-blocking: operations continue even if capture fails
+
+2. **Search Query Data** (customer search terms):
+   - Google Ads search terms (actual queries triggering Shopping ads)
+   - Keyword Planner enrichment (search volume, competition, CPC)
+   - Captured via `ensureSearchQueryData()` if stale (>7 days)
+   - Automatically included in evidence table for content generation
+
+**When data collection runs:**
+
+- **SKU Selection API** (`/api/sku-selection`): Triggers data collection for selected SKUs in background
+- **Regeneration API** (`/api/regenerate`): Ensures data exists before generating content
+- **Batch Generation API** (`/api/sku-selection/generate`): Collects data for all SKUs in batch
+
+**Key functions** (in `dashboard/src/lib/data-collection/ensure-data.ts`):
+
+- `ensureSkuData(masterSku)` - Ensure baseline + search data for single SKU
+- `ensureAllData(masterSkus)` - Ensure data for multiple SKUs (batch)
+- `ensureBaselineData(masterSku)` - Ensure performance baseline exists
+- `ensureSearchQueryData(masterSkus)` - Ensure search query data is recent
+- `capturePostPublishSnapshot(masterSku, publishEventId)` - Capture post-publish performance
+
+**Design philosophy:**
+
+- Non-blocking: Never fail operations due to data collection errors
+- Best-effort: Log failures but continue with available data
+- Fresh data: Only re-collect if stale (baselines >60 days, search queries >7 days)
+- Evidence-driven: Automatically feeds into evidence table for LLM prompts
 
 ## Git Conventions
 
