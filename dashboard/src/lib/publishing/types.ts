@@ -65,7 +65,7 @@ export interface BatchPublishResult {
  *
  * GMC Policy for AI-Generated Content:
  * - If content is AI-generated, use structured_title/structured_description
- *   with digital_source_type=trained_algorithmic_media
+ *   with compound format: trained_algorithmic_media:"content text"
  * - If both structured and standard fields are present, GMC ignores structured
  * - Set FEEDOPS_GMC_STRUCTURED_ONLY=1 to omit title/description and use only structured fields
  */
@@ -73,9 +73,9 @@ export interface GoogleSheetsRow {
   id: string // offer_id (GMC ID)
   title?: string // Standard title (omit if structured-only mode)
   description?: string // Standard description (omit if structured-only mode)
-  structured_title?: string // For AI-generated content
-  structured_description?: string // For AI-generated content
-  digital_source_type?: string // 'trained_algorithmic_media' for AI content
+  structured_title?: string // For AI-generated content (compound format: trained_algorithmic_media:"content")
+  structured_description?: string // For AI-generated content (compound format: trained_algorithmic_media:"content")
+  digital_source_type?: string // Internal field for building compound format (not a separate column)
   short_title?: string
   lifestyle_image_link?: string
   custom_label_4: string // tracking label: feedops-staging or feedops-production
@@ -90,7 +90,6 @@ export interface SheetColumnMap {
   description?: number
   structured_title?: number
   structured_description?: number
-  digital_source_type?: number
   short_title?: number
   lifestyle_image_link?: number
   custom_label_4?: number
