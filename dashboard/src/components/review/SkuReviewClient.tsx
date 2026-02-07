@@ -292,7 +292,7 @@ function ContentComparison({
                 </div>
               )}
             </div>
-            <div className="p-5 rounded-xl bg-zinc-100/60 border border-zinc-200/60 dark:bg-zinc-800/60 dark:border-zinc-700/60 whitespace-pre-wrap min-h-[120px] leading-relaxed shadow-sm">
+            <div className="p-5 rounded-xl bg-zinc-100/60 border border-zinc-200/60 dark:bg-zinc-800/60 dark:border-zinc-700/60 whitespace-pre-wrap break-words leading-relaxed shadow-sm overflow-auto">
               {currentLive || <span className="text-zinc-400 dark:text-zinc-500 italic">No current content found</span>}
             </div>
           </div>
@@ -307,7 +307,7 @@ function ContentComparison({
                 </div>
               )}
             </div>
-            <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-200/60 dark:from-emerald-900/20 dark:to-teal-900/20 dark:border-emerald-700/60 whitespace-pre-wrap min-h-[120px] leading-relaxed shadow-sm">
+            <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-200/60 dark:from-emerald-900/20 dark:to-teal-900/20 dark:border-emerald-700/60 whitespace-pre-wrap break-words leading-relaxed shadow-sm overflow-auto">
               {candidatePreview || <span className="text-zinc-400 dark:text-zinc-500 italic">No candidate content</span>}
             </div>
           </div>
@@ -362,7 +362,7 @@ function PlatformContent({
   }
 
   return (
-    <div className="grid grid-cols-[1fr_340px] gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
       <div className="space-y-8">
         {title && (
           <ContentComparison
@@ -394,15 +394,15 @@ function PlatformContent({
 
       {/* Insights sidebar */}
       <aside className="space-y-6">
-        <div className="sticky top-6 space-y-6">
-          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-blue-50/40 via-indigo-50/30 to-violet-50/40 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-violet-950/20">
+        <div className="lg:sticky lg:top-6 space-y-6">
+          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-blue-50/40 via-indigo-50/30 to-violet-50/40 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-violet-950/20 overflow-hidden">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 Search Insights
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-auto max-h-[600px]">
               <SearchInsightsCard
                 masterSku={sku}
                 currentTitle={title?.candidate_content ?? undefined}
@@ -411,26 +411,26 @@ function PlatformContent({
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-emerald-50/40 via-teal-50/30 to-cyan-50/40 dark:from-emerald-950/20 dark:via-teal-950/20 dark:to-cyan-950/20">
+          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-emerald-50/40 via-teal-50/30 to-cyan-50/40 dark:from-emerald-950/20 dark:via-teal-950/20 dark:to-cyan-950/20 overflow-hidden">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 Performance
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-auto max-h-[600px]">
               <PerformanceCard sku={sku} platform={platform as 'google' | 'bing' | 'shopify'} />
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-amber-50/40 via-orange-50/30 to-rose-50/40 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-rose-950/20">
+          <Card className="border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-br from-amber-50/40 via-orange-50/30 to-rose-50/40 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-rose-950/20 overflow-hidden">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <Activity className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 Content Quality
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-auto max-h-[600px]">
               <ContentQualityCard
                 title={title?.candidate_content || ''}
                 description={description?.candidate_content || ''}
