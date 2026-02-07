@@ -313,7 +313,7 @@ export function SkuReviewClient({
                 <div className="flex items-center gap-3">
                   <h1 className="text-2xl font-bold">{masterSku}</h1>
                   <GenerationSourceBadge generationModel={
-                    content.find(c => c.content_type === 'title')?.generation_model
+                    content.find(c => c.content_type === 'title')?.generation_model ?? null
                   } />
                 </div>
                 <p className="text-sm text-muted-foreground">Content Review</p>
