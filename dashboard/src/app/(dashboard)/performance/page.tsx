@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { TrendingUp, TrendingDown, RefreshCw, Download, AlertCircle, Loader2 } from "lucide-react"
+import { TrendingUp, TrendingDown, RefreshCw, Download, AlertCircle, Loader2, Info } from "lucide-react"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 
 // Types matching the API response
@@ -252,7 +252,7 @@ export default function PerformancePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Performance</h1>
           <p className="text-muted-foreground">
-            Track performance metrics for published SKUs
+            Track performance metrics for published master SKUs (aggregated across all variants/finishes)
           </p>
         </div>
         <div className="flex gap-2">
@@ -280,6 +280,17 @@ export default function PerformancePage() {
           </Button>
         </div>
       </div>
+
+      {/* Info Callout */}
+      <Alert className="mb-4">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Master SKU Aggregated Performance</AlertTitle>
+        <AlertDescription>
+          Performance metrics are shown per master SKU and platform, aggregated across all finish variants.
+          Each master SKU typically has 28 variant finishes (e.g., Polished Brass, Satin Nickel, etc.).
+          For variant-level insights, see the <a href="/search-insights" className="underline font-medium">Search Insights</a> tab.
+        </AlertDescription>
+      </Alert>
 
       {/* Warnings */}
       {performanceData.warnings.length > 0 && (
@@ -383,7 +394,7 @@ function PerformanceTable({ skus, platform }: { skus: SkuPerformance[]; platform
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>SKU</TableHead>
+                <TableHead>Master SKU</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead>Platform</TableHead>
                 <TableHead>Published</TableHead>
