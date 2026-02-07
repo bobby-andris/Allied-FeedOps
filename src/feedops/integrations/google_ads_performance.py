@@ -38,14 +38,40 @@ def _load_client():
     """Load Google Ads API client (google-ads library).
 
     Config resolution order:
-    - GOOGLE_ADS_CONFIG_PATH (explicit)
-    - default google-ads.yaml resolution (library default)
+    1. Environment variables (GOOGLE_ADS_* vars) - best for Cloud Run with Secrets
+    2. GOOGLE_ADS_CONFIG_PATH (explicit file path)
+    3. Default google-ads.yaml resolution (library default)
     """
     from google.ads.googleads.client import GoogleAdsClient  # type: ignore[import-not-found]
 
+    # Try environment variables first (best for Cloud Run / serverless)
+    developer_token = _truthy_env("GOOGLE_ADS_DEVELOPER_TOKEN")
+    client_id = _truthy_env("GOOGLE_ADS_CLIENT_ID")
+    client_secret = _truthy_env("GOOGLE_ADS_CLIENT_SECRET")
+    refresh_token = _truthy_env("GOOGLE_ADS_REFRESH_TOKEN")
+    login_customer_id = _truthy_env("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
+
+    if all([developer_token, client_id, client_secret, refresh_token]):
+        logger.info("Loading Google Ads client from environment variables")
+        config = {
+            "developer_token": developer_token,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "refresh_token": refresh_token,
+            "use_proto_plus": True,
+        }
+        if login_customer_id:
+            config["login_customer_id"] = login_customer_id
+        return GoogleAdsClient.load_from_dict(config)
+
+    # Fall back to config file
     config_path = _truthy_env("GOOGLE_ADS_CONFIG_PATH")
     if config_path:
+        logger.info(f"Loading Google Ads client from config file: {config_path}")
         return GoogleAdsClient.load_from_storage(path=config_path)
+
+    # Default location
+    logger.info("Loading Google Ads client from default location")
     return GoogleAdsClient.load_from_storage()
 
 
