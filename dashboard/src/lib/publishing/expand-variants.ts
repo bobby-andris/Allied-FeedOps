@@ -19,6 +19,7 @@ export interface ExpandedVariant {
   finish_code: string | null
   title: string
   description: string
+  image_url?: string
 }
 
 export interface ExpandVariantsOptions {
