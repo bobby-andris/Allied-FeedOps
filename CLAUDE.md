@@ -23,6 +23,14 @@
   - `GenerateKeywordIdeas` - discover related keywords from seeds (keywords, URLs, sites)
   - Rate limited - cache results (metrics update monthly)
 
+### Google Ads API Constraints (search queries)
+
+**Critical limitation**: `search_term_view` cannot be joined with `product_item_id` in same query - Google Ads API restriction
+- Workaround: Fetch products by campaign from `shopping_performance_view`, fetch search terms by campaign, join via `campaign_id`
+- Result: `item_ids` array contains all variants active in campaign, not necessarily triggered by each specific query
+- Metrics are campaign-level totals (shared across all products), not per-variant breakdowns
+- UI must clarify this limitation to avoid misleading users about per-variant performance
+
 ## Available MCP Servers & Skills (use these!)
 
 **MCP Servers** - Use these for database operations, external APIs, and browser automation:
@@ -88,6 +96,7 @@
 - `prompt_templates` (gold standard examples + category guidance; system prompt lives in code, DB `system_prompt` column is ignored)
 - `search_queries` (variant-level search terms with GMC offer ID mapping, Keyword Planner metrics)
 - `search_queries_by_master_sku` (aggregated search data by master SKU)
+- `search_queries_expanded` (view with LATERAL join expanding item_ids array to show all variant associations)
 - `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
 - `search_query_sync_jobs` (sync job tracking for Google Ads search term imports)
 
@@ -97,6 +106,12 @@
 - Use `notes` (not `revision_notes`)
 - Use `approved_by` / `approved_at` (not `reviewed_by` / `reviewed_at`)
 - Batches use `name` / `notes` / `executed_at`
+
+**PostgreSQL JSONB patterns**
+
+- JSONB columns store JSON as text strings - use `(column#>>'{}')::jsonb` to parse before array operations
+- LATERAL joins: `CROSS JOIN LATERAL jsonb_array_elements_text((item_ids#>>'{}')::jsonb)` to expand arrays
+- Case-sensitive joins: normalize with `regexp_replace()` or use `LOWER()` for both sides to prevent silent failures
 
 ## GMC / Google policy guardrails (critical)
 
@@ -114,6 +129,9 @@
 
 GMC offer IDs:
 `shopify_US_{shopify_product_id}_{shopify_variant_id}` (note uppercase `US`)
+
+**Case normalization**: Python sync code must normalize `shopify_us_` → `shopify_US_` to match `variant_index.gmc_offer_id`
+**JSONB storage**: Supabase JSONB columns expect JSON strings - use `json.dumps()` in Python before inserting
 
 ## Key dashboard locations
 
