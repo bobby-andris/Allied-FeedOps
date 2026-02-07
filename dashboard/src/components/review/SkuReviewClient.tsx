@@ -14,10 +14,11 @@ import { VariantSelector } from "@/components/review/VariantSelector"
 import { VariantApprovalGrid } from "@/components/review/VariantApprovalGrid"
 import { RegenerateButton } from "@/components/review/RegenerateButton"
 import { RegenerationHistory } from "@/components/review/RegenerationHistory"
-import { QualityAnalyzer } from "@/components/review/QualityAnalyzer"
 import { ProductHeroImage } from "@/components/review/ProductHeroImage"
 import { LifestyleImageReview } from "@/components/review/LifestyleImageReview"
-import { SearchInsightsSummary } from "@/components/review/SearchInsightsSummary"
+import { SearchInsightsCard } from "@/components/review/SearchInsightsCard"
+import { PerformanceCard } from "@/components/review/PerformanceCard"
+import { ContentQualityCard } from "@/components/review/ContentQualityCard"
 import { VariantContentGrid } from "@/components/review/VariantContentGrid"
 import { PublishButton } from "@/components/review/PublishButton"
 import { Button } from "@/components/ui/button"
@@ -402,12 +403,22 @@ function PlatformContent({
         )}
       </div>
 
-      {/* Right: Quality Analyzer sidebar */}
-      <div className="sticky top-4 self-start">
-        <QualityAnalyzer
+      {/* Right: Insight Cards sidebar */}
+      <div className="sticky top-4 self-start space-y-4">
+        <SearchInsightsCard
+          masterSku={sku}
+          currentTitle={title?.candidate_content ?? undefined}
+          currentDescription={description?.candidate_content ?? undefined}
+        />
+        <PerformanceCard
+          sku={sku}
+          platform={platform as 'google' | 'bing' | 'shopify'}
+        />
+        <ContentQualityCard
           title={title?.candidate_content || ''}
           description={description?.candidate_content || ''}
           platform={platform as 'google' | 'bing' | 'shopify'}
+          masterSku={sku}
         />
       </div>
     </div>
@@ -629,14 +640,6 @@ export function SkuReviewClient({
           .map(v => ({ finish: v.finish!, finish_code: v.finish_code! }))}
         selectedFinish={selectedFinish}
         onRefresh={() => router.refresh()}
-      />
-
-      {/* Search Insights */}
-      <Separator className="my-8" />
-      <SearchInsightsSummary
-        sku={sku}
-        currentTitle={getContentByPlatform(content, 'google').title?.candidate_content ?? undefined}
-        selectedFinish={selectedFinish}
       />
 
       {/* Approval Status */}

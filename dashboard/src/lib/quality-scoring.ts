@@ -743,3 +743,144 @@ export function analyzeContent(
     trustSignals: detectTrustSignals(description),
   }
 }
+
+// ============================================================================
+// 6-Dimension Analysis (for ContentQualityCard)
+// ============================================================================
+
+export interface SixDimensionScore {
+  specificity: number          // 0-10: Concrete claims
+  benefitCoverage: number      // 0-10: Benefits in hook
+  keywordInclusion: number     // 0-10: Search term coverage
+  formatAdherence: number      // 0-10: Within limits
+  brandVoice: number           // 0-10: Premium tone
+  factualAccuracy: number      // 0-10: All claims verified
+  overallScore: number         // 0-100: Average of 6 dimensions
+  status: 'ready' | 'minor' | 'major'  // ≥80% ready, 70-79% minor, <70% major
+  lowestDimension: {
+    name: string
+    score: number
+    label: string
+  }
+}
+
+/**
+ * Maps existing quality scores to 6 AGENTS.md dimensions for ContentQualityCard
+ *
+ * Mapping strategy:
+ * 1. Specificity ← (cvrProxy × 0.6) + (brandVoice × 0.4)
+ * 2. Benefit Coverage ← cvrProxy × 1.0
+ * 3. Keyword Inclusion ← ctrProxy × 1.0
+ * 4. Format Adherence ← length compliance checks
+ * 5. Brand Voice ← brandVoice (direct)
+ * 6. Factual Accuracy ← 10 - (issues.length × 2)
+ */
+export function analyzeSixDimensions(
+  title: string,
+  description: string,
+  platform: Platform
+): SixDimensionScore {
+  const analysis = analyzeContent(title, description, platform)
+
+  // 1. Specificity: Concrete claims (favor description quality + brand voice)
+  const specificity = clamp0to10(
+    (analysis.cvrProxy * 0.6) + (analysis.brandVoice * 0.4)
+  )
+
+  // 2. Benefit Coverage: Benefits in hook (use description score as proxy)
+  const benefitCoverage = analysis.cvrProxy
+
+  // 3. Keyword Inclusion: Search term coverage (use title score as proxy)
+  const keywordInclusion = analysis.ctrProxy
+
+  // 4. Format Adherence: Within limits (check length compliance)
+  let formatAdherence = 10
+
+  // Title length check
+  if (title.length > MAX_TITLE_LENGTH) {
+    formatAdherence -= 3
+  } else if (title.length < 50) {
+    formatAdherence -= 2
+  }
+
+  // Description length check (platform-specific)
+  if (platform === 'google') {
+    if (description.length < 500 || description.length > 900) {
+      formatAdherence -= 2
+    }
+  } else if (platform === 'bing') {
+    if (description.length < 600 || description.length > 1100) {
+      formatAdherence -= 2
+    }
+  } else {
+    // Shopify
+    if (description.length < 500 || description.length > 1000) {
+      formatAdherence -= 2
+    }
+  }
+
+  formatAdherence = clamp0to10(formatAdherence)
+
+  // 5. Brand Voice: Premium tone (direct from existing score)
+  const brandVoice = analysis.brandVoice
+
+  // 6. Factual Accuracy: All claims verified (penalize based on issues)
+  const factualIssues = analysis.issues.filter(issue =>
+    issue.includes('detected') ||
+    issue.includes('leakage') ||
+    issue.includes('exceeds') ||
+    issue.includes('ALL CAPS') ||
+    issue.includes('Promotional') ||
+    issue.includes('URL')
+  ).length
+
+  const factualAccuracy = clamp0to10(10 - (factualIssues * 2))
+
+  // Calculate overall score (average of 6 dimensions, scaled to 0-100)
+  const dimensionAvg = (
+    specificity +
+    benefitCoverage +
+    keywordInclusion +
+    formatAdherence +
+    brandVoice +
+    factualAccuracy
+  ) / 6
+
+  const overallScore = Math.round(dimensionAvg * 10)
+
+  // Determine status
+  let status: 'ready' | 'minor' | 'major'
+  if (overallScore >= 80) {
+    status = 'ready'
+  } else if (overallScore >= 70) {
+    status = 'minor'
+  } else {
+    status = 'major'
+  }
+
+  // Find lowest dimension for collapsed state
+  const dimensions = [
+    { name: 'specificity', score: specificity, label: 'Specificity' },
+    { name: 'benefitCoverage', score: benefitCoverage, label: 'Benefit Coverage' },
+    { name: 'keywordInclusion', score: keywordInclusion, label: 'Keyword Inclusion' },
+    { name: 'formatAdherence', score: formatAdherence, label: 'Format Adherence' },
+    { name: 'brandVoice', score: brandVoice, label: 'Brand Voice' },
+    { name: 'factualAccuracy', score: factualAccuracy, label: 'Factual Accuracy' },
+  ]
+
+  const lowestDimension = dimensions.reduce((min, dim) =>
+    dim.score < min.score ? dim : min
+  )
+
+  return {
+    specificity,
+    benefitCoverage,
+    keywordInclusion,
+    formatAdherence,
+    brandVoice,
+    factualAccuracy,
+    overallScore,
+    status,
+    lowestDimension,
+  }
+}

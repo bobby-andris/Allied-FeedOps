@@ -90,6 +90,45 @@ export type FeedbackPreset =
   | 'less_promotional' 
   | 'better_hook'
 
+export interface PerformanceBaseline {
+  master_sku: string
+  platform: 'google' | 'bing' | 'shopify'
+  baseline_start_date: string
+  baseline_end_date: string
+  avg_impressions: number
+  avg_clicks: number
+  avg_ctr: number
+  avg_conversions: number
+  avg_conversion_value: number
+  avg_cvr: number
+  avg_cost: number
+  avg_roas: number
+  created_at: string
+}
+
+export interface PerformanceSnapshot {
+  id: number
+  master_sku: string
+  platform: 'google' | 'bing' | 'shopify'
+  environment: 'staging' | 'production'
+  snapshot_date: string
+  impressions: number
+  clicks: number
+  ctr: number
+  conversions: number
+  conversion_value: number
+  cvr: number
+  cost: number
+  cpc: number
+  roas: number
+  publish_event_id: number | null
+  content_version: string | null
+  days_since_publish: number | null
+  fetched_at: string
+}
+
+export type PerformanceStatus = 'good' | 'warning' | 'critical' | 'no-data'
+
 export interface RegenerationHistory {
   id: string
   master_sku: string
@@ -153,39 +192,6 @@ export interface LifestyleImageSelection {
   selected_at: string
 }
 
-export interface PerformanceSnapshot {
-  id: string
-  master_sku: string
-  platform: 'google' | 'bing' | 'shopify'
-  environment: 'staging' | 'production'
-  snapshot_date: string
-  impressions: number
-  clicks: number
-  ctr: number
-  conversions: number
-  cvr: number
-  cost: number
-  cpc: number
-  roas: number | null
-  created_at: string
-}
-
-export interface PerformanceBaseline {
-  id: string
-  master_sku: string
-  platform: 'google' | 'bing' | 'shopify'
-  period_start: string
-  period_end: string
-  impressions: number
-  clicks: number
-  ctr: number
-  conversions: number
-  cvr: number
-  cost: number
-  cpc: number
-  roas: number | null
-  created_at: string
-}
 
 export interface VariantIndex {
   id: string
