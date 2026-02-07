@@ -929,9 +929,12 @@ class SearchTermsClient:
         logger.info(f"Deduped {len(search_terms)} search terms to {len(rows)} unique entries")
 
         try:
+            # Use proper Supabase upsert with ignoreDuplicates to handle conflicts
+            # The unique constraint is (query_text, gmc_offer_id, period_start, period_end)
             result = self.supabase.table("search_queries").upsert(
                 rows,
                 on_conflict="query_text,gmc_offer_id,period_start,period_end",
+                ignore_duplicates=False  # Update existing rows instead of ignoring
             ).execute()
 
             return len(result.data) if result.data else 0
