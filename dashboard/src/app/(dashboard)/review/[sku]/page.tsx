@@ -11,6 +11,7 @@ interface ContentRecord {
   baseline_content: string | null
   candidate_content: string | null
   quality_score: number | null
+  generation_model: string | null
   created_at: string
 }
 
