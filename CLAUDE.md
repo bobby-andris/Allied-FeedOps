@@ -66,7 +66,7 @@
 
 ## What's implemented (dashboard prompts)
 
-- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`, `22`
+- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`, `22`, `23`
   - 01-06: performance, batches, publishing, variant review, settings health, regeneration
   - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
   - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
@@ -76,7 +76,7 @@
   - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection, per-platform current content comparison)
   - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
   - 22: Performance data lifecycle (baseline capture before publish, snapshot API for post-publish tracking, performance-based SKU prioritization)
-- **Next up**: `docs/prompts/23` — Publishing enhancements (structured title/description, lifestyle images, Shopify strategy)
+  - 23: Publishing enhancements (structured title/description columns in Google Sheets, Shopify CDN image lifecycle, image migration script)
 
 ## Supabase schema (tables we rely on)
 
@@ -92,7 +92,7 @@
 - `product_catalog` (75,770 variants with full product data for evidence table - narrative_copy, bullets, dimensions, images)
 - `generated_content` (title/description content with baseline_content, candidate_content, **approved_content**, quality_score per platform; **approved_at**, **approved_version** for publishing locks)
 - `regeneration_history` (prompt audit trail with system_prompt, user_prompt, model_version, prompt_hash)
-- `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking)
+- `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking, **shopify_media_id**, **shopify_cdn_url**, **migrated_to_shopify_at** for CDN lifecycle)
 - `lifestyle_image_selections` (audit trail for image selection decisions)
 - `variant_finish_sentences` (product+finish tailored sentences for Google/Bing variant content generation)
 - `prompt_templates` (gold standard examples + category guidance; system prompt lives in code, DB `system_prompt` column is ignored)
@@ -108,7 +108,8 @@
 **Image Storage:**
 
 - Supabase Storage bucket `lifestyle-images` for temporary hosting during review/approval workflow
-- Image lifecycle: Supabase Storage (review) → Shopify CDN (post-publish via productCreateMedia)
+- Image lifecycle: Supabase Storage (review) → Approval → Shopify CDN (production via productCreateMedia) → Google Sheets
+- Only images with `shopify_cdn_url` are published to Google Sheets (Supabase Storage URLs never published)
 - Helper functions in `dashboard/src/lib/storage/upload-lifestyle-image.ts` for upload and CDN migration
 
 **Column naming conventions (do not drift)**
@@ -133,8 +134,6 @@
 ## Future TODOs
 
 - **Switch to `structured_title`/`structured_description` for GMC**: Google recommends AI-generated content use `structured_title` and `structured_description` attributes (compound format: `trained_algorithmic_media:"content text"`). Currently we write to plain `title`/`description` columns. Need to: add `structured_title` and `structured_description` columns to the supplemental feed sheet, enable `FEEDOPS_GMC_STRUCTURED_ONLY=1`, and stop writing plain title/description for AI content. See GMC product data spec for details.
-- **Lifestyle image publishing to Google Sheets**: The Google Sheets code supports a `lifestyle_image_link` column (auto-creates if missing), but the SKU and batch publish routes do NOT pass image URLs through. Need to: query `generated_images` for approved lifestyle images during publish, pass `image_url` to the Google Sheets function.
-- **Lifestyle image publishing to Shopify**: Implement image publishing via `productCreateMedia` and `productVariantAppendMedia` GraphQL mutations. Strategy documented in "Shopify Publishing Strategy" section above - upload images to Shopify, assign to specific variants, migrate URLs to Shopify CDN.
 
 ## Offer ID format (Google / Ads joins)
 
@@ -163,6 +162,9 @@ GMC offer IDs:
 - Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
 - Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
 - Image storage helpers: `dashboard/src/lib/storage/upload-lifestyle-image.ts` (uploadLifestyleImage, migrateToShopifyCdn, deleteFromStorage)
+- Shopify image upload: `dashboard/src/lib/publishing/shopify-images.ts` (uploadLifestyleImageToShopify, pollMediaStatus, associateImageWithVariant, uploadAndAssociateImage)
+- Shopify upload API: `dashboard/src/app/api/images/upload-to-shopify/route.ts` (manual CDN migration endpoint)
+- Migration script: `dashboard/scripts/migrate-approved-images-to-shopify.ts` (batch migrate approved images to Shopify CDN)
 - Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
 - Pattern extraction: `dashboard/src/lib/competitors/pattern-extraction.ts`
 - Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard, SearchInsightsSummary)
@@ -284,6 +286,8 @@ gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --
 - `NEXT_PUBLIC_SUPABASE_URL` - from Supabase dashboard
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - from Supabase dashboard
 - `SUPABASE_SERVICE_ROLE_KEY` - for server-side operations
+- `SHOPIFY_STORE_URL` - Shopify store URL (e.g., your-store.myshopify.com)
+- `SHOPIFY_ACCESS_TOKEN` - Shopify Admin API access token (shpat_xxxxx)
 
 ```bash
 cd dashboard
