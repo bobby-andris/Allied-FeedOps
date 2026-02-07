@@ -240,15 +240,22 @@ gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --
 
 ### Dashboard
 
+**Prerequisites**: Copy `.env.example` to `.env.local` and add:
+- `NEXT_PUBLIC_SUPABASE_URL` - from Supabase dashboard
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - from Supabase dashboard
+- `SUPABASE_SERVICE_ROLE_KEY` - for server-side operations
+
 ```bash
 cd dashboard
 npm install
-npm run dev
+npm run dev  # Starts Next.js on http://localhost:3000
+npm run build  # Build for production (from dashboard/, not repo root)
+npm run lint  # Run ESLint
 ```
 
 ### Testing
 
-**Build verification**: `npm run build` (from repo root, not `cd dashboard`)
+**Build verification**: `npm run build` (from dashboard/, not repo root)
 - No vitest configured yet - use build as integration test
 - TypeScript compilation errors will fail build
 
@@ -259,6 +266,44 @@ uv venv
 uv pip install -e ".[dev]"
 PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 ```
+
+## Common Workflows
+
+**Check build status after push**:
+```bash
+gcloud builds list --project=bobbys-project-346400 --limit=3
+```
+
+**Test before commit**:
+```bash
+cd dashboard && npm run build && npm run lint
+```
+
+**Rollback to archived content** (if needed):
+```bash
+git checkout archive/full-snapshot-2026-02-03 -- dashboard_data/batch-40sku-20260130-144146/
+```
+
+## Git Conventions
+
+**Commit format**: `type: description` (fix, feat, docs, refactor, test)
+**Always co-author**: End commits with `Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>`
+**Push to master triggers auto-deploy** - both Vercel and Cloud Run rebuild automatically
+
+## Debugging
+
+**Dashboard issues**:
+- Check Vercel logs: Use Vercel MCP or visit vercel.com dashboard
+- Check browser console for client errors
+- Verify Supabase connection: Test `/api/health`
+
+**Pipeline issues**:
+- Check Cloud Run logs: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50`
+- Test endpoint: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+
+**Database issues**:
+- Use Supabase MCP: `mcp__supabase__execute_sql` for direct queries
+- Check table schema: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'table_name'`
 
 ## Publishing Workflow
 
