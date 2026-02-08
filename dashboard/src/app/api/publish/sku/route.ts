@@ -175,6 +175,8 @@ export async function POST(request: NextRequest) {
           const googleResult = await publishExpandedVariantsToGoogleSheets(
             expandedVariants.map((v) => ({
               gmc_offer_id: v.gmc_offer_id,
+              master_sku: v.master_sku,
+              finish_code: v.finish_code,
               title: v.title,
               description: v.description,
               image_url: v.image_url,
