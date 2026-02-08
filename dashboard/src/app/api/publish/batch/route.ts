@@ -517,7 +517,9 @@ export async function POST(request: NextRequest) {
     const allSucceeded = failedCount === 0 && successCount > 0
     const batchStatus = allFailed ? 'failed' : allSucceeded ? 'completed' : 'partial'
 
-    await supabase
+    console.log(`[publishBatch] Updating batch status: ${batchStatus}, success=${successCount}, failed=${failedCount}`)
+
+    const { error: updateError } = await supabase
       .from('publish_batches')
       .update({
         status: batchStatus,
@@ -526,6 +528,13 @@ export async function POST(request: NextRequest) {
         failed_count: failedCount,
       })
       .eq('batch_id', batch_id)
+
+    if (updateError) {
+      console.error(`[publishBatch] Failed to update batch status:`, updateError)
+      throw new Error(`Failed to update batch status: ${updateError.message}`)
+    }
+
+    console.log(`[publishBatch] Batch status updated successfully to ${batchStatus}`)
 
     // 7. Return detailed results
     const batchResult: BatchPublishResult = {
