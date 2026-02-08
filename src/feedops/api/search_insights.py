@@ -120,8 +120,9 @@ async def sync_search_terms(
 
         job_id = job_result.data[0]["id"]
 
-        # Queue background processing
-        background_tasks.add_task(
+        # Queue background processing (using thread to survive container lifecycle)
+        from feedops.api.main import run_async_in_thread
+        run_async_in_thread(
             process_sync_job,
             job_id=job_id,
             days=request.days,

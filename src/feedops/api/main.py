@@ -19,9 +19,11 @@ Endpoints:
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import os
+import threading
 from typing import Literal
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
@@ -69,6 +71,39 @@ app.include_router(search_insights_router)
 # Include performance baseline router
 from feedops.api.performance_baseline import router as performance_baseline_router
 app.include_router(performance_baseline_router)
+
+
+# =============================================================================
+# Background Job Helper (Thread-based for Cloud Run compatibility)
+# =============================================================================
+
+
+def run_async_in_thread(async_func, **kwargs):
+    """Run async function in dedicated thread with new event loop.
+
+    This is necessary for Cloud Run because FastAPI BackgroundTasks are killed
+    when containers scale to zero. Using a non-daemon thread ensures the job
+    completes even if the HTTP response has been sent.
+
+    Args:
+        async_func: Async function to run
+        **kwargs: Arguments to pass to the function
+
+    Returns:
+        threading.Thread: The started thread
+    """
+    def wrapper():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(async_func(**kwargs))
+        finally:
+            loop.close()
+
+    thread = threading.Thread(target=wrapper, daemon=False)
+    thread.start()
+    logger.info(f"Started background job thread: {async_func.__name__}")
+    return thread
 
 
 # =============================================================================
@@ -621,8 +656,8 @@ async def hybrid_generate(
         total_variants = sum(len(f.variant_skus) for f in families)
         base_skus_count = len(families) + len(single_skus)
 
-        # Queue background processing
-        background_tasks.add_task(
+        # Queue background processing (using thread to survive container lifecycle)
+        run_async_in_thread(
             process_hybrid_batch_job,
             job_id=job_id,
             families=families,
