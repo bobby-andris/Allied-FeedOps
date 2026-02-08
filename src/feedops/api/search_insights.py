@@ -9,7 +9,7 @@ import logging
 from datetime import date, timedelta
 from typing import Literal
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from feedops.db.supabase_client import get_client, is_supabase_available
@@ -95,10 +95,7 @@ class SearchTermsResponse(BaseModel):
 
 
 @router.post("/sync", response_model=SyncJobResponse)
-async def sync_search_terms(
-    request: SyncSearchTermsRequest,
-    background_tasks: BackgroundTasks,
-):
+async def sync_search_terms(request: SyncSearchTermsRequest):
     """Sync search terms from Google Ads.
 
     Creates a sync job and processes in the background.

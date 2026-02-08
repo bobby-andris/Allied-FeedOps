@@ -26,7 +26,7 @@ import os
 import threading
 from typing import Literal
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from feedops.api.supabase_loader import (
@@ -476,9 +476,7 @@ Return your response as JSON: {{"content": "your generated {request.content_type
 
 
 @app.post("/batch-optimize", response_model=BatchJobResponse, tags=["Generation"])
-async def batch_optimize(
-    request: BatchOptimizeRequest, background_tasks: BackgroundTasks
-):
+async def batch_optimize(request: BatchOptimizeRequest):
     """Queue batch optimization job for multiple SKUs.
 
     Creates a job record in Supabase and processes SKUs in the background.
@@ -514,8 +512,8 @@ async def batch_optimize(
         ]
         supabase.table("batch_generation_job_skus").insert(sku_records).execute()
 
-        # Queue background processing
-        background_tasks.add_task(
+        # Queue background processing (using thread to survive container lifecycle)
+        run_async_in_thread(
             process_batch_job,
             job_id=job_id,
             skus=request.skus,
@@ -584,9 +582,7 @@ async def get_batch_status(job_id: str):
 
 
 @app.post("/hybrid-generate", response_model=HybridJobResponse, tags=["Generation"])
-async def hybrid_generate(
-    request: HybridGenerateRequest, background_tasks: BackgroundTasks
-):
+async def hybrid_generate(request: HybridGenerateRequest):
     """Generate content for multi-SKU families using hybrid approach.
 
     Detects multi-SKU product families (multiple master_skus sharing same product_id)
