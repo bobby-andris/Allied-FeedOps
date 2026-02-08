@@ -102,17 +102,24 @@ export async function POST(request: NextRequest) {
     // Create job record
     const jobId = `hybrid-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 
-    const { error: jobInsertError } = await supabase
+    const { data: jobData, error: jobInsertError } = await supabase
       .from('batch_generation_jobs')
       .insert({
-        job_id: jobId,
         status: 'processing',
         total_skus: skus.length,
-        processed_skus: 0,
+        completed_skus: 0,
         failed_skus: 0,
+        options: {
+          titles: options.titles,
+          descriptions: options.descriptions,
+          platforms: options.platforms,
+          hybrid: true,
+        },
       })
+      .select()
+      .single()
 
-    if (jobInsertError) {
+    if (jobInsertError || !jobData) {
       console.error('Failed to create job record:', jobInsertError)
       return NextResponse.json(
         { error: 'Failed to create generation job' },
@@ -120,10 +127,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const actualJobId = jobData.id
+
     // Process in background
     processHybridGeneration(
       supabase,
-      jobId,
+      actualJobId,
       families,
       singleSkus,
       options
@@ -133,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      job_id: jobId,
+      job_id: actualJobId,
       status: 'processing',
       total_skus: skus.length,
       multi_sku_families: families.length,
@@ -307,11 +316,11 @@ async function processHybridGeneration(
       .from('batch_generation_jobs')
       .update({
         status: 'completed',
-        processed_skus: status.processed,
+        completed_skus: status.processed,
         failed_skus: status.errors.length,
         completed_at: new Date().toISOString(),
       })
-      .eq('job_id', jobId)
+      .eq('id', jobId)
 
     console.log(`✓ Hybrid generation completed: ${status.base_skus_generated} base + ${status.variant_skus_adapted} adapted, ${status.errors.length} errors`)
   } catch (error) {
@@ -321,12 +330,12 @@ async function processHybridGeneration(
       .from('batch_generation_jobs')
       .update({
         status: 'failed',
-        processed_skus: status.processed,
+        completed_skus: status.processed,
         failed_skus: status.errors.length,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         completed_at: new Date().toISOString(),
       })
-      .eq('job_id', jobId)
+      .eq('id', jobId)
   }
 }
 
@@ -341,10 +350,10 @@ async function updateJobProgress(
   await supabase
     .from('batch_generation_jobs')
     .update({
-      processed_skus: status.processed,
+      completed_skus: status.processed,
       failed_skus: status.errors.length,
     })
-    .eq('job_id', jobId)
+    .eq('id', jobId)
 }
 
 /**
@@ -366,7 +375,7 @@ export async function GET(request: NextRequest) {
   const { data: jobData, error } = await supabase
     .from('batch_generation_jobs')
     .select('*')
-    .eq('job_id', jobId)
+    .eq('id', jobId)
     .maybeSingle()
 
   if (error || !jobData) {
@@ -377,13 +386,13 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    job_id: jobData.job_id,
+    job_id: jobData.id,
     status: jobData.status,
     total_skus: jobData.total_skus,
-    processed_skus: jobData.processed_skus,
+    completed_skus: jobData.completed_skus,
     failed_skus: jobData.failed_skus,
     created_at: jobData.created_at,
     completed_at: jobData.completed_at,
-    error: jobData.error,
+    error: jobData.error_message,
   })
 }
