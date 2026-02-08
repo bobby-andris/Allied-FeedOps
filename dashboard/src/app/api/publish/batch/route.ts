@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     // Update batch status to 'executing'
     await supabase
       .from('publish_batches')
-      .update({ status: 'executing', updated_at: new Date().toISOString() })
+      .update({ status: 'executing' })
       .eq('batch_id', batch_id)
 
     // 2. Get APPROVED content for each SKU (not candidate_content)
@@ -524,7 +524,6 @@ export async function POST(request: NextRequest) {
         executed_at: new Date().toISOString(),
         success_count: successCount,
         failed_count: failedCount,
-        updated_at: new Date().toISOString(),
       })
       .eq('batch_id', batch_id)
 
