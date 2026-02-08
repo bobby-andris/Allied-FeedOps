@@ -336,6 +336,37 @@ async function ensureLifestyleImageColumn(
     return { columnMap, numColumns }
   }
 
+  // Get current sheet properties to check grid size
+  const sheetMetadata = await sheets.spreadsheets.get({
+    spreadsheetId,
+    fields: 'sheets(properties(title,sheetId,gridProperties))',
+  })
+
+  const targetSheet = sheetMetadata.data.sheets?.find(
+    (s) => s.properties?.title === (sheetName || 'Sheet1')
+  )
+
+  const currentGridColumns = targetSheet?.properties?.gridProperties?.columnCount || 0
+  const requiredColumns = numColumns + 1 // Need one more column
+
+  // Expand grid if necessary
+  if (requiredColumns > currentGridColumns && targetSheet?.properties?.sheetId !== undefined) {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [
+          {
+            appendDimension: {
+              sheetId: targetSheet.properties.sheetId,
+              dimension: 'COLUMNS',
+              length: requiredColumns - currentGridColumns,
+            },
+          },
+        ],
+      },
+    })
+  }
+
   // Add the column header
   const newColIdx = numColumns
   const columnLetter = columnIndexToLetter(newColIdx)
@@ -389,6 +420,37 @@ async function ensureStructuredColumns(
   if (needsStructuredDescription) {
     updates.push({ column: 'structured_description', index: currentColIdx })
     currentColIdx++
+  }
+
+  // Get current sheet properties to check grid size
+  const sheetMetadata = await sheets.spreadsheets.get({
+    spreadsheetId,
+    fields: 'sheets(properties(title,sheetId,gridProperties))',
+  })
+
+  const targetSheet = sheetMetadata.data.sheets?.find(
+    (s) => s.properties?.title === (sheetName || 'Sheet1')
+  )
+
+  const currentGridColumns = targetSheet?.properties?.gridProperties?.columnCount || 0
+  const requiredColumns = currentColIdx // currentColIdx is already the total needed
+
+  // Expand grid if necessary
+  if (requiredColumns > currentGridColumns && targetSheet?.properties?.sheetId !== undefined) {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [
+          {
+            appendDimension: {
+              sheetId: targetSheet.properties.sheetId,
+              dimension: 'COLUMNS',
+              length: requiredColumns - currentGridColumns,
+            },
+          },
+        ],
+      },
+    })
   }
 
   // Add column headers in batch
