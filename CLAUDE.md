@@ -114,10 +114,17 @@ See: `docs/architecture/multi-sku-pattern.md`
 
 ### Offer ID Format
 
-GMC offer IDs: `shopify_US_{product_id}_{variant_id}` (uppercase `US`)
+**GMC Format**: `shopify_US_{product_id}_{variant_id}` (uppercase "US")
+**Database Format**: `shopify_us_{product_id}_{variant_id}` (lowercase "us")
 
-**IMPORTANT**: Database stores lowercase format, but publishing to Google Sheets requires uppercase US.
-**Fix applied**: `google-sheets.ts` transforms on publish: `shopify_us_` → `shopify_US_`
+**CRITICAL**: Database has lowercase, but GMC requires uppercase. Publishing code MUST transform.
+
+**Implementation**:
+- **Write to sheet**: Transform to uppercase via `.replace('shopify_us_', 'shopify_US_')`
+- **Lookup existing rows**: Use lowercase for case-insensitive matching (sheet may have mixed case)
+- **Affected file**: `dashboard/src/lib/publishing/google-sheets.ts` (line 757)
+
+**Impact**: Incorrect format breaks GMC sync - rows append as duplicates instead of updating existing rows.
 
 ### SKU Format Handling
 
@@ -296,6 +303,32 @@ See: `docs/architecture/data-pipeline.md`
 - Lifestyle images: variant-specific via `productVariantAppendMedia`
 - CDN lifecycle: Supabase Storage → Shopify CDN → Google Sheets
 
+## Google Sheets Feed Structure
+
+**Production Sheet ID**: `1qMjCn1ZPlDd0R3TkTI0kDnX6tnApIHrnfAOWfJj_QEg`
+**Sheet Name**: `SupplementalFeedData`
+
+**Column Layout** (as of 2026-02-08):
+- A: `id` (GMC offer ID - MUST be uppercase `shopify_US_`)
+- B: `mpn` (Manufacturer Part Number: `{master_sku}-{finish_code}`)
+- C: `product_type`
+- D: `pattern`
+- E: `custom_label_0`
+- F: `custom_label_1`
+- G: `custom_label_2`
+- H: `title`
+- I: `google_product_category`
+- J: `description`
+- K: `custom_label_4`
+- L: `lifestyle_image_link` (added 2026-02-08)
+- M: `structured_title` (added 2026-02-08)
+- N: `structured_description` (added 2026-02-08)
+
+**MPN Requirements**:
+- **New rows**: Populate MPN as `{master_sku}-{finish_code}` (e.g., `FT-16-ABR`)
+- **Existing rows**: Preserve current MPN value (don't overwrite)
+- **Implementation**: Check if row exists before setting MPN field
+
 ## Automated Data Collection
 
 SKU selection, regeneration, and batch generation APIs **automatically** trigger data collection:
@@ -340,6 +373,11 @@ git push origin master
 **Pipeline issues**:
 - Cloud Run logs: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50`
 - Test: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+
+**Batch publishing issues**:
+- **Stuck "executing" status**: Final batch status UPDATE fails silently (possible timeout or missing error handling)
+- **Workaround**: Manually update via Supabase: `UPDATE publish_batches SET status = 'published', success_count = N WHERE batch_id = 'batch-id'`
+- **Root cause**: Status update happens after long-running Google Sheets/Shopify operations, may exceed serverless function timeout
 
 ## Documentation
 
