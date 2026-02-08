@@ -202,6 +202,7 @@ def _fetch_performance_via_api(
     SELECT
       segments.product_item_id,
       segments.date,
+      campaign.advertising_channel_type,
       metrics.impressions,
       metrics.clicks,
       metrics.ctr,
@@ -330,6 +331,7 @@ def fetch_batch_product_performance(
     SELECT
       segments.product_item_id,
       segments.date,
+      campaign.advertising_channel_type,
       metrics.impressions,
       metrics.clicks,
       metrics.ctr,
