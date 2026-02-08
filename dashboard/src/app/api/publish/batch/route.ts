@@ -517,7 +517,7 @@ export async function POST(request: NextRequest) {
     // 6. Update batch status based on results
     const allFailed = successCount === 0 && failedCount > 0
     const allSucceeded = failedCount === 0 && successCount > 0
-    const batchStatus = allFailed ? 'failed' : allSucceeded ? 'completed' : 'partial'
+    const batchStatus = allFailed ? 'failed' : allSucceeded ? 'published' : 'partial'
 
     console.log(`[publishBatch] Updating batch status: ${batchStatus}, success=${successCount}, failed=${failedCount}`)
 
