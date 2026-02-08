@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { uploadVariantImage } from '@/lib/publishing/shopify-images'
+import { uploadProductImage } from '@/lib/publishing/shopify-images'
 
 /**
  * Diagnostic endpoint to test Shopify CDN migration
@@ -55,10 +55,10 @@ export async function GET(request: Request) {
     // Attempt upload
     console.log(`[Test Migration] Uploading image ${img.id} for ${img.gmc_offer_id}`)
 
-    const result = await uploadVariantImage(
+    // Use uploadProductImage (not uploadVariantImage) to avoid "variant already has media" error
+    const result = await uploadProductImage(
       img.image_url,
       variant.shopify_product_id,
-      variant.shopify_variant_id || '',
       `${img.master_sku} - ${img.finish}`
     )
 
