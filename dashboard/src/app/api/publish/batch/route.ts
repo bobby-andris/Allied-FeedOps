@@ -658,10 +658,11 @@ async function migrateImagesForPublish(
       }
 
       console.log(`[CDN Migration] Uploading variant image ${img.id} for ${img.gmc_offer_id}`)
-      const result = await uploadVariantImage(
+      // Use uploadProductImage instead of uploadVariantImage to avoid "variant already has media" error
+      // Lifestyle images don't need variant-specific association - they're just for GMC feed CDN hosting
+      const result = await uploadProductImage(
         img.image_url,
         variant.shopify_product_id,
-        variant.shopify_variant_id || '',
         `${img.master_sku} - ${img.finish}`
       )
 
