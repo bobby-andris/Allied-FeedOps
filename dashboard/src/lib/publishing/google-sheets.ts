@@ -751,7 +751,8 @@ export async function publishExpandedVariantsToGoogleSheets(
 
       // Build row data per GMC AI content disclosure policy
       const rowData: GoogleSheetsRow = {
-        id: variant.gmc_offer_id,
+        // Transform to GMC format: shopify_US_ (uppercase) not shopify_us_ (lowercase)
+        id: variant.gmc_offer_id.replace('shopify_us_', 'shopify_US_'),
         // Standard fields - omit if structured-only mode
         title: USE_STRUCTURED_ONLY ? undefined : variant.title,
         description: USE_STRUCTURED_ONLY ? undefined : variant.description,
