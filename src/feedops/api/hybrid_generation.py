@@ -160,7 +160,7 @@ async def adapt_variant_content(
             .eq("master_sku", base_sku)
             .eq("platform", platform)
             .eq("content_type", content_type)
-            .maybeSingle()
+            .maybe_single()
             .execute()
         )
 
@@ -186,7 +186,7 @@ async def adapt_variant_content(
             .eq("master_sku", variant_sku)
             .eq("platform", platform)
             .eq("content_type", content_type)
-            .maybeSingle()
+            .maybe_single()
             .execute()
         )
 
