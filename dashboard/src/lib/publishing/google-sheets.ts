@@ -224,6 +224,7 @@ function rowDataToValues(
 
   const entries: [keyof GoogleSheetsRow, string | undefined][] = [
     ['id', rowData.id],
+    ['mpn', rowData.mpn],
     ['title', rowData.title],
     ['description', rowData.description],
     ['structured_title', structuredTitle],
