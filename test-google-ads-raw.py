@@ -23,20 +23,21 @@ print("Loading Google Ads client...")
 client = _load_client()
 
 # Query for ANY products with impressions in last 7 days
+# Note: GAQL doesn't support SUM/GROUP BY like SQL, so we get raw rows
 query = f"""
 SELECT
   segments.product_item_id,
+  segments.date,
   campaign.advertising_channel_type,
   campaign.name,
-  SUM(metrics.impressions) as total_impressions,
-  SUM(metrics.clicks) as total_clicks
+  metrics.impressions,
+  metrics.clicks
 FROM shopping_performance_view
 WHERE
   segments.date BETWEEN '{start_date}' AND '{end_date}'
   AND metrics.impressions > 0
-GROUP BY segments.product_item_id, campaign.advertising_channel_type, campaign.name
-ORDER BY total_impressions DESC
-LIMIT 20
+ORDER BY metrics.impressions DESC
+LIMIT 100
 """
 
 print(f"\nQuerying Google Ads API for products with impressions...")
@@ -54,23 +55,42 @@ try:
         print("3. Customer ID is incorrect")
         sys.exit(1)
 
-    print(f"✅ Found {len(rows)} products with impressions\n")
-    print("Top products by impressions:")
-    print("-" * 100)
+    print(f"✅ Found {len(rows)} rows with impressions\n")
 
-    for i, row in enumerate(rows[:20], 1):
+    # Aggregate by product to get unique products
+    from collections import defaultdict
+    products = defaultdict(lambda: {"impressions": 0, "clicks": 0, "campaign_types": set(), "dates": set()})
+
+    for row in rows:
         segments = row.get("segments", {})
         campaign = row.get("campaign", {})
         metrics = row.get("metrics", {})
 
         product_id = segments.get("product_item_id", "N/A")
         campaign_type = campaign.get("advertising_channel_type", "N/A")
-        campaign_name = campaign.get("name", "N/A")[:40]
-        impressions = metrics.get("total_impressions", 0)
-        clicks = metrics.get("total_clicks", 0)
+        date_val = segments.get("date", "")
+        impressions = int(metrics.get("impressions", 0) or 0)
+        clicks = int(metrics.get("clicks", 0) or 0)
 
-        print(f"{i:2}. {product_id[:50]:50} | {campaign_type:15} | {impressions:>6,} impr | {clicks:>4} clicks")
-        print(f"    Campaign: {campaign_name}")
+        products[product_id]["impressions"] += impressions
+        products[product_id]["clicks"] += clicks
+        products[product_id]["campaign_types"].add(campaign_type)
+        products[product_id]["dates"].add(date_val)
+        products[product_id]["campaign_name"] = campaign.get("name", "N/A")[:40]
+
+    print(f"Unique products: {len(products)}\n")
+    print("Top products by impressions:")
+    print("-" * 100)
+
+    sorted_products = sorted(products.items(), key=lambda x: x[1]["impressions"], reverse=True)
+
+    for i, (product_id, data) in enumerate(sorted_products[:20], 1):
+        campaign_types = ", ".join(sorted(data["campaign_types"]))
+        print(f"{i:2}. {product_id[:60]:60}")
+        print(f"    Campaign types: {campaign_types}")
+        print(f"    Impressions: {data['impressions']:,} | Clicks: {data['clicks']}")
+        print(f"    Days with data: {len(data['dates'])}")
+        print()
 
     print("\n" + "=" * 100)
     print("ANALYSIS:")

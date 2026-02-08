@@ -284,7 +284,6 @@ def _capture_google_baseline(
             "avg_roas": round(avg_roas, 2),
             "baseline_start_date": start_date,
             "baseline_end_date": end_date,
-            "updated_at": datetime.utcnow().isoformat(),
         }
 
         # Upsert baseline
