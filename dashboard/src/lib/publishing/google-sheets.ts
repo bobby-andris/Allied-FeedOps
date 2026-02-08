@@ -178,8 +178,11 @@ export async function getExistingIds(
   for (let i = 1; i < values.length; i++) {
     const value = values[i]?.[0]
     if (value) {
+      // Normalize to lowercase for case-insensitive matching
+      // (Sheet may have "shopify_US_xxx" while DB has "shopify_us_xxx")
+      const normalizedId = String(value).toLowerCase()
       // Row numbers are 1-indexed in sheets, and we skip header, so row = i + 1
-      idToRow.set(String(value), i + 1)
+      idToRow.set(normalizedId, i + 1)
     }
   }
 
@@ -761,7 +764,8 @@ export async function publishExpandedVariantsToGoogleSheets(
         lifestyle_image_link: variant.image_url,
       }
 
-      const existingRow = existingIds.get(variant.gmc_offer_id)
+      // Normalize to lowercase for case-insensitive lookup
+      const existingRow = existingIds.get(variant.gmc_offer_id.toLowerCase())
       if (existingRow !== undefined) {
         rowsToUpdate.push({ rowNum: existingRow, data: rowData })
       } else {
