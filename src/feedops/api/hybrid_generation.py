@@ -209,7 +209,7 @@ async def adapt_variant_content(
 
         # Call OpenAI
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        model = os.getenv("OPENAI_MODEL", "gpt-4o")
+        model = os.getenv("OPENAI_MODEL", "gpt-5.2")
 
         completion = client.chat.completions.create(
             model=model,

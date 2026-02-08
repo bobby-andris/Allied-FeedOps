@@ -35,6 +35,15 @@ export interface BatchOptimizeRequest {
   dry_run?: boolean
 }
 
+export interface HybridGenerateRequest {
+  skus: string[]
+  options: {
+    titles: boolean
+    descriptions: boolean
+    platforms: ('google' | 'bing' | 'shopify')[]
+  }
+}
+
 // =============================================================================
 // Response Types
 // =============================================================================
@@ -89,6 +98,19 @@ export interface BatchStatusResponse {
   completed_skus: number
   failed_skus: number
   skus: BatchSkuStatus[]
+}
+
+export interface HybridJobResponse {
+  success: boolean
+  job_id: string
+  status: string
+  total_skus: number
+  multi_sku_families: number
+  single_skus: number
+  strategy: {
+    base_skus: number
+    variant_skus: number
+  }
 }
 
 // =============================================================================
@@ -225,6 +247,36 @@ export class PipelineClient {
    */
   async getBatchStatus(jobId: string): Promise<BatchStatusResponse> {
     const response = await fetch(`${this.baseUrl}/batch-status/${jobId}`)
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new PipelineError(
+        error.detail || response.statusText,
+        response.status,
+        error.detail
+      )
+    }
+
+    return response.json()
+  }
+
+  /**
+   * Generate content using hybrid approach for multi-SKU families.
+   * Detects families automatically and uses variant adaptation for cost savings.
+   * Returns immediately with job_id - use getBatchStatus to check progress.
+   *
+   * **Always use this instead of the TypeScript dashboard implementation.**
+   * Cloud Run has no timeout limits and can handle any batch size.
+   */
+  async hybridGenerate(request: HybridGenerateRequest): Promise<HybridJobResponse> {
+    const response = await fetch(`${this.baseUrl}/hybrid-generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        skus: request.skus,
+        options: request.options,
+      }),
+    })
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}))
