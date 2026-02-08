@@ -13,7 +13,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { uploadAndAssociateImage } from '../src/lib/publishing/shopify-images'
+import { uploadProductImage, uploadVariantImage } from '../src/lib/publishing/shopify-images'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -26,37 +26,30 @@ async function migrateApprovedImagesToShopify(
 ) {
   console.log(`\n🚀 Starting Shopify CDN migration (dry-run: ${dryRun})\n`)
 
-  // Find approved images without Shopify CDN URLs
-  let query = supabase
-    .from('generated_images')
-    .select('id, master_sku, finish_code, image_url, use_for_master')
+  // Migrate product-level images
+  console.log('📦 Migrating product-level images...\n')
+  let productQuery = supabase
+    .from('product_lifestyle_images')
+    .select('id, master_sku, shopify_product_id, image_url')
     .eq('approval_status', 'approved')
     .is('shopify_cdn_url', null)
 
   if (limit) {
-    query = query.limit(limit)
+    productQuery = productQuery.limit(limit)
   }
 
-  const { data: images, error } = await query
+  const { data: productImages, error: productError } = await productQuery
 
-  if (error) {
-    console.error('❌ Error fetching images:', error)
-    process.exit(1)
+  if (productError) {
+    console.error('❌ Error fetching product images:', productError)
   }
 
-  if (!images || images.length === 0) {
-    console.log('✅ No images to migrate')
-    return
-  }
+  let productSuccessCount = 0
+  let productErrorCount = 0
 
-  console.log(`📦 Found ${images.length} images to migrate\n`)
-
-  let successCount = 0
-  let errorCount = 0
-
-  for (const [index, image] of images.entries()) {
-    console.log(`\n[${index + 1}/${images.length}] Processing image ${image.id}`)
-    console.log(`  SKU: ${image.master_sku}, Finish: ${image.finish_code || 'Master'}`)
+  for (const [index, img] of (productImages || []).entries()) {
+    console.log(`\n[Product ${index + 1}/${productImages?.length || 0}] Processing ${img.id}`)
+    console.log(`  SKU: ${img.master_sku}`)
 
     if (dryRun) {
       console.log('  [DRY RUN] Would upload to Shopify')
@@ -64,70 +57,122 @@ async function migrateApprovedImagesToShopify(
     }
 
     try {
-      // Get Shopify product/variant IDs from variant_index
-      const variantQuery = supabase
-        .from('variant_index')
-        .select('shopify_product_id, shopify_variant_id, finish_code')
-        .eq('master_sku', image.master_sku)
-
-      if (image.finish_code && !image.use_for_master) {
-        variantQuery.eq('finish_code', image.finish_code)
-      }
-
-      const { data: variants, error: variantError } = await variantQuery.limit(1)
-
-      if (variantError || !variants || variants.length === 0) {
-        console.error('  ⚠️  No Shopify mapping found, skipping')
-        errorCount++
-        continue
-      }
-
-      const variant = variants[0]
-
-      if (!variant.shopify_product_id) {
-        console.error('  ⚠️  No Shopify product ID, skipping')
-        errorCount++
-        continue
-      }
-
-      // Upload to Shopify
       console.log('  📤 Uploading to Shopify...')
-      const result = await uploadAndAssociateImage(
-        image.image_url,
-        variant.shopify_product_id,
-        variant.shopify_variant_id || undefined,
-        `${image.master_sku} - ${image.finish_code || 'Master'}`
+      const result = await uploadProductImage(
+        img.image_url,
+        img.shopify_product_id,
+        `${img.master_sku} product image`
       )
 
       console.log(`  ✅ Uploaded! Media ID: ${result.mediaId}`)
       console.log(`  🔗 CDN URL: ${result.cdnUrl}`)
 
-      // Update database with Shopify CDN URL
       const { error: updateError } = await supabase
-        .from('generated_images')
+        .from('product_lifestyle_images')
         .update({
           shopify_media_id: result.mediaId,
           shopify_cdn_url: result.cdnUrl,
           migrated_to_shopify_at: new Date().toISOString(),
         })
-        .eq('id', image.id)
+        .eq('id', img.id)
 
       if (updateError) {
         console.error('  ❌ Database update failed:', updateError)
-        errorCount++
+        productErrorCount++
         continue
       }
 
-      successCount++
+      productSuccessCount++
     } catch (error) {
       console.error('  ❌ Upload failed:', error)
-      errorCount++
+      productErrorCount++
     }
   }
 
+  // Migrate variant-level images
+  console.log('\n\n📦 Migrating variant-level images...\n')
+  let variantQuery = supabase
+    .from('variant_lifestyle_images')
+    .select('id, master_sku, gmc_offer_id, finish, image_url')
+    .eq('approval_status', 'approved')
+    .is('shopify_cdn_url', null)
+
+  if (limit) {
+    variantQuery = variantQuery.limit(limit)
+  }
+
+  const { data: variantImages, error: variantError } = await variantQuery
+
+  if (variantError) {
+    console.error('❌ Error fetching variant images:', variantError)
+  }
+
+  let variantSuccessCount = 0
+  let variantErrorCount = 0
+
+  for (const [index, img] of (variantImages || []).entries()) {
+    console.log(`\n[Variant ${index + 1}/${variantImages?.length || 0}] Processing ${img.id}`)
+    console.log(`  SKU: ${img.master_sku}, Finish: ${img.finish}`)
+
+    if (dryRun) {
+      console.log('  [DRY RUN] Would upload to Shopify')
+      continue
+    }
+
+    try {
+      // Lookup Shopify IDs from variant_index
+      const { data: variant, error: lookupError } = await supabase
+        .from('variant_index')
+        .select('shopify_product_id, shopify_variant_id')
+        .eq('gmc_offer_id', img.gmc_offer_id)
+        .single()
+
+      if (lookupError || !variant?.shopify_product_id) {
+        console.error(`  ⚠️  No Shopify mapping for ${img.gmc_offer_id}, skipping`)
+        variantErrorCount++
+        continue
+      }
+
+      console.log('  📤 Uploading to Shopify...')
+      const result = await uploadVariantImage(
+        img.image_url,
+        variant.shopify_product_id,
+        variant.shopify_variant_id || '',
+        `${img.master_sku} - ${img.finish}`
+      )
+
+      console.log(`  ✅ Uploaded! Media ID: ${result.mediaId}`)
+      console.log(`  🔗 CDN URL: ${result.cdnUrl}`)
+
+      const { error: updateError } = await supabase
+        .from('variant_lifestyle_images')
+        .update({
+          shopify_media_id: result.mediaId,
+          shopify_cdn_url: result.cdnUrl,
+          migrated_to_shopify_at: new Date().toISOString(),
+        })
+        .eq('id', img.id)
+
+      if (updateError) {
+        console.error('  ❌ Database update failed:', updateError)
+        variantErrorCount++
+        continue
+      }
+
+      variantSuccessCount++
+    } catch (error) {
+      console.error('  ❌ Upload failed:', error)
+      variantErrorCount++
+    }
+  }
+
+  const successCount = productSuccessCount + variantSuccessCount
+  const errorCount = productErrorCount + variantErrorCount
+
   console.log(`\n\n📊 Migration complete:`)
-  console.log(`  ✅ Success: ${successCount}`)
-  console.log(`  ❌ Errors: ${errorCount}`)
+  console.log(`  ✅ Product images: ${productSuccessCount} success, ${productErrorCount} errors`)
+  console.log(`  ✅ Variant images: ${variantSuccessCount} success, ${variantErrorCount} errors`)
+  console.log(`  📈 Total: ${successCount} success, ${errorCount} errors`)
 }
 
 // Parse command line args

@@ -4,11 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { imageId, status, reason } = body
+    const { imageId, status, reason, imageType } = body
 
-    if (!imageId || !status) {
+    if (!imageId || !status || !imageType) {
       return NextResponse.json(
-        { error: 'imageId and status are required' },
+        { error: 'imageId, status, and imageType are required' },
         { status: 400 }
       )
     }
@@ -20,7 +20,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!['product', 'variant'].includes(imageType)) {
+      return NextResponse.json(
+        { error: 'imageType must be "product" or "variant"' },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
+
+    // Route to correct table based on image type
+    const tableName = imageType === 'product'
+      ? 'product_lifestyle_images'
+      : 'variant_lifestyle_images'
 
     const updateData: Record<string, unknown> = {
       approval_status: status,
@@ -37,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { data, error } = await supabase
-      .from('generated_images')
+      .from(tableName)
       .update(updateData)
       .eq('id', imageId)
       .select()

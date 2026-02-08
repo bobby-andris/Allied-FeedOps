@@ -150,6 +150,11 @@ export interface RegenerationHistory {
   generated_content_id: string | null
 }
 
+/**
+ * @deprecated Use ProductLifestyleImage or VariantLifestyleImage instead.
+ * This type represents the old unified generated_images table which conflated
+ * product-level and variant-level images. Kept for backward compatibility during migration.
+ */
 export interface GeneratedImage {
   id: string
   master_sku: string
@@ -183,7 +188,97 @@ export interface GeneratedImage {
   created_at: string
 }
 
-// Alias for enhanced usage in review components
+// ============================================================================
+// New Image Architecture: Separate Product and Variant Images
+// ============================================================================
+
+/**
+ * Product-level lifestyle images for Shopify product pages only.
+ * Not published to GMC feed. One set of images applies to all variants of a master SKU.
+ */
+export interface ProductLifestyleImage {
+  id: string
+  master_sku: string
+  shopify_product_id: string  // Links to variant_index.shopify_product_id
+
+  // Image storage (lifecycle: Supabase Storage → Shopify CDN)
+  image_url: string
+  thumbnail_url: string | null
+
+  // Shopify CDN (production stage - migrated during publish)
+  shopify_media_id: string | null
+  shopify_cdn_url: string | null
+  migrated_to_shopify_at: string | null
+
+  // Generation metadata
+  prompt: string | null
+  generation_model: string | null
+  generation_timestamp: string | null
+  score: number | null
+  score_breakdown: Record<string, unknown> | null
+
+  // Approval workflow
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
+
+  // Selection (if multiple image variations generated)
+  ai_selected: boolean
+  user_selected: boolean
+  variation_index: number  // 0, 1, 2 for multiple variations
+
+  created_at: string
+}
+
+/**
+ * Variant-level lifestyle images published to GMC feed (Google Sheets lifestyle_image_link column).
+ * Each variant (gmc_offer_id) can have its own unique lifestyle image.
+ * Still hosted on Shopify CDN but NOT displayed on Shopify product pages.
+ */
+export interface VariantLifestyleImage {
+  id: string
+  master_sku: string
+  gmc_offer_id: string  // Links to variant_index.gmc_offer_id (unique per variant)
+  finish: string
+  finish_code: string
+
+  // Image storage (lifecycle: Supabase Storage → Shopify CDN → GMC feed)
+  image_url: string
+  thumbnail_url: string | null
+
+  // Shopify CDN (production hosting for GMC feed)
+  shopify_media_id: string | null
+  shopify_cdn_url: string | null
+  migrated_to_shopify_at: string | null
+
+  // Generation metadata
+  prompt: string | null
+  generation_model: string | null
+  generation_timestamp: string | null
+  score: number | null
+  score_breakdown: Record<string, unknown> | null
+
+  // Approval workflow
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
+
+  // Selection (if multiple variations per variant)
+  ai_selected: boolean
+  user_selected: boolean
+  variation_index: number  // Multiple variations per gmc_offer_id
+
+  // GMC publishing tracking
+  gmc_pushed_at: string | null
+
+  created_at: string
+}
+
+/**
+ * @deprecated Use ProductLifestyleImage or VariantLifestyleImage instead
+ */
 export type EnhancedImageRecord = GeneratedImage
 
 export interface LifestyleImageSelection {
@@ -528,6 +623,16 @@ export interface Database {
         Row: GeneratedImage
         Insert: Omit<GeneratedImage, 'id' | 'created_at'>
         Update: Partial<Omit<GeneratedImage, 'id' | 'created_at'>>
+      }
+      product_lifestyle_images: {
+        Row: ProductLifestyleImage
+        Insert: Omit<ProductLifestyleImage, 'id' | 'created_at'>
+        Update: Partial<Omit<ProductLifestyleImage, 'id' | 'created_at'>>
+      }
+      variant_lifestyle_images: {
+        Row: VariantLifestyleImage
+        Insert: Omit<VariantLifestyleImage, 'id' | 'created_at'>
+        Update: Partial<Omit<VariantLifestyleImage, 'id' | 'created_at'>>
       }
       performance_snapshots: {
         Row: PerformanceSnapshot

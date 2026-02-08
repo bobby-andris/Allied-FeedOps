@@ -4,31 +4,39 @@ import { createClient } from '@/lib/supabase/server'
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
-    const { image_id, master_sku, selected, finish } = body
+    const { image_id, master_sku, selected, finish, imageType } = body
 
-    if (!image_id || !master_sku) {
+    if (!image_id || !master_sku || !imageType) {
       return NextResponse.json(
-        { error: 'image_id and master_sku are required' },
+        { error: 'image_id, master_sku, and imageType are required' },
+        { status: 400 }
+      )
+    }
+
+    if (!['product', 'variant'].includes(imageType)) {
+      return NextResponse.json(
+        { error: 'imageType must be "product" or "variant"' },
         { status: 400 }
       )
     }
 
     const supabase = await createClient()
 
+    // Determine table based on image type
+    const tableName = imageType === 'product'
+      ? 'product_lifestyle_images'
+      : 'variant_lifestyle_images'
+
     // If selecting an image, first unselect all other images at the same level
-    // (either master SKU level or specific finish level)
     if (selected) {
       const clearQuery = supabase
-        .from('generated_images')
-        .update({ selected: false })
+        .from(tableName)
+        .update({ user_selected: false })
         .eq('master_sku', master_sku)
 
-      if (finish) {
-        // Clear only images for this specific finish
+      if (imageType === 'variant' && finish) {
+        // Clear only images for this specific finish (variant level)
         clearQuery.eq('finish', finish)
-      } else {
-        // Clear only master-level images (finish is null)
-        clearQuery.is('finish', null)
       }
 
       await clearQuery
@@ -50,8 +58,8 @@ export async function PATCH(request: NextRequest) {
 
     // Update the specific image
     const { data, error } = await supabase
-      .from('generated_images')
-      .update({ selected })
+      .from(tableName)
+      .update({ user_selected: selected })
       .eq('id', image_id)
       .select()
       .single()

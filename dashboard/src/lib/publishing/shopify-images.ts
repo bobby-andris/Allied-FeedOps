@@ -304,3 +304,53 @@ export async function uploadAndAssociateImage(
     cdnUrl: finalResult.cdnUrl,
   }
 }
+
+/**
+ * Upload product-level lifestyle image to Shopify product.
+ * Used for images that appear on the product detail page (not variant-specific).
+ *
+ * @param imageUrl - Public URL from Supabase Storage
+ * @param shopifyProductId - Shopify product GID (e.g., "gid://shopify/Product/123") or numeric ID
+ * @param altText - Alt text for accessibility
+ * @returns Upload result with media ID and CDN URL
+ */
+export async function uploadProductImage(
+  imageUrl: string,
+  shopifyProductId: string,
+  altText: string
+): Promise<{ mediaId: string; cdnUrl: string }> {
+  // Convert product ID to GID format if needed
+  const productGid = shopifyProductId.startsWith('gid://')
+    ? shopifyProductId
+    : `gid://shopify/Product/${shopifyProductId}`
+
+  return await uploadAndAssociateImage(imageUrl, productGid, undefined, altText)
+}
+
+/**
+ * Upload variant-level lifestyle image to Shopify and associate with specific variant.
+ * These images are hosted on Shopify CDN but published to GMC feed (not shown on Shopify product pages).
+ *
+ * @param imageUrl - Public URL from Supabase Storage
+ * @param shopifyProductId - Shopify product GID or numeric ID
+ * @param shopifyVariantId - Shopify variant GID or numeric ID
+ * @param altText - Alt text for accessibility
+ * @returns Upload result with media ID and CDN URL
+ */
+export async function uploadVariantImage(
+  imageUrl: string,
+  shopifyProductId: string,
+  shopifyVariantId: string,
+  altText: string
+): Promise<{ mediaId: string; cdnUrl: string }> {
+  // Convert IDs to GID format if needed
+  const productGid = shopifyProductId.startsWith('gid://')
+    ? shopifyProductId
+    : `gid://shopify/Product/${shopifyProductId}`
+
+  const variantGid = shopifyVariantId.startsWith('gid://')
+    ? shopifyVariantId
+    : `gid://shopify/ProductVariant/${shopifyVariantId}`
+
+  return await uploadAndAssociateImage(imageUrl, productGid, variantGid, altText)
+}

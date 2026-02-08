@@ -92,11 +92,11 @@ export function LifestyleImageReview({
   const pushedToGmcCount = variantImages.filter(i => i.gmc_pushed_at).length
 
   // API handlers
-  const handleImageApprove = async (imageId: string) => {
+  const handleImageApprove = async (imageId: string, imageType: 'product' | 'variant') => {
     const response = await fetch('/api/review/images/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageId, status: 'approved' }),
+      body: JSON.stringify({ imageId, status: 'approved', imageType }),
     })
 
     if (!response.ok) {
@@ -107,11 +107,11 @@ export function LifestyleImageReview({
     onRefresh()
   }
 
-  const handleImageReject = async (imageId: string, reason?: string) => {
+  const handleImageReject = async (imageId: string, imageType: 'product' | 'variant', reason?: string) => {
     const response = await fetch('/api/review/images/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageId, status: 'rejected', reason }),
+      body: JSON.stringify({ imageId, status: 'rejected', imageType, reason }),
     })
 
     if (!response.ok) {
@@ -277,8 +277,8 @@ function VariantImageSection({
   currentFinish: string | null
   currentFinishImages: LifestyleImage[]
   sku: string
-  onApprove: (imageId: string) => Promise<void>
-  onReject: (imageId: string, reason?: string) => Promise<void>
+  onApprove: (imageId: string, imageType: 'product' | 'variant') => Promise<void>
+  onReject: (imageId: string, imageType: 'product' | 'variant', reason?: string) => Promise<void>
   onUserSelect: (imageId: string, finish: string) => Promise<void>
   onUseForMaster: (imageId: string) => Promise<void>
 }) {
@@ -364,8 +364,8 @@ function VariantImageSection({
               isUserSelected={image.user_selected}
               isUseForMaster={image.use_for_master}
               gmcPushedAt={image.gmc_pushed_at}
-              onApprove={() => onApprove(image.id)}
-              onReject={(reason) => onReject(image.id, reason)}
+              onApprove={() => onApprove(image.id, 'variant')}
+              onReject={(reason) => onReject(image.id, 'variant', reason)}
               onUserSelect={() => onUserSelect(image.id, currentFinish)}
               onUseForMaster={() => onUseForMaster(image.id)}
             />

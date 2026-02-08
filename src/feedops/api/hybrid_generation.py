@@ -291,6 +291,9 @@ async def adapt_variant_content(
         supabase.table("regeneration_history").insert(
             {
                 "generated_content_id": content_id_result.data["id"],
+                "master_sku": variant_sku,
+                "platform": platform,
+                "content_type": content_type,
                 "system_prompt": system_prompt,
                 "user_prompt": user_prompt,
                 "model_version": model,

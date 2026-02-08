@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { publishExpandedVariantsToGoogleSheets } from '@/lib/publishing/google-sheets'
 import { publishToShopify } from '@/lib/publishing/shopify'
 import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
+import { uploadProductImage, uploadVariantImage } from '@/lib/publishing/shopify-images'
 import type { Platform, PublishEventInsert } from '@/lib/publishing/types'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -115,7 +116,15 @@ export async function POST(request: NextRequest) {
     const offerIds = variants?.map((v) => v.gmc_offer_id).filter(Boolean) || []
     const shopifyProductId = variants?.find((v) => v.shopify_product_id)?.shopify_product_id
 
-    // 3. Publish to each platform
+    // 3. Migrate approved images to Shopify CDN (if not already migrated)
+    // Non-blocking - log errors but continue with publish
+    try {
+      await migrateImagesForPublish(supabase, master_sku)
+    } catch (error) {
+      console.error('Image CDN migration failed (non-blocking):', error)
+    }
+
+    // 4. Publish to each platform
     const results: PlatformResult[] = []
 
     // Publish to Google
@@ -364,4 +373,106 @@ async function logPublishEvent(
   } catch (error) {
     console.error('Failed to log publish event:', error)
   }
+}
+
+/**
+ * Migrate approved images to Shopify CDN before publishing.
+ * Only migrates images that are approved but not yet on CDN.
+ *
+ * Lifecycle: Supabase Storage → Shopify CDN → Google Sheets
+ */
+async function migrateImagesForPublish(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  masterSku: string
+): Promise<void> {
+  console.log(`[CDN Migration] Starting for ${masterSku}`)
+
+  // Get product-level images needing migration
+  const { data: productImages } = await supabase
+    .from('product_lifestyle_images')
+    .select('id, image_url, shopify_product_id, master_sku')
+    .eq('master_sku', masterSku)
+    .eq('approval_status', 'approved')
+    .is('shopify_cdn_url', null)
+
+  // Get variant-level images needing migration
+  const { data: variantImages } = await supabase
+    .from('variant_lifestyle_images')
+    .select('id, image_url, gmc_offer_id, master_sku, finish')
+    .eq('master_sku', masterSku)
+    .eq('approval_status', 'approved')
+    .is('shopify_cdn_url', null)
+
+  let migratedCount = 0
+  let errorCount = 0
+
+  // Migrate product images
+  for (const img of productImages || []) {
+    try {
+      console.log(`[CDN Migration] Uploading product image ${img.id}`)
+      const result = await uploadProductImage(
+        img.image_url,
+        img.shopify_product_id,
+        `${img.master_sku} product image`
+      )
+
+      await supabase
+        .from('product_lifestyle_images')
+        .update({
+          shopify_media_id: result.mediaId,
+          shopify_cdn_url: result.cdnUrl,
+          migrated_to_shopify_at: new Date().toISOString(),
+        })
+        .eq('id', img.id)
+
+      migratedCount++
+      console.log(`[CDN Migration] ✓ Product image ${img.id} migrated`)
+    } catch (error) {
+      console.error(`[CDN Migration] ✗ Failed to migrate product image ${img.id}:`, error)
+      errorCount++
+    }
+  }
+
+  // Migrate variant images
+  for (const img of variantImages || []) {
+    try {
+      // Lookup Shopify IDs from variant_index
+      const { data: variant } = await supabase
+        .from('variant_index')
+        .select('shopify_product_id, shopify_variant_id')
+        .eq('gmc_offer_id', img.gmc_offer_id)
+        .single()
+
+      if (!variant?.shopify_product_id) {
+        console.warn(`[CDN Migration] No Shopify mapping for ${img.gmc_offer_id}`)
+        errorCount++
+        continue
+      }
+
+      console.log(`[CDN Migration] Uploading variant image ${img.id} for ${img.gmc_offer_id}`)
+      const result = await uploadVariantImage(
+        img.image_url,
+        variant.shopify_product_id,
+        variant.shopify_variant_id || '',
+        `${img.master_sku} - ${img.finish}`
+      )
+
+      await supabase
+        .from('variant_lifestyle_images')
+        .update({
+          shopify_media_id: result.mediaId,
+          shopify_cdn_url: result.cdnUrl,
+          migrated_to_shopify_at: new Date().toISOString(),
+        })
+        .eq('id', img.id)
+
+      migratedCount++
+      console.log(`[CDN Migration] ✓ Variant image ${img.id} migrated`)
+    } catch (error) {
+      console.error(`[CDN Migration] ✗ Failed to migrate variant image ${img.id}:`, error)
+      errorCount++
+    }
+  }
+
+  console.log(`[CDN Migration] Complete: ${migratedCount} migrated, ${errorCount} errors`)
 }

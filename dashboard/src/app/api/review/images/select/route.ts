@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // First, clear user_selected for all images of this SKU+finish
+      // First, clear user_selected for all variant images of this SKU+finish
       const { error: clearError } = await supabase
-        .from('generated_images')
+        .from('variant_lifestyle_images')
         .update({ user_selected: false })
         .eq('master_sku', masterSku)
         .eq('finish', finish)
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
       // Then set the new selection
       const { error: selectError } = await supabase
-        .from('generated_images')
+        .from('variant_lifestyle_images')
         .update({ user_selected: true })
         .eq('id', imageId)
 
@@ -74,12 +74,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, action: 'user_selected' })
     }
 
-    // Handle use_for_master
+    // Handle use_for_master (product-level images)
     if (useForMaster) {
-      // First, clear use_for_master for all images of this SKU
+      // First, clear user_selected for all product images of this SKU
       const { error: clearError } = await supabase
-        .from('generated_images')
-        .update({ use_for_master: false })
+        .from('product_lifestyle_images')
+        .update({ user_selected: false })
         .eq('master_sku', masterSku)
 
       if (clearError) {
@@ -92,8 +92,8 @@ export async function POST(request: NextRequest) {
 
       // Then set the new master image
       const { error: masterError } = await supabase
-        .from('generated_images')
-        .update({ use_for_master: true })
+        .from('product_lifestyle_images')
+        .update({ user_selected: true })
         .eq('id', imageId)
 
       if (masterError) {

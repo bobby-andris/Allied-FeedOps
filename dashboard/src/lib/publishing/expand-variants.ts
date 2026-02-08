@@ -30,57 +30,39 @@ export interface ExpandVariantsOptions {
 }
 
 /**
- * Query approved lifestyle images for a master SKU that have been migrated to Shopify CDN.
- * Returns a map of finish_code -> shopify_cdn_url for variant-specific images,
- * plus a master image URL if use_for_master is true.
+ * Query approved variant lifestyle images for publishing to GMC feed.
+ * Returns map of gmc_offer_id -> shopify_cdn_url
  *
- * Strategy:
- * - Fetch all approved images for the SKU that have Shopify CDN URLs
- * - Build a map of finish-specific images (keyed by finish_code)
- * - Extract master image (use_for_master = true) as fallback
+ * IMPORTANT: Only returns images that have been migrated to Shopify CDN.
+ * Images still in Supabase Storage (not yet migrated) are excluded.
  *
- * IMPORTANT: Only images migrated to Shopify CDN are returned. Supabase Storage URLs
- * are not published to Google Sheets - they're only for review workflow.
+ * Uses new variant_lifestyle_images table which properly links to gmc_offer_id
+ * for precise variant-to-image mapping.
  */
-async function queryApprovedImages(
+async function queryApprovedVariantImages(
   supabase: Awaited<ReturnType<typeof createClient>>,
   master_sku: string
-): Promise<{
-  finishImages: Map<string, string>
-  masterImageUrl: string | null
-}> {
+): Promise<Map<string, string>> {
   const { data: images, error } = await supabase
-    .from('generated_images')
-    .select('finish_code, shopify_cdn_url, use_for_master')
+    .from('variant_lifestyle_images')
+    .select('gmc_offer_id, shopify_cdn_url')
     .eq('master_sku', master_sku)
     .eq('approval_status', 'approved')
-    .not('shopify_cdn_url', 'is', null)
+    .not('shopify_cdn_url', 'is', null)  // Must be migrated to CDN
 
   if (error) {
-    console.error('Error fetching approved images:', error)
-    return { finishImages: new Map(), masterImageUrl: null }
+    console.error('Error fetching approved variant images:', error)
+    return new Map()
   }
 
-  if (!images || images.length === 0) {
-    return { finishImages: new Map(), masterImageUrl: null }
-  }
-
-  const finishImages = new Map<string, string>()
-  let masterImageUrl: string | null = null
-
-  for (const img of images) {
-    // Extract master image (applies to all variants)
-    if (img.use_for_master && img.shopify_cdn_url) {
-      masterImageUrl = img.shopify_cdn_url
-    }
-
-    // Extract finish-specific images
-    if (img.finish_code && img.shopify_cdn_url && !img.use_for_master) {
-      finishImages.set(img.finish_code, img.shopify_cdn_url)
+  const imageMap = new Map<string, string>()
+  for (const img of images || []) {
+    if (img.shopify_cdn_url) {
+      imageMap.set(img.gmc_offer_id, img.shopify_cdn_url)
     }
   }
 
-  return { finishImages, masterImageUrl }
+  return imageMap
 }
 
 /**
@@ -128,29 +110,22 @@ export async function expandVariantsForPublish(
 
   const finishSentences = (finishData?.finish_sentences as Record<string, string>) || {}
 
-  // Query approved lifestyle images for this SKU
-  const { finishImages, masterImageUrl } = await queryApprovedImages(supabase, master_sku)
+  // Get approved variant images (with CDN URLs)
+  const variantImages = await queryApprovedVariantImages(supabase, master_sku)
 
   // Expand each variant
-  return variants.map((v) => {
-    // Determine image URL: finish-specific takes precedence, then master fallback
-    const imageUrl = v.finish_code
-      ? finishImages.get(v.finish_code) || masterImageUrl || undefined
-      : masterImageUrl || undefined
-
-    return {
-      gmc_offer_id: v.gmc_offer_id,
-      finish: v.finish || 'Unknown',
-      finish_code: v.finish_code,
-      title: generateVariantTitle(approved_title, v.finish || 'Unknown', platform),
-      description: generateVariantDescription(
-        approved_description,
-        v.finish || 'Unknown',
-        finishSentences
-      ),
-      image_url: imageUrl,
-    }
-  })
+  return variants.map((v) => ({
+    gmc_offer_id: v.gmc_offer_id,
+    finish: v.finish || 'Unknown',
+    finish_code: v.finish_code,
+    title: generateVariantTitle(approved_title, v.finish || 'Unknown', platform),
+    description: generateVariantDescription(
+      approved_description,
+      v.finish || 'Unknown',
+      finishSentences
+    ),
+    image_url: variantImages.get(v.gmc_offer_id),  // Direct lookup by gmc_offer_id
+  }))
 }
 
 /**

@@ -44,16 +44,24 @@ def _load_client():
     """Load Google Ads API client (google-ads library).
 
     Config resolution order:
-    - GOOGLE_ADS_CONFIG_PATH (explicit)
-    - default google-ads.yaml resolution (library default)
+    1. GOOGLE_ADS_CONFIG_PATH (explicit yaml path)
+    2. Environment variables (Cloud Run, CI/CD)
+    3. google-ads.yaml in home directory (local development)
     """
     # Lazy import: keeps this dependency optional until API mode is enabled.
     from google.ads.googleads.client import GoogleAdsClient  # type: ignore[import-not-found]
 
+    # If explicit config path is set, use it
     config_path = _truthy_env("GOOGLE_ADS_CONFIG_PATH")
     if config_path:
         return GoogleAdsClient.load_from_storage(path=config_path)
-    return GoogleAdsClient.load_from_storage()
+
+    # Try loading from environment variables (preferred for Cloud Run)
+    try:
+        return GoogleAdsClient.load_from_env()
+    except Exception:
+        # Fall back to yaml file for local development
+        return GoogleAdsClient.load_from_storage()
 
 
 def _fetch_search_terms_for_item_ids(

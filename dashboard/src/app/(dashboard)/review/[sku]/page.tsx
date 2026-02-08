@@ -138,16 +138,42 @@ async function getSkuData(urlSku: string) {
   // Use effectiveSku for remaining queries (the SKU format that worked)
   const sku = effectiveSku
 
-  // Get images
-  const { data: images, error: imagesError } = await supabase
-    .from('generated_images')
+  // Get product-level lifestyle images (for Shopify product page display)
+  const { data: productLifestyleImages, error: productImagesError } = await supabase
+    .from('product_lifestyle_images')
     .select('*')
     .eq('master_sku', sku)
     .order('variation_index')
 
-  if (imagesError) {
-    console.error('Error fetching images:', imagesError)
+  if (productImagesError) {
+    console.error('Error fetching product lifestyle images:', productImagesError)
   }
+
+  // Get variant-level lifestyle images (for GMC feed / variant-specific display)
+  const { data: variantLifestyleImages, error: variantImagesError } = await supabase
+    .from('variant_lifestyle_images')
+    .select('*')
+    .eq('master_sku', sku)
+    .order('finish', { ascending: true })
+    .order('variation_index')
+
+  if (variantImagesError) {
+    console.error('Error fetching variant lifestyle images:', variantImagesError)
+  }
+
+  // Transform for UI (combine both types for backward compat)
+  const images: ImageRecord[] = [
+    ...(productLifestyleImages || []).map(img => ({
+      ...img,
+      use_for_master: true,
+      approval_status: img.approval_status as 'pending' | 'approved' | 'rejected',
+    })),
+    ...(variantLifestyleImages || []).map(img => ({
+      ...img,
+      use_for_master: false,
+      approval_status: img.approval_status as 'pending' | 'approved' | 'rejected',
+    })),
+  ]
 
   // Get approval status
   const { data: approval, error: approvalError } = await supabase
@@ -289,15 +315,9 @@ async function getSkuData(urlSku: string) {
     .eq('platform', 'bing')
     .single()
 
-  // Transform images to ensure approval_status has a valid value
-  const transformedImages: ImageRecord[] = (images || []).map(img => ({
-    ...img,
-    approval_status: (img.approval_status as 'pending' | 'approved' | 'rejected') || 'pending',
-  }))
-
   return {
     content: (content || []) as ContentRecord[],
-    images: transformedImages,
+    images,
     approval: approval as ApprovalRecord | null,
     variants: (variants || []) as VariantIndex[],
     variantApprovals: (variantApprovals || []) as VariantApproval[],

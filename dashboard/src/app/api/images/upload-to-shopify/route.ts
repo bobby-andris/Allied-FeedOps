@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { uploadAndAssociateImage } from '@/lib/publishing/shopify-images'
+import { uploadProductImage, uploadVariantImage } from '@/lib/publishing/shopify-images'
 
 /**
  * Upload approved lifestyle image to Shopify CDN.
  *
  * POST /api/images/upload-to-shopify
- * Body: { imageId: string }
+ * Body: { imageId: string, imageType: 'product' | 'variant' }
  *
  * Workflow:
  * 1. Verify image is approved
@@ -19,21 +19,37 @@ import { uploadAndAssociateImage } from '@/lib/publishing/shopify-images'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { imageId } = body
+    const { imageId, imageType } = body
 
-    if (!imageId) {
+    if (!imageId || !imageType) {
       return NextResponse.json(
-        { error: 'imageId is required' },
+        { error: 'imageId and imageType are required' },
+        { status: 400 }
+      )
+    }
+
+    if (!['product', 'variant'].includes(imageType)) {
+      return NextResponse.json(
+        { error: 'imageType must be "product" or "variant"' },
         { status: 400 }
       )
     }
 
     const supabase = await createClient()
 
-    // Get image details
+    // Determine table based on image type
+    const tableName = imageType === 'product'
+      ? 'product_lifestyle_images'
+      : 'variant_lifestyle_images'
+
+    // Get image details from appropriate table
+    const selectFields = imageType === 'product'
+      ? 'id, master_sku, image_url, shopify_product_id, approval_status'
+      : 'id, master_sku, finish, image_url, gmc_offer_id, approval_status'
+
     const { data: image, error: fetchError } = await supabase
-      .from('generated_images')
-      .select('id, master_sku, finish_code, image_url, use_for_master, approval_status')
+      .from(tableName)
+      .select(selectFields)
       .eq('id', imageId)
       .single()
 
@@ -58,46 +74,48 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get Shopify product/variant IDs from variant_index
-    const query = supabase
-      .from('variant_index')
-      .select('shopify_product_id, shopify_variant_id, finish_code')
-      .eq('master_sku', image.master_sku)
+    let result: { mediaId: string; cdnUrl: string }
 
-    // If finish-specific image, filter by finish_code
-    if (image.finish_code && !image.use_for_master) {
-      query.eq('finish_code', image.finish_code)
-    }
+    if (imageType === 'product') {
+      // Product-level image - has shopify_product_id directly
+      if (!image.shopify_product_id) {
+        return NextResponse.json(
+          { error: 'Shopify product ID not found' },
+          { status: 404 }
+        )
+      }
 
-    const { data: variants, error: variantError } = await query.limit(1)
+      result = await uploadProductImage(
+        image.image_url,
+        image.shopify_product_id,
+        `${image.master_sku} product image`
+      )
+    } else {
+      // Variant-level image - lookup Shopify IDs via gmc_offer_id
+      const { data: variant, error: variantError } = await supabase
+        .from('variant_index')
+        .select('shopify_product_id, shopify_variant_id')
+        .eq('gmc_offer_id', image.gmc_offer_id)
+        .single()
 
-    if (variantError || !variants || variants.length === 0) {
-      return NextResponse.json(
-        { error: 'No Shopify product/variant mapping found in variant_index' },
-        { status: 404 }
+      if (variantError || !variant?.shopify_product_id) {
+        return NextResponse.json(
+          { error: 'No Shopify mapping found for this variant' },
+          { status: 404 }
+        )
+      }
+
+      result = await uploadVariantImage(
+        image.image_url,
+        variant.shopify_product_id,
+        variant.shopify_variant_id || '',
+        `${image.master_sku} - ${image.finish}`
       )
     }
-
-    const variant = variants[0]
-
-    if (!variant.shopify_product_id) {
-      return NextResponse.json(
-        { error: 'Shopify product ID not found in variant_index' },
-        { status: 404 }
-      )
-    }
-
-    // Upload to Shopify
-    const result = await uploadAndAssociateImage(
-      image.image_url,
-      variant.shopify_product_id,
-      variant.shopify_variant_id || undefined,
-      `${image.master_sku} - ${image.finish_code || 'Master'}`
-    )
 
     // Update database with Shopify CDN URL and metadata
     const { error: updateError } = await supabase
-      .from('generated_images')
+      .from(tableName)
       .update({
         shopify_media_id: result.mediaId,
         shopify_cdn_url: result.cdnUrl,
