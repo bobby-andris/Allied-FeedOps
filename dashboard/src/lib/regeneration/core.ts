@@ -58,6 +58,7 @@ export interface RegenerationResult {
   model?: string
   usedEvidence?: boolean
   usedVision?: boolean
+  mode?: 'full' | 'variant-adaptation'
 }
 
 /**
@@ -490,6 +491,297 @@ export async function regenerateContent(
       model: MODEL,
       usedEvidence: useEnhancedPrompt,
       usedVision: shouldUseVision,
+      mode: 'full',
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return { success: false, error: message }
+  }
+}
+
+/**
+ * Build variant adaptation prompt
+ */
+function buildVariantAdaptationPrompt(
+  contentType: ContentType,
+  platform: Platform,
+  baseSku: string,
+  variantSku: string,
+  baseContent: string,
+  baseSpec: string,
+  variantSpec: string
+): { prompt: string; requiresJson: boolean } {
+  const context = PLATFORM_CONTEXT[platform]?.[contentType] || ''
+  const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
+
+  if (isVariantDescription) {
+    return {
+      prompt: `You are adapting product content for a variant specification. You MUST respond with valid JSON.
+
+CONTEXT: ${context}
+
+BASE PRODUCT: ${baseSku}
+BASE CONTENT:
+${baseContent}
+
+TARGET PRODUCT: ${variantSku}
+KEY DIFFERENCE: Specification changes from ${baseSpec} to ${variantSpec}
+
+TASK:
+1. Adapt the description for the ${variantSpec} specification
+2. Update numeric specs and measurements (${baseSpec} → ${variantSpec})
+3. Adjust use case emphasis based on the specification difference
+4. Maintain the SAME brand voice, structure, and key selling points from the base content
+5. Keep similar length and format
+6. Generate finish_sentences for all 28 finishes relating to THIS variant
+
+CRITICAL:
+- This is a specification variant of the same product family
+- Maintain consistency with the base content's storytelling and tone
+- Focus only on meaningful differences (specs, use cases)
+- Do NOT reinvent the entire description - adapt strategically
+
+Respond with this EXACT JSON structure (no markdown, no code blocks):
+{
+  "content": "The adapted description for ${variantSpec}...",
+  "finish_sentences": {
+    "Antique Brass": "One sentence relating Antique Brass to this ${variantSpec} product...",
+    ... (all 28 finishes)
+  }
+}`,
+      requiresJson: true,
+    }
+  }
+
+  // For titles
+  return {
+    prompt: `You are adapting a product title for a variant specification.
+
+CONTEXT: ${context}
+
+BASE PRODUCT: ${baseSku}
+BASE TITLE: ${baseContent}
+
+TARGET PRODUCT: ${variantSku}
+KEY DIFFERENCE: Specification changes from ${baseSpec} to ${variantSpec}
+
+TASK:
+Adapt the title for the ${variantSpec} specification. Update the spec reference (${baseSpec} → ${variantSpec}) while maintaining the same structure and format.
+
+CRITICAL RULES:
+- For Google/Bing titles: Use {FINISH_NAME} placeholder at the START, update spec to ${variantSpec}
+- For Shopify titles: Update spec to ${variantSpec}, keep same structure as base
+- Maintain the SAME collection name, product name, and format
+- ONLY change the specification number/identifier
+
+Respond with ONLY the adapted title text.`,
+    requiresJson: false,
+  }
+}
+
+/**
+ * Adapt content from a base SKU for a variant SKU
+ * Uses focused prompting to maintain consistency while updating key differences
+ */
+export async function adaptVariantContent(
+  supabase: SupabaseClient,
+  baseSku: string,
+  variantSku: string,
+  platform: Platform,
+  contentType: ContentType,
+  baseSpec: string,
+  variantSpec: string
+): Promise<RegenerationResult> {
+  try {
+    // Get base content
+    const { data: baseContentData } = await supabase
+      .from('generated_content')
+      .select('candidate_content, approved_content')
+      .eq('master_sku', baseSku)
+      .eq('platform', platform)
+      .eq('content_type', contentType)
+      .maybeSingle()
+
+    if (!baseContentData) {
+      return {
+        success: false,
+        error: `No base content found for ${baseSku}/${platform}/${contentType}`,
+      }
+    }
+
+    // Use approved content if available, otherwise candidate
+    const baseContent = baseContentData.approved_content || baseContentData.candidate_content
+
+    if (!baseContent) {
+      return {
+        success: false,
+        error: `Base content is empty for ${baseSku}/${platform}/${contentType}`,
+      }
+    }
+
+    // Get current content for version tracking
+    const { data: currentContentData } = await supabase
+      .from('generated_content')
+      .select('*')
+      .eq('master_sku', variantSku)
+      .eq('platform', platform)
+      .eq('content_type', contentType)
+      .maybeSingle()
+
+    // Build adaptation prompt
+    const systemPrompt = `You are a product content specialist adapting content for product specification variants. Your goal is to maintain brand consistency while updating key specification differences.`
+
+    const { prompt: userPrompt, requiresJson } = buildVariantAdaptationPrompt(
+      contentType,
+      platform,
+      baseSku,
+      variantSku,
+      baseContent,
+      baseSpec,
+      variantSpec
+    )
+
+    const promptHash = crypto
+      .createHash('sha256')
+      .update(`${systemPrompt}\n\n${userPrompt}`, 'utf8')
+      .digest('hex')
+
+    // Call OpenAI
+    const messages: ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ]
+
+    const maxTokens = requiresJson ? 4000 : (contentType === 'title' ? 200 : 1000)
+    const tokenParams = MODEL.startsWith('gpt-5')
+      ? ({ max_completion_tokens: maxTokens } as const)
+      : ({ max_tokens: maxTokens } as const)
+
+    const completion = await getOpenAIClient().chat.completions.create({
+      model: MODEL,
+      messages,
+      temperature: 0.6, // Slightly lower than full generation for consistency
+      stream: false,
+      ...(requiresJson ? { response_format: { type: 'json_object' as const } } : {}),
+      ...tokenParams,
+    })
+
+    const rawResponse = completion.choices[0]?.message?.content?.trim()
+
+    if (!rawResponse) {
+      return { success: false, error: 'No content generated from OpenAI' }
+    }
+
+    // Parse response
+    let newContent: string
+    let finishSentences: Record<string, string> | null = null
+
+    if (requiresJson) {
+      try {
+        const parsed = JSON.parse(rawResponse)
+        newContent = parsed.content?.trim()
+        finishSentences = parsed.finish_sentences || null
+
+        if (!newContent) {
+          return { success: false, error: 'Invalid JSON response: missing content field' }
+        }
+      } catch {
+        newContent = rawResponse
+      }
+    } else {
+      newContent = rawResponse
+    }
+
+    // Validate
+    const violations = validateGeneratedContent(newContent, platform, contentType)
+
+    if (violations.length > 0) {
+      console.warn(`Validation violations for ${variantSku}/${platform}/${contentType}: ${violations.join('; ')}`)
+      // Continue anyway - variant adaptation is more forgiving
+    }
+
+    // Save to database
+    const currentVersion = currentContentData?.version ?? 0
+    const nextVersion = currentVersion + 1
+
+    if (currentContentData) {
+      const { error: updateError } = await supabase
+        .from('generated_content')
+        .update({
+          candidate_content: newContent,
+          version: nextVersion,
+          is_current: true,
+          generation_model: `${MODEL}-variant-adaptation`,
+          generation_prompt_hash: promptHash,
+          generation_timestamp: new Date().toISOString(),
+        })
+        .eq('id', currentContentData.id)
+
+      if (updateError) {
+        return { success: false, error: `Failed to update: ${updateError.message}` }
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('generated_content')
+        .insert({
+          master_sku: variantSku,
+          platform,
+          content_type: contentType,
+          candidate_content: newContent,
+          baseline_content: null,
+          version: 1,
+          is_current: true,
+          generation_model: `${MODEL}-variant-adaptation`,
+          generation_prompt_hash: promptHash,
+          generation_timestamp: new Date().toISOString(),
+        })
+
+      if (insertError) {
+        return { success: false, error: `Failed to insert: ${insertError.message}` }
+      }
+    }
+
+    // Save finish_sentences if present
+    if (finishSentences && Object.keys(finishSentences).length > 0 && (platform === 'google' || platform === 'bing')) {
+      await supabase
+        .from('variant_finish_sentences')
+        .upsert(
+          {
+            master_sku: variantSku,
+            platform,
+            finish_sentences: finishSentences,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'master_sku,platform' }
+        )
+    }
+
+    // Log to regeneration history
+    await supabase
+      .from('regeneration_history')
+      .insert({
+        master_sku: variantSku,
+        content_type: contentType,
+        platform,
+        mode: 'variant-adaptation',
+        previous_content: currentContentData?.candidate_content || null,
+        new_content: newContent,
+        model_version: `${MODEL}-variant-adaptation`,
+        system_prompt: systemPrompt,
+        user_prompt: userPrompt,
+        prompt_hash: promptHash,
+        quality_score_before: currentContentData?.quality_score || null,
+      })
+
+    return {
+      success: true,
+      content: newContent,
+      finishSentences: finishSentences || undefined,
+      version: nextVersion,
+      model: `${MODEL}-variant-adaptation`,
+      usedEvidence: false,
+      usedVision: false,
+      mode: 'variant-adaptation',
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

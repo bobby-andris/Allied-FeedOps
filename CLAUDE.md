@@ -1,364 +1,205 @@
-# Allied-FeedOps (Project Memory — Keep Short)
+# Allied-FeedOps
 
-## Canonical UI / Production
+## Quick Reference
 
-- **Next.js Dashboard (Vercel)**: `https://allied-feed-ops.vercel.app/login`
-- **Supabase project**: `qezuszwufortkiutlhym`
+**Production**:
+- Dashboard: https://allied-feed-ops.vercel.app/login
+- Pipeline API: https://feedops-pipeline-623866089882.us-east1.run.app
+- Supabase: `qezuszwufortkiutlhym`
 
-**Access**
+**Defaults**:
+- Google Ads customer ID: `6253381786`
+- GA4 property: Allied Brass — GA4 (Old)
 
-- Do **not** store login passwords in git. Share test credentials via a password manager / internal note.
+## MCP Servers & Skills
 
-## Defaults (for integrations / tooling)
+**Use these before writing custom code**:
 
-- **Google Ads customer ID**: `6253381786`
-- **GA4 property**: Allied Brass — GA4 (Old)
+**MCP Servers**:
+- `mcp__supabase__*` - Database queries, migrations, schema (`execute_sql` for quick queries)
+- `mcp__google-ads-mcp__*` - Ads data, Keyword Planner
+- `mcp__merchant-api-devdocs__*` - GMC product data, performance
+- `mcp__Apify__*` - Web scraping, competitor analysis
+- `mcp__vercel__*` - Deployment logs, management
+- `mcp__gcloud__*` / `mcp__cloud-run__*` - GCP operations
 
-### Google Ads API Capabilities
+**Agents** (via Task tool):
+- `merchant-integrator` - Merchant API migrations and integrations
 
-- **Search Terms**: `search_term_view` - actual queries triggering Shopping ads
-  - Note: Cannot get `product_item_id` in same query - product matching done via post-processing
-- **Keyword Planner**: `KeywordPlanIdeaService` - search volume, competition, CPC estimates
-  - `GenerateKeywordHistoricalMetrics` - get avg monthly searches, competition index (0-100), CPC ranges
-  - `GenerateKeywordIdeas` - discover related keywords from seeds (keywords, URLs, sites)
-  - Rate limited - cache results (metrics update monthly)
+**Skills** (via Skill tool):
+- `superpowers:brainstorming` - Before creative work
+- `superpowers:systematic-debugging` - When encountering bugs
+- `superpowers:test-driven-development` - Before implementation
+- `marketing-skills:*` - Copy, SEO, marketing content
 
-### Google Ads API Constraints (search queries)
+## What's Implemented
 
-**Critical limitation**: `search_term_view` cannot be joined with `product_item_id` in same query - Google Ads API restriction
-- Workaround: Fetch products by campaign from `shopping_performance_view`, fetch search terms by campaign, join via `campaign_id`
-- Result: `item_ids` array contains all variants active in campaign, not necessarily triggered by each specific query
-- Metrics are campaign-level totals (shared across all products), not per-variant breakdowns
-- UI must clarify this limitation to avoid misleading users about per-variant performance
+Prompts `01`-`09`, `14`, `19`-`24`:
+- 01-06: Performance, batches, publishing, variant review, settings, regeneration
+- 07: Dashboard overview with charts
+- 08: SKU selection & generation (tier-based scoring)
+- 09: Competitor intelligence (SERP analysis, Apify scraping)
+- 14: Search query insights (Google Ads search terms + Keyword Planner)
+- 19: Evidence table (product_catalog with vision support)
+- 20: SKU review enhancements (hero images, lifestyle approval)
+- 21: Variant content review (accordion UI, bulk actions)
+- 22: Performance data lifecycle (baseline + snapshots)
+- 23: Publishing enhancements (structured fields, Shopify CDN)
+- 24: Post-publish monitoring (performance/search delta tracking)
 
-## Available MCP Servers & Skills (use these!)
+## Content Generation
 
-**MCP Servers** - Use these for database operations, external APIs, and browser automation:
+**Default: Cloud Run Pipeline**
+- Location: `src/feedops/api/main.py` (FastAPI)
+- Quality: ~75-80/100
+- Speed: ~3 minutes per SKU
+- Use for: Bulk generation (50+ SKUs)
 
-- **Supabase MCP** (`mcp__supabase__*`): Use for direct database queries, migrations, and schema inspection. Prefer `mcp__supabase__execute_sql` for quick queries instead of writing scripts. Available tools: `execute_sql`, `apply_migration`, `list_tables`, `get_project`, etc.
-  - Use `execute_sql` with `information_schema.columns` to inspect table schemas before implementing features
-  - Example: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'performance_baselines'`
-  - For quick data population, use `execute_sql` with INSERT statements directly (faster than writing migration scripts)
-  - Example: `INSERT INTO performance_baselines (...) VALUES (...) ON CONFLICT (master_sku, platform) DO UPDATE SET ...`
-- **Playwright MCP** (`mcp__plugin_playwright_playwright__*`): Use for visual verification, UI testing, and screenshots. Tools: `browser_navigate`, `browser_take_screenshot`, `browser_click`, `browser_snapshot`, etc.
-- **Apify MCP** (`mcp__Apify__*`): Use for web scraping, competitor analysis, and data extraction. Search actors first with `search-actors`.
-- **Google Ads MCP** (`mcp__google-ads-mcp__*`): Use for Ads data queries and Keyword Planner.
-- **Merchant API MCP** (`mcp__merchant-api-devdocs__*`): Use for GMC product data, performance metrics, and feed management. Tools: `query_mapi_docs` (documentation), `find_mapi_code_sample` (code examples). Queries: `product_performance_view`, `product_view`, `price_competitiveness_product_view`.
-- **Analytics MCP** (`mcp__analytics-mcp__*`): Use for GA4 reporting.
-- **Context7 MCP** (`mcp__plugin_context7_context7__*`): Use to fetch up-to-date library documentation.
-- **Vercel MCP** (`mcp__vercel__*`): Use for deployment management and logs.
-- **GCloud MCP** (`mcp__gcloud__*`): Use for GCP operations via gcloud CLI.
-- **Cloud Run MCP** (`mcp__cloud-run__*`): Use for Cloud Run deployments and service management.
+**Experimental: 6-Agent Pipeline**
+- Status: Manual execution only (not in UI)
+- Quality: 87.2/100 avg (range: 82-98)
+- Speed: ~6 minutes per SKU (2x slower)
+- Use for: High-value SKUs, gold standard examples
 
-**Agents** - Use via Task tool with `subagent_type`:
+**Hybrid Multi-SKU Generation** (NEW)
+- Auto-detects product families (e.g., DMF-2/2X, 2/3X, 2/4X, 2/5X)
+- Base SKU: Full generation
+- Variants: Adaptation (60% cost savings)
+- See: `docs/architecture/content-generation-hybrid.md`
 
-- **merchant-integrator**: Use when migrating from Content API for Shopping to Merchant API, or implementing new Google Merchant API features. Handles authentication setup and integration patterns.
+## Key Database Tables
 
-**Skills** - Invoke with `Skill` tool for specialized workflows:
+**Content & Approvals**:
+- `sku_approvals` / `variant_approvals` - Approval status
+- `generated_content` - Title/description (baseline_content, candidate_content, **approved_content**)
+- `generated_images` - Lifestyle images (Shopify CDN lifecycle)
+- `variant_finish_sentences` - Finish-specific content for variants
+- `prompt_templates` - Gold standard examples (system prompt lives in code)
 
-- `superpowers:brainstorming` - Use before any creative/feature work
-- `superpowers:systematic-debugging` - Use when encountering bugs
-- `superpowers:test-driven-development` - Use before writing implementation code
-- `superpowers:verification-before-completion` - Use before claiming work is done
-- `marketing-skills:*` - Use for copy, SEO, and marketing content
+**Publishing**:
+- `publish_batches` / `batch_sku_assignments` - Batch management
+- `publish_events` - Audit log with content snapshots for rollback
 
-**Key rule**: Always check if an MCP tool or skill can accomplish the task before writing custom code or scripts.
+**Performance**:
+- `performance_baselines` - 30-day pre-publish metrics (avg impressions/clicks/CTR/CVR)
+- `performance_snapshots` - Post-publish tracking with days_since_publish
 
-## What's implemented (dashboard prompts)
+**Data Pipeline**:
+- `variant_index` - Maps master_sku ↔ gmc_offer_id (THE SOURCE OF TRUTH)
+- `product_catalog` - 75,770 variants with full product data
 
-- **Implemented**: `docs/prompts/01`–`09`, `14`, `19`, `20`, `21`, `22`, `23`, `24`
-  - 01-06: performance, batches, publishing, variant review, settings health, regeneration
-  - 07: dashboard overview with charts (ApprovalChart, PlatformBreakdown, QualityDistribution, RecentActivity)
-  - 08: SKU selection & generation (`/generate` page, `/api/sku-selection/*` routes, tier-based scoring)
-  - 09: Competitor intelligence (`/competitors` page, SERP analysis, marketplace scraping via Apify MCP)
-  - 14: Search query insights (`/search-insights` page, Google Ads search terms + Keyword Planner enrichment, variant-level tracking)
-  - 19: Evidence table for rich product context (product_catalog table, evidence builder, vision support)
-  - 20: SKU review page enhancements (product hero images, lifestyle image approval workflow with AI vs user selection, per-platform current content comparison)
-  - 21: Variant content review (accordion UI to view/approve all 28 variants per platform with bulk actions)
-  - 22: Performance data lifecycle (baseline capture before publish, snapshot API for post-publish tracking, performance-based SKU prioritization)
-  - 23: Publishing enhancements (structured title/description columns in Google Sheets, Shopify CDN image lifecycle, image migration script)
-  - 24: Post-publish monitoring (`/monitoring` page, performance delta tracking, search query change detection, automated snapshot capture)
+**Search**:
+- `search_queries` - Variant-level Google Ads search terms
+- `keyword_metrics` - Keyword Planner data (cached, 30-day TTL)
 
-
-## Content Generation Pipelines
-
-### Default: Cloud Run Pipeline
-- **Location:** `src/feedops/api/main.py` (FastAPI), Cloud Run service
-- **Quality:** ~75-80/100 average  
-- **Speed:** ~3 minutes per SKU
-- **Use for:** Bulk generation (50+ SKUs), speed over quality, default regenerate button
-
-### Experimental: 6-Agent Pipeline (Manual Execution)
-- **Status:** ✅ Implemented (manual spawning via Claude Code only, not in dashboard UI)
-- **Quality:** 87.2/100 average (range: 82-98), gold standard: 98/100
-- **Speed:** ~6 minutes per SKU (2x slower)
-- **Approval Rate:** 100% first-pass (0 revisions needed)
-- **AI Slop:** 0% in core content
-- **Use for:** High-value SKUs, gold standard examples, testing content strategies
-
-**Architecture:** 2-stage pipeline
-- **Stage 1:** Storytelling Workshop (Designer, Contractor, Homeowner personas - parallel)
-- **Stage 2:** Content Court (Synthesizer, Prosecutor, Judge - sequential)
-
-**Documentation:** See `docs/6-agent-pipeline.md` for full architecture and results
-
-**Backup & Restore:**
-- `6-agent-pipeline-content-backup.json` - Structured backup of 10 SKUs
-- `restore-6-agent-content.sql` - One-click SQL restore script
-- Helper: `dashboard/src/lib/agent-pipeline/insert-content.ts` (prevents format issues)
-
-**Pipeline Tracking:**
-- 🟣 Purple badge "6-Agent Pipeline" on `/review/[sku]` for agent content (`generation_model` contains "6-agent-pipeline")
-- 🔵 Blue badge "Cloud Run" for default pipeline content
-- Badge component: `dashboard/src/components/review/SkuReviewClient.tsx`
-
-**⚠️ Important:** Clicking "Regenerate" on review page uses Cloud Run pipeline and overwrites agent content. Restore from backup if needed: `restore-6-agent-content.sql` or tell Claude "restore the 6-agent content".
-
-**Future Enhancements:** See `docs/prompts/FUTURE-IDEAS.md`
-1. Dashboard integration (#1) - Add to /generate page UI
-2. 4-stage expansion (#2) - Add SEO Time Travel + Customer Reality Check agents
-3. Variant-level persona stories (#3) - Finish-specific content
-4. A/B testing infrastructure (#4) - Measure ROI vs Cloud Run
-
-## Supabase schema (tables we rely on)
-
-- `sku_approvals` (SKU-level approvals)
-- `variant_approvals` (per-finish approvals)
-- `variant_index` (maps `master_sku` ⇄ `gmc_offer_id`, finish info)
-- `publish_batches`, `batch_sku_assignments` (batch mgmt)
-- `publish_events` (audit log with content snapshots: `published_title`, `published_description`, `variant_count`, `content_version` for rollback)
-- `performance_baselines` (30-day pre-publish metrics: avg impressions/clicks/CTR/CVR/conversions/cost/ROAS per master_sku + platform; uses baseline_start_date/baseline_end_date, NOT period_days column)
-- `performance_snapshots` (post-publish metrics with days_since_publish tracking, linked to publish_event_id)
-- `batch_generation_jobs`, `batch_generation_job_skus` (batch content generation)
-- `competitor_scrape_jobs`, `competitor_listings`, `competitor_patterns` (competitor intelligence)
-- `product_catalog` (75,770 variants with full product data for evidence table - narrative_copy, bullets, dimensions, images)
-- `generated_content` (title/description content with baseline_content, candidate_content, **approved_content**, quality_score per platform; **approved_at**, **approved_version** for publishing locks)
-- `regeneration_history` (prompt audit trail with system_prompt, user_prompt, model_version, prompt_hash)
-- `generated_images` (lifestyle images with ai_selected, user_selected, use_for_master, approval_status, gmc tracking, **shopify_media_id**, **shopify_cdn_url**, **migrated_to_shopify_at** for CDN lifecycle)
-- `lifestyle_image_selections` (audit trail for image selection decisions)
-- `variant_finish_sentences` (product+finish tailored sentences for Google/Bing variant content generation)
-- `prompt_templates` (gold standard examples + category guidance; system prompt lives in code, DB `system_prompt` column is ignored)
-- `search_queries` (variant-level search terms with GMC offer ID mapping, Keyword Planner metrics)
-- `search_queries_by_master_sku` (aggregated search data by master SKU)
-- `search_queries_expanded` (view with LATERAL join expanding item_ids array to show all variant associations)
-- `keyword_metrics` (cached Keyword Planner data - search volume, competition, CPC; 30-day TTL)
-- `search_query_sync_jobs` (sync job tracking for Google Ads search term imports)
-- `search_query_snapshots` (historical snapshots of search query performance for post-publish monitoring and trend analysis)
-
-**Foreign key constraints (delete order matters)**
-- `regeneration_history.generated_content_id` → `generated_content.id` (delete from regeneration_history first)
-
-**Image Storage:**
-
-- Supabase Storage bucket `lifestyle-images` for temporary hosting during review/approval workflow
-- Image lifecycle: Supabase Storage (review) → Approval → Shopify CDN (production via productCreateMedia) → Google Sheets
-- Only images with `shopify_cdn_url` are published to Google Sheets (Supabase Storage URLs never published)
-- Helper functions in `dashboard/src/lib/storage/upload-lifestyle-image.ts` for upload and CDN migration
-
-**Column naming conventions (do not drift)**
-
-- Use `approval_status` (not `status`)
-- Use `notes` (not `revision_notes`)
-- Use `approved_by` / `approved_at` (not `reviewed_by` / `reviewed_at`)
-- Batches use `name` / `notes` / `executed_at`
-
-**PostgreSQL JSONB patterns**
-
-- JSONB columns store JSON as text strings - use `(column#>>'{}')::jsonb` to parse before array operations
+**Conventions**:
+- Column naming: `approval_status` (not `status`), `notes` (not `revision_notes`), `approved_by/approved_at`
+- JSONB: Store as text strings, parse with `(column#>>'{}')::jsonb` before array operations
 - LATERAL joins: `CROSS JOIN LATERAL jsonb_array_elements_text((item_ids#>>'{}')::jsonb)` to expand arrays
-- Case-sensitive joins: normalize with `regexp_replace()` or use `LOWER()` for both sides to prevent silent failures
+- Case-sensitive: Use `LOWER()` on both sides or `regexp_replace()` for joins
 
-## GMC / Google policy guardrails (critical)
+## Critical Patterns
 
-- **No hallucinations**: never invent specs/claims not in product data.
-- **AI text compliance**: prefer `structured_title` / `structured_description` with `digital_source_type=trained_algorithmic_media`.
-- **Structured-only mode**: when `FEEDOPS_GMC_STRUCTURED_ONLY=1`, omit standard `title`/`description` so Google does not ignore structured fields.
+### Multi-SKU Products ⚠️
 
-## Future TODOs
+**Multiple master_skus can share same product_id**. Example:
+- DMF-2/2X, DMF-2/3X, DMF-2/4X, DMF-2/5X all share `4539975336068`
 
-- **Switch to `structured_title`/`structured_description` for GMC**: Google recommends AI-generated content use `structured_title` and `structured_description` attributes (compound format: `trained_algorithmic_media:"content text"`). Currently we write to plain `title`/`description` columns. Need to: add `structured_title` and `structured_description` columns to the supplemental feed sheet, enable `FEEDOPS_GMC_STRUCTURED_ONLY=1`, and stop writing plain title/description for AI content. See GMC product data spec for details.
+**Impact**:
+- Google Ads aggregates at product_id level (not master_sku)
+- Query logic must account for this (product_id-based matching)
+- Content generation needs variant adaptation (not find/replace)
 
-## Offer ID format (Google / Ads joins)
+See: `docs/architecture/multi-sku-pattern.md`
 
-GMC offer IDs:
-`shopify_us_{shopify_product_id}_{shopify_variant_id}` (note **lowercase** `us`)
+### Offer ID Format
 
-**IMPORTANT**: Google Ads, GMC, and variant_index ALL use lowercase "us" format. Documentation previously said uppercase "US" but this was incorrect and has been fixed (2026-02-08).
+GMC offer IDs: `shopify_us_{product_id}_{variant_id}` (lowercase `us`)
 
-**JSONB storage**: Supabase JSONB columns expect JSON strings - use `json.dumps()` in Python before inserting
+**IMPORTANT**: All systems use lowercase. Previous docs said uppercase "US" - this was wrong.
 
-## Key dashboard locations
+### SKU Format Handling
 
+**Database**: Slash separators (`WP-2/16-GAL`, `DMF-2/2X`)
+**URLs**: Hyphens only (`/review/DMF-2-2X`)
+**Conversion**: Use `getSkuCandidates` in `dashboard/src/lib/sku-utils.ts`
+
+### GMC Policy Guardrails
+
+**Critical**: Never invent specs/claims not in product data
+**AI content**: Use `structured_title`/`structured_description` with `digital_source_type=trained_algorithmic_media`
+**Structured-only mode**: When `FEEDOPS_GMC_STRUCTURED_ONLY=1`, omit standard title/description
+
+### Component Patterns (Dashboard)
+
+**Card rendering**: Components like SearchInsightsCard render Card internally - don't wrap in additional Card
+**Grid layouts**: Use `grid-cols-1 lg:grid-cols-2` for 50/50 split (mobile stacks, desktop side-by-side)
+**TypeScript**: `ContentRecord` interface duplicated in page.tsx and SkuReviewClient.tsx - must match exactly
+**Optional chaining**: Use `?.property ?? null` when component expects `string | null`
+
+## Key Locations
+
+**Dashboard**:
 - Pages: `dashboard/src/app/(dashboard)/**`
 - API routes: `dashboard/src/app/api/**`
-- Supabase query layer: `dashboard/src/lib/supabase/{queries.ts,types.ts}`
-- Publishing libs: `dashboard/src/lib/publishing/*`
-- Performance tracking: `dashboard/src/lib/baseline-capture.ts` (pre-publish baseline), `dashboard/src/app/api/performance/capture-snapshot/route.ts` (post-publish snapshots)
-- Regeneration prompts (SINGLE SOURCE OF TRUTH): `dashboard/src/lib/regeneration/prompts.ts` (system prompt, finish list, platform context, validation). Title structure: Google/Bing = `{FINISH_NAME} [Product] [Specs] - [Collection Name] Collection - Allied Brass`; Shopify = inner core (no finish, no brand, "Collection" suffix required)
-- Gold standard examples: `docs/gold-standard-examples.json` (10 examples with cross-platform title consistency)
-- Regeneration API: `dashboard/src/app/api/regenerate/route.ts` (single-SKU generation with feedback; model default `gpt-5.2`)
-- Regeneration core: `dashboard/src/lib/regeneration/core.ts` (shared generation logic for batch + single-SKU)
-- Evidence table builder: `dashboard/src/lib/evidence/*` (builds rich product context for LLM prompts, includes search query insights)
-- Search query evidence: `src/feedops/integrations/search_query_insights.py` (Python) and `dashboard/src/lib/evidence/search-queries.ts` (TypeScript)
-- Data collection automation: `dashboard/src/lib/data-collection/ensure-data.ts` (automatic baseline and search query data collection before SKU operations)
-- SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection algorithm)
-- SKU selection API: `dashboard/src/app/api/sku-selection/route.ts` (scored recommendations)
-- SKU scoring: `dashboard/src/lib/sku-scoring.ts` (tier-based selection with performance boosting: 1.5x for high-traffic low-CTR, 1.3x for declining performance, 1.4x for below-baseline)
-- Batch generation API: `dashboard/src/app/api/sku-selection/generate/route.ts` (start batch jobs)
-- Dashboard charts: `dashboard/src/components/dashboard/*.tsx`
-- Image storage helpers: `dashboard/src/lib/storage/upload-lifestyle-image.ts` (uploadLifestyleImage, migrateToShopifyCdn, deleteFromStorage)
-- Shopify image upload: `dashboard/src/lib/publishing/shopify-images.ts` (uploadLifestyleImageToShopify, pollMediaStatus, associateImageWithVariant, uploadAndAssociateImage)
-- Shopify upload API: `dashboard/src/app/api/images/upload-to-shopify/route.ts` (manual CDN migration endpoint)
-- Migration script: `dashboard/scripts/migrate-approved-images-to-shopify.ts` (batch migrate approved images to Shopify CDN)
-- Competitor intelligence: `dashboard/src/app/(dashboard)/competitors/page.tsx`, `/api/competitors/*`
-- Pattern extraction: `dashboard/src/lib/competitors/pattern-extraction.ts`
-- Review components: `dashboard/src/components/review/*.tsx` (ProductHeroImage, LifestyleImageReview, ImageApprovalCard, SearchInsightsSummary)
-- Image approval API: `dashboard/src/app/api/review/images/approve/route.ts`
-- Image selection API: `dashboard/src/app/api/review/images/select/route.ts`
-- Variant approvals API: `dashboard/src/app/api/variants/approvals/route.ts`, `/bulk/route.ts`
-- Variant content utilities: `dashboard/src/lib/variant-content.ts` (generates variant titles/descriptions from base template)
-- Variant expansion for publishing: `dashboard/src/lib/publishing/expand-variants.ts` (expands `{FINISH_NAME}` templates to 28 unique variants)
-- Finish data: `dashboard/src/lib/finish-data.ts` (30 finish definitions; 28 used for content generation, excludes Military Camo and Red White and Blue)
-- Pipeline API: `src/feedops/api/main.py` (FastAPI endpoints for Cloud Run)
-- Pipeline client: `dashboard/src/lib/pipeline-client.ts` (TypeScript client for Cloud Run API)
-- Prompt loader: `dashboard/src/lib/prompts/loader.ts` (loads gold standard examples + category guidance from Supabase; system prompt is NOT loaded from DB)
-- Python prompt loader: `src/feedops/api/prompt_loader.py` (Python equivalent with fallback prompts)
-- Search insights page: `dashboard/src/app/(dashboard)/search-insights/page.tsx`
-- Search insights API: `dashboard/src/app/api/search-insights/*.ts` (sync triggers, job status)
-- Search insights components: `dashboard/src/components/search-insights/*.tsx` (QueryTable, FinishInsights, GapAnalysis)
-- Python search terms client: `src/feedops/integrations/google_ads_search_terms.py` (SearchTermsClient, KeywordPlannerClient)
-- Monitoring page: `dashboard/src/app/(dashboard)/monitoring/page.tsx` (post-publish performance and search query tracking)
-- Monitoring API: `dashboard/src/app/api/monitoring/*.ts` (performance-delta, search-delta, snapshot-capture)
+- Regeneration core: `dashboard/src/lib/regeneration/core.ts`
+- Prompts (SINGLE SOURCE): `dashboard/src/lib/regeneration/prompts.ts`
+- Evidence builder: `dashboard/src/lib/evidence/*`
+- Multi-SKU detection: `dashboard/src/lib/multi-sku-detection.ts`
+- Hybrid generation: `dashboard/src/app/api/sku-selection/generate-hybrid/route.ts`
 
-**Component patterns:**
+**Python Pipeline**:
+- Cloud Run API: `src/feedops/api/main.py`
+- Google Ads: `src/feedops/integrations/google_ads_performance.py`
+- Search terms: `src/feedops/integrations/google_ads_search_terms.py`
 
-- Components that render Card internally (SearchInsightsCard, PerformanceCard, ContentQualityCard) should NOT be wrapped in Card - causes double borders and render issues
-- Use `grid-cols-1 lg:grid-cols-2` for 50/50 split at ≥1024px breakpoint (mobile stacks, desktop side-by-side)
-- Components self-render Cards - don't wrap in additional Card components
+**Publishing**:
+- Google Sheets: `dashboard/src/lib/publishing/google-sheets.ts`
+- Shopify: `dashboard/src/lib/publishing/shopify.ts`
+- Variant expansion: `dashboard/src/lib/publishing/expand-variants.ts`
 
-**TypeScript configuration:**
+## Deployment (Auto-Deploy on Push to Master)
 
-- `dashboard/tsconfig.json`: Excludes `scripts/` directory from type checking (utility scripts, not Next.js app)
-- `ContentRecord` interface: Duplicated in `page.tsx` and `SkuReviewClient.tsx` - must match exactly (includes `generation_model: string | null`)
-- Optional chaining with strict types: Use `?.property ?? null` when component expects `string | null` (not `string | null | undefined`)
+**Two pipelines auto-deploy**:
+1. **Cloud Run** (Python): Push → Cloud Build trigger → Deploy
+2. **Vercel** (Dashboard): Push → Vercel auto-deploy
 
-## SKU Format Handling (Critical)
-
-**Database formats (inconsistent)**
-- Canonical format (from `product_catalog`): slash separators (e.g., `WP-2/16-GAL`, `DMF-2/2X`)
-- Some records use hyphen-only format (e.g., `920D-6`, `DMF-2-2X`)
-- **Always prioritize slash-format when querying** - see `getSkuCandidates` in `dashboard/src/lib/sku-utils.ts`
-
-**URL format**
-- URLs use hyphens only (slashes are path separators): `/review/DMF-2-2X`
-- Conversion: `skuToUrlPath` replaces `/` → `-`
-- Reverse: `getSkuCandidates` generates multiple candidates, tries slash-format first
-
-**Preventing duplicates**
-- Regeneration code should preserve database format (not convert to URL format)
-- If duplicates exist, `getSkuCandidates` prioritization ensures canonical match first
-
-## Deployment & CI/CD (ALREADY FULLY CONFIGURED — DO NOT RE-CREATE)
-
-**IMPORTANT: All deployment infrastructure is already set up and working. DO NOT:**
-- Create new GCP secrets (they already exist)
-- Create new Cloud Build triggers (already exists)
-- Run manual `gcloud run deploy` commands (CI/CD handles this automatically)
-- Set up GitHub connections (already authorized)
-
-### How Deployment Works
-
-**Two auto-deploy pipelines — both trigger on push to `master`:**
-
-1. **Cloud Run (Python pipeline)**: Push to master → Cloud Build trigger `feedops-pipeline-deploy` → builds Docker image → deploys to Cloud Run automatically
-2. **Vercel (Next.js dashboard)**: Push to master → Vercel auto-deploys automatically
-
-**You do NOT need to deploy manually. Just push to master and both services update.**
-
-### Cloud Run Service
-
-**Service URL:** https://feedops-pipeline-623866089882.us-east1.run.app
-
-**Endpoints:**
-- `GET /health` - Health check with Supabase status
-- `POST /optimize-sku` - Single SKU content generation
-- `POST /regenerate` - Content regeneration with feedback
-- `POST /batch-optimize` - Batch job creation
-- `GET /batch-status/{job_id}` - Batch job progress
-- `POST /performance/capture-baseline` - Capture performance baselines for SKUs (used by automation helpers)
-- `GET /performance/baseline/{master_sku}` - Get baseline status for SKU
-- `POST /search-insights/sync` - Sync search terms from Google Ads (used by Search Insights page)
-- `GET /search-insights/sync/{job_id}` - Get sync job status
-- `POST /search-insights/enrich` - Enrich keywords with Keyword Planner data
-- `GET /search-insights/terms` - Query stored search terms
-
-### Cloud Build Trigger (ALREADY EXISTS)
-
-- **Name**: `feedops-pipeline-deploy`
-- **Source**: `bobby-andris/Allied-FeedOps` → branch `^master$`
-- **Config**: `cloudbuild.yaml`
-- **Build SA**: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
-- **Runtime SA**: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
-
-To check build status: `gcloud builds list --project=bobbys-project-346400 --limit=5`
-
-### GCP Secrets (ALL ALREADY CREATED AND BOUND)
-
-All secrets below already exist in Secret Manager and are already bound to the runtime service account. Do NOT try to create or re-create them:
-
-- `feedops-openai-api-key`
-- `feedops-supabase-url`
-- `feedops-supabase-key`
-- `feedops-google-ads-developer-token`
-- `feedops-google-ads-client-id`
-- `feedops-google-ads-client-secret`
-- `feedops-google-ads-refresh-token`
-- `feedops-google-ads-login-customer-id`
-
-### Manual Deploy (ONLY if CI/CD is broken)
-
-Only use this as a last resort if the Cloud Build trigger is not working:
+**Check build status**:
 ```bash
-gcloud run deploy feedops-pipeline --source . --project=bobbys-project-346400 --region=us-east1 \
-  --set-secrets="OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=feedops-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=feedops-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=feedops-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=feedops-google-ads-refresh-token:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=feedops-google-ads-login-customer-id:latest" \
-  --set-env-vars="GOOGLE_ADS_CUSTOMER_ID=6253381786" \
-  --service-account=profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com \
-  --build-service-account=projects/bobbys-project-346400/serviceAccounts/profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com \
-  --allow-unauthenticated --memory=2Gi --cpu=2 --timeout=900 --max-instances=10
+gcloud builds list --project=bobbys-project-346400 --limit=5
 ```
 
-## Run locally
+**Service accounts**:
+- Build: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
+- Runtime: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
+
+**GCP secrets** (all 8 already exist, bound to runtime SA):
+- feedops-openai-api-key
+- feedops-supabase-url / feedops-supabase-key
+- feedops-google-ads-developer-token / client-id / client-secret / refresh-token / login-customer-id
+
+## Local Development
 
 ### Dashboard
-
-**Prerequisites**: Copy `.env.example` to `.env.local` and add:
-- `NEXT_PUBLIC_SUPABASE_URL` - from Supabase dashboard
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - from Supabase dashboard
-- `SUPABASE_SERVICE_ROLE_KEY` - for server-side operations
-- `SHOPIFY_STORE_URL` - Shopify store URL (e.g., your-store.myshopify.com)
-- `SHOPIFY_ACCESS_TOKEN` - Shopify Admin API access token (shpat_xxxxx)
 
 ```bash
 cd dashboard
 npm install
-npm run dev  # Starts Next.js on http://localhost:3000
-npm run build  # Build for production (from dashboard/, not repo root)
-npm run lint  # Run ESLint
+npm run dev  # http://localhost:3000
+npm run build  # Verify TypeScript before deploy
+npm run lint
 ```
 
-**Before deploying dashboard changes:**
-```bash
-npm run build  # Verify TypeScript compilation succeeds
+**Environment** (`.env.local`):
 ```
-This catches type errors that would fail Vercel deployment.
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SHOPIFY_STORE_URL=
+SHOPIFY_ACCESS_TOKEN=
+```
 
-### Testing
-
-**Build verification**: `npm run build` (from dashboard/, not repo root)
-- No vitest configured yet - use build as integration test
-- TypeScript compilation errors will fail build
-
-### Python (pipeline/tests still in repo)
+### Python Pipeline
 
 ```bash
 uv venv
@@ -368,165 +209,119 @@ PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 
 ## Common Workflows
 
-**Check build status after push**:
-```bash
-gcloud builds list --project=bobbys-project-346400 --limit=3
-```
+### Test Before Commit
 
-**Test before commit**:
 ```bash
 cd dashboard && npm run build && npm run lint
 ```
 
-**Rollback to archived content** (if needed):
+### Check Deployment
+
 ```bash
-git checkout archive/full-snapshot-2026-02-03 -- dashboard_data/batch-40sku-20260130-144146/
+# Vercel logs
+# Use Vercel MCP or dashboard
+
+# Cloud Run logs
+gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50
 ```
 
-## Automated Data Collection
+### Database Queries
 
-**Overview**: SKU selection, regeneration, and batch generation APIs automatically trigger data collection to ensure rich evidence is available for content generation.
+```typescript
+// Use Supabase MCP for quick queries
+mcp__supabase__execute_sql
 
-**What's collected automatically:**
+// Check schema
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'performance_baselines';
+```
 
-1. **Performance Baselines** (pre-optimization):
-   - 30-day avg metrics (impressions, clicks, CTR, CVR, conversions, cost, ROAS)
-   - Captured via `ensureBaselineData()` if not already present (within last 60 days)
-   - Non-blocking: operations continue even if capture fails
+## Data Pipeline
 
-2. **Search Query Data** (customer search terms):
-   - Google Ads search terms (actual queries triggering Shopping ads)
-   - Keyword Planner enrichment (search volume, competition, CPC)
-   - Captured via `ensureSearchQueryData()` if stale (>7 days)
-   - Automatically included in evidence table for content generation
+**Flow**: Acatalog.csv → variant_index → Google Sheets → GMC → Google Ads
 
-**When data collection runs:**
+**Key facts**:
+- GMC does NOT auto-sync from Shopify (custom feed via Google Sheets)
+- variant_index is source of truth (72,023 rows)
+- 99.7% of "missing data" issues are query logic problems (not data sync)
 
-- **SKU Selection API** (`/api/sku-selection`): Triggers data collection for selected SKUs in background
-- **Regeneration API** (`/api/regenerate`): Ensures data exists before generating content
-- **Batch Generation API** (`/api/sku-selection/generate`): Collects data for all SKUs in batch
-
-**Key functions** (in `dashboard/src/lib/data-collection/ensure-data.ts`):
-
-- `ensureSkuData(masterSku)` - Ensure baseline + search data for single SKU
-- `ensureAllData(masterSkus)` - Ensure data for multiple SKUs (batch)
-- `ensureBaselineData(masterSku)` - Ensure performance baseline exists
-- `ensureSearchQueryData(masterSkus)` - Ensure search query data is recent
-- `capturePostPublishSnapshot(masterSku, publishEventId)` - Capture post-publish performance
-
-**Design philosophy:**
-
-- Non-blocking: Never fail operations due to data collection errors
-- Best-effort: Log failures but continue with available data
-- Fresh data: Only re-collect if stale (baselines >60 days, search queries >7 days)
-- Evidence-driven: Automatically feeds into evidence table for LLM prompts
-
-## Git Conventions
-
-**Commit format**: `type: description` (fix, feat, docs, refactor, test)
-**Always co-author**: End commits with `Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>`
-**Push to master triggers auto-deploy** - both Vercel and Cloud Run rebuild automatically
-
-## Debugging
-
-**Dashboard issues**:
-- Check Vercel logs: Use Vercel MCP or visit vercel.com dashboard
-- Check browser console for client errors
-- Verify Supabase connection: Test `/api/health`
-
-**Pipeline issues**:
-- Check Cloud Run logs: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50`
-- Test endpoint: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
-
-**Database issues**:
-- Use Supabase MCP: `mcp__supabase__execute_sql` for direct queries
-- Check table schema: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'table_name'`
+See: `docs/architecture/data-pipeline.md`
 
 ## Publishing Workflow
 
-**Approval → Publishing flow:**
+1. **Generate**: Regeneration API → `candidate_content`
+2. **Approve**: User approval → `approved_content` (immutable)
+3. **Publish**: Batch publish reads `approved_content`
+4. **Expand**: Google/Bing get {FINISH_NAME} → 28 variants
+5. **Update**: Google Sheets rows updated by gmc_offer_id
+6. **Audit**: `publish_events` stores snapshots for rollback
 
-1. **Content Generation**: Regeneration API stores templates in `generated_content.candidate_content` with `{FINISH_NAME}` placeholder
-2. **Approval**: When content is approved, `candidate_content` → `approved_content` (immutable snapshot with `approved_at`, `approved_version`)
-3. **Publishing**: Batch publish reads `approved_content`, validates `sku_approvals.approval_status = 'approved'`
-4. **Variant Expansion**: For Google/Bing, `expand-variants.ts` replaces `{FINISH_NAME}` per variant using `variant_finish_sentences` table
-5. **Google Sheets**: Updates existing rows (by `gmc_offer_id`) or appends new rows - prevents duplicate entries
-6. **Audit Trail**: `publish_events` stores content snapshots (`published_title`, `published_description`) for rollback capability
+**Shopify**:
+- Product-level content only (no variant-specific titles/descriptions)
+- Lifestyle images: variant-specific via `productVariantAppendMedia`
+- CDN lifecycle: Supabase Storage → Shopify CDN → Google Sheets
 
-**Key constraint**: Content cannot be published unless approved. Regenerating content after approval does NOT change what will be published (uses `approved_content`, not `candidate_content`).
+## Automated Data Collection
 
-### Shopify Publishing Strategy
+SKU selection, regeneration, and batch generation APIs **automatically** trigger data collection:
+- **Performance baselines**: 30-day pre-optimization metrics (if missing/stale >60 days)
+- **Search query data**: Google Ads search terms + Keyword Planner (if stale >7 days)
+- **Non-blocking**: Operations continue even if collection fails
+- **Evidence-driven**: Auto-feeds into evidence table for content generation
 
-**Variant Content Approach: Product-Level Only**
+Functions: `ensureSkuData()`, `ensureAllData()` in `dashboard/src/lib/data-collection/ensure-data.ts`
 
-Shopify products have title/description at the product level only. Variants (e.g., "Polished Brass", "Antique Bronze") have SKU, price, and options but NO variant-specific title/description fields in Shopify's core data model.
+## Content Storage
 
-**Decision**: Use product-level content only (current implementation)
-- Updates product-level title/description via `productUpdate` GraphQL mutation
-- Strips `{FINISH_NAME}` placeholder since content is not variant-specific
-- Falls back to Google content if Shopify-specific content not available
-- Aligns with Shopify's design philosophy (variants are options, not separate products)
-- Requires no custom theme development
-
-**Why not variant-specific content?**
-- Shopify variants share the same product page URL (no separate SEO)
-- Default themes don't display variant metafields
-- Customers select finish from dropdown, expect consistent product description
-- Variant-specific content is already used effectively for Google/Bing feeds
-
-**Alternative considered but rejected**: Store finish-specific content in metafields (e.g., `feedops.variant_title`) to enable custom storefront display. Rejected because it adds complexity without clear benefit for default Shopify storefront UX.
-
-**Lifestyle Image Publishing Strategy**
-
-Unlike text content, visual differentiation matters for finishes. Customers expect to see the actual finish color/texture in product photos.
-
-**Implementation**:
-1. **Upload to Shopify**: Use `productCreateMedia` mutation to upload approved lifestyle image from `generated_images` table
-   - Provides Shopify media ID and CDN URL
-2. **Variant Assignment**: Use `productVariantAppendMedia` mutation to associate media with specific finish variant
-   - Enables finish-specific image display (e.g., Polished Brass lifestyle image only shows for Polished Brass variant)
-   - Links without duplicating files
-3. **CDN Migration**: Update `generated_images.image_url` with Shopify CDN URL and mark as published with `gmc_pushed_at` timestamp
-4. **Cleanup**: Optionally delete from Supabase Storage bucket after successful Shopify migration
-
-**Why variant-specific images?**
-- Customers need to see the actual finish they're selecting
-- Native Shopify support via `productVariantAppendMedia`
-- Better UX: selecting "Antique Bronze" shows bronze product images
-- Already generating finish-specific lifestyle images in the pipeline
-
-**GraphQL mutations used**:
-- `productUpdate` - Update product-level title/description
-- `productCreateMedia` - Upload lifestyle images to Shopify
-- `productVariantAppendMedia` - Associate images with specific variants
-- `tagsAdd` - Add environment tracking tags (feedops-staging, feedops-production)
-
-**Files**:
-- Publishing: `dashboard/src/lib/publishing/shopify.ts`
-- API route: `dashboard/src/app/api/publish/sku/route.ts`
-- Storage helpers: `dashboard/src/lib/storage/upload-lifestyle-image.ts`
-
-## Generated content storage
-
-**IMPORTANT**: Generated content (titles, descriptions, images) must now be stored in Supabase, not in git.
-
-- `dashboard_data/` is empty (only README.md) - all evaluation data archived
-- Dashboard must read from Supabase `generated_content` and `generated_images` tables
+**IMPORTANT**: Generated content stored in **Supabase only** (not git)
+- `dashboard_data/` is empty (all evaluation data archived)
+- Historical data: Branch `archive/full-snapshot-2026-02-03`
 - Use regeneration API to create new content
 
-## Historical archive
-
-All previous data (14,000+ generated files, evaluation data, research docs) preserved in:
-
-- **Branch**: `archive/full-snapshot-2026-02-03`
-- **Tag**: `backup/pre-dashboard-cleanup-2026-02-03`
-
-To restore archived content:
+## Git Conventions
 
 ```bash
-# View what's in the archive
-git show archive/full-snapshot-2026-02-03:dashboard_data/
+# Format: type: description
+git commit -m "fix: resolve baseline capture query logic
 
-# Restore specific files
-git checkout archive/full-snapshot-2026-02-03 -- dashboard_data/batch-40sku-20260130-144146/
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+
+# Push triggers auto-deploy
+git push origin master
 ```
+
+## Troubleshooting
+
+**Baseline capture issues**: See `docs/troubleshooting/baseline-capture.md`
+- Most common: offer ID case mismatch (uppercase vs lowercase)
+- Second: missing campaign type in query
+- Third: multi-SKU product query logic
+
+**Dashboard issues**:
+- Vercel logs via MCP or dashboard
+- Browser console for client errors
+- Test: `/api/health`
+
+**Pipeline issues**:
+- Cloud Run logs: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50`
+- Test: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+
+## Documentation
+
+**Architecture** (how systems work):
+- `docs/architecture/multi-sku-pattern.md` - Product families, query logic
+- `docs/architecture/data-pipeline.md` - Complete pipeline flow
+- `docs/architecture/content-generation-hybrid.md` - Multi-SKU generation
+
+**Troubleshooting** (when things break):
+- `docs/troubleshooting/baseline-capture.md` - Performance capture debugging
+
+**Investigation History** (root cause analyses):
+- `docs/audit/SUMMARY-2026-02-08.md` - Baseline capture investigation
+- `docs/audit/variant-id-mismatch-root-cause-2026-02-08.md` - Multi-SKU discovery
+- `docs/audit/hybrid-generation-implementation-2026-02-08.md` - Hybrid generation
+
+**Prompts** (implementation specs):
+- `docs/prompts/01-09.md` - Implemented features
+- `docs/prompts/FUTURE-IDEAS.md` - Backlog
