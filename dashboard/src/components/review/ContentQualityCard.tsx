@@ -28,11 +28,17 @@ export function ContentQualityCard({
   platform,
   masterSku,
 }: ContentQualityCardProps) {
-  const [isExpanded, setIsExpanded] = useState(() => {
+  // Initialize with default value (SSR-safe - no localStorage access during initialization)
+  const [isExpanded, setIsExpanded] = useState(true)
+
+  // Read from localStorage on mount (client-side only)
+  useEffect(() => {
     const key = `contentQualityCard:${masterSku}:expanded`
     const stored = localStorage.getItem(key)
-    return stored !== null ? stored === 'true' : true
-  })
+    if (stored !== null) {
+      setIsExpanded(stored === 'true')
+    }
+  }, [masterSku])
 
   // Save expanded state to localStorage
   useEffect(() => {
