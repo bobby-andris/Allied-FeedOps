@@ -16,6 +16,24 @@ import { uploadProductImage, uploadVariantImage } from '@/lib/publishing/shopify
  * 5. Associate with variant if finish-specific
  * 6. Update database with Shopify CDN URL and metadata
  */
+
+interface ProductImage {
+  id: string
+  master_sku: string
+  image_url: string
+  shopify_product_id: string
+  approval_status: string
+}
+
+interface VariantImage {
+  id: string
+  master_sku: string
+  finish: string
+  image_url: string
+  gmc_offer_id: string
+  approval_status: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -47,18 +65,28 @@ export async function POST(request: NextRequest) {
       ? 'id, master_sku, image_url, shopify_product_id, approval_status'
       : 'id, master_sku, finish, image_url, gmc_offer_id, approval_status'
 
-    const { data: image, error: fetchError } = await supabase
+    const { data, error: fetchError } = await supabase
       .from(tableName)
       .select(selectFields)
       .eq('id', imageId)
       .single()
 
-    if (fetchError || !image) {
+    if (fetchError) {
       return NextResponse.json(
         { error: 'Image not found' },
         { status: 404 }
       )
     }
+
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Image not found' },
+        { status: 404 }
+      )
+    }
+
+    // Type assertion after null check
+    const image = data as unknown as ProductImage | VariantImage
 
     if (image.approval_status !== 'approved') {
       return NextResponse.json(
@@ -78,7 +106,8 @@ export async function POST(request: NextRequest) {
 
     if (imageType === 'product') {
       // Product-level image - has shopify_product_id directly
-      if (!image.shopify_product_id) {
+      const productImage = image as ProductImage
+      if (!productImage.shopify_product_id) {
         return NextResponse.json(
           { error: 'Shopify product ID not found' },
           { status: 404 }
@@ -86,16 +115,17 @@ export async function POST(request: NextRequest) {
       }
 
       result = await uploadProductImage(
-        image.image_url,
-        image.shopify_product_id,
-        `${image.master_sku} product image`
+        productImage.image_url,
+        productImage.shopify_product_id,
+        `${productImage.master_sku} product image`
       )
     } else {
       // Variant-level image - lookup Shopify IDs via gmc_offer_id
+      const variantImage = image as VariantImage
       const { data: variant, error: variantError } = await supabase
         .from('variant_index')
         .select('shopify_product_id, shopify_variant_id')
-        .eq('gmc_offer_id', image.gmc_offer_id)
+        .eq('gmc_offer_id', variantImage.gmc_offer_id)
         .single()
 
       if (variantError || !variant?.shopify_product_id) {
@@ -106,10 +136,10 @@ export async function POST(request: NextRequest) {
       }
 
       result = await uploadVariantImage(
-        image.image_url,
+        variantImage.image_url,
         variant.shopify_product_id,
         variant.shopify_variant_id || '',
-        `${image.master_sku} - ${image.finish}`
+        `${variantImage.master_sku} - ${variantImage.finish}`
       )
     }
 
