@@ -181,9 +181,10 @@
 ## Offer ID format (Google / Ads joins)
 
 GMC offer IDs:
-`shopify_US_{shopify_product_id}_{shopify_variant_id}` (note uppercase `US`)
+`shopify_us_{shopify_product_id}_{shopify_variant_id}` (note **lowercase** `us`)
 
-**Case normalization**: Python sync code must normalize `shopify_us_` → `shopify_US_` to match `variant_index.gmc_offer_id`
+**IMPORTANT**: Google Ads, GMC, and variant_index ALL use lowercase "us" format. Documentation previously said uppercase "US" but this was incorrect and has been fixed (2026-02-08).
+
 **JSONB storage**: Supabase JSONB columns expect JSON strings - use `json.dumps()` in Python before inserting
 
 ## Key dashboard locations
