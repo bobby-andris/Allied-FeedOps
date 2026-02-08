@@ -180,15 +180,28 @@ async def adapt_variant_content(
             }
 
         # Get current content for version tracking
-        current_result = (
-            supabase.table("generated_content")
-            .select("*")
-            .eq("master_sku", variant_sku)
-            .eq("platform", platform)
-            .eq("content_type", content_type)
-            .maybe_single()
-            .execute()
-        )
+        try:
+            current_result = (
+                supabase.table("generated_content")
+                .select("*")
+                .eq("master_sku", variant_sku)
+                .eq("platform", platform)
+                .eq("content_type", content_type)
+                .maybe_single()
+                .execute()
+            )
+
+            # Validate result
+            if not current_result or not hasattr(current_result, 'data'):
+                logger.warning(
+                    f"Query for existing content returned invalid result for {variant_sku}/{platform}/{content_type}"
+                )
+                current_result = type('obj', (object,), {'data': None})()
+        except Exception as e:
+            logger.warning(
+                f"Failed to query existing content for {variant_sku}/{platform}/{content_type}: {e}"
+            )
+            current_result = type('obj', (object,), {'data': None})()
 
         # Build prompt
         system_prompt = "You are a product content specialist adapting content for product specification variants. Your goal is to maintain brand consistency while updating key specification differences."
@@ -304,16 +317,14 @@ async def adapt_variant_content(
 
         # Save finish_sentences if present (for descriptions)
         if finish_sentences and platform in ["google", "bing"]:
-            for finish_name, sentence in finish_sentences.items():
-                supabase.table("variant_finish_sentences").upsert(
-                    {
-                        "master_sku": variant_sku,
-                        "finish_name": finish_name,
-                        "platform": platform,
-                        "finish_sentence": sentence,
-                    },
-                    on_conflict="master_sku,finish_name,platform",
-                ).execute()
+            supabase.table("variant_finish_sentences").upsert(
+                {
+                    "master_sku": variant_sku,
+                    "platform": platform,
+                    "finish_sentences": finish_sentences,
+                },
+                on_conflict="master_sku,platform",
+            ).execute()
 
         return {"success": True, "content": new_content}
 
