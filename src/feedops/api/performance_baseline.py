@@ -305,6 +305,101 @@ def _capture_google_baseline(
         raise
 
 
+@router.get("/diagnose-products")
+async def diagnose_products():
+    """Check what products actually exist in Google Ads with impressions.
+
+    This endpoint queries Google Ads for ANY products with impressions
+    in the last 7 days, regardless of whether they're in our database.
+
+    Use this to:
+    1. Verify products are active in Google Ads campaigns
+    2. Check if offer IDs match our variant_index format
+    3. See what campaign types are returning data
+    """
+    try:
+        end_date = date.today()
+        start_date = end_date - timedelta(days=7)
+        customer_id = os.getenv("GOOGLE_ADS_CUSTOMER_ID")
+
+        if not customer_id:
+            raise HTTPException(status_code=500, detail="GOOGLE_ADS_CUSTOMER_ID not set")
+
+        client = _load_client()
+
+        # Query for ANY products with impressions (no product filter)
+        query = f"""
+        SELECT
+          segments.product_item_id,
+          campaign.advertising_channel_type,
+          campaign.name,
+          metrics.impressions,
+          metrics.clicks
+        FROM shopping_performance_view
+        WHERE
+          segments.date BETWEEN '{start_date}' AND '{end_date}'
+          AND metrics.impressions > 0
+        ORDER BY metrics.impressions DESC
+        LIMIT 50
+        """
+
+        rows = _run_gaql_query(client, customer_id, query)
+
+        if not rows:
+            return {
+                "error": "NO products found with impressions in Google Ads",
+                "date_range": f"{start_date} to {end_date}",
+                "possible_reasons": [
+                    "No active Shopping or Performance Max campaigns",
+                    "No products have impressions in date range",
+                    "Customer ID is incorrect"
+                ],
+                "products": [],
+            }
+
+        # Analyze what we found
+        campaign_types = defaultdict(int)
+        products = []
+        our_format_count = 0
+
+        for row in rows[:50]:
+            segments = row.get("segments", {})
+            campaign = row.get("campaign", {})
+            metrics = row.get("metrics", {})
+
+            product_id = segments.get("product_item_id", "")
+            campaign_type = campaign.get("advertising_channel_type", "UNKNOWN")
+            impressions = int(metrics.get("impressions", 0) or 0)
+            clicks = int(metrics.get("clicks", 0) or 0)
+
+            campaign_types[campaign_type] += 1
+
+            if "shopify_US_" in product_id:
+                our_format_count += 1
+
+            products.append({
+                "product_id": product_id,
+                "campaign_type": campaign_type,
+                "campaign_name": campaign.get("name", "")[:40],
+                "impressions": impressions,
+                "clicks": clicks,
+                "matches_our_format": "shopify_US_" in product_id,
+            })
+
+        return {
+            "date_range": f"{start_date} to {end_date}",
+            "total_products_found": len(rows),
+            "products_shown": len(products),
+            "campaign_types": dict(campaign_types),
+            "products_matching_our_format": our_format_count,
+            "products": products[:20],  # Return top 20
+        }
+
+    except Exception as e:
+        logger.error(f"Product diagnostic failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/diagnose-query")
 async def diagnose_query():
     """Diagnostic endpoint to test Google Ads queries and see what data returns.
