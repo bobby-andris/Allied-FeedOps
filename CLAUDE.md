@@ -114,9 +114,10 @@ See: `docs/architecture/multi-sku-pattern.md`
 
 ### Offer ID Format
 
-GMC offer IDs: `shopify_us_{product_id}_{variant_id}` (lowercase `us`)
+GMC offer IDs: `shopify_US_{product_id}_{variant_id}` (uppercase `US`)
 
-**IMPORTANT**: All systems use lowercase. Previous docs said uppercase "US" - this was wrong.
+**IMPORTANT**: Database stores lowercase format, but publishing to Google Sheets requires uppercase US.
+**Fix applied**: `google-sheets.ts` transforms on publish: `shopify_us_` → `shopify_US_`
 
 ### SKU Format Handling
 
@@ -177,6 +178,39 @@ gcloud builds list --project=bobbys-project-346400 --limit=5
 - feedops-openai-api-key
 - feedops-supabase-url / feedops-supabase-key
 - feedops-google-ads-developer-token / client-id / client-secret / refresh-token / login-customer-id
+
+## Cloud Run Service
+
+**Service URL**: https://feedops-pipeline-623866089882.us-east1.run.app
+
+**Endpoints**:
+- `GET /health` - Health check with Supabase status
+- `POST /optimize-sku` - Single SKU content generation
+- `POST /regenerate` - Content regeneration with feedback
+- `POST /batch-optimize` - Batch job creation
+- `GET /batch-status/{job_id}` - Batch job progress
+- `POST /performance/capture-baseline` - Capture performance baselines
+- `POST /search-insights/sync` - Sync search terms from Google Ads
+- `POST /hybrid-generate` - Hybrid multi-SKU generation (base + variants)
+
+**CRITICAL: Cloud Run Background Task Pattern**
+
+FastAPI `BackgroundTasks` are killed when containers scale to zero or during deployments.
+
+**Solution**: Use `run_async_in_thread()` helper in `src/feedops/api/main.py`
+- Pattern: Non-daemon threads with dedicated asyncio event loops that survive HTTP response
+- Used by: `/hybrid-generate`, `/search-insights/sync`, `/batch-optimize`
+- **Limitation**: Jobs still terminate during deployments (expected behavior)
+- See: `docs/audit/background-task-fix-2026-02-08.md` for full analysis
+
+**Pattern**:
+```python
+# Replace this (killed by container lifecycle)
+background_tasks.add_task(process_job, job_id=job_id)
+
+# With this (survives until completion or deployment)
+run_async_in_thread(process_job, job_id=job_id)
+```
 
 ## Local Development
 
