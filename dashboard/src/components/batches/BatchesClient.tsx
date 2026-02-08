@@ -39,14 +39,29 @@ export function BatchesClient({ batches, stats }: BatchesClientProps) {
   const handlePublish = async (batchId: string) => {
     setActionLoading(batchId)
     try {
-      const response = await fetch('/api/batches', {
-        method: 'PATCH',
+      // Call the actual publish endpoint, not just status update
+      const response = await fetch('/api/publish/batch', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batch_id: batchId, status: 'executing' }),
+        body: JSON.stringify({
+          batch_id: batchId,
+          platforms: ['google', 'shopify'],
+          environment: 'production'
+        }),
       })
+
       if (response.ok) {
+        const result = await response.json()
+        console.log('Publish result:', result)
         router.refresh()
+      } else {
+        const error = await response.json()
+        console.error('Publish failed:', error)
+        alert(`Publish failed: ${error.error || 'Unknown error'}`)
       }
+    } catch (error) {
+      console.error('Publish error:', error)
+      alert(`Publish error: ${error}`)
     } finally {
       setActionLoading(null)
     }
