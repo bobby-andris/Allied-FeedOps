@@ -7,14 +7,19 @@ from __future__ import annotations
 
 import logging
 import os
+from collections import defaultdict
 from datetime import date, datetime, timedelta
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from feedops.db.supabase_client import get_client, is_supabase_available
-from feedops.integrations.google_ads_performance import fetch_batch_product_performance
+from feedops.integrations.google_ads_performance import (
+    fetch_batch_product_performance,
+    _load_client,
+    _run_gaql_query,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -298,3 +303,143 @@ def _capture_google_baseline(
     except Exception as e:
         logger.error(f"Failed to capture Google baseline for {master_sku}: {e}")
         raise
+
+
+@router.get("/diagnose-query")
+async def diagnose_query():
+    """Diagnostic endpoint to test Google Ads queries and see what data returns.
+
+    This endpoint:
+    1. Gets SKUs with generated content
+    2. Queries Google Ads API with campaign.advertising_channel_type
+    3. Shows what campaign types return data
+    4. Identifies which offer IDs have performance data
+
+    Use this to diagnose why baseline capture returns zeros for some SKUs.
+    """
+    try:
+        supabase = get_client()
+
+        # Get sample SKUs with content
+        result = supabase.table("generated_content").select(
+            "master_sku"
+        ).limit(15).execute()
+
+        if not result.data:
+            return {
+                "error": "No SKUs with generated content found",
+                "test_results": {},
+            }
+
+        sample_skus = list(set(row["master_sku"] for row in result.data))
+        logger.info(f"Testing {len(sample_skus)} SKUs")
+
+        # Test first 5 SKUs
+        test_results: dict[str, dict[str, Any]] = {}
+        end_date = date.today()
+        start_date = end_date - timedelta(days=30)
+        customer_id = os.getenv("GOOGLE_ADS_CUSTOMER_ID")
+
+        if not customer_id:
+            raise HTTPException(status_code=500, detail="GOOGLE_ADS_CUSTOMER_ID not set")
+
+        client = _load_client()
+
+        for master_sku in sample_skus[:5]:
+            # Get variants
+            variant_result = supabase.table("variant_index").select(
+                "gmc_offer_id, finish_code"
+            ).eq("master_sku", master_sku).execute()
+
+            if not variant_result.data:
+                test_results[master_sku] = {"error": "No variants found"}
+                continue
+
+            offer_ids = [v["gmc_offer_id"] for v in variant_result.data if v.get("gmc_offer_id")]
+
+            if not offer_ids:
+                test_results[master_sku] = {"error": "No GMC offer IDs"}
+                continue
+
+            # Query Google Ads API (limit to first 10 variants)
+            safe_ids = [oid.replace("'", "\\'") for oid in offer_ids[:10]]
+            ids_clause = ", ".join(f"'{oid}'" for oid in safe_ids)
+
+            query = f"""
+            SELECT
+              segments.product_item_id,
+              segments.date,
+              campaign.advertising_channel_type,
+              campaign.name,
+              metrics.impressions,
+              metrics.clicks
+            FROM shopping_performance_view
+            WHERE
+              segments.product_item_id IN ({ids_clause})
+              AND segments.date BETWEEN '{start_date}' AND '{end_date}'
+            ORDER BY metrics.impressions DESC
+            LIMIT 50
+            """
+
+            try:
+                rows = _run_gaql_query(client, customer_id, query)
+
+                # Analyze results
+                campaign_types = defaultdict(int)
+                offer_ids_found = set()
+                total_impressions = 0
+                total_clicks = 0
+                sample_rows = []
+
+                for row in rows:
+                    segments = row.get("segments", {})
+                    campaign = row.get("campaign", {})
+                    metrics = row.get("metrics", {})
+
+                    campaign_type = campaign.get("advertising_channel_type", "UNKNOWN")
+                    campaign_types[campaign_type] += 1
+
+                    offer_id = segments.get("product_item_id", "")
+                    if offer_id:
+                        offer_ids_found.add(offer_id)
+
+                    impressions = int(metrics.get("impressions", 0) or 0)
+                    clicks = int(metrics.get("clicks", 0) or 0)
+
+                    total_impressions += impressions
+                    total_clicks += clicks
+
+                    # Save first few rows as samples
+                    if len(sample_rows) < 3 and impressions > 0:
+                        sample_rows.append({
+                            "offer_id": offer_id[-20:],  # Last 20 chars
+                            "date": segments.get("date", ""),
+                            "campaign_type": campaign_type,
+                            "campaign_name": campaign.get("name", "")[:30],
+                            "impressions": impressions,
+                            "clicks": clicks,
+                        })
+
+                test_results[master_sku] = {
+                    "total_variants": len(offer_ids),
+                    "variants_queried": len(safe_ids),
+                    "rows_returned": len(rows),
+                    "campaign_types": dict(campaign_types),
+                    "variants_with_data": len(offer_ids_found),
+                    "total_impressions": total_impressions,
+                    "total_clicks": total_clicks,
+                    "sample_rows": sample_rows,
+                }
+
+            except Exception as e:
+                test_results[master_sku] = {"error": str(e)}
+
+        return {
+            "date_range": f"{start_date} to {end_date}",
+            "skus_tested": len(test_results),
+            "test_results": test_results,
+        }
+
+    except Exception as e:
+        logger.error(f"Diagnostic query failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
