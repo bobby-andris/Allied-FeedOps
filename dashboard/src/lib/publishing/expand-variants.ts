@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export interface ExpandedVariant {
   gmc_offer_id: string
+  master_sku: string
   finish: string
   finish_code: string | null
   title: string
@@ -116,6 +117,7 @@ export async function expandVariantsForPublish(
   // Expand each variant
   return variants.map((v) => ({
     gmc_offer_id: v.gmc_offer_id,
+    master_sku,
     finish: v.finish || 'Unknown',
     finish_code: v.finish_code,
     title: generateVariantTitle(approved_title, v.finish || 'Unknown', platform),

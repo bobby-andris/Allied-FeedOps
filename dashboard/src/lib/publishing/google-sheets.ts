@@ -501,6 +501,8 @@ export interface PublishToGoogleSheetsResult {
  */
 export interface ExpandedVariantRow {
   gmc_offer_id: string
+  master_sku: string
+  finish_code: string | null
   title: string
   description: string
   image_url?: string
@@ -749,10 +751,16 @@ export async function publishExpandedVariantsToGoogleSheets(
     for (const variant of variants) {
       result.total_variants++
 
+      // Normalize to lowercase for case-insensitive lookup
+      const existingRow = existingIds.get(variant.gmc_offer_id.toLowerCase())
+      const isNewRow = existingRow === undefined
+
       // Build row data per GMC AI content disclosure policy
       const rowData: GoogleSheetsRow = {
         // Transform to GMC format: shopify_US_ (uppercase) not shopify_us_ (lowercase)
         id: variant.gmc_offer_id.replace('shopify_us_', 'shopify_US_'),
+        // MPN (Manufacturer Part Number): Only set for NEW rows (not updates)
+        mpn: isNewRow && variant.finish_code ? `${variant.master_sku}-${variant.finish_code}` : undefined,
         // Standard fields - omit if structured-only mode
         title: USE_STRUCTURED_ONLY ? undefined : variant.title,
         description: USE_STRUCTURED_ONLY ? undefined : variant.description,
@@ -765,12 +773,10 @@ export async function publishExpandedVariantsToGoogleSheets(
         lifestyle_image_link: variant.image_url,
       }
 
-      // Normalize to lowercase for case-insensitive lookup
-      const existingRow = existingIds.get(variant.gmc_offer_id.toLowerCase())
-      if (existingRow !== undefined) {
-        rowsToUpdate.push({ rowNum: existingRow, data: rowData })
-      } else {
+      if (isNewRow) {
         rowsToAppend.push(rowData)
+      } else {
+        rowsToUpdate.push({ rowNum: existingRow, data: rowData })
       }
     }
 

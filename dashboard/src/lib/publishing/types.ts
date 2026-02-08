@@ -71,6 +71,7 @@ export interface BatchPublishResult {
  */
 export interface GoogleSheetsRow {
   id: string // offer_id (GMC ID)
+  mpn?: string // Manufacturer Part Number: {master_sku}-{finish_code}
   title?: string // Standard title (omit if structured-only mode)
   description?: string // Standard description (omit if structured-only mode)
   structured_title?: string // For AI-generated content (compound format: trained_algorithmic_media:"content")
@@ -86,6 +87,7 @@ export interface GoogleSheetsRow {
  */
 export interface SheetColumnMap {
   id: number
+  mpn?: number
   title?: number
   description?: number
   structured_title?: number
