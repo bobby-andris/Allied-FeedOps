@@ -27,6 +27,7 @@ import threading
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from feedops.api.supabase_loader import (
@@ -62,6 +63,18 @@ app = FastAPI(
     title="FeedOps Pipeline API",
     description="Content generation pipeline for Allied Brass products",
     version=API_VERSION,
+)
+
+# CORS middleware — allow dashboard to call Cloud Run endpoints
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://allied-feed-ops.vercel.app",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include search insights router
