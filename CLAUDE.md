@@ -83,6 +83,10 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 **Performance**:
 - `performance_baselines` - 30-day pre-publish metrics (avg impressions/clicks/CTR/CVR)
 - `performance_snapshots` - Post-publish tracking with days_since_publish
+- **Snapshot endpoint**: `/api/performance/capture-snapshot` (already exists)
+  - Usage: `POST /api/performance/capture-snapshot?master_sku=920D-6&platform=google`
+  - Calculates `days_since_publish` from `publish_events.published_at`
+  - Regular collection: Set up GCP Cloud Scheduler or call from Cloud Run pipeline
 
 **Data Pipeline**:
 - `variant_index` - Maps master_sku ↔ gmc_offer_id (THE SOURCE OF TRUTH)
@@ -142,7 +146,10 @@ See: `docs/architecture/multi-sku-pattern.md`
 
 **Card rendering**: Components like SearchInsightsCard render Card internally - don't wrap in additional Card
 **Grid layouts**: Use `grid-cols-1 lg:grid-cols-2` for 50/50 split (mobile stacks, desktop side-by-side)
+**Multiple variants**: SkuReviewClient has 3 variants (main, magazine, original) - update all when changing props
+**Nested components**: PlatformContent sub-component needs data threaded through parent component
 **TypeScript**: `ContentRecord` interface duplicated in page.tsx and SkuReviewClient.tsx - must match exactly
+**Performance types**: `PerformanceBaseline`/`PerformanceSnapshot` duplicated across files - include ALL nullable fields
 **Optional chaining**: Use `?.property ?? null` when component expects `string | null`
 
 ## Key Locations
@@ -240,6 +247,9 @@ SHOPIFY_STORE_URL=
 SHOPIFY_ACCESS_TOKEN=
 ```
 
+**Local testing**: Copy ALL credentials from `.env.vercel` to `dashboard/.env.local` for accurate testing
+**Dev server cleanup**: If port 3000 conflicts, use `pkill -f "next dev"` and remove `.next/cache/fetch-cache/lock`
+
 ### Python Pipeline
 
 ```bash
@@ -255,6 +265,21 @@ PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 ```bash
 cd dashboard && npm run build && npm run lint
 ```
+
+### Capture Performance Snapshots
+
+```bash
+# Via dashboard API (requires auth)
+curl -X POST https://allied-feed-ops.vercel.app/api/performance/capture-snapshot
+
+# For specific SKU
+curl -X POST "https://allied-feed-ops.vercel.app/api/performance/capture-snapshot?master_sku=920D-6"
+
+# For specific platform
+curl -X POST "https://allied-feed-ops.vercel.app/api/performance/capture-snapshot?platform=google"
+```
+
+**Automation**: Set up GCP Cloud Scheduler to call endpoint daily/weekly for trend tracking
 
 ### Run Python Maintenance Scripts
 

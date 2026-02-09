@@ -46,6 +46,33 @@ Example keys from `dashboard_data/lifestyle-eval-candidate/google-patch-CL-41-18
 - Top-level: `offerId`, `title`, `description`, `short_title`, `_meta`, `variants`
 - Each `variants[]` entry: its own `offerId`, `title`, `description`, `_meta.finish`, `_meta.option_sku`
 
+## Performance Tracking
+
+The dashboard tracks content performance through two phases:
+
+### Pre-Publish Baseline
+Before publishing optimized content, the system captures a 30-day baseline from Google Ads:
+- Stored in `performance_baselines` table
+- Metrics: impressions, clicks, CTR, conversions, CVR
+- Used for before/after comparison on `/performance` and `/review/[sku]` pages
+
+### Post-Publish Snapshots
+After publishing, the `/api/performance/capture-snapshot` endpoint captures ongoing performance:
+- Stored in `performance_snapshots` table with `days_since_publish` tracking
+- Called manually or via scheduled job (GCP Cloud Scheduler recommended)
+- Aggregated into trend charts on SKU review pages
+
+**Example:**
+```bash
+# Capture snapshot for all published SKUs
+curl -X POST https://allied-feed-ops.vercel.app/api/performance/capture-snapshot
+
+# For specific SKU
+curl -X POST "https://allied-feed-ops.vercel.app/api/performance/capture-snapshot?master_sku=920D-6"
+```
+
+For setup details, see [CLAUDE.md](./CLAUDE.md#performance).
+
 ## Setup
 
 ### Python environment
