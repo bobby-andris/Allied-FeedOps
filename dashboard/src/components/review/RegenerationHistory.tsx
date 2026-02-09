@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { History, ChevronDown, ChevronRight, Undo, Loader2 } from 'lucide-react'
+import { History, ChevronDown, ChevronRight, Undo, Loader2, Code2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { RegenerationHistory as RegenerationHistoryType } from '@/lib/supabase/types'
 
@@ -211,6 +211,40 @@ export function RegenerationHistory({
                         </Button>
                       )}
                     </div>
+
+                    {/* Prompt Display Section */}
+                    {(entry.system_prompt || entry.user_prompt) && (
+                      <Collapsible className="mt-3">
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="gap-2 text-xs h-7">
+                            <Code2 className="h-3 w-3" />
+                            View Prompt
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-2 space-y-3">
+                          {entry.system_prompt && (
+                            <div>
+                              <h5 className="text-xs font-semibold text-muted-foreground mb-1">
+                                System Prompt
+                              </h5>
+                              <pre className="text-[10px] bg-muted p-2 rounded overflow-x-auto max-h-[300px] overflow-y-auto whitespace-pre-wrap font-mono">
+                                {entry.system_prompt}
+                              </pre>
+                            </div>
+                          )}
+                          {entry.user_prompt && (
+                            <div>
+                              <h5 className="text-xs font-semibold text-muted-foreground mb-1">
+                                User Prompt (SKU-specific + Platform Context)
+                              </h5>
+                              <pre className="text-[10px] bg-muted p-2 rounded overflow-x-auto max-h-[300px] overflow-y-auto whitespace-pre-wrap font-mono">
+                                {entry.user_prompt}
+                              </pre>
+                            </div>
+                          )}
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )}
                   </div>
                 ))}
               </div>
