@@ -65,9 +65,10 @@ export function LifestyleImageReview({
 }: LifestyleImageReviewProps) {
   const [activeTab, setActiveTab] = useState<'variant' | 'master'>('variant')
 
-  // All images are variant images (associated with a finish)
-  // Master SKU images are variant images with use_for_master=true
-  const variantImages = images.filter(img => img.finish)
+  // Display all images (both product and variant)
+  // Product images: use_for_master=true, no finish field
+  // Variant images: have finish field
+  const variantImages = images // Show all images
   const masterImage = images.find(img => img.use_for_master && img.user_selected)
 
   // Group variant images by finish
