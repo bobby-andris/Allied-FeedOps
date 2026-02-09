@@ -200,7 +200,7 @@ export function LifestyleImageReview({
 
       <CardContent>
         {images.length === 0 ? (
-          <EmptyImageState sku={sku} />
+          <EmptyImageState sku={sku} onRefresh={onRefresh} />
         ) : (
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'variant' | 'master')}>
             <TabsList className="mb-4">
@@ -248,17 +248,81 @@ export function LifestyleImageReview({
   )
 }
 
-function EmptyImageState({ sku }: { sku: string }) {
+function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => void }) {
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleGenerate = async () => {
+    setIsGenerating(true)
+    setError(null)
+
+    try {
+      const cloudRunUrl = process.env.NEXT_PUBLIC_CLOUD_RUN_URL ||
+        'https://feedops-pipeline-623866089882.us-east1.run.app'
+
+      const response = await fetch(`${cloudRunUrl}/generate-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          master_sku: sku,
+          num_variations: 3,
+          dry_run: false,
+        }),
+      })
+
+      if (!response.ok) {
+        const detail = await response.text()
+        throw new Error(detail || `Generation failed (${response.status})`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success(
+          `Generated ${data.images_generated} images for ${data.selected_finish} finish`
+        )
+        onRefresh()
+      } else {
+        throw new Error(data.message || 'Generation returned no images')
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
+      toast.error(`Image generation failed: ${message}`)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   return (
     <div className="text-center py-12 border-2 border-dashed rounded-lg">
       <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
       <h3 className="font-medium mb-2">No Lifestyle Images Generated</h3>
       <p className="text-muted-foreground text-sm mb-4">
-        Lifestyle images haven&apos;t been generated for SKU {sku} yet.
+        {isGenerating
+          ? 'Generating lifestyle images using AI. This may take 2-4 minutes...'
+          : `Lifestyle images haven't been generated for SKU ${sku} yet.`
+        }
       </p>
-      <Button variant="outline">
-        <RefreshCw className="h-4 w-4 mr-2" />
-        Generate Lifestyle Images
+      {error && (
+        <p className="text-destructive text-sm mb-4">{error}</p>
+      )}
+      <Button
+        variant="outline"
+        onClick={handleGenerate}
+        disabled={isGenerating}
+      >
+        {isGenerating ? (
+          <>
+            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            Generating...
+          </>
+        ) : (
+          <>
+            <Sparkles className="h-4 w-4 mr-2" />
+            Generate Lifestyle Images
+          </>
+        )}
       </Button>
     </div>
   )

@@ -203,6 +203,29 @@ class BatchStatusResponse(BaseModel):
     skus: list[dict]
 
 
+class GenerateImagesRequest(BaseModel):
+    """Request to generate lifestyle images for a SKU."""
+
+    master_sku: str = Field(..., description="Master SKU to generate images for")
+    num_variations: int = Field(
+        default=3, ge=1, le=5, description="Number of image variations to generate"
+    )
+    dry_run: bool = Field(
+        default=False, description="If true, generate images but don't upload/save"
+    )
+
+
+class GenerateImagesResponse(BaseModel):
+    """Response from lifestyle image generation endpoint."""
+
+    success: bool
+    master_sku: str
+    selected_finish: str
+    selected_finish_code: str
+    images_generated: int
+    message: str
+
+
 class HybridGenerateRequest(BaseModel):
     """Request for hybrid multi-SKU generation."""
 
@@ -245,6 +268,7 @@ async def root():
             "regenerate": "POST /regenerate",
             "batch_optimize": "POST /batch-optimize",
             "batch_status": "GET /batch-status/{job_id}",
+            "generate_images": "POST /generate-images",
             "hybrid_generate": "POST /hybrid-generate",
         },
     }
@@ -467,6 +491,59 @@ Return your response as JSON: {{"content": "your generated {request.content_type
         raise
     except Exception as e:
         logger.error(f"Regeneration failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# Lifestyle Image Generation
+# =============================================================================
+
+
+@app.post(
+    "/generate-images",
+    response_model=GenerateImagesResponse,
+    tags=["Generation"],
+)
+async def generate_lifestyle_images(request: GenerateImagesRequest):
+    """Generate lifestyle images for a SKU with smart finish selection.
+
+    Uses Google Ads performance data to select the most popular finish,
+    then generates lifestyle images using Gemini Imagen API.
+    Images are uploaded to Supabase Storage and records inserted into
+    product_lifestyle_images and variant_lifestyle_images tables.
+
+    This endpoint runs synchronously (~2-4 minutes).
+    """
+    try:
+        logger.info(
+            f"Generating lifestyle images for {request.master_sku} "
+            f"(variations={request.num_variations}, dry_run={request.dry_run})"
+        )
+
+        from feedops.pipeline.lifestyle_images import (
+            generate_lifestyle_images_for_sku,
+        )
+
+        result = generate_lifestyle_images_for_sku(
+            master_sku=request.master_sku,
+            num_variations=request.num_variations,
+            dry_run=request.dry_run,
+        )
+
+        return GenerateImagesResponse(
+            success=result["images_generated"] > 0,
+            master_sku=result["master_sku"],
+            selected_finish=result["selected_finish"],
+            selected_finish_code=result["selected_finish_code"],
+            images_generated=result["images_generated"],
+            message=result["message"],
+        )
+
+    except ValueError as e:
+        logger.warning(f"Image generation validation error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Image generation failed for {request.master_sku}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

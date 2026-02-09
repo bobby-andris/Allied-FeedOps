@@ -1501,3 +1501,407 @@ Mood: Classic elegance, warm luxury, traditional sophistication"""
     return """Lighting: Natural soft lighting with good product visibility
 Camera: 3/4 angle, product in sharp focus
 Mood: Professional, clean, lifestyle photography"""
+
+
+# =============================================================================
+# Smart Finish Selection & Cloud Run Integration
+# =============================================================================
+
+
+def select_best_finish_for_generation(
+    master_sku: str,
+    supabase_client,
+) -> tuple[str, str]:
+    """Select best finish based on Google Ads performance data.
+
+    Queries search_queries table (which has denormalized finish/finish_code)
+    and aggregates clicks by finish to find the most popular one.
+
+    Fallback order:
+    1. Most clicks
+    2. Most impressions (if clicks = 0)
+    3. First finish alphabetically
+    4. ABR as final fallback
+
+    Args:
+        master_sku: The master SKU to select finish for.
+        supabase_client: Supabase client instance.
+
+    Returns:
+        (finish_name, finish_code) tuple.
+    """
+    # Query search_queries for this master_sku (finish/finish_code are denormalized)
+    result = (
+        supabase_client.table("search_queries")
+        .select("finish, finish_code, clicks, impressions")
+        .eq("master_sku", master_sku)
+        .not_.is_("finish", "null")
+        .not_.is_("finish_code", "null")
+        .execute()
+    )
+
+    if result.data:
+        # Aggregate clicks and impressions by finish
+        finish_stats: dict[str, dict] = {}
+        for row in result.data:
+            fc = row["finish_code"]
+            if fc not in finish_stats:
+                finish_stats[fc] = {
+                    "finish": row["finish"],
+                    "finish_code": fc,
+                    "total_clicks": 0,
+                    "total_impressions": 0,
+                }
+            finish_stats[fc]["total_clicks"] += row.get("clicks") or 0
+            finish_stats[fc]["total_impressions"] += row.get("impressions") or 0
+
+        if finish_stats:
+            # Sort by clicks desc, then impressions desc
+            sorted_finishes = sorted(
+                finish_stats.values(),
+                key=lambda x: (x["total_clicks"], x["total_impressions"]),
+                reverse=True,
+            )
+            best = sorted_finishes[0]
+            if best["total_clicks"] > 0 or best["total_impressions"] > 0:
+                print(
+                    f"  Selected finish {best['finish']} ({best['finish_code']}) "
+                    f"with {best['total_clicks']} clicks, {best['total_impressions']} impressions"
+                )
+                return best["finish"], best["finish_code"]
+
+    # Fallback: get first finish alphabetically from variant_index
+    vi_result = (
+        supabase_client.table("variant_index")
+        .select("finish, finish_code")
+        .eq("master_sku", master_sku)
+        .not_.is_("finish", "null")
+        .not_.is_("finish_code", "null")
+        .order("finish_code")
+        .limit(1)
+        .execute()
+    )
+
+    if vi_result.data:
+        row = vi_result.data[0]
+        print(f"  No search data, falling back to first finish: {row['finish']} ({row['finish_code']})")
+        return row["finish"], row["finish_code"]
+
+    # Final fallback
+    print("  No finish data found, defaulting to ABR")
+    return "Antique Brass", "ABR"
+
+
+def upload_lifestyle_image_to_storage(
+    image_path: Path,
+    master_sku: str,
+    variation_num: int,
+    supabase_client,
+) -> str:
+    """Upload a lifestyle image to Supabase Storage.
+
+    Args:
+        image_path: Path to the local image file.
+        master_sku: Master SKU identifier.
+        variation_num: Variation number (1-N).
+        supabase_client: Supabase client instance.
+
+    Returns:
+        Public URL of the uploaded image.
+    """
+    image_path = Path(image_path)
+    safe_sku = master_sku.replace("/", "-")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    storage_path = f"{safe_sku}_var{variation_num}_{timestamp}.png"
+
+    with open(image_path, "rb") as f:
+        file_bytes = f.read()
+
+    supabase_client.storage.from_("lifestyle-images").upload(
+        path=storage_path,
+        file=file_bytes,
+        file_options={"content-type": "image/png"},
+    )
+
+    public_url = supabase_client.storage.from_("lifestyle-images").get_public_url(
+        storage_path
+    )
+    print(f"  ✓ Uploaded to storage: {storage_path}")
+    return public_url
+
+
+def save_lifestyle_image_to_db(
+    master_sku: str,
+    shopify_product_id: str,
+    finish: str,
+    finish_code: str,
+    gmc_offer_id: str,
+    image_url: str,
+    variation_num: int,
+    ai_selected: bool,
+    score: Optional[float],
+    prompt: str,
+    supabase_client,
+) -> tuple[str, str]:
+    """Insert records into product_lifestyle_images and variant_lifestyle_images.
+
+    Args:
+        master_sku: Master SKU identifier.
+        shopify_product_id: Shopify product ID (required for product_lifestyle_images).
+        finish: Full finish name.
+        finish_code: Short finish code.
+        gmc_offer_id: GMC offer ID for the variant.
+        image_url: Supabase Storage public URL.
+        variation_num: Variation number (1-N).
+        ai_selected: Whether this is the AI-selected best image.
+        score: Quality score (0-100) if available.
+        prompt: Generation prompt used.
+        supabase_client: Supabase client instance.
+
+    Returns:
+        (product_image_id, variant_image_id) tuple.
+    """
+    now = datetime.now().isoformat()
+
+    # Insert into product_lifestyle_images
+    product_result = (
+        supabase_client.table("product_lifestyle_images")
+        .insert(
+            {
+                "master_sku": master_sku,
+                "shopify_product_id": shopify_product_id,
+                "variation_index": variation_num,
+                "image_url": image_url,
+                "approval_status": "pending",
+                "ai_selected": ai_selected,
+                "user_selected": False,
+                "score": score,
+                "prompt": prompt[:5000],
+                "generation_model": AI_SYSTEM_VERSION,
+                "generation_timestamp": now,
+            }
+        )
+        .execute()
+    )
+    product_image_id = product_result.data[0]["id"] if product_result.data else ""
+
+    # Insert into variant_lifestyle_images
+    variant_result = (
+        supabase_client.table("variant_lifestyle_images")
+        .insert(
+            {
+                "master_sku": master_sku,
+                "gmc_offer_id": gmc_offer_id,
+                "finish": finish,
+                "finish_code": finish_code,
+                "variation_index": variation_num,
+                "image_url": image_url,
+                "approval_status": "pending",
+                "ai_selected": ai_selected,
+                "user_selected": False,
+                "score": score,
+                "prompt": prompt[:5000],
+                "generation_model": AI_SYSTEM_VERSION,
+                "generation_timestamp": now,
+            }
+        )
+        .execute()
+    )
+    variant_image_id = variant_result.data[0]["id"] if variant_result.data else ""
+
+    print(f"  ✓ Saved to DB: product={product_image_id}, variant={variant_image_id}")
+    return product_image_id, variant_image_id
+
+
+def generate_lifestyle_images_for_sku(
+    master_sku: str,
+    num_variations: int = 3,
+    dry_run: bool = False,
+) -> dict:
+    """Generate lifestyle images for a SKU with smart finish selection.
+
+    Steps:
+    1. Load product data from Supabase
+    2. Select best finish using Google Ads data
+    3. Generate images using LifestyleImageGenerator (existing code)
+    4. Score images and select best variation
+    5. Upload to Supabase Storage
+    6. Insert into database tables
+
+    Args:
+        master_sku: Master SKU to generate images for.
+        num_variations: Number of image variations to generate (1-5).
+        dry_run: If True, generate images but don't upload/save.
+
+    Returns:
+        Dict with generation summary.
+    """
+    from feedops.db.supabase_client import get_client
+
+    supabase = get_client()
+    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    if not gemini_api_key:
+        raise ValueError("GEMINI_API_KEY environment variable not set")
+
+    print(f"\n{'='*70}")
+    print(f"Smart Lifestyle Image Generation for {master_sku}")
+    print(f"{'='*70}")
+
+    # Step 1: Load product data
+    product_rows = (
+        supabase.table("product_catalog")
+        .select("*")
+        .eq("master_sku", master_sku)
+        .order("position")
+        .execute()
+    )
+    if not product_rows.data:
+        raise ValueError(f"SKU not found in product_catalog: {master_sku}")
+
+    first_row = product_rows.data[0]
+    category = first_row["category"]
+    title = first_row["title"]
+    style = first_row.get("style") or "modern"
+
+    print(f"  Category: {category}")
+    print(f"  Title: {title}")
+
+    # Step 2: Select best finish
+    print("\nSelecting best finish based on Google Ads data...")
+    selected_finish, selected_finish_code = select_best_finish_for_generation(
+        master_sku, supabase
+    )
+
+    # Step 3: Get variant info for selected finish
+    vi_result = (
+        supabase.table("variant_index")
+        .select("gmc_offer_id, shopify_product_id, shopify_variant_id")
+        .eq("master_sku", master_sku)
+        .eq("finish_code", selected_finish_code)
+        .limit(1)
+        .execute()
+    )
+    if not vi_result.data:
+        raise ValueError(
+            f"No variant found for {master_sku} with finish {selected_finish_code}"
+        )
+
+    variant_info = vi_result.data[0]
+    gmc_offer_id = variant_info["gmc_offer_id"]
+    shopify_product_id = variant_info.get("shopify_product_id") or ""
+
+    # Step 4: Get reference images for the selected finish
+    finish_rows = [
+        r for r in product_rows.data if r.get("finish_code") == selected_finish_code
+    ]
+    if not finish_rows:
+        # Fallback to first variant's images
+        finish_rows = [first_row]
+
+    ref_row = finish_rows[0]
+    product_image_urls = []
+    for field in ["main_image_url", "alt_image_1", "alt_image_2", "alt_image_3", "alt_image_4"]:
+        url = ref_row.get(field)
+        if url and url not in product_image_urls:
+            product_image_urls.append(url)
+
+    if not product_image_urls:
+        raise ValueError(f"No reference images found for {master_sku}")
+
+    print(f"  Using {len(product_image_urls)} reference images from {selected_finish} finish")
+
+    # Step 5: Build prompts using existing helpers
+    inventory = get_product_inventory(category, title)
+    scene = get_customer_focused_scene(
+        category=category, style=style, product_title=title
+    )
+    technical = get_technical_specs(style)
+
+    # Step 6: Generate images
+    output_dir = Path(
+        os.environ.get("LIFESTYLE_IMAGES_OUTPUT_DIR", "/tmp/lifestyle_images")
+    )
+    generator = LifestyleImageGenerator(api_key=gemini_api_key, output_dir=output_dir)
+    lifestyle_results = generator.generate_for_product(
+        product_image_urls=product_image_urls,
+        master_sku=master_sku,
+        inventory=inventory,
+        scene=scene,
+        technical=technical,
+        category=category,
+        num_variations=num_variations,
+    )
+
+    successful_results = [r for r in lifestyle_results if r.generation_success]
+    if not successful_results:
+        return {
+            "master_sku": master_sku,
+            "selected_finish": selected_finish,
+            "selected_finish_code": selected_finish_code,
+            "images_generated": 0,
+            "image_ids": [],
+            "best_variation_num": None,
+            "message": "All image generation attempts failed",
+        }
+
+    # Step 7: Score images and select best
+    best_variation_num = None
+    scores_by_variation: dict[int, float] = {}
+
+    ai_select_enabled = (
+        os.environ.get("LIFESTYLE_IMAGE_AI_SELECT", "true").lower() == "true"
+    )
+    if ai_select_enabled and len(successful_results) > 1:
+        best_variation_num, image_scores = select_best_lifestyle_image(
+            image_results=lifestyle_results,
+            reference_image_url=product_image_urls[0],
+            category=category,
+            api_key=gemini_api_key,
+        )
+        for s in image_scores:
+            if s.evaluation_success:
+                scores_by_variation[s.variation_num] = s.composite_score
+
+    if best_variation_num is None:
+        best_variation_num = successful_results[0].variation_num
+
+    # Step 8: Upload and save (if not dry_run)
+    image_ids = []
+    if not dry_run:
+        for result in successful_results:
+            is_best = result.variation_num == best_variation_num
+            score = scores_by_variation.get(result.variation_num)
+
+            # Upload to Supabase Storage
+            public_url = upload_lifestyle_image_to_storage(
+                image_path=Path(result.image_path),
+                master_sku=master_sku,
+                variation_num=result.variation_num,
+                supabase_client=supabase,
+            )
+
+            # Save to database
+            product_id, variant_id = save_lifestyle_image_to_db(
+                master_sku=master_sku,
+                shopify_product_id=shopify_product_id,
+                finish=selected_finish,
+                finish_code=selected_finish_code,
+                gmc_offer_id=gmc_offer_id,
+                image_url=public_url,
+                variation_num=result.variation_num,
+                ai_selected=is_best,
+                score=score,
+                prompt=result.prompt_used,
+                supabase_client=supabase,
+            )
+            image_ids.append(product_id)
+
+    return {
+        "master_sku": master_sku,
+        "selected_finish": selected_finish,
+        "selected_finish_code": selected_finish_code,
+        "images_generated": len(successful_results),
+        "image_ids": image_ids,
+        "best_variation_num": best_variation_num,
+        "message": f"Generated {len(successful_results)} images for {selected_finish} finish",
+    }
