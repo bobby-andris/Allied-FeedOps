@@ -161,13 +161,26 @@ async function getSkuData(urlSku: string) {
     console.error('Error fetching variant lifestyle images:', variantImagesError)
   }
 
+  // Build lookup from image_url to finish info (variant images have finish data)
+  const finishByUrl = new Map<string, { finish: string; finish_code: string }>()
+  for (const img of variantLifestyleImages || []) {
+    if (img.finish && img.image_url) {
+      finishByUrl.set(img.image_url, { finish: img.finish, finish_code: img.finish_code })
+    }
+  }
+
   // Transform for UI (combine both types for backward compat)
   const images: ImageRecord[] = [
-    ...(productLifestyleImages || []).map(img => ({
-      ...img,
-      use_for_master: true,
-      approval_status: img.approval_status as 'pending' | 'approved' | 'rejected',
-    })),
+    ...(productLifestyleImages || []).map(img => {
+      const finishInfo = finishByUrl.get(img.image_url)
+      return {
+        ...img,
+        use_for_master: true,
+        approval_status: img.approval_status as 'pending' | 'approved' | 'rejected',
+        finish: finishInfo?.finish ?? null,
+        finish_code: finishInfo?.finish_code ?? null,
+      }
+    }),
     ...(variantLifestyleImages || []).map(img => ({
       ...img,
       use_for_master: false,
