@@ -65,6 +65,29 @@ query checkMediaStatus($mediaId: ID!) {
 }
 `
 
+// GraphQL query for getting all product media
+const GET_PRODUCT_MEDIA_QUERY = `
+query getProductMedia($productId: ID!) {
+  product(id: $productId) {
+    id
+    media(first: 100) {
+      edges {
+        node {
+          ... on MediaImage {
+            id
+            alt
+            status
+            image {
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`
+
 interface ShopifyCredentials {
   storeUrl: string
   accessToken: string
@@ -221,6 +244,54 @@ export async function pollMediaStatus(
 }
 
 /**
+ * Check if media with matching alt text already exists for product.
+ *
+ * @param shopifyProductId - Shopify product GID
+ * @param altText - Alt text to match
+ * @returns Existing media if found, null otherwise
+ */
+export async function findExistingMedia(
+  shopifyProductId: string,
+  altText: string
+): Promise<{ mediaId: string; cdnUrl: string } | null> {
+  try {
+    const result = await executeShopifyGraphQL<{
+      product: {
+        id: string
+        media: {
+          edges: Array<{
+            node: {
+              id: string
+              alt: string | null
+              status: string
+              image: { url: string } | null
+            }
+          }>
+        }
+      }
+    }>(GET_PRODUCT_MEDIA_QUERY, { productId: shopifyProductId })
+
+    // Find media with matching alt text and READY status
+    const matchingMedia = result.product.media.edges.find(
+      (edge) => edge.node.alt === altText && edge.node.status === 'READY'
+    )
+
+    if (matchingMedia && matchingMedia.node.image?.url) {
+      console.log(`[Shopify] Found existing media: ${matchingMedia.node.id}`)
+      return {
+        mediaId: matchingMedia.node.id,
+        cdnUrl: matchingMedia.node.image.url,
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error('[Shopify] Error checking for existing media:', error)
+    return null // Continue with upload if check fails
+  }
+}
+
+/**
  * Associate media with specific product variant.
  *
  * @param shopifyProductId - Shopify product GID
@@ -256,6 +327,7 @@ export async function associateImageWithVariant(
 
 /**
  * Complete workflow: Upload image to Shopify, wait for processing, associate with variant.
+ * Checks for existing media first to prevent duplicates.
  *
  * @param supabaseImageUrl - Public URL from Supabase Storage
  * @param shopifyProductId - Shopify product GID
@@ -269,11 +341,21 @@ export async function uploadAndAssociateImage(
   shopifyVariantId?: string,
   altText?: string
 ): Promise<{ mediaId: string; cdnUrl: string }> {
+  const finalAltText = altText || 'Lifestyle image'
+
+  // Step 0: Check if media with this alt text already exists
+  const existingMedia = await findExistingMedia(shopifyProductId, finalAltText)
+
+  if (existingMedia) {
+    console.log(`[Shopify] Reusing existing media: ${existingMedia.mediaId}`)
+    return existingMedia
+  }
+
   // Step 1: Upload image to Shopify product
   const uploadResult = await uploadLifestyleImageToShopify(
     supabaseImageUrl,
     shopifyProductId,
-    altText
+    finalAltText
   )
 
   console.log(`[Shopify] Image uploaded, status: ${uploadResult.status}, media ID: ${uploadResult.mediaId}`)
