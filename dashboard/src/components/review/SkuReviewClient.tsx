@@ -82,6 +82,35 @@ interface ApprovalRecord {
   notes: string | null
 }
 
+interface PerformanceBaseline {
+  master_sku: string
+  platform: string
+  avg_impressions: number | null
+  avg_clicks: number | null
+  avg_ctr: number | null
+  avg_conversions: number | null
+  avg_cvr: number | null
+  avg_conversion_value: number | null
+  baseline_start_date: string
+  baseline_end_date: string
+  created_at: string
+}
+
+interface PerformanceSnapshot {
+  id: string
+  master_sku: string
+  platform: string
+  snapshot_date: string
+  impressions: number | null
+  clicks: number | null
+  ctr: number | null
+  conversions: number | null
+  cvr: number | null
+  conversion_value: number | null
+  days_since_publish: number | null
+  fetched_at: string
+}
+
 interface SkuReviewClientProps {
   sku: string
   content: ContentRecord[]
@@ -96,6 +125,8 @@ interface SkuReviewClientProps {
     google: Record<string, string> | null
     bing: Record<string, string> | null
   }
+  performanceBaselines: PerformanceBaseline[]
+  performanceSnapshots: PerformanceSnapshot[]
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -279,6 +310,8 @@ export function SkuReviewClient({
   currentContentByPlatform,
   variantCurrentContent,
   finishSentences,
+  performanceBaselines,
+  performanceSnapshots,
 }: SkuReviewClientProps) {
   const router = useRouter()
   const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'bing' | 'shopify'>('google')
@@ -369,7 +402,12 @@ export function SkuReviewClient({
                 currentDescription={description?.candidate_content ?? undefined}
               />
 
-              <PerformanceCard sku={masterSku} platform={selectedPlatform} />
+              <PerformanceCard
+                sku={masterSku}
+                platform={selectedPlatform}
+                baselines={performanceBaselines}
+                snapshots={performanceSnapshots}
+              />
             </div>
 
             {/* Content blocks - vertical layout */}

@@ -180,6 +180,35 @@ function PromptUsed({
   )
 }
 
+interface PerformanceBaseline {
+  master_sku: string
+  platform: string
+  avg_impressions: number | null
+  avg_clicks: number | null
+  avg_ctr: number | null
+  avg_conversions: number | null
+  avg_cvr: number | null
+  avg_conversion_value: number | null
+  baseline_start_date: string
+  baseline_end_date: string
+  created_at: string
+}
+
+interface PerformanceSnapshot {
+  id: string
+  master_sku: string
+  platform: string
+  snapshot_date: string
+  impressions: number | null
+  clicks: number | null
+  ctr: number | null
+  conversions: number | null
+  cvr: number | null
+  conversion_value: number | null
+  days_since_publish: number | null
+  fetched_at: string
+}
+
 interface SkuReviewClientProps {
   sku: string
   content: ContentRecord[]
@@ -194,6 +223,8 @@ interface SkuReviewClientProps {
     google: Record<string, string> | null
     bing: Record<string, string> | null
   }
+  performanceBaselines: PerformanceBaseline[]
+  performanceSnapshots: PerformanceSnapshot[]
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -342,6 +373,8 @@ function PlatformContent({
   finish,
   currentContent,
   liveLabel,
+  performanceBaselines,
+  performanceSnapshots,
 }: {
   platform: string
   content: ContentRecord[]
@@ -349,6 +382,8 @@ function PlatformContent({
   finish: string | null
   currentContent: { title: string | null; description: string | null } | undefined
   liveLabel: string
+  performanceBaselines: PerformanceBaseline[]
+  performanceSnapshots: PerformanceSnapshot[]
 }) {
   const { title, description } = getContentByPlatform(content, platform)
 
@@ -420,7 +455,12 @@ function PlatformContent({
               </CardTitle>
             </CardHeader>
             <CardContent className="overflow-auto max-h-[600px]">
-              <PerformanceCard sku={sku} platform={platform as 'google' | 'bing' | 'shopify'} />
+              <PerformanceCard
+                sku={sku}
+                platform={platform as 'google' | 'bing' | 'shopify'}
+                baselines={performanceBaselines}
+                snapshots={performanceSnapshots}
+              />
             </CardContent>
           </Card>
 
@@ -457,6 +497,8 @@ export function SkuReviewClient({
   currentContentByPlatform,
   variantCurrentContent,
   finishSentences,
+  performanceBaselines,
+  performanceSnapshots,
 }: SkuReviewClientProps) {
   const router = useRouter()
   const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'bing' | 'shopify'>('google')
@@ -589,6 +631,8 @@ export function SkuReviewClient({
                   finish={selectedFinish}
                   currentContent={currentContentByPlatform['google']}
                   liveLabel={liveLabel}
+                  performanceBaselines={performanceBaselines}
+                  performanceSnapshots={performanceSnapshots}
                 />
               </TabsContent>
             )}
@@ -601,6 +645,8 @@ export function SkuReviewClient({
                   finish={selectedFinish}
                   currentContent={currentContentByPlatform['bing']}
                   liveLabel={liveLabel}
+                  performanceBaselines={performanceBaselines}
+                  performanceSnapshots={performanceSnapshots}
                 />
               </TabsContent>
             )}
@@ -613,6 +659,8 @@ export function SkuReviewClient({
                   finish={selectedFinish}
                   currentContent={currentContentByPlatform['shopify']}
                   liveLabel={liveLabel}
+                  performanceBaselines={performanceBaselines}
+                  performanceSnapshots={performanceSnapshots}
                 />
               </TabsContent>
             )}

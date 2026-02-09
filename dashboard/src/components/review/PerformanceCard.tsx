@@ -1,11 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronDown, TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { Skeleton } from '@/components/ui/skeleton'
-import { usePerformanceData } from '@/hooks/usePerformanceData'
 import {
   formatNumber,
   formatCurrency,
@@ -15,54 +13,104 @@ import {
   getStatusColor,
   getStatusGlow,
   getCategoryAvgCTR,
+  calculatePerformanceStatus,
 } from '@/lib/performance-utils'
 import { cn } from '@/lib/utils'
+import type { PerformanceStatus } from '@/lib/supabase/types'
+
+interface PerformanceBaseline {
+  master_sku: string
+  platform: string
+  avg_impressions: number | null
+  avg_clicks: number | null
+  avg_ctr: number | null
+  avg_conversions: number | null
+  avg_cvr: number | null
+  avg_conversion_value: number | null
+  baseline_start_date: string
+  baseline_end_date: string
+  created_at: string
+}
+
+interface PerformanceSnapshot {
+  id: string
+  master_sku: string
+  platform: string
+  snapshot_date: string
+  impressions: number | null
+  clicks: number | null
+  ctr: number | null
+  conversions: number | null
+  cvr: number | null
+  conversion_value: number | null
+  days_since_publish: number | null
+  fetched_at: string
+}
+
+interface CurrentMetrics {
+  impressions: number
+  clicks: number
+  ctr: number
+  conversions: number
+  conversion_value: number
+}
 
 interface PerformanceCardProps {
   sku: string
   platform?: 'google' | 'bing' | 'shopify'
+  baselines: PerformanceBaseline[]
+  snapshots: PerformanceSnapshot[]
 }
 
-export function PerformanceCard({ sku, platform = 'google' }: PerformanceCardProps) {
+export function PerformanceCard({ sku, platform = 'google', baselines, snapshots }: PerformanceCardProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const { current, baseline, status, loading, error } = usePerformanceData(sku, platform)
 
-  // Loading state
-  if (loading) {
-    return (
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent pointer-events-none" />
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-serif flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            PERFORMANCE (30d)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-4 w-2/3" />
-        </CardContent>
-      </Card>
-    )
-  }
+  // Filter and aggregate data for the selected platform
+  const { baseline, current, status } = useMemo(() => {
+    // Get baseline for this platform (latest)
+    const platformBaseline = baselines
+      .filter(b => b.platform === platform)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] || null
 
-  // Error state
-  if (error) {
-    return (
-      <Card className="relative overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-serif flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            PERFORMANCE (30d)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{error}</p>
-        </CardContent>
-      </Card>
+    // Get snapshots for this platform (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const platformSnapshots = snapshots.filter(
+      s => s.platform === platform && new Date(s.snapshot_date) >= thirtyDaysAgo
     )
-  }
+
+    // Aggregate snapshots into current metrics
+    let currentMetrics: CurrentMetrics | null = null
+    if (platformSnapshots.length > 0) {
+      const totalImpressions = platformSnapshots.reduce((sum, s) => sum + (s.impressions || 0), 0)
+      const totalClicks = platformSnapshots.reduce((sum, s) => sum + (s.clicks || 0), 0)
+      const totalConversions = platformSnapshots.reduce((sum, s) => sum + (s.conversions || 0), 0)
+      const totalConversionValue = platformSnapshots.reduce((sum, s) => sum + (s.conversion_value || 0), 0)
+      const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+
+      currentMetrics = {
+        impressions: totalImpressions,
+        clicks: totalClicks,
+        ctr: avgCTR,
+        conversions: totalConversions,
+        conversion_value: totalConversionValue,
+      }
+    }
+
+    // Calculate status
+    const categoryAvgCTR = getCategoryAvgCTR('Bathroom Accessories')
+    const performanceStatus = calculatePerformanceStatus(
+      currentMetrics?.ctr,
+      platformBaseline?.avg_ctr ?? undefined,
+      categoryAvgCTR
+    )
+
+    return {
+      baseline: platformBaseline,
+      current: currentMetrics,
+      status: performanceStatus,
+    }
+  }, [baselines, snapshots, platform])
 
   // If no current data but baseline exists, show baseline
   if (!current && baseline) {

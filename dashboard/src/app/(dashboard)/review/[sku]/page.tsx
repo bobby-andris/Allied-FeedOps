@@ -315,6 +315,28 @@ async function getSkuData(urlSku: string) {
     .eq('platform', 'bing')
     .single()
 
+  // Get performance baselines (30-day pre-publish metrics)
+  const { data: performanceBaselines, error: baselinesError } = await supabase
+    .from('performance_baselines')
+    .select('*')
+    .eq('master_sku', sku)
+
+  if (baselinesError) {
+    console.error('Error fetching performance baselines:', baselinesError)
+  }
+
+  // Get latest performance snapshot (post-publish metrics)
+  const { data: performanceSnapshots, error: snapshotsError } = await supabase
+    .from('performance_snapshots')
+    .select('*')
+    .eq('master_sku', sku)
+    .order('snapshot_date', { ascending: false })
+    .limit(10)  // Get last 10 snapshots for trend
+
+  if (snapshotsError) {
+    console.error('Error fetching performance snapshots:', snapshotsError)
+  }
+
   return {
     content: (content || []) as ContentRecord[],
     images,
@@ -328,6 +350,8 @@ async function getSkuData(urlSku: string) {
       google: googleFinishSentences?.finish_sentences as Record<string, string> | null || null,
       bing: bingFinishSentences?.finish_sentences as Record<string, string> | null || null,
     },
+    performanceBaselines: performanceBaselines || [],
+    performanceSnapshots: performanceSnapshots || [],
   }
 }
 
@@ -337,7 +361,19 @@ export default async function SkuReviewPage({
   params: Promise<{ sku: string }>
 }) {
   const { sku } = await params
-  const { content, images, approval, variants, variantApprovals, productImages, currentContentByPlatform, variantCurrentContent, finishSentences } = await getSkuData(sku)
+  const {
+    content,
+    images,
+    approval,
+    variants,
+    variantApprovals,
+    productImages,
+    currentContentByPlatform,
+    variantCurrentContent,
+    finishSentences,
+    performanceBaselines,
+    performanceSnapshots
+  } = await getSkuData(sku)
 
   if (content.length === 0) {
     notFound()
@@ -355,6 +391,8 @@ export default async function SkuReviewPage({
       currentContentByPlatform={currentContentByPlatform}
       variantCurrentContent={variantCurrentContent}
       finishSentences={finishSentences}
+      performanceBaselines={performanceBaselines}
+      performanceSnapshots={performanceSnapshots}
     />
   )
 }

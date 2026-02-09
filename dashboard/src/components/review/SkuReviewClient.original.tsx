@@ -188,6 +188,35 @@ function PromptUsed({
   )
 }
 
+interface PerformanceBaseline {
+  master_sku: string
+  platform: string
+  avg_impressions: number | null
+  avg_clicks: number | null
+  avg_ctr: number | null
+  avg_conversions: number | null
+  avg_cvr: number | null
+  avg_conversion_value: number | null
+  baseline_start_date: string
+  baseline_end_date: string
+  created_at: string
+}
+
+interface PerformanceSnapshot {
+  id: string
+  master_sku: string
+  platform: string
+  snapshot_date: string
+  impressions: number | null
+  clicks: number | null
+  ctr: number | null
+  conversions: number | null
+  cvr: number | null
+  conversion_value: number | null
+  days_since_publish: number | null
+  fetched_at: string
+}
+
 interface SkuReviewClientProps {
   sku: string
   content: ContentRecord[]
@@ -203,6 +232,8 @@ interface SkuReviewClientProps {
     google: Record<string, string> | null
     bing: Record<string, string> | null
   }
+  performanceBaselines: PerformanceBaseline[]
+  performanceSnapshots: PerformanceSnapshot[]
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -351,6 +382,8 @@ function PlatformContent({
   finish,
   currentContent,
   liveLabel,
+  performanceBaselines,
+  performanceSnapshots,
 }: {
   platform: string
   content: ContentRecord[]
@@ -358,6 +391,8 @@ function PlatformContent({
   finish: string | null
   currentContent: { title: string | null; description: string | null } | undefined
   liveLabel: string
+  performanceBaselines: PerformanceBaseline[]
+  performanceSnapshots: PerformanceSnapshot[]
 }) {
   const { title, description } = getContentByPlatform(content, platform)
 
@@ -413,6 +448,8 @@ function PlatformContent({
         <PerformanceCard
           sku={sku}
           platform={platform as 'google' | 'bing' | 'shopify'}
+          baselines={performanceBaselines}
+          snapshots={performanceSnapshots}
         />
         <ContentQualityCard
           title={title?.candidate_content || ''}
@@ -436,6 +473,8 @@ export function SkuReviewClient({
   currentContentByPlatform,
   variantCurrentContent,
   finishSentences,
+  performanceBaselines,
+  performanceSnapshots,
 }: SkuReviewClientProps) {
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
   const router = useRouter()
@@ -567,7 +606,7 @@ export function SkuReviewClient({
                 Template uses &#123;FINISH_NAME&#125; for 28 variants
               </span>
             </div>
-            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['google']} liveLabel="Previous Version" />
+            <PlatformContent platform="google" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['google']} liveLabel="Previous Version" performanceBaselines={performanceBaselines} performanceSnapshots={performanceSnapshots} />
             {/* All Variants Grid for Google */}
             {hasVariants && (
               <VariantContentGrid
@@ -596,7 +635,7 @@ export function SkuReviewClient({
                 Template uses &#123;FINISH_NAME&#125; for 28 variants
               </span>
             </div>
-            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['bing']} liveLabel="Previous Version" />
+            <PlatformContent platform="bing" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['bing']} liveLabel="Previous Version" performanceBaselines={performanceBaselines} performanceSnapshots={performanceSnapshots} />
             {/* All Variants Grid for Bing */}
             {hasVariants && (
               <VariantContentGrid
@@ -625,7 +664,7 @@ export function SkuReviewClient({
                 No finish placeholder - content applies to all variants
               </span>
             </div>
-            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['shopify']} liveLabel="Current (Live)" />
+            <PlatformContent platform="shopify" content={content} sku={sku} finish={selectedFinish} currentContent={currentContentByPlatform['shopify']} liveLabel="Current (Live)" performanceBaselines={performanceBaselines} performanceSnapshots={performanceSnapshots} />
           </TabsContent>
         )}
       </Tabs>
