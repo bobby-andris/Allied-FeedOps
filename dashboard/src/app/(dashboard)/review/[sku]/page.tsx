@@ -169,18 +169,27 @@ async function getSkuData(urlSku: string) {
     }
   }
 
-  // Transform for UI (combine both types for backward compat)
+  // Transform for UI — deduplicate by image_url since the same image
+  // exists in both product_lifestyle_images and variant_lifestyle_images
+  const variantImageUrls = new Set(
+    (variantLifestyleImages || []).map(img => img.image_url).filter(Boolean)
+  )
+
   const images: ImageRecord[] = [
-    ...(productLifestyleImages || []).map(img => {
-      const finishInfo = finishByUrl.get(img.image_url)
-      return {
-        ...img,
-        use_for_master: true,
-        approval_status: img.approval_status as 'pending' | 'approved' | 'rejected',
-        finish: finishInfo?.finish ?? null,
-        finish_code: finishInfo?.finish_code ?? null,
-      }
-    }),
+    // Product images that DON'T also exist as variant images
+    ...(productLifestyleImages || [])
+      .filter(img => !img.image_url || !variantImageUrls.has(img.image_url))
+      .map(img => {
+        const finishInfo = finishByUrl.get(img.image_url)
+        return {
+          ...img,
+          use_for_master: true,
+          approval_status: img.approval_status as 'pending' | 'approved' | 'rejected',
+          finish: finishInfo?.finish ?? null,
+          finish_code: finishInfo?.finish_code ?? null,
+        }
+      }),
+    // All variant images (preferred — they have native finish data)
     ...(variantLifestyleImages || []).map(img => ({
       ...img,
       use_for_master: false,
