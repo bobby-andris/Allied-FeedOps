@@ -256,6 +256,15 @@ PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
 cd dashboard && npm run build && npm run lint
 ```
 
+### Run Python Maintenance Scripts
+
+```bash
+cd /path/to/Allied-FeedOps
+source .venv/bin/activate
+set -a && source .env.vercel && set +a
+python scripts/script_name.py
+```
+
 ### Check Deployment
 
 ```bash
@@ -302,6 +311,13 @@ See: `docs/architecture/data-pipeline.md`
 - Product-level content only (no variant-specific titles/descriptions)
 - Lifestyle images: variant-specific via `productVariantAppendMedia`
 - CDN lifecycle: Supabase Storage → Shopify CDN → Google Sheets
+
+**Shopify Media Upload**:
+- ALWAYS use `uploadProductImage()` for lifestyle images (not `uploadVariantImage()`)
+- `uploadProductImage()` uploads to product level without variant association
+- `uploadVariantImage()` attempts `productVariantAppendMedia` which fails with "variant already has media" error
+- `findExistingMedia()` checks for existing media by alt text before uploading to prevent duplicates
+- Images must reach READY status before CDN URL is available
 
 ## Google Sheets Feed Structure
 
@@ -373,6 +389,12 @@ git push origin master
 **Pipeline issues**:
 - Cloud Run logs: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50`
 - Test: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+
+**Shopify media issues**:
+- Duplicate lifestyle images: Check Shopify product media via GraphQL (see `scripts/cleanup_duplicate_media.py`)
+- CDN migration failing: Verify `migrateImagesForPublish()` not using `uploadVariantImage()`
+- Storefront not updating: Hard refresh (cmd+shift+r) to bypass CDN cache
+- Use /systematic-debugging skill for media upload errors instead of guessing fixes
 
 **Batch publishing issues**:
 - **Stuck "executing" status**: Final batch status UPDATE fails silently (possible timeout or missing error handling)
