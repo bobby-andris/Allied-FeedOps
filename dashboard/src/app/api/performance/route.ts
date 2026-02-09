@@ -40,11 +40,7 @@ interface PerformanceResponse {
   warnings: string[]
 }
 
-// SKU to Shopify Product ID mapping
-// TODO: This should come from a database table (variant_index)
-const SKU_PRODUCT_ID_MAP: Record<string, { shopifyProductId: string; name: string }> = {
-  '1051': { shopifyProductId: '4545063682180', name: 'Paper Towel Holders' },
-}
+// SKU to Shopify Product ID mapping is now queried from variant_index table
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -94,7 +90,29 @@ export async function GET(request: NextRequest) {
 
     const uniqueSkus = [...new Set((publishEvents || []).map(e => e.master_sku))]
 
-    // 2. Query performance_baselines for these SKUs
+    // 2. Query variant_index to get Shopify product IDs and product titles
+    const { data: variantIndexData, error: variantIndexError } = await supabase
+      .from('variant_index')
+      .select('master_sku, shopify_product_id, product_title')
+      .in('master_sku', uniqueSkus)
+
+    if (variantIndexError) {
+      console.error('Failed to fetch variant index:', variantIndexError)
+      warnings.push('Failed to fetch product mapping data')
+    }
+
+    // Build SKU to product mapping from variant_index (take first variant per master_sku)
+    const skuToProductMap = new Map<string, { shopifyProductId: string; name: string }>()
+    for (const variant of variantIndexData || []) {
+      if (!skuToProductMap.has(variant.master_sku)) {
+        skuToProductMap.set(variant.master_sku, {
+          shopifyProductId: variant.shopify_product_id,
+          name: variant.product_title || `SKU ${variant.master_sku}`,
+        })
+      }
+    }
+
+    // 3. Query performance_baselines for these SKUs
     let baselineQuery = supabase
       .from('performance_baselines')
       .select('*')
@@ -133,7 +151,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // 3. Fetch current performance from Google Ads (for google platform)
+    // 4. Fetch current performance from Google Ads (for google platform)
     let googleAdsData = new Map<string, ProductPerformance>()
     
     if (platform === 'google' && isGoogleAdsConfigured()) {
@@ -142,7 +160,7 @@ export async function GET(request: NextRequest) {
       const skuToProductId = new Map<string, string>()
 
       for (const skuId of uniqueSkus) {
-        const mapping = SKU_PRODUCT_ID_MAP[skuId]
+        const mapping = skuToProductMap.get(skuId)
         if (mapping) {
           shopifyProductIds.push(mapping.shopifyProductId)
           skuToProductId.set(skuId, mapping.shopifyProductId)
@@ -162,11 +180,21 @@ export async function GET(request: NextRequest) {
           warnings.push('Failed to fetch live Google Ads data. Showing cached data only.')
         }
       }
+
+      // Distribute Google Ads product-level data to all master_skus sharing that product
+      // (handles multi-SKU products like DMF-2/2X, DMF-2/3X sharing same product_id)
+      const skuToGoogleAdsData = new Map<string, ProductPerformance>()
+      for (const [skuId, mapping] of skuToProductMap) {
+        if (googleAdsData.has(mapping.shopifyProductId)) {
+          skuToGoogleAdsData.set(skuId, googleAdsData.get(mapping.shopifyProductId)!)
+        }
+      }
+      googleAdsData = skuToGoogleAdsData
     } else if (platform === 'google' && !isGoogleAdsConfigured()) {
       warnings.push('Google Ads API is not configured. Using cached data only.')
     }
 
-    // 4. Query performance_snapshots for fallback/additional data
+    // 5. Query performance_snapshots for fallback/additional data
     const { startDate, endDate } = getDateRange(dateRange)
     
     let snapshotQuery = supabase
@@ -206,12 +234,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 5. Build the response
+    // 6. Build the response
     const skuPerformanceList: SkuPerformance[] = []
 
     for (const [key, publishInfo] of publishedSkuMap) {
-      const [skuId] = key.split('-')
-      const skuMapping = SKU_PRODUCT_ID_MAP[skuId]
+      const skuId = key.substring(0, key.lastIndexOf('-' + publishInfo.platform))
+      const skuMapping = skuToProductMap.get(skuId)
       const shopifyProductId = skuMapping?.shopifyProductId || null
       const productName = skuMapping?.name || `SKU ${skuId}`
 
@@ -232,12 +260,12 @@ export async function GET(request: NextRequest) {
         clicks: 0,
       }
 
-      if (shopifyProductId && googleAdsData.has(shopifyProductId)) {
-        const gadsData = googleAdsData.get(shopifyProductId)!
+      if (googleAdsData.has(skuId)) {
+        const gadsData = googleAdsData.get(skuId)!
         current = {
           ctr: gadsData.ctr * 100, // Convert to percentage
-          cvr: gadsData.conversions > 0 && gadsData.clicks > 0 
-            ? (gadsData.conversions / gadsData.clicks) * 100 
+          cvr: gadsData.conversions > 0 && gadsData.clicks > 0
+            ? (gadsData.conversions / gadsData.clicks) * 100
             : 0,
           impressions: gadsData.impressions,
           clicks: gadsData.clicks,
