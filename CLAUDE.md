@@ -2,6 +2,24 @@
 
 ## ⚠️ CRITICAL BEHAVIORAL RULES (READ FIRST)
 
+### Anti-Pattern Detection (Check User Prompts)
+**Before executing, check if user's request matches known failure patterns:**
+
+1. **"Spawn agents to query [database]"** → Warn: MCP access issue. Offer: data-first OR ToolSearch
+2. **"Just give quick answer"** (for analysis) → Warn: Fabrication risk. Offer: data-first approach
+3. **"Fix and push"** / "deploy"** → Warn: No build verification. Enforce: build → lint → push workflow
+4. **"Use Node.js/npm for script"** → Warn: Wrong stack. Remind: Python for scripts
+5. **"Optimize N SKUs"** (no selection) → Ask: Which SKUs? Offer to query for criteria
+6. **"Continue where we left off"** → Check: Checkpoint file exists? Or need context summary?
+
+**Warning format:**
+```
+⚠️ Anti-Pattern: [Name]
+Issue: [why it fails]
+Recommend: [better approach]
+Proceed with recommendation or override?
+```
+
 ### Pre-Deploy Gates (MANDATORY)
 Before ANY `git push` or deployment:
 1. ✅ Run `cd dashboard && npm run build` - MUST pass
@@ -42,10 +60,22 @@ Use subagent_type: general-purpose (has access to all tools)
 - ✅ Use existing utilities before writing new code
 - ❌ NEVER switch languages without explicit user approval
 
-### Context Management
-- If session involves multi-agent orchestration, proactively checkpoint progress at 60-70% context
+### Context Management (Self-Monitoring Required)
+**Track message count as context usage proxy:**
+- ~50 messages (50% usage): Issue awareness note, plan checkpoints if long session
+- ~75 messages (60-65% usage): Recommend checkpoint soon
+- ~100 messages (70% usage): **Create checkpoint now** (required)
+- ~120+ messages (80%+ usage): **Auto-checkpoint + end session** (critical)
+
+**High-burn sessions** (multi-agent, deep research, many file reads):
+- Adjust thresholds DOWN by 20-30 messages
+- Checkpoint earlier and more frequently
+
+**Proactive behavior:**
+- Issue context warnings at thresholds WITHOUT user prompting
+- Offer `/checkpoint` at 60-70% usage
+- At 80%: Force checkpoint and recommend ending session
 - Write state to `.claude/checkpoints/[topic].md` BEFORE hitting limits
-- Long sessions: suggest breaking into phases rather than hitting context overflow
 
 ## Quick Reference
 

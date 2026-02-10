@@ -1,0 +1,19 @@
+{
+  "_comment": "Advanced import validation hook - add to .claude/hooks/config.json",
+  "_usage": "Merge this into your existing hooks config for more robust import checking",
+
+  "postToolUse": [
+    {
+      "tool": "Edit",
+      "pattern": "**/*.{ts,tsx,js,jsx}",
+      "description": "Validate import removal by checking actual usage",
+      "command": "bash -c 'if [ -n \"$OLD_STRING\" ] && [ -n \"$NEW_STRING\" ]; then OLD_IMPORTS=$(echo \"$OLD_STRING\" | grep \"^import\" | sed \"s/.*{\\(.*\\)}.*/\\1/\" | tr \",\" \"\\n\" | tr -d \" \"); NEW_IMPORTS=$(echo \"$NEW_STRING\" | grep \"^import\" | sed \"s/.*{\\(.*\\)}.*/\\1/\" | tr \",\" \"\\n\" | tr -d \" \"); for import in $OLD_IMPORTS; do if ! echo \"$NEW_IMPORTS\" | grep -q \"$import\"; then if grep -q \"$import\" \"$FILE_PATH\" 2>/dev/null; then echo \"❌ IMPORT STILL USED: $import found in file after removal\"; echo \"File: $FILE_PATH\"; exit 1; fi; fi; done; fi'"
+    },
+    {
+      "tool": "Edit",
+      "pattern": "**/*.{ts,tsx}",
+      "description": "Check for unused imports after edits",
+      "command": "bash -c 'if command -v eslint &> /dev/null; then eslint \"$FILE_PATH\" --quiet 2>&1 | grep \"is defined but never used\" || echo \"✅ No unused import warnings\"; fi'"
+    }
+  ]
+}
