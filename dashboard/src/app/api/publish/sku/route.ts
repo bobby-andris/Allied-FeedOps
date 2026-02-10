@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { publishExpandedVariantsToGoogleSheets } from '@/lib/publishing/google-sheets'
 import { publishToShopify } from '@/lib/publishing/shopify'
 import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
-import { uploadProductImage, uploadVariantImage } from '@/lib/publishing/shopify-images'
+import { uploadProductImage } from '@/lib/publishing/shopify-images'
 import type { Platform, PublishEventInsert } from '@/lib/publishing/types'
 import { NextRequest, NextResponse } from 'next/server'
 

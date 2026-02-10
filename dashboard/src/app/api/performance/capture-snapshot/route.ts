@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     let snapshotsCreated = 0
     const errors: string[] = []
 
-    for (const [key, publishEvent] of skuPlatformMap) {
+    for (const [, publishEvent] of skuPlatformMap) {
       const masterSku = publishEvent.master_sku
       const platform = publishEvent.platform
       const productId = skuToProductId.get(masterSku)

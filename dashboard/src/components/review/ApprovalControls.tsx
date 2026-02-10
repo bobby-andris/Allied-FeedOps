@@ -23,7 +23,8 @@ interface ApprovalControlsProps {
 
 export function ApprovalControls({
   sku,
-  currentStatus: _currentStatus,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  currentStatus,
   titleApproved,
   descriptionApproved,
   imageApproved,

@@ -86,7 +86,7 @@ async function migrateImages() {
       const fileBuffer = readFileSync(localPath)
 
       // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('lifestyle-images')
         .upload(filename, fileBuffer, {
           contentType: 'image/png',

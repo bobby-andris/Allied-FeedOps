@@ -5,7 +5,6 @@
  * Integrates with SKU selection, regeneration, and publishing workflows.
  */
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
@@ -335,7 +334,9 @@ export async function capturePostPublishSnapshot(
   publishEventId: string,
   supabase?: ReturnType<typeof createAdminClient>
 ): Promise<DataCollectionResult> {
-  const client = supabase || createAdminClient()
+  // client available for future use when direct DB writes are needed
+  const _client = supabase || createAdminClient()
+  void _client
 
   try {
     if (!PIPELINE_URL) {

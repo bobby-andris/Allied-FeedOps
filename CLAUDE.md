@@ -51,6 +51,8 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 
 **Default: Cloud Run Pipeline**
 - Location: `src/feedops/api/main.py` (FastAPI)
+- **Dashboard regeneration proxies to this pipeline** — `route.ts` is a thin proxy, NOT a separate codepath
+- Finish sentences for Google/Bing descriptions still generated via TypeScript/OpenAI (lightweight call)
 - Quality: ~75-80/100
 - Speed: ~3 minutes per SKU
 - Use for: Bulk generation (50+ SKUs)
@@ -91,6 +93,12 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 **Data Pipeline**:
 - `variant_index` - Maps master_sku ↔ gmc_offer_id (THE SOURCE OF TRUTH)
 - `product_catalog` - 75,770 variants with full product data
+
+**Lifestyle Images**:
+- `product_lifestyle_images` - Product-level (no finish columns, requires shopify_product_id)
+- `variant_lifestyle_images` - Variant-level (has finish/finish_code, gmc_offer_id)
+- **Dedup**: Same image exists in both tables; page.tsx deduplicates by image_url (prefer variant records)
+- **Generation**: Cloud Run `/generate-images` → Supabase Storage → both DB tables
 
 **Search**:
 - `search_queries` - Variant-level Google Ads search terms
@@ -144,9 +152,13 @@ See: `docs/architecture/multi-sku-pattern.md`
 
 ### Component Patterns (Dashboard)
 
+**ESLint**: Underscore prefix (`_unused`) does NOT suppress `no-unused-vars` — use `// eslint-disable-next-line` or remove the variable
 **Card rendering**: Components like SearchInsightsCard render Card internally - don't wrap in additional Card
 **Grid layouts**: Use `grid-cols-1 lg:grid-cols-2` for 50/50 split (mobile stacks, desktop side-by-side)
 **Multiple variants**: SkuReviewClient has 3 variants (main, magazine, original) - update all when changing props
+**Import cleanup**: Each SkuReviewClient variant uses DIFFERENT subsets of imports — always `grep` for usage before removing
+**localStorage SSR**: Use `useState(() => { if (typeof window === 'undefined') return default; ... })` lazy initializer, NOT useEffect+setState
+**Platform tabs**: SkuReviewClient persists selected platform in URL search params (`?platform=bing`) — sticky positioned at `top-[57px]`
 **Nested components**: PlatformContent sub-component needs data threaded through parent component
 **TypeScript**: `ContentRecord` interface duplicated in page.tsx and SkuReviewClient.tsx - must match exactly
 **Performance types**: `PerformanceBaseline`/`PerformanceSnapshot` duplicated across files - include ALL nullable fields
@@ -157,7 +169,8 @@ See: `docs/architecture/multi-sku-pattern.md`
 **Dashboard**:
 - Pages: `dashboard/src/app/(dashboard)/**`
 - API routes: `dashboard/src/app/api/**`
-- Regeneration core: `dashboard/src/lib/regeneration/core.ts`
+- Regeneration route: `dashboard/src/app/api/regenerate/route.ts` (thin proxy to Cloud Run `/regenerate`)
+- Regeneration core (legacy, used by batch): `dashboard/src/lib/regeneration/core.ts`
 - Prompts (SINGLE SOURCE): `dashboard/src/lib/regeneration/prompts.ts`
 - Evidence builder: `dashboard/src/lib/evidence/*`
 - Multi-SKU detection: `dashboard/src/lib/multi-sku-detection.ts`
@@ -175,6 +188,10 @@ See: `docs/architecture/multi-sku-pattern.md`
 
 ## Deployment (Auto-Deploy on Push to Master)
 
+**Vercel IDs** (for MCP tools):
+- Project: `prj_00zlLdZVgbP8XjDWIEXSRdFyqDqA`
+- Team: `team_KsEZDE8Pw0bKQDGlieBVBQVs`
+
 **Two pipelines auto-deploy**:
 1. **Cloud Run** (Python): Push → Cloud Build trigger → Deploy
 2. **Vercel** (Dashboard): Push → Vercel auto-deploy
@@ -188,10 +205,11 @@ gcloud builds list --project=bobbys-project-346400 --limit=5
 - Build: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
 - Runtime: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
 
-**GCP secrets** (all 8 already exist, bound to runtime SA):
+**GCP secrets** (all 9 already exist, bound to runtime SA):
 - feedops-openai-api-key
 - feedops-supabase-url / feedops-supabase-key
 - feedops-google-ads-developer-token / client-id / client-secret / refresh-token / login-customer-id
+- feedops-gemini-api-key
 
 ## Cloud Run Service
 
@@ -206,6 +224,7 @@ gcloud builds list --project=bobbys-project-346400 --limit=5
 - `POST /performance/capture-baseline` - Capture performance baselines
 - `POST /search-insights/sync` - Sync search terms from Google Ads
 - `POST /hybrid-generate` - Hybrid multi-SKU generation (base + variants)
+- `POST /generate-images` - Lifestyle image generation (Gemini Imagen, ~3 min, smart finish selection)
 
 **CRITICAL: Cloud Run Background Task Pattern**
 
@@ -213,7 +232,8 @@ FastAPI `BackgroundTasks` are killed when containers scale to zero or during dep
 
 **Solution**: Use `run_async_in_thread()` helper in `src/feedops/api/main.py`
 - Pattern: Non-daemon threads with dedicated asyncio event loops that survive HTTP response
-- Used by: `/hybrid-generate`, `/search-insights/sync`, `/batch-optimize`
+- Used by: `/hybrid-generate`, `/search-insights/sync`, `/batch-optimize`, `/generate-images`
+- **CORS**: `main.py` has CORSMiddleware allowing `allied-feed-ops.vercel.app` and `localhost:3000`
 - **Limitation**: Jobs still terminate during deployments (expected behavior)
 - See: `docs/audit/background-task-fix-2026-02-08.md` for full analysis
 

@@ -12,7 +12,7 @@
  * - Red (#ef4444): <70% "Major revision required"
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { analyzeSixDimensions, type Platform } from '@/lib/quality-scoring'
 
 interface ContentQualityCardProps {
@@ -28,23 +28,18 @@ export function ContentQualityCard({
   platform,
   masterSku,
 }: ContentQualityCardProps) {
-  // Initialize with default value (SSR-safe - no localStorage access during initialization)
-  const [isExpanded, setIsExpanded] = useState(true)
+  // Initialize from localStorage (SSR-safe via typeof check)
+  const [isExpanded, setIsExpanded] = useState(() => {
+    if (typeof window === 'undefined') return true
+    const stored = localStorage.getItem(`contentQualityCard:${masterSku}:expanded`)
+    return stored !== null ? stored === 'true' : true
+  })
 
-  // Read from localStorage on mount (client-side only)
-  useEffect(() => {
-    const key = `contentQualityCard:${masterSku}:expanded`
-    const stored = localStorage.getItem(key)
-    if (stored !== null) {
-      setIsExpanded(stored === 'true')
-    }
-  }, [masterSku])
-
-  // Save expanded state to localStorage
-  useEffect(() => {
-    const key = `contentQualityCard:${masterSku}:expanded`
-    localStorage.setItem(key, String(isExpanded))
-  }, [isExpanded, masterSku])
+  // Save expanded state to localStorage on change
+  const updateExpanded = (value: boolean) => {
+    setIsExpanded(value)
+    localStorage.setItem(`contentQualityCard:${masterSku}:expanded`, String(value))
+  }
 
   const analysis = useMemo(() => {
     if (title && description) {
@@ -78,7 +73,7 @@ export function ContentQualityCard({
     major: 'Major revision required',
   }[analysis.status]
 
-  const toggleExpanded = () => setIsExpanded(!isExpanded)
+  const toggleExpanded = () => updateExpanded(!isExpanded)
 
   return (
     <div

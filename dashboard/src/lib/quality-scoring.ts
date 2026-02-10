@@ -146,6 +146,7 @@ export interface QualityAnalysis {
   cvrProxy: number          // 0-10 (description score)
   brandVoice: number        // 0-10
   readability: number       // 0-10
+  keywordAlignment?: number // 0-10 (optional, only when search data available)
   compositeScore: number    // 0-100
   titleZoneAnalysis: TitleZoneAnalysis | null
   issues: string[]
@@ -643,13 +644,105 @@ export function detectTrustSignals(description: string): TrustSignals {
 }
 
 // ============================================================================
+// Keyword Alignment Scoring
+// ============================================================================
+
+const KEYWORD_PRODUCT_TYPES = [
+  'paper towel holder', 'paper towel stand', 'toilet paper holder',
+  'towel bar', 'towel ring', 'towel rack', 'towel shelf',
+  'robe hook', 'soap dish', 'soap dispenser',
+  'grab bar', 'glass shelf', 'shower caddy', 'shower shelf',
+  'toilet brush', 'tissue holder', 'vanity mirror', 'makeup mirror',
+  'towel warmer', 'wine rack', 'door knocker',
+]
+
+function extractProductTypePhrases(queries: string[]): string[] {
+  const counts = new Map<string, number>()
+  for (const query of queries) {
+    const lower = query.toLowerCase()
+    for (const pt of KEYWORD_PRODUCT_TYPES) {
+      if (lower.includes(pt)) {
+        counts.set(pt, (counts.get(pt) ?? 0) + 1)
+        break // One product type per query
+      }
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([phrase]) => phrase)
+}
+
+export function scoreKeywordAlignment(
+  title: string,
+  description: string,
+  platform: Platform,
+  searchQueries?: Array<{ query_text: string; total_clicks?: number; ctr?: number }> | null,
+  productMaterial?: string | null
+): { score: number; notes: string[] } {
+  const notes: string[] = []
+
+  // If no search data, return neutral — don't penalize
+  if (!searchQueries || searchQueries.length === 0) {
+    return { score: 5, notes: ['No search query data — scoring neutrally'] }
+  }
+
+  let score = 5 // Start neutral, adjust up/down
+  const titleLower = title.toLowerCase()
+  const descLower = description.toLowerCase()
+
+  // 1. Product type coverage: Does the title contain the core product type
+  //    from the top query by clicks?
+  const topByClicks = [...searchQueries]
+    .sort((a, b) => (b.total_clicks ?? 0) - (a.total_clicks ?? 0))
+    .slice(0, 5)
+
+  // Extract product type phrases from top queries
+  const productTypePhrases = extractProductTypePhrases(topByClicks.map(q => q.query_text))
+
+  if (productTypePhrases.length > 0) {
+    const mainPhrase = productTypePhrases[0] // Most common product type
+    if (titleLower.includes(mainPhrase)) {
+      score += 2
+    } else {
+      score -= 2
+      notes.push(`Top search term product type "${mainPhrase}" not in title`)
+    }
+  }
+
+  // 2. Material mention (platform-dependent)
+  const material = (productMaterial ?? '').toLowerCase()
+  if (platform !== 'shopify') {
+    // Google/Bing: material in title is valuable
+    if (material.includes('brass') && (titleLower.includes('brass') || titleLower.includes('solid brass'))) {
+      score += 1
+    } else if (material && !titleLower.includes(material.split(' ')[0])) {
+      notes.push(`Product material "${productMaterial}" not referenced in title`)
+    }
+  }
+  // Shopify: check description instead
+  if (platform === 'shopify' && material.includes('brass') && !descLower.includes('brass')) {
+    notes.push('Product material (brass) not mentioned in Shopify description')
+  }
+
+  // 3. Competitive positioning in description (all platforms)
+  if (material.includes('brass') && (descLower.includes('zinc') || descLower.includes('die-cast') || descLower.includes('plastic alternative'))) {
+    score += 1 // Competitive differentiation present
+  }
+
+  return { score: Math.max(0, Math.min(10, score)), notes }
+}
+
+// ============================================================================
 // Main Analysis Function
 // ============================================================================
 
 export function analyzeContent(
   title: string,
   description: string,
-  platform: Platform
+  platform: Platform,
+  searchQueries?: Array<{ query_text: string; total_clicks?: number; ctr?: number }> | null,
+  productMaterial?: string | null
 ): QualityAnalysis {
   // Score individual dimensions
   const titleResult = scoreTitleCtr(title, platform)
@@ -683,10 +776,26 @@ export function analyzeContent(
     n.includes('lacks')
   )
 
-  // Calculate composite: (ctr + cvr + voice + readability) / 40 * 100
-  let compositeScore = Math.round(
-    (titleResult.score + descResult.score + voiceResult.score + readabilityResult.score) / 40 * 100
-  )
+  // Calculate keyword alignment if data available
+  const keywordResult = scoreKeywordAlignment(title, description, platform, searchQueries, productMaterial)
+
+  // Composite: if keyword data available, include it; otherwise use original formula
+  let compositeScore: number
+  if (searchQueries && searchQueries.length > 0) {
+    compositeScore = Math.round(
+      (keywordResult.score * 0.20 +    // Keyword alignment
+       titleResult.score * 0.20 +       // Title zone structure
+       descResult.score * 0.25 +        // Description quality
+       voiceResult.score * 0.15 +       // Brand voice
+       readabilityResult.score * 0.20   // Readability
+      ) / 10 * 100
+    )
+  } else {
+    // Fallback: original formula
+    compositeScore = Math.round(
+      (titleResult.score + descResult.score + voiceResult.score + readabilityResult.score) / 40 * 100
+    )
+  }
 
   // ==================== HARD VIOLATION PENALTIES ====================
   // These catch platform-specific rule violations that individual scorers miss.
@@ -736,10 +845,11 @@ export function analyzeContent(
     cvrProxy: descResult.score,
     brandVoice: voiceResult.score,
     readability: readabilityResult.score,
+    keywordAlignment: keywordResult.score,
     compositeScore,
     titleZoneAnalysis: titleResult.zoneAnalysis,
     issues,
-    suggestions,
+    suggestions: [...suggestions, ...keywordResult.notes],
     trustSignals: detectTrustSignals(description),
   }
 }
@@ -778,9 +888,11 @@ export interface SixDimensionScore {
 export function analyzeSixDimensions(
   title: string,
   description: string,
-  platform: Platform
+  platform: Platform,
+  searchQueries?: Array<{ query_text: string; total_clicks?: number; ctr?: number }> | null,
+  productMaterial?: string | null
 ): SixDimensionScore {
-  const analysis = analyzeContent(title, description, platform)
+  const analysis = analyzeContent(title, description, platform, searchQueries, productMaterial)
 
   // 1. Specificity: Concrete claims (favor description quality + brand voice)
   const specificity = clamp0to10(
@@ -790,8 +902,10 @@ export function analyzeSixDimensions(
   // 2. Benefit Coverage: Benefits in hook (use description score as proxy)
   const benefitCoverage = analysis.cvrProxy
 
-  // 3. Keyword Inclusion: Search term coverage (use title score as proxy)
-  const keywordInclusion = analysis.ctrProxy
+  // 3. Keyword Inclusion: Search term coverage (use actual keyword data when available)
+  const keywordInclusion = searchQueries && searchQueries.length > 0
+    ? scoreKeywordAlignment(title, description, platform, searchQueries, productMaterial).score
+    : analysis.ctrProxy  // Fallback to zone analysis when no search data
 
   // 4. Format Adherence: Within limits (check length compliance)
   let formatAdherence = 10

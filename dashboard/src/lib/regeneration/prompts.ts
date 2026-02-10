@@ -89,6 +89,27 @@ ONLY for products with clear, natural frustrations:
 
 DO NOT manufacture drama where none exists. Authenticity matters.
 
+### Using Search Query Evidence
+The evidence table may include \`search_queries_top\` — these are ACTUAL customer search terms
+that triggered Google Shopping impressions for this product, ranked by clicks.
+
+How to use search queries:
+- The top queries by clicks reveal what customers type when looking for this product
+- Cross-reference queries against the product evidence (mounting_type, material, dimensions)
+- ONLY include terms that ACCURATELY describe this product
+- If a query contradicts the evidence (e.g., "wall mounted" for a countertop product), ignore it
+- Focus on the PRODUCT TYPE keyword (e.g., "paper towel holder", "towel ring") — this should appear in every title
+- Finish/color queries (e.g., "polished nickel", "brass") are handled by {FINISH_NAME} — do not duplicate
+- Integrate keywords naturally into readable titles — never force awkward phrasing for keyword coverage
+
+If no search query data is provided, rely on the product category, title, and bullets from the evidence table.
+
+### Material & Competitive Positioning
+- Reference the \`material\` field from the evidence table — do NOT assume all products are brass
+- The \`competitive_edge\` field in evidence contains a material-appropriate differentiator. Use it naturally when it fits the description's flow — do NOT force it into every description
+- Do NOT name specific competitor brands
+- Do NOT position against marketplaces (Amazon, Wayfair, etc.) — they sell our products
+
 ### Title Structure (Google/Bing)
 {FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection Name] Collection - Allied Brass
 
@@ -97,6 +118,10 @@ DO NOT manufacture drama where none exists. Authenticity matters.
 - Collection before brand (coordination buyers, not brand recognition)
 - Include differentiating features ("Space-Saving", "No Spring", "Rust Proof")
 - If no collection exists, omit the collection segment entirely
+
+### Title Length Guidance
+- Google/Bing: 70-150 characters. Front-load the most important terms in the first 70 characters (mobile truncation point).
+- Shopify: 50-80 characters (product page heading, not search result).
 
 ### Shopify Titles
 - NO {FINISH_NAME} placeholder (user already viewing specific variant)
@@ -118,9 +143,19 @@ DO NOT manufacture drama where none exists. Authenticity matters.
 Use synonyms across DIFFERENT sentences naturally:
 GOOD: "This wall-mounted towel bar keeps towels organized." ...later... "The solid brass rack coordinates with..."
 BAD: "This towel bar (towel rack / towel holder) is wall-mounted (wall mount / wall-mounted)."
-- ONE dimension format per mention ("16-inch" OR "16 inches", never both)
-- NEVER use slash-separated alternatives or parenthetical dumps
-- Distribute synonyms across sentences, never stack them
+
+ANTI-STUFFING RULES:
+- ONE dimension format per mention ("16-inch" OR "16 inches", NEVER "16 inches / 16-inch / 16in")
+- NEVER use slash-separated alternatives anywhere
+- NEVER use parenthetical keyword dumps
+- Distribute synonyms across sentences — at most ONE synonym per sentence
+- Natural readability always beats keyword coverage
+
+BAD EXAMPLE (DO NOT DO THIS):
+"Towel ring for bathroom use, 6 inches / 6-inch / 6in diameter, round wall-mounted design for hand towels and decorative towels"
+
+GOOD EXAMPLE:
+"This 6-inch towel ring keeps hand towels organized by your sink. The wall-mounted design uses concealed screws for a clean look. Solid brass construction provides lasting performance in a wet bathroom environment."
 
 ## Finish Sentences
 Generate 28 product-specific finish sentences. EXCLUDE:

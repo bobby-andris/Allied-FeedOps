@@ -1,12 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useCallback } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, ChevronDown, ChevronRight, Code2, Loader2, AlertTriangle, CheckCircle2, Info } from "lucide-react"
-import Link from "next/link"
+import { ArrowLeft, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Info } from "lucide-react"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 import { QualityScore } from "@/components/shared/QualityScore"
 import { ApprovalActions } from "@/components/review/ApprovalActions"
@@ -20,13 +17,8 @@ import { ContentQualityCard } from "@/components/review/ContentQualityCard"
 import { VariantContentGrid } from "@/components/review/VariantContentGrid"
 import { PublishButton } from "@/components/review/PublishButton"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { RegenerationHistory as RegenerationHistoryType, VariantIndex, VariantApproval } from "@/lib/supabase/types"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
 
 interface ContentRecord {
   id: string
@@ -314,7 +306,24 @@ export function SkuReviewClient({
   performanceSnapshots,
 }: SkuReviewClientProps) {
   const router = useRouter()
-  const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'bing' | 'shopify'>('google')
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+
+  // Persist platform selection in URL params
+  const validPlatforms = ['google', 'bing', 'shopify'] as const
+  const urlPlatform = searchParams.get('platform')
+  const initialPlatform = (validPlatforms.includes(urlPlatform as typeof validPlatforms[number])
+    ? urlPlatform
+    : 'google') as 'google' | 'bing' | 'shopify'
+  const [selectedPlatform, setSelectedPlatform] = useState(initialPlatform)
+
+  const handlePlatformChange = useCallback((value: string) => {
+    const p = value as 'google' | 'bing' | 'shopify'
+    setSelectedPlatform(p)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('platform', p)
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }, [searchParams, pathname, router])
 
   const masterSku = content[0]?.master_sku || sku
   const hasGoogleContent = content.some(c => c.platform === 'google')
@@ -366,12 +375,14 @@ export function SkuReviewClient({
         />
 
         {/* Platform tabs */}
-        <Tabs value={selectedPlatform} onValueChange={(v) => setSelectedPlatform(v as 'google' | 'bing' | 'shopify')} className="mt-6">
-          <TabsList>
-            {hasGoogleContent && <TabsTrigger value="google"><PlatformBadge platform="google" /></TabsTrigger>}
-            {hasBingContent && <TabsTrigger value="bing"><PlatformBadge platform="bing" /></TabsTrigger>}
-            {hasShopifyContent && <TabsTrigger value="shopify"><PlatformBadge platform="shopify" /></TabsTrigger>}
-          </TabsList>
+        <Tabs value={selectedPlatform} onValueChange={handlePlatformChange} className="mt-6">
+          <div className="sticky top-[57px] z-40 bg-background pt-2 pb-2 border-b -mx-4 px-4">
+            <TabsList>
+              {hasGoogleContent && <TabsTrigger value="google"><PlatformBadge platform="google" /></TabsTrigger>}
+              {hasBingContent && <TabsTrigger value="bing"><PlatformBadge platform="bing" /></TabsTrigger>}
+              {hasShopifyContent && <TabsTrigger value="shopify"><PlatformBadge platform="shopify" /></TabsTrigger>}
+            </TabsList>
+          </div>
 
           {/* Content */}
           <TabsContent value={selectedPlatform} className="mt-6 space-y-6">

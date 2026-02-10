@@ -16,7 +16,6 @@ import {
   calculatePerformanceStatus,
 } from '@/lib/performance-utils'
 import { cn } from '@/lib/utils'
-import type { PerformanceStatus } from '@/lib/supabase/types'
 
 interface PerformanceBaseline {
   master_sku: string
@@ -62,6 +61,7 @@ interface PerformanceCardProps {
   snapshots: PerformanceSnapshot[]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function PerformanceCard({ sku, platform = 'google', baselines, snapshots }: PerformanceCardProps) {
   const [isOpen, setIsOpen] = useState(false)
 

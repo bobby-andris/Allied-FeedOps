@@ -45,7 +45,8 @@ export async function getProductEvidence(
   // Add search query insights (actual search terms customers use)
   const searchQueries = await getSearchQueriesForMasterSku(supabase, masterSku).catch(() => [])
   if (searchQueries.length > 0) {
-    const searchEvidence = formatSearchQueriesForEvidence(searchQueries, 'master')
+    const currentTitle = (rows as ProductCatalogRow[])[0]?.title ?? ''
+    const searchEvidence = formatSearchQueriesForEvidence(searchQueries, 'master', { currentTitle })
     evidence = [...evidence, ...searchEvidence]
   }
 

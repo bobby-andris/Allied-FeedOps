@@ -280,10 +280,21 @@ export function buildEvidenceTable(
     source: 'enrichment',
   })
 
-  // Competitive edge (always include for Allied Brass)
+  // Competitive edge (material-aware)
+  const material = primary.material?.toLowerCase() ?? ''
+  let competitiveEdge: string
+  if (material.includes('brass')) {
+    competitiveEdge = 'Solid brass construction outlasts die-cast zinc and plastic alternatives at similar price points.'
+  } else if (material.includes('iron')) {
+    competitiveEdge = 'Durable iron construction built to last.'
+  } else if (material.includes('steel')) {
+    competitiveEdge = 'Sturdy steel construction built to last.'
+  } else {
+    competitiveEdge = 'Quality construction built to last.'
+  }
   evidence.push({
     field: 'competitive_edge',
-    value: 'Solid brass construction outlasts die-cast zinc and plastic alternatives',
+    value: competitiveEdge,
     source: 'enrichment',
   })
 

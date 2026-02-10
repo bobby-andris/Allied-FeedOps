@@ -100,8 +100,6 @@ export async function POST(request: NextRequest) {
     console.log(`Detected ${families.length} multi-SKU families and ${singleSkus.length} single SKUs`)
 
     // Create job record
-    const jobId = `hybrid-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-
     const { data: jobData, error: jobInsertError } = await supabase
       .from('batch_generation_jobs')
       .insert({

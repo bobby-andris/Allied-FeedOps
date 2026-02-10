@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageApprovalCard } from "@/components/review/ImageApprovalCard"
-import { Check, Image as ImageIcon, RefreshCw, Sparkles, Upload, ExternalLink } from "lucide-react"
+import { Check, Image as ImageIcon, RefreshCw, Sparkles, Upload } from "lucide-react"
 import { toast } from "sonner"
 
 // Convert local file path to GitHub raw URL for archived images
@@ -59,6 +59,7 @@ interface LifestyleImageReviewProps {
 export function LifestyleImageReview({
   sku,
   images,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   variants,
   selectedFinish,
   onRefresh,
@@ -332,6 +333,7 @@ function VariantImageSection({
   imagesByFinish,
   currentFinish,
   currentFinishImages,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sku,
   onApprove,
   onReject,

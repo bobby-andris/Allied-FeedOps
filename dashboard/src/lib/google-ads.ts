@@ -78,6 +78,7 @@ function getCustomer() {
 /**
  * Escape single quotes in a string for safe GAQL query interpolation
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function escapeGaqlString(value: string): string {
   return value.replace(/'/g, "\\'")
 }

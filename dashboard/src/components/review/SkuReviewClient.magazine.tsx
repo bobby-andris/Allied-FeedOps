@@ -4,14 +4,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, ChevronDown, ChevronRight, Code2, Loader2, Sparkles, TrendingUp, Activity } from "lucide-react"
-import Link from "next/link"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 import { QualityScore } from "@/components/shared/QualityScore"
 import { ApprovalActions } from "@/components/review/ApprovalActions"
-import { VariantSelector } from "@/components/review/VariantSelector"
-import { VariantApprovalGrid } from "@/components/review/VariantApprovalGrid"
 import { RegenerateButton } from "@/components/review/RegenerateButton"
 import { RegenerationHistory } from "@/components/review/RegenerationHistory"
 import { ProductHeroImage } from "@/components/review/ProductHeroImage"
@@ -502,6 +498,7 @@ export function SkuReviewClient({
 }: SkuReviewClientProps) {
   const router = useRouter()
   const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'bing' | 'shopify'>('google')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null)
 
   const masterSku = content[0]?.master_sku || sku

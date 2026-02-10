@@ -17,7 +17,7 @@ export async function uploadLifestyleImage(
   const supabase = createClient()
 
   // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('lifestyle-images')
     .upload(filename, file, {
       contentType: 'image/png',

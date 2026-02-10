@@ -52,23 +52,8 @@ export async function GET(request: NextRequest) {
     // If excluding a specific batch, also get its SKUs and exclude them from the unavailable list
     // (so they still show as "available" for adding to that specific batch)
     if (excludeBatchId) {
-      assignedSkus = assignedSkus.filter(_sku => {
-        // We'd need another query to check if this SKU is in the excluded batch
-        // For simplicity, we'll handle this differently - get assignments for the excluded batch
-        return true
-      })
-      
-      // Get SKUs already in the excluded batch
-      const { data: batchAssignments } = await supabase
-        .from('batch_sku_assignments')
-        .select('master_sku')
-        .eq('batch_id', excludeBatchId)
-
-      const _batchSkus = batchAssignments?.map(a => a.master_sku) || []
-      
-      // Remove these from assignedSkus so they don't get filtered out
-      // Actually, we want to filter these OUT from available since they're already in the batch
-      // So no change needed here
+      // No additional filtering needed - SKUs in the excluded batch
+      // should still show as unavailable since they're already assigned
     }
 
     // Filter out SKUs that are already assigned to active batches

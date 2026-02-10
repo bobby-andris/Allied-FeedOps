@@ -1,29 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import type { ChatCompletionMessageParam, ChatCompletionContentPart } from 'openai/resources/chat/completions'
 import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getProductEvidence, productExistsInCatalog } from '@/lib/evidence'
 import {
-  loadActivePromptTemplate,
-  formatGoldStandardExamples,
-  getCategoryGuidance,
-  type PromptTemplate,
-} from '@/lib/prompts/loader'
-import {
-  SYSTEM_PROMPT,
   FINISH_LIST,
-  FINISH_REFERENCE,
-  PLATFORM_CONTEXT,
-  SIMPLE_PLATFORM_CONTEXT,
-  FEEDBACK_PLATFORM_CONTEXT,
   getFinishSentenceInstructions,
   validateGeneratedContent,
 } from '@/lib/regeneration/prompts'
 import crypto from 'node:crypto'
 import { ensureSkuData } from '@/lib/data-collection/ensure-data'
 
-// Lazy-initialize OpenAI client (avoid build-time instantiation)
+// Python Cloud Run pipeline URL
+const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+
+// Lazy-initialize OpenAI client (only needed for finish_sentences)
 let _openai: OpenAI | null = null
 function getOpenAIClient(): OpenAI {
   if (!_openai) {
@@ -37,14 +27,8 @@ function getOpenAIClient(): OpenAI {
   return _openai
 }
 
-// Model to use for generation (default aligns with Python backend)
+// Model for finish_sentences only (main content comes from Python pipeline)
 const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
-
-// FINISH_LIST, FINISH_REFERENCE, SYSTEM_PROMPT, and PLATFORM_CONTEXT
-// are imported from @/lib/regeneration/prompts (single source of truth)
-
-// Whether to use vision for descriptions (default: true)
-const USE_VISION = process.env.FEEDOPS_USE_VISION !== '0'
 
 // Feedback preset descriptions
 const FEEDBACK_PRESETS: Record<FeedbackPreset, string> = {
@@ -73,239 +57,6 @@ interface RegenerateRequest {
   }
 }
 
-// System prompt is imported from @/lib/regeneration/prompts (SYSTEM_PROMPT)
-// No longer using a fallback — code is the single source of truth
-
-/**
- * Build enhanced prompt using evidence table
- */
-function buildEnhancedPrompt(
-  contentType: 'title' | 'description',
-  platform: string,
-  evidenceMarkdown: string,
-  promptTemplate?: PromptTemplate | null,
-  productCategory?: string
-): { prompt: string; requiresJson: boolean } {
-  const context = PLATFORM_CONTEXT[platform]?.[contentType] || ''
-
-  // Add gold standard examples if available
-  let examplesSection = ''
-  if (promptTemplate && contentType) {
-    const examples = formatGoldStandardExamples(
-      promptTemplate,
-      platform as 'google' | 'bing' | 'shopify',
-      contentType,
-      3 // Include 3 examples
-    )
-    if (examples) {
-      examplesSection = `\n\nGOLD STANDARD EXAMPLES (learn from these):\n${examples}\n`
-    }
-  }
-
-  // Add category guidance if available
-  let categoryGuidanceSection = ''
-  if (promptTemplate && productCategory) {
-    const guidance = getCategoryGuidance(promptTemplate, productCategory)
-    if (guidance) {
-      categoryGuidanceSection = `\n\nCATEGORY-SPECIFIC GUIDANCE for ${productCategory}:\n${guidance}\n`
-    }
-  }
-
-  // For Google/Bing descriptions, request JSON with finish_sentences
-  const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
-
-  if (isVariantDescription) {
-    return {
-      prompt: `Generate content for this product. You MUST respond with valid JSON.
-
-CONTEXT: ${context}
-${examplesSection}${categoryGuidanceSection}
-${evidenceMarkdown}
-
-${getFinishSentenceInstructions()}
-
-Remember:
-- Assess first: pain-point opening only when a natural frustration exists, otherwise quality/craftsmanship
-- Every factual claim must be traceable to the evidence table above
-- The base description must NOT include any specific finish name — finish content goes ONLY in finish_sentences
-- Each finish_sentence should relate the specific finish to THIS product
-
-Respond with this EXACT JSON structure (no markdown, no code blocks):
-{
-  "content": "The base description text here (no finish names)...",
-  "finish_sentences": {
-    "Antique Brass": "One sentence relating Antique Brass to this product...",
-    "Antique Bronze": "One sentence relating Antique Bronze to this product...",
-    ... (all 28 finishes - exclude Military Camo and Red White and Blue)
-  }
-}`,
-      requiresJson: true,
-    }
-  }
-
-  // For titles and Shopify, use simple text response
-  return {
-    prompt: `Generate a ${contentType} for this product.
-
-CONTEXT: ${context}
-${examplesSection}${categoryGuidanceSection}
-${evidenceMarkdown}
-
-CRITICAL RULES:
-- For Google/Bing titles: Use {FINISH_NAME} placeholder at the START, then product/specs, then "[Collection Name] Collection", then "Allied Brass". ALWAYS append "Collection" after the collection name.
-- For Shopify titles: Must be the inner core of the Google/Bing title — same product, same specs, minus {FINISH_NAME} and "Allied Brass". Structure: [Collection Name] Collection [Product] [Key Specs] - [Differentiator]. ALWAYS append "Collection" after the collection name.
-- Do NOT include any actual finish name like "Antique Brass", "Matte Black", etc.
-
-Remember:
-- Write for a human who's about to spend $80 and wants to feel good about it
-- Every factual claim must be traceable to the evidence table above
-- Weave keywords naturally, don't list them
-
-Respond with ONLY the ${contentType} text, no additional explanation or formatting.`,
-    requiresJson: false,
-  }
-}
-
-/**
- * Build enhanced feedback prompt using evidence table
- */
-function buildEnhancedFeedbackPrompt(
-  contentType: 'title' | 'description',
-  platform: string,
-  evidenceMarkdown: string,
-  currentContent: string,
-  feedback: string
-): string {
-  const context = FEEDBACK_PLATFORM_CONTEXT[platform] || platform
-
-  return `You are improving a product ${contentType} TEMPLATE based on reviewer feedback.
-
-PLATFORM: ${context}
-
-CURRENT ${contentType.toUpperCase()}:
-${currentContent}
-
-REVIEWER FEEDBACK:
-${feedback}
-
-${evidenceMarkdown}
-
-CRITICAL TEMPLATE RULES:
-- For Google/Bing: Use {FINISH_NAME} placeholder where finish should appear (NOT a specific finish like "Antique Brass")
-- For Google/Bing: Optionally use {FINISH_DESCRIPTION} for finish description
-- For Shopify: Do NOT include any finish name
-- This template will be used for ALL 28 finish variants
-
-Remember the buyer questions you're answering:
-- "Will this look good in MY bathroom?"
-- "Will this match my other fixtures?"
-- "Is this actually better than the $20 Amazon option?"
-- "Will this last? Is it quality?"
-
-Generate an improved ${contentType} template that addresses the feedback while answering these buyer questions.
-Every factual claim must be traceable to the evidence table above.
-
-Respond with ONLY the improved ${contentType} template text, no additional explanation or formatting.`
-}
-
-/**
- * Build simple prompt (fallback when catalog not available)
- */
-function buildSimplePrompt(
-  contentType: 'title' | 'description',
-  platform: string,
-  productData: Record<string, unknown>
-): { prompt: string; requiresJson: boolean } {
-  const context = SIMPLE_PLATFORM_CONTEXT[platform]?.[contentType] || ''
-
-  // For Google/Bing descriptions, request JSON with finish_sentences
-  const isVariantDescription = contentType === 'description' && (platform === 'google' || platform === 'bing')
-
-  if (isVariantDescription) {
-    return {
-      prompt: `Generate content for this product. You MUST respond with valid JSON.
-
-CONTEXT: ${context}
-
-PRODUCT DATA:
-${JSON.stringify(productData, null, 2)}
-
-${FINISH_REFERENCE}
-
-Generate a base description (no specific finish names) and 28 finish-specific sentences.
-Each finish sentence should relate the finish to THIS product.
-
-Respond with this EXACT JSON structure (no markdown, no code blocks):
-{
-  "content": "The base description text here (no finish names)...",
-  "finish_sentences": {
-    "Antique Brass": "One sentence relating Antique Brass to this product...",
-    ... (all 28 finishes)
-  }
-}`,
-      requiresJson: true,
-    }
-  }
-
-  return {
-    prompt: `Generate a ${contentType} for this product.
-
-CONTEXT: ${context}
-
-PRODUCT DATA:
-${JSON.stringify(productData, null, 2)}
-
-CRITICAL:
-- Do NOT include any specific finish name like "Antique Brass", "Matte Black", etc.
-
-Remember: Write for a human who's about to spend $80 and wants to feel good about it.
-
-Respond with ONLY the ${contentType} text, no additional explanation or formatting.`,
-    requiresJson: false,
-  }
-}
-
-/**
- * Build simple feedback prompt (fallback)
- */
-function buildSimpleFeedbackPrompt(
-  contentType: 'title' | 'description',
-  platform: string,
-  productData: Record<string, unknown>,
-  currentContent: string,
-  feedback: string
-): string {
-  const context = FEEDBACK_PLATFORM_CONTEXT[platform] || platform
-
-  return `You are improving a product ${contentType} TEMPLATE based on reviewer feedback.
-
-PLATFORM: ${context}
-
-CURRENT ${contentType.toUpperCase()}:
-${currentContent}
-
-REVIEWER FEEDBACK:
-${feedback}
-
-PRODUCT DATA:
-${JSON.stringify(productData, null, 2)}
-
-CRITICAL:
-- For Google/Bing: Use {FINISH_NAME} placeholder (NOT a specific finish like "Antique Brass")
-- For Shopify: Do NOT include any finish name
-- This template will be used for ALL 28 finish variants
-
-Remember the buyer questions you're answering:
-- "Will this look good in MY bathroom?"
-- "Will this match my other fixtures?"
-- "Is this actually better than the $20 Amazon option?"
-- "Will this last? Is it quality?"
-
-Generate an improved ${contentType} template that addresses the feedback while answering these buyer questions.
-
-Respond with ONLY the improved ${contentType} template text, no additional explanation or formatting.`
-}
-
 type SupabaseErrLike = {
   code?: string | null
   message?: string
@@ -327,7 +78,6 @@ function errorResponse(
   status: number,
   payload: { error: string; code?: string | null; details?: string | null; hint?: string | null; step?: string }
 ) {
-  // Never leak DB internals in production responses.
   const isProd = process.env.NODE_ENV === 'production'
   if (isProd) {
     return NextResponse.json({ error: payload.error }, { status })
@@ -335,18 +85,76 @@ function errorResponse(
   return NextResponse.json(payload, { status })
 }
 
-export async function POST(request: NextRequest) {
+/**
+ * Generate finish sentences via OpenAI (lightweight call).
+ * Only called for Google/Bing description regeneration since the
+ * Python pipeline doesn't generate finish_sentences.
+ */
+async function generateFinishSentences(
+  baseDescription: string,
+  masterSku: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _platform: string
+): Promise<Record<string, string> | null> {
   try {
-    // Validate OpenAI API key
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
-        { status: 500 }
-      )
+    const prompt = `You have generated this base description for a product (master SKU: ${masterSku}):
+
+"${baseDescription}"
+
+Now generate 28 finish-specific sentences — one for each finish listed below.
+Each sentence should describe how THAT FINISH relates to THIS SPECIFIC PRODUCT described above.
+
+${getFinishSentenceInstructions()}
+
+Respond with ONLY valid JSON (no markdown, no code blocks):
+{
+  "finish_sentences": {
+    "Antique Brass": "One sentence...",
+    "Antique Bronze": "One sentence...",
+    ... (all 28 finishes - exclude Military Camo and Red White and Blue)
+  }
+}`
+
+    const maxTokens = 3000
+    const tokenParams = MODEL.startsWith('gpt-5')
+      ? ({ max_completion_tokens: maxTokens } as const)
+      : ({ max_tokens: maxTokens } as const)
+
+    const completion = await getOpenAIClient().chat.completions.create({
+      model: MODEL,
+      messages: [
+        { role: 'system', content: 'You are a product content writer for Allied Brass bathroom hardware. Generate finish-specific sentences.' },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.7,
+      stream: false,
+      response_format: { type: 'json_object' as const },
+      ...tokenParams,
+    })
+
+    const raw = completion.choices[0]?.message?.content?.trim()
+    if (!raw) return null
+
+    const parsed = JSON.parse(raw)
+    const sentences = parsed.finish_sentences || parsed
+
+    // Validate we got a reasonable number of finishes
+    const keys = Object.keys(sentences)
+    if (keys.length < 20) {
+      console.warn(`Only ${keys.length} finish sentences generated (expected 28)`)
     }
 
+    return sentences
+  } catch (error) {
+    console.error('Failed to generate finish sentences:', error)
+    return null
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
     const body: RegenerateRequest = await request.json()
-    const { master_sku, content_type, platform, mode, feedback, options: _options } = body
+    const { master_sku, content_type, platform, mode, feedback } = body
 
     // Validate required fields
     if (!master_sku || !content_type || !platform || !mode) {
@@ -419,261 +227,88 @@ export async function POST(request: NextRequest) {
       logSupabaseError('Failed to fetch current generated content', currentContentError)
     }
 
-    // ==================== LOAD PROMPT TEMPLATE ====================
-    // System prompt comes from code (single source of truth).
-    // DB template provides gold standard examples + category guidance only.
-    const systemPrompt = SYSTEM_PROMPT
-    let promptTemplate: PromptTemplate | null = null
-
-    try {
-      promptTemplate = await loadActivePromptTemplate(supabase)
-      if (promptTemplate) {
-        console.log(`Loaded examples/guidance from template: ${promptTemplate.name} v${promptTemplate.version}`)
-      }
-    } catch (templateError) {
-      console.warn('Failed to load prompt template for examples:', templateError)
+    // ==================== CALL PYTHON CLOUD RUN PIPELINE ====================
+    // Build feedback text for Python endpoint
+    let feedbackText: string | null = null
+    if (mode === 'with_feedback' && feedback) {
+      const presetText = feedback.feedback_type
+        ? FEEDBACK_PRESETS[feedback.feedback_type]
+        : null
+      feedbackText = presetText
+        ? `${presetText}. ${feedback.user_feedback}\n\nCURRENT CONTENT:\n${feedback.current_content}`
+        : `${feedback.user_feedback}\n\nCURRENT CONTENT:\n${feedback.current_content}`
     }
 
-    // ==================== BUILD PROMPT WITH EVIDENCE ====================
-    let userPrompt = '' // Will be assigned below
-    let imageUrl: string | null = null
-    let useEnhancedPrompt = false
-    let requiresJson = false // True for Google/Bing descriptions (finish_sentences)
+    const finishCode = feedback?.finish || variantData?.finish_code || null
 
-    // Check if product exists in catalog for enhanced evidence
-    const catalogExists = await productExistsInCatalog(supabase, master_sku)
+    console.log(`Calling Python pipeline for ${master_sku} (${platform}/${content_type}, mode=${mode})`)
 
-    if (catalogExists) {
-      try {
-        // Get finish code for variant-specific context
-        const finishCode = feedback?.finish || variantData?.finish_code || undefined
-
-        // Build rich evidence table from product_catalog
-        const evidenceResult = await getProductEvidence(supabase, master_sku, {
-          platform: platform as 'google' | 'bing' | 'shopify',
-          finish_code: finishCode,
-        })
-
-        imageUrl = evidenceResult.imageUrl
-        useEnhancedPrompt = true
-
-        if (mode === 'simple') {
-          // Get product category for category-specific guidance
-          const productCategory = variantData?.product_category || undefined
-          const result = buildEnhancedPrompt(
-            content_type,
-            platform,
-            evidenceResult.markdown,
-            promptTemplate,
-            productCategory
-          )
-          userPrompt = result.prompt
-          requiresJson = result.requiresJson
-        } else {
-          // Combine preset + custom feedback
-          const feedbackText = feedback!.feedback_type
-            ? `${FEEDBACK_PRESETS[feedback!.feedback_type]}. ${feedback!.user_feedback}`
-            : feedback!.user_feedback
-
-          userPrompt = buildEnhancedFeedbackPrompt(
-            content_type,
-            platform,
-            evidenceResult.markdown,
-            feedback!.current_content,
-            feedbackText
-          )
-          // Feedback mode doesn't use JSON (simpler flow)
-          requiresJson = false
-        }
-
-        console.log(`Using enhanced prompt with evidence table for ${master_sku} (${platform}/${content_type})`)
-      } catch (evidenceError) {
-        console.warn('Failed to build evidence table, falling back to simple prompt:', evidenceError)
-        useEnhancedPrompt = false
-      }
-    }
-
-    // Fallback to simple prompt if catalog not available
-    if (!useEnhancedPrompt) {
-      const productData = {
+    const pipelineResponse = await fetch(`${PIPELINE_URL}/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         master_sku,
-        product_title: variantData?.product_title || master_sku,
-        product_category: variantData?.product_category || 'Bathroom Hardware',
-        finish: variantData?.finish,
-        finish_code: variantData?.finish_code,
-        dimensions: variantData?.dimensions,
-      }
-
-      if (mode === 'simple') {
-        const result = buildSimplePrompt(content_type, platform, productData)
-        userPrompt = result.prompt
-        requiresJson = result.requiresJson
-      } else {
-        const feedbackText = feedback!.feedback_type
-          ? `${FEEDBACK_PRESETS[feedback!.feedback_type]}. ${feedback!.user_feedback}`
-          : feedback!.user_feedback
-
-        userPrompt = buildSimpleFeedbackPrompt(
-          content_type,
-          platform,
-          productData,
-          feedback!.current_content,
-          feedbackText
-        )
-        // Feedback mode doesn't use JSON
-        requiresJson = false
-      }
-    }
-
-    const promptHash = crypto
-      .createHash('sha256')
-      .update(`${systemPrompt}\n\n${userPrompt}`, 'utf8')
-      .digest('hex')
-
-    // ==================== BUILD MESSAGES WITH OPTIONAL VISION ====================
-    const messages: ChatCompletionMessageParam[] = [
-      { role: 'system', content: systemPrompt },
-    ]
-
-    // Add vision support for descriptions when image URL is available
-    const shouldUseVision = USE_VISION && imageUrl && content_type === 'description'
-
-    if (shouldUseVision && imageUrl) {
-      // Build multimodal message with text and image
-      const contentParts: ChatCompletionContentPart[] = [
-        { type: 'text', text: userPrompt },
-        {
-          type: 'image_url',
-          image_url: {
-            url: imageUrl, // imageUrl is guaranteed non-null here
-            detail: 'low', // Use low detail to reduce token cost (~85 tokens)
-          },
-        },
-      ]
-      messages.push({ role: 'user', content: contentParts })
-      console.log(`Using vision with image: ${imageUrl}`)
-    } else {
-      messages.push({ role: 'user', content: userPrompt })
-    }
-
-    // ==================== CALL OPENAI ====================
-    // JSON mode needs more tokens for finish_sentences (28 entries)
-    const maxTokens = requiresJson ? 4000 : (content_type === 'title' ? 200 : 1000)
-    const tokenParams = MODEL.startsWith('gpt-5')
-      ? ({ max_completion_tokens: maxTokens } as const)
-      : ({ max_tokens: maxTokens } as const)
-
-    const completion = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      messages,
-      temperature: 0.7,
-      stream: false,
-      ...(requiresJson ? { response_format: { type: 'json_object' as const } } : {}),
-      ...tokenParams,
+        content_type,
+        platform,
+        feedback: feedbackText,
+        finish_code: finishCode,
+      }),
     })
 
-    const rawResponse = completion.choices[0]?.message?.content?.trim()
+    if (!pipelineResponse.ok) {
+      const errorData = await pipelineResponse.json().catch(() => ({ detail: 'Unknown pipeline error' }))
+      console.error(`Pipeline error (${pipelineResponse.status}):`, errorData)
+      return errorResponse(pipelineResponse.status === 404 ? 404 : 500, {
+        error: errorData.detail || `Pipeline returned ${pipelineResponse.status}`,
+        step: 'pipeline_call',
+      })
+    }
 
-    if (!rawResponse) {
+    const pipelineData = await pipelineResponse.json()
+    const newContent = pipelineData.content?.trim()
+    const pipelineModel = pipelineData.model || 'python-pipeline'
+
+    if (!newContent) {
       return NextResponse.json(
-        { error: 'No content generated from OpenAI' },
+        { error: 'No content generated from pipeline' },
         { status: 500 }
       )
     }
 
-    // Parse response based on mode
-    let newContent: string
-    let finishSentences: Record<string, string> | null = null
+    console.log(`Pipeline returned content (${newContent.length} chars) via model ${pipelineModel}`)
 
-    if (requiresJson) {
-      try {
-        const parsed = JSON.parse(rawResponse)
-        newContent = parsed.content?.trim()
-        finishSentences = parsed.finish_sentences || null
-
-        if (!newContent) {
-          return NextResponse.json(
-            { error: 'Invalid JSON response: missing content field' },
-            { status: 500 }
-          )
-        }
-
-        // Validate finish_sentences has all 28 finishes
-        if (finishSentences) {
-          const missingFinishes = FINISH_LIST.filter(f => !finishSentences![f])
-          if (missingFinishes.length > 0) {
-            console.warn(`Missing finish sentences for: ${missingFinishes.join(', ')}`)
-          }
-        }
-
-        console.log(`Parsed JSON response with ${finishSentences ? Object.keys(finishSentences).length : 0} finish sentences`)
-      } catch (parseError) {
-        console.error('Failed to parse JSON response:', parseError)
-        // Fallback: use raw response as content (best effort)
-        newContent = rawResponse
-      }
-    } else {
-      newContent = rawResponse
-    }
-
-    // ==================== VALIDATE & AUTO-RETRY ====================
+    // ==================== VALIDATE CONTENT ====================
     const violations = validateGeneratedContent(newContent, platform, content_type)
-
     if (violations.length > 0) {
       console.warn(`Validation violations for ${master_sku}/${platform}/${content_type}: ${violations.join('; ')}`)
+      // Log but don't block — Python pipeline has its own quality checks
+    }
 
-      // Auto-retry once with violation feedback
-      const retryInstruction = `VIOLATION — your previous response broke these rules:\n${violations.map(v => `- ${v}`).join('\n')}\n\nFix these violations in your new response. This is critical.`
+    // ==================== FINISH SENTENCES (Google/Bing descriptions only) ====================
+    let finishSentences: Record<string, string> | null = null
+    const isVariantDescription = content_type === 'description' && (platform === 'google' || platform === 'bing')
 
-      const retryMessages: ChatCompletionMessageParam[] = [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-        { role: 'assistant', content: requiresJson ? rawResponse : newContent },
-        { role: 'user', content: retryInstruction },
-      ]
+    if (isVariantDescription && process.env.OPENAI_API_KEY) {
+      console.log(`Generating finish sentences for ${master_sku}/${platform}...`)
+      finishSentences = await generateFinishSentences(newContent, master_sku, platform)
 
-      try {
-        const retryCompletion = await getOpenAIClient().chat.completions.create({
-          model: MODEL,
-          messages: retryMessages,
-          temperature: 0.5, // Lower temp for correction
-          stream: false,
-          ...(requiresJson ? { response_format: { type: 'json_object' as const } } : {}),
-          ...tokenParams,
-        })
-
-        const retryResponse = retryCompletion.choices[0]?.message?.content?.trim()
-
-        if (retryResponse) {
-          if (requiresJson) {
-            try {
-              const parsed = JSON.parse(retryResponse)
-              if (parsed.content?.trim()) {
-                newContent = parsed.content.trim()
-                finishSentences = parsed.finish_sentences || finishSentences
-              }
-            } catch {
-              // Keep original if retry parse fails
-            }
-          } else {
-            newContent = retryResponse
-          }
-
-          const retryViolations = validateGeneratedContent(newContent, platform, content_type)
-          if (retryViolations.length > 0) {
-            console.warn(`Retry still has violations: ${retryViolations.join('; ')}`)
-          } else {
-            console.log('Auto-retry fixed validation violations')
-          }
+      if (finishSentences) {
+        const missingFinishes = FINISH_LIST.filter(f => !finishSentences![f])
+        if (missingFinishes.length > 0) {
+          console.warn(`Missing finish sentences for: ${missingFinishes.join(', ')}`)
         }
-      } catch (retryError) {
-        console.warn('Auto-retry failed, using original content:', retryError)
+        console.log(`Generated ${Object.keys(finishSentences).length} finish sentences`)
       }
     }
 
     // ==================== SAVE TO DATABASE ====================
-    const currentVersion = currentContentData?.version ?? 0
+    const promptHash = crypto
+      .createHash('sha256')
+      .update(`pipeline:${master_sku}:${platform}:${content_type}:${Date.now()}`, 'utf8')
+      .digest('hex')
+      .slice(0, 16)
 
+    const currentVersion = currentContentData?.version ?? 0
     let savedContentId: string | null = null
     let nextVersion = currentVersion + 1
 
@@ -684,7 +319,7 @@ export async function POST(request: NextRequest) {
           candidate_content: newContent,
           version: nextVersion,
           is_current: true,
-          generation_model: MODEL,
+          generation_model: pipelineModel,
           generation_prompt_hash: promptHash,
           generation_timestamp: new Date().toISOString(),
         })
@@ -716,7 +351,7 @@ export async function POST(request: NextRequest) {
           baseline_content: null,
           version: nextVersion,
           is_current: true,
-          generation_model: MODEL,
+          generation_model: pipelineModel,
           generation_prompt_hash: promptHash,
           generation_timestamp: new Date().toISOString(),
         })
@@ -737,7 +372,7 @@ export async function POST(request: NextRequest) {
       savedContentId = inserted?.id ?? null
     }
 
-    // Log to regeneration history
+    // Log to regeneration history (supplements Python's own history entry)
     const { error: historyError } = await supabase
       .from('regeneration_history')
       .insert({
@@ -749,9 +384,9 @@ export async function POST(request: NextRequest) {
         feedback_preset: feedback?.feedback_type || null,
         previous_content: currentContentData?.candidate_content || null,
         new_content: newContent,
-        model_version: MODEL,
-        system_prompt: systemPrompt,
-        user_prompt: userPrompt,
+        model_version: pipelineModel,
+        system_prompt: 'python-pipeline', // Content generated by Python pipeline
+        user_prompt: `Pipeline call: ${platform}/${content_type}${feedbackText ? ' (with feedback)' : ''}`,
         prompt_hash: promptHash,
         quality_score_before: currentContentData?.quality_score || null,
         generated_content_id: savedContentId,
@@ -759,19 +394,13 @@ export async function POST(request: NextRequest) {
 
     if (historyError) {
       logSupabaseError('Failed to log regeneration history', historyError)
-      return errorResponse(500, {
-        error: 'Failed to save regeneration history',
-        code: historyError.code ?? null,
-        details: historyError.message ?? null,
-        hint: historyError.hint ?? null,
-        step: 'regeneration_history_insert',
-      })
+      // Non-fatal: Python pipeline also logs history
+      console.warn('TS-side regeneration history insert failed, but Python pipeline also logs history')
     }
 
     // Save finish_sentences to separate table (for Google/Bing descriptions only)
     let finishSentencesSaved = false
     if (finishSentences && Object.keys(finishSentences).length > 0 && (platform === 'google' || platform === 'bing')) {
-      // Upsert finish sentences (insert or update on conflict)
       const { error: finishError } = await supabase
         .from('variant_finish_sentences')
         .upsert(
@@ -786,7 +415,6 @@ export async function POST(request: NextRequest) {
 
       if (finishError) {
         logSupabaseError('Failed to save finish sentences', finishError)
-        // Non-fatal: log but continue (content was saved successfully)
         console.warn('Finish sentences not saved, but content was saved successfully')
       } else {
         finishSentencesSaved = true
@@ -799,12 +427,13 @@ export async function POST(request: NextRequest) {
       content: newContent,
       version: nextVersion,
       mode,
-      model: MODEL,
+      model: pipelineModel,
       generated_content_id: savedContentId,
-      used_evidence: useEnhancedPrompt,
-      used_vision: shouldUseVision,
+      used_evidence: true, // Python pipeline always uses evidence
+      used_vision: false, // Vision handled by Python pipeline internally
       finish_sentences_count: finishSentences ? Object.keys(finishSentences).length : 0,
       finish_sentences_saved: finishSentencesSaved,
+      pipeline: 'python', // Indicate content came from Python pipeline
     })
   } catch (error) {
     console.error('Regeneration error:', error)

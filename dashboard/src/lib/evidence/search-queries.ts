@@ -123,7 +123,8 @@ function formatVolume(value: number): string {
  */
 export function formatSearchQueriesForEvidence(
   queries: SearchQueryInsight[] | VariantSearchQuery[],
-  context: 'master' | 'variant'
+  context: 'master' | 'variant',
+  options?: { currentTitle?: string }
 ): Evidence[] {
   if (!queries || queries.length === 0) {
     return []
@@ -156,6 +157,37 @@ export function formatSearchQueriesForEvidence(
         value: queryParts.join(', '),
         source: 'search_insights',
       })
+    }
+
+    // Add missing keyword analysis if current title is available
+    if (options?.currentTitle && context === 'master') {
+      const titleLower = options.currentTitle.toLowerCase()
+      const masterQueries = queries as SearchQueryInsight[]
+
+      // Find queries with significant clicks where the query text is missing from title
+      const missingTerms = masterQueries
+        .filter(q => {
+          const clicks = q.total_clicks ?? 0
+          if (clicks < 5) return false // Must have meaningful clicks
+          // Check if the multi-word query is missing from the title
+          const words = q.query_text.toLowerCase().split(/\s+/)
+          if (words.length < 2) return false // Single words are too generic
+          return !titleLower.includes(q.query_text.toLowerCase())
+        })
+        .slice(0, 5)
+
+      if (missingTerms.length > 0) {
+        evidenceRows.push({
+          field: 'high_click_queries_not_in_title',
+          value: missingTerms.map(q => {
+            const clicks = q.total_clicks ?? 0
+            const impressions = q.total_impressions ?? 1
+            const ctr = ((clicks / impressions) * 100).toFixed(1)
+            return `"${q.query_text}" (${clicks} clicks, ${ctr}% CTR)`
+          }).join(', '),
+          source: 'keyword_gap_analysis',
+        })
+      }
     }
 
     // Extract themes from queries

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import type { PerformanceBaseline, PerformanceSnapshot, PerformanceStatus } from '@/lib/supabase/types'
+import type { PerformanceBaseline, PerformanceStatus } from '@/lib/supabase/types'
 import { calculatePerformanceStatus, getCategoryAvgCTR } from '@/lib/performance-utils'
 
 interface CurrentMetrics {
