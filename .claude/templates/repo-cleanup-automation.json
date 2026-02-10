@@ -1,0 +1,37 @@
+{
+  "_comment": "Repository cleanup automation - add to hooks config",
+
+  "preToolUse": [
+    {
+      "tool": "Write",
+      "description": "Warn about files in wrong locations",
+      "command": "bash -c 'if [ -n \"$FILE_PATH\" ]; then if echo \"$FILE_PATH\" | grep -qE \"^[^/]+\\.(png|jpg|gif|md|txt)$\"; then echo \"⚠️ Creating file at repository root\"; echo \"Consider: docs/images/ for images, docs/ for documentation\"; fi; fi'"
+    },
+    {
+      "tool": "Bash",
+      "pattern": ".*(mv|cp).*\\.(png|jpg|gif).*",
+      "description": "Suggest proper location for images",
+      "command": "echo \"💡 Moving image file. Remember: docs/images/ for documentation screenshots\""
+    }
+  ],
+
+  "postToolUse": [
+    {
+      "tool": "Write",
+      "pattern": "docs/**/*.md",
+      "description": "Remind to link new docs from CLAUDE.md or README",
+      "command": "bash -c 'if [ -n \"$FILE_PATH\" ]; then echo \"💡 New doc created: $FILE_PATH\"; echo \"Remember to link from CLAUDE.md or README.md if important\"; fi'"
+    },
+    {
+      "tool": "Write",
+      "pattern": "scripts/**/*",
+      "description": "Remind to document new scripts",
+      "command": "bash -c 'if [ -n \"$FILE_PATH\" ]; then echo \"💡 New script created\"; echo \"Remember to:\"; echo \"  1. Add purpose comment at top of script\"; echo \"  2. Document in scripts/README.md\"; fi'"
+    }
+  ],
+
+  "sessionEnd": {
+    "description": "Check for temporary files before ending",
+    "command": "bash -c 'TEMP_FILES=$(find . -maxdepth 1 -type f \\( -name \"*.png\" -o -name \"*.jpg\" -o -name \"*test*\" -o -name \"*temp*\" -o -name \"*tmp*\" \\) 2>/dev/null | wc -l); if [ \"$TEMP_FILES\" -gt 0 ]; then echo \"⚠️ Temporary files detected at root:\"; find . -maxdepth 1 -type f \\( -name \"*.png\" -o -name \"*.jpg\" -o -name \"*test*\" -o -name \"*temp*\" -o -name \"*tmp*\" \\); echo \"Delete or relocate before ending session?\"; fi'"
+  }
+}
