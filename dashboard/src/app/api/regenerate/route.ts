@@ -1,34 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
 import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
-import {
-  FINISH_LIST,
-  getFinishSentenceInstructions,
-  validateGeneratedContent,
-} from '@/lib/regeneration/prompts'
-import crypto from 'node:crypto'
+import { validateGeneratedContent } from '@/lib/regeneration/prompts'
 import { ensureSkuData } from '@/lib/data-collection/ensure-data'
 
 // Python Cloud Run pipeline URL
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
-
-// Lazy-initialize OpenAI client (only needed for finish_sentences)
-let _openai: OpenAI | null = null
-function getOpenAIClient(): OpenAI {
-  if (!_openai) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is not set')
-    }
-    _openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
-  }
-  return _openai
-}
-
-// Model for finish_sentences only (main content comes from Python pipeline)
-const MODEL = process.env.FEEDOPS_OPENAI_MODEL || 'gpt-5.2'
 
 // Feedback preset descriptions
 const FEEDBACK_PRESETS: Record<FeedbackPreset, string> = {
@@ -85,70 +62,21 @@ function errorResponse(
   return NextResponse.json(payload, { status })
 }
 
-/**
- * Generate finish sentences via OpenAI (lightweight call).
- * Only called for Google/Bing description regeneration since the
- * Python pipeline doesn't generate finish_sentences.
- */
-async function generateFinishSentences(
-  baseDescription: string,
-  masterSku: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _platform: string
-): Promise<Record<string, string> | null> {
-  try {
-    const prompt = `You have generated this base description for a product (master SKU: ${masterSku}):
-
-"${baseDescription}"
-
-Now generate 28 finish-specific sentences — one for each finish listed below.
-Each sentence should describe how THAT FINISH relates to THIS SPECIFIC PRODUCT described above.
-
-${getFinishSentenceInstructions()}
-
-Respond with ONLY valid JSON (no markdown, no code blocks):
-{
-  "finish_sentences": {
-    "Antique Brass": "One sentence...",
-    "Antique Bronze": "One sentence...",
-    ... (all 28 finishes - exclude Military Camo and Red White and Blue)
-  }
-}`
-
-    const maxTokens = 3000
-    const tokenParams = MODEL.startsWith('gpt-5')
-      ? ({ max_completion_tokens: maxTokens } as const)
-      : ({ max_tokens: maxTokens } as const)
-
-    const completion = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: 'You are a product content writer for Allied Brass bathroom hardware. Generate finish-specific sentences.' },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.7,
-      stream: false,
-      response_format: { type: 'json_object' as const },
-      ...tokenParams,
-    })
-
-    const raw = completion.choices[0]?.message?.content?.trim()
-    if (!raw) return null
-
-    const parsed = JSON.parse(raw)
-    const sentences = parsed.finish_sentences || parsed
-
-    // Validate we got a reasonable number of finishes
-    const keys = Object.keys(sentences)
-    if (keys.length < 20) {
-      console.warn(`Only ${keys.length} finish sentences generated (expected 28)`)
-    }
-
-    return sentences
-  } catch (error) {
-    console.error('Failed to generate finish sentences:', error)
+function normalizeFinishSentences(raw: unknown): Record<string, string> | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     return null
   }
+  const normalized = Object.fromEntries(
+    Object.entries(raw as Record<string, unknown>)
+      .filter(([finish, sentence]) => {
+        return typeof finish === 'string'
+          && finish.trim().length > 0
+          && typeof sentence === 'string'
+          && sentence.trim().length > 0
+      })
+      .map(([finish, sentence]) => [finish.trim(), (sentence as string).trim()])
+  )
+  return Object.keys(normalized).length ? normalized : null
 }
 
 export async function POST(request: NextRequest) {
@@ -267,12 +195,22 @@ export async function POST(request: NextRequest) {
     const pipelineData = await pipelineResponse.json()
     const newContent = pipelineData.content?.trim()
     const pipelineModel = pipelineData.model || 'python-pipeline'
+    const pipelinePromptHash = typeof pipelineData.prompt_hash === 'string'
+      ? pipelineData.prompt_hash.trim()
+      : ''
 
     if (!newContent) {
       return NextResponse.json(
         { error: 'No content generated from pipeline' },
         { status: 500 }
       )
+    }
+
+    if (!pipelinePromptHash) {
+      return errorResponse(500, {
+        error: 'Pipeline response missing prompt_hash',
+        step: 'pipeline_prompt_hash_missing',
+      })
     }
 
     console.log(`Pipeline returned content (${newContent.length} chars) via model ${pipelineModel}`)
@@ -284,30 +222,13 @@ export async function POST(request: NextRequest) {
       // Log but don't block — Python pipeline has its own quality checks
     }
 
-    // ==================== FINISH SENTENCES (Google/Bing descriptions only) ====================
-    let finishSentences: Record<string, string> | null = null
+    // ==================== FINISH SENTENCES (Python-generated for Google/Bing descriptions) ====================
     const isVariantDescription = content_type === 'description' && (platform === 'google' || platform === 'bing')
-
-    if (isVariantDescription && process.env.OPENAI_API_KEY) {
-      console.log(`Generating finish sentences for ${master_sku}/${platform}...`)
-      finishSentences = await generateFinishSentences(newContent, master_sku, platform)
-
-      if (finishSentences) {
-        const missingFinishes = FINISH_LIST.filter(f => !finishSentences![f])
-        if (missingFinishes.length > 0) {
-          console.warn(`Missing finish sentences for: ${missingFinishes.join(', ')}`)
-        }
-        console.log(`Generated ${Object.keys(finishSentences).length} finish sentences`)
-      }
-    }
+    const finishSentences = isVariantDescription
+      ? normalizeFinishSentences(pipelineData.finish_sentences)
+      : null
 
     // ==================== SAVE TO DATABASE ====================
-    const promptHash = crypto
-      .createHash('sha256')
-      .update(`pipeline:${master_sku}:${platform}:${content_type}:${Date.now()}`, 'utf8')
-      .digest('hex')
-      .slice(0, 16)
-
     const currentVersion = currentContentData?.version ?? 0
     let savedContentId: string | null = null
     let nextVersion = currentVersion + 1
@@ -320,7 +241,7 @@ export async function POST(request: NextRequest) {
           version: nextVersion,
           is_current: true,
           generation_model: pipelineModel,
-          generation_prompt_hash: promptHash,
+          generation_prompt_hash: pipelinePromptHash,
           generation_timestamp: new Date().toISOString(),
         })
         .eq('id', currentContentData.id)
@@ -352,7 +273,7 @@ export async function POST(request: NextRequest) {
           version: nextVersion,
           is_current: true,
           generation_model: pipelineModel,
-          generation_prompt_hash: promptHash,
+          generation_prompt_hash: pipelinePromptHash,
           generation_timestamp: new Date().toISOString(),
         })
         .select('id')
@@ -387,7 +308,7 @@ export async function POST(request: NextRequest) {
         model_version: pipelineModel,
         system_prompt: 'python-pipeline', // Content generated by Python pipeline
         user_prompt: `Pipeline call: ${platform}/${content_type}${feedbackText ? ' (with feedback)' : ''}`,
-        prompt_hash: promptHash,
+        prompt_hash: pipelinePromptHash,
         quality_score_before: currentContentData?.quality_score || null,
         generated_content_id: savedContentId,
       })

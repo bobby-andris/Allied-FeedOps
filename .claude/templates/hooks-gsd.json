@@ -1,0 +1,28 @@
+{
+  "_comment": "GSD workflow-specific hooks - merge with project hooks as needed",
+  "preToolUse": [
+    {
+      "tool": "Skill",
+      "description": "Remind about GSD workflow patterns",
+      "command": "bash -c 'if echo \"$SKILL\" | grep -qE \"gsd:(execute-phase|plan-phase|new-project)\"; then echo \"💡 GSD Workflow Tips:\"; echo \"- Execute phases atomically (one logical chunk at a time)\"; echo \"- Write continuation prompts between phases\"; echo \"- Update ROADMAP.md after completing phases\"; fi'"
+    },
+    {
+      "tool": "Bash",
+      "pattern": ".*git commit.*",
+      "description": "Check if commit aligns with GSD phase",
+      "command": "bash -c 'if [ -f \".planning/ROADMAP.md\" ]; then echo \"💡 Does this commit complete a GSD phase/milestone?\"; echo \"Consider: /gsd:progress to update phase status\"; fi'"
+    }
+  ],
+  "postToolUse": [
+    {
+      "tool": "Edit",
+      "pattern": "**/.planning/**/*.md",
+      "description": "Validate GSD planning documents",
+      "command": "bash -c 'if echo \"$FILE_PATH\" | grep -q \"PLAN.md\"; then echo \"✅ Plan updated. Remember:\"; echo \"- Plans should be executable (specific, not vague)\"; echo \"- Include success criteria\"; echo \"- Link to relevant architecture docs\"; fi'"
+    }
+  ],
+  "sessionStart": {
+    "description": "GSD context on session start",
+    "command": "bash -c 'if [ -f \".planning/ROADMAP.md\" ]; then echo \"📋 GSD Project Detected\"; echo \"Current status: Use /gsd:progress to check\"; echo \"Available: /gsd:plan-phase, /gsd:execute-phase, /gsd:checkpoint\"; fi'"
+  }
+}

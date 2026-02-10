@@ -122,12 +122,12 @@ product type. Name it the way a shopper would search for it.
 TITLE SUCCESS CRITERIA:
 - Product type appears in first 30 characters (mobile truncation).
 - Key dimension (e.g., "18-Inch") appears before character 70.
-- "Allied Brass" is the final segment.
+- Google and Bing titles must use "Allied Brass" as the final segment.
 - google_title and bing_title: minimum 60 characters, target 70-100 characters, max 150 characters.
-- Title MUST include: product type, primary dimension, material OR mount type, brand "Allied Brass".
+- Google/Bing titles MUST include: product type, primary dimension, material OR mount type, brand "Allied Brass".
 - If title is under 60 characters, add: collection name, secondary dimension, or additional spec.
 - google_short_title: max 70 characters, product type + key dimension only (no brand/collection).
-- shopify_title: max 255 characters, H1-friendly.
+- shopify_title: max 255 characters, H1-friendly, finish-agnostic, and must NOT include "Allied Brass".
 - Use commas or hyphens as separators. No pipes.
 - Never start with banned adjectives: Premium, Luxury, Best, High-Quality, Top-Rated.
 
@@ -143,7 +143,7 @@ BEFORE YOU WRITE, THINK ABOUT WHO IS READING THIS:
 2. WHAT QUESTIONS DO THEY HAVE BEFORE SPENDING $80+?
 - "Will this look good in MY bathroom?" → Help them visualize it
 - "Will this match my other fixtures?" → Address finish coordination
-- "Is this actually better than the $20 Amazon option?" → Explain the value
+- "Is this worth paying more than lower-cost alternatives?" → Explain the value
 - "Will this last? Is it quality?" → Provide trust signals (material, warranty)
 - Product-specific questions vary: grab bar buyers ask about weight capacity, shower basket buyers ask about drainage
 
@@ -206,7 +206,7 @@ BANNED CONTENT:
 === P1: SHOULD FOLLOW (scored) ===
 
 PRODUCT INNOVATION CONTEXT (use when relevant to THIS product):
-Some Allied Brass products have innovations that competitors don't offer:
+Some Allied Brass products have innovations that are often missing in lower-cost alternatives:
 - Shower baskets: ventilated wires drain water (bottles dry faster)
 - Grab bars: decorative ADA compliance (safety that looks designed, not institutional)
 - Toilet paper holders: rollerless (no clicking), multi-roll (never run out), recessed (built-in look)
@@ -220,7 +220,7 @@ BRAND VOICE:
 - Use confident, specific phrasing (e.g., "crafted", "enduring") when supported by evidence.
 - State what the product does directly. A grab bar provides secure support (not "helps provide").
 - Allied Brass is a niche brand with strong differentiators. When evidence supports it, highlight:
-  * Solid brass construction (vs. competitors' die-cast zinc or plastic).
+  * Solid brass construction (compared with common die-cast zinc or plastic options).
   * Lifetime warranty backed by the manufacturer.
   * Available in up to 28 coordinating designer finishes.
   * Part of 42+ coordinated collections for a unified look.
@@ -397,7 +397,8 @@ Score each dimension by counting how many required elements are present:
 
 5. Brand Voice (check these elements):
    [ ] No banned words (finest, luxurious, premium, exclusive, etc.)
-   [ ] "Allied Brass" is the final segment in titles
+   [ ] "Allied Brass" is the final segment in google_title and bing_title only
+   [ ] shopify_title does not include "Allied Brass"
    [ ] Confident, direct phrasing (not hedging: "helps provide" -> "provides")
    [ ] No ALL CAPS marketing language
    [ ] Collection name referenced in descriptions (when available)
@@ -429,7 +430,7 @@ _CATEGORY_GUIDANCE = {
             "shower door",
         ],
         "guidance": """CATEGORY NOTE: This is a niche/functional product. Shoppers searching
-for this product type already know what they want — focus on WHY THIS ONE over competitors
+for this product type already know what they want — focus on the concrete fit for this use case
 (material quality, dimensions, mounting system) rather than generic bathroom upgrade hooks.
 For Google/Bing: lead with exact product type and differentiating specs.
 For Shopify: open with the specific problem this product solves, not a generic bathroom hook.""",

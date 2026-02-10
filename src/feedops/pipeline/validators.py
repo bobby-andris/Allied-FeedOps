@@ -101,6 +101,15 @@ SKU_PATTERNS = [
 EXCESSIVE_EXCLAMATION = re.compile(r"!{2,}")
 EXCESSIVE_PUNCTUATION = re.compile(r"[!?]{3,}")
 
+# Speculative competitive language (requires evidence and often triggers policy/safety issues)
+SPECULATIVE_COMPETITIVE_PATTERNS = [
+    re.compile(r"\bnot found in competitors?\b", re.IGNORECASE),
+    re.compile(r"\bset(?:s)? this apart from competitors?\b", re.IGNORECASE),
+    re.compile(r"\bbetter than\b", re.IGNORECASE),
+    re.compile(r"\boutperform(?:s|ing)? competitors?\b", re.IGNORECASE),
+    re.compile(r"\bbeat(?:s)? (?:the )?(?:competition|competitors?)\b", re.IGNORECASE),
+]
+
 
 @dataclass
 class ValidationResult:
@@ -189,6 +198,19 @@ def _check_excessive_punctuation(value: str, field: str) -> list[str]:
     return warnings
 
 
+def _check_speculative_competitive_claims(value: str, field: str) -> list[str]:
+    """Check for broad competitive claims that are unsafe without direct evidence."""
+    errors = []
+    for pattern in SPECULATIVE_COMPETITIVE_PATTERNS:
+        match = pattern.search(value)
+        if match:
+            errors.append(
+                f"{field} contains speculative competitive claim: '{match.group(0)}' "
+                "(use evidence-backed product facts instead)"
+            )
+    return errors
+
+
 def validate_candidate_content(candidate: Candidate) -> list[str]:
     """Validate customer-facing fields for policy compliance.
 
@@ -220,6 +242,7 @@ def validate_candidate_content(candidate: Candidate) -> list[str]:
         errors.extend(_check_promotional_language(value, field))
         errors.extend(_check_sku_leakage(value, field))
         errors.extend(_check_character_limits(value, field))
+        errors.extend(_check_speculative_competitive_claims(value, field))
 
     return errors
 
@@ -251,6 +274,7 @@ def validate_candidate_content_full(candidate: Candidate) -> ValidationResult:
         errors.extend(_check_promotional_language(value, field))
         errors.extend(_check_sku_leakage(value, field))
         errors.extend(_check_character_limits(value, field))
+        errors.extend(_check_speculative_competitive_claims(value, field))
 
         # Soft validations (warnings)
         warnings.extend(_check_excessive_punctuation(value, field))

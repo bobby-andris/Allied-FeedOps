@@ -17,9 +17,10 @@ The system prompt uses a **BALANCED** approach — NOT every product needs emoti
 
 ### Single Source of Truth
 
-- **System prompt**: Lives in code at `dashboard/src/lib/regeneration/prompts.ts` (git-versioned, code-reviewed)
-- **Gold standard examples + category guidance**: Lives in Supabase `prompt_templates` table (data, not logic)
-- The DB's `system_prompt` column is **ignored** — code is authoritative
+- **Runtime canonical prompt**: Python pipeline code (`src/feedops/pipeline/prompts.py`) is the target single source of truth for generation.
+- **Dashboard prompt files** (for example `dashboard/src/lib/regeneration/prompts.ts`) are legacy/reference and must not be treated as runtime authority.
+- **Supabase `prompt_templates`** stores examples/guidance data (`gold_standard_examples`, `category_guidance`, `platform_rules`), not authoritative system prompt text.
+- The DB `prompt_templates.system_prompt` column may exist for history/backfill, but must not override the Python canonical prompt.
 
 ### Post-Generation Validation
 
@@ -55,6 +56,13 @@ These rules prevent disapprovals and “AI text” compliance issues. If any rul
 ### Operational Notes (This Repo)
 
 - For Google supplemental feeds, set `FEEDOPS_GMC_STRUCTURED_ONLY=1` when you want GMC to use `structured_title` / `structured_description` and ignore plain `title` / `description` (implemented in `src/feedops/integrations/google_supplemental.py`).
+
+### Runtime Inputs And Fixtures
+
+- **Supabase-first runtime data**: generation/evidence should read from live Supabase tables (`product_catalog`, `search_queries_by_master_sku`, `keyword_metrics`, `prompt_templates`, `variant_finish_sentences`).
+- **Deterministic regression fixtures**: `samples/eval-skus.json` and `samples/eval-skus-google-ads-90d.json` are required for repeatable offline validation in tests/CI.
+- `sample-catalog.csv` is demo/local fallback data and is not the source of truth for production generation.
+- Always validate table/column names against `docs/database/SCHEMA.md` before writing SQL or Supabase queries.
 
 ### Policy References (Keep Current)
 
@@ -409,3 +417,15 @@ Composite = (Specificity + Benefits + Keywords + Format + Voice + Accuracy) / 6 
 - ❌ ALL CAPS words
 - ❌ Promotional language in feed
 - ❌ Generic-only descriptions ("great quality product")
+
+---
+
+## Browser Automation
+
+Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
+
+Core workflow:
+1. `agent-browser open <url>` - Navigate to page
+2. `agent-browser snapshot -i` - Get interactive elements with refs (`@e1`, `@e2`)
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
+4. Re-snapshot after page changes

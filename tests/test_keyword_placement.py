@@ -68,6 +68,28 @@ def test_build_keyword_placement_plan_prefers_keyword_intent_anchor():
     assert "bath towel holder" in plan.description_terms
 
 
+def test_build_keyword_placement_plan_prefers_search_query_anchor():
+    parent_sku = _make_parent_sku()
+    evidence = [
+        Evidence(
+            field="search_queries_top",
+            value='"bathroom towel bar wall mount" (2.4K vol), "18 inch towel bar" (1.2K vol)',
+            source="search_insights",
+        ),
+        Evidence(
+            field="keyword_intent_master",
+            value="solid brass towel bar",
+            source="keyword_intent_master",
+        ),
+    ]
+
+    plan = build_keyword_placement_plan(parent_sku, evidence)
+
+    assert plan.title_anchor == "bathroom towel bar wall mount"
+    assert plan.enforce_alignment is True
+    assert "18 inch towel bar" in plan.description_terms
+
+
 def test_build_keyword_placement_plan_filters_material_mismatch():
     parent_sku = _make_parent_sku(material="Brass")
     evidence = [
@@ -113,8 +135,36 @@ def test_validate_candidate_keyword_placement_flags_missing_anchor_and_terms():
 
     assert any("google_title missing title anchor" in e for e in errors)
     assert any("google_short_title missing title anchor" in e for e in errors)
-    assert any("shopify_title must end with Allied Brass" in e for e in errors)
+    assert any("shopify_title must not include Allied Brass" in e for e in errors)
     assert any("google_description missing description term in first 150 chars" in e for e in errors)
+
+
+def test_validate_candidate_keyword_placement_flags_bing_anti_stuffing():
+    plan = KeywordPlacementPlan(
+        title_anchor="wall mount towel bar",
+        short_title_anchor=None,
+        title_support_terms=[],
+        description_terms=["bath towel holder"],
+        description_min_required=1,
+        description_first_150_required=0,
+        brand="Allied Brass",
+        enforce_alignment=True,
+    )
+    candidate = _make_candidate(
+        title="Wall Mount Towel Bar, Solid Brass, Allied Brass",
+        short_title="Wall Mount Towel Bar",
+        description=(
+            "This towel bar / towel rack (or towel holder) supports multiple sizes: "
+            '18 in / 24 in / 30 in for bathroom use.'
+        ),
+        shopify_title="Wall Mount Towel Bar",
+    )
+
+    errors = validate_candidate_keyword_placement(candidate, plan)
+
+    assert any("slash-separated keyword list" in e for e in errors)
+    assert any("parenthetical keyword list" in e for e in errors)
+    assert any("dimension dump list" in e for e in errors)
 
 
 # Fix 2.1: Canonical product type tests

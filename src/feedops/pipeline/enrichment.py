@@ -624,16 +624,19 @@ def detect_competitive_positioning(
     # Competitive edge statement
     if len(unique_differentiators) >= 3:
         edge = "high"
-        edge_statement = "Unique combination of design variety, finish options, and function not found in competitors"
+        edge_statement = (
+            "Combines coordinated collection design, broad finish availability, and "
+            "functional features."
+        )
     elif len(unique_differentiators) >= 2:
         edge = "high"
-        edge_statement = "Distinctive design and finish options set this apart from competitors"
+        edge_statement = "Distinctive design and finish options with functional utility."
     elif len(unique_differentiators) == 1:
         edge = "moderate"
         edge_statement = unique_differentiators[0]
     else:
         edge = "standard"
-        edge_statement = "Quality solid brass construction with premium finishes"
+        edge_statement = "Solid brass construction with durable finishes."
     
     return CompetitiveContext(
         edge_level=edge,
@@ -696,7 +699,7 @@ def enrich_product(parent_sku: ParentSKU) -> ProductEnrichment:
     # Aggregate differentiators (top 3)
     differentiators = competitive.unique_differentiators[:3]
     if not differentiators:
-        differentiators = ["Solid brass construction", "Premium designer finishes"]
+        differentiators = ["Solid brass construction", "Designer-oriented finish options"]
     
     # Build tone guidance
     tone_parts = [design_style.tone_guidance]

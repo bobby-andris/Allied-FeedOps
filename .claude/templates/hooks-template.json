@@ -1,0 +1,42 @@
+{
+  "_comment": "Generic hooks template - copy to .claude/hooks/config.json and customize",
+  "preToolUse": [
+    {
+      "tool": "Bash",
+      "description": "Block git push without tests/build",
+      "command": "bash -c 'if [[ \"$COMMAND\" =~ git\\ push ]]; then echo \"🛑 Pre-push validation...\"; if [ -f \"package.json\" ]; then npm test > /tmp/test.log 2>&1 || { echo \"❌ TESTS FAILED:\"; tail -20 /tmp/test.log; exit 1; }; echo \"✅ Tests passed\"; elif [ -f \"pyproject.toml\" ] || [ -f \"setup.py\" ]; then python -m pytest > /tmp/test.log 2>&1 || { echo \"❌ TESTS FAILED:\"; tail -20 /tmp/test.log; exit 1; }; echo \"✅ Tests passed\"; fi; fi'"
+    },
+    {
+      "tool": "Task",
+      "description": "Warn about MCP tool access in sub-agents",
+      "command": "bash -c 'if echo \"$PROMPT\" | grep -qE \"mcp__\" && ! echo \"$PROMPT\" | grep -q \"ToolSearch\"; then echo \"⚠️  Sub-agent may need ToolSearch for MCP tools\"; echo \"💡 Pattern: Use ToolSearch to load mcp__ tools, THEN execute task\"; fi'"
+    },
+    {
+      "tool": "Edit",
+      "description": "Detect potentially dangerous edits",
+      "command": "bash -c 'if echo \"$OLD_STRING\" | grep -qE \"(import|require|def |class |function )\" && ! echo \"$NEW_STRING\" | grep -qE \"(import|require|def |class |function )\"; then echo \"⚠️  Removed import/function/class. Verify it is unused.\"; fi'"
+    }
+  ],
+  "postToolUse": [
+    {
+      "tool": "Edit",
+      "pattern": "**/*.{ts,tsx,js,jsx}",
+      "description": "Lint JavaScript/TypeScript after edits",
+      "command": "bash -c 'if command -v eslint &> /dev/null; then eslint \"$FILE_PATH\" 2>&1 | head -15 || echo \"✅ No lint errors\"; fi'"
+    },
+    {
+      "tool": "Edit",
+      "pattern": "**/*.py",
+      "description": "Lint Python after edits",
+      "command": "bash -c 'if command -v ruff &> /dev/null; then ruff check \"$FILE_PATH\" 2>&1 | head -15 || echo \"✅ No lint errors\"; elif command -v flake8 &> /dev/null; then flake8 \"$FILE_PATH\" 2>&1 | head -15 || echo \"✅ No lint errors\"; fi'"
+    }
+  ],
+  "sessionStart": {
+    "description": "Welcome message with project reminders",
+    "command": "bash -c 'if [ -f \"CLAUDE.md\" ]; then echo \"📋 Project: $(basename $PWD)\"; echo \"💡 Remember to read CLAUDE.md for project-specific rules\"; fi'"
+  },
+  "sessionEnd": {
+    "description": "End-of-session checklist",
+    "command": "echo \"\n📋 Before ending:\n- [ ] Update CLAUDE.md with learnings?\n- [ ] Tests/builds passing?\n- [ ] Write continuation prompt if needed?\""
+  }
+}

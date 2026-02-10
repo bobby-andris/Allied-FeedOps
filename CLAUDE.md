@@ -1,5 +1,52 @@
 # Allied-FeedOps
 
+## ⚠️ CRITICAL BEHAVIORAL RULES (READ FIRST)
+
+### Pre-Deploy Gates (MANDATORY)
+Before ANY `git push` or deployment:
+1. ✅ Run `cd dashboard && npm run build` - MUST pass
+2. ✅ Run `npx tsc --noEmit` - MUST have zero errors
+3. ✅ Run `npm run lint` - Fix all issues
+4. ✅ If you removed imports during lint cleanup, `grep` for usage before committing
+5. ❌ NEVER push code that hasn't passed local build verification
+
+### Data Integrity (MANDATORY)
+1. ❌ NEVER fabricate SKU IDs, product data, metrics, or examples
+2. ✅ Query database FIRST, verify data is real, THEN analyze/plan
+3. ✅ When presenting findings, clearly distinguish verified facts from assumptions
+4. ✅ If data doesn't exist, say so explicitly and ask permission to proceed with assumptions
+
+### Multi-Agent MCP Tool Usage
+Sub-agents CAN access MCP tools when properly configured:
+
+**Pattern that works:**
+```
+Task prompt: "You have access to MCP tools. FIRST use ToolSearch to load the tools you need: [list mcp__ tools]. THEN execute your task: [description]."
+
+Use subagent_type: general-purpose (has access to all tools)
+```
+
+**For complex MCP workflows:**
+1. Option A: Run all MCP queries in main context, save results to `/tmp/`, pass file paths to agents
+2. Option B: Spawn agents with explicit ToolSearch instructions (see pattern above)
+
+### Database Schema
+✅ ALWAYS check `docs/database/SCHEMA.md` BEFORE writing ANY Supabase query
+- Prevents column name errors (e.g., `approval_status` not `status`)
+- Prevents wrong table queries
+- Documents all JSONB parsing patterns
+
+### Stack & Language Rules
+- ✅ Python for standalone scripts/pipelines (NOT Node.js unless specified)
+- ✅ TypeScript for dashboard/API routes
+- ✅ Use existing utilities before writing new code
+- ❌ NEVER switch languages without explicit user approval
+
+### Context Management
+- If session involves multi-agent orchestration, proactively checkpoint progress at 60-70% context
+- Write state to `.claude/checkpoints/[topic].md` BEFORE hitting limits
+- Long sessions: suggest breaking into phases rather than hitting context overflow
+
 ## Quick Reference
 
 **Production**:
@@ -14,6 +61,17 @@
 ## MCP Servers & Skills
 
 **Use these before writing custom code**:
+
+**Browser Automation**:
+
+Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
+
+Core workflow:
+1. `agent-browser open <url>` - Navigate to page
+2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
+4. Re-snapshot after page changes
+
 
 **MCP Servers**:
 - `mcp__supabase__*` - Database queries, migrations, schema (`execute_sql` for quick queries)
@@ -52,7 +110,9 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 **Default: Cloud Run Pipeline**
 - Location: `src/feedops/api/main.py` (FastAPI)
 - **Dashboard regeneration proxies to this pipeline** — `route.ts` is a thin proxy, NOT a separate codepath
-- Finish sentences for Google/Bing descriptions still generated via TypeScript/OpenAI (lightweight call)
+- Runtime prompt authority is Python (`src/feedops/pipeline/prompts.py` + `src/feedops/api/prompt_loader.py`)
+- TypeScript prompt logic is legacy/reference during migration and must not be treated as runtime source-of-truth
+- Finish sentence generation is being consolidated into Python; avoid adding new TS-side prompt behavior
 - Quality: ~75-80/100
 - Speed: ~3 minutes per SKU
 - Use for: Bulk generation (50+ SKUs)
@@ -76,7 +136,7 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 - `generated_content` - Title/description (baseline_content, candidate_content, **approved_content**)
 - `generated_images` - Lifestyle images (Shopify CDN lifecycle)
 - `variant_finish_sentences` - Finish-specific content for variants
-- `prompt_templates` - Gold standard examples (system prompt lives in code)
+- `prompt_templates` - Gold examples/guidance data (`gold_standard_examples`, `category_guidance`, `platform_rules`); do not use DB `system_prompt` as runtime authority
 
 **Publishing**:
 - `publish_batches` / `batch_sku_assignments` - Batch management
@@ -92,7 +152,7 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 
 **Data Pipeline**:
 - `variant_index` - Maps master_sku ↔ gmc_offer_id (THE SOURCE OF TRUTH)
-- `product_catalog` - 75,770 variants with full product data
+- `product_catalog` - All variants with full product data
 
 **Lifestyle Images**:
 - `product_lifestyle_images` - Product-level (no finish columns, requires shopify_product_id)
@@ -103,6 +163,8 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 **Search**:
 - `search_queries` - Variant-level Google Ads search terms
 - `keyword_metrics` - Keyword Planner data (cached, 30-day TTL)
+
+**CRITICAL**: ALWAYS check `docs/database/SCHEMA.md` BEFORE writing ANY Supabase query — prevents column name errors.
 
 **Conventions**:
 - Column naming: `approval_status` (not `status`), `notes` (not `revision_notes`), `approved_by/approved_at`
@@ -171,7 +233,7 @@ See: `docs/architecture/multi-sku-pattern.md`
 - API routes: `dashboard/src/app/api/**`
 - Regeneration route: `dashboard/src/app/api/regenerate/route.ts` (thin proxy to Cloud Run `/regenerate`)
 - Regeneration core (legacy, used by batch): `dashboard/src/lib/regeneration/core.ts`
-- Prompts (SINGLE SOURCE): `dashboard/src/lib/regeneration/prompts.ts`
+- Legacy prompt reference: `dashboard/src/lib/regeneration/prompts.ts` (not runtime source-of-truth)
 - Evidence builder: `dashboard/src/lib/evidence/*`
 - Multi-SKU detection: `dashboard/src/lib/multi-sku-detection.ts`
 - Hybrid generation: `dashboard/src/app/api/sku-selection/generate-hybrid/route.ts`
@@ -212,8 +274,6 @@ gcloud builds list --project=bobbys-project-346400 --limit=5
 - feedops-gemini-api-key
 
 ## Cloud Run Service
-
-**Service URL**: https://feedops-pipeline-623866089882.us-east1.run.app
 
 **Endpoints**:
 - `GET /health` - Health check with Supabase status
@@ -338,7 +398,7 @@ WHERE table_name = 'performance_baselines';
 
 **Key facts**:
 - GMC does NOT auto-sync from Shopify (custom feed via Google Sheets)
-- variant_index is source of truth (72,023 rows)
+- variant_index is source of truth for SKU↔offer ID mapping
 - 99.7% of "missing data" issues are query logic problems (not data sync)
 
 See: `docs/architecture/data-pipeline.md`
@@ -358,11 +418,8 @@ See: `docs/architecture/data-pipeline.md`
 - CDN lifecycle: Supabase Storage → Shopify CDN → Google Sheets
 
 **Shopify Media Upload**:
-- ALWAYS use `uploadProductImage()` for lifestyle images (not `uploadVariantImage()`)
-- `uploadProductImage()` uploads to product level without variant association
-- `uploadVariantImage()` attempts `productVariantAppendMedia` which fails with "variant already has media" error
-- `findExistingMedia()` checks for existing media by alt text before uploading to prevent duplicates
-- Images must reach READY status before CDN URL is available
+- ALWAYS use `uploadProductImage()` for lifestyle images (not `uploadVariantImage()` — fails with "variant already has media")
+- `findExistingMedia()` checks alt text to prevent duplicates; images must reach READY status before CDN URL is available
 
 ## Google Sheets Feed Structure
 
@@ -402,10 +459,7 @@ Functions: `ensureSkuData()`, `ensureAllData()` in `dashboard/src/lib/data-colle
 
 ## Content Storage
 
-**IMPORTANT**: Generated content stored in **Supabase only** (not git)
-- `dashboard_data/` is empty (all evaluation data archived)
-- Historical data: Branch `archive/full-snapshot-2026-02-03`
-- Use regeneration API to create new content
+**IMPORTANT**: Generated content stored in **Supabase only** (not git). Use regeneration API to create new content.
 
 ## Git Conventions
 

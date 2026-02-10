@@ -10,9 +10,17 @@ Python port of dashboard/src/lib/regeneration/core.ts (adaptVariantContent)
 import openai
 from datetime import datetime, timezone
 import json
-import hashlib
 import logging
 import os
+
+from feedops.api.prompt_loader import (
+    get_finish_list,
+    get_system_prompt,
+    get_system_prompt_hash,
+)
+from feedops.pipeline.finish_sentence_validation import (
+    normalize_and_validate_finish_sentences,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +55,17 @@ def build_variant_adaptation_prompt(
     ]
 
     if is_variant_description:
+        finish_names = get_finish_list()
+        finish_template = {
+            finish: f"One sentence relating {finish} to this {variant_spec} product..."
+            for finish in finish_names
+        }
+        response_schema = {
+            "content": f"The adapted description for {variant_spec}...",
+            "finish_sentences": finish_template,
+        }
+        response_schema_text = json.dumps(response_schema, indent=2)
+
         prompt = f"""You are adapting product content for a variant specification. You MUST respond with valid JSON.
 
 BASE PRODUCT: {base_sku}
@@ -71,39 +90,7 @@ CRITICAL:
 - Do NOT reinvent the entire description - adapt strategically
 
 Respond with this EXACT JSON structure (no markdown, no code blocks):
-{{
-  "content": "The adapted description for {variant_spec}...",
-  "finish_sentences": {{
-    "Antique Brass": "One sentence relating Antique Brass to this {variant_spec} product...",
-    "Antique Copper": "One sentence...",
-    "Antique Pewter": "One sentence...",
-    "Antique Silver": "One sentence...",
-    "Bright Brass": "One sentence...",
-    "Brushed Bronze": "One sentence...",
-    "Brushed Nickel": "One sentence...",
-    "Brushed Pewter": "One sentence...",
-    "Chrome": "One sentence...",
-    "Matte Black": "One sentence...",
-    "Matte White": "One sentence...",
-    "Oil Rubbed Bronze": "One sentence...",
-    "Polished Brass": "One sentence...",
-    "Polished Chrome": "One sentence...",
-    "Polished Nickel": "One sentence...",
-    "Satin Brass": "One sentence...",
-    "Satin Chrome": "One sentence...",
-    "Satin Nickel": "One sentence...",
-    "Unlacquered Brass": "One sentence...",
-    "Venetian Bronze": "One sentence...",
-    "Weathered Iron": "One sentence...",
-    "French Gold": "One sentence...",
-    "Polished Gold": "One sentence...",
-    "Satin Gold": "One sentence...",
-    "Polished Copper": "One sentence...",
-    "Rustic Bronze": "One sentence...",
-    "Graphite Nickel": "One sentence...",
-    "Matte Nickel": "One sentence..."
-  }}
-}}"""
+{response_schema_text}"""
         return prompt, True
 
     # For titles
@@ -204,7 +191,7 @@ async def adapt_variant_content(
             current_result = type('obj', (object,), {'data': None})()
 
         # Build prompt
-        system_prompt = "You are a product content specialist adapting content for product specification variants. Your goal is to maintain brand consistency while updating key specification differences."
+        system_prompt = get_system_prompt()
 
         user_prompt, requires_json = build_variant_adaptation_prompt(
             content_type,
@@ -216,9 +203,7 @@ async def adapt_variant_content(
             variant_spec,
         )
 
-        prompt_hash = hashlib.sha256(
-            f"{system_prompt}\n\n{user_prompt}".encode()
-        ).hexdigest()
+        prompt_hash = get_system_prompt_hash()
 
         # Call OpenAI
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -247,13 +232,38 @@ async def adapt_variant_content(
             try:
                 parsed = json.loads(raw_response)
                 new_content = parsed.get("content", "").strip()
-                finish_sentences = parsed.get("finish_sentences")
+                raw_finish_sentences = parsed.get("finish_sentences")
 
                 if not new_content:
                     return {
                         "success": False,
                         "error": "Invalid JSON response: missing content field",
                     }
+                if isinstance(raw_finish_sentences, dict):
+                    validated_finish_sentences, rejected = normalize_and_validate_finish_sentences(
+                        raw=raw_finish_sentences,
+                        finish_names=get_finish_list(),
+                        base_description=new_content,
+                    )
+                    if rejected:
+                        logger.warning(
+                            "Variant finish sentence validation rejected entries for %s/%s/%s: %s",
+                            variant_sku,
+                            platform,
+                            content_type,
+                            rejected,
+                        )
+                    if len(validated_finish_sentences) == len(get_finish_list()):
+                        finish_sentences = validated_finish_sentences
+                    else:
+                        logger.warning(
+                            "Variant finish sentence payload incomplete for %s/%s/%s (%s/%s accepted)",
+                            variant_sku,
+                            platform,
+                            content_type,
+                            len(validated_finish_sentences),
+                            len(get_finish_list()),
+                        )
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to parse JSON response: {e}")
                 new_content = raw_response

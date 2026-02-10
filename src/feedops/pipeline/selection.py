@@ -283,7 +283,12 @@ def rank_candidates(
 ) -> list[RankedCandidate]:
     ranked: list[RankedCandidate] = []
     for idx, candidate in enumerate(candidates):
-        heuristic = score_candidate(candidate, weights=weights)
+        if keyword_plan:
+            heuristic = score_candidate(
+                candidate, weights=weights, keyword_plan=keyword_plan
+            )
+        else:
+            heuristic = score_candidate(candidate, weights=weights)
         validation_errors = validate_candidate_content(candidate)
         keyword_errors: list[str] = []
         if keyword_plan:

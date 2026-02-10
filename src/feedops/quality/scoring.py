@@ -16,6 +16,10 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from feedops.models import Candidate
+from feedops.pipeline.keyword_placement import (
+    KeywordPlacementPlan,
+    validate_candidate_keyword_placement,
+)
 
 _URL_RE = re.compile(r"https?://", re.IGNORECASE)
 _CITATION_RE = re.compile(r"catalog_csv\.|\(\s*catalog_csv\.[^)]+\)", re.IGNORECASE)
@@ -1027,7 +1031,10 @@ class CandidateHeuristicScore:
 
 
 def score_candidate(
-    candidate: Candidate, *, weights: dict[str, float]
+    candidate: Candidate,
+    *,
+    weights: dict[str, float],
+    keyword_plan: KeywordPlacementPlan | None = None,
 ) -> CandidateHeuristicScore:
     """Score a candidate across platforms using weighted composites."""
     google_score = score_bundle(
@@ -1069,17 +1076,38 @@ def score_candidate(
     weighted_total = 0.0
     weight_sum = 0.0
     weighted_misses = 0.0
+    weighted_keyword_misses = 0.0
     per_platform = {
         "google": google_score,
         "bing": bing_score,
         "shopify": shopify_score,
     }
+    keyword_miss_by_platform = {"google": 0, "bing": 0, "shopify": 0}
+    if keyword_plan:
+        for error in validate_candidate_keyword_placement(candidate, keyword_plan):
+            if error.startswith("google_"):
+                keyword_miss_by_platform["google"] += 1
+            elif error.startswith("bing_"):
+                keyword_miss_by_platform["bing"] += 1
+            elif error.startswith("shopify_"):
+                keyword_miss_by_platform["shopify"] += 1
+
     for platform, score in per_platform.items():
         weight = weights.get(platform, 0.0)
         if weight <= 0:
             continue
-        weighted_total += weight * score.composite
+        keyword_misses = keyword_miss_by_platform[platform]
+        if keyword_plan:
+            keyword_alignment_score = max(0.0, 10.0 - keyword_misses * 3.0)
+            effective_composite = round(
+                score.composite * 0.8 + (keyword_alignment_score * 10.0) * 0.2,
+                2,
+            )
+        else:
+            effective_composite = score.composite
+        weighted_total += weight * effective_composite
         weighted_misses += weight * soft_gates[platform].miss_count
+        weighted_keyword_misses += weight * keyword_misses
         weight_sum += weight
 
     if weight_sum <= 0:
@@ -1087,6 +1115,11 @@ def score_candidate(
         weight_sum = len(per_platform)
         weighted_misses = sum(gate.miss_count for gate in soft_gates.values()) / len(
             per_platform
+        )
+        weighted_keyword_misses = (
+            sum(keyword_miss_by_platform.values()) / len(per_platform)
+            if keyword_plan
+            else 0.0
         )
 
     notes = tuple(
@@ -1098,6 +1131,11 @@ def score_candidate(
     for platform, assessment in soft_gates.items():
         for warning in assessment.warnings:
             soft_gate_warnings.append(f"{platform_labels[platform]}: {warning}")
+    for platform, misses in keyword_miss_by_platform.items():
+        if misses > 0:
+            soft_gate_warnings.append(
+                f"{platform_labels[platform]}: Keyword alignment misses ({misses})"
+            )
 
     weighted_composite = round(weighted_total / weight_sum, 2)
     # Tiered penalty: first miss costs 1.5, subsequent misses cost 1.0 each
@@ -1107,6 +1145,9 @@ def score_candidate(
         soft_gate_penalty = round(weighted_misses * 1.5, 2)
     else:
         soft_gate_penalty = round(1.5 + (weighted_misses - 1) * 1.0, 2)
+    # Additional keyword-miss penalty to reduce score inflation.
+    if weighted_keyword_misses > 0:
+        soft_gate_penalty = round(soft_gate_penalty + weighted_keyword_misses * 0.75, 2)
     adjusted_weighted = max(0.0, round(weighted_composite - soft_gate_penalty, 2))
 
     return CandidateHeuristicScore(

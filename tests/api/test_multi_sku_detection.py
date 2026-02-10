@@ -74,9 +74,9 @@ class TestExtractSpecDifference:
         base_sku = "920-6"
         variant_sku = "920D-6"
         base_spec, variant_spec = extract_spec_difference(base_sku, variant_sku)
-        # Should find first differing number
+        # TS parity: extracted differing spec retains the letter suffix when present.
         assert base_spec == "920"
-        assert variant_spec == "920"  # Same prefix, but D makes it different
+        assert variant_spec == "920D"
 
     def test_hyphen_format(self):
         """Test spec extraction with hyphen format."""

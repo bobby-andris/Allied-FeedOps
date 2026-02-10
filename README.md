@@ -16,9 +16,10 @@ The **Next.js Dashboard** at `https://allied-feed-ops.vercel.app` is the primary
 
 For dashboard setup and local development, see the [CLAUDE.md](./CLAUDE.md) file.
 
-## Python Pipeline (Legacy)
+## Python Pipeline (Runtime Canonical)
 
-The Python pipeline below is still available for batch processing and CLI operations.
+The Python pipeline is the runtime source of truth for prompt logic, generation, validation, and scoring.
+The dashboard is the primary operator UI and should proxy generation to Python endpoints.
 
 This repo is built around a **Master SKU → many variants (finishes/options)** model. The “shippable unit” on shopping platforms is the **variant offerId/item_id**, so review and publishing are **variant-first** where possible.
 
@@ -164,28 +165,56 @@ Run the full suite:
 PYTHONPATH=./src .venv/bin/python -m pytest -q
 ```
 
-## Content Generation: BALANCED Approach
+## Content Generation Architecture (Python Canonical)
 
-The content generation system uses a **BALANCED approach** — quality-first as the default, with pain-point messaging only when a natural frustration exists.
+The content generation system uses a **BALANCED approach**:
+- **Quality-first by default** for standard products.
+- **Pain-point-first only when natural** (grab bars, rollerless holders, etc.).
 
-### Single Source of Truth
+### Prompt Source Of Truth
 
-The system prompt lives in code at `dashboard/src/lib/regeneration/prompts.ts` (git-versioned, code-reviewed). The Supabase `prompt_templates` table provides gold standard examples and category guidance (data), but the system prompt in the DB is **ignored** — code is authoritative.
+- Runtime system prompt is canonical in Python: `src/feedops/pipeline/prompts.py`.
+- Prompt loading/versioning is enforced by: `src/feedops/api/prompt_loader.py`.
+- Supabase `prompt_templates` is data-only (gold examples/guidance), not runtime system prompt authority.
 
-### How It Works
+### Master vs Variant Behavior
 
-1. **Quality-First (DEFAULT)**: Standard products open with craftsmanship, materials, and design details
-2. **Pain-Point-First (ONLY when natural)**: Grab bars, rollerless TP holders, shower caddies — open with the problem, then the solution
-3. **Cross-platform title consistency**: Shopify titles are the "inner core" of Google/Bing titles (same product identity, minus finish and brand). Collection names always include "Collection" suffix (e.g., "Astor Place Collection", not just "Astor Place")
-4. **Post-generation validation**: Content is checked against hard rules (no "Allied Brass" in Shopify titles, no hardcoded finish names in Google/Bing descriptions, Shopify titles min 40 chars, etc.) with auto-retry on violations
+- **Google/Bing**: variant-facing outputs (finish-aware context).
+- **Shopify**: master-facing outputs (finish-agnostic base copy).
+- Channel rules and validator constraints are applied in the Python pipeline before persistence.
 
-### TypeScript Dashboard Content Generation
+### Runtime Prompt/Data Flow
 
-The Next.js dashboard generates content via `dashboard/src/app/api/regenerate/route.ts` (single-SKU with feedback support) and `dashboard/src/lib/regeneration/core.ts` (shared logic for batch + single-SKU). For Google/Bing, it generates:
-1. **Base content** - Finish-agnostic title/description
-2. **Finish sentences** - 28 product+finish tailored sentences stored in `variant_finish_sentences`
+```mermaid
+flowchart TD
+  subgraph UI["Dashboard (Next.js)"]
+    A["Review/Generate UI"] --> B["`/api/regenerate` route"]
+    B --> C["Cloud Run API (`src/feedops/api/main.py`)"]
+  end
 
-Variant content is composed at display-time by combining base content with finish-specific sentences. See `docs/prompts/21-unify-content-generation-methodology.md` for methodology comparison with Python.
+  subgraph PY["Python Generation Pipeline"]
+    C --> D["Load product + variants from Supabase (`product_catalog`, `variant_index`)"]
+    D --> E["Build evidence (`src/feedops/pipeline/evidence.py`)"]
+    E --> F["Load canonical system prompt (`src/feedops/pipeline/prompts.py`)"]
+    C --> G["Load data assets (`prompt_templates`, finish list, category guidance) via `prompt_loader.py`"]
+    F --> H["Compose runtime prompt (platform + master/variant rules)"]
+    G --> H
+    H --> I["LLM provider call (`src/feedops/providers/*`)"]
+    I --> J["Schema/validation + scoring"]
+  end
+
+  subgraph DB["Supabase Writes"]
+    J --> K["`generated_content` (candidate + score + prompt hash)"]
+    J --> L["`regeneration_history` (prompt/user context + mode)"]
+    J --> M["`variant_finish_sentences` (Google/Bing finish map)"]
+  end
+```
+
+### Why Fixtures Still Exist
+
+- Python (Cloud Run pipeline) is the runtime logic source-of-truth for prompt + generation + validation behavior.
+- Supabase is the runtime data/evidence source-of-truth for product rows, search insights, and persisted generation outputs.
+- Fixture SKU files in `samples/eval-skus*.json` are deterministic offline regression baskets for repeatable tests/CI when environment or network varies.
 
 ## 6-Agent Pipeline Content (Experimental)
 
@@ -256,4 +285,3 @@ The review page (`/review/[sku]`) displays a badge next to the SKU name:
 - Platform guidelines: `docs/04-platform-guidelines.md`
 - Testing notes: `docs/testing-guide.md`
 - Prompt redesign plan: `.claude/plans/streamed-shimmying-dove.md`
-

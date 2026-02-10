@@ -20,7 +20,6 @@ Endpoints:
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import logging
 import os
 import threading
@@ -36,12 +35,18 @@ from feedops.api.supabase_loader import (
 )
 from feedops.api.prompt_loader import (
     get_system_prompt,
+    get_system_prompt_hash,
     get_category_guidance,
     format_gold_standard_examples,
     get_finish_list,
 )
 from feedops.db.supabase_client import get_client, is_supabase_available
+from feedops.models.parent_sku import ParentSKU
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.finish_sentence_validation import (
+    normalize_and_validate_finish_sentences,
+)
+from feedops.pipeline.prompts import build_category_guidance
 from feedops.providers import get_provider
 from feedops.api.multi_sku_detection import (
     detect_multi_sku_families,
@@ -192,7 +197,9 @@ class RegenerateResponse(BaseModel):
     content_type: str
     platform: str
     content: str
+    finish_sentences: dict[str, str] | None = None
     used_feedback: bool
+    prompt_hash: str
     model: str | None = None
 
 
@@ -261,6 +268,141 @@ class HybridJobResponse(BaseModel):
     multi_sku_families: int
     single_skus: int
     strategy: dict  # {base_skus: int, variant_skus: int}
+
+
+def _build_generation_user_prompt(
+    parent_sku: ParentSKU,
+    evidence_markdown: str,
+    platform: str,
+    content_type: str,
+    feedback: str | None = None,
+    finish_code: str | None = None,
+) -> str:
+    """Build a unified user prompt for all API generation paths.
+
+    System prompt remains canonical in Python code. Supabase prompt template
+    data is used only for examples and category guidance.
+    """
+    category_guidance = get_category_guidance(parent_sku.category)
+    if not category_guidance:
+        category_guidance = build_category_guidance(parent_sku.category)
+
+    examples = format_gold_standard_examples(
+        platform=platform,
+        content_type=content_type,
+        max_examples=3,
+    )
+    examples_section = (
+        f"Gold Standard Examples (data-only guidance):\n{examples}\n"
+        if examples
+        else ""
+    )
+
+    context_lines: list[str] = []
+    if platform in {"google", "bing"}:
+        context_lines.append(
+            "Entity context: variant listing copy (finish-aware when variant finish context is available)."
+        )
+        if finish_code:
+            context_lines.append(
+                f"Requested variant finish code: {finish_code}. Integrate this variant context naturally."
+            )
+        context_lines.append(
+            "Use finish names from evidence data only; do not invent unsupported finish language."
+        )
+    else:
+        context_lines.append(
+            "Entity context: master SKU storefront copy (finish-agnostic base copy for Shopify)."
+        )
+
+    finish_list = ", ".join(get_finish_list())
+    context_lines.append(
+        "Canonical finish vocabulary reference (use only when supported by evidence): "
+        f"{finish_list}."
+    )
+    context_section = "\n".join(context_lines)
+
+    category_section = f"Category Guidance:\n{category_guidance}\n" if category_guidance else ""
+    feedback_section = f"Reviewer Feedback:\n{feedback}\n" if feedback else ""
+
+    return f"""\
+Product Evidence Table:
+{evidence_markdown}
+
+Target platform: {platform}
+Content type to generate: {content_type}
+
+{context_section}
+{category_section}
+{examples_section}{feedback_section}Generate only the {content_type} for {platform}.
+Return your response as JSON: {{"content": "your generated {content_type} here"}}
+"""
+
+
+def _build_finish_sentences_user_prompt(
+    *,
+    base_description: str,
+    master_sku: str,
+    platform: str,
+) -> str:
+    """Build finish-sentence prompt for Google/Bing variant descriptions."""
+    finish_names = get_finish_list()
+    finish_list_markdown = "\n".join(f'- "{finish}"' for finish in finish_names)
+    finish_schema_template = ",\n".join(
+        f'    "{finish}": "One product-specific sentence..."'
+        for finish in finish_names
+    )
+
+    return f"""\
+You are generating finish-specific companion lines for an existing product description.
+
+Master SKU: {master_sku}
+Platform: {platform}
+
+Base description:
+"{base_description}"
+
+Task:
+- Generate one sentence per finish in the canonical list below.
+- Each sentence must reference THIS product description context (not a generic finish blurb).
+- Keep claims factual and consistent with the base description.
+- Do not use slash-separated keyword dumps or parenthetical keyword stuffing.
+
+Canonical finishes:
+{finish_list_markdown}
+
+Return ONLY valid JSON:
+{{
+  "finish_sentences": {{
+{finish_schema_template}
+  }}
+}}
+"""
+
+
+def _validate_finish_sentences_payload(
+    raw: object,
+    *,
+    base_description: str,
+    master_sku: str,
+    platform: str,
+) -> dict[str, str]:
+    """Normalize + validate finish sentences and log rejection reasons."""
+    finish_names = get_finish_list()
+    accepted, rejected = normalize_and_validate_finish_sentences(
+        raw=raw,
+        finish_names=finish_names,
+        base_description=base_description,
+    )
+
+    if rejected:
+        logger.warning(
+            "Rejected finish sentences for %s/%s: %s",
+            master_sku,
+            platform,
+            rejected,
+        )
+    return accepted
 
 
 # =============================================================================
@@ -345,6 +487,7 @@ async def optimize_single_sku(request: OptimizeRequest):
 
         # Get LLM provider
         provider = get_provider()
+        prompt_hash = get_system_prompt_hash()
         supabase = get_client()
 
         results = []
@@ -354,16 +497,12 @@ async def optimize_single_sku(request: OptimizeRequest):
         # Generate for each platform and content type
         for platform in platforms:
             for content_type in content_types:
-                user_prompt = f"""
-Product Evidence Table:
-{evidence_markdown}
-
-Target platform: {platform}
-Content type to generate: {content_type}
-
-Generate only the {content_type} for {platform}.
-Return your response as JSON: {{"content": "your generated {content_type} here"}}
-"""
+                user_prompt = _build_generation_user_prompt(
+                    parent_sku=parent_sku,
+                    evidence_markdown=evidence_markdown,
+                    platform=platform,
+                    content_type=content_type,
+                )
                 simple_schema = {
                     "type": "object",
                     "properties": {"content": {"type": "string"}},
@@ -388,6 +527,7 @@ Return your response as JSON: {{"content": "your generated {content_type} here"}
                             "content_type": content_type,
                             "candidate_content": content,
                             "generation_model": provider.name,
+                            "generation_prompt_hash": prompt_hash,
                         },
                         on_conflict="master_sku,platform,content_type",
                     ).execute()
@@ -437,20 +577,17 @@ async def regenerate_content(request: RegenerateRequest):
         # Get LLM provider
         provider = get_provider()
 
+        prompt_hash = get_system_prompt_hash()
+
         # Build user prompt
-        user_prompt = f"""
-Product Evidence Table:
-{evidence_markdown}
-
-Target platform: {request.platform}
-Content type to generate: {request.content_type}
-
-{"FEEDBACK FROM REVIEWER:" + chr(10) + request.feedback if request.feedback else ""}
-
-Generate only the {request.content_type} for {request.platform}.
-{"Include the finish '" + request.finish_code + "' in the content." if request.finish_code else ""}
-Return your response as JSON: {{"content": "your generated {request.content_type} here"}}
-"""
+        user_prompt = _build_generation_user_prompt(
+            parent_sku=parent_sku,
+            evidence_markdown=evidence_markdown,
+            platform=request.platform,
+            content_type=request.content_type,
+            feedback=request.feedback,
+            finish_code=request.finish_code,
+        )
         simple_schema = {
             "type": "object",
             "properties": {"content": {"type": "string"}},
@@ -464,14 +601,56 @@ Return your response as JSON: {{"content": "your generated {request.content_type
         )
 
         content = response.get("content", "").strip()
+        finish_sentences: dict[str, str] | None = None
+
+        if request.content_type == "description" and request.platform in {"google", "bing"}:
+            finish_schema = {
+                "type": "object",
+                "properties": {
+                    "finish_sentences": {
+                        "type": "object",
+                        "properties": {
+                            finish: {"type": "string"} for finish in get_finish_list()
+                        },
+                        "required": get_finish_list(),
+                    }
+                },
+                "required": ["finish_sentences"],
+            }
+            finish_prompt = _build_finish_sentences_user_prompt(
+                base_description=content,
+                master_sku=request.master_sku,
+                platform=request.platform,
+            )
+            finish_response = await provider.generate(
+                prompt=finish_prompt,
+                schema=finish_schema,
+                system_prompt=get_system_prompt(),
+            )
+
+            finish_payload = finish_response.get("finish_sentences", finish_response)
+            validated_finish_sentences = _validate_finish_sentences_payload(
+                finish_payload,
+                base_description=content,
+                master_sku=request.master_sku,
+                platform=request.platform,
+            )
+            if len(validated_finish_sentences) == len(get_finish_list()):
+                finish_sentences = validated_finish_sentences
+            else:
+                logger.warning(
+                    "Finish sentence generation returned incomplete canonical coverage "
+                    "for %s/%s (%s/%s accepted)",
+                    request.master_sku,
+                    request.platform,
+                    len(validated_finish_sentences),
+                    len(get_finish_list()),
+                )
 
         # Save to regeneration_history
         try:
             supabase = get_client()
             system_prompt = get_system_prompt()
-            prompt_hash = hashlib.sha256(
-                (system_prompt + user_prompt).encode()
-            ).hexdigest()[:16]
 
             supabase.table("regeneration_history").insert(
                 {
@@ -490,13 +669,34 @@ Return your response as JSON: {{"content": "your generated {request.content_type
         except Exception as e:
             logger.warning(f"Failed to log regeneration history: {e}")
 
+        if finish_sentences:
+            try:
+                supabase = get_client()
+                supabase.table("variant_finish_sentences").upsert(
+                    {
+                        "master_sku": request.master_sku,
+                        "platform": request.platform,
+                        "finish_sentences": finish_sentences,
+                    },
+                    on_conflict="master_sku,platform",
+                ).execute()
+            except Exception as e:
+                logger.warning(
+                    "Failed to persist finish sentences for %s/%s: %s",
+                    request.master_sku,
+                    request.platform,
+                    e,
+                )
+
         return RegenerateResponse(
             success=True,
             master_sku=request.master_sku,
             content_type=request.content_type,
             platform=request.platform,
             content=content,
+            finish_sentences=finish_sentences,
             used_feedback=request.feedback is not None,
+            prompt_hash=prompt_hash,
             model=provider.name,
         )
 
@@ -818,20 +1018,17 @@ async def process_batch_job(
             evidence_markdown = format_evidence_markdown(evidence)
 
             provider = get_provider()
+            prompt_hash = get_system_prompt_hash()
 
             # Generate for each platform
             for platform in ["google", "bing", "shopify"]:
                 for content_type in ["title", "description"]:
-                    user_prompt = f"""
-Product Evidence Table:
-{evidence_markdown}
-
-Target platform: {platform}
-Content type to generate: {content_type}
-
-Generate only the {content_type} for {platform}.
-Return your response as JSON: {{"content": "your generated {content_type} here"}}
-"""
+                    user_prompt = _build_generation_user_prompt(
+                        parent_sku=parent_sku,
+                        evidence_markdown=evidence_markdown,
+                        platform=platform,
+                        content_type=content_type,
+                    )
                     simple_schema = {
                         "type": "object",
                         "properties": {"content": {"type": "string"}},
@@ -855,6 +1052,7 @@ Return your response as JSON: {{"content": "your generated {content_type} here"}
                                 "content_type": content_type,
                                 "candidate_content": content,
                                 "generation_model": provider.name,
+                                "generation_prompt_hash": prompt_hash,
                             },
                             on_conflict="master_sku,platform,content_type",
                         ).execute()
@@ -933,6 +1131,7 @@ async def process_hybrid_batch_job(
         content_types.append("description")
 
     provider = get_provider()
+    prompt_hash = get_system_prompt_hash()
 
     # Helper function for full generation
     async def generate_full_content(sku: str, platform: str, content_type: str):
@@ -944,16 +1143,12 @@ async def process_hybrid_batch_job(
         evidence = build_evidence_table(parent_sku)
         evidence_markdown = format_evidence_markdown(evidence)
 
-        user_prompt = f"""
-Product Evidence Table:
-{evidence_markdown}
-
-Target platform: {platform}
-Content type to generate: {content_type}
-
-Generate only the {content_type} for {platform}.
-Return your response as JSON: {{"content": "your generated {content_type} here"}}
-"""
+        user_prompt = _build_generation_user_prompt(
+            parent_sku=parent_sku,
+            evidence_markdown=evidence_markdown,
+            platform=platform,
+            content_type=content_type,
+        )
         simple_schema = {
             "type": "object",
             "properties": {"content": {"type": "string"}},
@@ -976,6 +1171,7 @@ Return your response as JSON: {{"content": "your generated {content_type} here"}
                 "content_type": content_type,
                 "candidate_content": content,
                 "generation_model": provider.name,
+                "generation_prompt_hash": prompt_hash,
             },
             on_conflict="master_sku,platform,content_type",
         ).execute()

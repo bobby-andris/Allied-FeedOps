@@ -1,19 +1,23 @@
-"""Prompt Loader - Load gold standard examples and prompts from Supabase.
+"""Prompt Loader - Load prompt data assets from Supabase.
 
 Fetches the active prompt template which includes:
-- System prompt with TRUE WHY framework
 - 10 gold standard examples for few-shot learning
 - Category-specific guidance
 - Platform rules
+
+The canonical system prompt is code-owned in `feedops.pipeline.prompts`.
+Supabase template data is used for examples/guidance only.
 """
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from datetime import datetime, timezone
 from typing import Any, TypedDict
 
 from feedops.db.supabase_client import get_client, is_supabase_available
+from feedops.pipeline.prompts import SYSTEM_PROMPT as CANONICAL_SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -77,56 +81,6 @@ FINISH_LIST_28 = [
     "Venetian Bronze",
 ]
 
-# Fallback system prompt with TRUE WHY framework
-FALLBACK_SYSTEM_PROMPT = """\
-You are an expert e-commerce content writer for Allied Brass bathroom hardware. \
-Generate titles and descriptions that connect with the TRUE WHY behind customer searches.
-
-## Core Principles
-
-### The TRUE WHY Framework
-Every product search begins with a motivation deeper than the product itself:
-- Surface need → Behavioral consequence → Daily frustration → Our solution
-- "I need a grab bar" → "I refuse to make my bathroom look like a hospital"
-- "I need a shower caddy" → "I'm tired of bottles on the floor and ugly plastic caddies"
-
-### When to Apply TRUE WHY (and When NOT To)
-- Apply when a clear pain point exists that drives the purchase decision
-- DON'T FORCE IT for standard products without dramatic pain points
-- A simple towel bar doesn't need manufactured drama—focus on quality and craftsmanship
-
-### Title Structure (Google/Bing)
-{FINISH_NAME} [Product] [Key Specs] - [Differentiator] - [Collection] - Allied Brass
-
-- Lead with finish (search relevance, immediate style context)
-- Collection before brand (coordination buyers, not brand recognition)
-- Include differentiating features ("Space-Saving", "No Spring", "Rust Proof")
-
-### Shopify Titles
-- NO {FINISH_NAME} placeholder (user already viewing specific variant)
-- NO "Allied Brass" (user already on the site)
-- Match the product catalog title style
-
-### Descriptions
-- Open with the TRUE WHY when one exists naturally
-- For standard products, open with quality/craftsmanship positioning
-- Include {FINISH_SENTENCE} placeholder for Google/Bing (inserted after first sentence)
-- Shopify descriptions are finish-agnostic (no placeholders)
-
-## Finish Sentences
-Generate 28 product-specific finish sentences. EXCLUDE:
-- Military Camo
-- Red White and Blue
-
-Each sentence should describe how THAT finish enhances THIS specific product.
-
-## Guardrails
-- NEVER invent specifications not in the evidence table
-- NO banned words: luxurious, premium, exclusive, unique (unless describing a genuinely unique feature)
-- NO ALL CAPS or promotional language
-- Claims must trace to evidence (product data, bullets, narrative copy)"""
-
-
 def load_active_prompt_template() -> PromptTemplate | None:
     """Load the active prompt template from Supabase.
 
@@ -179,15 +133,21 @@ def load_active_prompt_template() -> PromptTemplate | None:
 
 
 def get_system_prompt() -> str:
-    """Get the system prompt, preferring Supabase template if available.
+    """Get the canonical system prompt from Python code.
 
     Returns:
         System prompt string.
     """
-    template = load_active_prompt_template()
-    if template and template.get("system_prompt"):
-        return template["system_prompt"]
-    return FALLBACK_SYSTEM_PROMPT
+    return CANONICAL_SYSTEM_PROMPT
+
+
+def get_system_prompt_hash() -> str:
+    """Get stable short hash for canonical prompt versioning.
+
+    Returns:
+        First 16 chars of SHA256 hash of canonical system prompt.
+    """
+    return hashlib.sha256(get_system_prompt().encode()).hexdigest()[:16]
 
 
 def get_category_guidance(category: str | None) -> str | None:

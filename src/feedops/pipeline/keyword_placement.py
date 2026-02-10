@@ -11,6 +11,14 @@ from feedops.pipeline.enrichment import Evidence
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 _DEFAULT_BRAND = "Allied Brass"
+_SEARCH_QUERY_PATTERN = re.compile(r'"([^"]+)"\s*\(([^)]*)\)')
+_BING_SLASH_LIST_PATTERN = re.compile(r"\b[\w-]+(?:\s+[\w-]+)?\s*/\s*[\w-]+", re.IGNORECASE)
+_BING_PARENTHETICAL_LIST_PATTERN = re.compile(r"\([^)]*(?:\bor\b|/)[^)]*\)", re.IGNORECASE)
+_BING_DIMENSION_DUMP_PATTERN = re.compile(
+    r"(?:\d+(?:\.\d+)?\s*(?:in|inch(?:es)?|\")\s*[/,]\s*){2,}\d+(?:\.\d+)?\s*(?:in|inch(?:es)?|\")",
+    re.IGNORECASE,
+)
+_STOP_WORDS = {"and", "or", "the", "a", "an", "with", "for", "in", "of", "on"}
 
 _MATERIAL_PHRASES = [
     "solid brass",
@@ -298,6 +306,7 @@ class KeywordPlacementPlan:
     description_first_150_required: int
     brand: str = _DEFAULT_BRAND
     room_context: str | None = None
+    enforce_alignment: bool = False
 
 
 def _normalize(text: str) -> str:
@@ -329,6 +338,40 @@ def _dedupe_terms(terms: list[str]) -> list[str]:
         seen.add(key)
         out.append(term)
     return out
+
+
+def _parse_metric_score(metric: str) -> float:
+    """Parse volume/impression text (e.g. '2.4K vol') into sortable score."""
+    match = re.search(r"(\d+(?:\.\d+)?)\s*([kKmM]?)", metric or "")
+    if not match:
+        return 0.0
+    value = float(match.group(1))
+    suffix = match.group(2).lower()
+    if suffix == "k":
+        value *= 1000
+    elif suffix == "m":
+        value *= 1_000_000
+    return value
+
+
+def _collect_search_query_terms(evidence_rows: list[Evidence]) -> list[str]:
+    """Extract ranked search query terms from evidence rows."""
+    scored_terms: list[tuple[str, float]] = []
+    for row in evidence_rows:
+        if row.field not in {"search_queries_top", "variant_top_queries"}:
+            continue
+        for phrase, metric in _SEARCH_QUERY_PATTERN.findall(row.value or ""):
+            term = phrase.strip()
+            if not term:
+                continue
+            scored_terms.append((term, _parse_metric_score(metric)))
+
+    if not scored_terms:
+        return []
+
+    scored_terms.sort(key=lambda entry: entry[1], reverse=True)
+    ordered_terms = [term for term, _ in scored_terms]
+    return _dedupe_terms(ordered_terms)
 
 
 def _material_matches(term: str, material: str | None) -> bool:
@@ -459,11 +502,15 @@ def build_keyword_placement_plan(
     evidence_rows: list[Evidence],
 ) -> KeywordPlacementPlan:
     """Build deterministic placement plan from evidence keywords."""
+    search_query_terms = _collect_search_query_terms(evidence_rows)
     intent_terms = _collect_keywords(evidence_rows, "keyword_intent_master")
     external_terms = _collect_keywords(evidence_rows, "external_keywords")
     design_terms = _collect_keywords(evidence_rows, "design_intent_keywords")
     feature_terms = _collect_keywords(evidence_rows, "feature_title_keywords")
 
+    search_query_terms = _filter_terms(
+        search_query_terms, parent_sku=parent_sku, evidence_rows=evidence_rows
+    )
     intent_terms = _filter_terms(
         intent_terms, parent_sku=parent_sku, evidence_rows=evidence_rows
     )
@@ -476,20 +523,37 @@ def build_keyword_placement_plan(
         evidence_rows=evidence_rows,
     )
 
-    all_terms = _dedupe_terms(intent_terms + external_terms + secondary_terms)
+    all_terms = _dedupe_terms(
+        search_query_terms + intent_terms + external_terms + secondary_terms
+    )
 
     category_tokens = _category_tokens(parent_sku.category)
-    anchor = _select_anchor(intent_terms, category_tokens)
+    anchor_source = "fallback"
+    anchor = _select_anchor(search_query_terms, category_tokens)
+    if anchor:
+        anchor_source = "search_queries_top"
+    if not anchor:
+        anchor = _select_anchor(intent_terms, category_tokens)
+        if anchor:
+            anchor_source = "keyword_intent_master"
     if not anchor:
         anchor = _select_anchor(external_terms, category_tokens)
+        if anchor:
+            anchor_source = "external_keywords"
     if not anchor:
         anchor = _fallback_anchor(parent_sku.category, parent_sku.current_title)
 
     title_support_terms = [
-        term for term in _dedupe_terms(intent_terms + external_terms) if term != anchor
+        term
+        for term in _dedupe_terms(search_query_terms + intent_terms + external_terms)
+        if term != anchor
     ][:2]
 
-    description_terms = [term for term in all_terms if term != anchor]
+    description_terms = [
+        term
+        for term in _dedupe_terms(search_query_terms + all_terms)
+        if term != anchor
+    ]
     if len(description_terms) < 2:
         description_terms.extend(_fallback_description_terms(parent_sku.category))
         description_terms = _dedupe_terms(description_terms)
@@ -510,6 +574,7 @@ def build_keyword_placement_plan(
         description_first_150_required=0,  # Disabled: let model place keywords naturally
         brand=_DEFAULT_BRAND,
         room_context=get_room_context(parent_sku.category),
+        enforce_alignment=anchor_source != "fallback",
     )
 
 
@@ -538,7 +603,12 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
         for term in plan.description_terms:
             lines.append(f"- {term}")
     lines.append("")
-    lines.append(f"Brand rule: titles must end with {plan.brand}")
+    lines.append(
+        f"Brand rule: google_title and bing_title must end with {plan.brand}"
+    )
+    lines.append(
+        f"Shopify rule: shopify_title must not include {plan.brand}"
+    )
     if plan.room_context:
         lines.append("")
         lines.append(
@@ -608,10 +678,13 @@ def validate_candidate_keyword_placement(
             )
 
     brand_lower = plan.brand.lower()
-    for field in ("google_title", "bing_title", "shopify_title"):
+    for field in ("google_title", "bing_title"):
         value = getattr(candidate, field, "")
         if not value.rstrip().lower().endswith(brand_lower):
             errors.append(f"{field} must end with {plan.brand}")
+    shopify_title = candidate.shopify_title or ""
+    if brand_lower in shopify_title.lower():
+        errors.append(f"shopify_title must not include {plan.brand}")
 
     if plan.description_terms:
         for field in ("google_description", "bing_description", "shopify_description"):
@@ -643,5 +716,19 @@ def validate_candidate_keyword_placement(
                     f"{field} missing {plan.description_min_required} description term(s); "
                     f"found {len(matches)}"
                 )
+
+    bing_text = _strip_html(candidate.bing_description or "")
+    if _BING_SLASH_LIST_PATTERN.search(bing_text):
+        errors.append(
+            "bing_description contains slash-separated keyword list (anti-stuffing violation)"
+        )
+    if _BING_PARENTHETICAL_LIST_PATTERN.search(bing_text):
+        errors.append(
+            "bing_description contains parenthetical keyword list (anti-stuffing violation)"
+        )
+    if _BING_DIMENSION_DUMP_PATTERN.search(bing_text):
+        errors.append(
+            "bing_description contains dimension dump list (anti-stuffing violation)"
+        )
 
     return errors

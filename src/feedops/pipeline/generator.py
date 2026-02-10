@@ -5,20 +5,22 @@ import json
 import logging
 import os
 
+from feedops.api.prompt_loader import get_system_prompt
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.collection_descriptions import is_known_collection_name
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.finish_injection import get_finish_metadata
 from feedops.pipeline.images import fetch_image
 from feedops.pipeline.keyword_placement import (
+    KeywordPlacementPlan,
     build_keyword_placement_plan,
     format_keyword_placement_section,
+    validate_candidate_keyword_placement,
 )
 from feedops.pipeline.prompts import (
     CANDIDATE_SCHEMA,
     FINISH_CONTEXT_TEMPLATE,
     OPTIMIZATION_TEMPLATE,
-    SYSTEM_PROMPT,
     USER_PROMPT_TEMPLATE,
     VARIANT_USER_PROMPT_TEMPLATE,
     build_category_guidance,
@@ -139,7 +141,7 @@ def build_prompt(parent_sku: ParentSKU) -> str:
     keyword_placement = format_keyword_placement_section(keyword_plan)
 
     prompt = OPTIMIZATION_TEMPLATE.format(
-        system_prompt=SYSTEM_PROMPT,
+        system_prompt=get_system_prompt(),
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
@@ -174,7 +176,7 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )
-    return SYSTEM_PROMPT, user_prompt
+    return get_system_prompt(), user_prompt
 
 
 def parse_candidate_response(response: dict) -> Candidate:
@@ -271,6 +273,16 @@ def _needs_title_retry(candidate: Candidate) -> list[str]:
     return short_fields
 
 
+def _needs_keyword_alignment_retry(
+    candidate: Candidate,
+    keyword_plan: KeywordPlacementPlan,
+) -> list[str]:
+    """Return keyword placement violations that should trigger a retry."""
+    if not keyword_plan.enforce_alignment:
+        return []
+    return validate_candidate_keyword_placement(candidate, keyword_plan)
+
+
 async def generate_candidates(
     parent_sku: ParentSKU,
     llm: LLMProvider,
@@ -294,6 +306,9 @@ async def generate_candidates(
     """
     count = max(1, n)
     system_prompt, user_prompt = build_split_prompt(parent_sku)
+    keyword_plan = build_keyword_placement_plan(
+        parent_sku, build_evidence_table(parent_sku)
+    )
     image = None
     if parent_sku.variants:
         main_image_url = parent_sku.variants[0].main_image_url
@@ -321,21 +336,31 @@ async def generate_candidates(
             candidates.append(await _generate_one(0))
         except Exception as exc:
             errors.append(f"Candidate 0: {exc}")
-        # Retry once if title is too short
+        # Retry once if title is too short or keyword alignment misses.
         if candidates:
             short_fields = _needs_title_retry(candidates[0])
-            if short_fields:
+            keyword_errors = _needs_keyword_alignment_retry(candidates[0], keyword_plan)
+            if short_fields or keyword_errors:
                 errors.append(
-                    f"Candidate 0 retry: {', '.join(short_fields)} under "
-                    f"{_MIN_TITLE_LENGTH} chars ({', '.join(str(len(getattr(candidates[0], f))) for f in short_fields)})"
+                    f"Candidate 0 retry (title/keyword alignment): "
+                    f"short_titles={short_fields or 'none'}, "
+                    f"keyword_errors={len(keyword_errors)}"
                 )
                 try:
                     retry = await _generate_one(0)
                     retry_short = _needs_title_retry(retry)
-                    if not retry_short:
+                    retry_keyword_errors = _needs_keyword_alignment_retry(
+                        retry, keyword_plan
+                    )
+                    original_penalty = len(short_fields) * 2 + len(keyword_errors)
+                    retry_penalty = len(retry_short) * 2 + len(retry_keyword_errors)
+                    if retry_penalty < original_penalty:
                         candidates[0] = retry
-                    elif len(retry.google_title) > len(candidates[0].google_title):
-                        # Take the retry if it's at least longer
+                    elif retry_penalty == original_penalty and not retry_short:
+                        candidates[0] = retry
+                    elif retry_penalty == original_penalty and len(retry.google_title) > len(
+                        candidates[0].google_title
+                    ):
                         candidates[0] = retry
                 except Exception as exc:
                     errors.append(f"Candidate 0 retry failed: {exc}")
@@ -354,10 +379,12 @@ async def generate_candidates(
         else:
             candidates.append(result)
             short_fields = _needs_title_retry(result)
-            if short_fields:
+            keyword_errors = _needs_keyword_alignment_retry(result, keyword_plan)
+            if short_fields or keyword_errors:
                 errors.append(
-                    f"Candidate {idx} retry: {', '.join(short_fields)} under "
-                    f"{_MIN_TITLE_LENGTH} chars"
+                    f"Candidate {idx} retry (title/keyword alignment): "
+                    f"short_titles={short_fields or 'none'}, "
+                    f"keyword_errors={len(keyword_errors)}"
                 )
                 retry_indices.append(len(candidates) - 1)
 
@@ -371,9 +398,18 @@ async def generate_candidates(
                 continue
             original = candidates[pos]
             retry_short = _needs_title_retry(retry_result)
-            if not retry_short:
+            retry_keyword_errors = _needs_keyword_alignment_retry(retry_result, keyword_plan)
+            original_short = _needs_title_retry(original)
+            original_keyword_errors = _needs_keyword_alignment_retry(original, keyword_plan)
+            original_penalty = len(original_short) * 2 + len(original_keyword_errors)
+            retry_penalty = len(retry_short) * 2 + len(retry_keyword_errors)
+            if retry_penalty < original_penalty:
                 candidates[pos] = retry_result
-            elif len(retry_result.google_title) > len(original.google_title):
+            elif retry_penalty == original_penalty and not retry_short:
+                candidates[pos] = retry_result
+            elif retry_penalty == original_penalty and len(retry_result.google_title) > len(
+                original.google_title
+            ):
                 candidates[pos] = retry_result
 
     return candidates, errors
@@ -453,7 +489,7 @@ def build_variant_prompt(
         finish_name=finish_name,
     )
 
-    return SYSTEM_PROMPT, user_prompt
+    return get_system_prompt(), user_prompt
 
 
 async def generate_variant_candidate(

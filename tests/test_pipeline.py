@@ -4,10 +4,13 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from feedops.models import Candidate, Claim, ParentSKU, Score, Variant
+from feedops.pipeline import generator as generator_module
 from feedops.pipeline.claim_extraction import extract_claims
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.generator import (
     build_prompt,
+    build_split_prompt,
+    build_variant_prompt,
     generate_candidate,
     generate_candidates,
     parse_candidate_response,
@@ -597,6 +600,60 @@ def test_validate_candidate_content_rejects_catalog_csv_references():
     assert any("catalog_csv" in error for error in errors)
 
 
+def test_validate_candidate_content_rejects_speculative_competitive_claims():
+    """Speculative competitive claims are blocked unless phrased as evidence-backed facts."""
+    candidate = Candidate(
+        google_title="18-Inch Wall Mount Towel Bar Solid Brass - Allied Brass",
+        google_short_title="18-Inch Towel Bar",
+        google_description=(
+            "This towel bar is better than competitors and offers superior quality for any bathroom."
+        ),
+        bing_title="18-Inch Wall Mount Towel Bar Solid Brass - Allied Brass",
+        bing_description="Distinctive design not found in competitors.",
+        shopify_title="18-Inch Wall Mount Towel Bar Solid Brass",
+        shopify_description="<p>Set this apart from competitors with stronger design.</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
+        ),
+    )
+    errors = validate_candidate_content(candidate)
+    assert any("speculative competitive claim" in error for error in errors)
+
+
+def test_validate_candidate_content_allows_evidence_style_comparison_language():
+    """Evidence-style material comparisons remain allowed."""
+    candidate = Candidate(
+        google_title="18-Inch Wall Mount Towel Bar Solid Brass - Allied Brass",
+        google_short_title="18-Inch Towel Bar",
+        google_description=(
+            "Solid brass construction with concealed mounting hardware for daily use."
+        ),
+        bing_title="18-Inch Wall Mount Towel Bar Solid Brass - Allied Brass",
+        bing_description=(
+            "Solid brass construction compared with common die-cast zinc alternatives."
+        ),
+        shopify_title="18-Inch Wall Mount Towel Bar Solid Brass",
+        shopify_description="<p>Solid brass build for lasting bathroom performance.</p>",
+        claims=[],
+        self_score=Score(
+            specificity=8,
+            benefit_coverage=8,
+            keyword_inclusion=8,
+            format_adherence=8,
+            brand_voice=8,
+            factual_accuracy=8,
+        ),
+    )
+    errors = validate_candidate_content(candidate)
+    assert not any("speculative competitive claim" in error for error in errors)
+
+
 # Task 5.3: Candidate Generator Tests
 def test_build_prompt_includes_evidence(sample_parent_sku):
     """build_prompt includes evidence table."""
@@ -604,6 +661,33 @@ def test_build_prompt_includes_evidence(sample_parent_sku):
     assert "Available Product Data" in prompt
     assert "Towel Bars" in prompt
     assert "Brass" in prompt
+
+
+def test_build_prompt_uses_canonical_prompt_loader(sample_parent_sku, monkeypatch):
+    """build_prompt uses prompt_loader.get_system_prompt() for the system prompt."""
+    sentinel_prompt = "SENTINEL_CANONICAL_PROMPT"
+    monkeypatch.setattr(generator_module, "get_system_prompt", lambda: sentinel_prompt)
+
+    prompt = build_prompt(sample_parent_sku)
+    assert sentinel_prompt in prompt
+
+
+def test_build_split_prompt_uses_canonical_prompt_loader(sample_parent_sku, monkeypatch):
+    """build_split_prompt returns system prompt from prompt_loader.get_system_prompt()."""
+    sentinel_prompt = "SPLIT_PROMPT_SENTINEL"
+    monkeypatch.setattr(generator_module, "get_system_prompt", lambda: sentinel_prompt)
+
+    system_prompt, _ = build_split_prompt(sample_parent_sku)
+    assert system_prompt == sentinel_prompt
+
+
+def test_build_variant_prompt_uses_canonical_prompt_loader(sample_parent_sku, monkeypatch):
+    """build_variant_prompt returns system prompt from prompt_loader.get_system_prompt()."""
+    sentinel_prompt = "VARIANT_PROMPT_SENTINEL"
+    monkeypatch.setattr(generator_module, "get_system_prompt", lambda: sentinel_prompt)
+
+    system_prompt, _ = build_variant_prompt(sample_parent_sku, "Antique Brass", "google")
+    assert system_prompt == sentinel_prompt
 
 
 def test_candidate_schema_has_required_fields():

@@ -1,0 +1,475 @@
+# Dashboard + Content Generation Production Readiness — Master Implementation Plan
+
+> **For Codex/Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or equivalent) to implement this plan task-by-task.
+
+**Goal:** Make the content generation + review + publishing workflow production-ready so we can scale from 1 published SKU to 72,000+ SKUs while generating policy-safe, evidence-grounded titles/descriptions that maximize Shopping CTR and Shopify conversion (revenue).
+
+**Architecture (target):** Python (Cloud Run) is the single source of truth for prompt + generation + validation + scoring. The dashboard becomes a thin UI + orchestration layer that proxies to Python and renders results/review state from Supabase.
+
+**Tech stack:** Python 3.11 + FastAPI (`src/feedops/api/`), pipeline modules (`src/feedops/pipeline/`), Supabase (content + evidence + review queue), Next.js dashboard (`dashboard/`).
+
+---
+
+## How To Use This Master Plan
+
+This file is the “north star” list of phases and acceptance criteria.
+
+Execution cadence:
+1. Before starting a phase, create a *phase plan* in `docs/plans/` that breaks that phase into small tasks with test-first steps (TDD where feasible).
+2. Implement the phase plan task-by-task.
+3. Run all verification commands listed in the phase before marking it complete.
+4. Only then, move to the next phase.
+
+Definition of “phase complete” is explicit under each phase.
+
+## Implementation Status Protocol (Required)
+
+After each completed task, update this file immediately in the relevant phase section and append a row to the execution log below.
+
+Required per-task status update format:
+1. Mark task as `DONE` / `BLOCKED` / `IN PROGRESS`.
+2. Record date (`YYYY-MM-DD`), owner/model, and changed file paths.
+3. Record verification command(s) run and pass/fail result.
+4. If blocked, record exact blocker and next unblocking action.
+
+## Execution Log
+
+| Date | Phase | Task/Change | Status | Verification |
+|------|-------|-------------|--------|--------------|
+| 2026-02-10 | Phase 0 | Baseline gate script + baseline test/doc updates | DONE | `bash scripts/verify_phase_0.sh` (pass) |
+| 2026-02-10 | Phase 2 | Route/proxy unification status documented | DONE | `bash scripts/verify_phase_0.sh` (pass) |
+| 2026-02-10 | Phase 2 | `middleware.ts` migrated to `proxy.ts`; workspace root + lockfile warning cleanup | DONE | `cd dashboard && npm run lint && npm run build -- --webpack` (pass) |
+| 2026-02-10 | Phase 1 | Prompt parity checklist + prompt contract artifacts created | DONE | `docs/plans/2026-02-10-phase-1-ts-to-python-prompt-parity-checklist.md`, `docs/architecture/prompt-contract.md` (present) |
+| 2026-02-10 | Phase 1 | Prompt-source/prompt-hash verification test suite | DONE | `.venv/bin/pytest -q tests/test_prompt_title_guidance.py tests/test_prompts_finish.py` + `.venv/bin/pytest -q tests/test_prompt_loader.py tests/test_hybrid_generation_prompt.py tests/test_keyword_placement.py` (pass) |
+| 2026-02-10 | Phase 1 | Unified generator prompt retrieval via `prompt_loader.get_system_prompt()` | DONE | `.venv/bin/pytest -q tests/test_pipeline.py::test_build_prompt_uses_canonical_prompt_loader tests/test_pipeline.py::test_build_split_prompt_uses_canonical_prompt_loader tests/test_pipeline.py::test_build_variant_prompt_uses_canonical_prompt_loader` (pass) |
+| 2026-02-10 | Phase 1 | Post-refactor full Phase 1 verification rerun | DONE | `.venv/bin/pytest -q tests/test_prompt_title_guidance.py tests/test_prompts_finish.py tests/test_prompt_loader.py tests/test_hybrid_generation_prompt.py tests/test_keyword_placement.py tests/test_pipeline.py::test_build_prompt_uses_canonical_prompt_loader tests/test_pipeline.py::test_build_split_prompt_uses_canonical_prompt_loader tests/test_pipeline.py::test_build_variant_prompt_uses_canonical_prompt_loader` (pass) |
+| 2026-02-10 | Phase 2 | Regeneration route audit confirms Python pipeline proxy path | DONE | `rg` audit of `dashboard/src/app/api/regenerate/route.ts`, `dashboard/src/app/api/regenerate/batch/route.ts`, `dashboard/src/app/api/sku-selection/generate/route.ts`, `dashboard/src/app/api/sku-selection/generate-hybrid/route.ts` |
+| 2026-02-10 | Phase 2 | Phase 2 verification gates rerun | DONE | `.venv/bin/pytest -q tests/api` + `cd dashboard && npm run lint && npm run build -- --webpack` (pass) |
+| 2026-02-10 | Phase 0 | Added live Supabase canary gate script + integrated optional canary mode into baseline verify script | DONE | `bash scripts/verify_phase_0.sh` (pass, default offline mode), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (fails in this environment: DNS resolution for Supabase host) |
+| 2026-02-10 | Phase 0 | Verification scripts standardized on `.env.local` (`dashboard/.env.local` fallback only) | DONE | `bash scripts/verify_phase_0.sh` (pass), `RUN_SUPABASE_CANARY=auto bash scripts/verify_phase_0.sh` (canary invoked, DNS failure in this environment) |
+| 2026-02-10 | Phase 3 | Added Python finish sentence validation module and test suite | DONE | `.venv/bin/pytest -q tests/test_finish_sentence_validation.py tests/test_hybrid_generation_prompt.py tests/api/test_regenerate_response_contract.py` (pass) |
+| 2026-02-10 | Phase 3 | Enforced finish sentence validation + canonical persistence in `/regenerate` and hybrid generation flows | DONE | `bash scripts/verify_phase_0.sh` (pass) |
+| 2026-02-10 | Phase 0 | Fixed live canary fixture probe parsing (`eval-skus` object entries) and validated live Supabase canary end-to-end | DONE | `bash scripts/verify_live_supabase_canary.sh` (pass), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass) |
+| 2026-02-10 | Phase 4 | Implemented search-query-first keyword plan + Bing anti-stuffing validators + keyword-alignment retry/scoring integration | DONE | `.venv/bin/pytest -q tests/test_keyword_placement.py tests/test_quality.py tests/test_title_validators.py tests/test_selection.py tests/test_pipeline.py::test_generate_candidates_fetches_image_once_and_generates_n tests/test_pipeline.py::test_generate_candidates_skips_failed_attempts` (pass) |
+| 2026-02-10 | Phase 4 | Added speculative-competitor-claim guardrails in Python validators and sanitized enrichment/prompt comparative phrasing | DONE | `.venv/bin/pytest -q tests/test_keyword_placement.py tests/test_quality.py tests/test_title_validators.py tests/test_pipeline.py::test_validate_candidate_content_rejects_catalog_csv_references tests/test_pipeline.py::test_validate_candidate_content_rejects_speculative_competitive_claims tests/test_pipeline.py::test_validate_candidate_content_allows_evidence_style_comparison_language` (pass) |
+| 2026-02-10 | Phase 4 | Full end-to-end verification with live Supabase canary and dashboard production build after guardrail changes | DONE | `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass; Python `350 passed, 1 skipped`, canary `SUPABASE_CANARY_OK`, dashboard lint/build pass) |
+
+---
+
+## Non-Negotiable Constraints
+
+- **No hallucination:** Titles/descriptions must only state claims supported by the evidence pipeline. If unknown, omit.
+- **Policy-first:** If a copy technique conflicts with platform policy, policy wins.
+- **One prompt source of truth:** A single canonical system prompt must be used for every generation call (no drift between TS/Python/DB).
+- **Methodology validation (not A/B testing):** Verification is via rule compliance, offline evaluations, sampled human review, and regression tests—*not* traffic experiments.
+
+---
+
+## Current State (Repo Truth, Feb 10 2026)
+
+This plan assumes we’re starting from the current split-brain implementation:
+
+- Dashboard still contains legacy regeneration logic and (at least some) LLM calls.
+- Python API endpoints exist but do not always use the same prompt builder / pipeline path.
+- Supabase `prompt_templates` has examples/guidance, and there is code that can incorrectly treat DB `system_prompt` as authoritative.
+
+Files that will matter early:
+- `src/feedops/api/main.py`
+- `src/feedops/api/prompt_loader.py`
+- `src/feedops/pipeline/prompts.py`
+- `src/feedops/pipeline/generator.py`
+- `src/feedops/pipeline/finish_injection.py`
+- `src/feedops/quality/scoring.py`
+- `dashboard/src/app/api/regenerate/route.ts`
+- `dashboard/src/lib/regeneration/prompts.ts` (legacy TS prompt source)
+
+---
+
+## Baseline Architecture And Known Gaps (Approved)
+
+**Reviewed research inputs**
+- `docs/research/google-shopping-research-2026-02-10.md`
+- `docs/research/shopify-cro-research-2026-02-10.md`
+- `docs/research/prompt-scoring-audit-2026-02-10.md`
+- `docs/research/content-optimization-synthesis-2026-02-10.md`
+
+**Why TS changes were proposed while Python remained unchanged**
+- Historical prompt/scoring improvements were drafted around dashboard code paths (`dashboard/src/lib/regeneration/*` and `dashboard/src/lib/quality-scoring.ts`).
+- Runtime generation is being shifted to Cloud Run Python (`src/feedops/api/main.py`), which uses its own prompt/evidence/provider stack.
+- Result: TS prompt edits can fail to affect production generation if Python does not consume the same canonical prompt/version.
+
+**Known high-risk gaps (must be addressed early)**
+- Prompt source-of-truth drift risk in `src/feedops/api/prompt_loader.py`.
+- Thin Cloud Run prompt assembly in `src/feedops/api/main.py` if category guidance/examples are not consistently injected.
+- Finish list/key integrity drift risk in `src/feedops/api/hybrid_generation.py`.
+- Enrichment language policy risk (unverifiable or banned marketing language) in `src/feedops/pipeline/enrichment.py`.
+- Provider structural safety risk (JSON parse without strict schema validation/repair) in `src/feedops/providers/openai_provider.py`.
+- Policy mismatch risk for Shopify title rules in `src/feedops/pipeline/keyword_placement.py`.
+
+**Supabase schema reality check (validated on `qezuszwufortkiutlhym`, Feb 2026)**
+- Core generation/evidence tables exist and are populated: `product_catalog` (~75,770 rows), `prompt_templates` (1 row), `generated_content` (~400), `regeneration_history` (~177), `variant_finish_sentences` (~35), `search_queries_by_master_sku` (~894), `keyword_metrics` (~714).
+- Operational routing/index tables are present and populated for scaled rollout: `variant_index` (~72,023 rows), `search_queries` (~2,147), `publish_events` (~29), `publish_batches` (~6), `performance_baselines` (~166).
+- `prompt_templates.system_prompt` is present in schema, but architectural policy remains: code-owned canonical prompt only; DB prompt text is data and must not override runtime system prompt.
+- `generated_content.generation_prompt_hash` and `regeneration_history.prompt_hash` are present; Phase 1 uses these for prompt-version traceability.
+- Phase 4/5 target tables already exist but are currently empty: `keyword_coverage_master`, `keyword_coverage_variant`, `finish_search_patterns`; implementation work should write to these rather than creating new duplicate tables.
+
+**Fixture source strategy (why samples still exist)**
+- Offline regression must be deterministic and runnable without network credentials; fixture SKU baskets in `samples/eval-skus*.json` provide stable coverage for repeatable checks.
+- Runtime generation and evidence are Supabase-first via `product_catalog` and search insight tables; sample CSV data is only a local/demo fallback for tests and developer onboarding.
+- Phase 1+ work keeps both layers: deterministic offline fixtures for CI confidence, plus periodic live Supabase snapshot refresh for realism.
+
+**Baseline architecture (today)**
+```mermaid
+flowchart TD
+  subgraph DASH["Dashboard (Next.js)"]
+    UI["Review UI"] --> ROUTE["`/api/regenerate` route.ts"]
+    ROUTE --> CLOUD["POST `/regenerate` (Cloud Run)"]
+    ROUTE --> DBWRITE["Supabase writes (`generated_content`, `regeneration_history`, `variant_finish_sentences`)"]
+  end
+
+  subgraph CLOUDRUN["Cloud Run (Python FastAPI)"]
+    CLOUD --> MAIN["`src/feedops/api/main.py`"]
+    MAIN --> LOADSKU["Load product row(s) from Supabase"]
+    LOADSKU --> EVIDENCE["Build evidence table (`src/feedops/pipeline/evidence.py`)"]
+    EVIDENCE --> INPUTS["Inputs: catalog fields, variant dimensions, finishes, search query insights, enrichment signals"]
+    INPUTS --> PROMPT["Load system prompt (`src/feedops/api/prompt_loader.py`)"]
+    PROMPT --> PROVIDER["LLM provider (`src/feedops/providers/*`)"]
+    PROVIDER --> RESP["Structured JSON response"]
+  end
+
+  RESP --> DBWRITE
+```
+
+## Prompt Logic Inventory To Consolidate In Python (Phase 1 Scope)
+
+The previous system used three prompt-generation logic paths in TypeScript. Phase 1 must preserve the useful logic and remove duplication by consolidating it in Python.
+
+1. `dashboard/src/lib/regeneration/prompts.ts` (static prompt logic)
+   - Canonical system prompt text, platform context blocks, finish list/reference, hard validation rules.
+2. `dashboard/src/lib/regeneration/core.ts` (dynamic prompt assembly)
+   - Evidence-table-based user prompt construction, simple fallback prompt, variant-adaptation prompt, JSON parsing/validation expectations, finish sentence persistence behavior.
+3. `dashboard/src/app/api/regenerate/route.ts` (route-level prompt behavior)
+   - Regeneration mode handling, feedback injection, and TS-side finish sentence generation call flow.
+
+Phase 1 migration requirement:
+- Document each TS rule as one of: `adopt`, `adapt`, or `drop`.
+- Re-implement adopted/adapted rules in Python prompt builder/validators.
+- Remove TS runtime prompt decisions from production execution paths once parity is verified.
+
+## Platform And Entity Behavior Matrix (Must Stay Explicit)
+
+Generation behavior must remain intentionally different by platform and by entity type:
+
+- Google/Bing + Variant context
+  - Variant-aware listing output.
+  - Finish is part of title/description context.
+  - Must support finish-specific content injection and channel-specific anti-stuffing constraints.
+- Shopify + Master context
+  - Master SKU storefront copy across finishes.
+  - Finish-agnostic base title/description for product page clarity.
+  - Channel-specific constraints (`no finish name`, `no Allied Brass` in Shopify title rules where defined by policy).
+
+All Phase 1 tasks must preserve this matrix while moving prompt authority to Python.
+
+---
+
+## Global Acceptance Criteria (End State)
+
+By the time we complete all phases:
+
+1. **Consistency**
+   - Every generation call uses the same canonical system prompt and the same platform-specific rules.
+   - Generated records store a `prompt_version` (or hash) so we can trace exactly what produced any output.
+
+2. **Compliance**
+   - Google Shopping: AI-generated text is delivered using `structured_title` / `structured_description` and `digital_source_type=trained_algorithmic_media` where applicable.
+   - No disallowed formatting (ALL CAPS, promo text, finish names in Shopify base copy, etc.) slips through validation.
+
+3. **Quality**
+   - Titles front-load the product type + primary dimension + key modifier within the first ~70 characters (channel-specific rules).
+   - Descriptions follow benefits → features → trust structure and are scanner-friendly (bullets, short paragraphs).
+   - Bing descriptions never keyword-dump (no slash-separated synonym lists, no parenthetical dumps).
+   - Competitive positioning is allowed only when evidence supports it, and is expressed in qualified, non-speculative language.
+
+4. **Operational**
+   - Batch generation is idempotent, resumable, and rate-limit safe.
+   - Dashboards show generation status, validation failures, and “why this scored the way it did.”
+   - We can safely scale generation (and review) without manual firefighting.
+
+---
+
+## Phase 0 — Baseline, Guardrails, And Dev Environment
+
+**Objective:** Freeze a reliable baseline, define gating tests, and ensure local dev can run the full pipeline deterministically.
+
+**Key tasks**
+- Document the canonical “generate single SKU end-to-end” workflow (local + Cloud Run parity).
+- Create a small, curated SKU fixture set (10–30 master SKUs) covering key categories: towel bars, hooks, shelves, grab bars, paper holders, mirrors.
+- Add regression fixtures for validators (known-bad strings that must fail).
+- Ensure the repo has a single obvious command set for: lint, typecheck, unit tests, “generate sample”.
+
+**Verification commands**
+- Python unit tests: `.venv/bin/pytest -q`
+- Targeted pipeline tests: `.venv/bin/pytest -q tests/test_pipeline.py tests/test_finish_injection.py tests/test_quality.py`
+- Live Supabase runtime canary: `bash scripts/verify_live_supabase_canary.sh`
+- Dashboard build sanity: `cd dashboard && npm run lint && npm run build`
+- Phase 0 unified gate: `bash scripts/verify_phase_0.sh`
+- Phase 0 unified gate with required Supabase canary: `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh`
+
+**Definition of done**
+- Every developer can run the commands above locally and get a clean pass.
+- We have a committed SKU fixture list and a written “how to validate outputs without traffic.”
+
+---
+
+## Phase 1 — Single Source Of Truth For Prompts (Python Canonical)
+
+**Objective:** Ensure the Python pipeline always uses the best system prompt (single canonical source) and that Supabase examples do not cause prompt drift.
+
+**Implementation status (current)**
+- `DONE` TS-to-Python parity checklist created: `docs/plans/2026-02-10-phase-1-ts-to-python-prompt-parity-checklist.md`.
+- `DONE` Prompt contract created: `docs/architecture/prompt-contract.md`.
+- `DONE` Canonical prompt source in Python prompt loader (`src/feedops/api/prompt_loader.py` returns code-owned prompt, not DB `system_prompt`).
+- `DONE` Prompt hash traceability active via `get_system_prompt_hash()` and persisted to `generated_content.generation_prompt_hash` / `regeneration_history.prompt_hash`.
+- `DONE` Runtime prompt retrieval in `src/feedops/pipeline/generator.py` now uses `prompt_loader.get_system_prompt()` for `build_prompt`, `build_split_prompt`, and `build_variant_prompt`.
+- `DONE` Phase 1 verification commands currently green as of 2026-02-10.
+
+**Decisions (explicit)**
+- Canonical prompt lives in Python code (recommend `src/feedops/pipeline/prompts.py`).
+- Supabase `prompt_templates` remains **examples/guidance only**.
+- Dashboard never supplies its own system prompt to the generator; it only requests “generate X”.
+
+**Key tasks**
+- Create a TS-to-Python prompt logic parity checklist covering:
+  - static prompt rules (`prompts.ts`)
+  - dynamic prompt assembly (`core.ts`)
+  - route-level regeneration behavior (`route.ts`)
+  - each item marked `adopt` / `adapt` / `drop` with rationale.
+- Phase 1 artifact path: `docs/plans/2026-02-10-phase-1-ts-to-python-prompt-parity-checklist.md`
+- Fix `src/feedops/api/prompt_loader.py` so it **never** treats DB `system_prompt` as authoritative.
+- Introduce prompt versioning (hash or semver) and store it with generated outputs in Supabase.
+- Move all runtime prompt composition decisions to Python (including platform and master/variant branching).
+- Create a “prompt contract” doc that explains: where prompt lives, what is data-only, how to safely iterate.
+- Phase 1 artifact path: `docs/architecture/prompt-contract.md`
+
+**Verification commands**
+- `.venv/bin/pytest -q tests/test_prompt_title_guidance.py tests/test_prompts_finish.py`
+- `.venv/bin/pytest -q tests/test_prompt_loader.py tests/test_hybrid_generation_prompt.py tests/test_keyword_placement.py`
+
+**Definition of done**
+- For any generation call, logs show the same prompt version regardless of whether prompt templates exist in Supabase.
+- There is one and only one code path to retrieve the canonical system prompt.
+- Phase 1 artifact docs exist and are current:
+  - `docs/plans/2026-02-10-phase-1-ts-to-python-prompt-parity-checklist.md`
+  - `docs/architecture/prompt-contract.md`
+
+---
+
+## Phase 2 — Unify Generation Path (Dashboard Proxies, Python Generates)
+
+**Objective:** Eliminate any remaining LLM calls from the dashboard and route all title/description generation through Python for consistency and auditability.
+
+**Implementation status (current)**
+- Dashboard regeneration route no longer imports or calls OpenAI directly.
+- Python `/regenerate` now returns optional `finish_sentences` for Google/Bing descriptions.
+- Dashboard persists Python-returned `finish_sentences` into `variant_finish_sentences`.
+- Dashboard batch regeneration and hybrid generation routes now proxy to Python pipeline endpoints.
+- Next.js middleware deprecation warning is resolved by moving dashboard auth middleware to `dashboard/src/proxy.ts`.
+- Workspace-root/package-lock ambiguity is addressed by aligning Next root settings in `dashboard/next.config.ts` and keeping the dashboard lockfile authoritative (`dashboard/package-lock.json`).
+- Route audit confirms regeneration API paths proxy to Python endpoints (`/regenerate`, `/batch-optimize`, `/hybrid-generate`) and do not instantiate TS OpenAI clients.
+- `dashboard/src/lib/regeneration/core.ts` still contains legacy OpenAI helper code but is currently unreferenced by dashboard API routes (safe but removable cleanup).
+
+**Key tasks**
+- Remove or disable any TS-side OpenAI usage for regeneration endpoints.
+- Make dashboard regeneration strictly call Python endpoints and persist returned results (including finish sentences) into Supabase.
+- Ensure dashboard and Python agree on schemas for:
+  - Base content (title/description per platform)
+  - Finish sentences storage (`variant_finish_sentences`)
+  - Validation + scoring breakdowns
+
+**Verification commands**
+- `.venv/bin/pytest -q tests/api`
+- Dashboard build: `cd dashboard && npm run lint && npm run build -- --webpack`
+- Manual smoke: regenerate one SKU via dashboard and confirm no TS LLM call occurs (phase plan should define how to confirm via logs).
+
+**Definition of done**
+- The dashboard contains **zero** code paths that call LLM providers directly.
+- Regeneration button results match Python output 1:1 and include finish sentences where required.
+
+---
+
+## Phase 3 — Finish Sentences: Generate + Store In Python
+
+**Objective:** Ensure the “28 finish sentence moat” is generated consistently, validated, and stored in `variant_finish_sentences` from Python.
+
+**Implementation status (current)**
+- `DONE` Python finish sentence validation module added: `src/feedops/pipeline/finish_sentence_validation.py`.
+- `DONE` `/regenerate` flow validates finish sentence payload and persists only complete canonical finish maps.
+- `DONE` Hybrid generation path validates finish sentence payload with the same shared validator.
+- `DONE` Dedicated tests added and green:
+  - `tests/test_finish_sentence_validation.py`
+  - `tests/test_hybrid_generation_prompt.py`
+  - `tests/api/test_regenerate_response_contract.py`
+
+**Key tasks**
+- Make finish sentence generation a first-class pipeline step in Python.
+- Remove any hardcoded/duplicated finish lists across the repo; unify finish definitions in one module.
+- Add validators for finish sentence quality:
+  - No “designer finishes” boilerplate.
+  - Must be product-specific (not generic one-liners).
+  - Must not introduce unverified material/design claims.
+
+**Verification commands**
+- `.venv/bin/pytest -q tests/test_finish_injection.py tests/test_google_short_title_finish_injection.py`
+- Add tests for “finish list correctness” and “no banned boilerplate.”
+
+**Definition of done**
+- `variant_finish_sentences` is always produced by Python and is stable across runs for the same evidence (unless prompt version changes).
+
+---
+
+## Phase 4 — Tier 1 Methodology Improvements (Search Alignment + Anti-Stuffing + Scoring)
+
+**Objective:** Improve the *determinism* and *measurability* of title/description quality before scaling.
+
+**What we are porting into Python**
+The repo already has a Tier-1 plan drafted in TS form; we will implement the same intent in Python:
+- `docs/plans/2026-02-10-content-generation-tier1-improvements.md`
+
+**Key tasks**
+- `DONE` Implement a deterministic per-SKU keyword plan derived from Search Query Insights:
+  - Pick a title anchor phrase.
+  - Pick 1–2 support terms for title.
+  - Pick a small set of description terms.
+- `DONE` Enforce keyword alignment via validation + auto-retry:
+  - Titles can’t “look good” while missing the anchor.
+  - Descriptions must include minimum term coverage *without stuffing*.
+- `DONE` Add Bing anti-stuffing rules (prompt + validators).
+- `DONE` Add competitive positioning guardrails:
+  - Only allow comparisons when we have evidence (materials, warranties, capacities, etc.).
+  - Ban speculative “better than competitors” language.
+- `DONE` Recalibrate scoring so “high score” correlates with “search aligned + readable + policy-safe.”
+
+**Verification commands**
+- `.venv/bin/pytest -q tests/test_keyword_placement.py tests/test_quality.py tests/test_title_validators.py`
+- Add new tests:
+  - Keyword plan builder (anchor selection logic).
+  - Keyword-alignment validator (title + description).
+  - Bing anti-stuffing validator (slash/parenthetical dumps).
+
+**Definition of done**
+- We can run the SKU fixture set through generation and observe:
+  - No keyword dumping.
+  - Consistent anchor usage across titles.
+  - Lower variance in quality scores (less score inflation).
+
+---
+
+## Phase 5 — Evidence Pipeline Upgrades (Keyword Gaps + Competitors + Gold Examples)
+
+**Objective:** Give the model better evidence so it can differentiate and prioritize without guessing.
+
+**Key tasks**
+- Add “keyword gap” evidence: high-volume terms missing from the current title (or missing from generated candidate).
+- Add competitor title pattern evidence for the product category:
+  - Separate **direct competitors** (brand owners like Kingston Brass, Signature Hardware) from **marketplaces** (Wayfair, Amazon, Lowe’s, Houzz).
+  - Use direct competitors for positioning patterns; use marketplaces mainly for query language and merchandising norms.
+- Expand and diversify gold examples (`prompt_templates`) so examples cover:
+  - Multiple styles (modern, transitional, traditional).
+  - Multiple opening strategies (quality-first default, pain-point-first when natural).
+  - Multiple categories (not just towel bars).
+
+**Verification commands**
+- `.venv/bin/pytest -q tests/test_evidence_multisize.py tests/test_pipeline.py`
+- Add tests asserting:
+  - Keyword gap evidence only includes terms relevant to the SKU category.
+  - Competitor evidence never injects unverifiable claims.
+
+**Definition of done**
+- Evidence tables produced for fixture SKUs clearly show keyword plan + gaps + safe competitor context.
+
+---
+
+## Phase 6 — Dashboard Production Readiness (Review + Batch + Safety)
+
+**Objective:** Make the dashboard safe, reliable, and fast for daily use by operators reviewing and publishing content.
+
+**Key tasks**
+- Ensure regeneration, approvals, and publish flows are idempotent and fail-safe:
+  - Clear “in progress / failed / retry” state for generation and publishing.
+  - Visible validation failures with actionable messages.
+- Add role-based access control (if not already present) for publishing actions.
+- Add batch workflows:
+  - Queue N SKUs for generation.
+  - Background job execution (Cloud Run side), with progress reporting back to Supabase.
+- Ensure UI always matches policy:
+  - Shopify title rules (no brand/finish in base title).
+  - Google structured-only feed behavior when configured.
+
+**Verification commands**
+- Dashboard: `cd dashboard && npm run lint && npm run build`
+- Python: `.venv/bin/pytest -q tests/test_review_dashboard.py tests/test_reporter_google_patch_structured_only_env.py`
+
+**Definition of done**
+- An operator can safely:
+  - Regenerate content.
+  - Review + approve.
+  - Publish a batch.
+  - Understand why something failed and how to fix it.
+
+---
+
+## Phase 7 — Observability, Reliability, And Performance
+
+**Objective:** Production-hardening so we can scale without silent failures or “mystery regressions.”
+
+**Key tasks**
+- Add structured logs and request IDs for every generation call.
+- Emit metrics (counts, latency, retry rate, validation-failure rate, provider error rate).
+- Add circuit breakers / backoff for provider rate limits.
+- Add a “kill switch” configuration:
+  - Disable generation.
+  - Disable finish sentence regeneration.
+  - Force fallback behavior when providers are down.
+
+**Verification commands**
+- `.venv/bin/pytest -q`
+- Load test (phase plan should define a safe local load test that does not hit real providers; use mocks).
+
+**Definition of done**
+- We can detect regressions quickly and roll back by prompt version or config toggles.
+
+---
+
+## Phase 8 — Scale-Up Runbook (72k SKUs)
+
+**Objective:** Execute the scale-up in a controlled, reviewable way.
+
+**Key tasks**
+- Define batch sizing strategy and review capacity assumptions.
+- Create a runbook:
+  - How to choose SKUs.
+  - How to run batch optimize.
+  - How to review/approve efficiently.
+  - How to publish and validate feed outputs.
+- Define “stop conditions”:
+  - Validation failure spikes.
+  - Provider error spikes.
+  - Evidence pipeline regressions.
+
+**Verification commands**
+- Batch dry run using fixture SKUs + mocked provider.
+- Spot-check feed patch outputs and Shopify content formatting.
+
+**Definition of done**
+- A documented, repeatable process exists to go from 1 → 72,000 SKUs without needing ad-hoc interventions.
+
+---
+
+## Optional: JavaScript Test Runner (Vitest vs Jest)
+
+If we keep meaningful non-trivial logic in the dashboard (beyond rendering + proxying), add a JS unit test runner.
+
+Recommendation: **Vitest** for fast unit tests of pure TS helpers (validators, formatters). If we need deeper Next.js integration tests, consider Jest + `next/jest`.
+
+We will decide this in Phase 0 based on how much logic remains in the dashboard after Phase 2.

@@ -1,0 +1,38 @@
+{
+  "preToolUse": [
+    {
+      "tool": "Bash",
+      "description": "Block git push/deploy without build verification",
+      "command": "bash -c 'if [[ \"$COMMAND\" =~ (git\\ push|vercel.*deploy) ]]; then echo \"🛑 Pre-deploy validation...\"; cd dashboard 2>/dev/null && { npm run build > /tmp/build.log 2>&1 || { echo \"❌ BUILD FAILED:\"; tail -20 /tmp/build.log; exit 1; }; echo \"✅ Build passed\"; } || echo \"⚠️  Not in dashboard directory, skipping build check\"; fi'"
+    },
+    {
+      "tool": "Task",
+      "description": "Validate MCP tool usage in sub-agents",
+      "command": "bash -c 'if echo \"$PROMPT\" | grep -qE \"(mcp__supabase|mcp__google-ads|mcp__merchant|mcp__Apify)\" && ! echo \"$PROMPT\" | grep -q \"ToolSearch\"; then echo \"⚠️  WARNING: Prompt mentions MCP tools but no ToolSearch instruction.\"; echo \"💡 Sub-agents must use: ToolSearch to load mcp__ tools first\"; echo \"💡 OR gather MCP data in main context and pass file paths to agents\"; fi'"
+    },
+    {
+      "tool": "Edit",
+      "pattern": "**/*.{ts,tsx}",
+      "description": "Warn about import removal during edits",
+      "command": "bash -c 'if echo \"$OLD_STRING\" | grep -q \"^import\" && ! echo \"$NEW_STRING\" | grep -q \"import\"; then echo \"⚠️  Import removed. Verify it is truly unused before proceeding.\"; fi'"
+    }
+  ],
+  "postToolUse": [
+    {
+      "tool": "Edit",
+      "pattern": "**/*.{ts,tsx}",
+      "description": "Type-check after TypeScript edits",
+      "command": "bash -c 'cd dashboard 2>/dev/null && { npx tsc --noEmit 2>&1 | head -25 | grep -E \"(error TS|✓|Found 0 errors)\" || echo \"✅ No type errors\"; } || echo \"⚠️  Not in dashboard directory\"'"
+    },
+    {
+      "tool": "Bash",
+      "pattern": ".*git commit.*",
+      "description": "Remind about CLAUDE.md updates after commits",
+      "command": "echo \"💡 Session ending? Remember to update CLAUDE.md with learnings\""
+    }
+  ],
+  "sessionEnd": {
+    "description": "End-of-session reminder",
+    "command": "echo \"\n📋 Session ending checklist:\n- [ ] Update CLAUDE.md with new patterns/learnings?\n- [ ] Write continuation prompt if work is unfinished?\n- [ ] All builds passing locally?\""
+  }
+}

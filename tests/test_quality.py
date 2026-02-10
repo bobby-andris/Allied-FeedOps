@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from feedops.models import Candidate, Score
+from feedops.pipeline.keyword_placement import KeywordPlacementPlan
 from feedops.quality.evaluator import evaluate_exports_dir, render_markdown
 from feedops.quality.scoring import (
     assess_soft_gates,
@@ -134,6 +135,45 @@ def test_score_candidate_weighted_composite_matches_platform_scores():
     assert result.weighted_composite == expected
     assert result.soft_gate_penalty == 0.0
     assert result.adjusted_weighted_composite == expected
+
+
+def test_score_candidate_penalizes_keyword_alignment_misses():
+    candidate = Candidate(
+        google_title="18-Inch Wall Mount Rail, Solid Brass, Allied Brass",
+        google_short_title="18-Inch Wall Mount Rail",
+        google_description="A clean rail design with solid brass construction and concealed hardware.",
+        bing_title="18-Inch Wall Mount Rail, Solid Brass, Allied Brass",
+        bing_description="A clean rail design with solid brass construction and concealed hardware.",
+        shopify_title="18-Inch Wall Mount Rail",
+        shopify_description="<p>A clean rail design with solid brass construction and concealed hardware.</p>",
+        claims=[],
+        self_score=Score(
+            specificity=5,
+            benefit_coverage=5,
+            keyword_inclusion=5,
+            format_adherence=5,
+            brand_voice=5,
+            factual_accuracy=5,
+        ),
+    )
+    weights = {"google": 0.7, "bing": 0.15, "shopify": 0.15}
+    keyword_plan = KeywordPlacementPlan(
+        title_anchor="wall mount towel bar",
+        short_title_anchor="wall mount towel bar",
+        title_support_terms=[],
+        description_terms=["bath towel holder", "towel rack"],
+        description_min_required=2,
+        description_first_150_required=0,
+        brand="Allied Brass",
+        enforce_alignment=True,
+    )
+
+    baseline = score_candidate(candidate, weights=weights)
+    with_alignment = score_candidate(candidate, weights=weights, keyword_plan=keyword_plan)
+
+    assert with_alignment.weighted_composite < baseline.weighted_composite
+    assert with_alignment.soft_gate_penalty > baseline.soft_gate_penalty
+    assert any("Keyword alignment misses" in warning for warning in with_alignment.soft_gate_warnings)
 
 
 def test_evaluate_exports_dir_scores_temp_exports(tmp_path: Path):
