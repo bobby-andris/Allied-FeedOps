@@ -77,6 +77,10 @@ Required per-task status update format:
 | 2026-02-11 | Phase 7 | Required verification rerun in full-access environment (`RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh`) | DONE | pass: Python `389 passed, 1 skipped`; canary `SUPABASE_CANARY_OK` (`catalog_count=75770`, `probe_sku=1031/30`, `probe_variant_count=28`, `prompt_hash=530a11ec32d54c46`); dashboard `npm run lint` + `next build --webpack` pass; script finished `OK` |
 | 2026-02-11 | Phase 6 | Production dashboard validation run (login, generate, regenerate with/without feedback, batch/readiness) using real SKUs `920D-6` and `SB-16`; verified Python prompt-source traceability and finish sentence behavior | DONE (issues found) | Browser routes exercised: `/login`, `/review`, `/generate`, `/review/920D-6`, `/batches`, `/batches/test-workflow-1770569844`. SOT checks: `generated_content.generation_prompt_hash=530a11ec32d54c46`, `regeneration_history.prompt_hash=530a11ec32d54c46`, `generation_model=openai/gpt-5.2`; finish evidence: `variant_finish_sentences` refreshed for `920D-6` Google path. Required gates rerun: `.venv/bin/pytest -q` (pass: `389 passed, 1 skipped`) and `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass, `SUPABASE_CANARY_OK`, dashboard lint/build pass). Defects observed: batch status/remediation visibility mismatch in UI vs `publish_events`/`publish_batches` data. |
 | 2026-02-11 | Phase 6 | Batch/readiness hotfix for legacy DB schemas: added `batch_sku_assignments` read fallback when `status/error_message` columns are missing (`42703`) and wired batches list/detail/API to shared assignment store | DONE | Code: `dashboard/src/lib/batches/assignment-store.ts`, `dashboard/src/app/(dashboard)/batches/page.tsx`, `dashboard/src/app/(dashboard)/batches/[batchId]/page.tsx`, `dashboard/src/app/api/batches/route.ts`. Verification: `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_regenerate_route_contract.py tests/test_hybrid_generation_prompt.py` (pass: `14 passed`), `.venv/bin/pytest -q` (pass: `394 passed, 1 skipped`), `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build -- --webpack` (pass). Live stream browser recheck (`prephase8-fixes`, viewer `ws://localhost:9223`): `/batches` and `/batches/batch-ft16-uppercase-mpn-test` reload clean with no `batch_sku_assignments.status` console error after clear. Note: `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` currently blocked in this environment (`nodename nor servname provided, or not known`). |
+| 2026-02-11 | Phase 8 | 8.1 Batch sizing strategy finalized for 72k rollout (100 SKU hard cap, wave ramp, throughput-based capacity estimates) | DONE | `curl -sS "$FEEDOPS_PIPELINE_URL/health" | jq '{status,service,supabase_connected,product_catalog_count}'` (pass), `POST /batch-optimize` dry-run (`SB-16`,`107`) completed (`job_id=74ab0472-28c1-4237-b2ee-e8117b00fc70`, `2/2`) and throughput sampled (`~1.55 SKU/min`) |
+| 2026-02-11 | Phase 8 | 8.2 Operator runbook blocks for Generate -> Review -> Publish finalized and aligned to current dashboard + Cloud Run paths/tables | DONE | `GET /api/sku-selection`, `GET /api/sku-selection/jobs`, `GET /api/sku-selection/generate/{jobId}`, `GET /api/approvals`, `GET /api/batches` checks (pass); non-dry run `POST /batch-optimize` for SKU `1098` completed (`job_id=210b995c-2623-4843-a37e-096bd9408e36`, `1/1`) and `generated_content` prompt-hash/model spot-check (pass) |
+| 2026-02-11 | Phase 8 | 8.3 Stop-condition thresholds + rollback instructions finalized with verified query/CLI commands | DONE | `.venv/bin/python` threshold checks on `batch_generation_job_skus`, `publish_events`, `sku_approvals` (pass); `.venv/bin/feedops publish-history --limit 3` (pass); `.venv/bin/feedops rollback --sku FT-16 --platform shopify --dry-run` and non-dry-run rollback command execution path validated (no patch found, expected) |
+| 2026-02-11 | Phase 8 | 8.4 Dry-run + spot-check verification bundle documented and command-validated in this environment | DONE | `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` command set executed; local unauthenticated `POST /api/sku-selection/generate` guard check returned `307` with `/login` (expected), confirming write-route auth behavior |
 
 ---
 
@@ -539,24 +543,34 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
 
 **Objective:** Execute the scale-up in a controlled, reviewable way.
 
-**Key tasks**
-- Define batch sizing strategy and review capacity assumptions.
-- Create a runbook:
-  - How to choose SKUs.
-  - How to run batch optimize.
-  - How to review/approve efficiently.
-  - How to publish and validate feed outputs.
-- Define “stop conditions”:
-  - Validation failure spikes.
-  - Provider error spikes.
-  - Evidence pipeline regressions.
-
-**Verification commands**
-- Batch dry run using fixture SKUs + mocked provider.
-- Spot-check feed patch outputs and Shopify content formatting.
+**Implementation status**
+- `DONE` 8.1 Concrete batch sizing strategy.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Output: `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` section `1) Concrete Batch Sizing Strategy`.
+  - Notes:
+    - Encodes hard API cap (`100` SKUs/job) and wave progression (`2` dry-run -> `25` pilot -> `100` steady-state).
+    - Uses observed throughput sample from live validated run (`~1.55 SKU/min`) for capacity planning.
+- `DONE` 8.2 Operator runbook for generate -> review -> publish.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Output: `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` section `2) Operator Runbook (Generate -> Review -> Publish)`.
+  - Notes:
+    - Steps are mapped to current API routes and Supabase tables.
+    - Includes exact commands and expected outcomes for each stage.
+- `DONE` 8.3 Stop-condition thresholds and rollback instructions.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Output: `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` section `3) Stop Conditions and Rollback Instructions`.
+  - Notes:
+    - Threshold checks use row-level status data (`batch_generation_job_skus`) and `publish_events` to avoid counter drift issues.
+    - Rollback path references existing CLI (`feedops rollback`) and publish event snapshots.
+- `DONE` 8.4 Dry-run and spot-check verification commands.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Output: `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` section `4) Dry-Run and Spot-Check Verification Bundle`.
+  - Notes:
+    - Every listed command was executed at least once in this environment.
+    - Includes explicit expected outcomes for pass/fail triage.
 
 **Definition of done**
-- A documented, repeatable process exists to go from 1 → 72,000 SKUs without needing ad-hoc interventions.
+- A documented and command-validated process exists to progress from 1 -> 72,000 SKUs with explicit stop/rollback controls and no ad-hoc operational steps.
 
 ---
 

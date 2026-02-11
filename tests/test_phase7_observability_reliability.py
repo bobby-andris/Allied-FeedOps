@@ -10,6 +10,7 @@ import pytest
 from fastapi import HTTPException
 
 import feedops.api.main as api_main
+from feedops.pipeline.finish_sentence_placeholder import inject_finish_sentence_placeholder
 from feedops.models import ParentSKU, Variant
 from feedops.providers.base import LLMError
 from feedops.providers.openai_provider import OpenAIProvider
@@ -201,3 +202,42 @@ async def test_regenerate_description_skips_finish_sentence_path_when_killed(mon
     assert response.success is True
     assert response.finish_sentences is None
     assert fake_provider.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_regenerate_description_injects_finish_sentence_placeholder_when_finish_sentences_present(monkeypatch):
+    fake_provider = _FakeProvider(
+        [
+            {"content": "Keep towels organized with this wall-mounted towel bar."},
+            {"finish_sentences": {finish: f"{finish} complements this towel bar design." for finish in api_main.get_finish_list()}},
+        ]
+    )
+
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
+    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+
+    request = api_main.RegenerateRequest(
+        master_sku="1031/18",
+        content_type="description",
+        platform="google",
+        feedback=None,
+        finish_code="ABR",
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.success is True
+    assert response.finish_sentences is not None
+    assert "{FINISH_SENTENCE}" in response.content
+    assert response.content.count("{FINISH_SENTENCE}") == 1
+    assert fake_provider.calls == 2
+
+
+def test_inject_finish_sentence_placeholder_is_idempotent():
+    base = "Solid brass construction. {FINISH_SENTENCE} Concealed mounting keeps installation clean."
+    assert inject_finish_sentence_placeholder(base) == base

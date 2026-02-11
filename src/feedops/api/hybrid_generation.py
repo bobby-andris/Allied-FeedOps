@@ -26,6 +26,9 @@ from feedops.observability.metrics import metrics_registry
 from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
+from feedops.pipeline.finish_sentence_placeholder import (
+    inject_finish_sentence_placeholder,
+)
 from feedops.pipeline.validators import validate_candidate_content
 
 logger = logging.getLogger(__name__)
@@ -341,6 +344,7 @@ async def adapt_variant_content(
                         )
                     if len(validated_finish_sentences) == len(get_finish_list()):
                         finish_sentences = validated_finish_sentences
+                        new_content = inject_finish_sentence_placeholder(new_content)
                     else:
                         metrics_registry.increment(
                             "validation_failure_total",

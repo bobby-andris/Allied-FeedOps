@@ -48,6 +48,9 @@ from feedops.pipeline.evidence import build_evidence_table, format_evidence_mark
 from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
+from feedops.pipeline.finish_sentence_placeholder import (
+    inject_finish_sentence_placeholder,
+)
 from feedops.pipeline.prompts import build_category_guidance
 from feedops.providers import get_provider
 from feedops.api.multi_sku_detection import (
@@ -762,6 +765,7 @@ async def regenerate_content(request: RegenerateRequest):
             )
             if len(validated_finish_sentences) == len(get_finish_list()):
                 finish_sentences = validated_finish_sentences
+                content = inject_finish_sentence_placeholder(content)
             else:
                 logger.warning(
                     "Finish sentence generation returned incomplete canonical coverage "
