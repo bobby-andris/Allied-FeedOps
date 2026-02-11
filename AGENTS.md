@@ -434,7 +434,7 @@ Core workflow:
 
 Use this dedicated Supabase auth user for dashboard browser automation:
 - Email: `agent-browser@allied-feed-ops.local`
-- Password: `FeedOps_Agent_2026!Browser`
+- Password: `FeedOpsBrowser!2026`
 
 Notes:
 - This account is intended for automated dashboard verification only.

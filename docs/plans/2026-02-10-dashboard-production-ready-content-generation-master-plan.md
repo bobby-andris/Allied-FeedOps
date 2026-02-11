@@ -83,6 +83,7 @@ Required per-task status update format:
 | 2026-02-11 | Phase 8 | 8.4 Dry-run + spot-check verification bundle documented and command-validated in this environment | DONE | `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` command set executed; local unauthenticated `POST /api/sku-selection/generate` guard check returned `307` with `/login` (expected), confirming write-route auth behavior |
 | 2026-02-11 | Phase 7 | Shopify generation-path parity audit + full-generation history linkage fix across platforms | DONE | `.venv/bin/pytest -q` (pass: `401 passed, 1 skipped`), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass: `SUPABASE_CANARY_OK`, dashboard lint/build `OK`), live `SB-16` run via `optimize_single_sku` with DB verification (Google/Bing placeholder + finish sentence persistence + Shopify outputs + linked history IDs + model/prompt hash) |
 | 2026-02-11 | Phase 7 + Phase 6 | Production parity hardening + publish safety gates + review queue remediation pass | DONE | commit `23e1cfd6` pushed to `origin/master`; `.venv/bin/pytest -q` (pass: `434 passed, 1 skipped`), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass: `SUPABASE_CANARY_OK`, `catalog_count=75770`, `probe_sku=1031/30`, `probe_variant_count=28`, `prompt_hash=530a11ec32d54c46`), production smoke (`/health`, `/optimize-sku` dry run, `/regenerate`, `/hybrid-generate`, `/batch-status`) all returned expected success/processing states |
+| 2026-02-11 | Phase 7 | Hybrid requested-vs-expanded counter split to prevent progress overflow in hybrid jobs and dashboard history | DONE | commit `1b2dd79d` pushed to `origin/master`; tests: `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py::test_process_hybrid_batch_job_full_generation_matches_regenerate_finish_rules tests/test_phase7_observability_reliability.py::test_process_hybrid_batch_job_tracks_requested_and_expanded_counters tests/test_phase7_observability_reliability.py::test_process_batch_job_never_writes_partial_status` (pass), `.venv/bin/pytest -q` (pass: `436 passed, 1 skipped`), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass: `SUPABASE_CANARY_OK`, dashboard lint/build `OK`), production batch `38c55dae` final status `completed` with requested `2/2` and expanded `3/3`; `/generate` -> `Past Jobs` shows `2/2 (+3/3 expanded)` while historical failed jobs still show legacy overflow values |
 
 ### 2026-02-11 Production Readiness Verification Log (UTC)
 
@@ -619,6 +620,24 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
       - Google/Bing `variant_finish_sentences` persisted with 28 entries each.
       - Shopify title/description generated and persisted with prompt/model metadata.
       - All six full-generation rows (Google/Bing/Shopify × title/description) have linked `regeneration_history.generated_content_id`.
+
+### 2026-02-11 Hybrid Counter Remediation Verification Log (UTC)
+
+- Timestamp window: `2026-02-11 17:42:00Z` to `2026-02-11 18:03:00Z`.
+- SKUs used: `SB-16`, `1031/30`.
+- Routes touched:
+  - Cloud Run: `POST /hybrid-generate`, `GET /batch-status/{job_id}`, `GET /health`, `POST /optimize-sku` (dry run), `POST /regenerate`.
+  - Dashboard: `/generate` (`Generate` and `Past Jobs` tabs), `/login`.
+- Metadata fields checked:
+  - `batch_generation_jobs.total_skus`, `batch_generation_jobs.completed_skus`, `batch_generation_jobs.failed_skus`.
+  - `batch_generation_jobs.options.expanded_total_skus`, `batch_generation_jobs.options.expanded_completed_skus`, `batch_generation_jobs.options.expanded_failed_skus`.
+- Test and canary outputs:
+  - `.venv/bin/pytest -q` -> `436 passed, 1 skipped`.
+  - `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` -> `SUPABASE_CANARY_OK` and dashboard lint/build `OK`.
+- Deployment verification results:
+  - Cloud Build `4f1e9034-22a6-4504-9422-eb3f9eb10696` -> `SUCCESS`.
+  - Active Cloud Run image: `gcr.io/bobbys-project-346400/feedops-pipeline:1b2dd79d2252757b951e7ce5f184bab6bd55c412`.
+  - Live hybrid job `38c55dae-8b43-47cd-a3e5-06c92cf7ca78` completed with requested `2/2` and expanded `3/3`, no requested-counter overflow.
 
 **Runtime toggles (safe defaults)**
 - `FEEDOPS_DISABLE_GENERATION` (default: unset/`false`): when `true`, generation endpoints return `503` and background generation is not started.
