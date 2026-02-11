@@ -429,3 +429,13 @@ Core workflow:
 2. `agent-browser snapshot -i` - Get interactive elements with refs (`@e1`, `@e2`)
 3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
 4. Re-snapshot after page changes
+
+### Dashboard Login (Browser Agent)
+
+Use this dedicated Supabase auth user for dashboard browser automation:
+- Email: `agent-browser@allied-feed-ops.local`
+- Password: `FeedOps_Agent_2026!Browser`
+
+Notes:
+- This account is intended for automated dashboard verification only.
+- If login fails, rotate the password with Supabase Admin API and update this section.

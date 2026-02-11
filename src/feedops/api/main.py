@@ -1471,14 +1471,19 @@ async def process_batch_job(
             {"completed_skus": completed, "failed_skus": failed}
         ).eq("id", job_id).execute()
 
-    # Mark job complete
-    final_status = "completed" if failed == 0 else "partial" if completed > 0 else "failed"
-    supabase.table("batch_generation_jobs").update(
-        {
-            "status": final_status,
-            "completed_at": datetime.now(timezone.utc).isoformat(),
-        }
-    ).eq("id", job_id).execute()
+    # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
+    final_status = "completed" if failed == 0 else "failed"
+    final_payload = {
+        "status": final_status,
+        "completed_skus": completed,
+        "failed_skus": failed,
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if failed > 0 and completed > 0:
+        final_payload["error_message"] = (
+            f"Completed {completed} of {len(skus)} SKUs; {failed} failed"
+        )
+    supabase.table("batch_generation_jobs").update(final_payload).eq("id", job_id).execute()
 
     logger.info(f"Batch job {job_id} finished: {completed} completed, {failed} failed")
 
@@ -1592,19 +1597,24 @@ async def process_hybrid_batch_job(
         # Process single SKUs (full generation)
         logger.info(f"Processing {len(single_skus)} single SKUs")
         for sku in single_skus:
+            sku_failed = False
             for platform in platforms:
                 for content_type in content_types:
                     try:
                         await generate_full_content(sku, platform, content_type)
-                        completed += 1
                         logger.info(
                             f"✓ Generated {sku} / {platform} / {content_type}"
                         )
                     except Exception as e:
-                        failed += 1
+                        sku_failed = True
                         logger.error(
                             f"✗ Failed {sku} / {platform} / {content_type}: {e}"
                         )
+
+            if sku_failed:
+                failed += 1
+            else:
+                completed += 1
 
             # Update progress every SKU
             supabase.table("batch_generation_jobs").update(
@@ -1619,19 +1629,24 @@ async def process_hybrid_batch_job(
             # Step 1: Generate base SKU (full generation)
             base_sku = family.base_sku
 
+            base_sku_failed = False
             for platform in platforms:
                 for content_type in content_types:
                     try:
                         await generate_full_content(base_sku, platform, content_type)
-                        completed += 1
                         logger.info(
                             f"✓ Generated BASE {base_sku} / {platform} / {content_type}"
                         )
                     except Exception as e:
-                        failed += 1
+                        base_sku_failed = True
                         logger.error(
                             f"✗ Failed BASE {base_sku} / {platform} / {content_type}: {e}"
                         )
+
+            if base_sku_failed:
+                failed += 1
+            else:
+                completed += 1
 
             # Update progress after base SKU
             supabase.table("batch_generation_jobs").update(
@@ -1643,6 +1658,7 @@ async def process_hybrid_batch_job(
                 base_spec, variant_spec = extract_spec_difference(
                     base_sku, variant_sku
                 )
+                variant_sku_failed = False
 
                 for platform in platforms:
                     for content_type in content_types:
@@ -1658,36 +1674,44 @@ async def process_hybrid_batch_job(
                             )
 
                             if result["success"]:
-                                completed += 1
                                 logger.info(
                                     f"✓ Adapted VARIANT {variant_sku} / {platform} / {content_type} (from {base_sku})"
                                 )
                             else:
-                                failed += 1
+                                variant_sku_failed = True
                                 logger.error(
                                     f"✗ Failed VARIANT {variant_sku} / {platform} / {content_type}: {result.get('error')}"
                                 )
                         except Exception as e:
-                            failed += 1
+                            variant_sku_failed = True
                             logger.error(
                                 f"✗ Exception for VARIANT {variant_sku} / {platform} / {content_type}: {e}"
                             )
+
+                if variant_sku_failed:
+                    failed += 1
+                else:
+                    completed += 1
 
                 # Update progress after each variant SKU
                 supabase.table("batch_generation_jobs").update(
                     {"completed_skus": completed, "failed_skus": failed}
                 ).eq("id", job_id).execute()
 
-        # Mark job complete
-        final_status = (
-            "completed" if failed == 0 else "partial" if completed > 0 else "failed"
-        )
-        supabase.table("batch_generation_jobs").update(
-            {
-                "status": final_status,
-                "completed_at": datetime.now(timezone.utc).isoformat(),
-            }
-        ).eq("id", job_id).execute()
+        # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
+        final_status = "completed" if failed == 0 else "failed"
+        total_skus = len(single_skus) + sum(len(f.master_skus) for f in families)
+        final_payload = {
+            "status": final_status,
+            "completed_skus": completed,
+            "failed_skus": failed,
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if failed > 0 and completed > 0:
+            final_payload["error_message"] = (
+                f"Completed {completed} of {total_skus} SKUs; {failed} failed"
+            )
+        supabase.table("batch_generation_jobs").update(final_payload).eq("id", job_id).execute()
 
         logger.info(
             f"✓ Hybrid generation job {job_id} finished: {completed} completed, {failed} failed"

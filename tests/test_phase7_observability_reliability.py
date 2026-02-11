@@ -708,3 +708,65 @@ async def test_process_batch_job_respects_options_for_platform_and_content_type(
     assert len(history_rows) == 1
     assert history_rows[0]["platform"] == "google"
     assert history_rows[0]["content_type"] == "description"
+
+
+@pytest.mark.asyncio
+async def test_process_batch_job_never_writes_partial_status(monkeypatch):
+    provider = _RecordingProvider()
+    supabase = _CaptureSupabase()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    sample = _sample_parent_sku()
+    monkeypatch.setattr(
+        api_main,
+        "load_parent_sku_from_supabase",
+        lambda sku: sample if sku == "1031/18" else None,
+    )
+
+    await api_main.process_batch_job(
+        job_id="job-123",
+        skus=["1031/18", "missing-sku"],
+        num_candidates=1,
+        dry_run=False,
+    )
+
+    job_updates = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "batch_generation_jobs" and op["op"] == "update"
+    ]
+
+    assert job_updates
+    assert all(update.get("status") != "partial" for update in job_updates)
+    final_status = [update for update in job_updates if "status" in update][-1]
+    assert final_status["status"] == "failed"
+
+
+@pytest.mark.asyncio
+async def test_process_hybrid_batch_job_progress_counts_master_skus(monkeypatch):
+    provider = _RecordingProvider()
+    supabase = _CaptureSupabase()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+
+    await api_main.process_hybrid_batch_job(
+        job_id="job-123",
+        families=[],
+        single_skus=["1031/18"],
+        options={
+            "titles": True,
+            "descriptions": True,
+            "platforms": ["google", "bing", "shopify"],
+        },
+    )
+
+    job_updates = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "batch_generation_jobs" and op["op"] == "update"
+    ]
+    assert job_updates
+    assert all(update.get("status") != "partial" for update in job_updates)
+
+    final_status = [update for update in job_updates if "status" in update][-1]
+    assert final_status["status"] == "completed"
+    assert final_status["completed_skus"] == 1
+    assert final_status["failed_skus"] == 0
