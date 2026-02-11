@@ -53,11 +53,28 @@ function logSupabaseError(context: string, err: SupabaseErrLike | null | undefin
 
 function errorResponse(
   status: number,
-  payload: { error: string; code?: string | null; details?: string | null; hint?: string | null; step?: string }
+  payload: {
+    error: string
+    code?: string | null
+    details?: string | null
+    hint?: string | null
+    step?: string
+    actionable_message?: string | null
+    validation_errors?: string[]
+  }
 ) {
   const isProd = process.env.NODE_ENV === 'production'
   if (isProd) {
-    return NextResponse.json({ error: payload.error }, { status })
+    return NextResponse.json(
+      {
+        error: payload.error,
+        code: payload.code ?? null,
+        step: payload.step ?? null,
+        actionable_message: payload.actionable_message ?? null,
+        validation_errors: payload.validation_errors ?? [],
+      },
+      { status }
+    )
   }
   return NextResponse.json(payload, { status })
 }
@@ -86,17 +103,23 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!master_sku || !content_type || !platform || !mode) {
-      return NextResponse.json(
-        { error: 'Missing required fields: master_sku, content_type, platform, mode' },
-        { status: 400 }
-      )
+      return errorResponse(400, {
+        error: 'Missing required fields: master_sku, content_type, platform, mode',
+        code: 'regenerate_missing_required_fields',
+        step: 'request_validation',
+        actionable_message:
+          'Provide master_sku, content_type, platform, and mode, then retry.',
+      })
     }
 
     if (mode === 'with_feedback' && (!feedback?.user_feedback || !feedback?.current_content)) {
-      return NextResponse.json(
-        { error: 'Feedback mode requires feedback.user_feedback and feedback.current_content' },
-        { status: 400 }
-      )
+      return errorResponse(400, {
+        error: 'Feedback mode requires feedback.user_feedback and feedback.current_content',
+        code: 'regenerate_feedback_missing_fields',
+        step: 'request_validation_feedback',
+        actionable_message:
+          'Provide both feedback.user_feedback and feedback.current_content for feedback regeneration.',
+      })
     }
 
     const supabase = createAdminClient()
@@ -127,6 +150,8 @@ export async function POST(request: NextRequest) {
         details: schemaCheck.error.message ?? null,
         hint: schemaCheck.error.hint ?? null,
         step: 'schema_check_generated_content',
+        actionable_message:
+          'Apply dashboard Supabase migrations before retrying regeneration.',
       })
     }
 
@@ -189,6 +214,8 @@ export async function POST(request: NextRequest) {
       return errorResponse(pipelineResponse.status === 404 ? 404 : 500, {
         error: errorData.detail || `Pipeline returned ${pipelineResponse.status}`,
         step: 'pipeline_call',
+        actionable_message:
+          'Check Cloud Run pipeline health and FEEDOPS_PIPELINE_URL configuration, then retry.',
       })
     }
 
@@ -200,16 +227,21 @@ export async function POST(request: NextRequest) {
       : ''
 
     if (!newContent) {
-      return NextResponse.json(
-        { error: 'No content generated from pipeline' },
-        { status: 500 }
-      )
+      return errorResponse(500, {
+        error: 'No content generated from pipeline',
+        code: 'pipeline_empty_content',
+        step: 'pipeline_response_validation',
+        actionable_message:
+          'Retry regeneration. If it repeats, inspect Python pipeline logs for empty content responses.',
+      })
     }
 
     if (!pipelinePromptHash) {
       return errorResponse(500, {
         error: 'Pipeline response missing prompt_hash',
         step: 'pipeline_prompt_hash_missing',
+        actionable_message:
+          'Pipeline response contract is incomplete. Fix prompt_hash persistence in Python API before retrying.',
       })
     }
 
@@ -219,7 +251,8 @@ export async function POST(request: NextRequest) {
     const violations = validateGeneratedContent(newContent, platform, content_type)
     if (violations.length > 0) {
       console.warn(`Validation violations for ${master_sku}/${platform}/${content_type}: ${violations.join('; ')}`)
-      // Log but don't block — Python pipeline has its own quality checks
+      // Log but don't block — Python pipeline has its own quality checks.
+      // Surface these violations to operators so they can take action.
     }
 
     // ==================== FINISH SENTENCES (Python-generated for Google/Bing descriptions) ====================
@@ -232,6 +265,32 @@ export async function POST(request: NextRequest) {
     const currentVersion = currentContentData?.version ?? 0
     let savedContentId: string | null = null
     let nextVersion = currentVersion + 1
+
+    const currentCandidate = typeof currentContentData?.candidate_content === 'string'
+      ? currentContentData.candidate_content.trim()
+      : null
+    const isNoChange = currentCandidate !== null && currentCandidate === newContent
+
+    if (isNoChange) {
+      return NextResponse.json({
+        success: true,
+        content: newContent,
+        version: currentVersion,
+        mode,
+        model: pipelineModel,
+        generated_content_id: currentContentData?.id ?? null,
+        used_evidence: true,
+        used_vision: false,
+        finish_sentences_count: finishSentences ? Object.keys(finishSentences).length : 0,
+        finish_sentences_saved: false,
+        pipeline: 'python',
+        state: 'no_change',
+        idempotent: true,
+        validation_errors: violations,
+        actionable_message:
+          'Generated content is identical to the current candidate content; no database update was needed.',
+      })
+    }
 
     if (currentContentData) {
       const { data: updated, error: updateError } = await supabase
@@ -256,6 +315,8 @@ export async function POST(request: NextRequest) {
           details: updateError.message ?? null,
           hint: updateError.hint ?? null,
           step: 'generated_content_update',
+          actionable_message:
+            'Review Supabase write permissions/schema for generated_content and retry regeneration.',
         })
       }
 
@@ -287,37 +348,16 @@ export async function POST(request: NextRequest) {
           details: insertError.message ?? null,
           hint: insertError.hint ?? null,
           step: 'generated_content_insert',
+          actionable_message:
+            'Review Supabase insert permissions/schema for generated_content and retry regeneration.',
         })
       }
 
       savedContentId = inserted?.id ?? null
     }
 
-    // Log to regeneration history (supplements Python's own history entry)
-    const { error: historyError } = await supabase
-      .from('regeneration_history')
-      .insert({
-        master_sku,
-        content_type,
-        platform,
-        mode,
-        feedback_text: feedback?.user_feedback || null,
-        feedback_preset: feedback?.feedback_type || null,
-        previous_content: currentContentData?.candidate_content || null,
-        new_content: newContent,
-        model_version: pipelineModel,
-        system_prompt: 'python-pipeline', // Content generated by Python pipeline
-        user_prompt: `Pipeline call: ${platform}/${content_type}${feedbackText ? ' (with feedback)' : ''}`,
-        prompt_hash: pipelinePromptHash,
-        quality_score_before: currentContentData?.quality_score || null,
-        generated_content_id: savedContentId,
-      })
-
-    if (historyError) {
-      logSupabaseError('Failed to log regeneration history', historyError)
-      // Non-fatal: Python pipeline also logs history
-      console.warn('TS-side regeneration history insert failed, but Python pipeline also logs history')
-    }
+    // Python pipeline already logs history authoritatively (including prompt hash + model metadata).
+    // Do not insert a second dashboard-side row; duplicate records break traceability.
 
     // Save finish_sentences to separate table (for Google/Bing descriptions only)
     let finishSentencesSaved = false
@@ -355,12 +395,21 @@ export async function POST(request: NextRequest) {
       finish_sentences_count: finishSentences ? Object.keys(finishSentences).length : 0,
       finish_sentences_saved: finishSentencesSaved,
       pipeline: 'python', // Indicate content came from Python pipeline
+      state: 'completed',
+      idempotent: false,
+      validation_errors: violations,
+      actionable_message:
+        violations.length > 0
+          ? 'Validation warnings detected. Review violations before approving/publishing this content.'
+          : null,
     })
   } catch (error) {
     console.error('Regeneration error:', error)
     return errorResponse(500, {
       error: error instanceof Error ? error.message : 'Internal server error',
       step: 'unhandled_exception',
+      actionable_message:
+        'Unexpected regeneration failure. Retry once; if it persists, inspect API logs for this request.',
     })
   }
 }

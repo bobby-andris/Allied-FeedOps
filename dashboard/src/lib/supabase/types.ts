@@ -36,7 +36,7 @@ export interface PublishBatch {
   batch_id: string
   name: string
   target_date: string | null
-  status: 'draft' | 'ready' | 'executing' | 'completed' | 'failed'
+  status: 'draft' | 'pending' | 'executing' | 'published' | 'partial' | 'failed'
   notes: string | null
   executed_at: string | null
   sku_count: number

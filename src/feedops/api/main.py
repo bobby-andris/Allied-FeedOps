@@ -23,9 +23,11 @@ import asyncio
 import logging
 import os
 import threading
+import time
+import uuid
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -53,6 +55,12 @@ from feedops.api.multi_sku_detection import (
     extract_spec_difference,
 )
 from feedops.api.hybrid_generation import adapt_variant_content
+from feedops.api.runtime_controls import (
+    ensure_generation_enabled,
+    finish_sentence_regeneration_enabled,
+)
+from feedops.observability import get_request_id, log_event, request_context
+from feedops.observability.metrics import metrics_registry
 
 # Configure logging
 logging.basicConfig(
@@ -91,12 +99,44 @@ from feedops.api.performance_baseline import router as performance_baseline_rout
 app.include_router(performance_baseline_router)
 
 
+@app.middleware("http")
+async def attach_request_context(request: Request, call_next):
+    """Attach request ID context for structured logs/metrics."""
+    request_id = (
+        request.headers.get("x-request-id")
+        or request.headers.get("x-correlation-id")
+        or uuid.uuid4().hex
+    )
+
+    with request_context(request_id):
+        started = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            metrics_registry.increment(
+                "http_request_error_total",
+                method=request.method,
+                path=request.url.path,
+            )
+            raise
+        finally:
+            metrics_registry.observe(
+                "http_request_latency_seconds",
+                time.perf_counter() - started,
+                method=request.method,
+                path=request.url.path,
+            )
+
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
 # =============================================================================
 # Background Job Helper (Thread-based for Cloud Run compatibility)
 # =============================================================================
 
 
-def run_async_in_thread(async_func, **kwargs):
+def run_async_in_thread(async_func, request_id: str | None = None, **kwargs):
     """Run async function in dedicated thread with new event loop.
 
     This is necessary for Cloud Run because FastAPI BackgroundTasks are killed
@@ -111,12 +151,13 @@ def run_async_in_thread(async_func, **kwargs):
         threading.Thread: The started thread
     """
     def wrapper():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(async_func(**kwargs))
-        finally:
-            loop.close()
+        with request_context(request_id):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(async_func(**kwargs))
+            finally:
+                loop.close()
 
     thread = threading.Thread(target=wrapper, daemon=False)
     thread.start()
@@ -270,6 +311,44 @@ class HybridJobResponse(BaseModel):
     strategy: dict  # {base_skus: int, variant_skus: int}
 
 
+async def _generate_with_metrics(
+    *,
+    provider,
+    prompt: str,
+    schema: dict,
+    system_prompt: str,
+    endpoint: str,
+    platform: str,
+    content_type: str,
+):
+    """Wrapper that emits generation latency/error metrics per call."""
+    started = time.perf_counter()
+    try:
+        return await provider.generate(
+            prompt=prompt,
+            schema=schema,
+            system_prompt=system_prompt,
+        )
+    except Exception:
+        metrics_registry.increment(
+            "provider_error_total",
+            endpoint=endpoint,
+            provider=provider.name,
+            platform=platform,
+            content_type=content_type,
+        )
+        raise
+    finally:
+        metrics_registry.observe(
+            "generation_latency_seconds",
+            time.perf_counter() - started,
+            endpoint=endpoint,
+            provider=provider.name,
+            platform=platform,
+            content_type=content_type,
+        )
+
+
 def _build_generation_user_prompt(
     parent_sku: ParentSKU,
     evidence_markdown: str,
@@ -396,11 +475,22 @@ def _validate_finish_sentences_payload(
     )
 
     if rejected:
+        metrics_registry.increment(
+            "validation_failure_total",
+            type="finish_sentence_rejected",
+            platform=platform,
+        )
         logger.warning(
             "Rejected finish sentences for %s/%s: %s",
             master_sku,
             platform,
             rejected,
+        )
+    if len(accepted) != len(finish_names):
+        metrics_registry.increment(
+            "validation_failure_total",
+            type="finish_sentence_incomplete",
+            platform=platform,
         )
     return accepted
 
@@ -472,7 +562,16 @@ async def optimize_single_sku(request: OptimizeRequest):
     4. Save results to generated_content table (if not dry_run)
     """
     try:
+        ensure_generation_enabled(operation="optimize_single_sku")
         logger.info(f"Optimizing SKU: {request.master_sku}")
+        log_event(
+            logger,
+            logging.INFO,
+            "generation.optimize.start",
+            endpoint="optimize_single_sku",
+            master_sku=request.master_sku,
+            request_id=get_request_id(),
+        )
 
         # Load from Supabase
         parent_sku = load_parent_sku_from_supabase(request.master_sku)
@@ -509,10 +608,14 @@ async def optimize_single_sku(request: OptimizeRequest):
                     "required": ["content"],
                 }
 
-                response = await provider.generate(
+                response = await _generate_with_metrics(
+                    endpoint="optimize_single_sku",
+                    provider=provider,
                     prompt=user_prompt,
                     schema=simple_schema,
                     system_prompt=get_system_prompt(),
+                    platform=platform,
+                    content_type=content_type,
                 )
 
                 content = response.get("content", "").strip()
@@ -559,8 +662,18 @@ async def regenerate_content(request: RegenerateRequest):
     for high-quality content generation.
     """
     try:
+        ensure_generation_enabled(operation="regenerate_content")
         logger.info(
             f"Regenerating {request.content_type} for SKU: {request.master_sku}"
+        )
+        log_event(
+            logger,
+            logging.INFO,
+            "generation.regenerate.start",
+            endpoint="regenerate",
+            master_sku=request.master_sku,
+            platform=request.platform,
+            content_type=request.content_type,
         )
 
         # Load product data from Supabase
@@ -594,16 +707,24 @@ async def regenerate_content(request: RegenerateRequest):
             "required": ["content"],
         }
 
-        response = await provider.generate(
+        response = await _generate_with_metrics(
+            endpoint="regenerate",
+            provider=provider,
             prompt=user_prompt,
             schema=simple_schema,
             system_prompt=get_system_prompt(),
+            platform=request.platform,
+            content_type=request.content_type,
         )
 
         content = response.get("content", "").strip()
         finish_sentences: dict[str, str] | None = None
 
-        if request.content_type == "description" and request.platform in {"google", "bing"}:
+        if (
+            request.content_type == "description"
+            and request.platform in {"google", "bing"}
+            and finish_sentence_regeneration_enabled()
+        ):
             finish_schema = {
                 "type": "object",
                 "properties": {
@@ -622,10 +743,14 @@ async def regenerate_content(request: RegenerateRequest):
                 master_sku=request.master_sku,
                 platform=request.platform,
             )
-            finish_response = await provider.generate(
+            finish_response = await _generate_with_metrics(
+                endpoint="regenerate_finish_sentences",
+                provider=provider,
                 prompt=finish_prompt,
                 schema=finish_schema,
                 system_prompt=get_system_prompt(),
+                platform=request.platform,
+                content_type="finish_sentences",
             )
 
             finish_payload = finish_response.get("finish_sentences", finish_response)
@@ -646,6 +771,21 @@ async def regenerate_content(request: RegenerateRequest):
                     len(validated_finish_sentences),
                     len(get_finish_list()),
                 )
+        elif request.content_type == "description" and request.platform in {"google", "bing"}:
+            metrics_registry.increment(
+                "generation_kill_switch_total",
+                endpoint="regenerate",
+                switch="finish_sentence_regen",
+            )
+            log_event(
+                logger,
+                logging.WARNING,
+                "generation.finish_sentences.skipped",
+                endpoint="regenerate",
+                master_sku=request.master_sku,
+                platform=request.platform,
+                reason="FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN",
+            )
 
         # Save to regeneration_history
         try:
@@ -773,6 +913,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
     Use GET /batch-status/{job_id} to check progress.
     """
     try:
+        ensure_generation_enabled(operation="batch_optimize")
         supabase = get_client()
 
         # Create job in Supabase (using existing table from migration 006)
@@ -805,6 +946,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
         # Queue background processing (using thread to survive container lifecycle)
         run_async_in_thread(
             process_batch_job,
+            request_id=get_request_id(),
             job_id=job_id,
             skus=request.skus,
             num_candidates=request.num_candidates,
@@ -883,6 +1025,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
     Creates a job record and processes in background without timeout limits.
     """
     try:
+        ensure_generation_enabled(operation="hybrid_generate")
         supabase = get_client()
 
         # Validate options
@@ -945,6 +1088,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
         # Queue background processing (using thread to survive container lifecycle)
         run_async_in_thread(
             process_hybrid_batch_job,
+            request_id=get_request_id(),
             job_id=job_id,
             families=families,
             single_skus=single_skus,
@@ -988,6 +1132,7 @@ async def process_batch_job(
     """
     from datetime import datetime, timezone
 
+    ensure_generation_enabled(operation="process_batch_job")
     supabase = get_client()
 
     # Update job status to processing
@@ -1035,10 +1180,14 @@ async def process_batch_job(
                         "required": ["content"],
                     }
 
-                    response = await provider.generate(
+                    response = await _generate_with_metrics(
+                        endpoint="process_batch_job",
+                        provider=provider,
                         prompt=user_prompt,
                         schema=simple_schema,
                         system_prompt=get_system_prompt(),
+                        platform=platform,
+                        content_type=content_type,
                     )
 
                     content = response.get("content", "").strip()
@@ -1113,6 +1262,7 @@ async def process_hybrid_batch_job(
     """
     from datetime import datetime, timezone
 
+    ensure_generation_enabled(operation="process_hybrid_batch_job")
     supabase = get_client()
 
     # Update job status to processing
@@ -1155,10 +1305,14 @@ async def process_hybrid_batch_job(
             "required": ["content"],
         }
 
-        response = await provider.generate(
+        response = await _generate_with_metrics(
+            endpoint="process_hybrid_batch_job",
+            provider=provider,
             prompt=user_prompt,
             schema=simple_schema,
             system_prompt=get_system_prompt(),
+            platform=platform,
+            content_type=content_type,
         )
 
         content = response.get("content", "").strip()

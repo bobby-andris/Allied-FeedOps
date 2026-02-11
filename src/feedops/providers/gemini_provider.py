@@ -1,13 +1,22 @@
 """Google Gemini LLM provider using the new google-genai SDK."""
+import asyncio
 import json
 import logging
 import re
+import time
 from typing import Any
 
 from google import genai
 from google.genai import types
 
+from feedops.observability import log_event
+from feedops.observability.metrics import metrics_registry
 from feedops.providers.base import ImageInput, LLMProvider, LLMError
+from feedops.providers.reliability import (
+    circuit_breakers,
+    compute_backoff_seconds,
+    is_retryable_provider_error,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +116,26 @@ class GeminiProvider(LLMProvider):
         Raises:
             LLMError: After max_retries failures.
         """
+        circuit_ok, cooldown_remaining = circuit_breakers.allow_request(self.name)
+        if not circuit_ok:
+            metrics_registry.increment(
+                "provider_circuit_open_total", provider=self.name
+            )
+            raise LLMError(
+                f"Circuit breaker open ({cooldown_remaining:.2f}s remaining)",
+                self.name,
+                0,
+            )
+
+        start_time = time.perf_counter()
+        log_event(
+            logger,
+            logging.INFO,
+            "provider.generate.start",
+            provider=self.name,
+            has_image=bool(image),
+        )
+
         # Gemini doesn't have system messages; prepend to user prompt.
         full_prompt = prompt
         if system_prompt:
@@ -119,10 +148,26 @@ class GeminiProvider(LLMProvider):
                 response_text = await self._call_api(current_prompt, image=image)
                 json_text = self._extract_json(response_text)
                 result = json.loads(json_text)
+                circuit_breakers.record_success(self.name)
+                metrics_registry.observe(
+                    "provider_latency_seconds",
+                    time.perf_counter() - start_time,
+                    provider=self.name,
+                )
+                log_event(
+                    logger,
+                    logging.INFO,
+                    "provider.generate.success",
+                    provider=self.name,
+                    attempts=attempt + 1,
+                )
                 return result
 
             except json.JSONDecodeError as e:
                 last_error = str(e)
+                metrics_registry.increment(
+                    "provider_retry_total", provider=self.name, reason="json_decode"
+                )
                 logger.warning(f"JSON parse error (attempt {attempt + 1}): {last_error}")
                 current_prompt = f"""Your previous response was not valid JSON.
 Error: {last_error}
@@ -130,9 +175,45 @@ Error: {last_error}
 Original request: {full_prompt}
 
 Please respond with ONLY valid JSON, no explanations or markdown."""
+                if attempt < self.max_retries - 1:
+                    await asyncio.sleep(compute_backoff_seconds(attempt))
 
             except Exception as e:
                 last_error = str(e)
+                retryable = is_retryable_provider_error(e)
+                metrics_registry.increment(
+                    "provider_error_total",
+                    provider=self.name,
+                    error_type=type(e).__name__,
+                )
                 logger.error(f"Gemini API error (attempt {attempt + 1}): {last_error}")
+                if retryable and attempt < self.max_retries - 1:
+                    delay = compute_backoff_seconds(attempt)
+                    metrics_registry.increment(
+                        "provider_retry_total",
+                        provider=self.name,
+                        reason="retryable_api_error",
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                if not retryable:
+                    break
 
+        opened = circuit_breakers.record_failure(self.name)
+        if opened:
+            metrics_registry.increment("provider_circuit_open_total", provider=self.name)
+        metrics_registry.observe(
+            "provider_latency_seconds",
+            time.perf_counter() - start_time,
+            provider=self.name,
+        )
+        log_event(
+            logger,
+            logging.ERROR,
+            "provider.generate.failure",
+            provider=self.name,
+            attempts=self.max_retries,
+            error=last_error,
+            circuit_opened=opened,
+        )
         raise LLMError(f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries)

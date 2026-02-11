@@ -4,6 +4,7 @@ import { publishToShopify } from '@/lib/publishing/shopify'
 import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
 import { uploadProductImage } from '@/lib/publishing/shopify-images'
 import type { Platform, PublishEventInsert } from '@/lib/publishing/types'
+import { enforcePublishGuard } from '@/lib/auth/publish-guard'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface SkuPublishRequest {
@@ -16,7 +17,55 @@ interface PlatformResult {
   platform: Platform
   success: boolean
   error?: string
+  code?: string
+  actionable_message?: string
+  state?: 'completed' | 'no_change' | 'failed'
+  idempotent?: boolean
   details?: Record<string, unknown>
+}
+
+function publishErrorResponse(
+  status: number,
+  payload: {
+    error: string
+    code: string
+    step: string
+    actionable_message: string
+  }
+) {
+  return NextResponse.json(payload, { status })
+}
+
+async function isIdempotentNoop(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  args: {
+    master_sku: string
+    platform: Platform
+    environment: 'staging' | 'production'
+    title: string | null
+    description: string | null
+  }
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('publish_events')
+    .select('published_title, published_description')
+    .eq('master_sku', args.master_sku)
+    .eq('platform', args.platform)
+    .eq('environment', args.environment)
+    .eq('action', 'publish')
+    .eq('status', 'success')
+    .order('published_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error || !data) {
+    return false
+  }
+
+  return (
+    (data.published_title || null) === (args.title || null)
+    && (data.published_description || null) === (args.description || null)
+  )
 }
 
 /**
@@ -41,40 +90,53 @@ interface PlatformResult {
  */
 export async function POST(request: NextRequest) {
   try {
+    const guard = enforcePublishGuard(request)
+    if (!guard.allowed) {
+      return guard.response!
+    }
+
     const body = (await request.json()) as SkuPublishRequest
 
     // Validate required fields
     const { master_sku, platforms, environment } = body
 
     if (!master_sku) {
-      return NextResponse.json(
-        { error: 'master_sku is required' },
-        { status: 400 }
-      )
+      return publishErrorResponse(400, {
+        error: 'master_sku is required',
+        code: 'publish_missing_master_sku',
+        step: 'request_validation',
+        actionable_message: 'Provide master_sku in the request body and retry.',
+      })
     }
 
     if (!platforms || !Array.isArray(platforms) || platforms.length === 0) {
-      return NextResponse.json(
-        { error: 'platforms array is required and must not be empty' },
-        { status: 400 }
-      )
+      return publishErrorResponse(400, {
+        error: 'platforms array is required and must not be empty',
+        code: 'publish_missing_platforms',
+        step: 'request_validation',
+        actionable_message: 'Select at least one platform to publish.',
+      })
     }
 
     const validPlatforms: Platform[] = ['google', 'shopify', 'bing']
     for (const platform of platforms) {
       if (!validPlatforms.includes(platform)) {
-        return NextResponse.json(
-          { error: `Invalid platform: ${platform}. Must be one of: ${validPlatforms.join(', ')}` },
-          { status: 400 }
-        )
+        return publishErrorResponse(400, {
+          error: `Invalid platform: ${platform}. Must be one of: ${validPlatforms.join(', ')}`,
+          code: 'publish_invalid_platform',
+          step: 'request_validation',
+          actionable_message: `Use one of: ${validPlatforms.join(', ')}.`,
+        })
       }
     }
 
     if (!environment || !['staging', 'production'].includes(environment)) {
-      return NextResponse.json(
-        { error: "environment must be 'staging' or 'production'" },
-        { status: 400 }
-      )
+      return publishErrorResponse(400, {
+        error: "environment must be 'staging' or 'production'",
+        code: 'publish_invalid_environment',
+        step: 'request_validation',
+        actionable_message: "Set environment to either 'staging' or 'production'.",
+      })
     }
 
     const supabase = await createClient()
@@ -87,17 +149,21 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (approvalError && approvalError.code !== 'PGRST116') {
-      return NextResponse.json(
-        { error: `Failed to check approval status: ${approvalError.message}` },
-        { status: 500 }
-      )
+      return publishErrorResponse(500, {
+        error: `Failed to check approval status: ${approvalError.message}`,
+        code: 'publish_approval_lookup_failed',
+        step: 'approval_check',
+        actionable_message: 'Retry publish. If this persists, check sku_approvals table access.',
+      })
     }
 
     if (!approval || approval.approval_status !== 'approved') {
-      return NextResponse.json(
-        { error: `SKU ${master_sku} is not approved (status: ${approval?.approval_status || 'not found'})` },
-        { status: 400 }
-      )
+      return publishErrorResponse(400, {
+        error: `SKU ${master_sku} is not approved (status: ${approval?.approval_status || 'not found'})`,
+        code: 'publish_requires_approved_sku',
+        step: 'approval_check',
+        actionable_message: 'Approve this SKU in Review before publishing.',
+      })
     }
 
     // 2. Get variant data for this SKU
@@ -107,10 +173,12 @@ export async function POST(request: NextRequest) {
       .eq('master_sku', master_sku)
 
     if (variantError) {
-      return NextResponse.json(
-        { error: `Failed to fetch variants: ${variantError.message}` },
-        { status: 500 }
-      )
+      return publishErrorResponse(500, {
+        error: `Failed to fetch variants: ${variantError.message}`,
+        code: 'publish_variant_lookup_failed',
+        step: 'variant_lookup',
+        actionable_message: 'Retry publish. If this persists, check variant_index table health.',
+      })
     }
 
     const offerIds = variants?.map((v) => v.gmc_offer_id).filter(Boolean) || []
@@ -136,6 +204,10 @@ export async function POST(request: NextRequest) {
           platform: 'google',
           success: false,
           error: validation.errors.join('; '),
+          code: 'publish_missing_approved_content_google',
+          state: 'failed',
+          actionable_message: 'Approve Google title and description content before publishing.',
+          details: { validation_errors: validation.errors },
         })
 
         await logPublishEvent(supabase, {
@@ -145,12 +217,16 @@ export async function POST(request: NextRequest) {
           action: 'publish',
           status: 'failed',
           error_message: validation.errors.join('; '),
+          published_by: guard.actorId || undefined,
         })
       } else if (offerIds.length === 0) {
         results.push({
           platform: 'google',
           success: false,
           error: 'No GMC offer IDs found for this SKU',
+          code: 'publish_missing_offer_ids',
+          state: 'failed',
+          actionable_message: 'Sync variant index mappings so this SKU has GMC offer IDs.',
         })
 
         await logPublishEvent(supabase, {
@@ -160,9 +236,27 @@ export async function POST(request: NextRequest) {
           action: 'publish',
           status: 'failed',
           error_message: 'No GMC offer IDs found',
+          published_by: guard.actorId || undefined,
         })
       } else {
         try {
+          const googleNoop = await isIdempotentNoop(supabase, {
+            master_sku,
+            platform: 'google',
+            environment,
+            title: validation.title,
+            description: validation.description,
+          })
+
+          if (googleNoop) {
+            results.push({
+              platform: 'google',
+              success: true,
+              state: 'no_change',
+              idempotent: true,
+              details: { reason: 'Already published this content snapshot.' },
+            })
+          } else {
           // Expand templates for each variant
           const expandedVariants = await expandVariantsForPublish({
             master_sku,
@@ -206,13 +300,18 @@ export async function POST(request: NextRequest) {
             published_title: validation.title ?? undefined,
             published_description: validation.description ?? undefined,
             variant_count: expandedVariants.length,
+            published_by: guard.actorId || undefined,
           })
+          }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
           results.push({
             platform: 'google',
             success: false,
             error: errorMsg,
+            code: 'publish_google_failed',
+            state: 'failed',
+            actionable_message: 'Inspect Google Sheets integration logs and retry publish.',
           })
 
           await logPublishEvent(supabase, {
@@ -222,6 +321,7 @@ export async function POST(request: NextRequest) {
             action: 'publish',
             status: 'failed',
             error_message: errorMsg,
+            published_by: guard.actorId || undefined,
           })
         }
       }
@@ -241,6 +341,10 @@ export async function POST(request: NextRequest) {
           platform: 'shopify',
           success: false,
           error: 'No approved content found for Shopify or Google',
+          code: 'publish_missing_approved_content_shopify',
+          state: 'failed',
+          actionable_message: 'Approve Shopify or Google title/description content before publishing.',
+          details: { validation_errors: validation.errors },
         })
 
         await logPublishEvent(supabase, {
@@ -250,12 +354,16 @@ export async function POST(request: NextRequest) {
           action: 'publish',
           status: 'failed',
           error_message: 'No approved content found',
+          published_by: guard.actorId || undefined,
         })
       } else if (!shopifyProductId) {
         results.push({
           platform: 'shopify',
           success: false,
           error: 'No Shopify product ID found for this SKU',
+          code: 'publish_missing_shopify_product_id',
+          state: 'failed',
+          actionable_message: 'Sync variant_index so this SKU is linked to a Shopify product ID.',
         })
 
         await logPublishEvent(supabase, {
@@ -265,6 +373,7 @@ export async function POST(request: NextRequest) {
           action: 'publish',
           status: 'failed',
           error_message: 'No Shopify product ID found',
+          published_by: guard.actorId || undefined,
         })
       } else {
         try {
@@ -273,38 +382,60 @@ export async function POST(request: NextRequest) {
           const shopifyTitle = validation.title!.replace(/\s*\{FINISH_NAME\}\s*/g, ' ').trim()
           const shopifyDescription = validation.description!.replace(/\s*\{FINISH_NAME\}\s*/g, ' ').replace(/\s*\{FINISH_SENTENCE\}\s*/g, ' ').trim()
 
-          const shopifyResult = await publishToShopify(
-            shopifyProductId,
-            shopifyTitle,
-            shopifyDescription,
-            environment
-          )
-
-          results.push({
-            platform: 'shopify',
-            success: shopifyResult.success,
-            error: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
-            details: {
-              shopify_product_id: shopifyProductId,
-            },
-          })
-
-          await logPublishEvent(supabase, {
+          const shopifyNoop = await isIdempotentNoop(supabase, {
             master_sku,
             platform: 'shopify',
             environment,
-            action: 'publish',
-            status: shopifyResult.success ? 'success' : 'failed',
-            error_message: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
-            published_title: shopifyTitle ?? undefined,
-            published_description: shopifyDescription ?? undefined,
+            title: shopifyTitle,
+            description: shopifyDescription,
           })
+
+          if (shopifyNoop) {
+            results.push({
+              platform: 'shopify',
+              success: true,
+              state: 'no_change',
+              idempotent: true,
+              details: { reason: 'Already published this content snapshot.' },
+            })
+          } else {
+            const shopifyResult = await publishToShopify(
+              shopifyProductId,
+              shopifyTitle,
+              shopifyDescription,
+              environment
+            )
+
+            results.push({
+              platform: 'shopify',
+              success: shopifyResult.success,
+              error: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
+              details: {
+                shopify_product_id: shopifyProductId,
+              },
+            })
+
+            await logPublishEvent(supabase, {
+              master_sku,
+              platform: 'shopify',
+              environment,
+              action: 'publish',
+              status: shopifyResult.success ? 'success' : 'failed',
+              error_message: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
+              published_title: shopifyTitle ?? undefined,
+              published_description: shopifyDescription ?? undefined,
+              published_by: guard.actorId || undefined,
+            })
+          }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
           results.push({
             platform: 'shopify',
             success: false,
             error: errorMsg,
+            code: 'publish_shopify_failed',
+            state: 'failed',
+            actionable_message: 'Inspect Shopify publish logs and retry publish.',
           })
 
           await logPublishEvent(supabase, {
@@ -314,6 +445,7 @@ export async function POST(request: NextRequest) {
             action: 'publish',
             status: 'failed',
             error_message: errorMsg,
+            published_by: guard.actorId || undefined,
           })
         }
       }
@@ -325,6 +457,9 @@ export async function POST(request: NextRequest) {
         platform: 'bing',
         success: false,
         error: 'Bing publishing not yet implemented',
+        code: 'publish_bing_not_implemented',
+        state: 'failed',
+        actionable_message: 'Use Google/Shopify publish for now. Bing support is not implemented yet.',
       })
 
       await logPublishEvent(supabase, {
@@ -334,6 +469,7 @@ export async function POST(request: NextRequest) {
         action: 'publish',
         status: 'failed',
         error_message: 'Bing publishing not yet implemented',
+        published_by: guard.actorId || undefined,
       })
     }
 
@@ -351,12 +487,18 @@ export async function POST(request: NextRequest) {
         total: results.length,
         successful: successCount,
         failed: failedCount,
+        no_change: results.filter((r) => r.state === 'no_change').length,
       },
     })
   } catch (error) {
     console.error('SKU publish error:', error)
     const message = error instanceof Error ? error.message : 'Internal server error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return publishErrorResponse(500, {
+      error: message,
+      code: 'publish_unhandled_exception',
+      step: 'route_exception',
+      actionable_message: 'Retry publish once. If it persists, inspect API logs for the failing SKU.',
+    })
   }
 }
 

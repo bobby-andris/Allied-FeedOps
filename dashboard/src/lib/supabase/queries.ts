@@ -280,7 +280,7 @@ export async function updateBatchStatus(
     updated_at: new Date().toISOString(),
   }
   
-  if (status === 'completed') {
+  if (status === 'published' || status === 'partial' || status === 'failed') {
     updateData.executed_at = new Date().toISOString()
   }
 

@@ -12,17 +12,66 @@ from datetime import datetime, timezone
 import json
 import logging
 import os
+import time
 
 from feedops.api.prompt_loader import (
     get_finish_list,
     get_system_prompt,
     get_system_prompt_hash,
 )
+from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
+from feedops.models import Candidate, Score
+from feedops.observability import log_event
+from feedops.observability.metrics import metrics_registry
 from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
+from feedops.pipeline.validators import validate_candidate_content
 
 logger = logging.getLogger(__name__)
+
+
+def validate_adapted_variant_content(
+    content_type: str,
+    platform: str,
+    content: str,
+) -> list[str]:
+    """Validate adapted variant content with the same hard policy checks as core generation."""
+    sanitized_content = (
+        content.replace("{FINISH_NAME}", "Polished Nickel")
+        if content_type == "title"
+        else content
+    )
+
+    default_title = "Variant product title"
+    default_description = (
+        "Solid brass construction with concealed mounting designed for long-term daily use."
+    )
+    target_field = f"{platform}_{content_type}"
+
+    payload = {
+        "google_title": default_title,
+        "google_short_title": "Variant title",
+        "google_description": default_description,
+        "bing_title": default_title,
+        "bing_description": default_description,
+        "shopify_title": default_title,
+        "shopify_description": default_description,
+        "claims": [],
+        "self_score": Score(
+            specificity=10,
+            benefit_coverage=10,
+            keyword_inclusion=10,
+            format_adherence=10,
+            brand_voice=10,
+            factual_accuracy=10,
+        ),
+    }
+    payload[target_field] = sanitized_content
+
+    candidate = Candidate(**payload)
+    validation_errors = validate_candidate_content(candidate)
+    return [error for error in validation_errors if error.startswith(f"{target_field} ")]
 
 
 def build_variant_adaptation_prompt(
@@ -33,6 +82,7 @@ def build_variant_adaptation_prompt(
     base_content: str,
     base_spec: str,
     variant_spec: str,
+    include_finish_sentences: bool = True,
 ) -> tuple[str, bool]:
     """
     Build adaptation prompt for variant content generation.
@@ -54,7 +104,7 @@ def build_variant_adaptation_prompt(
         "bing",
     ]
 
-    if is_variant_description:
+    if is_variant_description and include_finish_sentences:
         finish_names = get_finish_list()
         finish_template = {
             finish: f"One sentence relating {finish} to this {variant_spec} product..."
@@ -92,6 +142,24 @@ CRITICAL:
 Respond with this EXACT JSON structure (no markdown, no code blocks):
 {response_schema_text}"""
         return prompt, True
+
+    if is_variant_description and not include_finish_sentences:
+        prompt = f"""You are adapting product content for a variant specification.
+
+BASE PRODUCT: {base_sku}
+BASE CONTENT:
+{base_content}
+
+TARGET PRODUCT: {variant_sku}
+KEY DIFFERENCE: Specification changes from {base_spec} to {variant_spec}
+
+TASK:
+1. Adapt the description for the {variant_spec} specification.
+2. Update numeric specs and measurements ({base_spec} → {variant_spec}).
+3. Maintain the same voice and structure from the base description.
+
+Respond with ONLY the adapted description text."""
+        return prompt, False
 
     # For titles
     prompt = f"""You are adapting a product title for a variant specification.
@@ -140,6 +208,18 @@ async def adapt_variant_content(
         Dict with success status and content/error
     """
     try:
+        started = time.perf_counter()
+        include_finish_sentences = finish_sentence_regeneration_enabled()
+        log_event(
+            logger,
+            logging.INFO,
+            "generation.variant_adaptation.start",
+            base_sku=base_sku,
+            variant_sku=variant_sku,
+            platform=platform,
+            content_type=content_type,
+            include_finish_sentences=include_finish_sentences,
+        )
         # Get base content
         base_result = (
             supabase.table("generated_content")
@@ -201,6 +281,7 @@ async def adapt_variant_content(
             base_content,
             base_spec,
             variant_spec,
+            include_finish_sentences=include_finish_sentences,
         )
 
         prompt_hash = get_system_prompt_hash()
@@ -246,6 +327,11 @@ async def adapt_variant_content(
                         base_description=new_content,
                     )
                     if rejected:
+                        metrics_registry.increment(
+                            "validation_failure_total",
+                            type="variant_finish_sentence_rejected",
+                            platform=platform,
+                        )
                         logger.warning(
                             "Variant finish sentence validation rejected entries for %s/%s/%s: %s",
                             variant_sku,
@@ -256,6 +342,11 @@ async def adapt_variant_content(
                     if len(validated_finish_sentences) == len(get_finish_list()):
                         finish_sentences = validated_finish_sentences
                     else:
+                        metrics_registry.increment(
+                            "validation_failure_total",
+                            type="variant_finish_sentence_incomplete",
+                            platform=platform,
+                        )
                         logger.warning(
                             "Variant finish sentence payload incomplete for %s/%s/%s (%s/%s accepted)",
                             variant_sku,
@@ -265,10 +356,42 @@ async def adapt_variant_content(
                             len(get_finish_list()),
                         )
             except json.JSONDecodeError as e:
+                metrics_registry.increment(
+                    "provider_error_total",
+                    provider=f"openai/{model}",
+                    error_type="JSONDecodeError",
+                )
                 logger.error(f"Failed to parse JSON response: {e}")
                 new_content = raw_response
         else:
             new_content = raw_response
+
+        content_validation_errors = validate_adapted_variant_content(
+            content_type=content_type,
+            platform=platform,
+            content=new_content,
+        )
+        if content_validation_errors:
+            metrics_registry.increment(
+                "validation_failure_total",
+                type="variant_content_validation",
+                platform=platform,
+            )
+            logger.warning(
+                "Variant adaptation validation failed for %s/%s/%s: %s",
+                variant_sku,
+                platform,
+                content_type,
+                content_validation_errors,
+            )
+            return {
+                "success": False,
+                "error": (
+                    "Variant adaptation failed policy validation: "
+                    + "; ".join(content_validation_errors[:3])
+                ),
+                "validation_errors": content_validation_errors,
+            }
 
         # Save to database
         current_version = current_result.data["version"] if current_result.data else 0
@@ -336,8 +459,38 @@ async def adapt_variant_content(
                 on_conflict="master_sku,platform",
             ).execute()
 
+        metrics_registry.observe(
+            "generation_latency_seconds",
+            time.perf_counter() - started,
+            endpoint="adapt_variant_content",
+            provider=f"openai/{model}",
+            platform=platform,
+            content_type=content_type,
+        )
+        log_event(
+            logger,
+            logging.INFO,
+            "generation.variant_adaptation.success",
+            variant_sku=variant_sku,
+            platform=platform,
+            content_type=content_type,
+        )
         return {"success": True, "content": new_content}
 
     except Exception as e:
+        metrics_registry.increment(
+            "provider_error_total",
+            provider="openai/variant-adaptation",
+            error_type=type(e).__name__,
+        )
         logger.error(f"Variant adaptation failed for {variant_sku}: {e}")
+        log_event(
+            logger,
+            logging.ERROR,
+            "generation.variant_adaptation.failure",
+            variant_sku=variant_sku,
+            platform=platform,
+            content_type=content_type,
+            error=str(e),
+        )
         return {"success": False, "error": str(e)}

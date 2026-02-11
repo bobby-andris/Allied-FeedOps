@@ -15,7 +15,7 @@ interface BatchSkuAssignment {
   id: string
   batch_id: string
   master_sku: string
-  status: string | null
+  status: 'pending' | 'success' | 'partial' | 'failed' | null
   error_message: string | null
   created_at: string
 }
@@ -27,12 +27,12 @@ interface BatchDetailClientProps {
 
 const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800',
-  ready: 'bg-blue-100 text-blue-800',
+  pending: 'bg-blue-100 text-blue-800',
   executing: 'bg-yellow-100 text-yellow-800',
-  completed: 'bg-green-100 text-green-800',
+  published: 'bg-green-100 text-green-800',
+  partial: 'bg-amber-100 text-amber-800',
   failed: 'bg-red-100 text-red-800',
   success: 'bg-green-100 text-green-800',
-  pending: 'bg-gray-100 text-gray-800',
 }
 
 export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps) {
@@ -44,13 +44,22 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
   const handlePublish = async () => {
     setActionLoading(true)
     try {
-      const response = await fetch('/api/batches', {
-        method: 'PATCH',
+      const response = await fetch('/api/publish/batch', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batch_id: batch.batch_id, status: 'executing' }),
+        body: JSON.stringify({
+          batch_id: batch.batch_id,
+          platforms: ['google', 'shopify'],
+          environment: 'production',
+        }),
       })
       if (response.ok) {
         router.refresh()
+      } else {
+        const payload = await response.json().catch(() => ({}))
+        const error = payload.error || 'Batch publish failed'
+        const action = payload.actionable_message ? ` Next step: ${payload.actionable_message}` : ''
+        alert(`${error}${action}`)
       }
     } finally {
       setActionLoading(false)
@@ -114,7 +123,7 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
             </p>
           </div>
           <div className="flex gap-2">
-            {batch.status === 'draft' && (
+            {(batch.status === 'draft' || batch.status === 'pending' || batch.status === 'failed' || batch.status === 'partial') && (
               <>
                 <Button variant="outline" onClick={() => setAddModalOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
@@ -126,11 +135,13 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
                   ) : (
                     <Play className="h-4 w-4 mr-2" />
                   )}
-                  Publish to Staging
+                  {batch.status === 'failed' || batch.status === 'partial'
+                    ? 'Retry Publish'
+                    : 'Publish to Production'}
                 </Button>
               </>
             )}
-            {batch.status === 'completed' && (
+            {batch.status === 'published' && (
               <Button variant="outline" className="text-yellow-600">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Rollback
@@ -202,18 +213,19 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
               <TableRow>
                 <TableHead>SKU</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Added</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+              <TableHead>Added</TableHead>
+              <TableHead>Failure Reason</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {assignments.length === 0 ? (
+              <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     No SKUs in this batch yet. Click &quot;Add SKUs&quot; to get started.
                   </TableCell>
-                </TableRow>
-              ) : (
+              </TableRow>
+            ) : (
                 assignments.map((assignment) => (
                   <TableRow key={assignment.id}>
                     <TableCell className="font-medium">{assignment.master_sku}</TableCell>
@@ -223,8 +235,11 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
                       </Badge>
                     </TableCell>
                     <TableCell>{formatDate(assignment.created_at)}</TableCell>
+                    <TableCell className="max-w-[320px] truncate text-xs text-red-700">
+                      {assignment.error_message || '-'}
+                    </TableCell>
                     <TableCell className="text-right">
-                      {batch.status === 'draft' && (
+                      {(batch.status === 'draft' || batch.status === 'pending' || batch.status === 'failed' || batch.status === 'partial') && (
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -239,7 +254,7 @@ export function BatchDetailClient({ batch, assignments }: BatchDetailClientProps
                           )}
                         </Button>
                       )}
-                      {batch.status === 'completed' && (
+                      {batch.status === 'published' && (
                         <Link href={`/performance?sku=${assignment.master_sku}`}>
                           <Button variant="outline" size="sm">
                             View Performance

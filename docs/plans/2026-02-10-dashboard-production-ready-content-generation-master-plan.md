@@ -53,6 +53,30 @@ Required per-task status update format:
 | 2026-02-10 | Phase 4 | Implemented search-query-first keyword plan + Bing anti-stuffing validators + keyword-alignment retry/scoring integration | DONE | `.venv/bin/pytest -q tests/test_keyword_placement.py tests/test_quality.py tests/test_title_validators.py tests/test_selection.py tests/test_pipeline.py::test_generate_candidates_fetches_image_once_and_generates_n tests/test_pipeline.py::test_generate_candidates_skips_failed_attempts` (pass) |
 | 2026-02-10 | Phase 4 | Added speculative-competitor-claim guardrails in Python validators and sanitized enrichment/prompt comparative phrasing | DONE | `.venv/bin/pytest -q tests/test_keyword_placement.py tests/test_quality.py tests/test_title_validators.py tests/test_pipeline.py::test_validate_candidate_content_rejects_catalog_csv_references tests/test_pipeline.py::test_validate_candidate_content_rejects_speculative_competitive_claims tests/test_pipeline.py::test_validate_candidate_content_allows_evidence_style_comparison_language` (pass) |
 | 2026-02-10 | Phase 4 | Full end-to-end verification with live Supabase canary and dashboard production build after guardrail changes | DONE | `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass; Python `350 passed, 1 skipped`, canary `SUPABASE_CANARY_OK`, dashboard lint/build pass) |
+| 2026-02-10 | Phase 5 | Wire gold standard examples into generator prompts (master + variant) | DONE | `.venv/bin/pytest -q tests/test_prompt_loader.py::test_format_gold_standard_examples_bundle_formats_cross_platform_examples tests/test_pipeline.py::test_build_split_prompt_includes_gold_examples_when_available tests/test_pipeline.py::test_build_split_prompt_omits_gold_examples_when_unavailable tests/test_pipeline.py::test_build_variant_prompt_includes_gold_examples_when_available` (pass) |
+| 2026-02-10 | Phase 5 | Raise gold example description cap to 5000 chars (avoid misleading truncation) | DONE | `.venv/bin/pytest -q tests/test_prompt_loader.py tests/test_pipeline.py::test_build_split_prompt_includes_gold_examples_when_available tests/test_pipeline.py::test_build_split_prompt_omits_gold_examples_when_unavailable tests/test_pipeline.py::test_build_variant_prompt_includes_gold_examples_when_available` (pass) |
+| 2026-02-10 | Phase 5 | Wire keyword gap evidence into `src/feedops/pipeline/evidence.py` using `src/feedops/pipeline/keyword_gaps.py` with category-relevance + finish exclusion filtering | DONE | `.venv/bin/pytest -q tests/test_pipeline.py::test_build_evidence_table_keyword_gaps_are_category_relevant_and_finish_excluded` (pass) |
+| 2026-02-10 | Phase 5 | Wire competitor evidence into `src/feedops/pipeline/evidence.py` via safe row builder in `src/feedops/pipeline/competitor_evidence.py` (filters speculative comparative language) | DONE | `.venv/bin/pytest -q tests/test_pipeline.py::test_build_evidence_table_competitor_rows_filter_speculative_language` (pass) |
+| 2026-02-10 | Phase 5 | Add integration tests validating keyword-gap category relevance + finish exclusion and competitor evidence language safety (`tests/test_pipeline.py`) | DONE | `.venv/bin/pytest -q tests/test_pipeline.py::test_build_evidence_table_keyword_gaps_are_category_relevant_and_finish_excluded tests/test_pipeline.py::test_build_evidence_table_competitor_rows_filter_speculative_language` (pass) |
+| 2026-02-10 | Phase 5 | Required verification gate: full test suite after evidence integration changes | DONE | `.venv/bin/pytest -q` (pass: `362 passed, 1 skipped`) |
+| 2026-02-10 | Phase 5 | Required verification gate: `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` | BLOCKED | Python tests pass inside gate; live canary failed with `Supabase table probe failed: [Errno 8] nodename nor servname provided, or not known` (environment DNS/network blocker). Next action: rerun canary in an environment with Supabase DNS/network access. |
+| 2026-02-10 | Phase 5 | Required verification gate rerun in network-enabled environment (`RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh`) | DONE | pass: Python `362 passed, 1 skipped`; canary `SUPABASE_CANARY_OK` (`catalog_count=75770`, `probe_sku=1031/30`, `probe_variant_count=28`); dashboard `npm run lint` + `next build --webpack` pass |
+| 2026-02-10 | Phase 6 | Converted Phase 6 bullets into executable dashboard subtasks with file/test targets | DONE | Plan-only update (`docs/plans/2026-02-10-dashboard-production-ready-content-generation-master-plan.md`) |
+| 2026-02-10 | Phase 6 | 6.1 Idempotent regeneration state handling + structured validation/actionable error payloads across API/UI | DONE | `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build` (fails in sandbox Turbopack with OS error 1), `cd dashboard && npm run build -- --webpack` (pass), `.venv/bin/pytest -q tests/api/test_regenerate_response_contract.py tests/api/test_dashboard_regenerate_route_contract.py` (pass) |
+| 2026-02-10 | Phase 6 | 6.2 Idempotent review/approval transitions + source-content gating for approval writes | DONE | `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build` (fails in sandbox Turbopack with OS error 1), `cd dashboard && npm run build -- --webpack` (pass), `.venv/bin/pytest -q tests/api/test_dashboard_approval_state_contract.py tests/api/test_dashboard_regenerate_route_contract.py` (pass) |
+| 2026-02-10 | Phase 6 | 6.3 Idempotent publish no-op detection + configurable publish RBAC guard + actionable publish failure codes | DONE | `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build` (fails in sandbox Turbopack with OS error 1), `cd dashboard && npm run build -- --webpack` (pass), `.venv/bin/pytest -q tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py` (pass) |
+| 2026-02-10 | Phase 6 | 6.4 Batch status model + retry safety + per-SKU failure visibility (`publish/batch` assignment state writes, batch status normalization in list/detail pages) | DONE | `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build` (fails in sandbox Turbopack with OS error 1), `cd dashboard && npm run build -- --webpack` (pass), `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py` (pass) |
+| 2026-02-10 | Phase 6 | 6.5 Validation/policy remediation surfaced in API + review/batch UIs (actionable next-step messaging) | DONE | `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build` (fails in sandbox Turbopack with OS error 1), `cd dashboard && npm run build -- --webpack` (pass), `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py tests/api/test_dashboard_regenerate_route_contract.py tests/api/test_dashboard_validation_surface_contract.py tests/test_review_dashboard.py tests/test_reporter_google_patch_structured_only_env.py` (pass) |
+| 2026-02-11 | Phase 6 | Full-access verification rerun confirms dashboard build + Phase 6 tests outside sandbox | DONE | `cd dashboard && npm run lint && npm run build` (pass with Turbopack), `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py tests/api/test_dashboard_regenerate_route_contract.py tests/api/test_dashboard_validation_surface_contract.py tests/test_review_dashboard.py tests/test_reporter_google_patch_structured_only_env.py` (pass: `48 passed`) |
+| 2026-02-11 | Phase 7 | Structured request-scoped logging + request ID propagation across generation paths | DONE | `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py::test_structured_log_event_includes_request_id` (pass) |
+| 2026-02-11 | Phase 7 | Added generation/provider metrics for latency, retries, validation failures, and provider errors | DONE | `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py::test_metrics_registry_tracks_latency_retry_and_errors tests/test_phase7_observability_reliability.py::test_regenerate_description_skips_finish_sentence_path_when_killed` (pass) |
+| 2026-02-11 | Phase 7 | Hardened provider retry behavior with exponential backoff + circuit breaker protection | DONE | `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py::test_openai_provider_applies_backoff_on_retryable_error tests/test_phase7_observability_reliability.py::test_openai_provider_circuit_breaker_blocks_after_threshold` (pass) |
+| 2026-02-11 | Phase 7 | Added generation/finish-sentence kill switches and forced provider fallback toggle | DONE | `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py tests/test_providers.py` (pass) |
+| 2026-02-11 | Phase 7 | Required verification: full Python test suite rerun after observability/reliability changes | DONE | `.venv/bin/pytest -q` (pass: `389 passed, 1 skipped`) |
+| 2026-02-11 | Phase 7 | Required verification: Supabase canary gate via Phase 0 script | BLOCKED | `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (Python tests pass, canary fails in this environment: `Supabase table probe failed: [Errno 8] nodename nor servname provided, or not known`) |
+| 2026-02-11 | Phase 7 | Required verification rerun in full-access environment (`RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh`) | DONE | pass: Python `389 passed, 1 skipped`; canary `SUPABASE_CANARY_OK` (`catalog_count=75770`, `probe_sku=1031/30`, `probe_variant_count=28`, `prompt_hash=530a11ec32d54c46`); dashboard `npm run lint` + `next build --webpack` pass; script finished `OK` |
+| 2026-02-11 | Phase 6 | Production dashboard validation run (login, generate, regenerate with/without feedback, batch/readiness) using real SKUs `920D-6` and `SB-16`; verified Python prompt-source traceability and finish sentence behavior | DONE (issues found) | Browser routes exercised: `/login`, `/review`, `/generate`, `/review/920D-6`, `/batches`, `/batches/test-workflow-1770569844`. SOT checks: `generated_content.generation_prompt_hash=530a11ec32d54c46`, `regeneration_history.prompt_hash=530a11ec32d54c46`, `generation_model=openai/gpt-5.2`; finish evidence: `variant_finish_sentences` refreshed for `920D-6` Google path. Required gates rerun: `.venv/bin/pytest -q` (pass: `389 passed, 1 skipped`) and `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass, `SUPABASE_CANARY_OK`, dashboard lint/build pass). Defects observed: batch status/remediation visibility mismatch in UI vs `publish_events`/`publish_batches` data. |
+| 2026-02-11 | Phase 6 | Batch/readiness hotfix for legacy DB schemas: added `batch_sku_assignments` read fallback when `status/error_message` columns are missing (`42703`) and wired batches list/detail/API to shared assignment store | DONE | Code: `dashboard/src/lib/batches/assignment-store.ts`, `dashboard/src/app/(dashboard)/batches/page.tsx`, `dashboard/src/app/(dashboard)/batches/[batchId]/page.tsx`, `dashboard/src/app/api/batches/route.ts`. Verification: `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_regenerate_route_contract.py tests/test_hybrid_generation_prompt.py` (pass: `14 passed`), `.venv/bin/pytest -q` (pass: `394 passed, 1 skipped`), `cd dashboard && npm run lint` (pass), `cd dashboard && npm run build -- --webpack` (pass). Live stream browser recheck (`prephase8-fixes`, viewer `ws://localhost:9223`): `/batches` and `/batches/batch-ft16-uppercase-mpn-test` reload clean with no `batch_sku_assignments.status` console error after clear. Note: `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` currently blocked in this environment (`nodename nor servname provided, or not known`). |
 
 ---
 
@@ -370,10 +394,12 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
 **Objective:** Give the model better evidence so it can differentiate and prioritize without guessing.
 
 **Key tasks**
-- Add “keyword gap” evidence: high-volume terms missing from the current title (or missing from generated candidate).
-- Add competitor title pattern evidence for the product category:
+- Gold standard examples are injected into generator prompts (DONE; 2026-02-10; files: `src/feedops/api/prompt_loader.py`, `src/feedops/pipeline/generator.py`, `src/feedops/pipeline/prompts.py`; tests: `tests/test_prompt_loader.py`, `tests/test_pipeline.py`).
+- `DONE` Add “keyword gap” evidence: high-volume terms missing from the current title (or missing from generated candidate). (2026-02-10; files: `src/feedops/pipeline/evidence.py`, `src/feedops/pipeline/keyword_gaps.py`, `tests/test_pipeline.py`)
+- `DONE` Add competitor title pattern evidence for the product category:
   - Separate **direct competitors** (brand owners like Kingston Brass, Signature Hardware) from **marketplaces** (Wayfair, Amazon, Lowe’s, Houzz).
   - Use direct competitors for positioning patterns; use marketplaces mainly for query language and merchandising norms.
+  - Safety rule enforced in row serialization: speculative comparative phrasing is dropped before prompt injection.
 - Expand and diversify gold examples (`prompt_templates`) so examples cover:
   - Multiple styles (modern, transitional, traditional).
   - Multiple opening strategies (quality-first default, pain-point-first when natural).
@@ -394,17 +420,43 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
 
 **Objective:** Make the dashboard safe, reliable, and fast for daily use by operators reviewing and publishing content.
 
-**Key tasks**
-- Ensure regeneration, approvals, and publish flows are idempotent and fail-safe:
-  - Clear “in progress / failed / retry” state for generation and publishing.
-  - Visible validation failures with actionable messages.
-- Add role-based access control (if not already present) for publishing actions.
-- Add batch workflows:
-  - Queue N SKUs for generation.
-  - Background job execution (Cloud Run side), with progress reporting back to Supabase.
-- Ensure UI always matches policy:
-  - Shopify title rules (no brand/finish in base title).
-  - Google structured-only feed behavior when configured.
+**Executable subtasks (dashboard scope only)**
+- `DONE` 6.0 Convert Phase 6 bullets into executable subtasks with code/test targets (this section).
+- `DONE` 6.1 Idempotent regeneration state handling. (2026-02-10; files: `dashboard/src/app/api/regenerate/route.ts`, `dashboard/src/app/api/regenerate/batch/route.ts`, `dashboard/src/components/review/RegenerateButton.tsx`, `dashboard/src/components/review/BatchRegenerateButton.tsx`, `tests/api/test_dashboard_regenerate_route_contract.py`; verification: `cd dashboard && npm run lint` pass, `cd dashboard && npm run build -- --webpack` pass, `.venv/bin/pytest -q tests/api/test_regenerate_response_contract.py tests/api/test_dashboard_regenerate_route_contract.py` pass)
+  - Target: `dashboard/src/app/api/regenerate/route.ts`, `dashboard/src/components/review/RegenerateButton.tsx`
+  - Requirements:
+    - No-op-safe retry when generated output equals current candidate content.
+    - Explicit response state: `completed` | `failed` | `no_change`.
+    - Return structured validation details for UI rendering.
+  - Tests/verification: dashboard lint/build + API contract tests.
+- `DONE` 6.2 Idempotent review/approval state handling. (2026-02-10; files: `dashboard/src/app/api/approvals/route.ts`, `dashboard/src/app/api/variants/approvals/route.ts`, `tests/api/test_dashboard_approval_state_contract.py`; verification: `cd dashboard && npm run lint` pass, `cd dashboard && npm run build -- --webpack` pass, `.venv/bin/pytest -q tests/api/test_dashboard_approval_state_contract.py tests/api/test_dashboard_regenerate_route_contract.py` pass)
+  - Target: `dashboard/src/app/api/approvals/route.ts`, `dashboard/src/app/api/variants/approvals/route.ts`
+  - Requirements:
+    - Repeated approve/reject requests are no-op safe.
+    - `approved_content`/`approved_version` only change on state transition (not duplicate requests).
+    - Actionable API errors when required source content is missing.
+  - Tests/verification: dashboard lint/build + relevant approval tests.
+- `DONE` 6.3 Idempotent publish state handling + RBAC guard. (2026-02-10; files: `dashboard/src/lib/auth/publish-guard.ts`, `dashboard/src/app/api/publish/sku/route.ts`, `dashboard/src/app/api/publish/batch/route.ts`, `tests/api/test_dashboard_publish_safety_contract.py`; verification: `cd dashboard && npm run lint` pass, `cd dashboard && npm run build -- --webpack` pass, `.venv/bin/pytest -q tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py` pass)
+  - Target: `dashboard/src/app/api/publish/sku/route.ts`, `dashboard/src/app/api/publish/batch/route.ts`, shared auth helper(s)
+  - Requirements:
+    - Repeat publish calls for already-published same content return idempotent success/no-op.
+    - Publishing routes return actionable failure codes/messages.
+    - Publishing endpoints enforce configurable role-based guardrails.
+  - Tests/verification: dashboard lint/build + publish-related Python tests.
+- `DONE` 6.4 Batch safety and retry semantics. (2026-02-10; files: `dashboard/src/app/api/publish/batch/route.ts`, `dashboard/src/app/api/batches/route.ts`, `dashboard/src/app/(dashboard)/batches/page.tsx`, `dashboard/src/app/(dashboard)/batches/[batchId]/page.tsx`, `dashboard/src/components/batches/BatchesClient.tsx`, `dashboard/src/components/batches/BatchDetailClient.tsx`, `dashboard/src/lib/supabase/types.ts`, `dashboard/src/lib/supabase/queries.ts`, `tests/api/test_dashboard_batch_readiness_contract.py`; verification: `cd dashboard && npm run lint` pass, `cd dashboard && npm run build -- --webpack` pass, `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py` pass)
+  - Target: `dashboard/src/app/api/batches/route.ts`, `dashboard/src/components/batches/BatchesClient.tsx`, `dashboard/src/components/batches/BatchDetailClient.tsx`, `dashboard/src/lib/supabase/types.ts`
+  - Requirements:
+    - Consistent batch status model (`draft/pending/executing/published/partial/failed`) across API + UI.
+    - Safe retry path for failed/partial batches without duplicate success writes.
+    - Per-SKU failure reason visibility in batch detail.
+  - Tests/verification: dashboard lint/build.
+- `DONE` 6.5 Validation and policy errors surfaced clearly in UI/API. (2026-02-10; files: `dashboard/src/app/api/regenerate/route.ts`, `dashboard/src/app/api/regenerate/batch/route.ts`, `dashboard/src/components/review/RegenerateButton.tsx`, `dashboard/src/components/review/BatchRegenerateButton.tsx`, `dashboard/src/components/batches/BatchesClient.tsx`, `dashboard/src/components/batches/BatchDetailClient.tsx`, `tests/api/test_dashboard_validation_surface_contract.py`; verification: `cd dashboard && npm run lint` pass, `cd dashboard && npm run build -- --webpack` pass, `.venv/bin/pytest -q tests/api/test_dashboard_batch_readiness_contract.py tests/api/test_dashboard_publish_safety_contract.py tests/api/test_dashboard_approval_state_contract.py tests/api/test_dashboard_regenerate_route_contract.py tests/api/test_dashboard_validation_surface_contract.py tests/test_review_dashboard.py tests/test_reporter_google_patch_structured_only_env.py` pass)
+  - Target: review and batch UI components + API response payloads.
+  - Requirements:
+    - UI renders human-actionable remediation text from API errors (not generic “failed” alerts).
+    - Policy/validation violations are explicit in API payloads and visible to operators.
+    - No prompt-source changes; Python remains generation authority.
+  - Tests/verification: dashboard lint/build + `tests/test_reporter_google_patch_structured_only_env.py`.
 
 **Verification commands**
 - Dashboard: `cd dashboard && npm run lint && npm run build`
@@ -431,6 +483,48 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
   - Disable generation.
   - Disable finish sentence regeneration.
   - Force fallback behavior when providers are down.
+
+**Execution updates**
+- `DONE` 7.1 Structured request-scoped logging + request ID propagation.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Files: `src/feedops/observability/__init__.py`, `src/feedops/api/main.py`, `src/feedops/providers/factory.py`, `src/feedops/api/hybrid_generation.py`, `tests/test_phase7_observability_reliability.py`.
+  - Notes:
+    - Added HTTP request middleware assigning/propagating `X-Request-ID`.
+    - Added structured JSON log events with request context across generation/provider/fallback paths.
+    - Background generation threads inherit request IDs.
+  - Verification: `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py` (pass).
+- `DONE` 7.2 Reliability metrics (latency, retries, validation failures, provider errors).
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Files: `src/feedops/observability/metrics.py`, `src/feedops/api/main.py`, `src/feedops/api/hybrid_generation.py`, `src/feedops/providers/openai_provider.py`, `src/feedops/providers/gemini_provider.py`, `tests/test_phase7_observability_reliability.py`.
+  - Notes:
+    - Added in-memory metrics registry with counters/timers.
+    - Instrumented provider latency/retry/error metrics.
+    - Instrumented generation latency and finish sentence validation-failure metrics.
+  - Verification: `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py tests/test_providers.py` (pass).
+- `DONE` 7.3 Provider backoff + circuit breaker hardening.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Files: `src/feedops/providers/reliability.py`, `src/feedops/providers/openai_provider.py`, `src/feedops/providers/gemini_provider.py`, `tests/test_phase7_observability_reliability.py`.
+  - Notes:
+    - Added retryable-error classification, exponential backoff, and process-wide circuit breaker registry.
+    - Added circuit-open protection + metrics/logging.
+  - Verification: `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py::test_openai_provider_applies_backoff_on_retryable_error tests/test_phase7_observability_reliability.py::test_openai_provider_circuit_breaker_blocks_after_threshold` (pass).
+- `DONE` 7.4 Kill switches and fallback control.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - Files: `src/feedops/api/runtime_controls.py`, `src/feedops/api/main.py`, `src/feedops/api/hybrid_generation.py`, `src/feedops/providers/factory.py`, `tests/test_phase7_observability_reliability.py`, `tests/test_providers.py`.
+  - Notes:
+    - Added generation kill switch for optimize/regenerate/batch/hybrid APIs.
+    - Added finish-sentence regeneration kill switch for regenerate + variant adaptation flows.
+    - Added fallback force-toggle to instantiate provider chain when both providers are available.
+  - Verification: `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py tests/test_providers.py` (pass).
+
+**Runtime toggles (safe defaults)**
+- `FEEDOPS_DISABLE_GENERATION` (default: unset/`false`): when `true`, generation endpoints return `503` and background generation is not started.
+- `FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN` (default: unset/`false`): when `true`, finish-sentence generation/adaptation paths are skipped.
+- `FEEDOPS_FORCE_PROVIDER_FALLBACK` (default: unset/`false`): when `true` and both API keys are set, provider factory returns primary+fallback chain.
+- `FEEDOPS_PROVIDER_CIRCUIT_BREAKER_ENABLED` (default: `true`): enables provider circuit protection.
+- `FEEDOPS_PROVIDER_CIRCUIT_FAILURE_THRESHOLD` (default: `5`): consecutive failed requests before circuit opens.
+- `FEEDOPS_PROVIDER_CIRCUIT_COOLDOWN_SECONDS` (default: `30`): circuit-open cooldown window.
+- `FEEDOPS_PROVIDER_BACKOFF_BASE_SECONDS` (default: `0.25`), `FEEDOPS_PROVIDER_BACKOFF_MAX_SECONDS` (default: `8`), `FEEDOPS_PROVIDER_BACKOFF_JITTER_SECONDS` (default: `0.1`): retry backoff tuning.
 
 **Verification commands**
 - `.venv/bin/pytest -q`

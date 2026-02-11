@@ -114,15 +114,23 @@ export async function PATCH(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const validPlatforms = ['google', 'bing', 'shopify'] as const
 
-    // Build the update object based on request format
-    // Supports two formats:
-    // 1. Legacy: { master_sku, element, approved }
-    // 2. Direct: { master_sku, title_approved?, description_approved?, image_approved? }
-    const updateData: Record<string, unknown> = {}
+    if (platform && !validPlatforms.includes(platform)) {
+      return NextResponse.json(
+        { error: `platform must be one of: ${validPlatforms.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Build normalized patch object from request.
+    const updateData: Partial<{
+      title_approved: boolean | null
+      description_approved: boolean | null
+      image_approved: boolean | null
+    }> = {}
 
     if (element !== undefined) {
-      // Legacy format: { element, approved }
       const validElements = ['title', 'description', 'image']
       if (!validElements.includes(element)) {
         return NextResponse.json(
@@ -130,12 +138,17 @@ export async function PATCH(request: NextRequest) {
           { status: 400 }
         )
       }
-      updateData[`${element}_approved`] = approved
+      if (approved === undefined) {
+        return NextResponse.json(
+          { error: 'approved is required when element is provided' },
+          { status: 400 }
+        )
+      }
+      updateData[`${element}_approved` as keyof typeof updateData] = normalizeApprovalValue(approved)
     } else {
-      // Direct format: { title_approved?, description_approved?, image_approved? }
-      if (title_approved !== undefined) updateData.title_approved = title_approved
-      if (description_approved !== undefined) updateData.description_approved = description_approved
-      if (image_approved !== undefined) updateData.image_approved = image_approved
+      if (title_approved !== undefined) updateData.title_approved = normalizeApprovalValue(title_approved)
+      if (description_approved !== undefined) updateData.description_approved = normalizeApprovalValue(description_approved)
+      if (image_approved !== undefined) updateData.image_approved = normalizeApprovalValue(image_approved)
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -145,113 +158,195 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Upsert the approval
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('sku_approvals')
       .select('*')
       .eq('master_sku', master_sku)
-      .single()
+      .maybeSingle()
 
-    let result
-    if (existing) {
-      result = await supabase
-        .from('sku_approvals')
-        .update({
-          ...updateData,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('master_sku', master_sku)
-        .select()
-        .single()
-    } else {
-      result = await supabase
-        .from('sku_approvals')
-        .insert({
-          master_sku,
-          ...updateData,
-          approval_status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
+    if (existingError) {
+      return NextResponse.json({ error: existingError.message }, { status: 500 })
     }
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error.message }, { status: 500 })
+    const currentState = {
+      title_approved: normalizeApprovalValue(existing?.title_approved),
+      description_approved: normalizeApprovalValue(existing?.description_approved),
+      image_approved: normalizeApprovalValue(existing?.image_approved),
+    }
+    const nextState = {
+      title_approved:
+        updateData.title_approved !== undefined ? updateData.title_approved : currentState.title_approved,
+      description_approved:
+        updateData.description_approved !== undefined
+          ? updateData.description_approved
+          : currentState.description_approved,
+      image_approved:
+        updateData.image_approved !== undefined ? updateData.image_approved : currentState.image_approved,
+    }
+    const currentStatus = existing?.approval_status || deriveApprovalStatus(currentState)
+    const nextStatus = deriveApprovalStatus(nextState)
+
+    const fieldsChanged = (['title_approved', 'description_approved', 'image_approved'] as const).some(
+      (field) => updateData[field] !== undefined && updateData[field] !== currentState[field]
+    )
+
+    if (existing && !fieldsChanged && currentStatus === nextStatus) {
+      return NextResponse.json({
+        data: { ...existing, approval_status: currentStatus },
+        state: 'no_change',
+        idempotent: true,
+      })
     }
 
-    // Auto-derive approval_status based on element approvals
-    const data = result.data
-    let newStatus = 'pending'
-
-    if (data.title_approved && data.description_approved && data.image_approved) {
-      newStatus = 'approved'
-    } else if (data.title_approved === false || data.description_approved === false || data.image_approved === false) {
-      newStatus = 'rejected'
+    // Only transition title/description approved content on first approval transition.
+    const transitionContentTypes: Array<'title' | 'description'> = []
+    if (currentState.title_approved !== true && nextState.title_approved === true) {
+      transitionContentTypes.push('title')
+    }
+    if (currentState.description_approved !== true && nextState.description_approved === true) {
+      transitionContentTypes.push('description')
     }
 
-    if (newStatus !== data.approval_status) {
-      await supabase
-        .from('sku_approvals')
-        .update({
-          approval_status: newStatus,
-          approved_at: newStatus === 'approved' ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('master_sku', master_sku)
-    }
+    const platformsToUpdate = platform ? [platform] : [...validPlatforms]
+    const sourceRows = new Map<string, { id: string; candidate_content: string; approved_version: number | null }>()
 
-    // ==========================================================================
-    // Copy approved content to generated_content table
-    // This locks the content so regeneration doesn't change what was approved
-    // ==========================================================================
-    const contentTypesToApprove: string[] = []
+    if (transitionContentTypes.length > 0) {
+      const missingSources: string[] = []
 
-    // Determine which content types to lock based on what was approved
-    const titleIsApproved = title_approved === true || (element === 'title' && approved === true)
-    const descIsApproved = description_approved === true || (element === 'description' && approved === true)
-
-    if (titleIsApproved) contentTypesToApprove.push('title')
-    if (descIsApproved) contentTypesToApprove.push('description')
-
-    if (contentTypesToApprove.length > 0) {
-      // Determine which platforms to update
-      // If platform specified, update only that platform; otherwise update all
-      const platforms = platform ? [platform] : ['google', 'bing', 'shopify']
-
-      for (const ct of contentTypesToApprove) {
-        for (const p of platforms) {
-          // Get current generated_content row
-          const { data: gcRow } = await supabase
+      for (const ct of transitionContentTypes) {
+        for (const p of platformsToUpdate) {
+          const { data: gcRow, error: gcError } = await supabase
             .from('generated_content')
             .select('id, candidate_content, approved_version')
             .eq('master_sku', master_sku)
             .eq('platform', p)
             .eq('content_type', ct)
-            .single()
+            .maybeSingle()
 
-          if (gcRow && gcRow.candidate_content) {
-            // Copy candidate_content to approved_content
-            await supabase
-              .from('generated_content')
-              .update({
-                approved_content: gcRow.candidate_content,
-                approved_at: new Date().toISOString(),
-                approved_version: (gcRow.approved_version || 0) + 1,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', gcRow.id)
+          if (gcError) {
+            return NextResponse.json(
+              {
+                error: `Failed to load source content for approval: ${gcError.message}`,
+                code: 'source_content_lookup_failed',
+                step: 'approval_source_content_check',
+                actionable_message:
+                  'Retry approval. If this persists, check generated_content table access for this SKU.',
+              },
+              { status: 500 }
+            )
           }
+
+          if (!gcRow || !gcRow.candidate_content || gcRow.candidate_content.trim().length === 0) {
+            missingSources.push(`${p}/${ct}`)
+            continue
+          }
+
+          sourceRows.set(`${p}:${ct}`, {
+            id: gcRow.id,
+            candidate_content: gcRow.candidate_content,
+            approved_version: gcRow.approved_version,
+          })
         }
+      }
+
+      if (missingSources.length > 0) {
+        return NextResponse.json(
+          {
+            error: 'Cannot approve content because source candidate content is missing.',
+            code: 'missing_source_content',
+            step: 'approval_source_content_check',
+            actionable_message:
+              'Regenerate the missing platform/content items first, then retry approval.',
+            missing_requirements: missingSources,
+          },
+          { status: 409 }
+        )
       }
     }
 
-    return NextResponse.json({ data: { ...data, approval_status: newStatus } })
+    const now = new Date().toISOString()
+    const approvalPayload = {
+      ...nextState,
+      approval_status: nextStatus,
+      approved_at: nextStatus === 'approved' ? now : null,
+      updated_at: now,
+    }
+
+    let savedRecord
+    if (existing) {
+      const { data, error } = await supabase
+        .from('sku_approvals')
+        .update(approvalPayload)
+        .eq('master_sku', master_sku)
+        .select()
+        .single()
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      savedRecord = data
+    } else {
+      const { data, error } = await supabase
+        .from('sku_approvals')
+        .insert({
+          master_sku,
+          ...approvalPayload,
+          created_at: now,
+        })
+        .select()
+        .single()
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      savedRecord = data
+    }
+
+    // Copy candidate content to approved content only for first-time approval transitions.
+    for (const ct of transitionContentTypes) {
+      for (const p of platformsToUpdate) {
+        const source = sourceRows.get(`${p}:${ct}`)
+        if (!source) continue
+
+        await supabase
+          .from('generated_content')
+          .update({
+            approved_content: source.candidate_content,
+            approved_at: now,
+            approved_version: (source.approved_version || 0) + 1,
+            updated_at: now,
+          })
+          .eq('id', source.id)
+      }
+    }
+
+    return NextResponse.json({
+      data: { ...savedRecord, approval_status: nextStatus },
+      state: 'updated',
+      idempotent: false,
+    })
   } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
+}
+
+function normalizeApprovalValue(value: unknown): boolean | null {
+  if (value === true || value === 1 || value === '1') return true
+  if (value === false || value === 0 || value === '0') return false
+  return null
+}
+
+function deriveApprovalStatus(state: {
+  title_approved: boolean | null
+  description_approved: boolean | null
+  image_approved: boolean | null
+}): 'pending' | 'approved' | 'rejected' {
+  if (state.title_approved === true && state.description_approved === true && state.image_approved === true) {
+    return 'approved'
+  }
+  if (state.title_approved === false || state.description_approved === false || state.image_approved === false) {
+    return 'rejected'
+  }
+  return 'pending'
 }

@@ -3,11 +3,17 @@
 import logging
 import os
 
+from feedops.observability import log_event
+from feedops.observability.metrics import metrics_registry
 from feedops.providers.base import ImageInput, LLMProvider
 from feedops.providers.gemini_provider import GeminiProvider
 from feedops.providers.openai_provider import OpenAIProvider
 
 logger = logging.getLogger(__name__)
+
+
+def _truthy(value: str | None) -> bool:
+    return (value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def get_provider(preferred: str | None = None) -> LLMProvider:
@@ -30,6 +36,24 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     openai_key = os.environ.get("OPENAI_API_KEY")
     gemini_key = os.environ.get("GEMINI_API_KEY")
     openai_model = os.environ.get("FEEDOPS_OPENAI_MODEL")
+    force_fallback = _truthy(os.environ.get("FEEDOPS_FORCE_PROVIDER_FALLBACK"))
+
+    if force_fallback and openai_key and gemini_key:
+        if preferred == "gemini":
+            return FallbackProvider(
+                primary=GeminiProvider(api_key=gemini_key),
+                fallback=OpenAIProvider(
+                    api_key=openai_key,
+                    model=openai_model or "gpt-5.2",
+                ),
+            )
+        return FallbackProvider(
+            primary=OpenAIProvider(
+                api_key=openai_key,
+                model=openai_model or "gpt-5.2",
+            ),
+            fallback=GeminiProvider(api_key=gemini_key),
+        )
 
     if preferred == "openai" and openai_key:
         if openai_model:
@@ -90,6 +114,17 @@ class FallbackProvider(LLMProvider):
                 reasoning_effort=reasoning_effort,
             )
         except Exception as e:
+            metrics_registry.increment(
+                "provider_fallback_total", primary=self.primary.name, fallback=self.fallback.name
+            )
+            log_event(
+                logger,
+                logging.WARNING,
+                "provider.fallback",
+                primary=self.primary.name,
+                fallback=self.fallback.name,
+                error=str(e)[:200],
+            )
             logger.warning(f"Primary provider failed: {e}, trying fallback")
             return await self.fallback.generate(
                 prompt, schema, image=image, system_prompt=system_prompt,

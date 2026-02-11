@@ -1,13 +1,22 @@
 """OpenAI LLM provider with JSON mode and retry logic."""
 
+import asyncio
 import base64
 import json
 import logging
+import time
 from typing import Any
 
 from openai import AsyncOpenAI
 
+from feedops.observability import log_event
+from feedops.observability.metrics import metrics_registry
 from feedops.providers.base import ImageInput, LLMError, LLMProvider
+from feedops.providers.reliability import (
+    circuit_breakers,
+    compute_backoff_seconds,
+    is_retryable_provider_error,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +101,26 @@ class OpenAIProvider(LLMProvider):
         Raises:
             LLMError: After max_retries failures.
         """
+        circuit_ok, cooldown_remaining = circuit_breakers.allow_request(self.name)
+        if not circuit_ok:
+            metrics_registry.increment(
+                "provider_circuit_open_total", provider=self.name
+            )
+            raise LLMError(
+                f"Circuit breaker open ({cooldown_remaining:.2f}s remaining)",
+                self.name,
+                0,
+            )
+
+        start_time = time.perf_counter()
+        log_event(
+            logger,
+            logging.INFO,
+            "provider.generate.start",
+            provider=self.name,
+            has_image=bool(image),
+        )
+
         # Build initial message list with optional system message for caching.
         messages: list[dict[str, Any]] = []
         if system_prompt:
@@ -167,10 +196,26 @@ class OpenAIProvider(LLMProvider):
                 else:
                     logger.debug(f"Token usage: {self._last_usage}")
                 result = json.loads(content)
+                circuit_breakers.record_success(self.name)
+                metrics_registry.observe(
+                    "provider_latency_seconds",
+                    time.perf_counter() - start_time,
+                    provider=self.name,
+                )
+                log_event(
+                    logger,
+                    logging.INFO,
+                    "provider.generate.success",
+                    provider=self.name,
+                    attempts=attempt + 1,
+                )
                 return result
 
             except json.JSONDecodeError as e:
                 last_error = str(e)
+                metrics_registry.increment(
+                    "provider_retry_total", provider=self.name, reason="json_decode"
+                )
                 logger.warning(
                     f"JSON parse error (attempt {attempt + 1}): {last_error}"
                 )
@@ -190,11 +235,57 @@ class OpenAIProvider(LLMProvider):
                             "content": f"Your response was not valid JSON. Error: {last_error}. Please fix and respond with valid JSON only.",
                         }
                     )
+                if attempt < self.max_retries - 1:
+                    delay = compute_backoff_seconds(attempt)
+                    await asyncio.sleep(delay)
 
             except Exception as e:
                 last_error = str(e)
+                retryable = is_retryable_provider_error(e)
+                metrics_registry.increment(
+                    "provider_error_total",
+                    provider=self.name,
+                    error_type=type(e).__name__,
+                )
                 logger.error(f"OpenAI API error (attempt {attempt + 1}): {last_error}")
+                if retryable and attempt < self.max_retries - 1:
+                    delay = compute_backoff_seconds(attempt)
+                    metrics_registry.increment(
+                        "provider_retry_total",
+                        provider=self.name,
+                        reason="retryable_api_error",
+                    )
+                    log_event(
+                        logger,
+                        logging.WARNING,
+                        "provider.generate.retry",
+                        provider=self.name,
+                        attempt=attempt + 1,
+                        delay_seconds=round(delay, 4),
+                        reason=last_error[:200],
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                if not retryable:
+                    break
 
+        opened = circuit_breakers.record_failure(self.name)
+        if opened:
+            metrics_registry.increment("provider_circuit_open_total", provider=self.name)
+        metrics_registry.observe(
+            "provider_latency_seconds",
+            time.perf_counter() - start_time,
+            provider=self.name,
+        )
+        log_event(
+            logger,
+            logging.ERROR,
+            "provider.generate.failure",
+            provider=self.name,
+            attempts=self.max_retries,
+            error=last_error,
+            circuit_opened=opened,
+        )
         raise LLMError(
             f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries
         )

@@ -13,8 +13,14 @@ interface RegenerateResult {
   platform: Platform
   content_type: ContentType
   success: boolean
+  state?: 'completed' | 'no_change'
+  idempotent?: boolean
   content?: string
   version?: number
+  validation_errors?: string[]
+  actionable_message?: string | null
+  code?: string | null
+  step?: string | null
   error?: string
 }
 
@@ -40,7 +46,12 @@ export async function POST(request: NextRequest) {
 
     if (!skus && !all) {
       return NextResponse.json(
-        { error: 'Must provide either "skus" array or "all: true"' },
+        {
+          error: 'Must provide either "skus" array or "all: true"',
+          code: 'batch_regenerate_missing_selection',
+          step: 'request_validation',
+          actionable_message: 'Pass an explicit SKU list or set all=true and retry.',
+        },
         { status: 400 }
       )
     }
@@ -56,7 +67,12 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         return NextResponse.json(
-          { error: 'Failed to fetch SKUs from database' },
+          {
+            error: 'Failed to fetch SKUs from database',
+            code: 'batch_regenerate_sku_fetch_failed',
+            step: 'target_sku_lookup',
+            actionable_message: 'Retry. If this persists, inspect generated_content table access.',
+          },
           { status: 500 }
         )
       }
@@ -68,7 +84,12 @@ export async function POST(request: NextRequest) {
 
     if (targetSkus.length === 0) {
       return NextResponse.json(
-        { error: 'No SKUs to regenerate' },
+        {
+          error: 'No SKUs to regenerate',
+          code: 'batch_regenerate_empty_selection',
+          step: 'target_sku_validation',
+          actionable_message: 'Select SKUs that already have generated content and retry.',
+        },
         { status: 400 }
       )
     }
@@ -109,12 +130,22 @@ export async function POST(request: NextRequest) {
                 typeof payload?.error === 'string'
                   ? payload.error
                   : `Regeneration failed with status ${regenerateResponse.status}`
+              const actionableMessage =
+                typeof payload?.actionable_message === 'string'
+                  ? payload.actionable_message
+                  : 'Inspect API validation details for this SKU and retry.'
               results.push({
                 sku,
                 platform,
                 content_type: contentType,
                 success: false,
                 error: errorMessage,
+                actionable_message: actionableMessage,
+                code: typeof payload?.code === 'string' ? payload.code : null,
+                step: typeof payload?.step === 'string' ? payload.step : null,
+                validation_errors: Array.isArray(payload?.validation_errors)
+                  ? payload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
+                  : [],
               })
               failed++
             } else {
@@ -123,6 +154,11 @@ export async function POST(request: NextRequest) {
                 platform,
                 content_type: contentType,
                 success: true,
+                state:
+                  payload?.state === 'no_change'
+                    ? 'no_change'
+                    : 'completed',
+                idempotent: payload?.idempotent === true,
                 content:
                   typeof payload?.content === 'string'
                     ? payload.content
@@ -131,6 +167,13 @@ export async function POST(request: NextRequest) {
                   typeof payload?.version === 'number'
                     ? payload.version
                     : undefined,
+                validation_errors: Array.isArray(payload?.validation_errors)
+                  ? payload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
+                  : [],
+                actionable_message:
+                  typeof payload?.actionable_message === 'string'
+                    ? payload.actionable_message
+                    : null,
               })
               successful++
             }
@@ -142,6 +185,10 @@ export async function POST(request: NextRequest) {
               success: false,
               error:
                 error instanceof Error ? error.message : 'Unknown error',
+              actionable_message:
+                'Retry this SKU. If it keeps failing, inspect dashboard API logs for this operation.',
+              code: 'batch_regenerate_operation_exception',
+              step: 'batch_regenerate_operation',
             })
             failed++
           }
@@ -164,13 +211,22 @@ export async function POST(request: NextRequest) {
         total_operations: totalOperations,
         successful,
         failed,
+        with_validation_warnings: results.filter(
+          (r) => r.success && Array.isArray(r.validation_errors) && r.validation_errors.length > 0
+        ).length,
+        no_change: results.filter((r) => r.state === 'no_change').length,
       },
       results,
     })
   } catch (error) {
     console.error('Batch regeneration error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      {
+        error: error instanceof Error ? error.message : 'Internal server error',
+        code: 'batch_regenerate_unhandled_exception',
+        step: 'route_exception',
+        actionable_message: 'Retry once. If this persists, inspect dashboard API logs.',
+      },
       { status: 500 }
     )
   }

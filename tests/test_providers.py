@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from feedops.providers.base import ImageInput, LLMProvider
-from feedops.providers.factory import get_provider
+from feedops.providers.factory import FallbackProvider, get_provider
 from feedops.providers.gemini_provider import GeminiProvider
 from feedops.providers.openai_provider import OpenAIProvider
 
@@ -216,6 +216,23 @@ def test_get_provider_falls_back_to_gemini():
     with patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
         assert provider.name.startswith("gemini/")
+
+
+def test_get_provider_force_fallback_returns_fallback_provider():
+    """Factory can force primary+fallback chain when both keys are present."""
+    with patch.dict(
+        "os.environ",
+        {
+            "OPENAI_API_KEY": "openai-key",
+            "GEMINI_API_KEY": "gemini-key",
+            "FEEDOPS_FORCE_PROVIDER_FALLBACK": "1",
+        },
+        clear=True,
+    ):
+        provider = get_provider()
+        assert isinstance(provider, FallbackProvider)
+        assert provider.primary.name.startswith("openai/")
+        assert provider.fallback.name.startswith("gemini/")
 
 
 def test_get_provider_raises_when_none_configured():

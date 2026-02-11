@@ -5,7 +5,10 @@ import json
 import logging
 import os
 
-from feedops.api.prompt_loader import get_system_prompt
+from feedops.api.prompt_loader import (
+    format_gold_standard_examples_bundle,
+    get_system_prompt,
+)
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.collection_descriptions import is_known_collection_name
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
@@ -139,12 +142,17 @@ def build_prompt(parent_sku: ParentSKU) -> str:
     evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
+    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+    gold_examples_section = (
+        f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
+    )
 
     prompt = OPTIMIZATION_TEMPLATE.format(
         system_prompt=get_system_prompt(),
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
+        gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )
@@ -168,11 +176,16 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
     evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
+    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+    gold_examples_section = (
+        f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
+    )
 
     user_prompt = USER_PROMPT_TEMPLATE.format(
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
+        gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
     )
@@ -451,6 +464,10 @@ def build_variant_prompt(
     evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
+    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+    gold_examples_section = (
+        f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
+    )
 
     # Get finish metadata for context
     finish_meta = get_finish_metadata(finish_name) or {}
@@ -484,6 +501,7 @@ def build_variant_prompt(
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
         finish_context=finish_context,
+        gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         variant_sku=variant_sku,
         finish_name=finish_name,

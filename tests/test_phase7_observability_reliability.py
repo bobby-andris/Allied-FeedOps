@@ -1,0 +1,203 @@
+from __future__ import annotations
+
+import json
+import logging
+from dataclasses import dataclass
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from fastapi import HTTPException
+
+import feedops.api.main as api_main
+from feedops.models import ParentSKU, Variant
+from feedops.providers.base import LLMError
+from feedops.providers.openai_provider import OpenAIProvider
+from feedops.providers.reliability import circuit_breakers
+
+
+@pytest.fixture(autouse=True)
+def _reset_runtime_state(monkeypatch):
+    from feedops.observability.metrics import metrics_registry
+
+    metrics_registry.reset()
+    circuit_breakers.reset()
+    monkeypatch.delenv("FEEDOPS_DISABLE_GENERATION", raising=False)
+    monkeypatch.delenv("FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN", raising=False)
+    monkeypatch.delenv("FEEDOPS_PROVIDER_CIRCUIT_FAILURE_THRESHOLD", raising=False)
+    monkeypatch.delenv("FEEDOPS_PROVIDER_CIRCUIT_COOLDOWN_SECONDS", raising=False)
+    yield
+    metrics_registry.reset()
+    circuit_breakers.reset()
+
+
+def _sample_parent_sku() -> ParentSKU:
+    variant = Variant(
+        option_sku="1031/18-ABR",
+        finish="Antique Brass",
+        finish_code="ABR",
+        gmc_id="shopify_US_4542872518788_32118222192772",
+        position=1,
+    )
+    return ParentSKU(
+        master_sku="1031/18",
+        category="Towel Bars",
+        collection="Skyline",
+        current_title="Skyline Collection 18 Inch Towel Bar",
+        current_description="This stylish towel bar...",
+        material="Brass",
+        mounting_type="Wall mount",
+        weight_capacity=10.0,
+        variants=[variant],
+    )
+
+
+class _FakeTable:
+    def insert(self, *_args, **_kwargs):
+        return self
+
+    def upsert(self, *_args, **_kwargs):
+        return self
+
+    def execute(self):
+        return SimpleNamespace(data=[{"id": "job-1"}])
+
+
+@dataclass
+class _FakeSupabase:
+    def table(self, _name: str) -> _FakeTable:
+        return _FakeTable()
+
+
+class _FakeProvider:
+    def __init__(self, responses: list[dict]):
+        self._responses = responses
+        self.calls = 0
+        self.name = "fake/provider"
+
+    async def generate(self, *_args, **_kwargs) -> dict:
+        result = self._responses[self.calls]
+        self.calls += 1
+        return result
+
+
+def test_structured_log_event_includes_request_id(caplog):
+    from feedops.observability import log_event, request_context
+
+    logger = logging.getLogger("phase7.test")
+    with caplog.at_level(logging.INFO):
+        with request_context("req-phase7-123"):
+            log_event(logger, logging.INFO, "generation.started", sku="ABC-123")
+
+    payload = json.loads(caplog.records[-1].message)
+    assert payload["event"] == "generation.started"
+    assert payload["request_id"] == "req-phase7-123"
+    assert payload["sku"] == "ABC-123"
+
+
+def test_metrics_registry_tracks_latency_retry_and_errors():
+    from feedops.observability.metrics import metrics_registry
+
+    metrics_registry.reset()
+    metrics_registry.increment("provider_retry_total", provider="openai")
+    metrics_registry.increment("provider_error_total", provider="openai")
+    with metrics_registry.timer("generation_latency_seconds", endpoint="regenerate"):
+        pass
+
+    snapshot = metrics_registry.snapshot()
+    assert snapshot["counters"][("provider_retry_total", (("provider", "openai"),))] == 1
+    assert snapshot["counters"][("provider_error_total", (("provider", "openai"),))] == 1
+    assert (
+        len(snapshot["timings"][("generation_latency_seconds", (("endpoint", "regenerate"),))])
+        == 1
+    )
+
+
+@pytest.mark.asyncio
+async def test_openai_provider_applies_backoff_on_retryable_error():
+    provider = OpenAIProvider(api_key="test-key", max_retries=2)
+
+    valid_response = MagicMock()
+    valid_response.choices = [MagicMock()]
+    valid_response.choices[0].message.content = '{"title": "Recovered"}'
+    valid_response.usage.prompt_tokens = 100
+    valid_response.usage.completion_tokens = 50
+
+    with patch.object(
+        provider.client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
+        with patch(
+            "feedops.providers.openai_provider.asyncio.sleep",
+            new_callable=AsyncMock,
+        ) as mock_sleep:
+            mock_create.side_effect = [Exception("429 rate limit"), valid_response]
+
+            result = await provider.generate("Test prompt", {"type": "object"})
+            assert result["title"] == "Recovered"
+            mock_sleep.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_openai_provider_circuit_breaker_blocks_after_threshold(monkeypatch):
+    monkeypatch.setenv("FEEDOPS_PROVIDER_CIRCUIT_FAILURE_THRESHOLD", "1")
+    monkeypatch.setenv("FEEDOPS_PROVIDER_CIRCUIT_COOLDOWN_SECONDS", "60")
+
+    provider = OpenAIProvider(api_key="test-key", max_retries=1)
+
+    with patch.object(
+        provider.client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
+        mock_create.side_effect = Exception("429 rate limit")
+
+        with pytest.raises(LLMError):
+            await provider.generate("Test prompt", {"type": "object"})
+
+        with pytest.raises(LLMError, match="Circuit breaker open"):
+            await provider.generate("Test prompt", {"type": "object"})
+
+        assert mock_create.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_optimize_single_sku_respects_generation_kill_switch(monkeypatch):
+    monkeypatch.setenv("FEEDOPS_DISABLE_GENERATION", "1")
+
+    def _unexpected_load(*_args, **_kwargs):
+        raise AssertionError("load_parent_sku_from_supabase should not be called")
+
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", _unexpected_load)
+
+    request = api_main.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=True)
+    with pytest.raises(HTTPException) as exc_info:
+        await api_main.optimize_single_sku(request)
+
+    assert exc_info.value.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_regenerate_description_skips_finish_sentence_path_when_killed(monkeypatch):
+    monkeypatch.setenv("FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN", "1")
+
+    fake_provider = _FakeProvider([{"content": "Base description only"}])
+
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
+    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+
+    request = api_main.RegenerateRequest(
+        master_sku="1031/18",
+        content_type="description",
+        platform="google",
+        feedback=None,
+        finish_code="ABR",
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.success is True
+    assert response.finish_sentences is None
+    assert fake_provider.calls == 1

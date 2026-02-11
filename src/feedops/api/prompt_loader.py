@@ -185,6 +185,7 @@ def format_gold_standard_examples(
     platform: str,
     content_type: str,
     max_examples: int = 3,
+    max_description_chars: int = 5000,
 ) -> str:
     """Format gold standard examples for inclusion in a prompt.
 
@@ -192,6 +193,7 @@ def format_gold_standard_examples(
         platform: Target platform ('google', 'bing', 'shopify').
         content_type: Type of content ('title', 'description').
         max_examples: Maximum number of examples to include.
+        max_description_chars: Maximum number of description characters to include.
 
     Returns:
         Formatted examples string, or empty string if none available.
@@ -228,11 +230,74 @@ def format_gold_standard_examples(
                 f"Why it works: {why_it_works}"
             )
         else:
+            description = (description or "").strip()
+            truncated = len(description) > max_description_chars
+            if truncated:
+                description = description[:max_description_chars].rstrip() + "…"
             formatted.append(
                 f"Example {idx + 1} ({category}):\n"
-                f"Description: {description[:300]}...\n"
+                f"Description{' (truncated)' if truncated else ''}:\n{description}\n"
                 f"Why it works: {why_it_works}"
             )
+
+    return "\n\n".join(formatted)
+
+
+def format_gold_standard_examples_bundle(
+    max_examples: int = 2,
+    max_description_chars: int = 5000,
+) -> str:
+    """Format gold standard examples showing both Google/Bing and Shopify outputs.
+
+    The generation schema returns multiple platform-specific fields in one
+    response (Google/Bing + Shopify). This formatter provides few-shot examples
+    that demonstrate the expected cross-platform shape without duplicating the
+    whole prompt for each platform.
+
+    Args:
+        max_examples: Maximum number of examples to include.
+        max_description_chars: Maximum number of description characters to include.
+
+    Returns:
+        Formatted examples string, or empty string if none available.
+    """
+    template = load_active_prompt_template()
+    if not template:
+        return ""
+
+    examples_data = template.get("gold_standard_examples", {})
+    examples = examples_data.get("examples", [])
+    if not examples:
+        return ""
+
+    formatted: list[str] = []
+    for idx, ex in enumerate(examples[:max_examples]):
+        content = ex.get("gold_standard_content", {})
+        category = ex.get("category", "Unknown")
+        why_it_works = content.get("why_it_works", "")
+
+        google_title = content.get("google_title", "")
+        google_description = content.get("google_description", "")
+        shopify_title = content.get("shopify_title", "")
+        shopify_description = content.get("shopify_description", "")
+
+        google_description = (google_description or "").strip()
+        shopify_description = (shopify_description or "").strip()
+        google_truncated = len(google_description) > max_description_chars
+        shopify_truncated = len(shopify_description) > max_description_chars
+        if google_truncated:
+            google_description = google_description[:max_description_chars].rstrip() + "…"
+        if shopify_truncated:
+            shopify_description = shopify_description[:max_description_chars].rstrip() + "…"
+
+        formatted.append(
+            f"Example {idx + 1} ({category}):\n"
+            f"Google title: {google_title}\n"
+            f"Google description{' (truncated)' if google_truncated else ''}:\n{google_description}\n"
+            f"Shopify title: {shopify_title}\n"
+            f"Shopify description{' (truncated)' if shopify_truncated else ''}:\n{shopify_description}\n"
+            f"Why it works: {why_it_works}"
+        )
 
     return "\n\n".join(formatted)
 

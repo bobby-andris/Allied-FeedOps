@@ -20,6 +20,40 @@ interface RegenerateButtonProps {
   onRegenerate?: () => void
 }
 
+type RegenerateApiResponse = {
+  success?: boolean
+  error?: string
+  code?: string | null
+  details?: string | null
+  step?: string | null
+  state?: 'completed' | 'no_change'
+  actionable_message?: string | null
+  validation_errors?: string[]
+}
+
+function formatActionableError(
+  data: RegenerateApiResponse | null | undefined,
+  fallback: string
+): string {
+  const base = data?.error || fallback
+  const parts: string[] = [base]
+
+  if (data?.actionable_message) {
+    parts.push(`Next step: ${data.actionable_message}`)
+  }
+  if (Array.isArray(data?.validation_errors) && data.validation_errors.length > 0) {
+    parts.push(`Validation: ${data.validation_errors.slice(0, 2).join('; ')}`)
+  }
+
+  if (process.env.NODE_ENV !== 'production' && (data?.code || data?.step || data?.details)) {
+    parts.push(
+      `(code=${data?.code ?? 'n/a'} step=${data?.step ?? 'n/a'} details=${data?.details ?? 'n/a'})`
+    )
+  }
+
+  return parts.join(' ')
+}
+
 export function RegenerateButton({
   sku,
   contentType,
@@ -48,18 +82,23 @@ export function RegenerateButton({
         }),
       })
 
-      const data = await response.json()
+      const data: RegenerateApiResponse = await response.json()
 
       if (!response.ok) {
-        const isProd = process.env.NODE_ENV === 'production'
-        const extra =
-          !isProd && (data?.code || data?.details || data?.step)
-            ? ` (code=${data?.code ?? 'n/a'} step=${data?.step ?? 'n/a'} details=${data?.details ?? 'n/a'})`
-            : ''
-        throw new Error((data.error || 'Failed to regenerate') + extra)
+        throw new Error(formatActionableError(data, 'Failed to regenerate'))
       }
 
-      toast.success(`${contentType === 'title' ? 'Title' : 'Description'} ${isInitialGeneration ? 'generated' : 'regenerated'} successfully`)
+      if (data.state === 'no_change') {
+        toast.info(data.actionable_message || 'No content changes were needed')
+      } else {
+        toast.success(`${contentType === 'title' ? 'Title' : 'Description'} ${isInitialGeneration ? 'generated' : 'regenerated'} successfully`)
+      }
+
+      if (data.validation_errors && data.validation_errors.length > 0) {
+        toast.warning('Validation warnings detected', {
+          description: data.validation_errors.slice(0, 3).join('; '),
+        })
+      }
 
       // Trigger parent refresh
       onRegenerate?.()
@@ -95,18 +134,23 @@ export function RegenerateButton({
         }),
       })
 
-      const data = await response.json()
+      const data: RegenerateApiResponse = await response.json()
 
       if (!response.ok) {
-        const isProd = process.env.NODE_ENV === 'production'
-        const extra =
-          !isProd && (data?.code || data?.details || data?.step)
-            ? ` (code=${data?.code ?? 'n/a'} step=${data?.step ?? 'n/a'} details=${data?.details ?? 'n/a'})`
-            : ''
-        throw new Error((data.error || 'Failed to regenerate') + extra)
+        throw new Error(formatActionableError(data, 'Failed to regenerate'))
       }
 
-      toast.success(`${contentType === 'title' ? 'Title' : 'Description'} regenerated with feedback`)
+      if (data.state === 'no_change') {
+        toast.info(data.actionable_message || 'No content changes were needed')
+      } else {
+        toast.success(`${contentType === 'title' ? 'Title' : 'Description'} regenerated with feedback`)
+      }
+
+      if (data.validation_errors && data.validation_errors.length > 0) {
+        toast.warning('Validation warnings detected', {
+          description: data.validation_errors.slice(0, 3).join('; '),
+        })
+      }
       setFeedbackModalOpen(false)
       
       // Trigger parent refresh

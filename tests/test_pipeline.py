@@ -235,6 +235,120 @@ def test_build_evidence_table_excludes_finish_specific_keywords(
     assert "satin nickel" not in kw_row.value.lower()
 
 
+def test_build_evidence_table_keyword_gaps_are_category_relevant_and_finish_excluded(
+    sample_parent_sku, monkeypatch
+):
+    """Keyword gap evidence keeps category-relevant gaps and excludes finish-specific terms."""
+    from feedops.pipeline import evidence as evidence_module
+
+    monkeypatch.setattr(
+        evidence_module,
+        "fetch_master_sku_keywords",
+        lambda item_group_id, item_ids, category=None: [],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "get_external_keywords",
+        lambda category=None, master_sku=None: [],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "fetch_search_queries_for_master_sku",
+        lambda master_sku: [
+            {"query_text": "bathroom towel bar wall mount", "avg_monthly_searches": 2400},
+            {"query_text": "antique brass towel bar", "avg_monthly_searches": 2100},
+            {"query_text": "kitchen faucet pull down", "avg_monthly_searches": 3000},
+        ],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "format_search_queries_for_evidence",
+        lambda queries, context: [],
+    )
+
+    evidence = evidence_module.build_evidence_table(sample_parent_sku)
+    row = next(e for e in evidence if e.field == "keyword_gaps_current_title")
+    value_lower = row.value.lower()
+
+    assert "bathroom towel bar wall mount" in value_lower
+    assert "antique brass towel bar" not in value_lower
+    assert "kitchen faucet pull down" not in value_lower
+
+
+def test_build_evidence_table_competitor_rows_filter_speculative_language(
+    sample_parent_sku, monkeypatch
+):
+    """Competitor evidence rows must not carry speculative 'better than' language."""
+    from feedops.pipeline import competitor_evidence as competitor_module
+    from feedops.pipeline import evidence as evidence_module
+
+    monkeypatch.setattr(
+        evidence_module,
+        "fetch_master_sku_keywords",
+        lambda item_group_id, item_ids, category=None: [],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "get_external_keywords",
+        lambda category=None, master_sku=None: [],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "fetch_search_queries_for_master_sku",
+        lambda master_sku: [],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "format_search_queries_for_evidence",
+        lambda queries, context: [],
+    )
+
+    fake_competitor = competitor_module.CompetitorEvidence(
+        category="Towel Bars",
+        direct=competitor_module.CompetitorBucket(
+            listing_count=2,
+            top_domains=(competitor_module.NameCount(name="build.com", count=2),),
+            top_brands=(competitor_module.NameCount(name="Delta", count=1),),
+            patterns=(
+                competitor_module.CompetitorPattern(
+                    pattern_type="keyword",
+                    pattern_value="better than competitors",
+                    frequency=10,
+                    avg_position=2.2,
+                    sources=("build.com",),
+                    example_titles=("Better than competitors towel bar",),
+                ),
+                competitor_module.CompetitorPattern(
+                    pattern_type="keyword",
+                    pattern_value="wall mount towel bar",
+                    frequency=9,
+                    avg_position=2.8,
+                    sources=("build.com",),
+                    example_titles=("Wall Mount Towel Bar",),
+                ),
+            ),
+        ),
+        marketplace=competitor_module.CompetitorBucket(0, (), (), ()),
+        mixed=competitor_module.CompetitorBucket(0, (), (), ()),
+        unknown=competitor_module.CompetitorBucket(0, (), (), ()),
+    )
+    monkeypatch.setattr(
+        competitor_module,
+        "build_competitor_evidence",
+        lambda *args, **kwargs: fake_competitor,
+    )
+
+    evidence = evidence_module.build_evidence_table(sample_parent_sku)
+    comp_rows = [e for e in evidence if e.source.startswith("competitor_evidence")]
+
+    assert comp_rows
+    combined = " ".join(row.value.lower() for row in comp_rows)
+    assert "wall mount towel bar" in combined
+    assert "better than" not in combined
+    assert "superior" not in combined
+    assert "not found in competitors" not in combined
+
+
 # Task 5.2: Claim Verifier Tests
 def test_verify_claims_marks_valid_claims(sample_parent_sku):
     """Valid claims are marked as verified."""
@@ -688,6 +802,41 @@ def test_build_variant_prompt_uses_canonical_prompt_loader(sample_parent_sku, mo
 
     system_prompt, _ = build_variant_prompt(sample_parent_sku, "Antique Brass", "google")
     assert system_prompt == sentinel_prompt
+
+
+def test_build_split_prompt_includes_gold_examples_when_available(sample_parent_sku, monkeypatch):
+    monkeypatch.setattr(
+        generator_module,
+        "format_gold_standard_examples_bundle",
+        lambda max_examples=2: "GOLD_EXAMPLES_SENTINEL",
+    )
+
+    _, user_prompt = build_split_prompt(sample_parent_sku)
+    assert "## Gold Standard Examples" in user_prompt
+    assert "GOLD_EXAMPLES_SENTINEL" in user_prompt
+
+
+def test_build_split_prompt_omits_gold_examples_when_unavailable(sample_parent_sku, monkeypatch):
+    monkeypatch.setattr(
+        generator_module,
+        "format_gold_standard_examples_bundle",
+        lambda max_examples=2: "",
+    )
+
+    _, user_prompt = build_split_prompt(sample_parent_sku)
+    assert "Gold Standard Examples" not in user_prompt
+
+
+def test_build_variant_prompt_includes_gold_examples_when_available(sample_parent_sku, monkeypatch):
+    monkeypatch.setattr(
+        generator_module,
+        "format_gold_standard_examples_bundle",
+        lambda max_examples=2: "GOLD_EXAMPLES_SENTINEL",
+    )
+
+    _, user_prompt = build_variant_prompt(sample_parent_sku, "Antique Brass", "google")
+    assert "## Gold Standard Examples" in user_prompt
+    assert "GOLD_EXAMPLES_SENTINEL" in user_prompt
 
 
 def test_candidate_schema_has_required_fields():

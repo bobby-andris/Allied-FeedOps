@@ -1,4 +1,7 @@
-from feedops.api.hybrid_generation import build_variant_adaptation_prompt
+from feedops.api.hybrid_generation import (
+    build_variant_adaptation_prompt,
+    validate_adapted_variant_content,
+)
 from feedops.api.prompt_loader import get_finish_list
 
 
@@ -32,3 +35,24 @@ def test_variant_description_prompt_does_not_include_legacy_finish_names():
     assert '"Antique Silver"' not in prompt
     assert '"Weathered Iron"' not in prompt
     assert '"French Gold"' not in prompt
+
+
+def test_validate_adapted_variant_content_rejects_speculative_comparison_claims():
+    errors = validate_adapted_variant_content(
+        content_type="description",
+        platform="google",
+        content="This 24-inch towel bar is better than competitor options.",
+    )
+
+    assert errors
+    assert any("speculative competitive claim" in error for error in errors)
+
+
+def test_validate_adapted_variant_content_accepts_grounded_description_copy():
+    errors = validate_adapted_variant_content(
+        content_type="description",
+        platform="google",
+        content="Solid brass construction with concealed mounting keeps towels organized in a compact 24-inch profile.",
+    )
+
+    assert errors == []

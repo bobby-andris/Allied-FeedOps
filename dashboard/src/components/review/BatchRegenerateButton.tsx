@@ -27,14 +27,39 @@ interface BatchResult {
     total_operations: number
     successful: number
     failed: number
+    with_validation_warnings?: number
+    no_change?: number
   }
   results?: Array<{
     sku: string
     platform: string
     content_type: string
     success: boolean
+    state?: 'completed' | 'no_change'
+    validation_errors?: string[]
+    actionable_message?: string | null
+    code?: string | null
+    step?: string | null
     error?: string
   }>
+}
+
+type BatchRegenerateErrorPayload = {
+  error?: string
+  actionable_message?: string | null
+  code?: string | null
+  step?: string | null
+}
+
+function formatFailureMessage(payload: BatchRegenerateErrorPayload, fallback: string): string {
+  const parts: string[] = [payload.error || fallback]
+  if (payload.actionable_message) {
+    parts.push(`Next step: ${payload.actionable_message}`)
+  }
+  if (process.env.NODE_ENV !== 'production' && (payload.code || payload.step)) {
+    parts.push(`(code=${payload.code ?? 'n/a'} step=${payload.step ?? 'n/a'})`)
+  }
+  return parts.join(' ')
 }
 
 export function BatchRegenerateButton({
@@ -80,11 +105,11 @@ export function BatchRegenerateButton({
         })
       }, 2000)
 
-      const data = await response.json()
+      const data = (await response.json()) as BatchResult & BatchRegenerateErrorPayload
       clearInterval(progressInterval)
 
       if (!response.ok) {
-        throw new Error(data.error || 'Batch regeneration failed')
+        throw new Error(formatFailureMessage(data, 'Batch regeneration failed'))
       }
 
       setResult(data)
@@ -100,6 +125,12 @@ export function BatchRegenerateButton({
         toast.warning(
           `Regeneration completed with ${data.summary.failed} failures out of ${data.summary.total_operations}`
         )
+      }
+
+      if ((data.summary.with_validation_warnings || 0) > 0) {
+        toast.warning('Some regenerated content has validation warnings', {
+          description: `${data.summary.with_validation_warnings} item(s) need review before approval.`,
+        })
       }
 
       onComplete?.()
@@ -185,6 +216,14 @@ export function BatchRegenerateButton({
                   <span className="font-medium text-red-600">{result.summary.failed}</span>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+                <div>
+                  No-change retries: <span className="font-medium">{result.summary.no_change || 0}</span>
+                </div>
+                <div>
+                  Validation warnings: <span className="font-medium">{result.summary.with_validation_warnings || 0}</span>
+                </div>
+              </div>
 
               {/* Show failed items if any */}
               {result.summary.failed > 0 && result.results && (
@@ -195,6 +234,7 @@ export function BatchRegenerateButton({
                     .map((r, i) => (
                       <div key={i} className="text-red-600">
                         {r.sku}/{r.platform}/{r.content_type}: {r.error || 'Unknown error'}
+                        {r.actionable_message ? ` Next step: ${r.actionable_message}` : ''}
                       </div>
                     ))}
                   {result.results.filter((r) => !r.success).length > 10 && (
@@ -202,6 +242,20 @@ export function BatchRegenerateButton({
                       ...and {result.results.filter((r) => !r.success).length - 10} more
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Show validation warning items if any */}
+              {(result.summary.with_validation_warnings || 0) > 0 && result.results && (
+                <div className="max-h-32 overflow-auto text-xs space-y-1 p-2 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded">
+                  {result.results
+                    .filter((r) => r.success && (r.validation_errors?.length || 0) > 0)
+                    .slice(0, 10)
+                    .map((r, i) => (
+                      <div key={`warn-${i}`} className="text-amber-700 dark:text-amber-300">
+                        {r.sku}/{r.platform}/{r.content_type}: {(r.validation_errors || []).join('; ')}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>

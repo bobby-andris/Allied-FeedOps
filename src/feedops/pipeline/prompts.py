@@ -490,6 +490,7 @@ USER_PROMPT_TEMPLATE = """\
 
 {keyword_placement}
 {category_guidance}
+{gold_examples}
 Respond with valid JSON matching this schema:
 {schema}
 
@@ -506,6 +507,7 @@ OPTIMIZATION_TEMPLATE = """
 
 {keyword_placement}
 {category_guidance}
+{gold_examples}
 ## Output Format
 Respond with valid JSON matching this schema:
 {schema}
@@ -556,6 +558,7 @@ VARIANT_USER_PROMPT_TEMPLATE = """\
 {keyword_placement}
 {category_guidance}
 {finish_context}
+{gold_examples}
 Respond with valid JSON matching this schema:
 {schema}
 

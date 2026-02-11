@@ -14,7 +14,7 @@ import { CreateBatchModal } from './CreateBatchModal'
 interface BatchStats {
   totalBatches: number
   draftCount: number
-  completedCount: number
+  publishedCount: number
   skusPublished: number
 }
 
@@ -25,9 +25,10 @@ interface BatchesClientProps {
 
 const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800',
-  ready: 'bg-blue-100 text-blue-800',
+  pending: 'bg-blue-100 text-blue-800',
   executing: 'bg-yellow-100 text-yellow-800',
-  completed: 'bg-green-100 text-green-800',
+  published: 'bg-green-100 text-green-800',
+  partial: 'bg-amber-100 text-amber-800',
   failed: 'bg-red-100 text-red-800',
 }
 
@@ -57,7 +58,10 @@ export function BatchesClient({ batches, stats }: BatchesClientProps) {
       } else {
         const error = await response.json()
         console.error('Publish failed:', error)
-        alert(`Publish failed: ${error.error || 'Unknown error'}`)
+        alert(
+          `Publish failed: ${error.error || 'Unknown error'}`
+          + (error.actionable_message ? ` Next step: ${error.actionable_message}` : '')
+        )
       }
     } catch (error) {
       console.error('Publish error:', error)
@@ -113,10 +117,10 @@ export function BatchesClient({ batches, stats }: BatchesClientProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">Published</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completedCount}</div>
+            <div className="text-2xl font-bold text-green-600">{stats.publishedCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -179,17 +183,17 @@ export function BatchesClient({ batches, stats }: BatchesClientProps) {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-                        {batch.status === 'draft' && (
+                        {(batch.status === 'draft' || batch.status === 'pending' || batch.status === 'failed' || batch.status === 'partial') && (
                           <Button 
                             size="sm"
                             onClick={() => handlePublish(batch.batch_id)}
                             disabled={actionLoading === batch.batch_id}
                           >
                             <Play className="h-4 w-4 mr-1" />
-                            Publish
+                            {batch.status === 'failed' || batch.status === 'partial' ? 'Retry' : 'Publish'}
                           </Button>
                         )}
-                        {batch.status === 'completed' && (
+                        {batch.status === 'published' && (
                           <Button variant="outline" size="sm" className="text-yellow-600">
                             <RotateCcw className="h-4 w-4" />
                           </Button>

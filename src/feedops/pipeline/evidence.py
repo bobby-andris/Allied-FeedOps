@@ -1,4 +1,5 @@
 """Evidence table builder for LLM prompts."""
+import logging
 import re
 from feedops.models import ParentSKU
 from feedops.integrations.keyword_bank import get_external_keywords
@@ -11,6 +12,8 @@ from feedops.integrations.search_query_insights import (
 from feedops.pipeline.enrichment import Evidence, enrich_product
 from feedops.pipeline.collection_descriptions import is_known_collection_name
 from feedops.pipeline.size_matrix import build_size_matrix
+
+logger = logging.getLogger(__name__)
 
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
@@ -280,14 +283,40 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
             ))
 
     # Search query insights: actual search terms customers use (from Google Ads)
+    search_queries: list[dict] = []
     try:
         search_queries = fetch_search_queries_for_master_sku(parent_sku.master_sku)
         if search_queries:
             search_evidence = format_search_queries_for_evidence(search_queries, "master")
             evidence.extend(search_evidence)
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Failed to fetch search queries: {e}")
+        logger.warning(f"Failed to fetch search queries: {e}")
+
+    # Keyword gaps: high-volume category-relevant terms missing from the current title.
+    # Search-intent guidance only (not product specification claims).
+    try:
+        if search_queries:
+            from feedops.pipeline.keyword_gaps import build_keyword_gap_evidence_rows
+
+            evidence.extend(
+                build_keyword_gap_evidence_rows(parent_sku, search_queries)
+            )
+    except Exception as e:
+        logger.warning(f"Failed to build keyword gap evidence: {e}")
+
+    # Competitor evidence: category language patterns and source mix.
+    # Strictly sanitized to avoid speculative "better than competitors" phrasing.
+    try:
+        if parent_sku.category:
+            from feedops.pipeline.competitor_evidence import (
+                build_competitor_evidence,
+                build_competitor_evidence_rows,
+            )
+
+            competitor = build_competitor_evidence(parent_sku.category)
+            evidence.extend(build_competitor_evidence_rows(competitor))
+    except Exception as e:
+        logger.warning(f"Failed to build competitor evidence: {e}")
 
     # On-the-fly enrichment: design context, functional features, competitive positioning
     enrichment = enrich_product(parent_sku)
