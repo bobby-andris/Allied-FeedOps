@@ -42,7 +42,7 @@ Platform readiness is computed from stored state (no hidden UI state):
   - `generated_content.approved_content` for platform `title` and `description`
 - Variant content readiness (Google/Bing):
   - `variant_approvals` has all finishes approved for title+description
-- Variant image readiness (Google/Bing):
+- Variant image readiness (Bing only):
   - `variant_lifestyle_images` has one approved + user-selected image per finish
 - Shopify image readiness:
   - `product_lifestyle_images` has one approved + user-selected master image
@@ -68,7 +68,8 @@ It now computes readiness and validates only the requested platform subset.
 
 ### Lifestyle image semantics
 
-- Google/Bing: variant image approval/selection remains finish-level and is required for readiness.
+- Google: variant image approval/selection remains finish-level in review, but is **not required** for Google publish readiness.
+- Bing: variant image approval/selection remains finish-level and is required for readiness.
 - Shopify: master image readiness is product-level.
   - Selecting a Shopify master image can now clone a previously approved+selected variant image into `product_lifestyle_images` when needed, removing the hidden “second approval” feeling.
 

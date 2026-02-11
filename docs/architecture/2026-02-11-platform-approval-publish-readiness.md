@@ -42,6 +42,7 @@ Inputs:
   - `generated_content.approved_content` by `{platform, content_type in [title, description]}`
 - Variant readiness (Google/Bing):
   - `variant_approvals` complete finish coverage with approved title+description
+- Variant image readiness (Bing only):
   - `variant_lifestyle_images` complete finish coverage with approved+selected image
 - Shopify readiness:
   - `product_lifestyle_images` has approved+selected master image
@@ -71,7 +72,11 @@ Error contract for readiness failures:
 
 ## Lifestyle image semantics
 
-Google/Bing:
+Google:
+
+- Variant image review remains finish-scoped, but variant image readiness is not required for Google publish.
+
+Bing:
 
 - Variant image readiness remains finish-scoped and required.
 

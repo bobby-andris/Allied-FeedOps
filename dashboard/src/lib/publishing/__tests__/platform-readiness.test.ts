@@ -30,7 +30,7 @@ describe('computePlatformReadiness + validateRequestedPlatformsReady', () => {
           shopify: { titleApproved: false, descriptionApproved: false },
         },
         variantApprovalsReady: true,
-        variantImagesReady: true,
+        variantImagesReady: false,
         shopifyMasterImageReady: false,
       }),
     )
@@ -87,6 +87,24 @@ describe('computePlatformReadiness + validateRequestedPlatformsReady', () => {
     expect(gate.ok).toBe(false)
     expect(gate.errors.length).toBeGreaterThanOrEqual(3)
     expect(gate.errors.every((error) => error.actionableMessage.length > 0)).toBe(true)
+  })
+
+  it('bing still requires variant image readiness', () => {
+    const readiness = computePlatformReadiness(
+      makeState({
+        content: {
+          google: { titleApproved: true, descriptionApproved: true },
+          bing: { titleApproved: true, descriptionApproved: true },
+          shopify: { titleApproved: false, descriptionApproved: false },
+        },
+        variantApprovalsReady: true,
+        variantImagesReady: false,
+      }),
+    )
+
+    expect(readiness.google.ready).toBe(true)
+    expect(readiness.bing.ready).toBe(false)
+    expect(readiness.bing.blockers.some((blocker) => blocker.code === 'bing_variant_image_not_selected')).toBe(true)
   })
 
   it('shopify readiness is independent from variant image approvals', () => {

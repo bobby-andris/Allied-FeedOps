@@ -21,10 +21,17 @@ describe('approval copy clarity', () => {
   })
 
   it('publish readiness help text distinguishes platform and variant scopes', () => {
-    const helpText = getPublishReadinessHelpText('google')
+    const googleHelpText = getPublishReadinessHelpText('google')
+    const bingHelpText = getPublishReadinessHelpText('bing')
 
-    expect(helpText).toMatch(/platform/i)
-    expect(helpText).toMatch(/variant/i)
-    expect(helpText).toMatch(/google/i)
+    expect(googleHelpText).toMatch(/platform/i)
+    expect(googleHelpText).toMatch(/variant/i)
+    expect(googleHelpText).toMatch(/google/i)
+    expect(googleHelpText).not.toMatch(/image/i)
+
+    expect(bingHelpText).toMatch(/platform/i)
+    expect(bingHelpText).toMatch(/variant/i)
+    expect(bingHelpText).toMatch(/image/i)
+    expect(bingHelpText).toMatch(/bing/i)
   })
 })

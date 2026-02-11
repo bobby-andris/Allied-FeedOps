@@ -25,7 +25,7 @@ Readiness is computed from persisted data in `src/lib/publishing/platform-readin
 
 - `generated_content.approved_content` title+description per platform
 - `variant_approvals` finish coverage for Google/Bing
-- `variant_lifestyle_images` approved+selected coverage per finish for Google/Bing
+- `variant_lifestyle_images` approved+selected coverage per finish for Bing
 - `product_lifestyle_images` approved+selected master image for Shopify
 
 ### Publish gating by selected platform(s)
@@ -40,10 +40,15 @@ Readiness is computed from persisted data in `src/lib/publishing/platform-readin
 
 ## Lifestyle image behavior
 
-### Google / Bing
+### Google
+
+- Variant image approval + user selection remains available at finish-level.
+- Google publish readiness does not require variant image coverage.
+
+### Bing
 
 - Variant image approval + user selection remains finish-level.
-- Readiness requires one approved+selected variant image per finish.
+- Bing readiness requires one approved+selected variant image per finish.
 
 ### Shopify
 

@@ -21,7 +21,8 @@ Core behavior changes:
 2. Publish gate is deterministic and platform-specific:
    - `POST /api/publish/sku` validates only requested `platforms[]`
 3. Lifestyle semantics are aligned by platform:
-   - Google/Bing require variant image coverage by finish
+   - Google does not require variant image coverage
+   - Bing requires variant image coverage by finish
    - Shopify requires one selected master product image
 
 No schema migration is required for this release.
@@ -86,7 +87,7 @@ Required per finish:
 - `title_approved = true`
 - `description_approved = true`
 
-### Google/Bing variant image readiness
+### Bing variant image readiness
 
 Data source:
 
@@ -154,7 +155,7 @@ where master_sku = 'CS-1'
   and title_approved = true
   and description_approved = true;
 
--- variant image approvals by finish
+-- bing variant image approvals by finish
 select count(distinct finish) as approved_selected_variant_image_finishes
 from public.variant_lifestyle_images
 where master_sku = 'CS-1'
@@ -190,16 +191,14 @@ Expected success contract for ready platform(s):
 
 Most common causes:
 
-- variant image coverage is incomplete
 - variant content coverage is incomplete across finishes
 
 How to confirm:
 
-- readiness error includes `google_variant_image_not_selected` or `google_variant_content_not_approved`
+- readiness error includes `google_variant_content_not_approved`
 
 Fix:
 
-- approve/select one variant image per required finish
 - bulk approve variant content per finish
 
 ### Symptom: "Shopify says not ready even though variant image is approved"
@@ -218,10 +217,12 @@ Fix:
 Cause:
 
 - platform approvals are independent; Bing title/description may not be approved
+- Bing also requires variant image coverage
 
 Fix:
 
 - use `Approve Bing Content for Publishing`
+- approve/select one variant image per required finish for Bing
 - verify `generated_content` rows for `platform='bing'` are approved
 
 ### Symptom: "Publish button enabled, but request fails"

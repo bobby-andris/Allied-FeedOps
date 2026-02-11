@@ -68,11 +68,14 @@ function withPlatformSpecificBlockers(
         actionableMessage: `Approve all ${platform} variant content before publishing ${platform}.`,
       })
     }
+  }
+
+  if (platform === 'bing') {
     if (!state.variantImagesReady) {
       baseBlockers.push({
-        code: `${platform}_variant_image_not_selected`,
-        reason: `${platform} variant image selection is incomplete`,
-        actionableMessage: `Select and approve one variant image per finish before publishing ${platform}.`,
+        code: 'bing_variant_image_not_selected',
+        reason: 'bing variant image selection is incomplete',
+        actionableMessage: 'Select and approve one variant image per finish before publishing bing.',
       })
     }
   }

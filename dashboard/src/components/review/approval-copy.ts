@@ -15,9 +15,16 @@ export function getVariantApprovalActionText(platform: Extract<Platform, 'google
 }
 
 export function getPublishReadinessHelpText(platform: Platform): string {
+  if (platform === 'google') {
+    return 'Google publish readiness checks platform content approval plus variant content readiness.'
+  }
+
+  if (platform === 'bing') {
+    return 'Bing publish readiness checks platform content approval plus variant content and variant image readiness.'
+  }
+
   if (platform === 'shopify') {
     return 'Shopify publish readiness checks platform content approval and a selected Shopify master image.'
   }
-
-  return `${platformDisplay(platform)} publish readiness checks platform content approval plus variant content and variant image readiness.`
+  return `${platformDisplay(platform)} publish readiness checks platform content approval.`
 }
