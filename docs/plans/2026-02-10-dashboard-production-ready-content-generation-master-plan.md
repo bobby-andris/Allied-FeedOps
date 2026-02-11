@@ -82,6 +82,38 @@ Required per-task status update format:
 | 2026-02-11 | Phase 8 | 8.3 Stop-condition thresholds + rollback instructions finalized with verified query/CLI commands | DONE | `.venv/bin/python` threshold checks on `batch_generation_job_skus`, `publish_events`, `sku_approvals` (pass); `.venv/bin/feedops publish-history --limit 3` (pass); `.venv/bin/feedops rollback --sku FT-16 --platform shopify --dry-run` and non-dry-run rollback command execution path validated (no patch found, expected) |
 | 2026-02-11 | Phase 8 | 8.4 Dry-run + spot-check verification bundle documented and command-validated in this environment | DONE | `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` command set executed; local unauthenticated `POST /api/sku-selection/generate` guard check returned `307` with `/login` (expected), confirming write-route auth behavior |
 | 2026-02-11 | Phase 7 | Shopify generation-path parity audit + full-generation history linkage fix across platforms | DONE | `.venv/bin/pytest -q` (pass: `401 passed, 1 skipped`), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass: `SUPABASE_CANARY_OK`, dashboard lint/build `OK`), live `SB-16` run via `optimize_single_sku` with DB verification (Google/Bing placeholder + finish sentence persistence + Shopify outputs + linked history IDs + model/prompt hash) |
+| 2026-02-11 | Phase 7 + Phase 6 | Production parity hardening + publish safety gates + review queue remediation pass | DONE | commit `23e1cfd6` pushed to `origin/master`; `.venv/bin/pytest -q` (pass: `434 passed, 1 skipped`), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass: `SUPABASE_CANARY_OK`, `catalog_count=75770`, `probe_sku=1031/30`, `probe_variant_count=28`, `prompt_hash=530a11ec32d54c46`), production smoke (`/health`, `/optimize-sku` dry run, `/regenerate`, `/hybrid-generate`, `/batch-status`) all returned expected success/processing states |
+
+### 2026-02-11 Production Readiness Verification Log (UTC)
+
+- Timestamp window: `2026-02-11 10:36:44Z` to `2026-02-11 11:03:00Z` (latest run marker captured at `2026-02-11 11:00:57Z` via `date -u`).
+- Representative SKUs used for live verification: `SB-16`, `1051`, `920D-6`, `WP-2TB-16-GAL`, plus full review remediation sweep over active queue SKUs.
+- Routes and runtime paths validated:
+  - Pipeline endpoints: `GET /health`, `POST /optimize-sku`, `POST /regenerate`, `POST /hybrid-generate`, `GET /batch-status/{job_id}`.
+  - Dashboard proxy/generation/publish paths touched in this pass: `dashboard/src/app/api/sku-selection/generate/route.ts`, `dashboard/src/app/api/sku-selection/generate-hybrid/route.ts`, `dashboard/src/app/api/regenerate/route.ts`, `dashboard/src/app/api/publish/sku/route.ts`, `dashboard/src/app/api/publish/batch/route.ts`.
+  - Python generation/parity paths touched in this pass: `src/feedops/api/main.py`, `src/feedops/api/hybrid_generation.py`, `src/feedops/pipeline/finish_sentence_placeholder.py`.
+- Metadata/linkage fields explicitly checked in live Supabase records:
+  - `generated_content.generation_model`, `generated_content.generation_prompt_hash`, `generated_content.generation_timestamp`.
+  - `regeneration_history.generated_content_id`, `regeneration_history.prompt_hash`, `regeneration_history.model_version`.
+  - `variant_finish_sentences.finish_sentences` cardinality for Google/Bing (`len(json)` expected = `28`).
+- Metadata verification results snapshot:
+  - `SB-16` and `1051` latest generation rows show `generation_model=openai/gpt-5.2` and `generation_prompt_hash=530a11ec32d54c46`.
+  - `variant_finish_sentences` counts are `28` for `SB-16` (Google/Bing), `1051` (Google/Bing), and `920D-6` (Google/Bing).
+  - `regeneration_history` latest rows include non-null `generated_content_id` with current prompt hash/model fields.
+- Test/canary outputs for this pass:
+  - `.venv/bin/pytest -q` -> `434 passed, 1 skipped`.
+  - `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` -> `SUPABASE_CANARY_OK`, `catalog_count=75770`, `probe_sku=1031/30`, `probe_variant_count=28`, `prompt_hash=530a11ec32d54c46`, dashboard lint/build `OK`.
+  - Targeted parity tests (new/updated): `tests/test_phase7_observability_reliability.py` and `tests/test_hybrid_generation_parity.py` fallback/placeholder cases pass.
+- Production smoke evidence:
+  - `GET /health` returned `{status:\"healthy\", service:\"feedops-pipeline\", version:\"1.0.0\", supabase_connected:true}`.
+  - `POST /optimize-sku` dry run (`SB-16`) returned success with message `Generated content for 3 platforms`.
+  - `POST /regenerate` (`SB-16`, Google description) returned success with `model=openai/gpt-5.2`, `prompt_hash=530a11ec32d54c46`, placeholder present exactly once, and finish sentence count `28`.
+  - `POST /hybrid-generate` returned queued `job_id`; `GET /batch-status/{job_id}` returned `processing` with expected counters.
+- Review queue remediation evidence:
+  - Before remediation (`/tmp/review_quality_audit_before.json`): `strict_ready=9/92`, `not_ready=83`, with widespread missing placeholders/finish-sentence completeness/Shopify title brand violations.
+  - After targeted regenerate sweep (`/tmp/review_quality_targeted_regen.json` + `/tmp/review_quality_audit_after.json`): `strict_ready=90/92`, `not_ready=2`, `223` successful operations, `5` failed operations (all `WP-2TB-16-GAL` `404`).
+  - Final after stale content correction (`/tmp/review_quality_audit_after_final.json`): `strict_ready=91/92`, `not_ready=1` (`WP-2TB-16-GAL` only remaining blocker; missing slots + finish sentence rows).
+  - Generic finish-count claim issue class is absent in final issue counts (remaining issues are slot and finish-sentence completeness for the single blocked SKU).
 
 ---
 
