@@ -79,41 +79,41 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | TBD | Pending |
-| API-02 | TBD | Pending |
-| API-03 | TBD | Pending |
-| API-04 | TBD | Pending |
-| API-05 | TBD | Pending |
-| DISC-01 | TBD | Pending |
-| DISC-02 | TBD | Pending |
-| DISC-03 | TBD | Pending |
-| DISC-04 | TBD | Pending |
-| DISC-05 | TBD | Pending |
-| DISC-06 | TBD | Pending |
-| DISC-07 | TBD | Pending |
-| DISC-08 | TBD | Pending |
-| DISC-09 | TBD | Pending |
-| DISC-10 | TBD | Pending |
-| DISC-11 | TBD | Pending |
-| DISC-12 | TBD | Pending |
-| SAMP-01 | TBD | Pending |
-| SAMP-02 | TBD | Pending |
-| SAMP-03 | TBD | Pending |
-| SAMP-04 | TBD | Pending |
-| SAMP-05 | TBD | Pending |
-| SAMP-06 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| DOC-02 | TBD | Pending |
-| DOC-03 | TBD | Pending |
-| DOC-04 | TBD | Pending |
-| DOC-05 | TBD | Pending |
-| DOC-06 | TBD | Pending |
+| API-01 | Phase 1 | Pending |
+| API-02 | Phase 1 | Pending |
+| API-03 | Phase 1 | Pending |
+| API-04 | Phase 1 | Pending |
+| API-05 | Phase 1 | Pending |
+| DISC-01 | Phase 2 | Pending |
+| DISC-02 | Phase 2 | Pending |
+| DISC-03 | Phase 2 | Pending |
+| DISC-04 | Phase 2 | Pending |
+| DISC-05 | Phase 2 | Pending |
+| DISC-06 | Phase 2 | Pending |
+| DISC-07 | Phase 2 | Pending |
+| DISC-08 | Phase 2 | Pending |
+| DISC-09 | Phase 2 | Pending |
+| DISC-10 | Phase 2 | Pending |
+| DISC-11 | Phase 2 | Pending |
+| DISC-12 | Phase 2 | Pending |
+| SAMP-01 | Phase 3 | Pending |
+| SAMP-02 | Phase 3 | Pending |
+| SAMP-03 | Phase 3 | Pending |
+| SAMP-04 | Phase 3 | Pending |
+| SAMP-05 | Phase 3 | Pending |
+| SAMP-06 | Phase 3 | Pending |
+| DOC-01 | Phase 4 | Pending |
+| DOC-02 | Phase 4 | Pending |
+| DOC-03 | Phase 4 | Pending |
+| DOC-04 | Phase 4 | Pending |
+| DOC-05 | Phase 4 | Pending |
+| DOC-06 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 29 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 29 ⚠️
+- Mapped to phases: 29 (100% coverage)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after initial definition*
+*Last updated: 2026-02-11 after roadmap creation*
