@@ -18,6 +18,7 @@ import {
   generateVariantTitle,
   generateVariantDescription,
 } from "@/lib/variant-content"
+import { getVariantApprovalActionText } from './approval-copy'
 
 interface VariantContentGridProps {
   sku: string
@@ -122,6 +123,7 @@ export function VariantContentGrid({
         body: JSON.stringify({
           master_sku: sku,
           finishes,
+          platform,
           action: 'approve',
           title_approved: true,
           description_approved: true,
@@ -130,7 +132,7 @@ export function VariantContentGrid({
 
       if (!response.ok) throw new Error('Failed to approve variants')
 
-      toast.success(`Approved ${finishes.length} variant(s)`)
+      toast.success(`Approved ${finishes.length} ${platform.toUpperCase()} variant content row(s)`)
       setSelectedVariants(new Set())
       router.refresh()
       onApprovalChange()
@@ -159,6 +161,7 @@ export function VariantContentGrid({
         body: JSON.stringify({
           master_sku: sku,
           finishes,
+          platform,
           action: 'reject',
           title_approved: false,
           description_approved: false,
@@ -167,7 +170,7 @@ export function VariantContentGrid({
 
       if (!response.ok) throw new Error('Failed to reject variants')
 
-      toast.success(`Rejected ${finishes.length} variant(s)`)
+      toast.success(`Rejected ${finishes.length} ${platform.toUpperCase()} variant content row(s)`)
       setSelectedVariants(new Set())
       router.refresh()
       onApprovalChange()
@@ -258,7 +261,7 @@ export function VariantContentGrid({
               <Badge variant="outline">{platform.toUpperCase()}</Badge>
             </CardTitle>
             <CardDescription>
-              {stats.approved}/{stats.total} approved
+              {stats.approved}/{stats.total} approved for {platform.toUpperCase()} variant publish scope
               {stats.rejected > 0 && ` • ${stats.rejected} rejected`}
               {stats.pending > 0 && ` • ${stats.pending} pending`}
             </CardDescription>
@@ -284,7 +287,7 @@ export function VariantContentGrid({
                   ) : (
                     <XCircle className="h-4 w-4 mr-2" />
                   )}
-                  Reject ({selectedVariants.size})
+                  Reject Selected {platform.toUpperCase()} Variants ({selectedVariants.size})
                 </Button>
                 <Button
                   size="sm"
@@ -297,7 +300,7 @@ export function VariantContentGrid({
                   ) : (
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                   )}
-                  Approve ({selectedVariants.size})
+                  Approve Selected {platform.toUpperCase()} Variants ({selectedVariants.size})
                 </Button>
               </>
             ) : (
@@ -312,7 +315,7 @@ export function VariantContentGrid({
                 ) : (
                   <Check className="h-4 w-4 mr-2" />
                 )}
-                Approve All ({stats.total})
+                {getVariantApprovalActionText(platform)} ({stats.total})
               </Button>
             )}
           </div>

@@ -19,6 +19,8 @@ import { PublishButton } from "@/components/review/PublishButton"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
+import { computePlatformReadiness } from '@/lib/publishing/platform-readiness'
+import { getPublishReadinessHelpText } from './approval-copy'
 
 interface ContentRecord {
   id: string
@@ -27,6 +29,7 @@ interface ContentRecord {
   content_type: string
   baseline_content: string | null
   candidate_content: string | null
+  approved_content: string | null
   quality_score: number | null
   generation_model: string | null
   created_at: string
@@ -65,15 +68,6 @@ interface CurrentContentByPlatform {
   [platform: string]: { title: string | null; description: string | null }
 }
 
-interface ApprovalRecord {
-  master_sku: string
-  approval_status: string
-  title_approved: boolean | number | null
-  description_approved: boolean | number | null
-  image_approved: boolean | number | null
-  notes: string | null
-}
-
 interface PerformanceBaseline {
   master_sku: string
   platform: string
@@ -107,7 +101,6 @@ interface SkuReviewClientProps {
   sku: string
   content: ContentRecord[]
   images: ImageRecord[]
-  approval: ApprovalRecord | null
   variants: VariantIndex[]
   variantApprovals: VariantApproval[]
   productImages: ProductImageData | null
@@ -220,19 +213,22 @@ function ContentBlock({
 }
 
 // Status banner at top showing approval readiness
-function ApprovalStatusBanner({ approval, titleScore, descScore }: {
-  approval: ApprovalRecord | null
+function ApprovalStatusBanner({ platform, ready, blockers, titleScore, descScore }: {
+  platform: 'google' | 'bing' | 'shopify'
+  ready: boolean
+  blockers: Array<{ reason: string }>
   titleScore: number | null
   descScore: number | null
 }) {
-  const isApproved = approval?.approval_status === 'approved'
   const hasPoorQuality = (titleScore !== null && titleScore < 70) || (descScore !== null && descScore < 70)
 
-  if (isApproved) {
+  if (ready) {
     return (
       <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
         <CheckCircle2 className="h-5 w-5 text-green-600" />
-        <span className="font-medium text-green-900 dark:text-green-100">Approved and ready to publish</span>
+        <span className="font-medium text-green-900 dark:text-green-100">
+          {platform.charAt(0).toUpperCase() + platform.slice(1)} is ready to publish
+        </span>
       </div>
     )
   }
@@ -247,9 +243,18 @@ function ApprovalStatusBanner({ approval, titleScore, descScore }: {
   }
 
   return (
-    <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+    <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
       <Info className="h-5 w-5 text-blue-600" />
-      <span className="font-medium text-blue-900 dark:text-blue-100">Pending review</span>
+      <div className="space-y-1">
+        <div className="font-medium text-blue-900 dark:text-blue-100">
+          {platform.charAt(0).toUpperCase() + platform.slice(1)} is not publish-ready
+        </div>
+        {blockers.slice(0, 2).map((blocker, index) => (
+          <div key={`${blocker.reason}-${index}`} className="text-xs text-blue-900/90 dark:text-blue-100/90">
+            • {blocker.reason}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -295,7 +300,6 @@ export function SkuReviewClient({
   sku,
   content,
   images,
-  approval,
   variants,
   variantApprovals,
   productImages,
@@ -333,6 +337,57 @@ export function SkuReviewClient({
   const { title, description } = getContentByPlatform(content, selectedPlatform)
   const currentContent = currentContentByPlatform[selectedPlatform]
 
+  const isApprovedFlag = (value: unknown) => value === true || value === 1 || value === '1'
+
+  const requiredVariantFinishes = new Set(
+    variants
+      .map((variant) => variant.finish)
+      .filter((finish): finish is string => Boolean(finish))
+  )
+
+  const approvedVariantContentFinishes = new Set(
+    variantApprovals
+      .filter((approval) =>
+        approval.finish
+        && approval.approval_status === 'approved'
+        && isApprovedFlag(approval.title_approved)
+        && isApprovedFlag(approval.description_approved)
+      )
+      .map((approval) => approval.finish)
+  )
+
+  const selectedVariantImageFinishes = new Set(
+    images
+      .filter((image) => image.finish && image.approval_status === 'approved' && image.user_selected)
+      .map((image) => image.finish as string)
+  )
+
+  const shopifyMasterImageReady = images.some(
+    (image) => image.use_for_master && image.approval_status === 'approved' && image.user_selected
+  )
+
+  const contentByPlatform = {
+    google: {
+      titleApproved: content.some((c) => c.platform === 'google' && c.content_type === 'title' && Boolean(c.approved_content)),
+      descriptionApproved: content.some((c) => c.platform === 'google' && c.content_type === 'description' && Boolean(c.approved_content)),
+    },
+    bing: {
+      titleApproved: content.some((c) => c.platform === 'bing' && c.content_type === 'title' && Boolean(c.approved_content)),
+      descriptionApproved: content.some((c) => c.platform === 'bing' && c.content_type === 'description' && Boolean(c.approved_content)),
+    },
+    shopify: {
+      titleApproved: content.some((c) => c.platform === 'shopify' && c.content_type === 'title' && Boolean(c.approved_content)),
+      descriptionApproved: content.some((c) => c.platform === 'shopify' && c.content_type === 'description' && Boolean(c.approved_content)),
+    },
+  } as const
+
+  const platformReadiness = computePlatformReadiness({
+    content: contentByPlatform,
+    variantApprovalsReady: requiredVariantFinishes.size > 0 && approvedVariantContentFinishes.size >= requiredVariantFinishes.size,
+    variantImagesReady: requiredVariantFinishes.size > 0 && selectedVariantImageFinishes.size >= requiredVariantFinishes.size,
+    shopifyMasterImageReady,
+  })
+
   const titleIsTemplate = title?.candidate_content?.includes('{FINISH_NAME}') || false
   const descIsTemplate = description?.candidate_content?.includes('{FINISH_NAME}') || false
 
@@ -361,7 +416,7 @@ export function SkuReviewClient({
                 <p className="text-sm text-muted-foreground">Content Review</p>
               </div>
             </div>
-            <PublishButton sku={masterSku} approvalStatus={approval?.approval_status || 'pending'} />
+            <PublishButton sku={masterSku} platformReadiness={platformReadiness} />
           </div>
         </div>
       </header>
@@ -369,7 +424,9 @@ export function SkuReviewClient({
       <main className="container mx-auto px-4 py-6 max-w-5xl">
         {/* Status banner */}
         <ApprovalStatusBanner
-          approval={approval}
+          platform={selectedPlatform}
+          ready={platformReadiness[selectedPlatform].ready}
+          blockers={platformReadiness[selectedPlatform].blockers}
           titleScore={title?.quality_score || null}
           descScore={description?.quality_score || null}
         />
@@ -453,9 +510,9 @@ export function SkuReviewClient({
             {/* Approval actions */}
             <div className="flex items-center justify-between border-t pt-6">
               <div className="text-sm text-muted-foreground">
-                Review content quality and approve when ready
+                {getPublishReadinessHelpText(selectedPlatform)}
               </div>
-              <ApprovalActions sku={masterSku} finish={null} type="title" />
+              <ApprovalActions sku={masterSku} platform={selectedPlatform} scope="platform" />
             </div>
 
             {/* Variant content */}

@@ -230,7 +230,6 @@ export function LifestyleImageReview({
                 onApprove={handleImageApprove}
                 onReject={handleImageReject}
                 onUserSelect={handleUserSelect}
-                onUseForMaster={handleUseForMaster}
               />
             </TabsContent>
 
@@ -338,7 +337,6 @@ function VariantImageSection({
   onApprove,
   onReject,
   onUserSelect,
-  onUseForMaster,
 }: {
   imagesByFinish: Record<string, LifestyleImage[]>
   currentFinish: string | null
@@ -347,7 +345,6 @@ function VariantImageSection({
   onApprove: (imageId: string, imageType: 'product' | 'variant') => Promise<void>
   onReject: (imageId: string, imageType: 'product' | 'variant', reason?: string) => Promise<void>
   onUserSelect: (imageId: string, finish: string) => Promise<void>
-  onUseForMaster: (imageId: string) => Promise<void>
 }) {
   const finishesWithImages = Object.keys(imagesByFinish)
 
@@ -361,7 +358,7 @@ function VariantImageSection({
       <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
         <p className="text-sm">
           <strong>Variant Images</strong> are used for Google Merchant Center feeds where each
-          finish has its own listing. Review the AI recommendation, then select your preferred image.
+          finish has its own listing. Review approval and selection here for Google/Bing variant readiness.
         </p>
       </div>
 
@@ -434,7 +431,6 @@ function VariantImageSection({
               onApprove={() => onApprove(image.id, 'variant')}
               onReject={(reason) => onReject(image.id, 'variant', reason)}
               onUserSelect={() => onUserSelect(image.id, currentFinish)}
-              onUseForMaster={() => onUseForMaster(image.id)}
             />
           ))}
         </div>
@@ -517,7 +513,7 @@ function MasterImageSection({
       <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
         <p className="text-sm">
           <strong>Master SKU Image</strong> is used for Shopify product pages where all finishes
-          share one page. Select an approved variant image to use as the master.
+          share one page. Select an approved variant image here to complete Shopify image readiness.
         </p>
       </div>
 
@@ -608,7 +604,7 @@ function MasterImageSection({
                     className="w-full"
                     onClick={() => onUseForMaster(image.id)}
                   >
-                    Use for Master SKU
+                    Use as Shopify Master Image
                   </Button>
                 )}
               </div>

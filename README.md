@@ -23,6 +23,59 @@ The dashboard is the primary operator UI and should proxy generation to Python e
 
 This repo is built around a **Master SKU → many variants (finishes/options)** model. The “shippable unit” on shopping platforms is the **variant offerId/item_id**, so review and publishing are **variant-first** where possible.
 
+## Dashboard Approval + Publish Readiness (2026-02-11)
+
+The dashboard approval and publish model now uses deterministic, platform-specific readiness instead of a single global publish gate.
+
+### What changed
+
+- Approval UI now has one explicit platform approval action per tab (`Google`, `Bing`, `Shopify`).
+- Variant approval controls are explicitly labeled as **variant scope** (`Google/Bing variant content`).
+- Publish supports platform subsets independently (`google`, `bing`, `shopify`, or combinations) when those platforms are ready.
+- Publish is fail-closed per requested platform with actionable blockers.
+
+### Deterministic readiness model
+
+Platform readiness is computed from stored state (no hidden UI state):
+
+- Content approval:
+  - `generated_content.approved_content` for platform `title` and `description`
+- Variant content readiness (Google/Bing):
+  - `variant_approvals` has all finishes approved for title+description
+- Variant image readiness (Google/Bing):
+  - `variant_lifestyle_images` has one approved + user-selected image per finish
+- Shopify image readiness:
+  - `product_lifestyle_images` has one approved + user-selected master image
+
+### Publish API behavior
+
+`POST /api/publish/sku` no longer hard-blocks all publishing on `sku_approvals.approval_status='approved'`.
+It now computes readiness and validates only the requested platform subset.
+
+- Success: requested platforms that are ready can publish independently.
+- Failure: returns `409` with:
+  - `code: "publish_platform_not_ready"`
+  - `step: "platform_readiness"`
+  - `readiness_errors[]` containing `platform`, `code`, `reason`, `actionableMessage`
+
+### Approval API behavior
+
+- `PATCH /api/approvals`
+  - Supports optional `platform` to snapshot approved content per platform.
+  - Platform-scoped approve requests still transition approved content even if global booleans were already true.
+- `POST /api/variants/approvals/bulk`
+  - Supports optional `platform` (currently `google | bing`) for clearer scope and messaging.
+
+### Lifestyle image semantics
+
+- Google/Bing: variant image approval/selection remains finish-level and is required for readiness.
+- Shopify: master image readiness is product-level.
+  - Selecting a Shopify master image can now clone a previously approved+selected variant image into `product_lifestyle_images` when needed, removing the hidden “second approval” feeling.
+
+See `docs/architecture/2026-02-11-platform-approval-publish-readiness.md` for full details.
+For operations, incident response, and rollback procedures, use:
+`docs/troubleshooting/2026-02-11-platform-readiness-ops-runbook.md`.
+
 ## Core Concepts
 
 ### Master SKU vs Variant

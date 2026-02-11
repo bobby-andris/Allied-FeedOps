@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -20,42 +20,93 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { Loader2, Rocket, CheckCircle2, XCircle } from "lucide-react"
 import { toast } from 'sonner'
+import type { Platform } from '@/lib/publishing/types'
+import type { PlatformReadinessByPlatform } from '@/lib/publishing/platform-readiness'
 
 interface PublishButtonProps {
   sku: string
-  approvalStatus: string | null
+  // New readiness-aware mode
+  platformReadiness?: PlatformReadinessByPlatform
+  // Backward-compatible props
+  approvalStatus?: string | null
   hasGoogleContent?: boolean
+  hasBingContent?: boolean
   hasShopifyContent?: boolean
 }
 
 type Environment = 'production' | 'staging'
-type Platform = 'google' | 'shopify'
 
 interface PublishResult {
   platform: Platform
   success: boolean
   error?: string
+  code?: string
+  actionable_message?: string
   details?: Record<string, unknown>
 }
 
-export function PublishButton({
-  sku,
+function fallbackReadinessFromLegacyProps({
   approvalStatus,
   hasGoogleContent = true,
+  hasBingContent = false,
   hasShopifyContent = true,
-}: PublishButtonProps) {
+}: Pick<PublishButtonProps, 'approvalStatus' | 'hasGoogleContent' | 'hasBingContent' | 'hasShopifyContent'>): PlatformReadinessByPlatform {
+  const globallyApproved = approvalStatus === 'approved'
+  return {
+    google: {
+      ready: globallyApproved && hasGoogleContent,
+      blockers: globallyApproved && hasGoogleContent
+        ? []
+        : [{ code: 'legacy_not_ready', reason: 'Google is not approved yet', actionableMessage: 'Approve Google content before publishing.' }],
+    },
+    bing: {
+      ready: globallyApproved && hasBingContent,
+      blockers: globallyApproved && hasBingContent
+        ? []
+        : [{ code: 'legacy_not_ready', reason: 'Bing is not approved yet', actionableMessage: 'Approve Bing content before publishing.' }],
+    },
+    shopify: {
+      ready: globallyApproved && hasShopifyContent,
+      blockers: globallyApproved && hasShopifyContent
+        ? []
+        : [{ code: 'legacy_not_ready', reason: 'Shopify is not approved yet', actionableMessage: 'Approve Shopify content before publishing.' }],
+    },
+  }
+}
+
+export function PublishButton(props: PublishButtonProps) {
+  const {
+    sku,
+    platformReadiness,
+    approvalStatus,
+    hasGoogleContent,
+    hasBingContent,
+    hasShopifyContent,
+  } = props
+
+  const readiness = useMemo(
+    () => platformReadiness ?? fallbackReadinessFromLegacyProps({
+      approvalStatus,
+      hasGoogleContent,
+      hasBingContent,
+      hasShopifyContent,
+    }),
+    [platformReadiness, approvalStatus, hasGoogleContent, hasBingContent, hasShopifyContent],
+  )
+
+  const initialPlatforms = useMemo<Platform[]>(
+    () => (['google', 'bing', 'shopify'] as Platform[]).filter((platform) => readiness[platform].ready),
+    [readiness],
+  )
+
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [environment, setEnvironment] = useState<Environment>('production')
-  const [platforms, setPlatforms] = useState<Platform[]>(['google', 'shopify'])
+  const [platforms, setPlatforms] = useState<Platform[]>(initialPlatforms)
   const [results, setResults] = useState<PublishResult[] | null>(null)
-
-  // Only show if SKU is approved
-  if (approvalStatus !== 'approved') {
-    return null
-  }
 
   const togglePlatform = (platform: Platform) => {
     setPlatforms((prev) =>
@@ -67,7 +118,7 @@ export function PublishButton({
 
   const handlePublish = async () => {
     if (platforms.length === 0) {
-      toast.error('Please select at least one platform')
+      toast.error('Select at least one platform to publish')
       return
     }
 
@@ -88,21 +139,33 @@ export function PublishButton({
       const data = await response.json()
 
       if (!response.ok) {
+        if (Array.isArray(data.readiness_errors) && data.readiness_errors.length > 0) {
+          const readinessResults: PublishResult[] = data.readiness_errors.map((error: {
+            platform: Platform
+            reason: string
+            code: string
+            actionableMessage: string
+          }) => ({
+            platform: error.platform,
+            success: false,
+            error: error.reason,
+            code: error.code,
+            actionable_message: error.actionableMessage,
+          }))
+          setResults(readinessResults)
+        }
         throw new Error(data.error || 'Publish failed')
       }
 
       setResults(data.results)
 
-      // Show toast with summary
       const successful = data.summary?.successful || 0
       const failed = data.summary?.failed || 0
 
       if (failed === 0) {
         toast.success(
           `Published to ${successful} platform${successful > 1 ? 's' : ''} successfully`,
-          {
-            description: platforms.join(', '),
-          }
+          { description: platforms.join(', ') },
         )
       } else if (successful === 0) {
         toast.error('Publishing failed', {
@@ -116,7 +179,6 @@ export function PublishButton({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Publishing failed'
       toast.error(message)
-      setResults(null)
     } finally {
       setLoading(false)
     }
@@ -130,16 +192,15 @@ export function PublishButton({
           Publish
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Publish to Production</DialogTitle>
+          <DialogTitle>Publish Platform Subset</DialogTitle>
           <DialogDescription>
-            Push approved content for SKU {sku} to selected platforms
+            Publish SKU {sku} to ready platforms only. Unready selections will fail with exact blockers.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {/* Environment selector */}
           <div className="space-y-2">
             <Label>Environment</Label>
             <Select
@@ -157,75 +218,73 @@ export function PublishButton({
             </Select>
           </div>
 
-          {/* Platform checkboxes */}
           <div className="space-y-3">
             <Label>Platforms</Label>
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="google"
-                  checked={platforms.includes('google')}
-                  onCheckedChange={() => togglePlatform('google')}
-                  disabled={loading || !hasGoogleContent}
-                />
-                <label
-                  htmlFor="google"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Google Shopping (GMC Sheets)
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="shopify"
-                  checked={platforms.includes('shopify')}
-                  onCheckedChange={() => togglePlatform('shopify')}
-                  disabled={loading || !hasShopifyContent}
-                />
-                <label
-                  htmlFor="shopify"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Shopify
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="bing"
-                  checked={false}
-                  disabled={true}
-                />
-                <label
-                  htmlFor="bing"
-                  className="text-sm font-medium leading-none opacity-50"
-                >
-                  Bing (coming soon)
-                </label>
-              </div>
+              {(['google', 'bing', 'shopify'] as Platform[]).map((platform) => {
+                const ready = readiness[platform].ready
+                const blockers = readiness[platform].blockers
+
+                return (
+                  <div key={platform} className="rounded-md border p-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={platform}
+                        checked={platforms.includes(platform)}
+                        onCheckedChange={() => togglePlatform(platform)}
+                        disabled={loading}
+                      />
+                      <label
+                        htmlFor={platform}
+                        className="text-sm font-medium capitalize leading-none"
+                      >
+                        {platform}
+                      </label>
+                      <Badge variant={ready ? 'default' : 'secondary'}>
+                        {ready ? 'Ready' : 'Not Ready'}
+                      </Badge>
+                    </div>
+                    {!ready && blockers.length > 0 && (
+                      <div className="mt-2 text-xs text-muted-foreground space-y-1">
+                        {blockers.slice(0, 2).map((blocker) => (
+                          <div key={`${platform}-${blocker.code}`}>• {blocker.reason}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {/* Results */}
           {results && (
             <div className="space-y-2 pt-2 border-t">
               <Label>Results</Label>
-              <div className="space-y-1">
-                {results.map((result) => (
+              <div className="space-y-2">
+                {results.map((result, index) => (
                   <div
-                    key={result.platform}
-                    className="flex items-center justify-between text-sm"
+                    key={`${result.platform}-${result.code ?? result.error ?? 'result'}-${index}`}
+                    className="rounded-md border p-2 text-sm"
                   >
-                    <span className="capitalize">{result.platform}</span>
-                    {result.success ? (
-                      <span className="flex items-center gap-1 text-green-600">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Success
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-red-600">
-                        <XCircle className="h-4 w-4" />
-                        Failed
-                      </span>
+                    <div className="flex items-center justify-between">
+                      <span className="capitalize font-medium">{result.platform}</span>
+                      {result.success ? (
+                        <span className="flex items-center gap-1 text-green-600">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Success
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-red-600">
+                          <XCircle className="h-4 w-4" />
+                          Failed
+                        </span>
+                      )}
+                    </div>
+                    {!result.success && result.error && (
+                      <div className="mt-1 text-xs text-muted-foreground">{result.error}</div>
+                    )}
+                    {!result.success && result.actionable_message && (
+                      <div className="mt-1 text-xs text-red-700">{result.actionable_message}</div>
                     )}
                   </div>
                 ))}
@@ -240,10 +299,7 @@ export function PublishButton({
         </div>
 
         <DialogFooter>
-          <Button
-            onClick={handlePublish}
-            disabled={loading || platforms.length === 0}
-          >
+          <Button onClick={handlePublish} disabled={loading || platforms.length === 0}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

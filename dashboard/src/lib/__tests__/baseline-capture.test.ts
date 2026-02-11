@@ -1,42 +1,54 @@
-/**
- * Tests for performance baseline capture
- *
- * RED -> GREEN -> REFACTOR cycle
- */
-
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { captureBaseline } from '../baseline-capture'
 import type { SupabaseClient } from '@supabase/supabase-js'
+
+import { captureBaseline } from '../baseline-capture'
 import * as googleAds from '../google-ads'
 
-// Mock Google Ads module
 vi.mock('../google-ads')
 
-describe('captureBaseline', () => {
-  let mockSupabase: SupabaseClient
+type MockContext = {
+  supabase: SupabaseClient
+  upsert: ReturnType<typeof vi.fn>
+}
 
-  beforeEach(() => {
-    vi.clearAllMocks()
+function createSupabaseMock(shopifyProductId: string | null = '1234567890'): MockContext {
+  const single = vi.fn().mockResolvedValue({
+    data: shopifyProductId ? { shopify_product_id: shopifyProductId } : null,
+    error: null,
+  })
+  const limit = vi.fn(() => ({ single }))
+  const eq = vi.fn(() => ({ limit }))
+  const select = vi.fn(() => ({ eq }))
+  const upsert = vi.fn().mockResolvedValue({ data: null, error: null })
 
-    // Create mock Supabase client
-    mockSupabase = {
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({
-              data: { shopify_product_id: '1234567890' },
-              error: null,
-            })),
-          })),
-        })),
-        upsert: vi.fn(() => Promise.resolve({ data: null, error: null })),
-      })),
-    } as unknown as SupabaseClient
+  const from = vi.fn((table: string) => {
+    if (table === 'variant_index') {
+      return { select }
+    }
+    if (table === 'performance_baselines') {
+      return { upsert }
+    }
+    return {}
   })
 
-  it('captures 30-day performance baseline before publishing', async () => {
-    // Setup: Mock Google Ads API to return performance data
-    const mockPerformance = new Map([
+  return {
+    supabase: { from } as unknown as SupabaseClient,
+    upsert,
+  }
+}
+
+describe('captureBaseline', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(googleAds.getDateRange).mockReturnValue({
+      startDate: '2026-01-08',
+      endDate: '2026-02-07',
+    })
+  })
+
+  it('captures and stores 30-day baseline metrics before publishing', async () => {
+    const { supabase, upsert } = createSupabaseMock('1234567890')
+    const performanceMap = new Map([
       ['1234567890', {
         productItemId: 'shopify_US_1234567890_9876543210',
         impressions: 45200,
@@ -50,52 +62,41 @@ describe('captureBaseline', () => {
       }],
     ])
 
-    vi.mocked(googleAds.getDateRange).mockReturnValue({
-      startDate: '2026-01-08',
-      endDate: '2026-02-07',
-    })
-    vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(mockPerformance)
+    vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(performanceMap)
 
-    // Execute: Capture baseline for master SKU
-    const result = await captureBaseline(mockSupabase, '920D-6', 'google')
+    const result = await captureBaseline(supabase, '920D-6', 'google')
 
-    // Verify: Baseline data calculated and stored
     expect(result).toEqual({
       master_sku: '920D-6',
       platform: 'google',
       baseline_start_date: '2026-01-08',
       baseline_end_date: '2026-02-07',
-      avg_impressions: 1506.67, // 45200 / 30 days
-      avg_clicks: 48.2, // 1446 / 30
+      avg_impressions: 1506.67,
+      avg_clicks: 48.2,
       avg_ctr: 0.032,
-      avg_conversions: 2.97, // 89 / 30
-      avg_conversion_value: 94.90, // 2847 / 30
-      avg_cvr: 0.0615, // 89 / 1446
-      avg_cost: 40.00, // 1200 / 30
+      avg_conversions: 2.97,
+      avg_conversion_value: 94.9,
+      avg_cvr: 0.0615,
+      avg_cost: 40,
       avg_roas: 2.37,
     })
 
-    // Verify: Data upserted to Supabase
-    expect(mockSupabase.from).toHaveBeenCalledWith('performance_baselines')
+    expect(upsert).toHaveBeenCalledTimes(1)
   })
 
-  it('returns null when product has no performance data', async () => {
-    // Setup: Empty performance data
-    vi.mocked(googleAds.getDateRange).mockReturnValue({
-      startDate: '2026-01-08',
-      endDate: '2026-02-07',
-    })
+  it('returns null when no performance data is available', async () => {
+    const { supabase, upsert } = createSupabaseMock('1234567890')
     vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(new Map())
 
-    // Execute
-    const result = await captureBaseline(mockSupabase, '920D-6', 'google')
+    const result = await captureBaseline(supabase, '920D-6', 'google')
 
-    // Verify: Returns null when no data
     expect(result).toBeNull()
+    expect(upsert).not.toHaveBeenCalled()
   })
 
-  it('calculates CVR correctly when there are clicks', async () => {
-    const mockPerformance = new Map([
+  it('calculates avg_cvr from conversions/clicks when clicks are present', async () => {
+    const { supabase } = createSupabaseMock('1234567890')
+    const performanceMap = new Map([
       ['1234567890', {
         productItemId: 'shopify_US_1234567890_9876543210',
         impressions: 10000,
@@ -109,20 +110,16 @@ describe('captureBaseline', () => {
       }],
     ])
 
-    vi.mocked(googleAds.getDateRange).mockReturnValue({
-      startDate: '2026-01-08',
-      endDate: '2026-02-07',
-    })
-    vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(mockPerformance)
+    vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(performanceMap)
 
-    const result = await captureBaseline(mockSupabase, '920D-6', 'google')
+    const result = await captureBaseline(supabase, '920D-6', 'google')
 
-    // CVR = conversions / clicks = 10 / 200 = 0.05
     expect(result?.avg_cvr).toBe(0.05)
   })
 
-  it('sets CVR to 0 when there are no clicks', async () => {
-    const mockPerformance = new Map([
+  it('sets avg_cvr to zero when clicks are zero', async () => {
+    const { supabase } = createSupabaseMock('1234567890')
+    const performanceMap = new Map([
       ['1234567890', {
         productItemId: 'shopify_US_1234567890_9876543210',
         impressions: 10000,
@@ -136,15 +133,10 @@ describe('captureBaseline', () => {
       }],
     ])
 
-    vi.mocked(googleAds.getDateRange).mockReturnValue({
-      startDate: '2026-01-08',
-      endDate: '2026-02-07',
-    })
-    vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(mockPerformance)
+    vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(performanceMap)
 
-    const result = await captureBaseline(mockSupabase, '920D-6', 'google')
+    const result = await captureBaseline(supabase, '920D-6', 'google')
 
-    // CVR = 0 when no clicks
     expect(result?.avg_cvr).toBe(0)
   })
 })

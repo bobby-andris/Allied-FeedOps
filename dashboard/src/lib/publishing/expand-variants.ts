@@ -222,7 +222,10 @@ export async function getVariantCount(master_sku: string): Promise<number> {
  */
 export async function validateContentForPublishing(
   master_sku: string,
-  platform: 'google' | 'bing' | 'shopify'
+  platform: 'google' | 'bing' | 'shopify',
+  options?: {
+    requireGlobalSkuApproval?: boolean
+  }
 ): Promise<{
   isValid: boolean
   title: string | null
@@ -230,6 +233,7 @@ export async function validateContentForPublishing(
   errors: string[]
   issues: ContentValidationIssue[]
 }> {
+  const requireGlobalSkuApproval = options?.requireGlobalSkuApproval ?? true
   const supabase = await createClient()
   const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
   const issues: ContentValidationIssue[] = []
@@ -280,25 +284,27 @@ export async function validateContentForPublishing(
     })
   }
 
-  // Also check approval status
-  const { data: approval } = await supabase
-    .from('sku_approvals')
-    .select('approval_status, title_approved, description_approved')
-    .eq('master_sku', canonicalMasterSku)
-    .single()
+  // Optional global approval gate for legacy workflows.
+  if (requireGlobalSkuApproval) {
+    const { data: approval } = await supabase
+      .from('sku_approvals')
+      .select('approval_status, title_approved, description_approved')
+      .eq('master_sku', canonicalMasterSku)
+      .single()
 
-  if (!approval) {
-    issues.push({
-      code: 'publish_missing_approval_record',
-      message: 'No approval record found',
-      actionable_message: 'Approve this SKU in Review before publishing.',
-    })
-  } else if (approval.approval_status !== 'approved') {
-    issues.push({
-      code: 'publish_requires_approved_sku',
-      message: `SKU approval status is "${approval.approval_status}", expected "approved"`,
-      actionable_message: 'Approve this SKU in Review before publishing.',
-    })
+    if (!approval) {
+      issues.push({
+        code: 'publish_missing_approval_record',
+        message: 'No approval record found',
+        actionable_message: 'Approve this SKU in Review before publishing.',
+      })
+    } else if (approval.approval_status !== 'approved') {
+      issues.push({
+        code: 'publish_requires_approved_sku',
+        message: `SKU approval status is "${approval.approval_status}", expected "approved"`,
+        actionable_message: 'Approve this SKU in Review before publishing.',
+      })
+    }
   }
 
   if (platform === 'google' || platform === 'bing') {

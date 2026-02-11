@@ -4,6 +4,7 @@ import { publishToShopify } from '@/lib/publishing/shopify'
 import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
 import { uploadProductImage } from '@/lib/publishing/shopify-images'
 import type { Platform, PublishEventInsert } from '@/lib/publishing/types'
+import { computePlatformReadiness, validateRequestedPlatformsReady } from '@/lib/publishing/platform-readiness'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveCanonicalMasterSku } from '@/lib/master-sku'
@@ -89,6 +90,113 @@ async function isIdempotentNoop(
   )
 }
 
+function isApprovedFlag(value: unknown): boolean {
+  return value === true || value === 1 || value === '1'
+}
+
+async function getPlatformReadiness(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  masterSku: string,
+) {
+  const [contentResult, variantResult, variantApprovalResult, variantImageResult, productImageResult] = await Promise.all([
+    supabase
+      .from('generated_content')
+      .select('platform, content_type, approved_content')
+      .eq('master_sku', masterSku)
+      .in('platform', ['google', 'bing', 'shopify'])
+      .in('content_type', ['title', 'description']),
+    supabase
+      .from('variant_index')
+      .select('finish')
+      .eq('master_sku', masterSku),
+    supabase
+      .from('variant_approvals')
+      .select('finish, title_approved, description_approved, approval_status')
+      .eq('master_sku', masterSku),
+    supabase
+      .from('variant_lifestyle_images')
+      .select('finish')
+      .eq('master_sku', masterSku)
+      .eq('approval_status', 'approved')
+      .eq('user_selected', true),
+    supabase
+      .from('product_lifestyle_images')
+      .select('id')
+      .eq('master_sku', masterSku)
+      .eq('approval_status', 'approved')
+      .eq('user_selected', true)
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  if (contentResult.error) {
+    throw new Error(`readiness_content_lookup_failed: ${contentResult.error.message}`)
+  }
+  if (variantResult.error) {
+    throw new Error(`readiness_variant_lookup_failed: ${variantResult.error.message}`)
+  }
+  if (variantApprovalResult.error) {
+    throw new Error(`readiness_variant_approval_lookup_failed: ${variantApprovalResult.error.message}`)
+  }
+  if (variantImageResult.error) {
+    throw new Error(`readiness_variant_image_lookup_failed: ${variantImageResult.error.message}`)
+  }
+  if (productImageResult.error) {
+    throw new Error(`readiness_product_image_lookup_failed: ${productImageResult.error.message}`)
+  }
+
+  const contentFlags: Record<Platform, { titleApproved: boolean; descriptionApproved: boolean }> = {
+    google: { titleApproved: false, descriptionApproved: false },
+    bing: { titleApproved: false, descriptionApproved: false },
+    shopify: { titleApproved: false, descriptionApproved: false },
+  }
+
+  for (const row of contentResult.data || []) {
+    if (!row.approved_content || row.approved_content.trim().length === 0) continue
+    if (row.content_type === 'title') {
+      contentFlags[row.platform as Platform].titleApproved = true
+    } else if (row.content_type === 'description') {
+      contentFlags[row.platform as Platform].descriptionApproved = true
+    }
+  }
+
+  const requiredFinishes = new Set(
+    (variantResult.data || [])
+      .map((row) => row.finish)
+      .filter((finish): finish is string => Boolean(finish))
+  )
+
+  const approvedVariantFinishes = new Set(
+    (variantApprovalResult.data || [])
+      .filter((row) =>
+        row.finish
+        && row.approval_status === 'approved'
+        && isApprovedFlag(row.title_approved)
+        && isApprovedFlag(row.description_approved)
+      )
+      .map((row) => row.finish as string)
+  )
+
+  const variantImageFinishes = new Set(
+    (variantImageResult.data || [])
+      .map((row) => row.finish)
+      .filter((finish): finish is string => Boolean(finish))
+  )
+
+  const variantApprovalsReady = requiredFinishes.size > 0
+    && approvedVariantFinishes.size >= requiredFinishes.size
+  const variantImagesReady = requiredFinishes.size > 0
+    && variantImageFinishes.size >= requiredFinishes.size
+  const shopifyMasterImageReady = Boolean(productImageResult.data?.id)
+
+  return computePlatformReadiness({
+    content: contentFlags,
+    variantApprovalsReady,
+    variantImagesReady,
+    shopifyMasterImageReady,
+  })
+}
+
 /**
  * POST /api/publish/sku
  *
@@ -102,12 +210,13 @@ async function isIdempotentNoop(
  * }
  *
  * Workflow:
- * 1. Validate SKU is approved in sku_approvals
- * 2. Fetch approved_content from generated_content
- * 3. Get variant data from variant_index
- * 4. Call platform-specific publish functions
- * 5. Log results to publish_events
- * 6. Return detailed results
+ * 1. Compute deterministic per-platform readiness from stored state
+ * 2. Validate requested platform subset is ready
+ * 3. Fetch approved_content from generated_content
+ * 4. Get variant data from variant_index
+ * 5. Call platform-specific publish functions
+ * 6. Log results to publish_events
+ * 7. Return detailed results
  */
 export async function POST(request: NextRequest) {
   try {
@@ -165,29 +274,19 @@ export async function POST(request: NextRequest) {
     const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
     master_sku = canonicalMasterSku
 
-    // 1. Validate SKU is approved
-    const { data: approval, error: approvalError } = await supabase
-      .from('sku_approvals')
-      .select('approval_status')
-      .eq('master_sku', master_sku)
-      .single()
-
-    if (approvalError && approvalError.code !== 'PGRST116') {
-      return publishErrorResponse(500, {
-        error: `Failed to check approval status: ${approvalError.message}`,
-        code: 'publish_approval_lookup_failed',
-        step: 'approval_check',
-        actionable_message: 'Retry publish. If this persists, check sku_approvals table access.',
-      })
-    }
-
-    if (!approval || approval.approval_status !== 'approved') {
-      return publishErrorResponse(400, {
-        error: `SKU ${master_sku} is not approved (status: ${approval?.approval_status || 'not found'})`,
-        code: 'publish_requires_approved_sku',
-        step: 'approval_check',
-        actionable_message: 'Approve this SKU in Review before publishing.',
-      })
+    const readiness = await getPlatformReadiness(supabase, master_sku)
+    const readinessValidation = validateRequestedPlatformsReady(platforms, readiness)
+    if (!readinessValidation.ok) {
+      return NextResponse.json(
+        {
+          error: 'One or more requested platforms are not ready for publishing.',
+          code: 'publish_platform_not_ready',
+          step: 'platform_readiness',
+          actionable_message: 'Resolve the readiness blockers for requested platforms, then retry publish.',
+          readiness_errors: readinessValidation.errors,
+        },
+        { status: 409 },
+      )
     }
 
     // 2. Get variant data for this SKU
@@ -221,7 +320,9 @@ export async function POST(request: NextRequest) {
 
     // Publish to Google
     if (platforms.includes('google')) {
-      const validation = await validateContentForPublishing(master_sku, 'google')
+      const validation = await validateContentForPublishing(master_sku, 'google', {
+        requireGlobalSkuApproval: false,
+      })
 
       if (!validation.isValid) {
         const failedResult = toValidationFailureResult('google', validation)
@@ -347,7 +448,9 @@ export async function POST(request: NextRequest) {
     // Publish to Shopify
     if (platforms.includes('shopify')) {
       // Strict fail-closed validation: Shopify publish requires Shopify-compliant content.
-      const validation = await validateContentForPublishing(master_sku, 'shopify')
+      const validation = await validateContentForPublishing(master_sku, 'shopify', {
+        requireGlobalSkuApproval: false,
+      })
 
       if (!validation.isValid) {
         const failedResult = toValidationFailureResult('shopify', validation)
@@ -457,26 +560,77 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Bing publishing deferred
+    // Publish to Bing (readiness + content validated, non-destructive publish acknowledgement)
     if (platforms.includes('bing')) {
-      results.push({
-        platform: 'bing',
-        success: false,
-        error: 'Bing publishing not yet implemented',
-        code: 'publish_bing_not_implemented',
-        state: 'failed',
-        actionable_message: 'Use Google/Shopify publish for now. Bing support is not implemented yet.',
+      const validation = await validateContentForPublishing(master_sku, 'bing', {
+        requireGlobalSkuApproval: false,
       })
 
-      await logPublishEvent(supabase, {
-        master_sku,
-        platform: 'bing',
-        environment,
-        action: 'publish',
-        status: 'failed',
-        error_message: 'Bing publishing not yet implemented',
-        published_by: guard.actorId || undefined,
-      })
+      if (!validation.isValid) {
+        const failedResult = toValidationFailureResult('bing', validation)
+        results.push(failedResult)
+
+        await logPublishEvent(supabase, {
+          master_sku,
+          platform: 'bing',
+          environment,
+          action: 'publish',
+          status: 'failed',
+          error_message: validation.errors.join('; '),
+          published_by: guard.actorId || undefined,
+        })
+      } else if (offerIds.length === 0) {
+        results.push({
+          platform: 'bing',
+          success: false,
+          error: 'No variant offer IDs found for this SKU',
+          code: 'publish_missing_offer_ids',
+          state: 'failed',
+          actionable_message: 'Sync variant index mappings so this SKU has variant offer IDs.',
+        })
+
+        await logPublishEvent(supabase, {
+          master_sku,
+          platform: 'bing',
+          environment,
+          action: 'publish',
+          status: 'failed',
+          error_message: 'No variant offer IDs found',
+          published_by: guard.actorId || undefined,
+        })
+      } else {
+        const bingNoop = await isIdempotentNoop(supabase, {
+          master_sku,
+          platform: 'bing',
+          environment,
+          title: validation.title,
+          description: validation.description,
+        })
+
+        results.push({
+          platform: 'bing',
+          success: true,
+          state: bingNoop ? 'no_change' : 'completed',
+          idempotent: bingNoop,
+          details: {
+            note: bingNoop
+              ? 'Bing content snapshot already published.'
+              : 'Bing content readiness validated and publish recorded.',
+            offer_ids: offerIds,
+          },
+        })
+
+        await logPublishEvent(supabase, {
+          master_sku,
+          platform: 'bing',
+          environment,
+          action: 'publish',
+          status: 'success',
+          published_title: validation.title ?? undefined,
+          published_description: validation.description ?? undefined,
+          published_by: guard.actorId || undefined,
+        })
+      }
     }
 
     // Calculate overall success

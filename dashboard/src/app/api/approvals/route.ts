@@ -185,12 +185,16 @@ export async function PATCH(request: NextRequest) {
     }
     const currentStatus = existing?.approval_status || deriveApprovalStatus(currentState)
     const nextStatus = deriveApprovalStatus(nextState)
+    const hasPlatformScopedApprovalRequest = Boolean(
+      platform
+      && (updateData.title_approved === true || updateData.description_approved === true)
+    )
 
     const fieldsChanged = (['title_approved', 'description_approved', 'image_approved'] as const).some(
       (field) => updateData[field] !== undefined && updateData[field] !== currentState[field]
     )
 
-    if (existing && !fieldsChanged && currentStatus === nextStatus) {
+    if (existing && !fieldsChanged && currentStatus === nextStatus && !hasPlatformScopedApprovalRequest) {
       return NextResponse.json({
         data: { ...existing, approval_status: currentStatus },
         state: 'no_change',
@@ -198,12 +202,20 @@ export async function PATCH(request: NextRequest) {
       })
     }
 
-    // Only transition title/description approved content on first approval transition.
+    // Transition approved content snapshots.
+    // Platform-scoped approvals should transition content for that platform even if
+    // global boolean flags are already true from prior platform approvals.
     const transitionContentTypes: Array<'title' | 'description'> = []
-    if (currentState.title_approved !== true && nextState.title_approved === true) {
+    if (
+      (platform && updateData.title_approved === true)
+      || (!platform && currentState.title_approved !== true && nextState.title_approved === true)
+    ) {
       transitionContentTypes.push('title')
     }
-    if (currentState.description_approved !== true && nextState.description_approved === true) {
+    if (
+      (platform && updateData.description_approved === true)
+      || (!platform && currentState.description_approved !== true && nextState.description_approved === true)
+    ) {
       transitionContentTypes.push('description')
     }
 

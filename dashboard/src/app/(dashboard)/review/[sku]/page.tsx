@@ -10,6 +10,7 @@ interface ContentRecord {
   content_type: string
   baseline_content: string | null
   candidate_content: string | null
+  approved_content: string | null
   quality_score: number | null
   generation_model: string | null
   created_at: string
@@ -53,15 +54,6 @@ interface ProductImageData {
 // - Google/Bing: from baseline_content in generated_content (previous generation)
 interface CurrentContentByPlatform {
   [platform: string]: { title: string | null; description: string | null }
-}
-
-interface ApprovalRecord {
-  master_sku: string
-  approval_status: string
-  title_approved: number | null  // 1 = approved, 0 = rejected, null = not reviewed
-  description_approved: number | null
-  image_approved: number | null
-  notes: string | null
 }
 
 /**
@@ -197,17 +189,6 @@ async function getSkuData(urlSku: string) {
     })),
   ]
 
-  // Get approval status
-  const { data: approval, error: approvalError } = await supabase
-    .from('sku_approvals')
-    .select('*')
-    .eq('master_sku', sku)
-    .single()
-  
-  if (approvalError && approvalError.code !== 'PGRST116') {
-    console.error('Error fetching approval:', approvalError)
-  }
-  
   // Get variants from variant_index
   const { data: variants, error: variantsError } = await supabase
     .from('variant_index')
@@ -362,7 +343,6 @@ async function getSkuData(urlSku: string) {
   return {
     content: (content || []) as ContentRecord[],
     images,
-    approval: approval as ApprovalRecord | null,
     variants: (variants || []) as VariantIndex[],
     variantApprovals: (variantApprovals || []) as VariantApproval[],
     productImages,
@@ -386,7 +366,6 @@ export default async function SkuReviewPage({
   const {
     content,
     images,
-    approval,
     variants,
     variantApprovals,
     productImages,
@@ -406,7 +385,6 @@ export default async function SkuReviewPage({
       sku={sku}
       content={content}
       images={images}
-      approval={approval}
       variants={variants}
       variantApprovals={variantApprovals}
       productImages={productImages}

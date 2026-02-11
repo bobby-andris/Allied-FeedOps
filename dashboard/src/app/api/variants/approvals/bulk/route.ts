@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       master_sku,
       finishes,
       action,
+      platform,
       title_approved,
       description_approved,
       image_approved,
@@ -47,6 +48,13 @@ export async function POST(request: NextRequest) {
     if (!action || !['approve', 'reject'].includes(action)) {
       return NextResponse.json(
         { error: 'action must be "approve" or "reject"' },
+        { status: 400 }
+      )
+    }
+
+    if (platform && !['google', 'bing'].includes(platform)) {
+      return NextResponse.json(
+        { error: 'platform must be "google" or "bing" when provided' },
         { status: 400 }
       )
     }
@@ -140,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${action === 'approve' ? 'Approved' : 'Rejected'} ${successCount} variant(s)${failCount > 0 ? `, ${failCount} failed` : ''}`,
+      message: `${action === 'approve' ? 'Approved' : 'Rejected'} ${successCount} ${platform ? `${platform.toUpperCase()} ` : ''}variant(s)${failCount > 0 ? `, ${failCount} failed` : ''}`,
       results,
       successCount,
       failCount,

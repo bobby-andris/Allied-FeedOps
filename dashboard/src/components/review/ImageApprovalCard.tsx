@@ -47,7 +47,8 @@ interface ImageApprovalCardProps {
   onApprove: () => Promise<void>
   onReject: (reason?: string) => Promise<void>
   onUserSelect: () => Promise<void>
-  onUseForMaster: () => Promise<void>
+  onUseForMaster?: () => Promise<void>
+  showMasterSelectionAction?: boolean
 }
 
 export function ImageApprovalCard({
@@ -60,6 +61,7 @@ export function ImageApprovalCard({
   onReject,
   onUserSelect,
   onUseForMaster,
+  showMasterSelectionAction = false,
 }: ImageApprovalCardProps) {
   const [rejectReason, setRejectReason] = useState('')
   const [showRejectDialog, setShowRejectDialog] = useState(false)
@@ -99,6 +101,7 @@ export function ImageApprovalCard({
   }
 
   const handleUseForMaster = async () => {
+    if (!onUseForMaster) return
     setIsSettingMaster(true)
     try {
       await onUseForMaster()
@@ -256,7 +259,7 @@ export function ImageApprovalCard({
           )}
 
           {/* Use for Master - only for approved and selected */}
-          {isApproved && isUserSelected && !isUseForMaster && (
+          {showMasterSelectionAction && isApproved && isUserSelected && !isUseForMaster && onUseForMaster && (
             <Button
               variant="outline"
               size="sm"
