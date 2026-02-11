@@ -11,6 +11,7 @@ from fastapi import HTTPException
 
 import feedops.api.main as api_main
 from feedops.api.hybrid_generation import build_variant_adaptation_prompt
+from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.pipeline.finish_sentence_placeholder import inject_finish_sentence_placeholder
 from feedops.models import ParentSKU, Variant
 from feedops.providers.base import LLMError
@@ -742,15 +743,32 @@ async def test_process_batch_job_never_writes_partial_status(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_process_hybrid_batch_job_progress_counts_master_skus(monkeypatch):
+async def test_process_hybrid_batch_job_tracks_requested_and_expanded_counters(
+    monkeypatch,
+):
     provider = _RecordingProvider()
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(
+        api_main,
+        "adapt_variant_content",
+        AsyncMock(return_value={"success": True, "content": "adapted"}),
+    )
+
+    families = [
+        MultiSkuFamily(
+            product_id="family-1",
+            master_skus=["A-16", "A-18", "A-24"],
+            base_sku="A-16",
+            variant_skus=["A-18", "A-24"],
+        )
+    ]
 
     await api_main.process_hybrid_batch_job(
         job_id="job-123",
-        families=[],
-        single_skus=["1031/18"],
+        families=families,
+        single_skus=["SB-16"],
+        requested_skus=["SB-16", "A-18"],
         options={
             "titles": True,
             "descriptions": True,
@@ -768,5 +786,11 @@ async def test_process_hybrid_batch_job_progress_counts_master_skus(monkeypatch)
 
     final_status = [update for update in job_updates if "status" in update][-1]
     assert final_status["status"] == "completed"
-    assert final_status["completed_skus"] == 1
+    assert final_status["completed_skus"] == 2
     assert final_status["failed_skus"] == 0
+    assert final_status["completed_skus"] + final_status["failed_skus"] == 2
+
+    options = final_status["options"]
+    assert options["expanded_total_skus"] == 2
+    assert options["expanded_completed_skus"] == 2
+    assert options["expanded_failed_skus"] == 0

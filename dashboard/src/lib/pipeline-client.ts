@@ -102,6 +102,9 @@ export interface BatchStatusResponse {
   total_skus: number
   completed_skus: number
   failed_skus: number
+  expanded_total_skus?: number
+  expanded_completed_skus?: number
+  expanded_failed_skus?: number
   skus: BatchSkuStatus[]
 }
 

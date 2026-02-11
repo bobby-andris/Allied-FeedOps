@@ -37,10 +37,22 @@ export async function GET() {
       }
     }
 
-    const result = (jobs || []).map(job => ({
-      ...job,
-      skus: skusByJob[job.id] || [],
-    }))
+    const result = (jobs || []).map(job => {
+      const options = (job.options && typeof job.options === 'object')
+        ? job.options as Record<string, unknown>
+        : {}
+      const expandedTotal = Number(options.expanded_total_skus ?? 0)
+      const expandedCompleted = Number(options.expanded_completed_skus ?? 0)
+      const expandedFailed = Number(options.expanded_failed_skus ?? 0)
+
+      return {
+        ...job,
+        expanded_total_skus: Number.isFinite(expandedTotal) ? expandedTotal : 0,
+        expanded_completed_skus: Number.isFinite(expandedCompleted) ? expandedCompleted : 0,
+        expanded_failed_skus: Number.isFinite(expandedFailed) ? expandedFailed : 0,
+        skus: skusByJob[job.id] || [],
+      }
+    })
 
     return NextResponse.json({ jobs: result })
   } catch (error) {

@@ -51,12 +51,22 @@ export async function GET(
       .select('*')
       .eq('job_id', jobId)
 
+    const options = (job.options && typeof job.options === 'object')
+      ? job.options as Record<string, unknown>
+      : {}
+    const expandedTotal = Number(options.expanded_total_skus ?? 0)
+    const expandedCompleted = Number(options.expanded_completed_skus ?? 0)
+    const expandedFailed = Number(options.expanded_failed_skus ?? 0)
+
     return NextResponse.json({
       job_id: job.id,
       status: job.status,
       total_skus: job.total_skus,
       completed_skus: job.completed_skus || 0,
       failed_skus: job.failed_skus || 0,
+      expanded_total_skus: Number.isFinite(expandedTotal) ? expandedTotal : 0,
+      expanded_completed_skus: Number.isFinite(expandedCompleted) ? expandedCompleted : 0,
+      expanded_failed_skus: Number.isFinite(expandedFailed) ? expandedFailed : 0,
       skus: skus || [],
     })
   } catch (error) {

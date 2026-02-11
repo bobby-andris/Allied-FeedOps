@@ -60,11 +60,17 @@ export async function GET(
     }
 
     // Calculate estimated remaining time
-    const completedCount = job.completed_skus + job.failed_skus
-    const remainingCount = job.total_skus - completedCount
+    const completedCount = Number(job.completed_skus || 0) + Number(job.failed_skus || 0)
+    const remainingCount = Math.max(Number(job.total_skus || 0) - completedCount, 0)
     const estimatedRemainingMinutes = job.status === 'processing'
       ? Math.ceil(remainingCount * 0.5) // ~30 seconds per SKU
       : 0
+    const options = (job.options && typeof job.options === 'object')
+      ? job.options as Record<string, unknown>
+      : {}
+    const expandedTotal = Number(options.expanded_total_skus ?? 0)
+    const expandedCompleted = Number(options.expanded_completed_skus ?? 0)
+    const expandedFailed = Number(options.expanded_failed_skus ?? 0)
 
     return NextResponse.json({
       job_id: job.id,
@@ -72,6 +78,9 @@ export async function GET(
       total_skus: job.total_skus,
       completed_skus: job.completed_skus,
       failed_skus: job.failed_skus,
+      expanded_total_skus: Number.isFinite(expandedTotal) ? expandedTotal : 0,
+      expanded_completed_skus: Number.isFinite(expandedCompleted) ? expandedCompleted : 0,
+      expanded_failed_skus: Number.isFinite(expandedFailed) ? expandedFailed : 0,
       options: job.options,
       created_at: job.created_at,
       started_at: job.started_at,

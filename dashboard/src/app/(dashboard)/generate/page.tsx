@@ -50,6 +50,9 @@ interface JobStatus {
   total_skus: number
   completed_skus: number
   failed_skus: number
+  expanded_total_skus?: number
+  expanded_completed_skus?: number
+  expanded_failed_skus?: number
   skus: Array<{
     master_sku: string
     status: string
@@ -63,6 +66,9 @@ interface PastJob {
   total_skus: number
   completed_skus: number
   failed_skus: number
+  expanded_total_skus?: number
+  expanded_completed_skus?: number
+  expanded_failed_skus?: number
   options: Record<string, unknown> | null
   error_message: string | null
   created_at: string
@@ -286,6 +292,13 @@ export default function GeneratePage() {
     : 0
 
   const isJobDone = jobStatus?.status === 'completed' || jobStatus?.status === 'partial' || jobStatus?.status === 'failed'
+  const expandedProgressText = (total?: number, completed?: number, failed?: number) => {
+    const safeTotal = total ?? 0
+    const safeCompleted = completed ?? 0
+    const safeFailed = failed ?? 0
+    if (safeTotal <= 0) return null
+    return `+${safeCompleted}/${safeTotal} expanded${safeFailed > 0 ? ` (${safeFailed} failed)` : ''}`
+  }
 
   return (
     <div className="space-y-6 p-8 max-w-5xl mx-auto">
@@ -703,6 +716,19 @@ export default function GeneratePage() {
                       {jobStatus
                         ? `${jobStatus.completed_skus} of ${jobStatus.total_skus} SKUs completed`
                         : `Processing ${selectedSkus.size} SKUs...`}
+                      {jobStatus && expandedProgressText(
+                        jobStatus.expanded_total_skus,
+                        jobStatus.expanded_completed_skus,
+                        jobStatus.expanded_failed_skus
+                      ) && (
+                        <span className="text-muted-foreground ml-2">
+                          ({expandedProgressText(
+                            jobStatus.expanded_total_skus,
+                            jobStatus.expanded_completed_skus,
+                            jobStatus.expanded_failed_skus
+                          )})
+                        </span>
+                      )}
                       {jobStatus && jobStatus.failed_skus > 0 && (
                         <span className="text-red-600 ml-2">
                           ({jobStatus.failed_skus} failed)
@@ -855,6 +881,19 @@ export default function GeneratePage() {
                             {job.failed_skus > 0 && (
                               <span className="text-red-600 ml-1">
                                 ({job.failed_skus} failed)
+                              </span>
+                            )}
+                            {expandedProgressText(
+                              job.expanded_total_skus,
+                              job.expanded_completed_skus,
+                              job.expanded_failed_skus
+                            ) && (
+                              <span className="text-muted-foreground ml-1">
+                                ({expandedProgressText(
+                                  job.expanded_total_skus,
+                                  job.expanded_completed_skus,
+                                  job.expanded_failed_skus
+                                )})
                               </span>
                             )}
                           </td>

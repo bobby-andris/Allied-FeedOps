@@ -274,6 +274,9 @@ class BatchStatusResponse(BaseModel):
     total_skus: int
     completed_skus: int
     failed_skus: int
+    expanded_total_skus: int = 0
+    expanded_completed_skus: int = 0
+    expanded_failed_skus: int = 0
     skus: list[dict]
 
 
@@ -1208,6 +1211,15 @@ async def get_batch_status(job_id: str):
             total_skus=job.data["total_skus"],
             completed_skus=job.data.get("completed_skus", 0),
             failed_skus=job.data.get("failed_skus", 0),
+            expanded_total_skus=int(
+                (job.data.get("options") or {}).get("expanded_total_skus", 0)
+            ),
+            expanded_completed_skus=int(
+                (job.data.get("options") or {}).get("expanded_completed_skus", 0)
+            ),
+            expanded_failed_skus=int(
+                (job.data.get("options") or {}).get("expanded_failed_skus", 0)
+            ),
             skus=skus.data or [],
         )
 
@@ -1265,6 +1277,13 @@ async def hybrid_generate(request: HybridGenerateRequest):
             family_skus.update(family.master_skus)
         single_skus = [sku for sku in request.skus if sku not in family_skus]
 
+        requested_scope = set(request.skus)
+        processing_scope = set(single_skus)
+        for family in families:
+            processing_scope.add(family.base_sku)
+            processing_scope.update(family.variant_skus)
+        expanded_total_skus = len(processing_scope - requested_scope)
+
         logger.info(
             f"Detected {len(families)} multi-SKU families and {len(single_skus)} single SKUs"
         )
@@ -1283,6 +1302,9 @@ async def hybrid_generate(request: HybridGenerateRequest):
                         "descriptions": options.get("descriptions", True),
                         "platforms": platforms,
                         "hybrid": True,
+                        "expanded_total_skus": expanded_total_skus,
+                        "expanded_completed_skus": 0,
+                        "expanded_failed_skus": 0,
                     },
                 }
             )
@@ -1302,6 +1324,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
             job_id=job_id,
             families=families,
             single_skus=single_skus,
+            requested_skus=request.skus,
             options=options,
         )
 
@@ -1493,6 +1516,7 @@ async def process_hybrid_batch_job(
     families: list,
     single_skus: list[str],
     options: dict,
+    requested_skus: list[str] | None = None,
 ):
     """Background task for hybrid multi-SKU generation.
 
@@ -1512,8 +1536,24 @@ async def process_hybrid_batch_job(
         {"status": "processing", "started_at": datetime.now(timezone.utc).isoformat()}
     ).eq("id", job_id).execute()
 
-    completed = 0
-    failed = 0
+    requested_scope = set(requested_skus or [])
+    if not requested_scope:
+        requested_scope.update(single_skus)
+        for family in families:
+            requested_scope.update(family.master_skus)
+
+    processing_scope = set(single_skus)
+    for family in families:
+        processing_scope.add(family.base_sku)
+        processing_scope.update(family.variant_skus)
+
+    requested_total = len(requested_scope)
+    expanded_total = len(processing_scope - requested_scope)
+
+    requested_completed = 0
+    requested_failed = 0
+    expanded_completed = 0
+    expanded_failed = 0
 
     platforms = options.get("platforms", ["google", "bing", "shopify"])
     content_types = []
@@ -1525,6 +1565,68 @@ async def process_hybrid_batch_job(
     provider = get_provider()
     prompt_hash = get_system_prompt_hash()
     system_prompt = get_system_prompt()
+
+    def _build_job_options() -> dict:
+        return {
+            "titles": options.get("titles", True),
+            "descriptions": options.get("descriptions", True),
+            "platforms": platforms,
+            "hybrid": True,
+            "expanded_total_skus": expanded_total,
+            "expanded_completed_skus": expanded_completed,
+            "expanded_failed_skus": expanded_failed,
+        }
+
+    def _update_job_progress(
+        *,
+        status: str | None = None,
+        completed_at: str | None = None,
+        error_message: str | None = None,
+        enforce_invariant: bool = True,
+    ) -> None:
+        processed_requested = requested_completed + requested_failed
+        if enforce_invariant and processed_requested > requested_total:
+            overflow_message = (
+                f"Hybrid progress overflow: requested {processed_requested} exceeds total {requested_total}"
+            )
+            supabase.table("batch_generation_jobs").update(
+                {
+                    "status": "failed",
+                    "completed_skus": requested_completed,
+                    "failed_skus": requested_failed,
+                    "options": _build_job_options(),
+                    "error_message": overflow_message[:500],
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                }
+            ).eq("id", job_id).execute()
+            raise ValueError(overflow_message)
+
+        payload: dict[str, object] = {
+            "completed_skus": requested_completed,
+            "failed_skus": requested_failed,
+            "options": _build_job_options(),
+        }
+        if status:
+            payload["status"] = status
+        if completed_at:
+            payload["completed_at"] = completed_at
+        if error_message:
+            payload["error_message"] = error_message[:500]
+
+        supabase.table("batch_generation_jobs").update(payload).eq("id", job_id).execute()
+
+    def _record_sku_result(sku: str, *, success: bool) -> None:
+        nonlocal requested_completed, requested_failed, expanded_completed, expanded_failed
+        if sku in requested_scope:
+            if success:
+                requested_completed += 1
+            else:
+                requested_failed += 1
+        else:
+            if success:
+                expanded_completed += 1
+            else:
+                expanded_failed += 1
 
     # Helper function for full generation
     async def generate_full_content(sku: str, platform: str, content_type: str):
@@ -1611,15 +1713,8 @@ async def process_hybrid_batch_job(
                             f"✗ Failed {sku} / {platform} / {content_type}: {e}"
                         )
 
-            if sku_failed:
-                failed += 1
-            else:
-                completed += 1
-
-            # Update progress every SKU
-            supabase.table("batch_generation_jobs").update(
-                {"completed_skus": completed, "failed_skus": failed}
-            ).eq("id", job_id).execute()
+            _record_sku_result(sku, success=not sku_failed)
+            _update_job_progress()
 
         # Process multi-SKU families (hybrid approach)
         logger.info(f"Processing {len(families)} multi-SKU families")
@@ -1643,15 +1738,8 @@ async def process_hybrid_batch_job(
                             f"✗ Failed BASE {base_sku} / {platform} / {content_type}: {e}"
                         )
 
-            if base_sku_failed:
-                failed += 1
-            else:
-                completed += 1
-
-            # Update progress after base SKU
-            supabase.table("batch_generation_jobs").update(
-                {"completed_skus": completed, "failed_skus": failed}
-            ).eq("id", job_id).execute()
+            _record_sku_result(base_sku, success=not base_sku_failed)
+            _update_job_progress()
 
             # Step 2: Adapt variant SKUs
             for variant_sku in family.variant_skus:
@@ -1688,44 +1776,42 @@ async def process_hybrid_batch_job(
                                 f"✗ Exception for VARIANT {variant_sku} / {platform} / {content_type}: {e}"
                             )
 
-                if variant_sku_failed:
-                    failed += 1
-                else:
-                    completed += 1
-
-                # Update progress after each variant SKU
-                supabase.table("batch_generation_jobs").update(
-                    {"completed_skus": completed, "failed_skus": failed}
-                ).eq("id", job_id).execute()
+                _record_sku_result(variant_sku, success=not variant_sku_failed)
+                _update_job_progress()
 
         # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
-        final_status = "completed" if failed == 0 else "failed"
-        total_skus = len(single_skus) + sum(len(f.master_skus) for f in families)
-        final_payload = {
-            "status": final_status,
-            "completed_skus": completed,
-            "failed_skus": failed,
-            "completed_at": datetime.now(timezone.utc).isoformat(),
-        }
-        if failed > 0 and completed > 0:
-            final_payload["error_message"] = (
-                f"Completed {completed} of {total_skus} SKUs; {failed} failed"
+        total_failures = requested_failed + expanded_failed
+        final_status = "completed" if total_failures == 0 else "failed"
+        final_error: str | None = None
+        if total_failures > 0:
+            final_error = (
+                f"Requested: {requested_completed}/{requested_total} completed, "
+                f"{requested_failed} failed; Expanded: {expanded_completed}/{expanded_total} completed, "
+                f"{expanded_failed} failed"
             )
-        supabase.table("batch_generation_jobs").update(final_payload).eq("id", job_id).execute()
+        _update_job_progress(
+            status=final_status,
+            completed_at=datetime.now(timezone.utc).isoformat(),
+            error_message=final_error,
+        )
 
         logger.info(
-            f"✓ Hybrid generation job {job_id} finished: {completed} completed, {failed} failed"
+            "✓ Hybrid generation job %s finished: requested %s/%s completed (%s failed), "
+            "expanded %s/%s completed (%s failed)",
+            job_id,
+            requested_completed,
+            requested_total,
+            requested_failed,
+            expanded_completed,
+            expanded_total,
+            expanded_failed,
         )
 
     except Exception as e:
         logger.error(f"Hybrid generation processing error: {e}")
-
-        supabase.table("batch_generation_jobs").update(
-            {
-                "status": "failed",
-                "completed_skus": completed,
-                "failed_skus": failed,
-                "error_message": str(e)[:500],
-                "completed_at": datetime.now(timezone.utc).isoformat(),
-            }
-        ).eq("id", job_id).execute()
+        _update_job_progress(
+            status="failed",
+            completed_at=datetime.now(timezone.utc).isoformat(),
+            error_message=str(e),
+            enforce_invariant=False,
+        )
