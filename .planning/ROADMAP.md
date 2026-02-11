@@ -29,10 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. We know the maximum LIMIT value that works reliably (tested 10K, 50K, 100K)
   4. We know actual data retention windows for both search terms and performance views
   5. We have confirmed custom_label_0 field availability in Merchant API product_view
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- Plans will be created during `/gsd:plan-phase 1`
+- [ ] 01-01-PLAN.md — Validate core views (API-01: search_term_view limitation, API-02: shopping_performance_view product queries)
+- [ ] 01-02-PLAN.md — Test query boundaries and custom labels (API-03: LIMIT values, API-04: data retention, API-05: custom_label_0)
 
 ### Phase 2: Comprehensive Data Discovery
 **Goal**: Complete inventory of all available Google Ads API data sources with documented fields, filtering capabilities, and use cases
@@ -87,11 +88,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. API Capability Validation | 0/TBD | Not started | - |
+| 1. API Capability Validation | 0/2 | Planned | - |
 | 2. Comprehensive Data Discovery | 0/TBD | Not started | - |
 | 3. Sample Testing & Analysis | 0/TBD | Not started | - |
 | 4. Documentation & Decision | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-11*
+*Last updated: 2026-02-11 (Phase 1 planned)*
