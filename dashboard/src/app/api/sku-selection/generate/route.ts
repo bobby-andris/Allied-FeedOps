@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ensureAllData } from '@/lib/data-collection/ensure-data'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveCanonicalMasterSkuList } from '@/lib/master-sku'
 
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
 
@@ -56,12 +57,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Ensure data collection before batch generation (non-blocking, best-effort)
     const adminClient = createAdminClient()
-    ensureAllData(skus, adminClient)
+    const canonicalSkus = [...new Set(await resolveCanonicalMasterSkuList(adminClient, skus))]
+
+    // Ensure data collection before batch generation (non-blocking, best-effort)
+    ensureAllData(canonicalSkus, adminClient)
       .then((result) => {
         if (result.success) {
-          console.log(`Data collection triggered for ${skus.length} SKUs before batch generation`, result.details)
+          console.log(`Data collection triggered for ${canonicalSkus.length} SKUs before batch generation`, result.details)
         } else {
           console.warn('Data collection failed (non-blocking):', result.error)
         }
@@ -76,7 +79,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        skus,
+        skus: canonicalSkus,
         num_candidates: options.num_candidates ?? 1,
         dry_run: false,
         options: {

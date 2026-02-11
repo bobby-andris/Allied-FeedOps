@@ -4,6 +4,7 @@ import pytest
 from feedops.api.multi_sku_detection import (
     extract_product_id,
     extract_spec_difference,
+    get_related_master_skus,
     MultiSkuFamily,
 )
 
@@ -131,6 +132,75 @@ class TestMultiSkuFamily:
         )
 
         assert family.base_sku == family.master_skus[0]
+
+
+class _Query:
+    def __init__(self, table_name: str, rows: list[dict]):
+        self._table_name = table_name
+        self._rows = rows
+        self._eq_filters: dict[str, str] = {}
+        self._in_filter: tuple[str, set[str]] | None = None
+        self._ilike_filter: tuple[str, str] | None = None
+        self._limit: int | None = None
+
+    def select(self, *_args, **_kwargs):
+        return self
+
+    def eq(self, column: str, value: str):
+        self._eq_filters[column] = value
+        return self
+
+    def ilike(self, column: str, pattern: str):
+        self._ilike_filter = (column, pattern.replace("%", ""))
+        return self
+
+    def in_(self, column: str, values: list[str]):
+        self._in_filter = (column, set(values))
+        return self
+
+    def limit(self, value: int):
+        self._limit = value
+        return self
+
+    def execute(self):
+        data = list(self._rows)
+        for column, value in self._eq_filters.items():
+            data = [row for row in data if row.get(column) == value]
+        if self._in_filter:
+            column, values = self._in_filter
+            data = [row for row in data if str(row.get(column, "")) in values]
+        if self._ilike_filter:
+            column, pattern = self._ilike_filter
+            pattern_lower = pattern.lower()
+            data = [row for row in data if pattern_lower in str(row.get(column, "")).lower()]
+        if self._limit is not None:
+            data = data[: self._limit]
+        return type("Result", (), {"data": data})()
+
+
+class _FakeSupabase:
+    def __init__(self, rows_by_table: dict[str, list[dict]]):
+        self._rows_by_table = rows_by_table
+
+    def table(self, table_name: str):
+        return _Query(table_name, self._rows_by_table.get(table_name, []))
+
+
+def test_get_related_master_skus_resolves_hyphen_slash_aliases() -> None:
+    rows = [
+        {
+            "master_sku": "WP-2TB/16-GAL",
+            "gmc_offer_id": "shopify_us_4539975336068_111",
+        },
+        {
+            "master_sku": "WP-2TB/22-GAL",
+            "gmc_offer_id": "shopify_us_4539975336068_222",
+        },
+    ]
+    supabase = _FakeSupabase(rows_by_table={"variant_index": rows})
+
+    related = get_related_master_skus(supabase, "WP-2TB-16-GAL")
+    assert related == ["WP-2TB/16-GAL", "WP-2TB/22-GAL"]
 
 
 # Integration tests that require Supabase would go here

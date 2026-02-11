@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { publishToShopify } from '@/lib/publishing/shopify'
 import type { ShopifyPublishRequest, PublishEventInsert } from '@/lib/publishing/types'
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveCanonicalMasterSku } from '@/lib/master-sku'
 
 /**
  * POST /api/publish/shopify
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as ShopifyPublishRequest
 
     // Validate required fields
-    const { master_sku, shopify_product_id, title, description, environment } = body
+    let { master_sku } = body
+    const { shopify_product_id, title, description, environment } = body
 
     if (!master_sku) {
       return NextResponse.json(
@@ -56,6 +58,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
+    const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
+    master_sku = canonicalMasterSku
+
     // Publish to Shopify
     const result = await publishToShopify(
       shopify_product_id,
@@ -63,8 +69,6 @@ export async function POST(request: NextRequest) {
       description,
       environment
     )
-
-    const supabase = await createClient()
 
     // Log publish event to Supabase
     const publishEvent: PublishEventInsert = {

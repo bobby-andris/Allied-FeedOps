@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveCanonicalMasterSkuList } from '@/lib/master-sku'
 
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
 
@@ -48,11 +50,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const adminClient = createAdminClient()
+    const canonicalSkus = [...new Set(await resolveCanonicalMasterSkuList(adminClient, skus))]
+
     const response = await fetch(`${PIPELINE_URL}/hybrid-generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        skus,
+        skus: canonicalSkus,
         options,
       }),
     })

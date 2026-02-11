@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from typing import Optional
 import re
 
+from feedops.api.sku_alias import resolve_canonical_master_sku
+
 
 @dataclass
 class MultiSkuFamily:
@@ -44,21 +46,27 @@ def get_related_master_skus(supabase, master_sku: str) -> list[str]:
     Returns:
         List of master_skus sharing the same product_id (sorted alphabetically)
     """
+    canonical_master_sku = resolve_canonical_master_sku(
+        supabase,
+        master_sku,
+        tables=("variant_index",),
+    )
+
     # Query variant_index for this SKU's offer_id
     variant_result = (
         supabase.table("variant_index")
         .select("gmc_offer_id")
-        .eq("master_sku", master_sku)
+        .eq("master_sku", canonical_master_sku)
         .limit(1)
         .execute()
     )
 
     if not variant_result.data:
-        return [master_sku]
+        return [canonical_master_sku]
 
     product_id = extract_product_id(variant_result.data[0]["gmc_offer_id"])
     if not product_id:
-        return [master_sku]
+        return [canonical_master_sku]
 
     # Find all SKUs with the same product_id
     related_result = (
@@ -69,7 +77,7 @@ def get_related_master_skus(supabase, master_sku: str) -> list[str]:
     )
 
     if not related_result.data:
-        return [master_sku]
+        return [canonical_master_sku]
 
     # Get unique master_skus
     unique_skus = sorted(set(v["master_sku"] for v in related_result.data))
@@ -90,7 +98,10 @@ def detect_multi_sku_families(supabase, master_skus: list[str]) -> list[MultiSku
     families = []
     processed = set()
 
-    for sku in master_skus:
+    for sku in [
+        resolve_canonical_master_sku(supabase, candidate, tables=("variant_index",))
+        for candidate in master_skus
+    ]:
         if sku in processed:
             continue
 

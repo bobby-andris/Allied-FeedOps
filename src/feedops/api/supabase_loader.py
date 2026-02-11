@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 
+from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.db.supabase_client import get_client
 from feedops.models.parent_sku import ParentSKU
 from feedops.models.variant import Variant
@@ -25,17 +26,18 @@ def load_parent_sku_from_supabase(master_sku: str) -> ParentSKU | None:
         ParentSKU object with all variants, or None if not found.
     """
     client = get_client()
+    canonical_master_sku = resolve_canonical_master_sku(client, master_sku)
 
     result = (
         client.table("product_catalog")
         .select("*")
-        .eq("master_sku", master_sku)
+        .eq("master_sku", canonical_master_sku)
         .order("position", desc=False)
         .execute()
     )
 
     if not result.data:
-        logger.warning(f"SKU not found in product_catalog: {master_sku}")
+        logger.warning(f"SKU not found in product_catalog: {canonical_master_sku}")
         return None
 
     rows = result.data
@@ -80,7 +82,7 @@ def load_parent_sku_from_supabase(master_sku: str) -> ParentSKU | None:
 
     # Build ParentSKU from first row (shared fields) + all variants
     parent = ParentSKU(
-        master_sku=master_sku,
+        master_sku=canonical_master_sku,
         core_sku=first.get("core_sku"),
         category=first["category"],
         collection=first.get("collection"),
@@ -121,7 +123,7 @@ def load_parent_sku_from_supabase(master_sku: str) -> ParentSKU | None:
         data_source="supabase",
     )
 
-    logger.info(f"Loaded {master_sku} from Supabase: {len(variants)} variants")
+    logger.info(f"Loaded {canonical_master_sku} from Supabase: {len(variants)} variants")
     return parent
 
 

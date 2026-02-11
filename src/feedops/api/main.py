@@ -61,6 +61,10 @@ from feedops.api.multi_sku_detection import (
     extract_spec_difference,
 )
 from feedops.api.hybrid_generation import adapt_variant_content
+from feedops.api.sku_alias import (
+    resolve_canonical_master_sku,
+    resolve_canonical_master_skus,
+)
 from feedops.api.runtime_controls import (
     ensure_generation_enabled,
     finish_sentence_regeneration_enabled,
@@ -782,18 +786,27 @@ async def optimize_single_sku(request: OptimizeRequest):
     """
     try:
         ensure_generation_enabled(operation="optimize_single_sku")
-        logger.info(f"Optimizing SKU: {request.master_sku}")
+        supabase = get_client()
+        canonical_master_sku = resolve_canonical_master_sku(
+            supabase, request.master_sku
+        )
+        logger.info(
+            "Optimizing SKU: requested=%s canonical=%s",
+            request.master_sku,
+            canonical_master_sku,
+        )
         log_event(
             logger,
             logging.INFO,
             "generation.optimize.start",
             endpoint="optimize_single_sku",
-            master_sku=request.master_sku,
+            master_sku=canonical_master_sku,
+            requested_master_sku=request.master_sku,
             request_id=get_request_id(),
         )
 
         # Load from Supabase
-        parent_sku = load_parent_sku_from_supabase(request.master_sku)
+        parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
         if not parent_sku:
             raise HTTPException(
                 status_code=404, detail=f"SKU not found: {request.master_sku}"
@@ -807,7 +820,6 @@ async def optimize_single_sku(request: OptimizeRequest):
         provider = get_provider()
         prompt_hash = get_system_prompt_hash()
         system_prompt = get_system_prompt()
-        supabase = get_client()
 
         results = []
         platforms = ["google", "bing", "shopify"]
@@ -844,7 +856,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                     content, finish_sentences = await _enforce_finish_sentence_parity(
                         provider=provider,
                         content=content,
-                        master_sku=request.master_sku,
+                        master_sku=canonical_master_sku,
                         platform=platform,
                         endpoint="optimize_single_sku",
                     )
@@ -853,7 +865,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                 if not request.dry_run:
                     _persist_generated_content_and_history(
                         supabase=supabase,
-                        master_sku=request.master_sku,
+                        master_sku=canonical_master_sku,
                         platform=platform,
                         content_type=content_type,
                         content=content,
@@ -866,7 +878,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                     if finish_sentences:
                         supabase.table("variant_finish_sentences").upsert(
                             {
-                                "master_sku": request.master_sku,
+                                "master_sku": canonical_master_sku,
                                 "platform": platform,
                                 "finish_sentences": finish_sentences,
                             },
@@ -875,7 +887,7 @@ async def optimize_single_sku(request: OptimizeRequest):
 
         return OptimizeResponse(
             success=True,
-            master_sku=request.master_sku,
+            master_sku=canonical_master_sku,
             message=f"Generated content for {len(platforms)} platforms",
             report="\n".join(results),
         )
@@ -901,21 +913,29 @@ async def regenerate_content(request: RegenerateRequest):
     """
     try:
         ensure_generation_enabled(operation="regenerate_content")
+        supabase = get_client()
+        canonical_master_sku = resolve_canonical_master_sku(
+            supabase, request.master_sku
+        )
         logger.info(
-            f"Regenerating {request.content_type} for SKU: {request.master_sku}"
+            "Regenerating %s for SKU: requested=%s canonical=%s",
+            request.content_type,
+            request.master_sku,
+            canonical_master_sku,
         )
         log_event(
             logger,
             logging.INFO,
             "generation.regenerate.start",
             endpoint="regenerate",
-            master_sku=request.master_sku,
+            master_sku=canonical_master_sku,
+            requested_master_sku=request.master_sku,
             platform=request.platform,
             content_type=request.content_type,
         )
 
         # Load product data from Supabase
-        parent_sku = load_parent_sku_from_supabase(request.master_sku)
+        parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
         if not parent_sku:
             raise HTTPException(
                 status_code=404, detail=f"SKU not found: {request.master_sku}"
@@ -962,18 +982,17 @@ async def regenerate_content(request: RegenerateRequest):
             content, finish_sentences = await _enforce_finish_sentence_parity(
                 provider=provider,
                 content=content,
-                master_sku=request.master_sku,
+                master_sku=canonical_master_sku,
                 platform=request.platform,
                 endpoint="regenerate",
             )
 
         # Save to regeneration_history
         try:
-            supabase = get_client()
             system_prompt = get_system_prompt()
             supabase.table("generated_content").upsert(
                 {
-                    "master_sku": request.master_sku,
+                    "master_sku": canonical_master_sku,
                     "platform": request.platform,
                     "content_type": request.content_type,
                     "candidate_content": content,
@@ -984,14 +1003,14 @@ async def regenerate_content(request: RegenerateRequest):
             ).execute()
             generated_content_id = _lookup_generated_content_id(
                 supabase=supabase,
-                master_sku=request.master_sku,
+                master_sku=canonical_master_sku,
                 platform=request.platform,
                 content_type=request.content_type,
             )
 
             supabase.table("regeneration_history").insert(
                 {
-                    "master_sku": request.master_sku,
+                    "master_sku": canonical_master_sku,
                     "content_type": request.content_type,
                     "platform": request.platform,
                     "mode": "with_feedback" if request.feedback else "simple",
@@ -1009,10 +1028,9 @@ async def regenerate_content(request: RegenerateRequest):
 
         if finish_sentences:
             try:
-                supabase = get_client()
                 supabase.table("variant_finish_sentences").upsert(
                     {
-                        "master_sku": request.master_sku,
+                        "master_sku": canonical_master_sku,
                         "platform": request.platform,
                         "finish_sentences": finish_sentences,
                     },
@@ -1021,14 +1039,14 @@ async def regenerate_content(request: RegenerateRequest):
             except Exception as e:
                 logger.warning(
                     "Failed to persist finish sentences for %s/%s: %s",
-                    request.master_sku,
+                    canonical_master_sku,
                     request.platform,
                     e,
                 )
 
         return RegenerateResponse(
             success=True,
-            master_sku=request.master_sku,
+            master_sku=canonical_master_sku,
             content_type=request.content_type,
             platform=request.platform,
             content=content,
@@ -1113,6 +1131,9 @@ async def batch_optimize(request: BatchOptimizeRequest):
     try:
         ensure_generation_enabled(operation="batch_optimize")
         supabase = get_client()
+        canonical_skus = list(
+            dict.fromkeys(resolve_canonical_master_skus(supabase, request.skus))
+        )
         options = _normalize_generation_options(request.options)
 
         if not options["titles"] and not options["descriptions"]:
@@ -1131,7 +1152,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
             .insert(
                 {
                     "status": "queued",
-                    "total_skus": len(request.skus),
+                    "total_skus": len(canonical_skus),
                     "completed_skus": 0,
                     "failed_skus": 0,
                     "options": {
@@ -1151,7 +1172,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
         # Create individual SKU records
         sku_records = [
             {"job_id": job_id, "master_sku": sku, "status": "pending"}
-            for sku in request.skus
+            for sku in canonical_skus
         ]
         supabase.table("batch_generation_job_skus").insert(sku_records).execute()
 
@@ -1160,7 +1181,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
             process_batch_job,
             request_id=get_request_id(),
             job_id=job_id,
-            skus=request.skus,
+            skus=canonical_skus,
             num_candidates=request.num_candidates,
             dry_run=request.dry_run,
             options=options,
@@ -1170,7 +1191,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
             success=True,
             job_id=str(job_id),
             status="queued",
-            total_skus=len(request.skus),
+            total_skus=len(canonical_skus),
         )
 
     except Exception as e:
@@ -1249,6 +1270,9 @@ async def hybrid_generate(request: HybridGenerateRequest):
     try:
         ensure_generation_enabled(operation="hybrid_generate")
         supabase = get_client()
+        canonical_skus = list(
+            dict.fromkeys(resolve_canonical_master_skus(supabase, request.skus))
+        )
 
         # Validate options
         options = request.options
@@ -1265,19 +1289,22 @@ async def hybrid_generate(request: HybridGenerateRequest):
             )
 
         logger.info(
-            f"Hybrid generation requested for {len(request.skus)} SKUs: {request.skus}"
+            "Hybrid generation requested for %s SKUs: requested=%s canonical=%s",
+            len(request.skus),
+            request.skus,
+            canonical_skus,
         )
 
         # Detect multi-SKU families
-        families = detect_multi_sku_families(supabase, request.skus)
+        families = detect_multi_sku_families(supabase, canonical_skus)
 
         # Get single SKUs (not in any family)
         family_skus = set()
         for family in families:
             family_skus.update(family.master_skus)
-        single_skus = [sku for sku in request.skus if sku not in family_skus]
+        single_skus = [sku for sku in canonical_skus if sku not in family_skus]
 
-        requested_scope = set(request.skus)
+        requested_scope = set(canonical_skus)
         processing_scope = set(single_skus)
         for family in families:
             processing_scope.add(family.base_sku)
@@ -1294,7 +1321,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
             .insert(
                 {
                     "status": "queued",
-                    "total_skus": len(request.skus),
+                    "total_skus": len(canonical_skus),
                     "completed_skus": 0,
                     "failed_skus": 0,
                     "options": {
@@ -1324,7 +1351,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
             job_id=job_id,
             families=families,
             single_skus=single_skus,
-            requested_skus=request.skus,
+            requested_skus=canonical_skus,
             options=options,
         )
 
@@ -1332,7 +1359,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
             success=True,
             job_id=str(job_id),
             status="queued",
-            total_skus=len(request.skus),
+            total_skus=len(canonical_skus),
             multi_sku_families=len(families),
             single_skus=len(single_skus),
             strategy={
@@ -1386,6 +1413,7 @@ async def process_batch_job(
 
     for sku in skus:
         try:
+            canonical_sku = resolve_canonical_master_sku(supabase, sku)
             # Update SKU status
             supabase.table("batch_generation_job_skus").update(
                 {
@@ -1395,9 +1423,9 @@ async def process_batch_job(
             ).eq("job_id", job_id).eq("master_sku", sku).execute()
 
             # Load and generate for this SKU
-            parent_sku = load_parent_sku_from_supabase(sku)
+            parent_sku = load_parent_sku_from_supabase(canonical_sku)
             if not parent_sku:
-                raise ValueError(f"SKU not found: {sku}")
+                raise ValueError(f"SKU not found: {canonical_sku}")
 
             # Build evidence and generate content
             evidence = build_evidence_table(parent_sku)
@@ -1438,7 +1466,7 @@ async def process_batch_job(
                         content, finish_sentences = await _enforce_finish_sentence_parity(
                             provider=provider,
                             content=content,
-                            master_sku=sku,
+                            master_sku=canonical_sku,
                             platform=platform,
                             endpoint="process_batch_job",
                         )
@@ -1446,7 +1474,7 @@ async def process_batch_job(
                     if not dry_run:
                         _persist_generated_content_and_history(
                             supabase=supabase,
-                            master_sku=sku,
+                            master_sku=canonical_sku,
                             platform=platform,
                             content_type=content_type,
                             content=content,
@@ -1459,7 +1487,7 @@ async def process_batch_job(
                         if finish_sentences:
                             supabase.table("variant_finish_sentences").upsert(
                                 {
-                                    "master_sku": sku,
+                                    "master_sku": canonical_sku,
                                     "platform": platform,
                                     "finish_sentences": finish_sentences,
                                 },
@@ -1631,9 +1659,10 @@ async def process_hybrid_batch_job(
     # Helper function for full generation
     async def generate_full_content(sku: str, platform: str, content_type: str):
         """Generate content using full pipeline."""
-        parent_sku = load_parent_sku_from_supabase(sku)
+        canonical_sku = resolve_canonical_master_sku(supabase, sku)
+        parent_sku = load_parent_sku_from_supabase(canonical_sku)
         if not parent_sku:
-            raise ValueError(f"SKU not found: {sku}")
+            raise ValueError(f"SKU not found: {canonical_sku}")
 
         evidence = build_evidence_table(parent_sku)
         evidence_markdown = format_evidence_markdown(evidence)
@@ -1666,14 +1695,14 @@ async def process_hybrid_batch_job(
             content, finish_sentences = await _enforce_finish_sentence_parity(
                 provider=provider,
                 content=content,
-                master_sku=sku,
+                master_sku=canonical_sku,
                 platform=platform,
                 endpoint="process_hybrid_batch_job",
             )
 
         _persist_generated_content_and_history(
             supabase=supabase,
-            master_sku=sku,
+            master_sku=canonical_sku,
             platform=platform,
             content_type=content_type,
             content=content,
@@ -1686,7 +1715,7 @@ async def process_hybrid_batch_job(
         if finish_sentences:
             supabase.table("variant_finish_sentences").upsert(
                 {
-                    "master_sku": sku,
+                    "master_sku": canonical_sku,
                     "platform": platform,
                     "finish_sentences": finish_sentences,
                 },

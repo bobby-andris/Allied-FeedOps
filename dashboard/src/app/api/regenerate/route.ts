@@ -3,6 +3,7 @@ import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateGeneratedContent } from '@/lib/regeneration/prompts'
 import { ensureSkuData } from '@/lib/data-collection/ensure-data'
+import { resolveCanonicalMasterSku } from '@/lib/master-sku'
 
 // Python Cloud Run pipeline URL
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
@@ -133,12 +134,13 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient()
+    const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
 
     // Ensure data collection before regeneration (non-blocking, best-effort)
-    ensureSkuData(master_sku, supabase)
+    ensureSkuData(canonicalMasterSku, supabase)
       .then((result) => {
         if (result.success && result.details) {
-          console.log(`Data collection for ${master_sku}:`, result.details)
+          console.log(`Data collection for ${canonicalMasterSku}:`, result.details)
         }
       })
       .catch((error) => {
@@ -169,7 +171,7 @@ export async function POST(request: NextRequest) {
     const { data: variantData, error: variantError } = await supabase
       .from('variant_index')
       .select('*')
-      .eq('master_sku', master_sku)
+      .eq('master_sku', canonicalMasterSku)
       .limit(1)
       .maybeSingle()
 
@@ -181,7 +183,7 @@ export async function POST(request: NextRequest) {
     const { data: currentContentData, error: currentContentError } = await supabase
       .from('generated_content')
       .select('*')
-      .eq('master_sku', master_sku)
+      .eq('master_sku', canonicalMasterSku)
       .eq('platform', platform)
       .eq('content_type', content_type)
       .maybeSingle()
@@ -204,13 +206,13 @@ export async function POST(request: NextRequest) {
 
     const finishCode = feedback?.finish || variantData?.finish_code || null
 
-    console.log(`Calling Python pipeline for ${master_sku} (${platform}/${content_type}, mode=${mode})`)
+    console.log(`Calling Python pipeline for ${canonicalMasterSku} (${platform}/${content_type}, mode=${mode})`)
 
     const pipelineResponse = await fetch(`${PIPELINE_URL}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        master_sku,
+        master_sku: canonicalMasterSku,
         content_type,
         platform,
         feedback: feedbackText,
@@ -260,7 +262,7 @@ export async function POST(request: NextRequest) {
     // ==================== VALIDATE CONTENT ====================
     const violations = validateGeneratedContent(newContent, platform, content_type)
     if (violations.length > 0) {
-      console.warn(`Validation violations for ${master_sku}/${platform}/${content_type}: ${violations.join('; ')}`)
+      console.warn(`Validation violations for ${canonicalMasterSku}/${platform}/${content_type}: ${violations.join('; ')}`)
       // Log but don't block — Python pipeline has its own quality checks.
       // Surface these violations to operators so they can take action.
     }
@@ -336,7 +338,7 @@ export async function POST(request: NextRequest) {
       const { data: inserted, error: insertError } = await supabase
         .from('generated_content')
         .insert({
-          master_sku,
+          master_sku: canonicalMasterSku,
           platform,
           content_type,
           candidate_content: newContent,
@@ -376,7 +378,7 @@ export async function POST(request: NextRequest) {
         .from('variant_finish_sentences')
         .upsert(
           {
-            master_sku,
+            master_sku: canonicalMasterSku,
             platform,
             finish_sentences: finishSentences,
             updated_at: new Date().toISOString(),
@@ -389,7 +391,7 @@ export async function POST(request: NextRequest) {
         console.warn('Finish sentences not saved, but content was saved successfully')
       } else {
         finishSentencesSaved = true
-        console.log(`Saved ${Object.keys(finishSentences).length} finish sentences for ${master_sku}/${platform}`)
+        console.log(`Saved ${Object.keys(finishSentences).length} finish sentences for ${canonicalMasterSku}/${platform}`)
       }
     }
 

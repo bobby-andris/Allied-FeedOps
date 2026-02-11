@@ -12,6 +12,7 @@
 
 import { generateVariantTitle, generateVariantDescription, templateHasHardcodedFinish } from '@/lib/variant-content'
 import { PLACEHOLDERS } from '@/lib/finish-data'
+import { resolveCanonicalMasterSku } from '@/lib/master-sku'
 import { createClient } from '@/lib/supabase/server'
 
 export interface ExpandedVariant {
@@ -126,12 +127,13 @@ export async function expandVariantsForPublish(
 ): Promise<ExpandedVariant[]> {
   const { master_sku, platform, approved_title, approved_description } = options
   const supabase = await createClient()
+  const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
 
   // Get all variants for this SKU from variant_index
   const { data: variants, error: variantError } = await supabase
     .from('variant_index')
     .select('gmc_offer_id, finish, finish_code')
-    .eq('master_sku', master_sku)
+    .eq('master_sku', canonicalMasterSku)
 
   if (variantError) {
     console.error('Error fetching variants:', variantError)
@@ -139,7 +141,7 @@ export async function expandVariantsForPublish(
   }
 
   if (!variants?.length) {
-    console.warn(`No variants found for master_sku: ${master_sku}`)
+    console.warn(`No variants found for master_sku: ${canonicalMasterSku}`)
     return []
   }
 
@@ -147,7 +149,7 @@ export async function expandVariantsForPublish(
   const { data: finishData, error: finishError } = await supabase
     .from('variant_finish_sentences')
     .select('finish_sentences')
-    .eq('master_sku', master_sku)
+    .eq('master_sku', canonicalMasterSku)
     .eq('platform', platform)
     .single()
 
@@ -176,12 +178,12 @@ export async function expandVariantsForPublish(
   }
 
   // Get approved variant images (with CDN URLs)
-  const variantImages = await queryApprovedVariantImages(supabase, master_sku)
+  const variantImages = await queryApprovedVariantImages(supabase, canonicalMasterSku)
 
   // Expand each variant
   return variants.map((v) => ({
     gmc_offer_id: v.gmc_offer_id,
-    master_sku,
+    master_sku: canonicalMasterSku,
     finish: v.finish || 'Unknown',
     finish_code: v.finish_code,
     title: generateVariantTitle(approved_title, v.finish || 'Unknown', platform),
@@ -200,11 +202,12 @@ export async function expandVariantsForPublish(
  */
 export async function getVariantCount(master_sku: string): Promise<number> {
   const supabase = await createClient()
+  const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
 
   const { count, error } = await supabase
     .from('variant_index')
     .select('*', { count: 'exact', head: true })
-    .eq('master_sku', master_sku)
+    .eq('master_sku', canonicalMasterSku)
 
   if (error) {
     console.error('Error counting variants:', error)
@@ -228,13 +231,14 @@ export async function validateContentForPublishing(
   issues: ContentValidationIssue[]
 }> {
   const supabase = await createClient()
+  const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
   const issues: ContentValidationIssue[] = []
 
   // Get approved content for both title and description
   const { data, error } = await supabase
     .from('generated_content')
     .select('content_type, approved_content')
-    .eq('master_sku', master_sku)
+    .eq('master_sku', canonicalMasterSku)
     .eq('platform', platform)
     .in('content_type', ['title', 'description'])
 
@@ -280,7 +284,7 @@ export async function validateContentForPublishing(
   const { data: approval } = await supabase
     .from('sku_approvals')
     .select('approval_status, title_approved, description_approved')
-    .eq('master_sku', master_sku)
+    .eq('master_sku', canonicalMasterSku)
     .single()
 
   if (!approval) {
@@ -334,7 +338,7 @@ export async function validateContentForPublishing(
     const { data: finishData, error: finishError } = await supabase
       .from('variant_finish_sentences')
       .select('finish_sentences')
-      .eq('master_sku', master_sku)
+      .eq('master_sku', canonicalMasterSku)
       .eq('platform', platform)
       .maybeSingle()
 

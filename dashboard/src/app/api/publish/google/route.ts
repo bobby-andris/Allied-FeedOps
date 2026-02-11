@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { publishToGoogleSheets } from '@/lib/publishing/google-sheets'
 import type { PublishRequest, PublishEventInsert } from '@/lib/publishing/types'
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveCanonicalMasterSku } from '@/lib/master-sku'
 
 interface GooglePublishRequest extends PublishRequest {
   // Optional: override offer IDs (if not provided, fetched from variant_index)
@@ -28,7 +29,8 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as GooglePublishRequest
 
     // Validate required fields
-    const { master_sku, title, description, environment, image_url, offer_ids } = body
+    let { master_sku } = body
+    const { title, description, environment, image_url, offer_ids } = body
 
     if (!master_sku) {
       return NextResponse.json(
@@ -56,6 +58,8 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
+    master_sku = canonicalMasterSku
     let resolvedOfferIds = offer_ids || []
 
     // If no offer IDs provided, fetch from variant_index

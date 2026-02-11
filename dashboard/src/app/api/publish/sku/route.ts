@@ -6,6 +6,7 @@ import { uploadProductImage } from '@/lib/publishing/shopify-images'
 import type { Platform, PublishEventInsert } from '@/lib/publishing/types'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveCanonicalMasterSku } from '@/lib/master-sku'
 
 interface SkuPublishRequest {
   master_sku: string
@@ -118,7 +119,8 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as SkuPublishRequest
 
     // Validate required fields
-    const { master_sku, platforms, environment } = body
+    let { master_sku } = body
+    const { platforms, environment } = body
 
     if (!master_sku) {
       return publishErrorResponse(400, {
@@ -160,6 +162,8 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
+    master_sku = canonicalMasterSku
 
     // 1. Validate SKU is approved
     const { data: approval, error: approvalError } = await supabase

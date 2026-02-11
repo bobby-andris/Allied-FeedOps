@@ -19,6 +19,7 @@ from feedops.api.prompt_loader import (
     get_system_prompt,
     get_system_prompt_hash,
 )
+from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
 from feedops.models import Candidate, Score
 from feedops.observability import log_event
@@ -235,6 +236,11 @@ async def adapt_variant_content(
         Dict with success status and content/error
     """
     try:
+        requested_base_sku = base_sku
+        requested_variant_sku = variant_sku
+        base_sku = resolve_canonical_master_sku(supabase, base_sku)
+        variant_sku = resolve_canonical_master_sku(supabase, variant_sku)
+
         started = time.perf_counter()
         include_finish_sentences = finish_sentence_regeneration_enabled()
         log_event(
@@ -243,6 +249,8 @@ async def adapt_variant_content(
             "generation.variant_adaptation.start",
             base_sku=base_sku,
             variant_sku=variant_sku,
+            requested_base_sku=requested_base_sku,
+            requested_variant_sku=requested_variant_sku,
             platform=platform,
             content_type=content_type,
             include_finish_sentences=include_finish_sentences,

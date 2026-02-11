@@ -14,6 +14,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.integrations.google_ads_performance import (
     fetch_batch_product_performance,
@@ -91,8 +92,15 @@ async def capture_baseline(request: CaptureBaselineRequest):
         skus_with_data = 0
         errors = []
 
-        for master_sku in request.master_skus:
+        for requested_master_sku in request.master_skus:
+            master_sku = requested_master_sku
             try:
+                master_sku = resolve_canonical_master_sku(
+                    supabase,
+                    requested_master_sku,
+                    tables=("variant_index", "performance_baselines", "product_catalog"),
+                )
+
                 # Get all variants (offer_ids) for this master SKU
                 variant_result = supabase.table("variant_index").select(
                     "gmc_offer_id"
@@ -128,8 +136,13 @@ async def capture_baseline(request: CaptureBaselineRequest):
                 skus_processed += 1
 
             except Exception as e:
-                logger.error(f"Failed to capture baseline for {master_sku}: {e}")
-                errors.append(f"{master_sku}: {str(e)}")
+                logger.error(
+                    "Failed to capture baseline for requested=%s canonical=%s: %s",
+                    requested_master_sku,
+                    master_sku,
+                    e,
+                )
+                errors.append(f"{requested_master_sku}: {str(e)}")
 
         return CaptureBaselineResponse(
             success=True,
@@ -150,15 +163,20 @@ async def get_baseline_status(master_sku: str):
     """Get baseline status for a master SKU."""
     try:
         supabase = get_client()
+        canonical_master_sku = resolve_canonical_master_sku(
+            supabase,
+            master_sku,
+            tables=("performance_baselines", "variant_index", "product_catalog"),
+        )
 
         # Fetch baselines for all platforms
         result = supabase.table("performance_baselines").select("*").eq(
-            "master_sku", master_sku
+            "master_sku", canonical_master_sku
         ).execute()
 
         if not result.data:
             return BaselineStatusResponse(
-                master_sku=master_sku,
+                master_sku=canonical_master_sku,
                 platforms={},
                 last_updated=None,
             )
@@ -187,7 +205,7 @@ async def get_baseline_status(master_sku: str):
                     last_updated = updated_at
 
         return BaselineStatusResponse(
-            master_sku=master_sku,
+            master_sku=canonical_master_sku,
             platforms=platforms,
             last_updated=last_updated,
         )

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveCanonicalMasterSkuList } from '@/lib/master-sku'
 
 interface BatchRegenerateRequest {
   skus?: string[]
@@ -81,6 +82,9 @@ export async function POST(request: NextRequest) {
     } else if (skus) {
       targetSkus = skus
     }
+
+    const canonicalSkus = await resolveCanonicalMasterSkuList(supabase, targetSkus)
+    targetSkus = [...new Set(canonicalSkus.filter((sku) => sku))]
 
     if (targetSkus.length === 0) {
       return NextResponse.json(

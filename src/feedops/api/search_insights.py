@@ -12,6 +12,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.integrations.google_ads_search_terms import (
     SearchTermsClient,
@@ -234,7 +235,12 @@ async def get_search_terms(
         ).limit(limit)
 
         if master_sku:
-            query = query.eq("master_sku", master_sku)
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase,
+                master_sku,
+                tables=("search_queries", "variant_index", "product_catalog"),
+            )
+            query = query.eq("master_sku", canonical_master_sku)
 
         if finish_code:
             query = query.eq("finish_code", finish_code)
@@ -274,7 +280,17 @@ async def get_aggregated_terms(
         ).limit(limit)
 
         if master_sku:
-            query = query.eq("master_sku", master_sku)
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase,
+                master_sku,
+                tables=(
+                    "search_queries_by_master_sku",
+                    "search_queries",
+                    "variant_index",
+                    "product_catalog",
+                ),
+            )
+            query = query.eq("master_sku", canonical_master_sku)
 
         result = query.execute()
 

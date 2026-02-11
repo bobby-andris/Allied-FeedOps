@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveCanonicalMasterSku } from '@/lib/master-sku'
 
 interface RevertRequest {
   master_sku: string
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
 
     // Get the history entry to revert to
     const { data: historyEntry, error: historyError } = await supabase
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
     const { data: currentContent, error: currentError } = await supabase
       .from('generated_content')
       .select('*')
-      .eq('master_sku', master_sku)
+      .eq('master_sku', canonicalMasterSku)
       .eq('platform', platform)
       .eq('content_type', content_type)
       .eq('is_current', true)
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
     const { data: newContentRecord, error: insertError } = await supabase
       .from('generated_content')
       .upsert({
-        master_sku,
+        master_sku: canonicalMasterSku,
         platform,
         content_type,
         candidate_content: revertContent,
@@ -104,7 +106,7 @@ export async function POST(request: NextRequest) {
     await supabase
       .from('regeneration_history')
       .insert({
-        master_sku,
+        master_sku: canonicalMasterSku,
         content_type,
         platform,
         mode: 'simple', // Revert is treated as a simple regeneration
