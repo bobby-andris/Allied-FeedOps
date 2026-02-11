@@ -49,7 +49,8 @@ from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
 from feedops.pipeline.finish_sentence_placeholder import (
-    inject_finish_sentence_placeholder,
+    normalize_base_description_with_finish_placeholder,
+    strip_generic_finish_count_claims,
 )
 from feedops.pipeline.prompts import build_category_guidance
 from feedops.providers import get_provider
@@ -462,6 +463,88 @@ Return ONLY valid JSON:
 """
 
 
+def _lookup_generated_content_id(
+    *,
+    supabase,
+    master_sku: str,
+    platform: str,
+    content_type: str,
+) -> str | None:
+    """Resolve generated_content.id for history linkage."""
+    try:
+        lookup = (
+            supabase.table("generated_content")
+            .select("id")
+            .eq("master_sku", master_sku)
+            .eq("platform", platform)
+            .eq("content_type", content_type)
+            .maybe_single()
+            .execute()
+        )
+        data = getattr(lookup, "data", None)
+        if isinstance(data, dict):
+            content_id = data.get("id")
+            if isinstance(content_id, str) and content_id:
+                return content_id
+    except Exception as exc:
+        logger.warning(
+            "Failed to resolve generated_content_id for %s/%s/%s: %s",
+            master_sku,
+            platform,
+            content_type,
+            exc,
+        )
+    return None
+
+
+def _persist_generated_content_and_history(
+    *,
+    supabase,
+    master_sku: str,
+    platform: str,
+    content_type: str,
+    content: str,
+    generation_model: str,
+    prompt_hash: str,
+    system_prompt: str,
+    user_prompt: str,
+    mode: str,
+):
+    """Persist generated content and linked history in one canonical path."""
+    supabase.table("generated_content").upsert(
+        {
+            "master_sku": master_sku,
+            "platform": platform,
+            "content_type": content_type,
+            "candidate_content": content,
+            "generation_model": generation_model,
+            "generation_prompt_hash": prompt_hash,
+        },
+        on_conflict="master_sku,platform,content_type",
+    ).execute()
+
+    generated_content_id = _lookup_generated_content_id(
+        supabase=supabase,
+        master_sku=master_sku,
+        platform=platform,
+        content_type=content_type,
+    )
+
+    history_payload = {
+        "master_sku": master_sku,
+        "content_type": content_type,
+        "platform": platform,
+        "mode": mode,
+        "new_content": content,
+        "model_version": generation_model,
+        "system_prompt": system_prompt[:5000],
+        "user_prompt": user_prompt[:5000],
+        "prompt_hash": prompt_hash,
+        "generated_content_id": generated_content_id,
+    }
+    supabase.table("regeneration_history").insert(history_payload).execute()
+
+
 def _validate_finish_sentences_payload(
     raw: object,
     *,
@@ -496,6 +579,86 @@ def _validate_finish_sentences_payload(
             platform=platform,
         )
     return accepted
+
+
+async def _enforce_finish_sentence_parity(
+    *,
+    provider,
+    content: str,
+    master_sku: str,
+    platform: str,
+    endpoint: str,
+) -> tuple[str, dict[str, str] | None]:
+    """Apply regenerate-equivalent finish handling for Google/Bing descriptions."""
+    sanitized_content = strip_generic_finish_count_claims(content)
+
+    if not finish_sentence_regeneration_enabled():
+        metrics_registry.increment(
+            "generation_kill_switch_total",
+            endpoint=endpoint,
+            switch="finish_sentence_regen",
+        )
+        log_event(
+            logger,
+            logging.WARNING,
+            "generation.finish_sentences.skipped",
+            endpoint=endpoint,
+            master_sku=master_sku,
+            platform=platform,
+            reason="FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN",
+        )
+        return sanitized_content, None
+
+    finish_schema = {
+        "type": "object",
+        "properties": {
+            "finish_sentences": {
+                "type": "object",
+                "properties": {
+                    finish: {"type": "string"} for finish in get_finish_list()
+                },
+                "required": get_finish_list(),
+            }
+        },
+        "required": ["finish_sentences"],
+    }
+    finish_prompt = _build_finish_sentences_user_prompt(
+        base_description=sanitized_content,
+        master_sku=master_sku,
+        platform=platform,
+    )
+    finish_response = await _generate_with_metrics(
+        endpoint=f"{endpoint}_finish_sentences",
+        provider=provider,
+        prompt=finish_prompt,
+        schema=finish_schema,
+        system_prompt=get_system_prompt(),
+        platform=platform,
+        content_type="finish_sentences",
+    )
+
+    finish_payload = finish_response.get("finish_sentences", finish_response)
+    validated_finish_sentences = _validate_finish_sentences_payload(
+        finish_payload,
+        base_description=sanitized_content,
+        master_sku=master_sku,
+        platform=platform,
+    )
+    if len(validated_finish_sentences) != len(get_finish_list()):
+        logger.warning(
+            "Finish sentence generation returned incomplete canonical coverage "
+            "for %s/%s (%s/%s accepted)",
+            master_sku,
+            platform,
+            len(validated_finish_sentences),
+            len(get_finish_list()),
+        )
+        return sanitized_content, None
+
+    return (
+        normalize_base_description_with_finish_placeholder(sanitized_content),
+        validated_finish_sentences,
+    )
 
 
 # =============================================================================
@@ -590,6 +753,7 @@ async def optimize_single_sku(request: OptimizeRequest):
         # Get LLM provider
         provider = get_provider()
         prompt_hash = get_system_prompt_hash()
+        system_prompt = get_system_prompt()
         supabase = get_client()
 
         results = []
@@ -616,27 +780,45 @@ async def optimize_single_sku(request: OptimizeRequest):
                     provider=provider,
                     prompt=user_prompt,
                     schema=simple_schema,
-                    system_prompt=get_system_prompt(),
+                    system_prompt=system_prompt,
                     platform=platform,
                     content_type=content_type,
                 )
 
                 content = response.get("content", "").strip()
+                finish_sentences: dict[str, str] | None = None
+                if content_type == "description" and platform in {"google", "bing"}:
+                    content, finish_sentences = await _enforce_finish_sentence_parity(
+                        provider=provider,
+                        content=content,
+                        master_sku=request.master_sku,
+                        platform=platform,
+                        endpoint="optimize_single_sku",
+                    )
                 results.append(f"{platform}/{content_type}: {content[:100]}...")
 
                 if not request.dry_run:
-                    # Save to generated_content table
-                    supabase.table("generated_content").upsert(
-                        {
-                            "master_sku": request.master_sku,
-                            "platform": platform,
-                            "content_type": content_type,
-                            "candidate_content": content,
-                            "generation_model": provider.name,
-                            "generation_prompt_hash": prompt_hash,
-                        },
-                        on_conflict="master_sku,platform,content_type",
-                    ).execute()
+                    _persist_generated_content_and_history(
+                        supabase=supabase,
+                        master_sku=request.master_sku,
+                        platform=platform,
+                        content_type=content_type,
+                        content=content,
+                        generation_model=provider.name,
+                        prompt_hash=prompt_hash,
+                        system_prompt=system_prompt,
+                        user_prompt=user_prompt,
+                        mode="full_generation",
+                    )
+                    if finish_sentences:
+                        supabase.table("variant_finish_sentences").upsert(
+                            {
+                                "master_sku": request.master_sku,
+                                "platform": platform,
+                                "finish_sentences": finish_sentences,
+                            },
+                            on_conflict="master_sku,platform",
+                        ).execute()
 
         return OptimizeResponse(
             success=True,
@@ -723,78 +905,25 @@ async def regenerate_content(request: RegenerateRequest):
         content = response.get("content", "").strip()
         finish_sentences: dict[str, str] | None = None
 
-        if (
-            request.content_type == "description"
-            and request.platform in {"google", "bing"}
-            and finish_sentence_regeneration_enabled()
-        ):
-            finish_schema = {
-                "type": "object",
-                "properties": {
-                    "finish_sentences": {
-                        "type": "object",
-                        "properties": {
-                            finish: {"type": "string"} for finish in get_finish_list()
-                        },
-                        "required": get_finish_list(),
-                    }
-                },
-                "required": ["finish_sentences"],
-            }
-            finish_prompt = _build_finish_sentences_user_prompt(
-                base_description=content,
-                master_sku=request.master_sku,
-                platform=request.platform,
-            )
-            finish_response = await _generate_with_metrics(
-                endpoint="regenerate_finish_sentences",
+        if request.content_type == "description" and request.platform in {"google", "bing"}:
+            content, finish_sentences = await _enforce_finish_sentence_parity(
                 provider=provider,
-                prompt=finish_prompt,
-                schema=finish_schema,
-                system_prompt=get_system_prompt(),
-                platform=request.platform,
-                content_type="finish_sentences",
-            )
-
-            finish_payload = finish_response.get("finish_sentences", finish_response)
-            validated_finish_sentences = _validate_finish_sentences_payload(
-                finish_payload,
-                base_description=content,
+                content=content,
                 master_sku=request.master_sku,
                 platform=request.platform,
-            )
-            if len(validated_finish_sentences) == len(get_finish_list()):
-                finish_sentences = validated_finish_sentences
-                content = inject_finish_sentence_placeholder(content)
-            else:
-                logger.warning(
-                    "Finish sentence generation returned incomplete canonical coverage "
-                    "for %s/%s (%s/%s accepted)",
-                    request.master_sku,
-                    request.platform,
-                    len(validated_finish_sentences),
-                    len(get_finish_list()),
-                )
-        elif request.content_type == "description" and request.platform in {"google", "bing"}:
-            metrics_registry.increment(
-                "generation_kill_switch_total",
                 endpoint="regenerate",
-                switch="finish_sentence_regen",
-            )
-            log_event(
-                logger,
-                logging.WARNING,
-                "generation.finish_sentences.skipped",
-                endpoint="regenerate",
-                master_sku=request.master_sku,
-                platform=request.platform,
-                reason="FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN",
             )
 
         # Save to regeneration_history
         try:
             supabase = get_client()
             system_prompt = get_system_prompt()
+            generated_content_id = _lookup_generated_content_id(
+                supabase=supabase,
+                master_sku=request.master_sku,
+                platform=request.platform,
+                content_type=request.content_type,
+            )
 
             supabase.table("regeneration_history").insert(
                 {
@@ -808,6 +937,7 @@ async def regenerate_content(request: RegenerateRequest):
                     "system_prompt": system_prompt[:5000],  # Truncate for DB
                     "user_prompt": user_prompt[:5000],
                     "prompt_hash": prompt_hash,
+                    "generated_content_id": generated_content_id,
                 }
             ).execute()
         except Exception as e:
@@ -1168,6 +1298,7 @@ async def process_batch_job(
 
             provider = get_provider()
             prompt_hash = get_system_prompt_hash()
+            system_prompt = get_system_prompt()
 
             # Generate for each platform
             for platform in ["google", "bing", "shopify"]:
@@ -1189,26 +1320,44 @@ async def process_batch_job(
                         provider=provider,
                         prompt=user_prompt,
                         schema=simple_schema,
-                        system_prompt=get_system_prompt(),
+                        system_prompt=system_prompt,
                         platform=platform,
                         content_type=content_type,
                     )
 
                     content = response.get("content", "").strip()
+                    finish_sentences: dict[str, str] | None = None
+                    if content_type == "description" and platform in {"google", "bing"}:
+                        content, finish_sentences = await _enforce_finish_sentence_parity(
+                            provider=provider,
+                            content=content,
+                            master_sku=sku,
+                            platform=platform,
+                            endpoint="process_batch_job",
+                        )
 
                     if not dry_run:
-                        # Save to generated_content
-                        supabase.table("generated_content").upsert(
-                            {
-                                "master_sku": sku,
-                                "platform": platform,
-                                "content_type": content_type,
-                                "candidate_content": content,
-                                "generation_model": provider.name,
-                                "generation_prompt_hash": prompt_hash,
-                            },
-                            on_conflict="master_sku,platform,content_type",
-                        ).execute()
+                        _persist_generated_content_and_history(
+                            supabase=supabase,
+                            master_sku=sku,
+                            platform=platform,
+                            content_type=content_type,
+                            content=content,
+                            generation_model=provider.name,
+                            prompt_hash=prompt_hash,
+                            system_prompt=system_prompt,
+                            user_prompt=user_prompt,
+                            mode="full_generation",
+                        )
+                        if finish_sentences:
+                            supabase.table("variant_finish_sentences").upsert(
+                                {
+                                    "master_sku": sku,
+                                    "platform": platform,
+                                    "finish_sentences": finish_sentences,
+                                },
+                                on_conflict="master_sku,platform",
+                            ).execute()
 
             completed += 1
 
@@ -1286,6 +1435,7 @@ async def process_hybrid_batch_job(
 
     provider = get_provider()
     prompt_hash = get_system_prompt_hash()
+    system_prompt = get_system_prompt()
 
     # Helper function for full generation
     async def generate_full_content(sku: str, platform: str, content_type: str):
@@ -1314,25 +1464,43 @@ async def process_hybrid_batch_job(
             provider=provider,
             prompt=user_prompt,
             schema=simple_schema,
-            system_prompt=get_system_prompt(),
+            system_prompt=system_prompt,
             platform=platform,
             content_type=content_type,
         )
 
         content = response.get("content", "").strip()
+        finish_sentences: dict[str, str] | None = None
+        if content_type == "description" and platform in {"google", "bing"}:
+            content, finish_sentences = await _enforce_finish_sentence_parity(
+                provider=provider,
+                content=content,
+                master_sku=sku,
+                platform=platform,
+                endpoint="process_hybrid_batch_job",
+            )
 
-        # Save to generated_content
-        supabase.table("generated_content").upsert(
-            {
-                "master_sku": sku,
-                "platform": platform,
-                "content_type": content_type,
-                "candidate_content": content,
-                "generation_model": provider.name,
-                "generation_prompt_hash": prompt_hash,
-            },
-            on_conflict="master_sku,platform,content_type",
-        ).execute()
+        _persist_generated_content_and_history(
+            supabase=supabase,
+            master_sku=sku,
+            platform=platform,
+            content_type=content_type,
+            content=content,
+            generation_model=provider.name,
+            prompt_hash=prompt_hash,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            mode="full_generation",
+        )
+        if finish_sentences:
+            supabase.table("variant_finish_sentences").upsert(
+                {
+                    "master_sku": sku,
+                    "platform": platform,
+                    "finish_sentences": finish_sentences,
+                },
+                on_conflict="master_sku,platform",
+            ).execute()
 
         return content
 

@@ -27,7 +27,8 @@ from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
 from feedops.pipeline.finish_sentence_placeholder import (
-    inject_finish_sentence_placeholder,
+    normalize_base_description_with_finish_placeholder,
+    strip_generic_finish_count_claims,
 )
 from feedops.pipeline.validators import validate_candidate_content
 
@@ -102,10 +103,8 @@ def build_variant_adaptation_prompt(
     Returns:
         Tuple of (prompt, requires_json)
     """
-    is_variant_description = content_type == "description" and platform in [
-        "google",
-        "bing",
-    ]
+    is_description = content_type == "description"
+    is_variant_description = is_description and platform in ["google", "bing"]
 
     if is_variant_description and include_finish_sentences:
         finish_names = get_finish_list()
@@ -160,6 +159,29 @@ TASK:
 1. Adapt the description for the {variant_spec} specification.
 2. Update numeric specs and measurements ({base_spec} → {variant_spec}).
 3. Maintain the same voice and structure from the base description.
+
+Respond with ONLY the adapted description text."""
+        return prompt, False
+
+    if is_description:
+        platform_rules = ""
+        if platform == "shopify":
+            platform_rules = """
+4. Keep the description finish-agnostic; do NOT mention a specific finish name.
+5. Preserve Shopify-friendly structure and conversion-oriented clarity."""
+        prompt = f"""You are adapting product content for a variant specification.
+
+BASE PRODUCT: {base_sku}
+BASE CONTENT:
+{base_content}
+
+TARGET PRODUCT: {variant_sku}
+KEY DIFFERENCE: Specification changes from {base_spec} to {variant_spec}
+
+TASK:
+1. Adapt the description for the {variant_spec} specification.
+2. Update numeric specs and measurements ({base_spec} → {variant_spec}).
+3. Maintain the same voice and structure from the base description.{platform_rules}
 
 Respond with ONLY the adapted description text."""
         return prompt, False
@@ -344,7 +366,9 @@ async def adapt_variant_content(
                         )
                     if len(validated_finish_sentences) == len(get_finish_list()):
                         finish_sentences = validated_finish_sentences
-                        new_content = inject_finish_sentence_placeholder(new_content)
+                        new_content = normalize_base_description_with_finish_placeholder(
+                            new_content
+                        )
                     else:
                         metrics_registry.increment(
                             "validation_failure_total",
@@ -369,6 +393,9 @@ async def adapt_variant_content(
                 new_content = raw_response
         else:
             new_content = raw_response
+
+        if content_type == "description" and platform in {"google", "bing"}:
+            new_content = strip_generic_finish_count_claims(new_content)
 
         content_validation_errors = validate_adapted_variant_content(
             content_type=content_type,

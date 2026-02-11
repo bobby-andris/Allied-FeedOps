@@ -81,6 +81,7 @@ Required per-task status update format:
 | 2026-02-11 | Phase 8 | 8.2 Operator runbook blocks for Generate -> Review -> Publish finalized and aligned to current dashboard + Cloud Run paths/tables | DONE | `GET /api/sku-selection`, `GET /api/sku-selection/jobs`, `GET /api/sku-selection/generate/{jobId}`, `GET /api/approvals`, `GET /api/batches` checks (pass); non-dry run `POST /batch-optimize` for SKU `1098` completed (`job_id=210b995c-2623-4843-a37e-096bd9408e36`, `1/1`) and `generated_content` prompt-hash/model spot-check (pass) |
 | 2026-02-11 | Phase 8 | 8.3 Stop-condition thresholds + rollback instructions finalized with verified query/CLI commands | DONE | `.venv/bin/python` threshold checks on `batch_generation_job_skus`, `publish_events`, `sku_approvals` (pass); `.venv/bin/feedops publish-history --limit 3` (pass); `.venv/bin/feedops rollback --sku FT-16 --platform shopify --dry-run` and non-dry-run rollback command execution path validated (no patch found, expected) |
 | 2026-02-11 | Phase 8 | 8.4 Dry-run + spot-check verification bundle documented and command-validated in this environment | DONE | `docs/plans/2026-02-11-phase8-72k-scale-up-runbook.md` command set executed; local unauthenticated `POST /api/sku-selection/generate` guard check returned `307` with `/login` (expected), confirming write-route auth behavior |
+| 2026-02-11 | Phase 7 | Shopify generation-path parity audit + full-generation history linkage fix across platforms | DONE | `.venv/bin/pytest -q` (pass: `401 passed, 1 skipped`), `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` (pass: `SUPABASE_CANARY_OK`, dashboard lint/build `OK`), live `SB-16` run via `optimize_single_sku` with DB verification (Google/Bing placeholder + finish sentence persistence + Shopify outputs + linked history IDs + model/prompt hash) |
 
 ---
 
@@ -520,6 +521,72 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
     - Added finish-sentence regeneration kill switch for regenerate + variant adaptation flows.
     - Added fallback force-toggle to instantiate provider chain when both providers are available.
   - Verification: `.venv/bin/pytest -q tests/test_phase7_observability_reliability.py tests/test_providers.py` (pass).
+- `DONE` 7.5 Generation-path parity fix (Generate + Hybrid == Regenerate finish handling).
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - SKU verification target: `SB-16`.
+  - Routes/code paths touched:
+    - `POST /optimize-sku` full generation path.
+    - `process_hybrid_batch_job` full-generation branch (`generate_full_content`).
+    - `POST /regenerate` kept aligned through shared parity helper.
+    - Hybrid variant adaptation path (`adapt_variant_content`) for sanitization parity.
+  - Files: `src/feedops/api/main.py`, `src/feedops/api/hybrid_generation.py`, `src/feedops/pipeline/finish_sentence_placeholder.py`, `tests/test_phase7_observability_reliability.py`.
+  - What was fixed:
+    - Added shared parity helper that enforces Google/Bing description finish flow:
+      - strips generic finish-count claims from base description;
+      - generates + validates canonical finish sentences (28);
+      - injects `{FINISH_SENTENCE}` exactly once when complete.
+    - Wired helper into full Generate and Hybrid full-generation flows.
+    - Persisted `variant_finish_sentences` for Generate and Hybrid full-generation descriptions.
+    - Kept `generation_model` + `generation_prompt_hash` writes unchanged in `generated_content`.
+  - Metadata/traceability fields checked (live):
+    - `generated_content.generation_model`
+    - `generated_content.generation_prompt_hash`
+    - `generated_content.generation_timestamp/updated_at`
+    - `variant_finish_sentences.finish_sentences` (count == 28 for Google + Bing)
+    - `regeneration_history.prompt_hash`, `regeneration_history.model_version` (existing SB-16 rows confirmed intact)
+  - Validation run:
+    - `.venv/bin/pytest -q` → `398 passed, 1 skipped`.
+    - `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` → `SUPABASE_CANARY_OK`, dashboard lint/build `OK`.
+    - Live SB-16 checks:
+      - `google_description` and `bing_description` contain `{FINISH_SENTENCE}` exactly once.
+      - No `available in 28 designer finishes` phrase remained in final base descriptions.
+      - `variant_finish_sentences` persisted with 28 entries for Google and Bing.
+- `DONE` 7.6 Shopify generation-path alignment + cross-platform linkage hardening.
+  - Date: `2026-02-11`; owner/model: `Codex GPT-5`.
+  - SKU verification target: `SB-16`.
+  - Routes/code paths touched:
+    - `POST /optimize-sku` (full generation persistence + linkage).
+    - `process_batch_job` (full generation persistence + linkage).
+    - `process_hybrid_batch_job` full-generation branch (`generate_full_content`) (full generation persistence + linkage).
+    - `POST /regenerate` (now attempts `generated_content_id` linkage when a row exists).
+    - Hybrid variant adaptation prompt builder for Shopify descriptions (`build_variant_adaptation_prompt`).
+  - Files: `src/feedops/api/main.py`, `src/feedops/api/hybrid_generation.py`, `tests/test_phase7_observability_reliability.py`.
+  - What was fixed:
+    - Added canonical helper to persist `generated_content` and immediately write linked `regeneration_history` with:
+      - `generated_content_id`
+      - `model_version`
+      - `prompt_hash`
+      - truncated `system_prompt` / `user_prompt`
+      - `mode="full_generation"`.
+    - Wired helper into all full-generation paths so linkage is consistent across Google/Bing/Shopify.
+    - Added best-effort `generated_content_id` linkage in `/regenerate` history writes.
+    - Fixed Shopify hybrid adaptation prompt drift: `shopify/description` now uses description-specific adaptation instructions (no title fallback), including explicit finish-agnostic guardrail.
+  - Metadata/traceability fields checked (live):
+    - `generated_content.generation_model`
+    - `generated_content.generation_prompt_hash`
+    - `regeneration_history.generated_content_id`
+    - `regeneration_history.model_version`
+    - `regeneration_history.prompt_hash`
+    - `variant_finish_sentences.finish_sentences` cardinality for Google/Bing.
+  - Validation run:
+    - `.venv/bin/pytest -q` → `401 passed, 1 skipped`.
+    - `RUN_SUPABASE_CANARY=1 bash scripts/verify_phase_0.sh` → `SUPABASE_CANARY_OK`, dashboard lint/build `OK`.
+    - Live `SB-16` checks:
+      - Google/Bing descriptions contain `{FINISH_SENTENCE}` exactly once.
+      - Google/Bing base descriptions do not contain prohibited generic finish-count claims.
+      - Google/Bing `variant_finish_sentences` persisted with 28 entries each.
+      - Shopify title/description generated and persisted with prompt/model metadata.
+      - All six full-generation rows (Google/Bing/Shopify × title/description) have linked `regeneration_history.generated_content_id`.
 
 **Runtime toggles (safe defaults)**
 - `FEEDOPS_DISABLE_GENERATION` (default: unset/`false`): when `true`, generation endpoints return `503` and background generation is not started.
