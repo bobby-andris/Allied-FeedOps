@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { publishExpandedVariantsToGoogleSheets } from '@/lib/publishing/google-sheets'
 import { publishToShopify } from '@/lib/publishing/shopify'
-import { expandVariantsForPublish } from '@/lib/publishing/expand-variants'
+import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
 import { uploadProductImage } from '@/lib/publishing/shopify-images'
 import { captureBaseline } from '@/lib/baseline-capture'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
@@ -120,6 +120,20 @@ function resolveAssignmentStatus(outcome: AssignmentOutcome | undefined): BatchA
     return 'failed'
   }
   return 'partial'
+}
+
+function extractValidationFailureDetails(
+  validation: Awaited<ReturnType<typeof validateContentForPublishing>>,
+  fallbackCode: string,
+  fallbackAction: string
+): { code: string; actionable_message: string; validation_errors: string[]; validation_issues: unknown[] } {
+  const primaryIssue = validation.issues[0]
+  return {
+    code: primaryIssue?.code ?? fallbackCode,
+    actionable_message: primaryIssue?.actionable_message ?? fallbackAction,
+    validation_errors: validation.errors,
+    validation_issues: validation.issues,
+  }
 }
 
 async function updateAssignmentStatus(
@@ -420,8 +434,7 @@ export async function POST(request: NextRequest) {
 
       // Publish to Google
       if (platforms.includes('google')) {
-        const title = content.google_title
-        const description = content.google_description
+        const validation = await validateContentForPublishing(sku, 'google')
 
         // Check approval status first
         if (content.approval_status !== 'approved') {
@@ -449,7 +462,36 @@ export async function POST(request: NextRequest) {
             batch_id,
             published_by: guard.actorId || undefined,
           })
-        } else if (!title || !description) {
+        } else if (!validation.isValid) {
+          const details = extractValidationFailureDetails(
+            validation,
+            'batch_publish_google_validation_failed',
+            'Resolve Google content parity/policy issues before publishing this SKU.'
+          )
+          const result: PublishResult = {
+            success: false,
+            master_sku: sku,
+            platform: 'google',
+            error: validation.errors.join('; '),
+            details: {
+              ...details,
+              state: 'failed',
+            },
+          }
+          recordResult(result)
+          failedCount++
+
+          await logPublishEvent(supabase, {
+            master_sku: sku,
+            platform: 'google',
+            environment,
+            action: 'publish',
+            status: 'failed',
+            error_message: validation.errors.join('; '),
+            batch_id,
+            published_by: guard.actorId || undefined,
+          })
+        } else if (!validation.title || !validation.description) {
           const result: PublishResult = {
             success: false,
             master_sku: sku,
@@ -506,8 +548,8 @@ export async function POST(request: NextRequest) {
               master_sku: sku,
               platform: 'google',
               environment,
-              title,
-              description,
+              title: validation.title,
+              description: validation.description,
               contentVersion: content.google_version,
             })
 
@@ -546,8 +588,8 @@ export async function POST(request: NextRequest) {
               const expandedVariants = await expandVariantsForPublish({
                 master_sku: sku,
                 platform: 'google',
-                approved_title: title,
-                approved_description: description,
+                approved_title: validation.title,
+                approved_description: validation.description,
               })
 
               // Publish expanded variants - each with unique title/description
@@ -592,8 +634,8 @@ export async function POST(request: NextRequest) {
                 error_message: googleResult.success ? undefined : googleResult.errors.join('; '),
                 batch_id,
                 // Include content snapshot for rollback capability
-                published_title: title,
-                published_description: description,
+                published_title: validation.title,
+                published_description: validation.description,
                 variant_count: expandedVariants.length,
                 content_version: content.google_version,
                 published_by: guard.actorId || undefined,
@@ -631,8 +673,7 @@ export async function POST(request: NextRequest) {
 
       // Publish to Shopify
       if (platforms.includes('shopify')) {
-        const title = content.shopify_title || content.google_title
-        const description = content.shopify_description || content.google_description
+        const validation = await validateContentForPublishing(sku, 'shopify')
 
         // Check approval status first
         if (content.approval_status !== 'approved') {
@@ -660,15 +701,19 @@ export async function POST(request: NextRequest) {
             batch_id,
             published_by: guard.actorId || undefined,
           })
-        } else if (!title || !description) {
+        } else if (!validation.isValid) {
+          const details = extractValidationFailureDetails(
+            validation,
+            'batch_publish_shopify_validation_failed',
+            'Resolve Shopify content policy issues before publishing this SKU.'
+          )
           const result: PublishResult = {
             success: false,
             master_sku: sku,
             platform: 'shopify',
-            error: 'Missing approved title or description for Shopify',
+            error: validation.errors.join('; '),
             details: {
-              code: 'batch_publish_missing_approved_content_shopify',
-              actionable_message: 'Approve Shopify title/description content before publishing.',
+              ...details,
               state: 'failed',
             },
           }
@@ -681,7 +726,7 @@ export async function POST(request: NextRequest) {
             environment,
             action: 'publish',
             status: 'failed',
-            error_message: 'Missing approved title or description',
+            error_message: validation.errors.join('; '),
             batch_id,
             published_by: guard.actorId || undefined,
           })
@@ -711,13 +756,40 @@ export async function POST(request: NextRequest) {
             published_by: guard.actorId || undefined,
           })
         } else {
+          if (!validation.title || !validation.description) {
+            const result: PublishResult = {
+              success: false,
+              master_sku: sku,
+              platform: 'shopify',
+              error: 'Missing approved title or description for Shopify',
+              details: {
+                code: 'batch_publish_missing_approved_content_shopify',
+                actionable_message: 'Approve Shopify title/description content before publishing.',
+                state: 'failed',
+              },
+            }
+            recordResult(result)
+            failedCount++
+
+            await logPublishEvent(supabase, {
+              master_sku: sku,
+              platform: 'shopify',
+              environment,
+              action: 'publish',
+              status: 'failed',
+              error_message: 'Missing approved title or description',
+              batch_id,
+              published_by: guard.actorId || undefined,
+            })
+            continue
+          }
           try {
             const shopifyNoop = await isIdempotentNoop(supabase, {
               master_sku: sku,
               platform: 'shopify',
               environment,
-              title,
-              description,
+              title: validation.title,
+              description: validation.description,
               contentVersion: content.shopify_version || content.google_version,
             })
 
@@ -737,8 +809,8 @@ export async function POST(request: NextRequest) {
             } else {
               const shopifyResult = await publishToShopify(
                 content.shopify_product_id,
-                title,
-                description,
+                validation.title,
+                validation.description,
                 environment
               )
 
@@ -768,8 +840,8 @@ export async function POST(request: NextRequest) {
                 error_message: shopifyResult.success ? undefined : shopifyResult.errors.join('; '),
                 batch_id,
                 // Include content snapshot for rollback capability
-                published_title: title,
-                published_description: description,
+                published_title: validation.title,
+                published_description: validation.description,
                 content_version: content.shopify_version || content.google_version,
                 published_by: guard.actorId || undefined,
               })

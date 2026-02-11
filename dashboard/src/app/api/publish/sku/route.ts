@@ -24,6 +24,26 @@ interface PlatformResult {
   details?: Record<string, unknown>
 }
 
+function toValidationFailureResult(
+  platform: Platform,
+  validation: Awaited<ReturnType<typeof validateContentForPublishing>>
+): PlatformResult {
+  const primaryIssue = validation.issues[0]
+  return {
+    platform,
+    success: false,
+    error: validation.errors.join('; '),
+    code: primaryIssue?.code ?? `publish_${platform}_validation_failed`,
+    state: 'failed',
+    actionable_message: primaryIssue?.actionable_message
+      ?? `Resolve ${platform} content validation issues before publishing.`,
+    details: {
+      validation_errors: validation.errors,
+      validation_issues: validation.issues,
+    },
+  }
+}
+
 function publishErrorResponse(
   status: number,
   payload: {
@@ -200,15 +220,8 @@ export async function POST(request: NextRequest) {
       const validation = await validateContentForPublishing(master_sku, 'google')
 
       if (!validation.isValid) {
-        results.push({
-          platform: 'google',
-          success: false,
-          error: validation.errors.join('; '),
-          code: 'publish_missing_approved_content_google',
-          state: 'failed',
-          actionable_message: 'Approve Google title and description content before publishing.',
-          details: { validation_errors: validation.errors },
-        })
+        const failedResult = toValidationFailureResult('google', validation)
+        results.push(failedResult)
 
         await logPublishEvent(supabase, {
           master_sku,
@@ -329,23 +342,12 @@ export async function POST(request: NextRequest) {
 
     // Publish to Shopify
     if (platforms.includes('shopify')) {
-      // Prefer Shopify-specific content, fall back to Google content
-      let validation = await validateContentForPublishing(master_sku, 'shopify')
-      if (!validation.isValid) {
-        // Try Google content as fallback
-        validation = await validateContentForPublishing(master_sku, 'google')
-      }
+      // Strict fail-closed validation: Shopify publish requires Shopify-compliant content.
+      const validation = await validateContentForPublishing(master_sku, 'shopify')
 
       if (!validation.isValid) {
-        results.push({
-          platform: 'shopify',
-          success: false,
-          error: 'No approved content found for Shopify or Google',
-          code: 'publish_missing_approved_content_shopify',
-          state: 'failed',
-          actionable_message: 'Approve Shopify or Google title/description content before publishing.',
-          details: { validation_errors: validation.errors },
-        })
+        const failedResult = toValidationFailureResult('shopify', validation)
+        results.push(failedResult)
 
         await logPublishEvent(supabase, {
           master_sku,
@@ -353,7 +355,7 @@ export async function POST(request: NextRequest) {
           environment,
           action: 'publish',
           status: 'failed',
-          error_message: 'No approved content found',
+          error_message: validation.errors.join('; '),
           published_by: guard.actorId || undefined,
         })
       } else if (!shopifyProductId) {

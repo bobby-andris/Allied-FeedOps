@@ -204,6 +204,39 @@ class _CaptureSupabase:
         return dict(row)
 
 
+class _BatchJobTable:
+    def __init__(self, db: "_BatchJobSupabase", name: str):
+        self._db = db
+        self._name = name
+        self._payload = None
+
+    def insert(self, payload, **_kwargs):
+        self._payload = payload
+        if self._name == "batch_generation_jobs":
+            self._db.job_payloads.append(payload)
+        elif self._name == "batch_generation_job_skus":
+            self._db.sku_payloads.append(payload)
+        return self
+
+    def execute(self):
+        if self._name == "batch_generation_jobs":
+            return SimpleNamespace(data=[{"id": "job-xyz"}])
+        return SimpleNamespace(data=[])
+
+
+@dataclass
+class _BatchJobSupabase:
+    job_payloads: list[dict]
+    sku_payloads: list[list[dict]]
+
+    def __init__(self):
+        self.job_payloads = []
+        self.sku_payloads = []
+
+    def table(self, name: str) -> _BatchJobTable:
+        return _BatchJobTable(self, name)
+
+
 def _patch_generation_deps(monkeypatch, provider, supabase):
     monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
@@ -309,10 +342,21 @@ async def test_optimize_single_sku_respects_generation_kill_switch(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_regenerate_description_skips_finish_sentence_path_when_killed(monkeypatch):
+async def test_regenerate_description_uses_fallback_finish_sentences_when_killed(
+    monkeypatch,
+):
     monkeypatch.setenv("FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN", "1")
 
-    fake_provider = _FakeProvider([{"content": "Base description only"}])
+    fake_provider = _FakeProvider(
+        [
+            {
+                "content": (
+                    "Antique Brass keeps towels organized in this wall-mounted towel bar. "
+                    "Choose from 28 designer finishes to coordinate your bath."
+                )
+            }
+        ]
+    )
 
     monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
@@ -333,7 +377,12 @@ async def test_regenerate_description_skips_finish_sentence_path_when_killed(mon
     response = await api_main.regenerate_content(request)
 
     assert response.success is True
-    assert response.finish_sentences is None
+    assert response.finish_sentences is not None
+    assert len(response.finish_sentences) == len(api_main.get_finish_list())
+    assert "{FINISH_SENTENCE}" in response.content
+    assert response.content.count("{FINISH_SENTENCE}") == 1
+    assert "Antique Brass" not in response.content
+    assert "choose from 28 designer finishes" not in response.content.lower()
     assert fake_provider.calls == 1
 
 
@@ -371,9 +420,60 @@ async def test_regenerate_description_injects_finish_sentence_placeholder_when_f
     assert fake_provider.calls == 2
 
 
+@pytest.mark.asyncio
+async def test_regenerate_description_falls_back_when_finish_sentences_incomplete(
+    monkeypatch,
+):
+    fake_provider = _FakeProvider(
+        [
+            {
+                "content": (
+                    "Polished Nickel keeps towels organized with a wall-mounted profile."
+                )
+            },
+            {"finish_sentences": {"Antique Brass": "Antique Brass warms the space."}},
+        ]
+    )
+
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
+    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+
+    request = api_main.RegenerateRequest(
+        master_sku="1031/18",
+        content_type="description",
+        platform="google",
+        feedback=None,
+        finish_code="ABR",
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.success is True
+    assert response.finish_sentences is not None
+    assert len(response.finish_sentences) == len(api_main.get_finish_list())
+    assert "{FINISH_SENTENCE}" in response.content
+    assert response.content.count("{FINISH_SENTENCE}") == 1
+    assert "Polished Nickel" not in response.content
+    assert fake_provider.calls == 2
+
+
 def test_inject_finish_sentence_placeholder_is_idempotent():
     base = "Solid brass construction. {FINISH_SENTENCE} Concealed mounting keeps installation clean."
     assert inject_finish_sentence_placeholder(base) == base
+
+
+def test_inject_finish_sentence_placeholder_collapses_duplicates():
+    base = (
+        "Solid brass construction. {FINISH_SENTENCE} Concealed mounting keeps installation clean. "
+        "{FINISH_SENTENCE}"
+    )
+    normalized = inject_finish_sentence_placeholder(base)
+    assert normalized.count("{FINISH_SENTENCE}") == 1
 
 
 @pytest.mark.asyncio
@@ -527,3 +627,84 @@ async def test_process_batch_job_persists_linked_history_for_all_platforms(monke
     for row in history_rows:
         assert row["generated_content_id"] is not None
         assert row["mode"] == "full_generation"
+
+
+def test_batch_optimize_request_exposes_generation_options_field():
+    assert "options" in api_main.BatchOptimizeRequest.model_fields
+
+
+@pytest.mark.asyncio
+async def test_batch_optimize_passes_generation_options_to_background_job(monkeypatch):
+    supabase = _BatchJobSupabase()
+    captured: dict[str, object] = {}
+
+    def _capture_run_async(async_func, request_id=None, **kwargs):
+        captured["func_name"] = getattr(async_func, "__name__", "")
+        captured["kwargs"] = kwargs
+        return SimpleNamespace()
+
+    monkeypatch.setattr(api_main, "get_client", lambda: supabase)
+    monkeypatch.setattr(api_main, "run_async_in_thread", _capture_run_async)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-123")
+
+    request = api_main.BatchOptimizeRequest.model_validate(
+        {
+            "skus": ["1031/18", "920D-6"],
+            "num_candidates": 1,
+            "dry_run": False,
+            "options": {
+                "titles": False,
+                "descriptions": True,
+                "platforms": ["google"],
+            },
+        }
+    )
+
+    response = await api_main.batch_optimize(request)
+
+    assert response.success is True
+    assert captured["func_name"] == "process_batch_job"
+    assert captured["kwargs"]["options"] == {
+        "titles": False,
+        "descriptions": True,
+        "platforms": ["google"],
+    }
+    assert supabase.job_payloads
+    assert supabase.job_payloads[0]["options"]["titles"] is False
+    assert supabase.job_payloads[0]["options"]["descriptions"] is True
+    assert supabase.job_payloads[0]["options"]["platforms"] == ["google"]
+
+
+@pytest.mark.asyncio
+async def test_process_batch_job_respects_options_for_platform_and_content_type(monkeypatch):
+    provider = _RecordingProvider()
+    supabase = _CaptureSupabase()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+
+    await api_main.process_batch_job(
+        job_id="job-123",
+        skus=["1031/18"],
+        num_candidates=1,
+        dry_run=False,
+        options={"titles": False, "descriptions": True, "platforms": ["google"]},
+    )
+
+    generated_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "generated_content"
+        and op["op"] == "upsert"
+    ]
+    assert len(generated_rows) == 1
+    assert generated_rows[0]["platform"] == "google"
+    assert generated_rows[0]["content_type"] == "description"
+
+    history_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "regeneration_history"
+        and op["op"] == "insert"
+    ]
+    assert len(history_rows) == 1
+    assert history_rows[0]["platform"] == "google"
+    assert history_rows[0]["content_type"] == "description"

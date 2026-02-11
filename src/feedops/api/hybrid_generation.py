@@ -27,7 +27,9 @@ from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
 from feedops.pipeline.finish_sentence_placeholder import (
+    build_fallback_finish_sentences,
     normalize_base_description_with_finish_placeholder,
+    strip_hardcoded_finish_names,
     strip_generic_finish_count_claims,
 )
 from feedops.pipeline.validators import validate_candidate_content
@@ -366,9 +368,6 @@ async def adapt_variant_content(
                         )
                     if len(validated_finish_sentences) == len(get_finish_list()):
                         finish_sentences = validated_finish_sentences
-                        new_content = normalize_base_description_with_finish_placeholder(
-                            new_content
-                        )
                     else:
                         metrics_registry.increment(
                             "validation_failure_total",
@@ -395,7 +394,20 @@ async def adapt_variant_content(
             new_content = raw_response
 
         if content_type == "description" and platform in {"google", "bing"}:
-            new_content = strip_generic_finish_count_claims(new_content)
+            finish_names = get_finish_list()
+            new_content = normalize_base_description_with_finish_placeholder(
+                strip_hardcoded_finish_names(
+                    strip_generic_finish_count_claims(new_content),
+                    finish_names,
+                )
+            )
+            if not finish_sentences:
+                metrics_registry.increment(
+                    "validation_failure_total",
+                    type="variant_finish_sentence_fallback_used",
+                    platform=platform,
+                )
+                finish_sentences = build_fallback_finish_sentences(finish_names)
 
         content_validation_errors = validate_adapted_variant_content(
             content_type=content_type,

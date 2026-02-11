@@ -79,6 +79,11 @@ export async function POST(request: NextRequest) {
         skus,
         num_candidates: options.num_candidates ?? 1,
         dry_run: false,
+        options: {
+          titles: options.titles,
+          descriptions: options.descriptions,
+          platforms: options.platforms,
+        },
       }),
     })
 

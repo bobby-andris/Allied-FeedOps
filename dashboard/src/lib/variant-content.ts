@@ -109,6 +109,14 @@ export function generateVariantDescription(
 
   let result = baseDescription.trim()
 
+  // Defensive parity guard: if finish sentences exist but the template is missing
+  // the canonical placeholder and still contains a hardcoded finish, this creates
+  // contradictory variant output at expansion time.
+  const contradiction = detectVariantFinishContradiction(result, Boolean(finishSentences))
+  if (contradiction) {
+    throw new Error(contradiction)
+  }
+
   // Priority 1: Replace {FINISH_SENTENCE} placeholder if present
   if (result.includes(PLACEHOLDERS.FINISH_SENTENCE)) {
     const finishSentence = finishSentences?.[finishName]
@@ -366,5 +374,30 @@ export function templateHasHardcodedFinish(template: string): string | null {
       return finishName
     }
   }
+  return null
+}
+
+/**
+ * Detect contradiction risk when finish sentences are present but template content
+ * already hardcodes a specific finish and lacks the canonical placeholder.
+ */
+export function detectVariantFinishContradiction(
+  template: string,
+  hasFinishSentences: boolean
+): string | null {
+  if (!hasFinishSentences) {
+    return null
+  }
+
+  const result = template.trim()
+  if (!result || result.includes(PLACEHOLDERS.FINISH_SENTENCE)) {
+    return null
+  }
+
+  const hardcodedFinish = templateHasHardcodedFinish(result)
+  if (hardcodedFinish) {
+    return `variant_finish_contradiction: hardcoded_finish=${hardcodedFinish}`
+  }
+
   return null
 }

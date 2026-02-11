@@ -33,6 +33,11 @@ export interface BatchOptimizeRequest {
   skus: string[]
   num_candidates?: number
   dry_run?: boolean
+  options?: {
+    titles?: boolean
+    descriptions?: boolean
+    platforms?: ('google' | 'bing' | 'shopify')[]
+  }
 }
 
 export interface HybridGenerateRequest {
@@ -227,6 +232,7 @@ export class PipelineClient {
         skus: request.skus,
         num_candidates: request.num_candidates ?? 1,
         dry_run: request.dry_run ?? true,
+        options: request.options,
       }),
     })
 

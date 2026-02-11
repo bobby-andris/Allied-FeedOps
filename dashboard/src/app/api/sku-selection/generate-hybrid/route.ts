@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const PIPELINE_URL =
-  process.env.FEEDOPS_PIPELINE_URL ||
-  'https://feedops-pipeline-623866089882.us-east1.run.app'
+const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
 
 interface GenerateHybridRequest {
   skus: string[]
@@ -40,6 +38,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'At least one platform must be selected' },
         { status: 400 }
+      )
+    }
+
+    if (!PIPELINE_URL) {
+      return NextResponse.json(
+        { error: 'Content generation pipeline is not configured (FEEDOPS_PIPELINE_URL not set)' },
+        { status: 503 }
       )
     }
 

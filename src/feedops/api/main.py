@@ -49,7 +49,9 @@ from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
 from feedops.pipeline.finish_sentence_placeholder import (
+    build_fallback_finish_sentences,
     normalize_base_description_with_finish_placeholder,
+    strip_hardcoded_finish_names,
     strip_generic_finish_count_claims,
 )
 from feedops.pipeline.prompts import build_category_guidance
@@ -212,6 +214,13 @@ class BatchOptimizeRequest(BaseModel):
         default=1, ge=1, le=5, description="Candidates per SKU"
     )
     dry_run: bool = Field(default=True, description="If true, don't save to database")
+    options: dict | None = Field(
+        default=None,
+        description=(
+            "Optional generation controls: "
+            "{titles: bool, descriptions: bool, platforms: list[str]}"
+        ),
+    )
 
 
 class HealthResponse(BaseModel):
@@ -313,6 +322,34 @@ class HybridJobResponse(BaseModel):
     multi_sku_families: int
     single_skus: int
     strategy: dict  # {base_skus: int, variant_skus: int}
+
+
+def _normalize_generation_options(options: dict | None) -> dict:
+    """Normalize optional generation controls used by batch endpoints."""
+    normalized = {
+        "titles": True,
+        "descriptions": True,
+        "platforms": ["google", "bing", "shopify"],
+    }
+    if not isinstance(options, dict):
+        return normalized
+
+    if "titles" in options:
+        normalized["titles"] = bool(options.get("titles"))
+    if "descriptions" in options:
+        normalized["descriptions"] = bool(options.get("descriptions"))
+
+    raw_platforms = options.get("platforms")
+    if isinstance(raw_platforms, list):
+        valid = {"google", "bing", "shopify"}
+        parsed_platforms = [
+            platform
+            for platform in raw_platforms
+            if isinstance(platform, str) and platform in valid
+        ]
+        normalized["platforms"] = parsed_platforms
+
+    return normalized
 
 
 async def _generate_with_metrics(
@@ -590,7 +627,15 @@ async def _enforce_finish_sentence_parity(
     endpoint: str,
 ) -> tuple[str, dict[str, str] | None]:
     """Apply regenerate-equivalent finish handling for Google/Bing descriptions."""
-    sanitized_content = strip_generic_finish_count_claims(content)
+    finish_names = get_finish_list()
+    fallback_finish_sentences = build_fallback_finish_sentences(finish_names)
+    sanitized_content = strip_hardcoded_finish_names(
+        strip_generic_finish_count_claims(content),
+        finish_names,
+    )
+    normalized_content = normalize_base_description_with_finish_placeholder(
+        sanitized_content
+    )
 
     if not finish_sentence_regeneration_enabled():
         metrics_registry.increment(
@@ -607,17 +652,20 @@ async def _enforce_finish_sentence_parity(
             platform=platform,
             reason="FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN",
         )
-        return sanitized_content, None
+        metrics_registry.increment(
+            "validation_failure_total",
+            type="finish_sentence_fallback_used",
+            platform=platform,
+        )
+        return normalized_content, fallback_finish_sentences
 
     finish_schema = {
         "type": "object",
         "properties": {
             "finish_sentences": {
                 "type": "object",
-                "properties": {
-                    finish: {"type": "string"} for finish in get_finish_list()
-                },
-                "required": get_finish_list(),
+                "properties": {finish: {"type": "string"} for finish in finish_names},
+                "required": finish_names,
             }
         },
         "required": ["finish_sentences"],
@@ -653,12 +701,14 @@ async def _enforce_finish_sentence_parity(
             len(validated_finish_sentences),
             len(get_finish_list()),
         )
-        return sanitized_content, None
+        metrics_registry.increment(
+            "validation_failure_total",
+            type="finish_sentence_fallback_used",
+            platform=platform,
+        )
+        return normalized_content, fallback_finish_sentences
 
-    return (
-        normalize_base_description_with_finish_placeholder(sanitized_content),
-        validated_finish_sentences,
-    )
+    return normalized_content, validated_finish_sentences
 
 
 # =============================================================================
@@ -918,6 +968,17 @@ async def regenerate_content(request: RegenerateRequest):
         try:
             supabase = get_client()
             system_prompt = get_system_prompt()
+            supabase.table("generated_content").upsert(
+                {
+                    "master_sku": request.master_sku,
+                    "platform": request.platform,
+                    "content_type": request.content_type,
+                    "candidate_content": content,
+                    "generation_model": provider.name,
+                    "generation_prompt_hash": prompt_hash,
+                },
+                on_conflict="master_sku,platform,content_type",
+            ).execute()
             generated_content_id = _lookup_generated_content_id(
                 supabase=supabase,
                 master_sku=request.master_sku,
@@ -1049,6 +1110,17 @@ async def batch_optimize(request: BatchOptimizeRequest):
     try:
         ensure_generation_enabled(operation="batch_optimize")
         supabase = get_client()
+        options = _normalize_generation_options(request.options)
+
+        if not options["titles"] and not options["descriptions"]:
+            raise HTTPException(
+                status_code=400,
+                detail="At least one content type must be selected (titles or descriptions)",
+            )
+        if not options["platforms"]:
+            raise HTTPException(
+                status_code=400, detail="At least one platform must be selected"
+            )
 
         # Create job in Supabase (using existing table from migration 006)
         job_result = (
@@ -1062,6 +1134,9 @@ async def batch_optimize(request: BatchOptimizeRequest):
                     "options": {
                         "num_candidates": request.num_candidates,
                         "dry_run": request.dry_run,
+                        "titles": options["titles"],
+                        "descriptions": options["descriptions"],
+                        "platforms": options["platforms"],
                     },
                 }
             )
@@ -1085,6 +1160,7 @@ async def batch_optimize(request: BatchOptimizeRequest):
             skus=request.skus,
             num_candidates=request.num_candidates,
             dry_run=request.dry_run,
+            options=options,
         )
 
         return BatchJobResponse(
@@ -1259,6 +1335,7 @@ async def process_batch_job(
     skus: list[str],
     num_candidates: int,
     dry_run: bool,
+    options: dict | None = None,
 ):
     """Background task to process batch optimization.
 
@@ -1276,6 +1353,13 @@ async def process_batch_job(
 
     completed = 0
     failed = 0
+    normalized_options = _normalize_generation_options(options)
+    platforms = normalized_options["platforms"]
+    content_types = []
+    if normalized_options["titles"]:
+        content_types.append("title")
+    if normalized_options["descriptions"]:
+        content_types.append("description")
 
     for sku in skus:
         try:
@@ -1301,8 +1385,8 @@ async def process_batch_job(
             system_prompt = get_system_prompt()
 
             # Generate for each platform
-            for platform in ["google", "bing", "shopify"]:
-                for content_type in ["title", "description"]:
+            for platform in platforms:
+                for content_type in content_types:
                     user_prompt = _build_generation_user_prompt(
                         parent_sku=parent_sku,
                         evidence_markdown=evidence_markdown,

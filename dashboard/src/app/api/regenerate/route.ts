@@ -5,7 +5,7 @@ import { validateGeneratedContent } from '@/lib/regeneration/prompts'
 import { ensureSkuData } from '@/lib/data-collection/ensure-data'
 
 // Python Cloud Run pipeline URL
-const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
 
 // Feedback preset descriptions
 const FEEDBACK_PRESETS: Record<FeedbackPreset, string> = {
@@ -119,6 +119,16 @@ export async function POST(request: NextRequest) {
         step: 'request_validation_feedback',
         actionable_message:
           'Provide both feedback.user_feedback and feedback.current_content for feedback regeneration.',
+      })
+    }
+
+    if (!PIPELINE_URL) {
+      return errorResponse(503, {
+        error: 'Content generation pipeline is not configured (FEEDOPS_PIPELINE_URL not set)',
+        code: 'regenerate_pipeline_not_configured',
+        step: 'pipeline_config',
+        actionable_message:
+          'Set FEEDOPS_PIPELINE_URL for this environment before retrying regeneration.',
       })
     }
 
