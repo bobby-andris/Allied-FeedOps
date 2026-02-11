@@ -1,0 +1,192 @@
+{
+  "test_1_single_product": {
+    "success": true,
+    "row_count": 30,
+    "sample_results": [
+      {
+        "campaign": {
+          "resource_name": "customers/6253381786/campaigns/21407925574",
+          "advertising_channel_type": "SHOPPING"
+        },
+        "metrics": {
+          "clicks": "2",
+          "conversions_value": 0.0,
+          "conversions": 0.0,
+          "cost_micros": "7090000",
+          "ctr": 0.00816326530612245,
+          "impressions": "245"
+        },
+        "segments": {
+          "date": "2026-02-10",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "campaign": {
+          "resource_name": "customers/6253381786/campaigns/21407926783",
+          "advertising_channel_type": "SHOPPING"
+        },
+        "metrics": {
+          "clicks": "0",
+          "conversions_value": 0.0,
+          "conversions": 0.0,
+          "cost_micros": "0",
+          "ctr": 0.0,
+          "impressions": "9"
+        },
+        "segments": {
+          "date": "2026-02-10",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "campaign": {
+          "resource_name": "customers/6253381786/campaigns/23552989844",
+          "advertising_channel_type": "PERFORMANCE_MAX"
+        },
+        "metrics": {
+          "clicks": "0",
+          "conversions_value": 0.0,
+          "conversions": 0.0,
+          "cost_micros": "0",
+          "ctr": 0.0,
+          "impressions": "1"
+        },
+        "segments": {
+          "date": "2026-02-10",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "campaign": {
+          "resource_name": "customers/6253381786/campaigns/21407925574",
+          "advertising_channel_type": "SHOPPING"
+        },
+        "metrics": {
+          "clicks": "7",
+          "conversions_value": 0.0,
+          "conversions": 0.0,
+          "cost_micros": "14510000",
+          "ctr": 0.017543859649122806,
+          "impressions": "399"
+        },
+        "segments": {
+          "date": "2026-02-09",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "campaign": {
+          "resource_name": "customers/6253381786/campaigns/21407926783",
+          "advertising_channel_type": "SHOPPING"
+        },
+        "metrics": {
+          "clicks": "0",
+          "conversions_value": 0.0,
+          "conversions": 0.0,
+          "cost_micros": "0",
+          "ctr": 0.0,
+          "impressions": "24"
+        },
+        "segments": {
+          "date": "2026-02-09",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      }
+    ],
+    "error": null
+  },
+  "test_2_batch_query": {
+    "success": true,
+    "row_count": 133,
+    "product_count": 5,
+    "sample_results": [
+      {
+        "metrics": {
+          "clicks": "2",
+          "ctr": 0.00784313725490196,
+          "impressions": "255"
+        },
+        "segments": {
+          "date": "2026-02-10",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "metrics": {
+          "clicks": "7",
+          "ctr": 0.016548463356973995,
+          "impressions": "423"
+        },
+        "segments": {
+          "date": "2026-02-09",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "metrics": {
+          "clicks": "5",
+          "ctr": 0.01858736059479554,
+          "impressions": "269"
+        },
+        "segments": {
+          "date": "2026-02-08",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "metrics": {
+          "clicks": "3",
+          "ctr": 0.008823529411764706,
+          "impressions": "340"
+        },
+        "segments": {
+          "date": "2026-02-07",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      },
+      {
+        "metrics": {
+          "clicks": "7",
+          "ctr": 0.020289855072463767,
+          "impressions": "345"
+        },
+        "segments": {
+          "date": "2026-02-06",
+          "product_item_id": "shopify_us_4538703609988_32096241320068"
+        },
+        "shopping_performance_view": {
+          "resource_name": "customers/6253381786/shoppingPerformanceView"
+        }
+      }
+    ],
+    "error": null
+  }
+}
