@@ -637,7 +637,36 @@ The repo already has a Tier-1 plan drafted in TS form; we will implement the sam
 - Deployment verification results:
   - Cloud Build `4f1e9034-22a6-4504-9422-eb3f9eb10696` -> `SUCCESS`.
   - Active Cloud Run image: `gcr.io/bobbys-project-346400/feedops-pipeline:1b2dd79d2252757b951e7ce5f184bab6bd55c412`.
-  - Live hybrid job `38c55dae-8b43-47cd-a3e5-06c92cf7ca78` completed with requested `2/2` and expanded `3/3`, no requested-counter overflow.
+- Live hybrid job `38c55dae-8b43-47cd-a3e5-06c92cf7ca78` completed with requested `2/2` and expanded `3/3`, no requested-counter overflow.
+
+### 2026-02-11 Review Queue Blocker Remediation (UTC)
+
+- Timestamp window: `2026-02-11 18:10:00Z` to `2026-02-11 19:05:00Z`.
+- Objective: clear active review blockers without legacy tagging or broad destructive cleanup.
+- SKUs audited as blockers: `1031/18`, `1031/24`, `1031/30`, `1031/36`, `CL-28-30`, `WP-2TB-16-GAL`.
+- Routes/processes touched:
+  - Cloud Run: `POST /regenerate` (targeted bing title/description regeneration only for required SKUs).
+  - Supabase data maintenance: deterministic row updates/copies for alias normalization (`WP-2TB/16-GAL` -> `WP-2TB-16-GAL`) and placeholder cleanup.
+- Metadata and policy fields checked:
+  - Readiness: review queue strict policy checks (`google_missing_finish_sentence_placeholder`, `google_missing_finish_sentence_rows`, `shopify_title_has_brand`, slot completeness).
+  - Variant data: `variant_finish_sentences` row presence/cardinality for Google/Bing descriptions.
+  - Regeneration metadata on successful calls: `model`, `prompt_hash`, `finish_sentences_count`.
+- Evidence artifacts:
+  - Before audit: `/private/tmp/review_quality_audit_current.json` (`strict_ready=86`, `not_ready=6` on `active_review_skus=92`).
+  - Remediation plan split: `/private/tmp/review_quality_remediation_plan.json` (`db_only=1`, `regeneration_required=5`).
+  - Targeted regeneration results: `/private/tmp/review_quality_targeted_regen_round2.json` (`total=14`, `ok=8`, `failed=6`), where all six failures were `404 SKU not found` for alias `WP-2TB-16-GAL`.
+  - After audit: `/private/tmp/review_quality_audit_current_after.json` (`strict_ready=92`, `not_ready=0` on `active_review_skus=92`).
+- Deterministic fixes applied (no model calls):
+  - `CL-28-30` Shopify description placeholder cleanup to remove finish placeholder drift in base content.
+  - `WP-2TB-16-GAL` alias normalization by copying canonical slash-SKU content/finish-sentence rows from `WP-2TB/16-GAL`.
+- Regeneration results summary:
+  - `1031/18`, `1031/24`, `1031/30`, `1031/36`: bing title+description regenerated successfully.
+  - All regenerated bing descriptions recorded `finish_sentences_count=28`.
+  - No blocker required broad backfill; only targeted repairs/regeneration were used.
+- Outcome:
+  - Active review queue strict-ready quality moved from `86/92` to `92/92`.
+  - Remaining blockers in active review queue: `0`.
+  - Legacy tagging/UI badge work was intentionally deferred in favor of canonical data correctness.
 
 **Runtime toggles (safe defaults)**
 - `FEEDOPS_DISABLE_GENERATION` (default: unset/`false`): when `true`, generation endpoints return `503` and background generation is not started.
