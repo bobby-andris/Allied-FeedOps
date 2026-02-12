@@ -10,30 +10,30 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 2 of 4 (Comprehensive Data Discovery)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-12 — Completed plan 02-02 (Custom Label Filtering and PMax Discovery)
+Last activity: 2026-02-12 — Completed plan 02-03 (Bidding, Attribution, and Competitive Metrics Discovery)
 
-Progress: [█████░░░░░] 50%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 3.75 minutes
-- Total execution time: 0.25 hours
+- Total plans completed: 5
+- Average duration: 3 minutes
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. API Capability Validation | 2 | 9 min | 4.5 min |
-| 2. Comprehensive Data Discovery | 2 | 6 min | 3 min |
+| 2. Comprehensive Data Discovery | 3 | 8 min | 2.7 min |
 
 **Recent Trend:**
-- Latest: 02-02 (3 minutes)
-- Previous: 02-01 (3 minutes)
-- Trend: Accelerating velocity (~3 min/plan in Phase 2)
+- Latest: 02-03 (2 minutes)
+- Previous: 02-02 (3 minutes)
+- Trend: Accelerating velocity (~2.7 min/plan in Phase 2)
 
 *Updated after each plan completion*
 
@@ -84,6 +84,24 @@ Progress: [█████░░░░░] 50%
    - This is an API constraint, not a data availability issue
    - Impact: Limited metrics available for placement analysis
 
+9. **Auction Insights Metrics Not Available via API** (02-03, 2026-02-12)
+   - API returned access restriction error for auction_insight_* metrics (impression share, overlap rate, outranking share)
+   - These metrics may be UI-only or require special API access
+   - Use own-account impression share and position metrics instead
+   - Impact: Cannot get competitor-specific data programmatically, but can track market share via impression_share metrics
+
+10. **Product-Level Impression Share Available** (02-03, 2026-02-12)
+   - Query succeeded with search_impression_share and search_click_share at product granularity
+   - Sample data: 51% impression share, 34% click share for top product
+   - Available in shopping_performance_view with segments.product_item_id
+   - Impact: Can track competitive position for individual SKUs, not just campaigns
+
+11. **Data-Driven Attribution Model Available** (02-03, 2026-02-12)
+   - Conversion actions show GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN with data_driven_model_status: AVAILABLE
+   - 19 enabled conversion actions with 30-day click / 1-day view-through lookback
+   - Conversion lag distribution queryable (176 lag buckets found in 30-day window)
+   - Impact: Attribution data is more sophisticated than basic last-click; conversion lag data informs backfill timing
+
 Key context from PROJECT.md:
 - Phase 0 is discovery only — no schema migrations, no production deployment
 - 5 core questions must be answered before planning main backfill
@@ -100,9 +118,9 @@ None yet. Research summary indicates HIGH confidence in feasibility.
 
 ## Session Continuity
 
-Last session: 2026-02-12 — Plan 02-02 execution
-Stopped at: Completed 02-02-PLAN.md (Custom Label Filtering and PMax Discovery)
+Last session: 2026-02-12 — Plan 02-03 execution
+Stopped at: Completed 02-03-PLAN.md (Bidding, Attribution, and Competitive Metrics Discovery)
 Resume file: None
 
 ---
-*Next step:* Continue Phase 2 with Plan 02-03 (Segmentation Analysis)
+*Next step:* Continue Phase 2 with Plan 02-04 (final plan in phase)
