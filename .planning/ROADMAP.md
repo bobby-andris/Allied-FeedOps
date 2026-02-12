@@ -63,10 +63,12 @@ Plans:
   3. Keyword Planner ideas are generated for sample SKUs with documented opportunity gaps
   4. Query performance is measured (p50, p95, p99 response times) for batch sizing decisions
   5. Comprehensive data retrieval works for sample SKUs (all metrics identified in Phase 2)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- Plans will be created during `/gsd:plan-phase 3`
+- [ ] 03-01-PLAN.md — Select test SKUs across categories and fetch search terms (SAMP-01, SAMP-02)
+- [ ] 03-02-PLAN.md — Generate Keyword Planner ideas and calculate opportunity gaps (SAMP-03, SAMP-04)
+- [ ] 03-03-PLAN.md — Measure query performance and validate comprehensive metric retrieval (SAMP-05, SAMP-06)
 
 ### Phase 4: Documentation & Decision
 **Goal**: Comprehensive API reference document and clear Go/No-Go recommendation for Phases 1-5 backfill execution
