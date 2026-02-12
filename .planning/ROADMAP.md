@@ -45,10 +45,13 @@ Plans:
   3. Custom label filtering capabilities are tested and documented (can we filter by custom_label_0-4?)
   4. Performance Max campaign data patterns are documented
   5. Competitive metrics availability is confirmed (auction insights, impression share, etc.)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- Plans will be created during `/gsd:plan-phase 2`
+- [ ] 02-01-PLAN.md — Enumerate all views, metrics, and Shopping report types (DISC-01, DISC-02, DISC-06)
+- [ ] 02-02-PLAN.md — Test custom label filtering and PMax data patterns (DISC-03, DISC-04, DISC-05)
+- [ ] 02-03-PLAN.md — Discover bidding, attribution, and competitive metrics (DISC-07, DISC-08, DISC-09)
+- [ ] 02-04-PLAN.md — Discover audience segmentation, asset performance, and ML insights (DISC-10, DISC-11, DISC-12)
 
 ### Phase 3: Sample Testing & Analysis
 **Goal**: Validated backfill approach with real API responses from diverse product categories showing performance, opportunity gaps, and query execution characteristics
