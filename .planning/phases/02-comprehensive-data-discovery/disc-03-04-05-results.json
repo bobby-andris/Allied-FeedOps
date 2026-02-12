@@ -1,0 +1,176 @@
+{
+  "customer_id": "6253381786",
+  "timestamp": "2026-02-12T02:03:06Z",
+  "custom_label_discovery": {
+    "attributes": {
+      "custom_attribute0": {
+        "populated": true,
+        "unique_values": [
+          "wall mounted swing towel arms",
+          "wall mounted towel rings",
+          "wall mounted make-up mirrors",
+          "glass shelves"
+        ],
+        "total_unique_in_sample": 4,
+        "sample_size": 50
+      },
+      "custom_attribute1": {
+        "populated": true,
+        "unique_values": [
+          "low"
+        ],
+        "total_unique_in_sample": 1,
+        "sample_size": 2
+      },
+      "custom_attribute2": {
+        "populated": true,
+        "unique_values": [
+          "sports minnesota slapshot",
+          "sports philadelphia slapshot",
+          "sports losangelesbiga diamond",
+          "sports boston hardwood"
+        ],
+        "total_unique_in_sample": 4,
+        "sample_size": 50
+      },
+      "custom_attribute3": {
+        "populated": true,
+        "unique_values": [
+          "bidnamic_pull",
+          "bidnamic zombie pmax"
+        ],
+        "total_unique_in_sample": 2,
+        "sample_size": 3
+      },
+      "custom_attribute4": {
+        "populated": false,
+        "unique_values": [],
+        "total_unique_in_sample": 0,
+        "sample_size": 1
+      }
+    },
+    "filtering_tests": [
+      {
+        "success": true,
+        "label": "exact_match",
+        "row_count": 20,
+        "elapsed_seconds": 1.157,
+        "query": "SELECT\n          segments.product_item_id,\n          segments.product_custom_attribute0,\n          metrics.impressions,\n          metrics.clicks\n        FROM shopping_performance_view\n        WHERE segments.product_custom_attribute0 = 'wall mounted swing towel arms'\n          AND segments.date DURING LAST_30_DAYS\n        LIMIT 20"
+      },
+      {
+        "success": true,
+        "label": "in_clause",
+        "row_count": 20,
+        "elapsed_seconds": 0.936,
+        "query": "SELECT\n          segments.product_item_id,\n          segments.product_custom_attribute0,\n          metrics.impressions,\n          metrics.clicks\n        FROM shopping_performance_view\n        WHERE segments.product_custom_attribute0 IN ('wall mounted swing towel arms', 'wall mounted towel rings', 'wall mounted make-up mirrors')\n          AND segments.date DURING LAST_30_DAYS\n        LIMIT 20"
+      },
+      {
+        "success": true,
+        "label": "not_filter",
+        "row_count": 20,
+        "elapsed_seconds": 1.275,
+        "query": "SELECT\n          segments.product_item_id,\n          segments.product_custom_attribute0,\n          metrics.impressions,\n          metrics.clicks\n        FROM shopping_performance_view\n        WHERE segments.product_custom_attribute0 != 'wall mounted swing towel arms'\n          AND segments.date DURING LAST_30_DAYS\n        LIMIT 20"
+      },
+      {
+        "success": true,
+        "label": "cross_attribute",
+        "row_count": 20,
+        "elapsed_seconds": 0.992,
+        "query": "SELECT\n          segments.product_item_id,\n          segments.product_custom_attribute0,\n          segments.product_custom_attribute1,\n          metrics.impressions,\n          metrics.clicks\n        FROM shopping_performance_view\n        WHERE segments.product_custom_attribute0 = 'wall mounted swing towel arms'\n          AND segments.product_custom_attribute1 = 'low'\n          AND segments.date DURING LAST_30_DAYS\n        LIMIT 20"
+      }
+    ],
+    "population_strategy": {
+      "currently_populated": [
+        {
+          "attribute": "custom_attribute0",
+          "unique_values_sample": [
+            "wall mounted swing towel arms",
+            "wall mounted towel rings",
+            "wall mounted make-up mirrors",
+            "glass shelves"
+          ],
+          "sample_size": 50
+        },
+        {
+          "attribute": "custom_attribute1",
+          "unique_values_sample": [
+            "low"
+          ],
+          "sample_size": 2
+        },
+        {
+          "attribute": "custom_attribute2",
+          "unique_values_sample": [
+            "sports minnesota slapshot",
+            "sports philadelphia slapshot",
+            "sports losangelesbiga diamond",
+            "sports boston hardwood"
+          ],
+          "sample_size": 50
+        },
+        {
+          "attribute": "custom_attribute3",
+          "unique_values_sample": [
+            "bidnamic_pull",
+            "bidnamic zombie pmax"
+          ],
+          "sample_size": 3
+        }
+      ],
+      "available_slots": [
+        "custom_attribute4"
+      ],
+      "recommendations": [
+        {
+          "slot": "custom_label_4",
+          "strategy": "Populate with product_item_id",
+          "benefit": "Enable direct product filtering by offer ID",
+          "implementation": "Add column to Google Sheets supplemental feed"
+        },
+        {
+          "slot": "custom_label_4",
+          "strategy": "Populate with category/tier data",
+          "benefit": "Enable category-level performance segmentation",
+          "implementation": "Map products to categories in feed"
+        }
+      ]
+    }
+  },
+  "pmax_discovery": {
+    "campaign_identification": {
+      "success": true,
+      "label": "pmax_campaigns",
+      "row_count": 15,
+      "elapsed_seconds": 0.492,
+      "query": "SELECT\n      campaign.id,\n      campaign.name,\n      campaign.advertising_channel_type,\n      campaign.status\n    FROM campaign\n    WHERE campaign.advertising_channel_type = 'PERFORMANCE_MAX'\n    LIMIT 20"
+    },
+    "product_level_data": {
+      "success": true,
+      "label": "pmax_product_performance",
+      "row_count": 20,
+      "elapsed_seconds": 1.197,
+      "query": "SELECT\n      segments.product_item_id,\n      segments.date,\n      campaign.id,\n      campaign.advertising_channel_type,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.conversions,\n      metrics.cost_micros\n    FROM shopping_performance_view\n    WHERE campaign.advertising_channel_type = 'PERFORMANCE_MAX'\n      AND segments.date DURING LAST_30_DAYS\n      AND metrics.impressions > 0\n    ORDER BY metrics.impressions DESC\n    LIMIT 20"
+    },
+    "asset_groups": {
+      "success": true,
+      "label": "pmax_asset_groups",
+      "row_count": 20,
+      "elapsed_seconds": 0.561,
+      "query": "SELECT\n      asset_group.id,\n      asset_group.name,\n      asset_group.status,\n      asset_group.ad_strength,\n      campaign.id\n    FROM asset_group\n    WHERE campaign.advertising_channel_type = 'PERFORMANCE_MAX'\n    LIMIT 20"
+    },
+    "placements": {
+      "success": true,
+      "label": "pmax_placements",
+      "row_count": 20,
+      "elapsed_seconds": 0.587,
+      "query": "SELECT\n      performance_max_placement_view.display_name,\n      performance_max_placement_view.placement,\n      performance_max_placement_view.placement_type,\n      metrics.impressions\n    FROM performance_max_placement_view\n    WHERE segments.date DURING LAST_30_DAYS\n    ORDER BY metrics.impressions DESC\n    LIMIT 20"
+    },
+    "campaign_comparison": {
+      "success": true,
+      "label": "pmax_vs_shopping",
+      "row_count": 501,
+      "elapsed_seconds": 0.72,
+      "query": "SELECT\n      campaign.advertising_channel_type,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.conversions,\n      metrics.cost_micros\n    FROM campaign\n    WHERE campaign.advertising_channel_type IN ('SHOPPING', 'PERFORMANCE_MAX')\n      AND segments.date DURING LAST_30_DAYS"
+    }
+  }
+}
