@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 8 of 8 (Monitoring & Automation)
-Plan: 4 of 4
+Plan: 5 of 5
 Status: Complete
-Last activity: 2026-02-13 — Completed Phase 8 (all 4 plans executed)
+Last activity: 2026-02-13 — Completed Phase 8 Plan 5 (monitoring endpoint gap closure)
 
-Progress: [██████████] 100% (v1.0 milestone complete - 15/15 plans)
+Progress: [██████████] 100% (v1.0 milestone complete - 16/16 plans)
 
 ## Performance Metrics
 
@@ -33,9 +33,9 @@ Progress: [██████████] 100% (v1.0 milestone complete - 15/15
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 15
-- Average duration: 3.2 minutes
-- Total execution time: 47.5 minutes
+- Total plans completed: 16
+- Average duration: 3.1 minutes
+- Total execution time: 49.5 minutes
 
 **By Phase:**
 
@@ -44,10 +44,11 @@ Progress: [██████████] 100% (v1.0 milestone complete - 15/15
 | 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
 | 6 Data Collection Pipeline | 3 | 11.4 min | 3.8 min |
 | 7 Data Quality & Validation | 4 | 10.4 min | 2.6 min |
-| 8 Monitoring & Automation | 4 | 12.5 min | 3.1 min |
+| 8 Monitoring & Automation | 5 | 14.5 min | 2.9 min |
 
 *Updated after each plan completion*
 | Phase 08 P04 | 5 | 2 tasks | 1 file |
+| Phase 08 P05 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,16 @@ Progress: [██████████] 100% (v1.0 milestone complete - 15/15
    - Cloud Scheduler runs incremental refresh at 2:00 AM Pacific Time daily
    - Alternative: Run at different time or multiple times per day
    - Impact: Minimizes impact on business hours, allows overnight processing of previous day's data
+
+7. **Direct Table Queries Over RPC** (Plan 08-05)
+   - Replace all execute_sql RPC calls with direct supabase.table() queries
+   - RPC returns JSONB (single JSON value), not list-of-dicts like table queries
+   - Impact: Reliable data structure handling, no RPC wrapping surprises
+
+8. **Python-Side Aggregation for Coverage** (Plan 08-05)
+   - Use len(set(...)) instead of SQL COUNT(DISTINCT ...) for coverage calculations
+   - Simpler code, no RPC complexity, minimal performance difference for ~2,800 SKU catalog
+   - Impact: Clearer code, easier to debug
 
 **Phase 7 (Data Quality & Validation):**
 
@@ -245,7 +256,11 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 
 ### Pending Todos
 
-None yet. Will populate during v1.0 execution.
+**Post-Deployment Verification (Phase 08 Plan 05):**
+- Verify coverage endpoint returns valid JSON with total_skus, search_terms_coverage, performance_coverage, keywords_coverage
+- Verify freshness endpoint returns valid JSON with per-SKU data age arrays
+- Verify api-health endpoint returns valid JSON (precautionary check)
+- Commands in 08-05-SUMMARY.md Next Phase Readiness section
 
 ### Blockers/Concerns
 
@@ -259,7 +274,7 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 8 plan execution
-Stopped at: Completed 08-04-PLAN.md (Cloud Scheduler & alert setup)
+Stopped at: Completed 08-05-PLAN.md (monitoring endpoint gap closure)
 Resume file: None
 
 ---
