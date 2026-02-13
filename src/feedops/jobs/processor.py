@@ -109,12 +109,12 @@ class BatchProcessor:
         )
 
         # Load job to check for checkpoint
-        job = await get_job(self.job_id)
+        job = get_job(self.job_id)
         if not job:
             raise ValueError(f"Job {self.job_id} not found")
 
         # Resume from checkpoint if exists
-        checkpoint_data = job.get("checkpoint_data", {})
+        checkpoint_data = job.checkpoint_data or {}
         start_index = checkpoint_data.get("batch_index", 0)
         logger.info(
             f"Job {self.job_id}: Starting from index {start_index} "
@@ -122,7 +122,7 @@ class BatchProcessor:
         )
 
         # Set job to running status
-        await update_job_status(self.job_id, "running")
+        update_job_status(self.job_id, "running")
 
         # Track metrics
         start_time = time.time()
@@ -176,15 +176,15 @@ class BatchProcessor:
                     logger.error(
                         f"Job {self.job_id}: Batch {batch_num} failed permanently: {exc}"
                     )
-                    await log_job_error(
+                    # Log error for first item in batch as representative
+                    item_id = batch[0] if batch else "unknown"
+                    error_context = f"batch_index={batch_index}, batch_size={len(batch)}, attempt={attempt + 1}"
+                    log_job_error(
                         self.job_id,
+                        item_id=item_id,
                         error_type="batch_error",
-                        error_message=str(exc),
-                        context={
-                            "batch_index": batch_index,
-                            "batch_size": len(batch),
-                            "attempt": attempt + 1,
-                        },
+                        error_message=f"{str(exc)} [{error_context}]",
+                        retry_count=attempt,
                     )
                     failed_items += len(batch)
                     break
@@ -195,11 +195,11 @@ class BatchProcessor:
 
             # Update progress
             progress_pct = int((completed_items / total_items) * 100)
-            await update_job_progress(
+            update_job_progress(
                 self.job_id,
-                completed=completed_items,
-                failed=failed_items,
-                total=total_items,
+                completed_items=completed_items,
+                total_items=total_items,
+                started_at_epoch=start_time,
             )
 
             logger.info(
@@ -208,7 +208,7 @@ class BatchProcessor:
 
             # Save checkpoint every checkpoint_interval items
             if completed_items % self.checkpoint_interval == 0 or batch_end >= total_items:
-                await save_checkpoint(
+                save_checkpoint(
                     self.job_id,
                     {
                         "batch_index": batch_end,
@@ -240,10 +240,11 @@ class BatchProcessor:
 
         # Update job with final status
         duration = time.time() - start_time
-        await update_job_status(
+        from datetime import datetime, timezone
+        update_job_status(
             self.job_id,
             final_status,
-            completed_at=time.time(),
+            completed_at=datetime.now(timezone.utc),
         )
 
         logger.info(
