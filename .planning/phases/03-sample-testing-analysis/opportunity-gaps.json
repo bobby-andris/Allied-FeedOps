@@ -1,0 +1,736 @@
+{
+  "metadata": {
+    "date": "2026-02-13",
+    "min_monthly_searches": 100
+  },
+  "summary": {
+    "total_skus": 5,
+    "avg_coverage_rate": 0.57,
+    "total_gap_volume": 168530,
+    "total_gap_keywords": 153
+  },
+  "skus": {
+    "P-700-16-GB": {
+      "category": "grab bar",
+      "current_search_terms": 11507,
+      "kp_high_volume_ideas": 94,
+      "gap_count": 31,
+      "gap_volume": 34520,
+      "coverage_rate": 0.67,
+      "top_gaps": [
+        {
+          "text": "toilet rails",
+          "avg_monthly_searches": 2900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 290000,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "bathroom grab rails for the elderly",
+          "avg_monthly_searches": 2900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 240000,
+          "high_cpc_micros": 1730000
+        },
+        {
+          "text": "home depot grab bars",
+          "avg_monthly_searches": 2400,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 168607,
+          "high_cpc_micros": 1100000
+        },
+        {
+          "text": "tub grab bar",
+          "avg_monthly_searches": 2400,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 281069,
+          "high_cpc_micros": 2173779
+        },
+        {
+          "text": "suction grab bars for shower",
+          "avg_monthly_searches": 1900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 280071,
+          "high_cpc_micros": 1024156
+        },
+        {
+          "text": "stainless steel grab bars",
+          "avg_monthly_searches": 1900,
+          "competition": "HIGH",
+          "competition_index": 54,
+          "low_cpc_micros": 500000,
+          "high_cpc_micros": 5340000
+        },
+        {
+          "text": "handicap toilet bars",
+          "avg_monthly_searches": 1600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 271219,
+          "high_cpc_micros": 1292268
+        },
+        {
+          "text": "toilet rails for elderly",
+          "avg_monthly_searches": 1600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 334639,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "bathroom handrails",
+          "avg_monthly_searches": 1600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 279207,
+          "high_cpc_micros": 1764703
+        },
+        {
+          "text": "toilet bars for elderly",
+          "avg_monthly_searches": 1600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 334639,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "delta grab bars",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 412165,
+          "high_cpc_micros": 1740000
+        },
+        {
+          "text": "grab handle",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 282869,
+          "high_cpc_micros": 1710000
+        },
+        {
+          "text": "toilet bars",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 293835,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "suction grab bars",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 295186,
+          "high_cpc_micros": 1144881
+        },
+        {
+          "text": "bed grab rail",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 209742,
+          "high_cpc_micros": 760000
+        },
+        {
+          "text": "bathtub safety rail",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 238391,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "hand rails for shower",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 296667,
+          "high_cpc_micros": 1754225
+        },
+        {
+          "text": "toilet assist bars",
+          "avg_monthly_searches": 880,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 270000,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "shower handles for elderly",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 284682,
+          "high_cpc_micros": 1250000
+        },
+        {
+          "text": "handicap handrails",
+          "avg_monthly_searches": 590,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 371812,
+          "high_cpc_micros": 3161585
+        }
+      ]
+    },
+    "TD-23": {
+      "category": "Retractable Hooks and Garment Rods",
+      "current_search_terms": 13164,
+      "kp_high_volume_ideas": 29,
+      "gap_count": 14,
+      "gap_volume": 9090,
+      "coverage_rate": 0.517,
+      "top_gaps": [
+        {
+          "text": "wall mounted drying rack for clothes",
+          "avg_monthly_searches": 2900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 300000,
+          "high_cpc_micros": 1090000
+        },
+        {
+          "text": "clothes hanging rod for car",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 150674,
+          "high_cpc_micros": 721692
+        },
+        {
+          "text": "double rod clothing rack",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 287434,
+          "high_cpc_micros": 1506263
+        },
+        {
+          "text": "double rod garment rack",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 287434,
+          "high_cpc_micros": 1506263
+        },
+        {
+          "text": "clothing rack double rod",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 287434,
+          "high_cpc_micros": 1506263
+        },
+        {
+          "text": "car garment rod",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 139914,
+          "high_cpc_micros": 686030
+        },
+        {
+          "text": "single rod garment rack",
+          "avg_monthly_searches": 590,
+          "competition": "UNSPECIFIED",
+          "competition_index": 99,
+          "low_cpc_micros": 230000,
+          "high_cpc_micros": 740000
+        },
+        {
+          "text": "wall mounted clothes hanging rail",
+          "avg_monthly_searches": 320,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 390000,
+          "high_cpc_micros": 2191175
+        },
+        {
+          "text": "clothes hanging rack ceiling",
+          "avg_monthly_searches": 320,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 259999,
+          "high_cpc_micros": 1328790
+        },
+        {
+          "text": "double garment rack with wheels",
+          "avg_monthly_searches": 210,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 314497,
+          "high_cpc_micros": 2643430
+        },
+        {
+          "text": "heavy duty double rod clothing rack",
+          "avg_monthly_searches": 210,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 250402,
+          "high_cpc_micros": 1839181
+        },
+        {
+          "text": "wall hanging rod for clothes",
+          "avg_monthly_searches": 140,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 240000,
+          "high_cpc_micros": 1003175
+        },
+        {
+          "text": "closet clothes rail",
+          "avg_monthly_searches": 110,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 278498,
+          "high_cpc_micros": 2540000
+        },
+        {
+          "text": "rod iron clothes rack",
+          "avg_monthly_searches": 110,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 423599,
+          "high_cpc_micros": 1870409
+        }
+      ]
+    },
+    "WP-2/16-GAL": {
+      "category": "Glass Shelves",
+      "current_search_terms": 13736,
+      "kp_high_volume_ideas": 86,
+      "gap_count": 43,
+      "gap_volume": 51760,
+      "coverage_rate": 0.5,
+      "top_gaps": [
+        {
+          "text": "bookshelves with glass doors",
+          "avg_monthly_searches": 12100,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 372127,
+          "high_cpc_micros": 1440000
+        },
+        {
+          "text": "under cabinet wine glass rack",
+          "avg_monthly_searches": 3600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 250000,
+          "high_cpc_micros": 1003942
+        },
+        {
+          "text": "display cabinet with glass doors and shelves",
+          "avg_monthly_searches": 3600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 318825,
+          "high_cpc_micros": 1649844
+        },
+        {
+          "text": "under counter wine glass rack",
+          "avg_monthly_searches": 3600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 250000,
+          "high_cpc_micros": 1003942
+        },
+        {
+          "text": "over toilet wall cabinet",
+          "avg_monthly_searches": 2900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 317666,
+          "high_cpc_micros": 1256378
+        },
+        {
+          "text": "wine glass rack",
+          "avg_monthly_searches": 2400,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 295484,
+          "high_cpc_micros": 1750000
+        },
+        {
+          "text": "wine and glass rack",
+          "avg_monthly_searches": 2400,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 295484,
+          "high_cpc_micros": 1750000
+        },
+        {
+          "text": "wall mounted wine glass rack",
+          "avg_monthly_searches": 1600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 310000,
+          "high_cpc_micros": 1480000
+        },
+        {
+          "text": "wine glass wall rack",
+          "avg_monthly_searches": 1600,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 310000,
+          "high_cpc_micros": 1480000
+        },
+        {
+          "text": "hanging wine glass rack",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 307609,
+          "high_cpc_micros": 1599898
+        },
+        {
+          "text": "storage cabinet with glass doors",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 349212,
+          "high_cpc_micros": 1738491
+        },
+        {
+          "text": "corner glass shower",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 1370000,
+          "high_cpc_micros": 6520000
+        },
+        {
+          "text": "shelves with glass doors",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 290000,
+          "high_cpc_micros": 1057581
+        },
+        {
+          "text": "black curio cabinet",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 383723,
+          "high_cpc_micros": 2060000
+        },
+        {
+          "text": "table top shelves",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 249477,
+          "high_cpc_micros": 1170000
+        },
+        {
+          "text": "glass storage cabinet",
+          "avg_monthly_searches": 880,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 420746,
+          "high_cpc_micros": 1458547
+        },
+        {
+          "text": "shot glass shelf",
+          "avg_monthly_searches": 880,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 183914,
+          "high_cpc_micros": 710000
+        },
+        {
+          "text": "ikea vittsjo shelf",
+          "avg_monthly_searches": 880,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 109052,
+          "high_cpc_micros": 650000
+        },
+        {
+          "text": "mirror with hooks and shelf",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 355643,
+          "high_cpc_micros": 1295203
+        },
+        {
+          "text": "black bookshelf with glass doors",
+          "avg_monthly_searches": 590,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 361711,
+          "high_cpc_micros": 1830422
+        }
+      ]
+    },
+    "CL-20-6": {
+      "category": "Multi Hooks",
+      "current_search_terms": 10398,
+      "kp_high_volume_ideas": 93,
+      "gap_count": 55,
+      "gap_volume": 51300,
+      "coverage_rate": 0.409,
+      "top_gaps": [
+        {
+          "text": "shower curtain hangers",
+          "avg_monthly_searches": 14800,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 230000,
+          "high_cpc_micros": 1210000
+        },
+        {
+          "text": "no hook shower curtain",
+          "avg_monthly_searches": 2400,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 238814,
+          "high_cpc_micros": 910115
+        },
+        {
+          "text": "suction hooks for shower",
+          "avg_monthly_searches": 1900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 270000,
+          "high_cpc_micros": 956122
+        },
+        {
+          "text": "black shower curtain hooks",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 304694,
+          "high_cpc_micros": 1430000
+        },
+        {
+          "text": "shower curtain clips",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 200992,
+          "high_cpc_micros": 920000
+        },
+        {
+          "text": "black shower curtain rings",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 304694,
+          "high_cpc_micros": 1430000
+        },
+        {
+          "text": "bathroom robe hooks",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 390000,
+          "high_cpc_micros": 2370000
+        },
+        {
+          "text": "over the door towel hooks",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 259999,
+          "high_cpc_micros": 1210000
+        },
+        {
+          "text": "double shower curtain hooks",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 290000,
+          "high_cpc_micros": 1160000
+        },
+        {
+          "text": "wall mounted towel hooks",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 86,
+          "low_cpc_micros": 380595,
+          "high_cpc_micros": 1799501
+        },
+        {
+          "text": "metal shower curtain rings",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 251991,
+          "high_cpc_micros": 1176706
+        },
+        {
+          "text": "suction cup hooks for shower",
+          "avg_monthly_searches": 1300,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 272092,
+          "high_cpc_micros": 925099
+        },
+        {
+          "text": "brass towel hook",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 599737,
+          "high_cpc_micros": 3192032
+        },
+        {
+          "text": "black towel hooks",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 501407,
+          "high_cpc_micros": 2446398
+        },
+        {
+          "text": "gold shower curtain hooks",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 330000,
+          "high_cpc_micros": 1472676
+        },
+        {
+          "text": "gold shower curtain rings",
+          "avg_monthly_searches": 1000,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 330000,
+          "high_cpc_micros": 1472676
+        },
+        {
+          "text": "gold towel hooks",
+          "avg_monthly_searches": 880,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 420000,
+          "high_cpc_micros": 2017733
+        },
+        {
+          "text": "shower towel hook",
+          "avg_monthly_searches": 880,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 339734,
+          "high_cpc_micros": 1815003
+        },
+        {
+          "text": "bathroom wall hooks",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 427131,
+          "high_cpc_micros": 1750000
+        },
+        {
+          "text": "best shower curtain hooks",
+          "avg_monthly_searches": 720,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 340000,
+          "high_cpc_micros": 1268396
+        }
+      ]
+    },
+    "WP-GTB-2": {
+      "category": "Assorted Wall Accessories",
+      "current_search_terms": 11587,
+      "kp_high_volume_ideas": 41,
+      "gap_count": 10,
+      "gap_volume": 21860,
+      "coverage_rate": 0.756,
+      "top_gaps": [
+        {
+          "text": "electric towel warmer",
+          "avg_monthly_searches": 12100,
+          "competition": "MEDIUM",
+          "competition_index": 29,
+          "low_cpc_micros": 406459,
+          "high_cpc_micros": 1502222
+        },
+        {
+          "text": "heated towel warmer",
+          "avg_monthly_searches": 2900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 400000,
+          "high_cpc_micros": 1610547
+        },
+        {
+          "text": "wooden towel rack",
+          "avg_monthly_searches": 2400,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 336816,
+          "high_cpc_micros": 1323992
+        },
+        {
+          "text": "towel dryer",
+          "avg_monthly_searches": 1900,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 228443,
+          "high_cpc_micros": 863353
+        },
+        {
+          "text": "electric towel rail",
+          "avg_monthly_searches": 1000,
+          "competition": "MEDIUM",
+          "competition_index": 4,
+          "low_cpc_micros": 377548,
+          "high_cpc_micros": 4230000
+        },
+        {
+          "text": "bathroom radiators",
+          "avg_monthly_searches": 590,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 522403,
+          "high_cpc_micros": 3480000
+        },
+        {
+          "text": "towel radiator",
+          "avg_monthly_searches": 480,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 467454,
+          "high_cpc_micros": 2050000
+        },
+        {
+          "text": "bathroom heated towel rail",
+          "avg_monthly_searches": 210,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 449781,
+          "high_cpc_micros": 2890000
+        },
+        {
+          "text": "heated towel radiator",
+          "avg_monthly_searches": 170,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 605487,
+          "high_cpc_micros": 1885950
+        },
+        {
+          "text": "vertical heated towel rail",
+          "avg_monthly_searches": 110,
+          "competition": "UNSPECIFIED",
+          "competition_index": 100,
+          "low_cpc_micros": 640000,
+          "high_cpc_micros": 5007766
+        }
+      ]
+    }
+  }
+}
