@@ -140,10 +140,13 @@ Plans:
   4. System automatically triggers backfill for SKUs with missing or stale data via scheduled jobs
   5. System transitions from 180-day backfill to daily 1-day incremental refresh with Prometheus metrics exported
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: TBD during phase planning
+- [ ] 08-01-PLAN.md — Python monitoring API endpoints (freshness, coverage, api-health) + Prometheus /metrics mount
+- [ ] 08-02-PLAN.md — Stale SKU detection, incremental refresh logic, and Slack/email alert helpers
+- [ ] 08-03-PLAN.md — Dashboard backfill monitoring page with Tremor (job status, coverage KPIs, freshness heatmap, API health)
+- [ ] 08-04-PLAN.md — Cloud Scheduler setup for daily incremental refresh + notification channel configuration
 
 ## Progress
 
@@ -159,7 +162,7 @@ Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 �
 | 1. Job Infrastructure & Foundation | v1.0 | 4/4 | Complete | 2026-02-13 |
 | 2. Data Collection Pipeline | v1.0 | 3/3 | Complete | 2026-02-13 |
 | 3. Data Quality & Validation | v1.0 | 4/4 | Complete | 2026-02-13 |
-| 4. Monitoring & Automation | v1.0 | 0/? | Not started | - |
+| 4. Monitoring & Automation | v1.0 | 0/4 | Planning complete | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
