@@ -60,6 +60,7 @@ class StartBackfillRequest(BaseModel):
     - batch_size (default 10): Number of items processed per batch
     - checkpoint_interval (default 100): Save checkpoint every N items
     - days_lookback (default 180): Date range for data collection (search terms, performance)
+    - mode (optional): Set to "incremental" to auto-detect stale SKUs when skus list is empty
     """
 
     job_type: Literal[
@@ -71,13 +72,13 @@ class StartBackfillRequest(BaseModel):
     ] = Field(..., description="Type of backfill job to run")
     skus: list[str] = Field(
         ...,
-        min_length=1,
+        min_length=0,
         max_length=3000,
-        description="SKU IDs to process",
+        description="SKU IDs to process (can be empty if mode=incremental in config)",
     )
     config: dict = Field(
         default_factory=dict,
-        description="Job config: batch_size (10), checkpoint_interval (100), days_lookback (180)",
+        description="Job config: batch_size (10), checkpoint_interval (100), days_lookback (180), mode (incremental)",
     )
 
 
@@ -336,6 +337,9 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
     connection exhaustion. Creates job record, starts background processing
     via run_async_in_thread (not BackgroundTasks), and returns initial state.
 
+    Supports incremental mode: if config.mode == "incremental" and skus list is empty,
+    automatically detects stale SKUs using get_stale_skus().
+
     Args:
         request: Job configuration with type, SKUs, and config
 
@@ -344,6 +348,7 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
 
     Raises:
         HTTPException: 429 if max concurrent jobs reached
+        HTTPException: 400 if skus empty and mode is not incremental
     """
     from feedops.jobs.manager import create_job, get_active_job_count
 
@@ -355,14 +360,36 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
             detail="Maximum concurrent jobs (3) reached. Wait for active jobs to complete.",
         )
 
+    # Handle incremental mode: auto-detect stale SKUs if list is empty
+    skus = request.skus
+    mode = request.config.get("mode")
+
+    if not skus:
+        if mode == "incremental":
+            logger.info("Incremental mode detected with empty SKU list - auto-detecting stale SKUs")
+            from feedops.jobs.scheduler import get_stale_skus
+
+            days_threshold = request.config.get("days_lookback", 7)
+            skus = get_stale_skus(days_threshold=days_threshold)
+
+            if not skus:
+                logger.info("No stale SKUs found - nothing to process")
+                # Still create a job for tracking purposes but it will complete immediately
+                skus = []
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="SKU list cannot be empty unless config.mode is set to 'incremental'",
+            )
+
     logger.info(
-        f"Starting backfill job: type={request.job_type}, skus={len(request.skus)}"
+        f"Starting backfill job: type={request.job_type}, skus={len(skus)}, mode={mode}"
     )
 
-    # Create job in database
+    # Create job in database (use resolved skus, not request.skus)
     job_id = create_job(
         job_type=request.job_type,
-        item_ids=request.skus,
+        skus=skus,
         config=request.config,
     )
 
@@ -374,7 +401,7 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
         _start_background_processing,
         request_id=None,  # TODO: Pass request_id from context
         job_id=str(job_id),
-        skus=request.skus,
+        skus=skus,  # Use resolved skus, not request.skus
         config=request.config,
         job_type=request.job_type,
     )
