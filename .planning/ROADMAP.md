@@ -97,10 +97,12 @@ Plans:
   4. System syncs custom_label_0 from Google Merchant Center to Supabase
   5. All collected data includes collection timestamps and uses explicit date ranges (YYYY-MM-DD format)
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD during phase planning
+- [ ] 06-01-PLAN.md -- Collection worker functions (search terms, performance, keyword planner, custom labels)
+- [ ] 06-02-PLAN.md -- Wire workers into backfill API endpoints (replace _noop_process with job-type routing)
+- [ ] 06-03-PLAN.md -- Unit tests for all 4 collection workers
 
 ### Phase 3: Data Quality & Validation
 **Goal**: Ensure data completeness, freshness, and accuracy through validation layers and contamination prevention
@@ -152,7 +154,7 @@ Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 �
 | 0.3 Sample Testing & Analysis | Phase 0 | 3/3 | Complete | 2026-02-13 |
 | 0.4 Documentation & Decision | Phase 0 | 2/2 | Complete | 2026-02-13 |
 | 1. Job Infrastructure & Foundation | v1.0 | 4/4 | Complete | 2026-02-13 |
-| 2. Data Collection Pipeline | v1.0 | 0/? | Not started | - |
+| 2. Data Collection Pipeline | v1.0 | 0/3 | Planned | - |
 | 3. Data Quality & Validation | v1.0 | 0/? | Not started | - |
 | 4. Monitoring & Automation | v1.0 | 0/? | Not started | - |
 
