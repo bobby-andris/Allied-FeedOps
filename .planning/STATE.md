@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 2 of 4 (Comprehensive Data Discovery)
-Plan: 4 of 4 in current phase
+Phase: 3 of 4 (Sample Testing & Analysis)
+Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-02-12 — Completed plan 02-04 (Audience, Asset, and ML Insights Discovery)
+Last activity: 2026-02-13 — Completed plan 03-01 (Sample SKU Selection and Search Term Fetching)
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 2.83 minutes
-- Total execution time: 0.28 hours
+- Total plans completed: 7
+- Average duration: 3.0 minutes
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
@@ -29,14 +29,15 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 1. API Capability Validation | 2 | 9 min | 4.5 min |
 | 2. Comprehensive Data Discovery | 4 | 11 min | 2.75 min |
+| 3. Sample Testing & Analysis | 1 | 6 min | 6.0 min |
 
 **Recent Trend:**
-- Latest: 02-04 (3 minutes)
-- Previous: 02-03 (2 minutes)
-- Trend: Consistent velocity (~2.75 min/plan in Phase 2)
+- Latest: 03-01 (6 minutes)
+- Previous: 02-04 (3 minutes)
+- Trend: Longer execution for data collection tasks
 
 *Updated after each plan completion*
-| Phase 02 P04 | 3 | 2 tasks | 2 files |
+| Phase 03 P01 | 6 | 1 task | 3 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,24 @@ Progress: [██████████] 100%
    - Conversion lag distribution queryable (176 lag buckets found in 30-day window)
    - Impact: Attribution data is more sophisticated than basic last-click; conversion lag data informs backfill timing
 
+12. **LAST_N_DAYS Syntax Not Supported** (03-01, 2026-02-13)
+   - Google Ads API rejects date literals like `LAST_90_DAYS` with "Invalid value" error
+   - Must use explicit date ranges: `BETWEEN 'YYYY-MM-DD' AND 'YYYY-MM-DD'`
+   - Calculate dates in code before building query string
+   - Impact: All date range queries require Python datetime calculations
+
+13. **Filtered Fields Must Be in SELECT Clause** (03-01, 2026-02-13)
+   - API enforces strict rule: fields used in WHERE must appear in SELECT
+   - Example: `WHERE campaign.advertising_channel_type = 'SHOPPING'` requires `SELECT campaign.advertising_channel_type`
+   - Same applies to segments.product_item_id and other filtered fields
+   - Impact: SELECT clauses must include all WHERE filter fields, not just desired output fields
+
+14. **Category-Based SKU Selection Requires Fallback Strategy** (03-01, 2026-02-13)
+   - Many products in catalog lack recent Google Ads activity (<30 days)
+   - Category-only selection insufficient for representative sampling
+   - Solution: Use known-active offer IDs from validation phase as fallback
+   - Impact: Sample selection scripts need two-tier strategy (category first, fallback second)
+
 Key context from PROJECT.md:
 - Phase 0 is discovery only — no schema migrations, no production deployment
 - 5 core questions must be answered before planning main backfill
@@ -111,6 +130,7 @@ Key context from PROJECT.md:
 - [Phase 02-04]: Asset Performance Labels Not Available - asset_group_asset.performance_label field unrecognized by API v22
 - [Phase 02-04]: Search Term Insights Require Campaign-Level Query - cannot query all campaigns at once for campaign_search_term_insight
 - [Phase 02-04]: Demographics and Quality Scores Not Available for Shopping - confirmed these metrics only exist for Search/Display campaigns
+- [Phase 03-01]: Sample set established - 6 SKUs, 5 categories, 60K+ search terms, 560K impressions
 
 ### Pending Todos
 
@@ -122,9 +142,9 @@ None yet. Research summary indicates HIGH confidence in feasibility.
 
 ## Session Continuity
 
-Last session: 2026-02-12 — Plan 02-04 execution
-Stopped at: Completed 02-04-PLAN.md (Audience, Asset, and ML Insights Discovery)
+Last session: 2026-02-13 — Plan 03-01 execution
+Stopped at: Completed 03-01-PLAN.md (Sample SKU Selection and Search Term Fetching)
 Resume file: None
 
 ---
-*Next step:* Phase 2 complete. Ready for Phase 3 (Sample Testing) or Phase 4 (Gap Analysis & Recommendations)
+*Next step:* Phase 3 complete. Ready for Phase 4 (Gap Analysis & Recommendations)
