@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** Phase 1 - Job Infrastructure & Foundation (v1.0 milestone)
+**Current focus:** Phase 6 - Data Collection Pipeline (v1.0 milestone)
 
 ## Current Position
 
-Phase: 1 of 4 (Job Infrastructure & Foundation)
-Plan: 4 of 4
-Status: Phase complete
-Last activity: 2026-02-13 — Completed 05-04-PLAN.md (integration tests)
+Phase: 6 of 8 (Data Collection Pipeline)
+Plan: 2 of 4
+Status: In progress
+Last activity: 2026-02-13 — Completed 06-01-PLAN.md (data collection workers)
 
-Progress: [███░░░░░░░] 25% (1/4 phases complete, 4/4 plans in phase 1 complete)
+Progress: [███░░░░░░░] 12.5% (1/8 plans complete in current phase)
 
 ## Performance Metrics
 
@@ -33,21 +33,34 @@ Progress: [███░░░░░░░] 25% (1/4 phases complete, 4/4 plans i
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 4
-- Average duration: 3.3 minutes
-- Total execution time: 13.3 minutes
+- Total plans completed: 5
+- Average duration: 3.4 minutes
+- Total execution time: 16.8 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
+| 6 Data Collection Pipeline | 1 | 3.5 min | 3.5 min |
 
 *Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
+
+**Phase 6 (Data Collection Pipeline):**
+
+1. **GMC Data Caching Strategy** (Plan 06-01)
+   - Module-level cache with 5-minute TTL avoids redundant API calls across consecutive batches
+   - GMC API returns all products at once (expensive call)
+   - Impact: Significant API cost reduction for large backfill jobs
+
+2. **Search Terms Filtering Approach** (Plan 06-01)
+   - Worker filters results after fetch (client is batch-native with campaign-join pattern)
+   - Client handles campaign-join, worker handles batch filtering
+   - Impact: Clean separation of concerns, preserves existing client API
 
 **Phase 5 (Job Infrastructure):**
 
@@ -155,9 +168,9 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 
 ## Session Continuity
 
-Last session: 2026-02-13 — Phase 5 plan execution
-Stopped at: Completed 05-04-PLAN.md (integration tests) - Phase 1 complete
+Last session: 2026-02-13 — Phase 6 plan execution
+Stopped at: Completed 06-01-PLAN.md (data collection workers)
 Resume file: None
 
 ---
-*Next step:* Begin Phase 2 (Data Collection Workers) - Build real collection endpoints using validated infrastructure.
+*Next step:* Continue Phase 6 - Execute 06-02-PLAN.md (backfill API endpoint integration)
