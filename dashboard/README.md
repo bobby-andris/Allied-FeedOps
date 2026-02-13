@@ -70,21 +70,26 @@ Status is computed from persisted data only:
 
 No API contract or schema changes were required.
 
-## Manual title override (2026-02-13)
+## Manual base content overrides (2026-02-13)
 
-For Google/Bing variant templates, operators can manually edit the base title from SKU review:
+For Google/Bing variant templates, operators can manually edit base title/description content from SKU review:
 
-- UI entry point: `Edit Base Title` in the title content block.
-- Finish token lock: `{FINISH_NAME}` is fixed/non-editable.
-- Validation rules:
-  - template must contain exactly one `{FINISH_NAME}`
-  - hardcoded finish names are rejected
-- Save endpoint:
-  - `POST /api/review/manual-title`
-  - updates `generated_content.candidate_content` for `content_type='title'`
-  - clears `approved_content`/approval snapshot for that title so re-approval is required
+- Title override:
+  - UI entry point: `Edit Base Title` in the title content block.
+  - locked token: `{FINISH_NAME}`
+  - validation: exactly one token and no hardcoded finish names
+  - save endpoint: `POST /api/review/manual-title`
+  - updates `generated_content.candidate_content` (`content_type='title'`)
+  - clears `approved_content`/approval snapshot for title (re-approval required)
+- Description override:
+  - UI entry point: `Edit Base Description` in the description content block.
+  - locked token: `{FINISH_SENTENCE}` (legacy `[FINISH_SENTENCE]` is normalized on save)
+  - validation: exactly one `{FINISH_SENTENCE}` token and no hardcoded finish names
+  - save endpoint: `POST /api/review/manual-description`
+  - updates `generated_content.candidate_content` (`content_type='description'`)
+  - clears `approved_content`/approval snapshot for description (re-approval required)
 
-This preserves deterministic variant propagation while preventing accidental per-finish hardcoding.
+Both overrides preserve deterministic variant propagation while preventing accidental per-finish hardcoding.
 
 ## Lifestyle image behavior
 
@@ -132,12 +137,16 @@ This prevents `duplicate key value violates unique constraint product_lifestyle_
   - `src/components/review/ImageApprovalCard.tsx`
   - `src/components/review/PublishButton.tsx`
   - `src/components/review/approval-copy.ts`
+  - `src/components/review/ManualTitleEditor.tsx`
+  - `src/components/review/ManualDescriptionEditor.tsx`
 - API
   - `src/app/api/approvals/route.ts`
   - `src/app/api/variants/approvals/bulk/route.ts`
   - `src/app/api/publish/sku/route.ts`
   - `src/app/api/review/images/select/route.ts`
   - `src/app/api/review/images/select/master-selection.ts`
+  - `src/app/api/review/manual-title/route.ts`
+  - `src/app/api/review/manual-description/route.ts`
 
 ## Test coverage
 

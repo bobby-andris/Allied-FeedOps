@@ -17,11 +17,13 @@ import { ContentQualityCard } from "@/components/review/ContentQualityCard"
 import { VariantContentGrid } from "@/components/review/VariantContentGrid"
 import { PublishButton } from "@/components/review/PublishButton"
 import { ManualTitleEditor } from "@/components/review/ManualTitleEditor"
+import { ManualDescriptionEditor } from "@/components/review/ManualDescriptionEditor"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
 import { buildPlatformProgress, computePlatformReadinessForSku, type LatestPublishSnapshot } from '@/lib/review/platform-progress'
 import { getPublishReadinessHelpText } from './approval-copy'
+import { PLACEHOLDERS } from "@/lib/finish-data"
 
 interface ContentRecord {
   id: string
@@ -167,6 +169,14 @@ function ContentBlock({
               sku={sku}
               platform={platform}
               currentTitle={candidate}
+              onSaved={() => onRefresh()}
+            />
+          )}
+          {type === 'description' && (platform === 'google' || platform === 'bing') && candidate && (
+            <ManualDescriptionEditor
+              sku={sku}
+              platform={platform}
+              currentDescription={candidate}
               onSaved={() => onRefresh()}
             />
           )}
@@ -443,8 +453,14 @@ export function SkuReviewClient({
   })
   const platformProgress = buildPlatformProgress(platformReadiness, publishedSnapshots)
 
-  const titleIsTemplate = title?.candidate_content?.includes('{FINISH_NAME}') || false
-  const descIsTemplate = description?.candidate_content?.includes('{FINISH_NAME}') || false
+  const titleIsTemplate = title?.candidate_content?.includes(PLACEHOLDERS.FINISH_NAME) || false
+  const descCandidate = description?.candidate_content || ''
+  const descIsTemplate = (
+    descCandidate.includes(PLACEHOLDERS.FINISH_SENTENCE)
+    || descCandidate.includes('[FINISH_SENTENCE]')
+    || descCandidate.includes(PLACEHOLDERS.FINISH_NAME)
+    || descCandidate.includes(PLACEHOLDERS.FINISH_DESCRIPTION)
+  )
 
   return (
     <div className="min-h-screen bg-background">

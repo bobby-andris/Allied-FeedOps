@@ -90,3 +90,7 @@ Variant title previews and publish expansion already derive from platform base t
 - No schema changes.
 - One additive API route only (`/api/review/manual-title`).
 - Existing generation/publish contracts remain unchanged.
+
+Related:
+
+- `docs/architecture/2026-02-13-manual-base-description-override.md`

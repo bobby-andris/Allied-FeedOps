@@ -68,7 +68,7 @@ The review UI now surfaces platform progress at both list and detail levels usin
   - readiness state
   - blocker reason when blocked
   - latest production publish timestamp
-- latest published title/description snapshot
+  - latest published title/description snapshot
 
 Progress state is derived from:
 
@@ -77,15 +77,20 @@ Progress state is derived from:
 - `variant_lifestyle_images`
 - latest successful production `publish_events`
 
-### Manual base title override (Google/Bing)
+### Manual base content overrides (Google/Bing)
 
-When regenerate-with-feedback cannot produce the exact title you need, the review page supports manual base title edits for Google/Bing:
+When regenerate-with-feedback cannot produce the exact result you need, the review page supports manual base edits for Google/Bing:
 
-- Use `Edit Base Title` from the Title block on `/review/[sku]`.
-- The finish token is locked as `{FINISH_NAME}` and cannot be manually edited.
-- Save updates the platform base title template and applies to all variants (variant rows derive from the base template).
-- Hardcoded finish names are blocked in manual templates.
-- Save clears `approved_content` for that platform title so the operator must re-approve before publish.
+- `Edit Base Title` in the Title block:
+  - locked token: `{FINISH_NAME}`
+  - applies template updates across all variants
+  - blocks hardcoded finish names
+  - clears `approved_content` for title so re-approval is required
+- `Edit Base Description` in the Description block:
+  - locked token: `{FINISH_SENTENCE}` (legacy `[FINISH_SENTENCE]` is normalized on save)
+  - applies template updates across all variants
+  - blocks hardcoded finish names
+  - clears `approved_content` for description so re-approval is required
 
 ### Approval API behavior
 
@@ -94,6 +99,10 @@ When regenerate-with-feedback cannot produce the exact title you need, the revie
   - Platform-scoped approve requests still transition approved content even if global booleans were already true.
 - `POST /api/variants/approvals/bulk`
   - Supports optional `platform` (currently `google | bing`) for clearer scope and messaging.
+- `POST /api/review/manual-title`
+  - Manual base title override for Google/Bing variant templates.
+- `POST /api/review/manual-description`
+  - Manual base description override for Google/Bing variant templates.
 
 ### Lifestyle image semantics
 
