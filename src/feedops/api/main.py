@@ -104,9 +104,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount Prometheus /metrics endpoint (MON-10)
+from prometheus_client import make_asgi_app, REGISTRY
+metrics_app = make_asgi_app(registry=REGISTRY)
+app.mount("/metrics", metrics_app)
+
 # Include search insights router
 from feedops.api.search_insights import router as search_insights_router
 app.include_router(search_insights_router)
+
+# Include monitoring router
+from feedops.api.monitoring import router as monitoring_router
+app.include_router(monitoring_router)
 
 # Include performance baseline router
 from feedops.api.performance_baseline import router as performance_baseline_router

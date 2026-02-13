@@ -45,6 +45,8 @@ from typing import Literal
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
+from feedops.observability import get_request_id, log_event
+
 logger = logging.getLogger(__name__)
 
 
@@ -280,6 +282,8 @@ async def _start_background_processing(job_id: str, skus: list[str], config: dic
     - custom_labels: collect_custom_labels_batch with no rate limiter
     - full_backfill: collect_full_backfill_batch (composite worker, runs all 4 sequentially)
 
+    Sends notifications at job start/complete/fail via notify_job_event().
+
     Args:
         job_id: Job UUID
         skus: List of SKU IDs to process
@@ -288,6 +292,7 @@ async def _start_background_processing(job_id: str, skus: list[str], config: dic
     """
     from feedops.jobs.manager import get_job, update_job_status
     from feedops.jobs.processor import BatchProcessor
+    from feedops.observability.alerts import notify_job_event
 
     try:
         # Get job details
@@ -298,6 +303,28 @@ async def _start_background_processing(job_id: str, skus: list[str], config: dic
 
         # Update status to running
         update_job_status(job_id, "running")
+
+        # Log job start event with structured context
+        log_event(
+            logger,
+            logging.INFO,
+            "backfill.job.started",
+            job_id=job_id,
+            job_type=job_type,
+            total_items=len(skus),
+            batch_size=config.get("batch_size", 10),
+        )
+
+        # Send start notification (fire-and-forget)
+        try:
+            notify_job_event(
+                event_type="started",
+                job_id=job_id,
+                job_type=job_type,
+                details={"total_items": len(skus)},
+            )
+        except Exception as notify_error:
+            logger.warning(f"Failed to send start notification: {notify_error}")
 
         # Extract config
         batch_size = config.get("batch_size", 10)
@@ -318,10 +345,67 @@ async def _start_background_processing(job_id: str, skus: list[str], config: dic
         # Run processing with real worker function
         await processor.run(process_fn=process_fn)
 
+        # Log job completion event
+        final_job = get_job(job_id)
+        if final_job:
+            log_event(
+                logger,
+                logging.INFO,
+                "backfill.job.completed",
+                job_id=job_id,
+                job_type=job_type,
+                status=final_job.status,
+                completed_items=final_job.completed_items,
+                failed_items=final_job.failed_items,
+            )
+
+            # Send completion notification (fire-and-forget)
+            try:
+                notify_job_event(
+                    event_type="completed",
+                    job_id=job_id,
+                    job_type=job_type,
+                    details={
+                        "total": final_job.total_items,
+                        "completed": final_job.completed_items,
+                        "failed": final_job.failed_items,
+                    },
+                )
+            except Exception as notify_error:
+                logger.warning(f"Failed to send completion notification: {notify_error}")
+
         logger.info(f"Background processing completed for job {job_id}")
 
     except Exception as e:
+        # Log job failure event
+        log_event(
+            logger,
+            logging.ERROR,
+            "backfill.job.failed",
+            job_id=job_id,
+            job_type=job_type,
+            error=str(e),
+            error_type=type(e).__name__,
+        )
         logger.error(f"Background processing failed for job {job_id}: {e}")
+
+        # Send failure notification (fire-and-forget)
+        try:
+            job = get_job(job_id)
+            notify_job_event(
+                event_type="failed",
+                job_id=job_id,
+                job_type=job_type,
+                details={
+                    "error": str(e),
+                    "total": job.total_items if job else len(skus),
+                    "completed": job.completed_items if job else 0,
+                    "failed": job.failed_items if job else 0,
+                },
+            )
+        except Exception as notify_error:
+            logger.warning(f"Failed to send failure notification: {notify_error}")
+
         # Processor will have marked job as failed via manager functions
 
 
@@ -381,6 +465,19 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
                 status_code=400,
                 detail="SKU list cannot be empty unless config.mode is set to 'incremental'",
             )
+
+    # Log job creation event with structured context
+    log_event(
+        logger,
+        logging.INFO,
+        "backfill.job.created",
+        job_type=request.job_type,
+        total_skus=len(skus),
+        mode=mode,
+        batch_size=request.config.get("batch_size", 10),
+        checkpoint_interval=request.config.get("checkpoint_interval", 100),
+        request_id=get_request_id(),
+    )
 
     logger.info(
         f"Starting backfill job: type={request.job_type}, skus={len(skus)}, mode={mode}"

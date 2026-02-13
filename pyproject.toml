@@ -25,6 +25,7 @@ dependencies = [
     "gspread>=6.0",
     "google-api-python-client>=2.0",
     "supabase>=2.0",
+    "prometheus-client>=0.20",
 ]
 
 [project.optional-dependencies]
