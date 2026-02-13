@@ -140,13 +140,14 @@ Plans:
   4. System automatically triggers backfill for SKUs with missing or stale data via scheduled jobs
   5. System transitions from 180-day backfill to daily 1-day incremental refresh with Prometheus metrics exported
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 - [x] 08-01-PLAN.md — Python monitoring API endpoints (freshness, coverage, api-health) + Prometheus /metrics mount
 - [x] 08-02-PLAN.md — Stale SKU detection, incremental refresh logic, and Slack/email alert helpers
 - [x] 08-03-PLAN.md — Dashboard backfill monitoring page with Tremor (job status, coverage KPIs, freshness heatmap, API health)
 - [x] 08-04-PLAN.md — Cloud Scheduler setup for daily incremental refresh + notification channel configuration
+- [ ] 08-05-PLAN.md — Gap closure: Fix monitoring endpoints 500 errors (replace execute_sql RPC with direct table queries)
 
 ## Progress
 
