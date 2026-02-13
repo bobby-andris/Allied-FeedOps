@@ -1,261 +1,117 @@
-# Phase 0: Google Ads API Discovery
+# Allied FeedOps
 
-## Project Overview
+## What This Is
 
-**Purpose**: Validate Google Ads API capabilities and data access patterns before executing the full 5-phase backfill and monitoring plan.
+A Google Ads feed optimization platform that automatically collects search performance data, generates AI-powered product content, and publishes optimized feeds to Google Merchant Center, Bing, and Shopify. Built for Allied Brass's 2,784-SKU catalog to improve search visibility and conversion rates through data-driven content optimization.
 
-**Why Phase 0 Exists**: The comprehensive backfill plan (Phases 1-5) makes critical assumptions about Google Ads API capabilities:
-- Product-level search term queries (filtering by `product_item_id`)
-- Large result set limits (50K rows per query)
-- Specific retention windows (180 days for search terms, 2 years for performance)
-- Custom label availability via Merchant API
+## Core Value
 
-These assumptions need validation BEFORE detailed planning. If they're wrong, the entire backfill strategy needs rework.
+Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation, enabling data-driven optimization at scale for the entire catalog.
 
-**Timeline**: 1-2 days of investigation before ANY Phase 1-5 planning begins.
+## Current Milestone: v1.0 Historical Data Backfill
 
-**Context**: Only 84/2,784 SKUs (3%) currently have search query data. The infrastructure is solid, signals are wired correctly, but we need historical data backfill. Phase 0 ensures we know HOW to backfill before planning the execution.
+**Goal:** Execute comprehensive Google Ads historical data backfill for all 2,784 SKUs with production-ready monitoring and validation.
 
-## Success Criteria
+**Target capabilities:**
+- Campaign-join pattern for product-specific search term collection
+- Optimal batch sizing (size 10) for 127ms p95 query performance
+- Keyword Planner integration for ALL SKUs (addressing 43% coverage gap)
+- Custom label sync pipeline from Google Merchant Center
+- 180-day historical backfill across search terms and performance metrics
+- Monitoring & alerting pipeline with automated schedules
+- Data quality validation (completeness, accuracy, freshness)
+- Performance dashboards for tracking backfill progress
+- Incremental refresh strategy for ongoing data sync
 
-Phase 0 is complete when we have:
+**Timeline:** 2-3 weeks (comprehensive approach)
 
-1. ✅ **All 5 core questions answered** (even if answers are "no" or "limited")
-2. ✅ **Working GAQL queries** that demonstrate feasible backfill approach
-3. ✅ **Alternative strategies documented** if any assumptions fail
-4. ✅ **Comprehensive API reference** (`docs/google-ads-api-capabilities.md`)
-5. ✅ **Sample data** from 5-10 test SKUs showing actual API responses
-6. ✅ **Decision document** - Proceed with original plan vs. modified plan vs. different approach
+**Success metric:** All 2,784 SKUs have 180 days of search terms, performance data, and Keyword Planner opportunities with ongoing automated collection.
 
-**Definition of Success**: We have enough information to confidently plan Phases 1-5 OR pivot to a different strategy if critical assumptions are wrong.
+## Requirements
 
-## The 5 Core Questions
+### Validated (Phase 0 - Complete)
 
-### Q1: Product-Level Search Term Filtering
-**Question**: Can we filter `search_term_view` by `product_item_id`? Or must we use `shopping_performance_view`?
+Phase 0 validated Google Ads API capabilities with GO recommendation (4.65/5 confidence):
 
-**Why Critical**: Original plan assumes we can query search terms for specific products. If we can only get campaign-level data, backfill strategy needs major rework.
+- ✓ **API-01**: search_term_view product filtering limitation documented (campaign-join workaround validated)
+- ✓ **API-02**: shopping_performance_view supports product-level queries
+- ✓ **API-03**: Query LIMIT values up to 100K tested (50K recommended)
+- ✓ **API-04**: Data retention from 2020-01-01 confirmed (~6 years available)
+- ✓ **API-05**: custom_attribute0-4 fields accessible (note: no underscore before number)
+- ✓ **DISC-01 through DISC-12**: 23 API views enumerated, 36+ metrics cataloged
+- ✓ **SAMP-01 through SAMP-06**: 6 sample SKUs tested, 60K+ search terms validated
+- ✓ **DOC-01 through DOC-06**: Comprehensive API reference created with Go/No-Go decision
 
-**Test Approach**:
-- Try GAQL query: `SELECT ... FROM search_term_view WHERE segments.product_item_id = 'shopify_US_...'`
-- If fails, try: `SELECT ... FROM shopping_performance_view WHERE ...`
-- Document which fields are available in each view
+### Active (v1.0 - In Planning)
 
-**Success Output**: Working query that gets product-specific search terms OR documented alternative approach.
+Currently defining requirements for v1.0 milestone. Will be populated during requirements gathering phase.
 
----
+### Out of Scope
 
-### Q2: Query Result Limits
-**Question**: What's the actual LIMIT we can request in GAQL queries?
+**For v1.0:**
+- Real-time data streaming (batch collection sufficient for v1)
+- Advanced ML models for content optimization (manual prompts first)
+- Multi-account Google Ads management (single account: 6253381786)
+- Competitive intelligence beyond own metrics (auction insights API unavailable)
+- Mobile app or native integrations (web dashboard sufficient)
 
-**Current State**:
-- Plan assumes: 50K rows per query
-- Current code uses: 1K rows per query
-- Developer token: **Highest level with standard access** (no read limits)
+## Context
 
-**Why Critical**: Determines batch size for backfill jobs. If limit is lower than 50K, need more query batching.
+### Phase 0 Discovery (Complete - 2026-02-13)
 
-**Test Approach**:
-- Start with LIMIT 10000, then 50000, then 100000
-- Find where API starts rejecting or rate limiting
-- Test on `search_term_view` and `shopping_performance_view`
+Phase 0 validated API feasibility through 4 phases:
+1. **API Capability Validation** - Core query patterns and constraints identified
+2. **Comprehensive Data Discovery** - 23 views, 36+ metrics cataloged
+3. **Sample Testing & Analysis** - 6 SKUs tested, query performance benchmarked
+4. **Documentation & Decision** - 60KB API reference created, GO recommendation issued
 
-**Success Output**: Documented maximum LIMIT per view + recommended batch size for production.
+**Key findings:**
+- Product-level search term queries require 2-step campaign-join pattern
+- Optimal batch size is 10 SKUs (127ms p95 performance, 7.1 min for full catalog)
+- Keyword Planner reveals 43% coverage gap (168K monthly searches)
+- Custom labels available via custom_attribute0-4 fields
+- Data retention: 2020-01-01 to present
 
----
+**6 Critical modifications identified:**
+1. Use batch size 10 (not 50K LIMIT per query)
+2. Campaign-join pattern for search terms (2-step query)
+3. Skip auction insights API (use own impression/click share)
+4. Plan for 33% competitive metric coverage (sufficient for high-value SKUs)
+5. Use explicit date ranges (LAST_N_DAYS syntax rejected by API)
+6. Include Keyword Planner for ALL SKUs (not just cold-start)
 
-### Q3: Data Retention Windows
-**Question**: Confirm retention periods - 180 days for search terms, 2 years for shopping performance?
+### Current Data State
 
-**Why Critical**: Determines how far back we can backfill and how often we need to collect fresh data.
-
-**Test Approach**:
-- Query with `WHERE segments.date BETWEEN '2024-08-11' AND '2025-02-11'` (180 days ago to today)
-- Query with `WHERE segments.date BETWEEN '2024-02-11' AND '2025-02-11'` (365 days ago to today)
-- Query with `WHERE segments.date BETWEEN '2023-02-11' AND '2025-02-11'` (2 years ago to today)
-- Document oldest available date for each view
-
-**Success Output**: Confirmed retention windows OR corrected retention windows + impact on backfill plan.
-
----
-
-### Q4: Custom Label Availability
-**Question**: Is `custom_label_0` available via Merchant API `products.list()`?
-
-**Current State**:
-- User has 60 manually-curated categories in `custom_label_0` in Google Merchant Center
-- Field exists in Google Sheets but NOT in `product_catalog` database table
-- Decision made: Use `custom_label_0` for FST clustering (don't extract from titles)
-
-**Why Critical**: Need to sync `custom_label_0` to database for clustering analysis. If not available via API, need manual CSV export workflow.
-
-**Test Approach**:
-- Use Merchant API MCP tool: `mcp__merchant-api-devdocs__query_mapi_docs` to check available fields
-- Test query: `SELECT id, offer_id, custom_label_0 FROM product_view LIMIT 10`
-- Document field name and data structure
-
-**Success Output**: Working query to fetch `custom_label_0` OR alternative sync strategy (CSV export, Google Sheets API).
-
----
-
-### Q5: Keyword Planner Opportunity Gap
-**Question**: For 5-10 sample SKUs across categories, what high-volume Keyword Planner terms are NOT in current Google Ads search data?
-
-**Why Critical**: Validates decision to use KP for ALL SKUs (not just cold-start). Current Google Ads data reflects unoptimized feed → KP reveals ranking opportunities.
-
-**Sample Strategy**: 5-10 SKUs across product categories:
-- 2x Towel bars (different styles/finishes)
-- 2x Grab bars (different sizes)
-- 2x Mirrors (different types)
-- 2x Shelves (glass vs metal)
-- 2x Cabinet hardware (different categories)
-
-**Test Approach**:
-1. Get current Google Ads search terms for sample SKUs (via `search_term_view`)
-2. Generate KP keyword ideas using product titles/descriptions as seed
-3. Compare: What high-volume KP terms (avg_monthly_searches > 100) are missing from Google Ads data?
-4. Document gap size and opportunity value
-
-**Success Output**: Evidence document showing KP opportunity gaps + validation that KP is necessary for comprehensive coverage.
-
----
-
-## Investigation Approach
-
-**Hybrid Strategy** (Manual Exploration → Automated Validation):
-
-### Phase 1: Manual Exploration (Day 1, Hours 1-4)
-- Use Google Ads Developer Assistant for interactive query testing
-- Test each of the 5 questions manually
-- Document findings, errors, limitations in scratch notes
-- Identify working query patterns
-
-### Phase 2: Automated Validation (Day 1, Hours 5-8)
-- Write Python script to run validated queries at scale
-- Test with 5-10 sample SKUs across categories
-- Capture actual API responses
-- Generate sample data for evidence review
-
-### Phase 3: Documentation (Day 2, Hours 1-4)
-- Write comprehensive `docs/google-ads-api-capabilities.md`
-- Include working GAQL queries, field references, limitations
-- Document alternative strategies for any failed assumptions
-- Create decision tree: Original plan vs. Modified plan vs. Pivot
-
-## Deliverables
-
-### Primary Deliverable
-**`docs/google-ads-api-capabilities.md`** - Comprehensive API reference including:
-- Answers to all 5 core questions
-- Working GAQL query examples
-- Field reference for `search_term_view`, `shopping_performance_view`, `product_view`
-- Documented limitations and workarounds
-- Alternative strategies if assumptions fail
-- Sample API responses (10-20 examples)
-- Decision recommendation: Proceed vs. Modify vs. Pivot
-
-### Supporting Artifacts
-- **Sample data**: JSON/CSV files with API responses from 5-10 test SKUs
-- **Test queries**: Collection of working GAQL queries for backfill
-- **Error log**: Documented failures and lessons learned
-- **Decision doc**: Go/No-Go recommendation for Phases 1-5
-
-## Out of Scope for Phase 0
-
-**NOT doing in Phase 0**:
-- ❌ Full backfill execution (that's Phases 1-5)
-- ❌ Schema migrations for `custom_label_0` (that's Phase 1)
-- ❌ Prompt updates or content generation changes
-- ❌ Dashboard UI changes
-- ❌ Production deployment of any code
-- ❌ Detailed planning for Phases 1-5 (wait until Phase 0 completes)
-
-**Phase 0 is pure research** - No production changes, no schema updates, no user-facing features.
-
-## Key Context
+- **Total SKUs:** 2,784
+- **SKUs with search data:** 84 (3%)
+- **Coverage gap:** 97% of catalog lacks historical search intelligence
+- **Backfill window:** 180 days (2025-08-16 to 2026-02-13)
 
 ### Technical Environment
-- **Supabase Project**: qezuszwufortkiutlhym
-- **Google Ads Customer ID**: 6253381786
-- **Developer Token Level**: Highest with standard access (no read limits)
-- **Python Pipeline**: Cloud Run (auto-deploys on push to master)
-- **Dashboard**: Vercel (allied-feed-ops.vercel.app)
 
-### Current Data Coverage
-- Total SKUs: 2,784
-- SKUs with search query data: 84 (3%)
-- Coverage problem: Backfill hasn't run yet, not a data sync issue
+- **Supabase Project:** qezuszwufortkiutlhym
+- **Google Ads Customer ID:** 6253381786
+- **Python Pipeline:** Cloud Run (auto-deploys on push to master)
+- **Dashboard:** Vercel (allied-feed-ops.vercel.app)
+- **Developer Token:** Highest level with standard access (no read limits)
 
-### Available Tools
-- **MCP Servers**: `mcp__google-ads-mcp__*`, `mcp__merchant-api-devdocs__*`, `mcp__supabase__*`
-- **Google Ads Developer Assistant**: `/Users/bobby/Documents/GitHub/google-ads-api-developer-assistant`
-- **Existing code**: `src/feedops/integrations/google_ads_search_terms.py` (reference implementation)
+## Constraints
 
-### Related Documents
-- **Original 5-phase plan**: `docs/plans/2026-02-11-schema-scalability-and-backfill.md`
-- **Signal audit**: `docs/audit/signal-audit-2026-02-11/*.md` (9 agent reports)
-- **Codebase map**: `.planning/codebase/*.md` (7 files from `/gsd:map-codebase`)
-- **Database schema**: `docs/database/SCHEMA.md`
-- **Notion reference**: https://www.notion.so/3041adf992e9814d9a86eb931c130438 (Phases 1-5 details)
+- **API Rate Limits:** Google Ads API has undocumented rate limits - batch size 10 provides safety margin
+- **Timeline:** 2-3 weeks for comprehensive v1.0 (fast execution would sacrifice monitoring/validation)
+- **Data Retention:** 180 days for search terms, ~6 years for performance (account-dependent, not API limit)
+- **Competitive Metrics:** Only 33% coverage for impression/click share (sufficient volume required)
+- **Tech Stack:** Python for pipelines (Cloud Run), TypeScript for dashboard (Next.js/Vercel)
 
-## Risks and Mitigations
+## Key Decisions
 
-### Risk 1: API Doesn't Support Product-Level Queries
-**Impact**: Can't filter search terms by product → must query all terms → huge result sets
-**Mitigation**: Document alternative: Use `shopping_performance_view` with broader filters + post-query filtering
-**Fallback**: Campaign-level queries + heuristic matching via product titles
+| Decision | Rationale | Outcome |
+|----------|-----------|---------|
+| Phase 0 discovery before execution | Validate API assumptions before detailed planning (5 core questions) | ✓ Good - Found 6 critical modifications, avoided failed assumptions |
+| GO decision (4.65/5 confidence) | All core capabilities validated, performance acceptable, high-value data accessible | — Pending (v1.0 execution will validate) |
+| Keyword Planner for ALL SKUs | 43% coverage gap identified (168K monthly searches) | — Pending (v1.0 will measure impact) |
+| Campaign-join pattern for search terms | API rejects direct product filtering in search_term_view | ✓ Good - Workaround validated in Phase 3 testing |
+| Batch size 10 (not 50K LIMIT) | Optimal throughput (127ms/SKU p95) vs retry granularity | — Pending (v1.0 will validate at scale) |
 
-### Risk 2: Retention Window Shorter Than Assumed
-**Impact**: Can't backfill full 180 days → less historical data
-**Mitigation**: Document actual window + adjust backfill plan timeline
-**Fallback**: Focus on most recent data, run more frequent collections going forward
-
-### Risk 3: Custom Label Not Available via API
-**Impact**: Can't sync `custom_label_0` programmatically
-**Mitigation**: CSV export workflow from Merchant Center + manual upload to Supabase
-**Fallback**: Extract categories from titles (less clean but workable)
-
-### Risk 4: Query Limits Lower Than Expected
-**Impact**: Need more batching → slower backfill
-**Mitigation**: Document actual limits + design batch jobs accordingly
-**Fallback**: Use pagination + smaller chunks (already standard pattern)
-
-### Risk 5: KP Opportunity Gap Is Small
-**Impact**: Decision to use KP for all SKUs might be overkill
-**Mitigation**: If gap is <10% of total volume, reconsider KP strategy
-**Fallback**: KP only for cold-start + low-performer SKUs (original plan)
-
-## Success Metrics
-
-### Quantitative
-- ✅ All 5 questions have documented answers
-- ✅ At least 3 working GAQL queries tested
-- ✅ Sample data from 5-10 SKUs collected
-- ✅ API response times measured (p50, p95, p99)
-- ✅ Error rates documented (<5% query failure acceptable)
-
-### Qualitative
-- ✅ Confident in backfill feasibility (Go/No-Go decision clear)
-- ✅ Alternative strategies documented for any blockers
-- ✅ API reference comprehensive enough to plan Phases 1-5
-- ✅ User confirms: "We have enough information to proceed"
-
-## Next Steps After Phase 0
-
-**If assumptions validated** (happy path):
-1. Run new `/gsd:new-project` with validated API data
-2. Plan Phases 1-5 in detail (roadmap with tasks)
-3. Execute Phase 1: Schema + custom_label_0 sync
-4. Execute Phase 2: Historical backfill (180 days)
-5. Continue through Phase 5
-
-**If assumptions partially wrong** (modify plan):
-1. Update backfill plan with corrected constraints
-2. Re-estimate timeline and batch sizes
-3. Run new `/gsd:new-project` with modified approach
-4. Proceed with adjusted plan
-
-**If critical blockers found** (pivot):
-1. Document why original approach won't work
-2. Design alternative strategy (e.g., campaign-level aggregation)
-3. User decision: Proceed with alternative vs. wait for API changes vs. different data source
+---
+*Last updated: 2026-02-13 after Phase 0 completion and v1.0 milestone initialization*
