@@ -27,6 +27,7 @@ VALIDATION_THRESHOLDS = {
     "search_terms_freshness_days": 7,
     "keyword_cache_ttl_days": 30,
     "job_success_threshold": 0.95,
+    "baseline_contamination_days": 30,  # SKUs published within this window are ineligible
 }
 
 
@@ -60,6 +61,7 @@ class ValidatedPerformanceMetrics(BaseModel):
     avg_roas: float = Field(..., ge=0.0)
     baseline_start_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     baseline_end_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    metadata: dict[str, Any] = Field(default_factory=lambda: {"is_multi_sku_family": False})
 
     @field_validator("avg_clicks")
     @classmethod

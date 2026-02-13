@@ -181,10 +181,13 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
     data to master_sku level, and saves to performance_baselines with idempotent upserts.
 
     Data Flow:
-    1. For each master_sku: query variant_index to get all gmc_offer_id values
-    2. Call fetch_batch_product_performance() with all offer IDs for the batch
-    3. Aggregate variant metrics to master_sku level (sum impressions/clicks, weighted avg CTR)
-    4. Upsert to performance_baselines with ON CONFLICT (master_sku, platform)
+    1. Check contamination eligibility (VALID-04) - skip SKUs published <30 days
+    2. For each master_sku: query variant_index to get all gmc_offer_id values
+    3. Call fetch_batch_product_performance() with all offer IDs for the batch
+    4. Aggregate variant metrics to master_sku level (sum impressions/clicks, weighted avg CTR)
+    5. Detect multi-SKU families and add metadata (VALID-03, VALID-08)
+    6. Validate date boundaries (VALID-09)
+    7. Upsert to performance_baselines with ON CONFLICT (master_sku, platform)
 
     Args:
         batch: List of master SKU IDs to collect performance for
@@ -192,6 +195,7 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
     Returns:
         List of result dicts:
         - {"item_id": sku, "status": "ok", "impressions": N, "clicks": M} if data found
+        - {"item_id": sku, "status": "skipped", "reason": str} if ineligible
         - {"item_id": sku, "status": "no_data"} if no performance data
 
     Notes:
@@ -204,6 +208,8 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
     from feedops.integrations.google_ads_performance import fetch_batch_product_performance
     from feedops.db.supabase_client import get_client
     from feedops.api.backfill import compute_date_range
+    from feedops.jobs.contamination import check_batch_eligibility, validate_date_boundaries
+    from feedops.jobs.multi_sku import detect_multi_sku_families, get_family_metadata
 
     if not batch:
         return []
@@ -217,11 +223,36 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
         start_date, end_date = compute_date_range(days_lookback=180)
         num_days = 180
 
-        # Build mapping of offer_id -> master_sku for this batch
-        offer_to_sku: dict[str, str] = {}
-        sku_to_offers: dict[str, list[str]] = {sku: [] for sku in batch}
+        # STEP 1: Check contamination eligibility (VALID-04)
+        # Skip SKUs published within last 30 days to avoid mixing pre/post data
+        eligibility = check_batch_eligibility(batch, platform="google")
 
-        for sku in batch:
+        ineligible_skus = [sku for sku, (eligible, _) in eligibility.items() if not eligible]
+        eligible_skus = [sku for sku, (eligible, _) in eligibility.items() if eligible]
+
+        results = []
+
+        # Add skipped status for ineligible SKUs
+        for sku in ineligible_skus:
+            _, reason = eligibility[sku]
+            logger.info(f"Skipping {sku}: {reason}")
+            results.append({
+                "item_id": sku,
+                "status": "skipped",
+                "reason": reason,
+            })
+
+        if not eligible_skus:
+            logger.warning(f"All {len(batch)} SKUs in batch are ineligible due to recent publish events")
+            return results
+
+        logger.info(f"Skipped {len(ineligible_skus)} SKUs due to recent publish events, processing {len(eligible_skus)} eligible SKUs")
+
+        # Build mapping of offer_id -> master_sku for eligible SKUs only
+        offer_to_sku: dict[str, str] = {}
+        sku_to_offers: dict[str, list[str]] = {sku: [] for sku in eligible_skus}
+
+        for sku in eligible_skus:
             # Query variant_index for all variants of this master_sku
             result = supabase.table("variant_index").select("gmc_offer_id").eq(
                 "master_sku", sku
@@ -277,10 +308,15 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
             sku_metrics[sku]["total_conversion_value"] += metrics.get("conversion_value", 0.0)
             sku_metrics[sku]["total_cost"] += metrics.get("cost", 0.0)
 
-        # Upsert to performance_baselines table
-        results = []
+        # STEP 2: Detect multi-SKU families (VALID-03, VALID-08)
+        # Identify SKUs that share product_id with other master_skus
+        # Google Ads aggregates at product_id level, so we need to flag this
+        multi_sku_families = detect_multi_sku_families(eligible_skus)
+        logger.info(f"Detected {len(multi_sku_families)} SKUs in multi-SKU families")
 
-        for sku in batch:
+        # Upsert to performance_baselines table
+        # Process eligible SKUs only
+        for sku in eligible_skus:
             if sku not in sku_metrics:
                 results.append({"item_id": sku, "status": "no_data"})
                 continue
@@ -309,6 +345,29 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
                 else 0.0
             )
 
+            # STEP 3: Validate date boundaries (VALID-09)
+            # Ensure baseline period doesn't overlap with any publish events
+            boundaries_valid, boundary_message = validate_date_boundaries(
+                start_date, end_date, sku, platform="google"
+            )
+            if not boundaries_valid:
+                logger.warning(f"Skipping {sku}: {boundary_message}")
+                results.append({
+                    "item_id": sku,
+                    "status": "skipped",
+                    "reason": boundary_message,
+                })
+                continue
+
+            # STEP 4: Add multi-SKU family metadata (VALID-08)
+            # Flag if this SKU shares product_id with other master_skus
+            if sku in multi_sku_families:
+                family_members = multi_sku_families[sku]
+                metadata = get_family_metadata(sku, family_members)
+                logger.info(f"SKU {sku} is in multi-SKU family: {family_members}")
+            else:
+                metadata = {"is_multi_sku_family": False}
+
             # Prepare baseline record (DATA-05: include date range fields)
             baseline_record = {
                 "master_sku": sku,
@@ -323,6 +382,7 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
                 "avg_cvr": avg_cvr,
                 "avg_cost": avg_cost,
                 "avg_roas": avg_roas,
+                "metadata": metadata,  # VALID-08: Multi-SKU family flags
                 # created_at is auto-populated by DB default (DATA-10)
             }
 
@@ -350,12 +410,18 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
                 f"{metrics['total_clicks']} clicks"
             )
 
-            results.append({
+            # Build result with family info if applicable
+            result_dict = {
                 "item_id": sku,
                 "status": "ok",
                 "impressions": metrics["total_impressions"],
                 "clicks": metrics["total_clicks"],
-            })
+            }
+            if metadata.get("is_multi_sku_family"):
+                result_dict["multi_sku_family"] = True
+                result_dict["family_size"] = metadata.get("family_size")
+
+            results.append(result_dict)
 
         return results
 
