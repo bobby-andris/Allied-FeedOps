@@ -1,77 +1,97 @@
-# Requirements: Phase 0 - Google Ads API Discovery
+# Requirements: Allied FeedOps v1.0
 
-**Defined:** 2026-02-11
-**Core Value:** Answer critical questions about Google Ads API capabilities and comprehensively map available data to validate backfill assumptions before planning Phases 1-5.
+**Defined:** 2026-02-13
+**Core Value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
 
-## v1 Requirements
+## v1.0 Requirements
 
-Requirements for Phase 0 investigation. Each maps to discovery activities.
+### Job Management & Foundation
 
-### API Validation
+- [ ] **JOB-01**: System can create batch job records with unique IDs and initial status
+- [ ] **JOB-02**: System can update job status (creating, running, complete, failed, partial)
+- [ ] **JOB-03**: System can track progress metrics (SKUs processed, percentage complete, ETA)
+- [ ] **JOB-04**: System can log errors with SKU ID, error type, and error message
+- [ ] **JOB-05**: System can resume interrupted jobs from last checkpoint
+- [ ] **JOB-06**: System implements idempotent upserts (ON CONFLICT) for all data writes
+- [ ] **JOB-07**: System implements exponential backoff for API rate limit errors
+- [ ] **JOB-08**: System implements token bucket rate limiting (10 QPS max)
+- [ ] **JOB-09**: System creates checkpoints every 100 SKUs processed
+- [ ] **JOB-10**: System limits concurrent batch jobs to 3 maximum
 
-- [ ] **API-01**: Confirm search_term_view cannot filter by product_item_id through test query
-- [ ] **API-02**: Validate shopping_performance_view supports product-level queries with working GAQL example
-- [ ] **API-03**: Test query result limits with 10K, 50K, and 100K LIMIT values to find ceiling
-- [ ] **API-04**: Validate 11-year data retention by querying dates from 2015-2026
-- [ ] **API-05**: Confirm custom_label_0 field exists in Merchant API product_view with test query
+### Data Collection
 
-### Data Discovery
+- [ ] **DATA-01**: System can fetch search terms using campaign-join pattern (2-step query)
+- [ ] **DATA-02**: System can collect 180 days of performance metrics per SKU
+- [ ] **DATA-03**: System can generate Keyword Planner ideas for all 2,784 SKUs
+- [ ] **DATA-04**: System can sync custom_label_0 from Google Merchant Center
+- [ ] **DATA-05**: System can capture performance baselines with date range metadata
+- [ ] **DATA-06**: System processes SKUs in batches of 10 for optimal throughput
+- [ ] **DATA-07**: System uses explicit date ranges (YYYY-MM-DD) in all GAQL queries
+- [ ] **DATA-08**: System handles lowercase offer IDs (shopify_us_) per API format
+- [ ] **DATA-09**: System collects competitive metrics (impression/click share) where available
+- [ ] **DATA-10**: System stores all collected data with collection timestamps
 
-- [ ] **DISC-01**: Enumerate all available views/resources (search_term_view, shopping_performance_view, product_view, campaign_view, etc.)
-- [ ] **DISC-02**: Document all performance metrics available (clicks, impressions, CTR, conversions, cost, CPC, conversion_value, ROAS, etc.)
-- [ ] **DISC-03**: Explore custom label filtering capabilities - can we filter search terms by custom_label_0 through custom_label_4?
-- [ ] **DISC-04**: Investigate if we can populate custom labels with product_item_id for easier filtering
-- [ ] **DISC-05**: Identify Performance Max campaign data availability and query patterns
-- [ ] **DISC-06**: Map all Shopping campaign report types and their use cases
-- [ ] **DISC-07**: Document bidding data (bid amounts, bid strategies, auction insights)
-- [ ] **DISC-08**: Explore attribution data (conversion paths, assisted conversions, attribution models)
-- [ ] **DISC-09**: Investigate competitive metrics (auction insights, impression share, outranking share)
-- [ ] **DISC-10**: Document asset-level performance (if available for Shopping ads)
-- [ ] **DISC-11**: Explore audience segmentation data (demographics, location, device, time-of-day)
-- [ ] **DISC-12**: Identify any machine learning insights or recommendations API provides
+### Data Quality & Validation
 
-### Sample Testing
+- [ ] **VALID-01**: System validates completeness (actual SKU count vs expected 2,784)
+- [ ] **VALID-02**: System checks data freshness (baselines <60 days, search terms <7 days)
+- [ ] **VALID-03**: System detects multi-SKU families via product_id matching
+- [ ] **VALID-04**: System prevents baseline capture for SKUs published in last 30 days
+- [ ] **VALID-05**: System validates schema at collection time using Pydantic models
+- [ ] **VALID-06**: System performs range checks (CTR 0-1, clicks <= impressions)
+- [ ] **VALID-07**: System sets job status to 'partial' if success_count < 95%
+- [ ] **VALID-08**: System flags aggregated data for multi-SKU families in database
+- [ ] **VALID-09**: System validates date boundaries don't overlap publish events
+- [ ] **VALID-10**: System detects statistical outliers in collected metrics
 
-- [ ] **SAMP-01**: Select 5-10 test SKUs across product categories (towel bars, grab bars, mirrors, shelves, hardware)
-- [ ] **SAMP-02**: Fetch current Google Ads search terms for sample SKUs via campaign-join pattern
-- [ ] **SAMP-03**: Generate Keyword Planner ideas for sample SKUs using product titles as seed
-- [ ] **SAMP-04**: Calculate opportunity gap (high-volume KP terms not in Google Ads data)
-- [ ] **SAMP-05**: Measure query performance (p50, p95, p99 response times)
-- [ ] **SAMP-06**: Test comprehensive data retrieval for sample SKUs (all metrics from DISC-02)
+### Monitoring & Automation
 
-### Documentation
-
-- [ ] **DOC-01**: Create docs/google-ads-api-capabilities.md with comprehensive API field reference
-- [ ] **DOC-02**: Document working GAQL query examples for all valuable data types
-- [ ] **DOC-03**: Include sample API responses (20-30 examples across different views)
-- [ ] **DOC-04**: Create data value assessment - which metrics are most useful for content optimization?
-- [ ] **DOC-05**: Document alternative strategies for any failed assumptions
-- [ ] **DOC-06**: Provide Go/No-Go recommendation for Phases 1-5 with expanded data collection scope
+- [ ] **MON-01**: Dashboard displays batch job status and progress
+- [ ] **MON-02**: Dashboard shows coverage metrics (X/2,784 SKUs with data)
+- [ ] **MON-03**: Dashboard displays data freshness heatmap
+- [ ] **MON-04**: Dashboard tracks API health (latency, error rates, rate limits)
+- [ ] **MON-05**: System sends email alerts on job failure
+- [ ] **MON-06**: System sends Slack notifications on job completion
+- [ ] **MON-07**: System automatically triggers backfill for missing SKU data
+- [ ] **MON-08**: System implements incremental refresh (daily 1-day queries after initial 180-day backfill)
+- [ ] **MON-09**: System logs structured events with request_id context
+- [ ] **MON-10**: System exports Prometheus metrics (job progress, API latency, errors)
 
 ## v2 Requirements
 
-Deferred exploration - valuable but not blocking Phase 0 completion.
+Deferred to future release. Tracked but not in current roadmap.
 
-### Advanced Features
+### Optimization
 
-- **ADV-01**: BigQuery Data Transfer Service integration patterns (for 2+ year backfills at scale)
-- **ADV-02**: Real-time bid adjustment API capabilities
-- **ADV-03**: Smart Shopping campaign optimization signals
-- **ADV-04**: Google Analytics 4 integration for conversion tracking
-- **ADV-05**: Automated rules and scripts capabilities
+- **OPT-01**: System adapts batch size based on API latency (smart batching)
+- **OPT-02**: System implements dead letter queue for failed items
+- **OPT-03**: System processes date ranges in parallel (parallel window processing)
+- **OPT-04**: System analyzes historical trends for pattern detection
+- **OPT-05**: System predicts SKU performance based on historical data
+
+### Advanced Monitoring
+
+- **ADV-01**: System detects anomalies in collected metrics
+- **ADV-02**: System provides SLA tracking dashboards
+- **ADV-03**: System generates automated quality reports
+- **ADV-04**: System implements canary deployments for backfill changes
 
 ## Out of Scope
 
-Explicitly excluded from Phase 0 to maintain focus on discovery.
+Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Actual backfill implementation | Phase 0 is pure research - implementation happens in Phases 1-5 |
-| Full 2,784 SKU data collection | Sample testing only (5-10 SKUs) - validates approach before scale |
-| Schema migrations | No database changes until we know what data to collect |
-| Dashboard UI | Visualization comes after we have data to display |
-| Production deployment | Investigation phase - no production changes |
-| Performance optimization | Premature - optimize after we validate what to build |
+| Real-time data streaming | Keyword Planner rate-limited, data updates monthly. Batch collection sufficient. |
+| Offset-based pagination | Google Ads API only supports token-based via SearchStream |
+| Parallel worker architecture | Sequential completes in 5-7 min. Parallelism adds 80% effort for 20% time savings at current scale. |
+| Granular job cancellation | Cloud Run background tasks don't support graceful cancellation |
+| Custom retry policies per API | Google Ads SDK already implements optimal exponential backoff |
+| Sub-second progress updates | Causes write amplification. Update every 10 SKUs or 5 seconds instead. |
+| Multi-account management | Single account (6253381786) sufficient for v1.0 |
+| Advanced ML models | Manual prompts first, defer ML to v2+ |
+| Mobile app | Web dashboard sufficient for v1.0 |
+| Competitive intelligence beyond own metrics | Auction insights API unavailable |
 
 ## Traceability
 
@@ -79,41 +99,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | Phase 1 | Pending |
-| API-02 | Phase 1 | Pending |
-| API-03 | Phase 1 | Pending |
-| API-04 | Phase 1 | Pending |
-| API-05 | Phase 1 | Pending |
-| DISC-01 | Phase 2 | Pending |
-| DISC-02 | Phase 2 | Pending |
-| DISC-03 | Phase 2 | Pending |
-| DISC-04 | Phase 2 | Pending |
-| DISC-05 | Phase 2 | Pending |
-| DISC-06 | Phase 2 | Pending |
-| DISC-07 | Phase 2 | Pending |
-| DISC-08 | Phase 2 | Pending |
-| DISC-09 | Phase 2 | Pending |
-| DISC-10 | Phase 2 | Pending |
-| DISC-11 | Phase 2 | Pending |
-| DISC-12 | Phase 2 | Pending |
-| SAMP-01 | Phase 3 | Pending |
-| SAMP-02 | Phase 3 | Pending |
-| SAMP-03 | Phase 3 | Pending |
-| SAMP-04 | Phase 3 | Pending |
-| SAMP-05 | Phase 3 | Pending |
-| SAMP-06 | Phase 3 | Pending |
-| DOC-01 | Phase 4 | Pending |
-| DOC-02 | Phase 4 | Pending |
-| DOC-03 | Phase 4 | Pending |
-| DOC-04 | Phase 4 | Pending |
-| DOC-05 | Phase 4 | Pending |
-| DOC-06 | Phase 4 | Pending |
+| TBD | TBD | Pending |
 
 **Coverage:**
-- v1 requirements: 29 total
-- Mapped to phases: 29 (100% coverage)
-- Unmapped: 0
+- v1 requirements: 40 total
+- Mapped to phases: 0 (roadmap not created yet)
+- Unmapped: 40 ⚠️
 
 ---
-*Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after roadmap creation*
+*Requirements defined: 2026-02-13*
+*Last updated: 2026-02-13 after research synthesis and category scoping*
