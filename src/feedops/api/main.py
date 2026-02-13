@@ -15,6 +15,10 @@ Endpoints:
 - GET /performance/baseline/{master_sku} - Get baseline status for SKU
 - POST /search-insights/sync - Sync search terms from Google Ads
 - GET /search-insights/sync/{job_id} - Get search term sync status
+- POST /backfill/start - Create and start a backfill job
+- GET /backfill/status/{job_id} - Get backfill job progress
+- POST /backfill/resume/{job_id} - Resume failed/partial job
+- GET /backfill/jobs - List backfill jobs
 """
 
 from __future__ import annotations
@@ -107,6 +111,17 @@ app.include_router(search_insights_router)
 # Include performance baseline router
 from feedops.api.performance_baseline import router as performance_baseline_router
 app.include_router(performance_baseline_router)
+
+# Import backfill endpoints
+from feedops.api.backfill import (
+    StartBackfillRequest,
+    BackfillJobResponse,
+    BackfillJobListResponse,
+    start_backfill,
+    get_backfill_status,
+    resume_backfill,
+    list_backfill_jobs,
+)
 
 
 @app.middleware("http")
@@ -1844,3 +1859,36 @@ async def process_hybrid_batch_job(
             error_message=str(e),
             enforce_invariant=False,
         )
+
+
+# =============================================================================
+# Backfill Job Endpoints (v1.0 Data Collection Infrastructure)
+# =============================================================================
+
+
+@app.post("/backfill/start", response_model=BackfillJobResponse)
+async def api_start_backfill(request: StartBackfillRequest):
+    """Create and start a new data backfill job.
+
+    Processes SKUs in batches with rate limiting, checkpointing, and error tracking.
+    Maximum 3 concurrent jobs allowed.
+    """
+    return await start_backfill(request)
+
+
+@app.get("/backfill/status/{job_id}", response_model=BackfillJobResponse)
+async def api_get_backfill_status(job_id: str):
+    """Get backfill job status and progress."""
+    return await get_backfill_status(job_id)
+
+
+@app.post("/backfill/resume/{job_id}", response_model=BackfillJobResponse)
+async def api_resume_backfill(job_id: str):
+    """Resume a failed or partial backfill job from its last checkpoint."""
+    return await resume_backfill(job_id)
+
+
+@app.get("/backfill/jobs", response_model=BackfillJobListResponse)
+async def api_list_backfill_jobs(status: str | None = None, limit: int = 20):
+    """List backfill jobs, optionally filtered by status."""
+    return await list_backfill_jobs(status=status, limit=limit)

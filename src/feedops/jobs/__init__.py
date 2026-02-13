@@ -28,6 +28,7 @@ from feedops.jobs.manager import (
     log_job_error,
     get_job_errors,
 )
+from feedops.jobs.processor import BatchProcessor
 
 __all__ = [
     # Models
@@ -45,4 +46,6 @@ __all__ = [
     "save_checkpoint",
     "log_job_error",
     "get_job_errors",
+    # Processor
+    "BatchProcessor",
 ]
