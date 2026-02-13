@@ -118,10 +118,12 @@ Plans:
   4. System prevents baseline capture for SKUs published in last 30 days by checking publish_events
   5. System validates data ranges (CTR 0-1, clicks <= impressions) and sets job status to 'partial' if success rate <95%
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD during phase planning
+- [ ] 07-01-PLAN.md -- Pydantic validation models + worker integration (VALID-05, VALID-06, VALID-07)
+- [ ] 07-02-PLAN.md -- Multi-SKU family detection + publish contamination prevention (VALID-03, VALID-04, VALID-08, VALID-09)
+- [ ] 07-03-PLAN.md -- Completeness, freshness, and outlier detection with API endpoint (VALID-01, VALID-02, VALID-10)
 
 ### Phase 4: Monitoring & Automation
 **Goal**: Enable production observability with dashboards, alerting, and automated incremental refresh for ongoing data sync
