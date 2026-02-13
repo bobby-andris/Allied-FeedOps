@@ -29,6 +29,12 @@ from feedops.jobs.manager import (
     get_job_errors,
 )
 from feedops.jobs.processor import BatchProcessor
+from feedops.jobs.workers import (
+    collect_search_terms_batch,
+    collect_performance_batch,
+    collect_keyword_planner_batch,
+    collect_custom_labels_batch,
+)
 
 __all__ = [
     # Models
@@ -48,4 +54,9 @@ __all__ = [
     "get_job_errors",
     # Processor
     "BatchProcessor",
+    # Workers
+    "collect_search_terms_batch",
+    "collect_performance_batch",
+    "collect_keyword_planner_batch",
+    "collect_custom_labels_batch",
 ]

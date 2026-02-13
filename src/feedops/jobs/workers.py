@@ -326,3 +326,254 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
             {"item_id": sku, "status": "error", "error": str(e)}
             for sku in batch
         ]
+
+
+# =============================================================================
+# Worker 3: Keyword Planner Collection
+# =============================================================================
+
+
+async def collect_keyword_planner_batch(batch: list[str]) -> list[dict]:
+    """Collect Keyword Planner metrics for a batch of master SKUs.
+
+    Generates keyword ideas using product titles and existing search terms as seeds,
+    then enriches with historical metrics from Keyword Planner API. Leverages 30-day
+    cache TTL (DATA-03) to avoid redundant API calls.
+
+    Data Flow:
+    1. For each master_sku: query variant_index for product_title
+    2. Query search_queries for top existing search terms (up to 5)
+    3. Build keyword list: [product_title] + top search terms
+    4. Call KeywordPlannerClient.get_historical_metrics() with use_cache=True
+    5. Client automatically caches results to keyword_metrics table
+
+    Args:
+        batch: List of master SKU IDs to collect keyword metrics for
+
+    Returns:
+        List of result dicts:
+        - {"item_id": sku, "status": "ok", "keywords_enriched": N} if successful
+        - {"item_id": sku, "status": "no_data"} if no keywords to enrich
+
+    Notes:
+        - KeywordPlannerClient handles caching internally (DATA-03: 30-day TTL)
+        - Idempotent via KeywordPlannerClient._cache_metrics (upsert on keyword)
+        - Rate limiting applied at BatchProcessor level (not inside worker)
+        - Timestamps auto-included via updated_at field in keyword_metrics
+    """
+    from feedops.integrations.google_ads_search_terms import KeywordPlannerClient
+    from feedops.db.supabase_client import get_client
+
+    if not batch:
+        return []
+
+    logger.info(f"Collecting Keyword Planner metrics for {len(batch)} SKUs")
+
+    try:
+        supabase = get_client()
+        kp_client = KeywordPlannerClient()
+
+        results = []
+
+        for sku in batch:
+            # Step 1: Get product title from variant_index
+            variant_result = supabase.table("variant_index").select(
+                "product_title"
+            ).eq("master_sku", sku).limit(1).execute()
+
+            if not variant_result.data:
+                logger.warning(f"No variant_index record found for {sku}")
+                results.append({"item_id": sku, "status": "no_data"})
+                continue
+
+            product_title = variant_result.data[0].get("product_title")
+            if not product_title:
+                logger.warning(f"No product_title for {sku}")
+                results.append({"item_id": sku, "status": "no_data"})
+                continue
+
+            # Step 2: Get top search terms from search_queries
+            search_result = supabase.table("search_queries").select(
+                "query_text, impressions"
+            ).eq("master_sku", sku).order(
+                "impressions", desc=True
+            ).limit(5).execute()
+
+            top_search_terms = [row["query_text"] for row in search_result.data]
+
+            # Step 3: Build keyword list
+            keywords = [product_title] + top_search_terms
+
+            if not keywords:
+                logger.warning(f"No keywords to enrich for {sku}")
+                results.append({"item_id": sku, "status": "no_data"})
+                continue
+
+            logger.info(f"Enriching {len(keywords)} keywords for {sku}")
+
+            # Step 4: Fetch metrics with 30-day cache (DATA-03)
+            # KeywordPlannerClient handles idempotent caching internally
+            metrics = kp_client.get_historical_metrics(
+                keywords=keywords,
+                use_cache=True,
+                cache_max_age_days=30,
+            )
+
+            enriched_count = len(metrics)
+            logger.info(f"Enriched {enriched_count} keywords for {sku}")
+
+            results.append({
+                "item_id": sku,
+                "status": "ok",
+                "keywords_enriched": enriched_count,
+            })
+
+        return results
+
+    except Exception as e:
+        logger.error(f"Keyword Planner collection failed for batch: {e}")
+        # Return error status for all items in batch
+        return [
+            {"item_id": sku, "status": "error", "error": str(e)}
+            for sku in batch
+        ]
+
+
+# =============================================================================
+# Worker 4: Custom Labels Collection
+# =============================================================================
+
+
+# Module-level cache for GMC data (reused across consecutive batches within same job run)
+_gmc_cache: dict[str, dict] | None = None
+_gmc_cache_time: datetime | None = None
+_GMC_CACHE_TTL_SECONDS = 300  # 5 minutes
+
+
+async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
+    """Collect custom labels 0-4 from Google Merchant Center for a batch of master SKUs.
+
+    Syncs GMC custom labels to variant_index.custom_labels JSONB column. The GMC API
+    returns all products at once, so this worker caches the full product list and
+    reuses it across consecutive batches within the same job run.
+
+    Data Flow:
+    1. Call fetch_merchant_center_items() ONCE (or use cached data)
+    2. Build lookup dict: {offerId: {"customLabel0": val, ...}}
+    3. For each master_sku: get all gmc_offer_id values from variant_index
+    4. Update variant_index.custom_labels with GMC data (upsert by gmc_offer_id)
+
+    Args:
+        batch: List of master SKU IDs to sync custom labels for
+
+    Returns:
+        List of result dicts:
+        - {"item_id": sku, "status": "ok", "variants_updated": N} if successful
+        - {"item_id": sku, "status": "no_data"} if no variants found
+
+    Notes:
+        - Requires migration 026 (custom_labels JSONB column)
+        - GMC API call is expensive - cached for 5 minutes (reused across batches)
+        - Idempotent via .update().eq("gmc_offer_id", offer_id)
+        - Timestamps auto-included via updated_at field (DATA-10)
+    """
+    from feedops.integrations.merchant_center import fetch_merchant_center_items
+    from feedops.db.supabase_client import get_client
+
+    global _gmc_cache, _gmc_cache_time
+
+    if not batch:
+        return []
+
+    logger.info(f"Collecting custom labels for {len(batch)} SKUs")
+
+    try:
+        supabase = get_client()
+
+        # Step 1: Fetch GMC data (with caching to avoid redundant API calls)
+        now = datetime.now(timezone.utc)
+        cache_expired = (
+            _gmc_cache is None or
+            _gmc_cache_time is None or
+            (now - _gmc_cache_time).total_seconds() > _GMC_CACHE_TTL_SECONDS
+        )
+
+        if cache_expired:
+            logger.info("Fetching GMC items (cache miss or expired)")
+            gmc_items = fetch_merchant_center_items()
+            logger.info(f"Fetched {len(gmc_items)} GMC items")
+
+            # Build lookup dict keyed by offerId
+            _gmc_cache = {}
+            for item in gmc_items:
+                offer_id = item.get("offerId")
+                if offer_id:
+                    # Normalize offer ID to lowercase for lookup (DATA-08)
+                    offer_id_lower = offer_id.replace("shopify_US_", "shopify_us_")
+                    _gmc_cache[offer_id_lower] = {
+                        "customLabel0": item.get("customLabel0"),
+                        "customLabel1": item.get("customLabel1"),
+                        "customLabel2": item.get("customLabel2"),
+                        "customLabel3": item.get("customLabel3"),
+                        "customLabel4": item.get("customLabel4"),
+                    }
+
+            _gmc_cache_time = now
+            logger.info(f"GMC cache updated with {len(_gmc_cache)} items")
+        else:
+            logger.info(f"Using cached GMC data ({len(_gmc_cache)} items)")
+
+        # Step 3: For each SKU, update custom labels
+        results = []
+
+        for sku in batch:
+            # Get all variants for this master_sku
+            variant_result = supabase.table("variant_index").select(
+                "gmc_offer_id"
+            ).eq("master_sku", sku).execute()
+
+            if not variant_result.data:
+                logger.warning(f"No variants found for {sku}")
+                results.append({"item_id": sku, "status": "no_data"})
+                continue
+
+            variants_updated = 0
+
+            for row in variant_result.data:
+                offer_id = row.get("gmc_offer_id")
+                if not offer_id:
+                    continue
+
+                # Lookup custom labels from GMC cache
+                custom_labels = _gmc_cache.get(offer_id)
+
+                if custom_labels:
+                    # Update variant_index with custom_labels JSONB
+                    # Idempotent: update by unique gmc_offer_id (JOB-06)
+                    supabase.table("variant_index").update({
+                        "custom_labels": custom_labels,
+                        "updated_at": datetime.now(timezone.utc).isoformat(),  # DATA-10
+                    }).eq("gmc_offer_id", offer_id).execute()
+
+                    variants_updated += 1
+
+            if variants_updated > 0:
+                logger.info(f"Updated {variants_updated} variants for {sku}")
+                results.append({
+                    "item_id": sku,
+                    "status": "ok",
+                    "variants_updated": variants_updated,
+                })
+            else:
+                logger.warning(f"No custom labels found in GMC for {sku}")
+                results.append({"item_id": sku, "status": "no_data"})
+
+        return results
+
+    except Exception as e:
+        logger.error(f"Custom labels collection failed for batch: {e}")
+        # Return error status for all items in batch
+        return [
+            {"item_id": sku, "status": "error", "error": str(e)}
+            for sku in batch
+        ]
