@@ -119,22 +119,83 @@ def normalize_offer_id(offer_id: str) -> str:
     return offer_id.replace("shopify_US_", "shopify_us_")
 
 
-async def _noop_process(batch: list[str]) -> list[dict]:
-    """Placeholder process function for Phase 1.
+def _get_worker_config(job_type: str) -> tuple:
+    """Get the worker function and rate limiter for a job type.
 
-    This allows testing the full job infrastructure without requiring
-    actual Google Ads API calls. Phase 2 will replace this with real
-    data collection functions for each job type.
+    Maps job_type to the appropriate collection worker and rate limiter
+    based on API-specific rate limits:
+    - search_terms: 10 QPS (Google Ads API)
+    - performance_metrics: 10 QPS (Google Ads API)
+    - keyword_planner: 2 QPS (Keyword Planner API)
+    - custom_labels: No rate limit (GMC API has different limits)
+    - full_backfill: Runs all 4 sequentially, uses most restrictive limiter (10 QPS)
 
     Args:
-        batch: List of SKU IDs to process
+        job_type: One of search_terms, performance_metrics, keyword_planner, custom_labels, full_backfill
 
     Returns:
-        List of result dicts with item_id and status
+        Tuple of (process_fn, rate_limiter)
+
+    Raises:
+        ValueError: If job_type is unknown
     """
-    logger.info(f"Processing batch of {len(batch)} items (noop)")
-    await asyncio.sleep(0.1)  # Simulate work
-    return [{"item_id": item, "status": "ok"} for item in batch]
+    from feedops.jobs.workers import (
+        collect_search_terms_batch,
+        collect_performance_batch,
+        collect_keyword_planner_batch,
+        collect_custom_labels_batch,
+    )
+    from feedops.jobs.rate_limiter import google_ads_limiter, keyword_planner_limiter
+
+    async def collect_full_backfill_batch(batch: list[str]) -> list[dict]:
+        """Composite worker: runs all 4 collection types sequentially for the same batch.
+
+        Executes workers in dependency order:
+        1. search_terms (feeds keyword_planner)
+        2. performance_metrics
+        3. keyword_planner (uses search_terms as seeds)
+        4. custom_labels
+
+        Args:
+            batch: List of master SKU IDs to process
+
+        Returns:
+            List of result dicts with item_id, status, and sub_results
+        """
+        results = {}
+        for sku in batch:
+            results[sku] = {"item_id": sku, "status": "ok", "sub_results": {}}
+
+        # Run in dependency order
+        for sub_type, worker_fn in [
+            ("search_terms", collect_search_terms_batch),
+            ("performance_metrics", collect_performance_batch),
+            ("keyword_planner", collect_keyword_planner_batch),
+            ("custom_labels", collect_custom_labels_batch),
+        ]:
+            try:
+                sub_results = await worker_fn(batch)
+                for r in sub_results:
+                    results[r["item_id"]]["sub_results"][sub_type] = r["status"]
+            except Exception as e:
+                logger.error(f"full_backfill sub-worker {sub_type} failed: {e}")
+                for sku in batch:
+                    results[sku]["sub_results"][sub_type] = "error"
+
+        return list(results.values())
+
+    config_map = {
+        "search_terms": (collect_search_terms_batch, google_ads_limiter),
+        "performance_metrics": (collect_performance_batch, google_ads_limiter),
+        "keyword_planner": (collect_keyword_planner_batch, keyword_planner_limiter),
+        "custom_labels": (collect_custom_labels_batch, None),
+        "full_backfill": (collect_full_backfill_batch, google_ads_limiter),
+    }
+
+    if job_type not in config_map:
+        raise ValueError(f"Unknown job type: {job_type}")
+
+    return config_map[job_type]
 
 
 def _job_to_response(job) -> BackfillJobResponse:
@@ -166,23 +227,27 @@ def _job_to_response(job) -> BackfillJobResponse:
     )
 
 
-async def _start_background_processing(job_id: str, skus: list[str], config: dict):
+async def _start_background_processing(job_id: str, skus: list[str], config: dict, job_type: str):
     """Background processing function for backfill jobs.
 
     This will be called via run_async_in_thread from main.py to ensure
     the job survives HTTP response completion.
 
-    Phase 1: Uses _noop_process placeholder
-    Phase 2: Will route to real collection functions based on job_type
+    Routes to the correct worker function based on job_type:
+    - search_terms: collect_search_terms_batch with google_ads_limiter (10 QPS)
+    - performance_metrics: collect_performance_batch with google_ads_limiter (10 QPS)
+    - keyword_planner: collect_keyword_planner_batch with keyword_planner_limiter (2 QPS)
+    - custom_labels: collect_custom_labels_batch with no rate limiter
+    - full_backfill: collect_full_backfill_batch (composite worker, runs all 4 sequentially)
 
     Args:
         job_id: Job UUID
         skus: List of SKU IDs to process
         config: Job configuration dict
+        job_type: Type of backfill job (determines worker selection)
     """
     from feedops.jobs.manager import get_job, update_job_status
     from feedops.jobs.processor import BatchProcessor
-    from feedops.jobs.rate_limiter import google_ads_limiter
 
     try:
         # Get job details
@@ -198,19 +263,20 @@ async def _start_background_processing(job_id: str, skus: list[str], config: dic
         batch_size = config.get("batch_size", 10)
         checkpoint_interval = config.get("checkpoint_interval", 100)
 
-        # Create processor with appropriate rate limiter
-        # For Phase 1, all jobs use google_ads_limiter
-        # Phase 2 will select limiter based on job_type
+        # Get worker function and rate limiter for this job type
+        process_fn, rate_limiter = _get_worker_config(job_type)
+
+        # Create processor with job-type-specific worker and rate limiter
         processor = BatchProcessor(
             job_id=job_id,
             items=skus,
             batch_size=batch_size,
             checkpoint_interval=checkpoint_interval,
-            rate_limiter=google_ads_limiter,
+            rate_limiter=rate_limiter,
         )
 
-        # Run processing (with noop function for Phase 1)
-        await processor.run(process_fn=_noop_process)
+        # Run processing with real worker function
+        await processor.run(process_fn=process_fn)
 
         logger.info(f"Background processing completed for job {job_id}")
 
@@ -271,6 +337,7 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
         job_id=str(job_id),
         skus=request.skus,
         config=request.config,
+        job_type=request.job_type,
     )
 
     # Get job to return initial state
@@ -344,9 +411,10 @@ async def resume_backfill(job_id: str) -> BackfillJobResponse:
 
     logger.info(f"Resuming backfill job: {job_id} from checkpoint")
 
-    # Extract SKUs and config from job
+    # Extract SKUs, config, and job_type from job
     skus = job.item_ids if hasattr(job, "item_ids") else []
     config = job.config or {}
+    job_type = job.job_type
 
     # Start background processing from checkpoint
     from feedops.api.main import run_async_in_thread
@@ -357,6 +425,7 @@ async def resume_backfill(job_id: str) -> BackfillJobResponse:
         job_id=job_id,
         skus=skus,
         config=config,
+        job_type=job_type,
     )
 
     # Get updated job state
