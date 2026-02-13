@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 8 of 8 (Monitoring & Automation)
-Plan: 3 of 4
-Status: In Progress
-Last activity: 2026-02-13 — Completed 08-03-PLAN.md (Backfill monitoring dashboard)
+Plan: 4 of 4
+Status: Complete
+Last activity: 2026-02-13 — Completed 08-04-PLAN.md (Cloud Scheduler & alert setup)
 
-Progress: [████████░░] 75% (3/4 phases complete in v1.0 milestone)
+Progress: [██████████] 100% (Phase 8 complete - 4/4 plans)
 
 ## Performance Metrics
 
@@ -33,9 +33,9 @@ Progress: [████████░░] 75% (3/4 phases complete in v1.0 mile
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 13
-- Average duration: 3.3 minutes
-- Total execution time: 42.5 minutes
+- Total plans completed: 15
+- Average duration: 3.2 minutes
+- Total execution time: 47.5 minutes
 
 **By Phase:**
 
@@ -44,10 +44,10 @@ Progress: [████████░░] 75% (3/4 phases complete in v1.0 mile
 | 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
 | 6 Data Collection Pipeline | 3 | 11.4 min | 3.8 min |
 | 7 Data Quality & Validation | 4 | 10.4 min | 2.6 min |
-| 8 Monitoring & Automation | 2 | 7.5 min | 3.8 min |
+| 8 Monitoring & Automation | 4 | 12.5 min | 3.1 min |
 
 *Updated after each plan completion*
-| Phase 08 P03 | 2 | 2 tasks | 5 files |
+| Phase 08 P04 | 5 | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -69,6 +69,21 @@ Progress: [████████░░] 75% (3/4 phases complete in v1.0 mile
    - Allow empty SKU list when config.mode='incremental', auto-detect stale SKUs
    - Alternative: Always require SKU list or separate endpoint
    - Impact: Enables Cloud Scheduler to POST minimal payload for daily sync automation
+
+4. **OIDC Authentication for Cloud Scheduler** (Plan 08-04)
+   - Use existing profit-pilot-runtime service account with OIDC tokens for Cloud Scheduler HTTP jobs
+   - Alternative: Create separate scheduler service account or use API keys
+   - Impact: Secure Cloud Run invocation without managing API keys, leverages existing IAM setup
+
+5. **Slack-Only Notifications** (Plan 08-04)
+   - Configure Slack webhook directly on Cloud Run env var, skip email notifications (optional)
+   - Alternative: Use Cloud Monitoring alert policies or configure both Slack and email
+   - Impact: Simpler setup, notification logic already in Python app from Plan 08-02
+
+6. **Daily 2am PT Schedule** (Plan 08-04)
+   - Cloud Scheduler runs incremental refresh at 2:00 AM Pacific Time daily
+   - Alternative: Run at different time or multiple times per day
+   - Impact: Minimizes impact on business hours, allows overnight processing of previous day's data
 
 **Phase 7 (Data Quality & Validation):**
 
@@ -244,8 +259,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 8 plan execution
-Stopped at: Completed 08-02-PLAN.md (Scheduler & alert notifications)
+Stopped at: Completed 08-04-PLAN.md (Cloud Scheduler & alert setup)
 Resume file: None
 
 ---
-*Next step:* Begin Phase 8 - Full-Catalog Backfill Execution
+*Next step:* Phase 8 complete. Ready for Phase 9 (Full-Catalog Backfill Execution) or v1.0 milestone completion
