@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 6 of 8 (Data Collection Pipeline)
-Plan: 2 of 4
+Plan: 3 of 4
 Status: In progress
-Last activity: 2026-02-13 — Completed 06-01-PLAN.md (data collection workers)
+Last activity: 2026-02-13 — Completed 06-02-PLAN.md (backfill API endpoint integration)
 
-Progress: [███░░░░░░░] 12.5% (1/8 plans complete in current phase)
+Progress: [██████░░░░] 25.0% (2/8 plans complete in current phase)
 
 ## Performance Metrics
 
@@ -33,16 +33,16 @@ Progress: [███░░░░░░░] 12.5% (1/8 plans complete in current 
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 5
-- Average duration: 3.4 minutes
-- Total execution time: 16.8 minutes
+- Total plans completed: 6
+- Average duration: 3.2 minutes
+- Total execution time: 19.1 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
-| 6 Data Collection Pipeline | 1 | 3.5 min | 3.5 min |
+| 6 Data Collection Pipeline | 2 | 5.8 min | 2.9 min |
 
 *Updated after each plan completion*
 
@@ -61,6 +61,11 @@ Progress: [███░░░░░░░] 12.5% (1/8 plans complete in current 
    - Worker filters results after fetch (client is batch-native with campaign-join pattern)
    - Client handles campaign-join, worker handles batch filtering
    - Impact: Clean separation of concerns, preserves existing client API
+
+3. **Full Backfill as Composite Worker** (Plan 06-02)
+   - Single processor runs all 4 collection types sequentially (not 4 separate jobs)
+   - Composite worker calls individual workers in dependency order
+   - Impact: Simpler implementation, clearer checkpoint/resume semantics
 
 **Phase 5 (Job Infrastructure):**
 
@@ -94,10 +99,10 @@ Progress: [███░░░░░░░] 12.5% (1/8 plans complete in current 
    - Aligned with VALID-08 requirement
    - Impact: Resilient to transient failures without blocking overall progress
 
-4. **Placeholder _noop_process for Phase 1** (Plan 05-03)
-   - Backfill endpoints use placeholder process function instead of waiting for real collection workers
-   - Allows testing full job lifecycle without Google Ads API dependencies
-   - Impact: Can validate rate limiting, checkpointing, concurrent job limiting before Phase 2 data collection
+4. **Placeholder _noop_process for Phase 1** (Plan 05-03) - REPLACED in 06-02
+   - Backfill endpoints used placeholder process function for Phase 1 testing
+   - Replaced with job-type routing in Plan 06-02
+   - Impact: Endpoints now route to real collection workers
 
 5. **Job Validation in Resume Endpoint** (Plan 05-03)
    - Resume endpoint validates job status (only 'failed' or 'partial' can resume)
@@ -169,8 +174,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 6 plan execution
-Stopped at: Completed 06-01-PLAN.md (data collection workers)
+Stopped at: Completed 06-02-PLAN.md (backfill API endpoint integration)
 Resume file: None
 
 ---
-*Next step:* Continue Phase 6 - Execute 06-02-PLAN.md (backfill API endpoint integration)
+*Next step:* Continue Phase 6 - Execute 06-03-PLAN.md (validation testing)
