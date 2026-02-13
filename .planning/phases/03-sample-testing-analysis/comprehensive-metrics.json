@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "date": "2026-02-13",
+    "lookback_days": 30
+  },
+  "metric_availability": {
+    "core": {
+      "available": true,
+      "skus_with_data": 5
+    },
+    "conversions": {
+      "available": true,
+      "skus_with_data": 5
+    },
+    "shopping_cart": {
+      "available": true,
+      "skus_with_data": 5
+    },
+    "competitive": {
+      "available": true,
+      "skus_with_data": 2
+    }
+  },
+  "skus": {
+    "P-700-16-GB": {
+      "offer_id": "shopify_us_4542235967620_32114644287620",
+      "days_with_data": 30,
+      "core": {
+        "impressions": 332.0,
+        "clicks": 3.0,
+        "ctr": 0.015897435897435898,
+        "cost_micros": 1710000.0,
+        "average_cpc": 780000.0
+      },
+      "conversions": {
+        "conversions": 0.0,
+        "conversions_value": 0.0,
+        "conversions_from_interactions_rate": 0.0
+      },
+      "shopping_cart": {
+        "orders": 0.0,
+        "average_order_value_micros": 0.0,
+        "revenue_micros": 0.0,
+        "units_sold": 0.0
+      },
+      "competitive": {}
+    },
+    "TD-23": {
+      "offer_id": "shopify_us_4538703609988_32096241320068",
+      "days_with_data": 30,
+      "core": {
+        "impressions": 13597.0,
+        "clicks": 206.0,
+        "ctr": 0.014994538388271724,
+        "cost_micros": 401550000.0,
+        "average_cpc": 1879184.1560944503
+      },
+      "conversions": {
+        "conversions": 3.211039,
+        "conversions_value": 697.1188420000001,
+        "conversions_from_interactions_rate": 0.011981748595848595,
+        "cost_per_conversion": 141877885.66693923
+      },
+      "shopping_cart": {
+        "orders": 1.25,
+        "average_order_value_micros": 11893333.333333334,
+        "revenue_micros": 160450000.0,
+        "units_sold": 1.5,
+        "average_cart_size": 1.5
+      },
+      "competitive": {
+        "search_impression_share": 0.41157621247913634,
+        "search_click_share": 0.2621296061913887
+      }
+    },
+    "WP-2/16-GAL": {
+      "offer_id": "shopify_us_4543465947268_32123035451524",
+      "days_with_data": 30,
+      "core": {
+        "impressions": 5356.0,
+        "clicks": 57.0,
+        "ctr": 0.011416440678037886,
+        "cost_micros": 90440000.0,
+        "average_cpc": 1706715.367965368
+      },
+      "conversions": {
+        "conversions": 1.0,
+        "conversions_value": 184.8,
+        "conversions_from_interactions_rate": 0.007575757575757575,
+        "cost_per_conversion": 9870000.0
+      },
+      "shopping_cart": {
+        "orders": 1.0,
+        "average_order_value_micros": 6160000.0,
+        "revenue_micros": 184800000.0,
+        "units_sold": 1.0,
+        "average_cart_size": 1.0
+      },
+      "competitive": {}
+    },
+    "CL-20-6": {
+      "offer_id": "shopify_us_4538765508740_32096780222596",
+      "days_with_data": 15,
+      "core": {
+        "impressions": 2624.0,
+        "clicks": 4.0,
+        "ctr": 0.0010311503556536669,
+        "cost_micros": 6242519.0,
+        "average_cpc": 1256969.0
+      },
+      "conversions": {
+        "conversions": 0.0,
+        "conversions_value": 0.0,
+        "conversions_from_interactions_rate": 0.0
+      },
+      "shopping_cart": {
+        "orders": 0.0,
+        "average_order_value_micros": 0.0,
+        "revenue_micros": 0.0,
+        "units_sold": 0.0
+      },
+      "competitive": {}
+    },
+    "WP-GTB-2": {
+      "offer_id": "shopify_us_4542830280836_32117943369860",
+      "days_with_data": 30,
+      "core": {
+        "impressions": 8588.0,
+        "clicks": 106.0,
+        "ctr": 0.012059150471327242,
+        "cost_micros": 118920000.0,
+        "average_cpc": 1232933.0870279146
+      },
+      "conversions": {
+        "conversions": 0.49999899999999997,
+        "conversions_value": 156.041347,
+        "conversions_from_interactions_rate": 0.005747112068965518,
+        "cost_per_conversion": 20220048.480161518
+      },
+      "shopping_cart": {
+        "orders": 0.333333,
+        "average_order_value_micros": 10150000.0,
+        "revenue_micros": 101499899.0,
+        "units_sold": 0.333333,
+        "average_cart_size": 1.0
+      },
+      "competitive": {
+        "search_impression_share": 0.6355178273741888,
+        "search_click_share": 0.1441310404943746
+      }
+    }
+  }
+}
