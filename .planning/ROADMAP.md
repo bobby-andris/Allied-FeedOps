@@ -81,10 +81,11 @@ Plans:
   4. Data value assessment identifies which metrics are most useful for content optimization
   5. Alternative strategies are documented for any failed assumptions
   6. Clear Go/No-Go recommendation exists for proceeding with Phases 1-5
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- Plans will be created during `/gsd:plan-phase 4`
+- [ ] 04-01-PLAN.md — Comprehensive API reference with field tables, working GAQL queries, and 20-30 sample responses (DOC-01, DOC-02, DOC-03)
+- [ ] 04-02-PLAN.md — Data value assessment, alternative strategies, and Go/No-Go recommendation (DOC-04, DOC-05, DOC-06)
 
 ## Progress
 
@@ -96,7 +97,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. API Capability Validation | 2/2 | ✓ Complete | 2026-02-12 |
 | 2. Comprehensive Data Discovery | 4/4 | ✓ Complete | 2026-02-12 |
 | 3. Sample Testing & Analysis | 3/3 | ✓ Complete | 2026-02-13 |
-| 4. Documentation & Decision | 0/TBD | Not started | - |
+| 4. Documentation & Decision | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
