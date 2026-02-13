@@ -78,10 +78,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Database schema (backfill_jobs, backfill_job_errors) + Python models and job manager
-- [ ] 05-02-PLAN.md — Token bucket rate limiter + generic batch processor with checkpointing
-- [ ] 05-03-PLAN.md — FastAPI backfill endpoints (start, status, resume, list) with concurrent job limiting
-- [ ] 05-04-PLAN.md — Test suite for rate limiter, job manager, and batch processor
+- [x] 05-01-PLAN.md — Database schema (backfill_jobs, backfill_job_errors) + Python models and job manager
+- [x] 05-02-PLAN.md — Token bucket rate limiter + generic batch processor with checkpointing
+- [x] 05-03-PLAN.md — FastAPI backfill endpoints (start, status, resume, list) with concurrent job limiting
+- [x] 05-04-PLAN.md — Test suite for rate limiter, job manager, and batch processor
 
 ### Phase 2: Data Collection Pipeline
 **Goal**: Implement all data collection endpoints using campaign-join pattern for search terms and direct queries for performance metrics
@@ -151,7 +151,7 @@ Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 �
 | 0.2 Comprehensive Data Discovery | Phase 0 | 4/4 | Complete | 2026-02-12 |
 | 0.3 Sample Testing & Analysis | Phase 0 | 3/3 | Complete | 2026-02-13 |
 | 0.4 Documentation & Decision | Phase 0 | 2/2 | Complete | 2026-02-13 |
-| 1. Job Infrastructure & Foundation | v1.0 | 0/4 | Planned | - |
+| 1. Job Infrastructure & Foundation | v1.0 | 4/4 | Complete | 2026-02-13 |
 | 2. Data Collection Pipeline | v1.0 | 0/? | Not started | - |
 | 3. Data Quality & Validation | v1.0 | 0/? | Not started | - |
 | 4. Monitoring & Automation | v1.0 | 0/? | Not started | - |
