@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 1 of 4 (Job Infrastructure & Foundation)
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Executing plans
-Last activity: 2026-02-13 — Completed 05-01-PLAN.md (database schema and Python job models)
+Last activity: 2026-02-13 — Completed 05-03-PLAN.md (backfill API endpoints)
 
-Progress: [█░░░░░░░░░] 10% (0/4 phases complete, 2/4 plans in phase 1 complete)
+Progress: [██░░░░░░░░] 15% (0/4 phases complete, 3/4 plans in phase 1 complete)
 
 ## Performance Metrics
 
@@ -33,15 +33,15 @@ Progress: [█░░░░░░░░░] 10% (0/4 phases complete, 2/4 plans i
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 2
-- Average duration: 2.6 minutes
-- Total execution time: 5.2 minutes
+- Total plans completed: 3
+- Average duration: 2.5 minutes
+- Total execution time: 7.6 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 5 Job Infrastructure & Foundation | 2 | 5.2 min | 2.6 min |
+| 5 Job Infrastructure & Foundation | 3 | 7.6 min | 2.5 min |
 
 *Updated after each plan completion*
 
@@ -80,6 +80,16 @@ Progress: [█░░░░░░░░░] 10% (0/4 phases complete, 2/4 plans i
    - Jobs marked 'complete' if ≥95% of items succeed (some failures acceptable)
    - Aligned with VALID-08 requirement
    - Impact: Resilient to transient failures without blocking overall progress
+
+4. **Placeholder _noop_process for Phase 1** (Plan 05-03)
+   - Backfill endpoints use placeholder process function instead of waiting for real collection workers
+   - Allows testing full job lifecycle without Google Ads API dependencies
+   - Impact: Can validate rate limiting, checkpointing, concurrent job limiting before Phase 2 data collection
+
+5. **Job Validation in Resume Endpoint** (Plan 05-03)
+   - Resume endpoint validates job status (only 'failed' or 'partial' can resume)
+   - Prevents accidental duplicate processing of completed jobs
+   - Impact: Clear contract for callers, safety against state errors
 
 **Phase 0 (Discovery):**
 
@@ -136,8 +146,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 5 plan execution
-Stopped at: Completed 05-01-PLAN.md (database schema and Python job models)
+Stopped at: Completed 05-03-PLAN.md (backfill API endpoints)
 Resume file: None
 
 ---
-*Next step:* Continue Phase 5 execution (plans 05-03 and 05-04 remaining).
+*Next step:* Continue Phase 5 execution (plan 05-04 remaining - integration tests).
