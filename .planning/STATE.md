@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 5 of 4 (Job Infrastructure & Foundation)
+Phase: 1 of 4 (Job Infrastructure & Foundation)
 Plan: 2 of 4
 Status: Executing plans
-Last activity: 2026-02-13 — Completed 05-02-PLAN.md (rate limiter and batch processor)
+Last activity: 2026-02-13 — Completed 05-01-PLAN.md (database schema and Python job models)
 
-Progress: [████░░░░░░] 0% (0/4 phases complete)
+Progress: [█░░░░░░░░░] 10% (0/4 phases complete, 2/4 plans in phase 1 complete)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [████░░░░░░] 0% (0/4 phases complete)
 
 **v1.0 Velocity:**
 - Total plans completed: 2
-- Average duration: 2.0 minutes
-- Total execution time: 4 minutes
+- Average duration: 2.6 minutes
+- Total execution time: 5.2 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 5.1 Job Infrastructure & Foundation | 2 | 4 min | 2.0 min |
+| 5 Job Infrastructure & Foundation | 2 | 5.2 min | 2.6 min |
 
 *Updated after each plan completion*
 
@@ -51,7 +51,22 @@ Progress: [████░░░░░░] 0% (0/4 phases complete)
 
 **Phase 5 (Job Infrastructure):**
 
-1. **Thread-Safe Rate Limiting with threading.Lock** (Plan 05-02)
+1. **JSONB for SKU Lists and Checkpoint Data** (Plan 05-01)
+   - Store SKU arrays and checkpoint state as JSONB (not separate table or TEXT arrays)
+   - Enables flexible checkpoint state without schema changes
+   - Impact: Simplified schema, supports arbitrary checkpoint complexity
+
+2. **RPC Function for Atomic Failure Increment** (Plan 05-01)
+   - increment_backfill_failures() prevents race conditions during concurrent error logging
+   - Guarantees accurate failed_items count under concurrent writes
+   - Impact: Reliable failure tracking in multi-threaded job processing
+
+3. **ETA Calculation in Python Manager** (Plan 05-01)
+   - Rate-based ETA calculated in manager.py (not SQL triggers)
+   - Centralized logic easier to test and modify
+   - Impact: Requires passing started_at_epoch from caller
+
+4. **Thread-Safe Rate Limiting with threading.Lock** (Plan 05-02)
    - TokenBucket uses threading.Lock (not asyncio.Lock) for process-wide thread safety
    - Multiple async tasks in same process can safely share token buckets
    - Impact: Prevents race conditions in multi-task concurrent job execution
@@ -121,7 +136,7 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 5 plan execution
-Stopped at: Completed 05-02-PLAN.md (rate limiter and batch processor)
+Stopped at: Completed 05-01-PLAN.md (database schema and Python job models)
 Resume file: None
 
 ---
