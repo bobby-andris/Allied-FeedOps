@@ -247,6 +247,22 @@ class BatchProcessor:
             completed_at=datetime.now(timezone.utc),
         )
 
+        # Post-completion validation: correct status if processor's success calculation
+        # doesn't match the 95% threshold from VALIDATION_THRESHOLDS (VALID-07)
+        try:
+            from feedops.jobs.quality_report import correct_job_status
+            correction = correct_job_status(self.job_id)
+            if correction["corrected"]:
+                final_status = correction["new_status"]
+                logger.warning(
+                    f"Job {self.job_id}: Status corrected from "
+                    f"'{correction['old_status']}' to '{correction['new_status']}' "
+                    f"by post-completion validation"
+                )
+        except Exception as e:
+            # Don't let validation failure break the processor
+            logger.error(f"Job {self.job_id}: Post-completion validation failed: {e}")
+
         logger.info(
             f"Job {self.job_id}: Finished with status '{final_status}' - "
             f"duration {duration:.1f}s, completed {completed_items}/{total_items} items, "
