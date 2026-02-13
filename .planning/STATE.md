@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 3 of 4 (Data Quality & Validation)
-Plan: 1 of 3
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-02-13 — Completed 07-01-PLAN.md (data validation foundation)
+Last activity: 2026-02-13 — Completed 07-02-PLAN.md (multi-SKU detection and contamination prevention)
 
-Progress: [███████░░░] 62% (2.33/4 phases complete in v1.0 milestone)
+Progress: [███████░░░] 65% (2.5/4 phases complete in v1.0 milestone)
 
 ## Performance Metrics
 
@@ -33,9 +33,9 @@ Progress: [███████░░░] 62% (2.33/4 phases complete in v1.0 m
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 8
-- Average duration: 3.4 minutes
-- Total execution time: 27.0 minutes
+- Total plans completed: 9
+- Average duration: 3.5 minutes
+- Total execution time: 30.8 minutes
 
 **By Phase:**
 
@@ -43,7 +43,7 @@ Progress: [███████░░░] 62% (2.33/4 phases complete in v1.0 m
 |-------|-------|-------|----------|
 | 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
 | 6 Data Collection Pipeline | 3 | 11.4 min | 3.8 min |
-| 7 Data Quality & Validation | 1 | 2.4 min | 2.4 min |
+| 7 Data Quality & Validation | 2 | 6.2 min | 3.1 min |
 
 *Updated after each plan completion*
 
@@ -67,6 +67,21 @@ Progress: [███████░░░] 62% (2.33/4 phases complete in v1.0 m
    - Keyword Planner and Custom Labels use non-blocking validation (warnings only)
    - Core metrics (performance, search terms) strictly enforce constraints
    - Impact: Critical data quality enforced, supplementary data logs warnings
+
+4. **Multi-SKU Metadata in JSONB Column** (Plan 07-02)
+   - Flexible metadata storage without schema changes for future validation flags
+   - Alternative: Separate table or boolean columns
+   - Impact: JSONB metadata column supports arbitrary validation metadata
+
+5. **Batch Eligibility Check Before Data Fetch** (Plan 07-02)
+   - Contamination check before API calls prevents wasted quota on ineligible SKUs
+   - Alternative: Check during upsert or separate pre-validation step
+   - Impact: More efficient - filters before expensive API operations
+
+6. **30-Day Contamination Threshold** (Plan 07-02)
+   - SKUs published within 30 days are ineligible for baseline capture
+   - Alternative: 14 days or 60 days
+   - Impact: Ensures sufficient separation between baseline and post-publish periods (configurable)
 
 **Phase 6 (Data Collection Pipeline):**
 
@@ -192,8 +207,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 7 plan execution
-Stopped at: Completed 07-01-PLAN.md (data validation foundation)
+Stopped at: Completed 07-02-PLAN.md (multi-SKU detection and contamination prevention)
 Resume file: None
 
 ---
-*Next step:* Continue Phase 7 - Execute 07-02-PLAN.md (validation test suite)
+*Next step:* Continue Phase 7 - Execute 07-03-PLAN.md (validation testing)
