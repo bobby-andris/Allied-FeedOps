@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 1 of 4 (Job Infrastructure & Foundation)
-Plan: 3 of 4
-Status: Executing plans
-Last activity: 2026-02-13 — Completed 05-03-PLAN.md (backfill API endpoints)
+Plan: 4 of 4
+Status: Phase complete
+Last activity: 2026-02-13 — Completed 05-04-PLAN.md (integration tests)
 
-Progress: [██░░░░░░░░] 15% (0/4 phases complete, 3/4 plans in phase 1 complete)
+Progress: [███░░░░░░░] 25% (1/4 phases complete, 4/4 plans in phase 1 complete)
 
 ## Performance Metrics
 
@@ -33,15 +33,15 @@ Progress: [██░░░░░░░░] 15% (0/4 phases complete, 3/4 plans i
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 3
-- Average duration: 2.5 minutes
-- Total execution time: 7.6 minutes
+- Total plans completed: 4
+- Average duration: 3.3 minutes
+- Total execution time: 13.3 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 5 Job Infrastructure & Foundation | 3 | 7.6 min | 2.5 min |
+| 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
 
 *Updated after each plan completion*
 
@@ -90,6 +90,16 @@ Progress: [██░░░░░░░░] 15% (0/4 phases complete, 3/4 plans i
    - Resume endpoint validates job status (only 'failed' or 'partial' can resume)
    - Prevents accidental duplicate processing of completed jobs
    - Impact: Clear contract for callers, safety against state errors
+
+6. **Fix Processor Async/Sync Mismatch** (Plan 05-04)
+   - Processor was calling sync manager functions with await
+   - Fixed to call manager functions directly (not async)
+   - Impact: Processor now works correctly with manager layer
+
+7. **Idempotent Upsert Contract Test** (Plan 05-04)
+   - Test validates and documents JOB-06 requirement for Phase 2
+   - Proves upsert pattern prevents duplicates during checkpoint/resume
+   - Impact: Executable documentation for Phase 2 collection worker implementors
 
 **Phase 0 (Discovery):**
 
@@ -146,8 +156,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 ## Session Continuity
 
 Last session: 2026-02-13 — Phase 5 plan execution
-Stopped at: Completed 05-03-PLAN.md (backfill API endpoints)
+Stopped at: Completed 05-04-PLAN.md (integration tests) - Phase 1 complete
 Resume file: None
 
 ---
-*Next step:* Continue Phase 5 execution (plan 05-04 remaining - integration tests).
+*Next step:* Begin Phase 2 (Data Collection Workers) - Build real collection endpoints using validated infrastructure.
