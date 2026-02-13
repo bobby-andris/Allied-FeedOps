@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 8 of 8 (Monitoring & Automation)
-Plan: 2 of 4
+Plan: 3 of 4
 Status: In Progress
-Last activity: 2026-02-13 — Completed 08-02-PLAN.md (Scheduler & alert notifications)
+Last activity: 2026-02-13 — Completed 08-03-PLAN.md (Backfill monitoring dashboard)
 
 Progress: [████████░░] 75% (3/4 phases complete in v1.0 milestone)
 
@@ -47,6 +47,7 @@ Progress: [████████░░] 75% (3/4 phases complete in v1.0 mile
 | 8 Monitoring & Automation | 2 | 7.5 min | 3.8 min |
 
 *Updated after each plan completion*
+| Phase 08 P03 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -223,6 +224,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 08-01]: RPC execute_sql for freshness queries - Enables single-query freshness check for all SKUs via SQL aggregation instead of N queries
 - [Phase 08-01]: Separate coverage and freshness endpoints - Dashboard can fetch coverage frequently without transferring large freshness arrays
 - [Phase 08-01]: P95 calculation in Python (not database) - Faster response, no additional database load for health checks
+- [Phase 08-03]: Install Tremor with --legacy-peer-deps - React 19 compatibility workaround, no runtime issues
+- [Phase 08-03]: Separate polling for jobs vs. monitoring data - jobs refresh every 5s, monitoring data fetches once on mount
+- [Phase 08-03]: Limit freshness heatmap to 500 SKUs - performance optimization for browser rendering
 
 ### Pending Todos
 
