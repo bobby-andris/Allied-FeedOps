@@ -99,13 +99,55 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TBD | TBD | Pending |
+| JOB-01 | Phase 1 | Pending |
+| JOB-02 | Phase 1 | Pending |
+| JOB-03 | Phase 1 | Pending |
+| JOB-04 | Phase 1 | Pending |
+| JOB-05 | Phase 1 | Pending |
+| JOB-06 | Phase 1 | Pending |
+| JOB-07 | Phase 1 | Pending |
+| JOB-08 | Phase 1 | Pending |
+| JOB-09 | Phase 1 | Pending |
+| JOB-10 | Phase 1 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| DATA-05 | Phase 2 | Pending |
+| DATA-06 | Phase 1 | Pending |
+| DATA-07 | Phase 1 | Pending |
+| DATA-08 | Phase 1 | Pending |
+| DATA-09 | Phase 2 | Pending |
+| DATA-10 | Phase 2 | Pending |
+| VALID-01 | Phase 3 | Pending |
+| VALID-02 | Phase 3 | Pending |
+| VALID-03 | Phase 3 | Pending |
+| VALID-04 | Phase 3 | Pending |
+| VALID-05 | Phase 3 | Pending |
+| VALID-06 | Phase 3 | Pending |
+| VALID-07 | Phase 3 | Pending |
+| VALID-08 | Phase 3 | Pending |
+| VALID-09 | Phase 3 | Pending |
+| VALID-10 | Phase 3 | Pending |
+| MON-01 | Phase 4 | Pending |
+| MON-02 | Phase 4 | Pending |
+| MON-03 | Phase 4 | Pending |
+| MON-04 | Phase 4 | Pending |
+| MON-05 | Phase 4 | Pending |
+| MON-06 | Phase 4 | Pending |
+| MON-07 | Phase 4 | Pending |
+| MON-08 | Phase 4 | Pending |
+| MON-09 | Phase 4 | Pending |
+| MON-10 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 40 total
-- Mapped to phases: 0 (roadmap not created yet)
-- Unmapped: 40 ⚠️
+- Mapped to phases: 40 (100% coverage)
+- Phase 1: 13 requirements
+- Phase 2: 7 requirements
+- Phase 3: 10 requirements
+- Phase 4: 10 requirements
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after research synthesis and category scoping*
+*Last updated: 2026-02-13 (roadmap created, 100% coverage validated)*

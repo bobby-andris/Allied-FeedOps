@@ -1,104 +1,158 @@
-# Roadmap: Phase 0 - Google Ads API Discovery
+# Roadmap: Allied FeedOps v1.0
 
-## Overview
+## Milestones
 
-This is a pure research project to validate Google Ads API capabilities before executing a comprehensive backfill plan. We'll answer 5 core questions about API constraints, map all available data sources, test with sample SKUs, and document findings to inform the full backfill strategy (Phases 1-5). Success means we have enough information to confidently plan the main backfill OR pivot to a different approach if critical assumptions are wrong.
+- ✅ **Phase 0 Discovery** - API validation and research (shipped 2026-02-13)
+- 🚧 **v1.0 Historical Data Backfill** - Phases 1-4 (in planning)
 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
+- Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: API Capability Validation** - Test core API assumptions and establish working query patterns
-- [x] **Phase 2: Comprehensive Data Discovery** - Map all available views, metrics, and filtering capabilities
-- [x] **Phase 3: Sample Testing & Analysis** - Validate approach with 5-10 real SKUs across categories
-- [x] **Phase 4: Documentation & Decision** - Create comprehensive API reference and provide Go/No-Go recommendation
+<details>
+<summary>✅ Phase 0 Discovery - SHIPPED 2026-02-13</summary>
 
-## Phase Details
-
-### Phase 1: API Capability Validation
+### Phase 0.1: API Capability Validation
 **Goal**: Confirm Google Ads API can support product-level backfill strategy with validated query patterns and documented constraints
-**Depends on**: Nothing (first phase)
 **Requirements**: API-01, API-02, API-03, API-04, API-05
-**Success Criteria** (what must be TRUE):
-  1. We know whether search_term_view supports product_item_id filtering (expected: no)
-  2. We have working GAQL query for shopping_performance_view with product-level filtering
-  3. We know the maximum LIMIT value that works reliably (tested 10K, 50K, 100K)
-  4. We know actual data retention windows for both search terms and performance views
-  5. We have confirmed custom_label_0 field availability in Merchant API product_view
 **Plans**: 2 plans
 
 Plans:
-- [x] 01-01-PLAN.md — Validate core views (API-01: search_term_view limitation, API-02: shopping_performance_view product queries)
-- [x] 01-02-PLAN.md — Test query boundaries and custom labels (API-03: LIMIT values, API-04: data retention, API-05: custom_label_0)
+- [x] 00.1-01-PLAN.md — Validate core views (API-01: search_term_view limitation, API-02: shopping_performance_view product queries)
+- [x] 00.1-02-PLAN.md — Test query boundaries and custom labels (API-03: LIMIT values, API-04: data retention, API-05: custom_label_0)
 
-### Phase 2: Comprehensive Data Discovery
+### Phase 0.2: Comprehensive Data Discovery
 **Goal**: Complete inventory of all available Google Ads API data sources with documented fields, filtering capabilities, and use cases
-**Depends on**: Phase 1
-**Requirements**: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05, DISC-06, DISC-07, DISC-08, DISC-09, DISC-10, DISC-11, DISC-12
-**Success Criteria** (what must be TRUE):
-  1. All available views and resources are enumerated with field listings (search_term_view, shopping_performance_view, product_view, campaign_view, etc.)
-  2. All performance metrics are documented with data types and availability (clicks, impressions, conversions, ROAS, etc.)
-  3. Custom label filtering capabilities are tested and documented (can we filter by custom_label_0-4?)
-  4. Performance Max campaign data patterns are documented
-  5. Competitive metrics availability is confirmed (auction insights, impression share, etc.)
+**Requirements**: DISC-01 through DISC-12
 **Plans**: 4 plans
 
 Plans:
-- [x] 02-01-PLAN.md — Enumerate all views, metrics, and Shopping report types (DISC-01, DISC-02, DISC-06)
-- [x] 02-02-PLAN.md — Test custom label filtering and PMax data patterns (DISC-03, DISC-04, DISC-05)
-- [x] 02-03-PLAN.md — Discover bidding, attribution, and competitive metrics (DISC-07, DISC-08, DISC-09)
-- [x] 02-04-PLAN.md — Discover audience segmentation, asset performance, and ML insights (DISC-10, DISC-11, DISC-12)
+- [x] 00.2-01-PLAN.md — Enumerate all views, metrics, and Shopping report types
+- [x] 00.2-02-PLAN.md — Test custom label filtering and PMax data patterns
+- [x] 00.2-03-PLAN.md — Discover bidding, attribution, and competitive metrics
+- [x] 00.2-04-PLAN.md — Discover audience segmentation, asset performance, and ML insights
 
-### Phase 3: Sample Testing & Analysis
-**Goal**: Validated backfill approach with real API responses from diverse product categories showing performance, opportunity gaps, and query execution characteristics
-**Depends on**: Phase 2
-**Requirements**: SAMP-01, SAMP-02, SAMP-03, SAMP-04, SAMP-05, SAMP-06
-**Success Criteria** (what must be TRUE):
-  1. 5-10 test SKUs are selected across product categories (towel bars, grab bars, mirrors, shelves, hardware)
-  2. Current Google Ads search terms are fetched for all sample SKUs using validated query patterns
-  3. Keyword Planner ideas are generated for sample SKUs with documented opportunity gaps
-  4. Query performance is measured (p50, p95, p99 response times) for batch sizing decisions
-  5. Comprehensive data retrieval works for sample SKUs (all metrics identified in Phase 2)
+### Phase 0.3: Sample Testing & Analysis
+**Goal**: Validated backfill approach with real API responses from diverse product categories
+**Requirements**: SAMP-01 through SAMP-06
 **Plans**: 3 plans
 
 Plans:
-- [x] 03-01-PLAN.md — Select test SKUs across categories and fetch search terms (SAMP-01, SAMP-02)
-- [x] 03-02-PLAN.md — Generate Keyword Planner ideas and calculate opportunity gaps (SAMP-03, SAMP-04)
-- [x] 03-03-PLAN.md — Measure query performance and validate comprehensive metric retrieval (SAMP-05, SAMP-06)
+- [x] 00.3-01-PLAN.md — Select test SKUs across categories and fetch search terms
+- [x] 00.3-02-PLAN.md — Generate Keyword Planner ideas and calculate opportunity gaps
+- [x] 00.3-03-PLAN.md — Measure query performance and validate comprehensive metric retrieval
 
-### Phase 4: Documentation & Decision
-**Goal**: Comprehensive API reference document and clear Go/No-Go recommendation for Phases 1-5 backfill execution
-**Depends on**: Phase 3
-**Requirements**: DOC-01, DOC-02, DOC-03, DOC-04, DOC-05, DOC-06
-**Success Criteria** (what must be TRUE):
-  1. `docs/google-ads-api-capabilities.md` exists with complete field reference for all views
-  2. Document includes 20-30 sample API responses showing real data structures
-  3. Working GAQL query examples are provided for all valuable data types
-  4. Data value assessment identifies which metrics are most useful for content optimization
-  5. Alternative strategies are documented for any failed assumptions
-  6. Clear Go/No-Go recommendation exists for proceeding with Phases 1-5
+### Phase 0.4: Documentation & Decision
+**Goal**: Comprehensive API reference document and clear Go/No-Go recommendation
+**Requirements**: DOC-01 through DOC-06
 **Plans**: 2 plans
 
 Plans:
-- [x] 04-01-PLAN.md — Comprehensive API reference with field tables, working GAQL queries, and 20-30 sample responses (DOC-01, DOC-02, DOC-03)
-- [x] 04-02-PLAN.md — Data value assessment, alternative strategies, and Go/No-Go recommendation (DOC-04, DOC-05, DOC-06)
+- [x] 00.4-01-PLAN.md — Comprehensive API reference with field tables and working GAQL queries
+- [x] 00.4-02-PLAN.md — Data value assessment and Go/No-Go recommendation
+
+</details>
+
+## v1.0 Historical Data Backfill (In Planning)
+
+**Milestone Goal:** Execute comprehensive Google Ads historical data backfill for all 2,784 SKUs with production-ready monitoring and validation.
+
+### Phase 1: Job Infrastructure & Foundation
+**Goal**: Establish robust job-based async processing infrastructure with rate limiting, error handling, and resumability
+
+**Depends on**: Phase 0 (complete)
+
+**Requirements**: JOB-01, JOB-02, JOB-03, JOB-04, JOB-05, JOB-06, JOB-07, JOB-08, JOB-09, JOB-10, DATA-06, DATA-07, DATA-08
+
+**Success Criteria** (what must be TRUE):
+  1. System can create batch jobs and track their status through complete lifecycle (creating, running, complete, failed, partial)
+  2. System can process 100 SKUs with progress updates, error logging, and ETA calculation
+  3. System recovers from interruptions by resuming jobs from last checkpoint without data duplication
+  4. System respects API rate limits using token bucket limiting (10 QPS max) and exponential backoff
+  5. Database connections remain stable with no exhaustion when running 3 concurrent jobs
+
+**Plans**: TBD
+
+Plans:
+- [ ] 01-01: TBD during phase planning
+
+### Phase 2: Data Collection Pipeline
+**Goal**: Implement all data collection endpoints using campaign-join pattern for search terms and direct queries for performance metrics
+
+**Depends on**: Phase 1
+
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-09, DATA-10
+
+**Success Criteria** (what must be TRUE):
+  1. System collects search terms for all 2,784 SKUs using 2-step campaign-join pattern
+  2. System captures 180 days of performance metrics (impressions, clicks, CTR, conversions) per SKU
+  3. System generates Keyword Planner ideas for all SKUs and stores with 30-day TTL
+  4. System syncs custom_label_0 from Google Merchant Center to Supabase
+  5. All collected data includes collection timestamps and uses explicit date ranges (YYYY-MM-DD format)
+
+**Plans**: TBD
+
+Plans:
+- [ ] 02-01: TBD during phase planning
+
+### Phase 3: Data Quality & Validation
+**Goal**: Ensure data completeness, freshness, and accuracy through validation layers and contamination prevention
+
+**Depends on**: Phase 2
+
+**Requirements**: VALID-01, VALID-02, VALID-03, VALID-04, VALID-05, VALID-06, VALID-07, VALID-08, VALID-09, VALID-10
+
+**Success Criteria** (what must be TRUE):
+  1. System validates 100% requirement coverage (all 2,784 SKUs accounted for) after each batch job
+  2. System detects and flags stale data (baselines >60 days, search terms >7 days) in dashboard
+  3. System identifies multi-SKU families via product_id matching and marks aggregated data with badges
+  4. System prevents baseline capture for SKUs published in last 30 days by checking publish_events
+  5. System validates data ranges (CTR 0-1, clicks <= impressions) and sets job status to 'partial' if success rate <95%
+
+**Plans**: TBD
+
+Plans:
+- [ ] 03-01: TBD during phase planning
+
+### Phase 4: Monitoring & Automation
+**Goal**: Enable production observability with dashboards, alerting, and automated incremental refresh for ongoing data sync
+
+**Depends on**: Phase 3
+
+**Requirements**: MON-01, MON-02, MON-03, MON-04, MON-05, MON-06, MON-07, MON-08, MON-09, MON-10
+
+**Success Criteria** (what must be TRUE):
+  1. Dashboard displays real-time job status, progress, and coverage metrics (X/2,784 SKUs with data)
+  2. Dashboard shows data freshness heatmap and API health metrics (latency p95, error rates, rate limit hits)
+  3. System sends email alerts on job failure and Slack notifications on completion
+  4. System automatically triggers backfill for SKUs with missing or stale data via scheduled jobs
+  5. System transitions from 180-day backfill to daily 1-day incremental refresh with Prometheus metrics exported
+
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD during phase planning
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 → 4
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. API Capability Validation | 2/2 | ✓ Complete | 2026-02-12 |
-| 2. Comprehensive Data Discovery | 4/4 | ✓ Complete | 2026-02-12 |
-| 3. Sample Testing & Analysis | 3/3 | ✓ Complete | 2026-02-13 |
-| 4. Documentation & Decision | 2/2 | ✓ Complete | 2026-02-13 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 0.1 API Capability Validation | Phase 0 | 2/2 | Complete | 2026-02-12 |
+| 0.2 Comprehensive Data Discovery | Phase 0 | 4/4 | Complete | 2026-02-12 |
+| 0.3 Sample Testing & Analysis | Phase 0 | 3/3 | Complete | 2026-02-13 |
+| 0.4 Documentation & Decision | Phase 0 | 2/2 | Complete | 2026-02-13 |
+| 1. Job Infrastructure & Foundation | v1.0 | 0/? | Not started | - |
+| 2. Data Collection Pipeline | v1.0 | 0/? | Not started | - |
+| 3. Data Quality & Validation | v1.0 | 0/? | Not started | - |
+| 4. Monitoring & Automation | v1.0 | 0/? | Not started | - |
 
 ---
-*Roadmap created: 2026-02-11*
-*Last updated: 2026-02-13 (Phase 4 complete - milestone complete)*
+*Phase 0 completed: 2026-02-13*
+*v1.0 milestone initialized: 2026-02-13*

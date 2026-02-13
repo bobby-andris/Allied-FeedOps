@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** Milestone v1.0 - Historical Data Backfill
+**Current focus:** Phase 1 - Job Infrastructure & Foundation (v1.0 milestone)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-13 — Milestone v1.0 started
+Phase: 1 of 4 (Job Infrastructure & Foundation)
+Plan: Ready to plan
+Status: Phase planning not started
+Last activity: 2026-02-13 — v1.0 roadmap created, requirements mapped
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [████░░░░░░] 0% (0/4 phases complete)
 
 ## Performance Metrics
 
-**Velocity:**
+**Phase 0 Velocity (Discovery Milestone):**
 - Total plans completed: 11
 - Average duration: 3.3 minutes
 - Total execution time: 0.63 hours
@@ -27,144 +27,76 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. API Capability Validation | 2 | 9 min | 4.5 min |
-| 2. Comprehensive Data Discovery | 4 | 11 min | 2.75 min |
-| 3. Sample Testing & Analysis | 3 | 14 min | 4.7 min |
-| 4. Documentation & Decision | 2 | 8 min | 4.0 min |
+| 0.1 API Capability Validation | 2 | 9 min | 4.5 min |
+| 0.2 Comprehensive Data Discovery | 4 | 11 min | 2.75 min |
+| 0.3 Sample Testing & Analysis | 3 | 14 min | 4.7 min |
+| 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
-**Recent Trend:**
-- Latest: 04-02 (2.6 minutes)
-- Previous: 04-01 (5 minutes)
-- Trend: Plan 04-02 faster due to synthesis work (vs new documentation)
+**v1.0 Velocity:**
+- Total plans completed: 0
+- Will be updated after first plan execution
 
 *Updated after each plan completion*
-| Phase 03 P01 | 6 | 1 task | 3 files |
-| Phase 03 P02 | 4 | 1 task | 3 files |
-| Phase 03 P03 | 262 | 2 tasks | 3 files |
-| Phase 04 P01 | 306 | 1 task | 1 file |
-| Phase 04 P02 | 155 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
 ### Decisions
 
-1. **search_term_view Cannot Filter by Product** (01-01, 2026-02-11)
-   - API explicitly rejects `segments.product_item_id` in search_term_view queries
-   - Must use campaign-join pattern (already implemented in codebase)
-   - Impact: Two-step query required for product→search term association
+Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 
-2. **Google Ads API Uses Lowercase Offer IDs** (01-01, 2026-02-11)
-   - API returns and expects `shopify_us_` format (lowercase), not `shopify_US_`
-   - Database format already matches API (no transformation needed for queries)
-   - Impact: Confirms existing database schema is correct; GMC publishing must still transform to uppercase
+1. **Campaign-Join Pattern Required for Search Terms** (Phase 0.1)
+   - API cannot filter search_term_view by product_item_id directly
+   - Must use 2-step query: shopping_performance_view → search_term_view → join in memory
+   - Impact: DATA-01 requirement implementation
 
-3. **LIMIT Values Up to 100K Work Without Issues** (01-02, 2026-02-12)
-   - Tested 10K, 50K, and 100K LIMIT values - all succeeded with 2-4s response times
-   - Recommend 50K as default batch size (balances throughput with retry granularity)
-   - Impact: Can use larger batches than initially assumed, reducing total API calls needed
+2. **Batch Size 10 Optimal for API Performance** (Phase 0.3)
+   - Testing showed 127ms p95 per SKU with batch size 10
+   - Full 2,784 SKU catalog completes in 7.1 minutes
+   - Impact: DATA-06 requirement (process SKUs in batches of 10)
 
-4. **Data Retention Starts 2020-01-01 for This Account** (01-02, 2026-02-12)
-   - No data exists before 2020 despite API documentation claiming 11 years retention
-   - Likely reflects account activation date, not API limitation
-   - Impact: Historical backfill window is 2020-01-01 to present (~6 years)
+3. **Explicit Date Ranges Required** (Phase 0.3)
+   - API rejects LAST_N_DAYS syntax
+   - Must use BETWEEN 'YYYY-MM-DD' AND 'YYYY-MM-DD' format
+   - Impact: DATA-07 requirement (explicit date ranges)
 
-5. **Custom Attribute Field Naming Has No Underscore** (01-02, 2026-02-12)
-   - Correct: `product_custom_attribute0` through `product_custom_attribute4`
-   - Incorrect: `product_custom_attribute_0` (with underscore before number)
-   - Impact: Must use correct field names in all queries; research document needs correction
+4. **Lowercase Offer IDs for API Queries** (Phase 0.1)
+   - API expects shopify_us_ format (lowercase 'us')
+   - Database format already correct
+   - Impact: DATA-08 requirement (handle lowercase offer IDs)
 
-6. **Custom Labels 0-3 Populated, Custom Label 4 Available** (02-02, 2026-02-12)
-   - 4 custom labels currently populated with category/tier data
-   - custom_label_4 is available for future use (could populate with product_item_id or category data)
-   - Custom labels are READ-ONLY via Google Ads API (SET via Google Sheets supplemental feed)
-   - Impact: Can use custom labels for efficient product segmentation without long IN clauses
+5. **Keyword Planner Coverage Gap Identified** (Phase 0.4)
+   - 43% of potential search volume (168K monthly) not currently captured
+   - Recommendation: Run Keyword Planner for ALL SKUs, not just cold-start
+   - Impact: DATA-03 requirement (Keyword Planner for all 2,784 SKUs)
 
-7. **Performance Max Populates shopping_performance_view** (02-02, 2026-02-12)
-   - PMax campaigns populate shopping_performance_view with product-level metrics
-   - Filter by `campaign.advertising_channel_type = 'PERFORMANCE_MAX'` to isolate PMax data
-   - Asset groups queryable with ad_strength data
-   - Impact: Same query patterns work for both Standard Shopping and Performance Max
+6. **Multi-SKU Family Pattern Documented** (Phase 0.3)
+   - Google Ads aggregates metrics by product_id (not master_sku)
+   - Example: DMF-2/2X, DMF-2/3X, DMF-2/4X all share same product_id
+   - Impact: VALID-03 requirement (detect multi-SKU families)
 
-8. **performance_max_placement_view Metric Compatibility** (02-02, 2026-02-12)
-   - performance_max_placement_view supports impressions metric only
-   - clicks, conversions, and other metrics incompatible with this view
-   - This is an API constraint, not a data availability issue
-   - Impact: Limited metrics available for placement analysis
-
-9. **Auction Insights Metrics Not Available via API** (02-03, 2026-02-12)
-   - API returned access restriction error for auction_insight_* metrics (impression share, overlap rate, outranking share)
-   - These metrics may be UI-only or require special API access
-   - Use own-account impression share and position metrics instead
-   - Impact: Cannot get competitor-specific data programmatically, but can track market share via impression_share metrics
-
-10. **Product-Level Impression Share Available** (02-03, 2026-02-12)
-   - Query succeeded with search_impression_share and search_click_share at product granularity
-   - Sample data: 51% impression share, 34% click share for top product
-   - Available in shopping_performance_view with segments.product_item_id
-   - Impact: Can track competitive position for individual SKUs, not just campaigns
-
-11. **Data-Driven Attribution Model Available** (02-03, 2026-02-12)
-   - Conversion actions show GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN with data_driven_model_status: AVAILABLE
-   - 19 enabled conversion actions with 30-day click / 1-day view-through lookback
-   - Conversion lag distribution queryable (176 lag buckets found in 30-day window)
-   - Impact: Attribution data is more sophisticated than basic last-click; conversion lag data informs backfill timing
-
-12. **LAST_N_DAYS Syntax Not Supported** (03-01, 2026-02-13)
-   - Google Ads API rejects date literals like `LAST_90_DAYS` with "Invalid value" error
-   - Must use explicit date ranges: `BETWEEN 'YYYY-MM-DD' AND 'YYYY-MM-DD'`
-   - Calculate dates in code before building query string
-   - Impact: All date range queries require Python datetime calculations
-
-13. **Filtered Fields Must Be in SELECT Clause** (03-01, 2026-02-13)
-   - API enforces strict rule: fields used in WHERE must appear in SELECT
-   - Example: `WHERE campaign.advertising_channel_type = 'SHOPPING'` requires `SELECT campaign.advertising_channel_type`
-   - Same applies to segments.product_item_id and other filtered fields
-   - Impact: SELECT clauses must include all WHERE filter fields, not just desired output fields
-
-14. **Category-Based SKU Selection Requires Fallback Strategy** (03-01, 2026-02-13)
-   - Many products in catalog lack recent Google Ads activity (<30 days)
-   - Category-only selection insufficient for representative sampling
-   - Solution: Use known-active offer IDs from validation phase as fallback
-   - Impact: Sample selection scripts need two-tier strategy (category first, fallback second)
-
-Key context from PROJECT.md:
-- Phase 0 is discovery only — no schema migrations, no production deployment
-- 5 core questions must be answered before planning main backfill
-- Research validates that campaign-join pattern already exists in codebase
-- GMC offer ID case sensitivity (shopify_us vs shopify_US) is known pitfall
-- [Phase 02-04]: Asset Performance Labels Not Available - asset_group_asset.performance_label field unrecognized by API v22
-- [Phase 02-04]: Search Term Insights Require Campaign-Level Query - cannot query all campaigns at once for campaign_search_term_insight
-- [Phase 02-04]: Demographics and Quality Scores Not Available for Shopping - confirmed these metrics only exist for Search/Display campaigns
-- [Phase 03-01]: Sample set established - 6 SKUs, 5 categories, 60K+ search terms, 560K impressions
-
-15. **Keyword Planner Requires Generic Category Terms for Idea Generation** (03-02, 2026-02-13)
-   - Full product titles (brand + model) return only exact match with 0 search volume
-   - Generic category terms (e.g., "grab bar" vs "Pipeline Collection 16 Inch Grab Bar") generate 100+ related ideas
-   - Impact: Seed keyword selection is critical for quality Keyword Planner results
-
-16. **Keyword Planner Competition Field Returns Integer (Not Enum)** (03-02, 2026-02-13)
-   - API returns competition as int (0-3) instead of enum object with .name attribute
-   - Must handle both int and enum types in parsing code
-   - Mapping: 0=UNSPECIFIED, 1=LOW, 2=MEDIUM, 3=HIGH
-   - Impact: Type checking required to avoid runtime errors
-- [Phase 03-03]: Batch size 10 optimal for backfill (127ms p95 per SKU, 7.1min for 2784 SKUs)
-- [Phase 03-03]: average_cpm and 2 competitive metrics incompatible with shopping_performance_view
-- [Phase 04-02]: GO recommendation: Proceed with Phases 1-5 backfill (4.65/5 confidence based on weighted scoring matrix)
-- [Phase 04-02]: Keyword Planner essential for ALL SKUs (not just cold-start) - 43% coverage gap identified (168K monthly search volume)
+7. **Competitive Metrics Have 33% Coverage** (Phase 0.4)
+   - Impression/click share only available for products with sufficient volume
+   - This is acceptable - high-value SKUs are what matter
+   - Impact: DATA-09 requirement (collect where available)
 
 ### Pending Todos
 
-None yet.
+None yet. Will populate during v1.0 execution.
 
 ### Blockers/Concerns
 
-None yet. Research summary indicates HIGH confidence in feasibility.
+None. Phase 0 issued GO recommendation with 4.65/5 confidence.
+
+**Validation needed during Phase 1:**
+- Confirm rate limiting works at scale (100+ SKU test)
+- Verify connection pooling prevents exhaustion with 3 concurrent jobs
+- Test checkpoint recovery with actual Cloud Run container restart
 
 ## Session Continuity
 
-Last session: 2026-02-13 — Plan 04-02 execution
-Stopped at: Completed 04-02-PLAN.md (Data Value Assessment and Go/No-Go Recommendation)
+Last session: 2026-02-13 — v1.0 roadmap creation
+Stopped at: ROADMAP.md and STATE.md written, REQUIREMENTS.md traceability pending update
 Resume file: None
 
 ---
-*Next step:* **Phase 0 COMPLETE.** All discovery phases finished. GO recommendation issued (4.65/5 confidence). Ready to proceed with Phases 1-5 backfill planning and execution.
+*Next step:* Update REQUIREMENTS.md traceability section, then `/gsd:plan-phase 1` to begin Job Infrastructure & Foundation planning.
