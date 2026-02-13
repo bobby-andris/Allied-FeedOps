@@ -36,6 +36,15 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
+from pydantic import ValidationError
+
+from feedops.jobs.validators import (
+    ValidatedPerformanceMetrics,
+    ValidatedSearchTerm,
+    ValidatedKeywordMetrics,
+    ValidatedCustomLabels,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -105,10 +114,28 @@ async def collect_search_terms_batch(batch: list[str]) -> list[dict]:
 
         logger.info(f"Filtered to {len(filtered_terms)} terms for batch SKUs")
 
+        # Validate each term before saving
+        validated_terms = []
+        for term in filtered_terms:
+            try:
+                # Validate term structure
+                ValidatedSearchTerm(
+                    query_text=term.get("query_text", ""),
+                    master_sku=term.get("master_sku", ""),
+                    impressions=term.get("impressions", 0),
+                    clicks=term.get("clicks", 0),
+                )
+                validated_terms.append(term)
+            except ValidationError as e:
+                logger.warning(f"Invalid search term for {term.get('master_sku')}: {e}")
+                continue
+
+        logger.info(f"Validated {len(validated_terms)} terms (filtered out {len(filtered_terms) - len(validated_terms)} invalid)")
+
         # Save to database with idempotent upserts
-        if filtered_terms:
+        if validated_terms:
             saved_count = client.save_search_terms_to_db(
-                search_terms=filtered_terms,
+                search_terms=validated_terms,
                 period_start=period_start,
                 period_end=period_end,
                 sync_job_id=None,  # Could pass job_id here if available
@@ -118,7 +145,7 @@ async def collect_search_terms_batch(batch: list[str]) -> list[dict]:
         # Build result status for each SKU in batch
         results = []
         for sku in batch:
-            sku_terms = [t for t in filtered_terms if t.get("master_sku") == sku]
+            sku_terms = [t for t in validated_terms if t.get("master_sku") == sku]
             if sku_terms:
                 results.append({
                     "item_id": sku,
@@ -299,9 +326,22 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
                 # created_at is auto-populated by DB default (DATA-10)
             }
 
+            # Validate before database write (VALID-05, VALID-06, VALID-09)
+            try:
+                validated = ValidatedPerformanceMetrics(**baseline_record)
+            except ValidationError as e:
+                logger.error(f"Validation failed for {sku}: {e}")
+                results.append({
+                    "item_id": sku,
+                    "status": "validation_error",
+                    "error": str(e),
+                })
+                continue
+
             # Upsert with ON CONFLICT (master_sku, platform) for idempotency (JOB-06)
+            # Use validated.model_dump() to ensure only validated data is written
             supabase.table("performance_baselines").upsert(
-                baseline_record,
+                validated.model_dump(exclude_none=True),
                 on_conflict="master_sku,platform"
             ).execute()
 
@@ -419,8 +459,22 @@ async def collect_keyword_planner_batch(batch: list[str]) -> list[dict]:
                 cache_max_age_days=30,
             )
 
-            enriched_count = len(metrics)
-            logger.info(f"Enriched {enriched_count} keywords for {sku}")
+            # Validate metrics post-fetch (log warnings, don't block)
+            validated_count = 0
+            for metric in metrics:
+                try:
+                    ValidatedKeywordMetrics(
+                        keyword=metric.get("keyword", ""),
+                        avg_monthly_searches=metric.get("avg_monthly_searches"),
+                        competition=metric.get("competition"),
+                        competition_index=metric.get("competition_index"),
+                    )
+                    validated_count += 1
+                except ValidationError as e:
+                    logger.warning(f"Invalid keyword metric for {sku}: {e}")
+
+            enriched_count = validated_count
+            logger.info(f"Enriched and validated {enriched_count} keywords for {sku} (fetched {len(metrics)} total)")
 
             results.append({
                 "item_id": sku,
@@ -548,6 +602,16 @@ async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
                 custom_labels = _gmc_cache.get(offer_id)
 
                 if custom_labels:
+                    # Validate before update
+                    try:
+                        ValidatedCustomLabels(
+                            gmc_offer_id=offer_id,
+                            custom_labels=custom_labels,
+                        )
+                    except ValidationError as e:
+                        logger.warning(f"Invalid custom labels for {offer_id}: {e}")
+                        continue
+
                     # Update variant_index with custom_labels JSONB
                     # Idempotent: update by unique gmc_offer_id (JOB-06)
                     supabase.table("variant_index").update({
