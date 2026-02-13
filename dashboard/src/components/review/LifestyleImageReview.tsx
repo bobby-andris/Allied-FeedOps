@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageApprovalCard } from "@/components/review/ImageApprovalCard"
 import { Check, Image as ImageIcon, RefreshCw, Sparkles, Upload } from "lucide-react"
 import { toast } from "sonner"
+import { resolveDefaultFinishSelection } from './lifestyle-image-selection'
 
 // Convert local file path to GitHub raw URL for archived images
 function getImageUrl(imagePath: string | null): string | null {
@@ -81,10 +82,10 @@ export function LifestyleImageReview({
   }, {} as Record<string, LifestyleImage[]>)
 
   // Get images for currently selected finish (default to first finish with images)
-  const availableFinishes = Object.keys(imagesByFinish)
-  const currentFinish = selectedFinish && imagesByFinish[selectedFinish]
-    ? selectedFinish
-    : availableFinishes[0] || null
+  const currentFinish = resolveDefaultFinishSelection({
+    selectedFinish,
+    imagesByFinish,
+  })
   const currentFinishImages = currentFinish ? imagesByFinish[currentFinish] || [] : []
 
   // Count stats
@@ -358,7 +359,7 @@ function VariantImageSection({
       <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
         <p className="text-sm">
           <strong>Variant Images</strong> are used for Google Merchant Center feeds where each
-          finish has its own listing. Review approval and selection here for Google/Bing variant readiness.
+          finish has its own listing. Variant image selection is required for Bing readiness and optional for Google.
         </p>
       </div>
 
@@ -513,7 +514,7 @@ function MasterImageSection({
       <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
         <p className="text-sm">
           <strong>Master SKU Image</strong> is used for Shopify product pages where all finishes
-          share one page. Select an approved variant image here to complete Shopify image readiness.
+          share one page. Selecting a master image is optional for Shopify publishing.
         </p>
       </div>
 
@@ -553,7 +554,7 @@ function MasterImageSection({
             <span className="font-medium text-muted-foreground">No Master Image Set</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Select an approved variant image below to use as the master SKU image.
+            You can select an approved variant image below to use as the master SKU image.
           </p>
         </div>
       )}

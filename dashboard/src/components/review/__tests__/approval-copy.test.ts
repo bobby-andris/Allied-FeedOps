@@ -27,7 +27,8 @@ describe('approval copy clarity', () => {
     expect(googleHelpText).toMatch(/platform/i)
     expect(googleHelpText).toMatch(/variant/i)
     expect(googleHelpText).toMatch(/google/i)
-    expect(googleHelpText).not.toMatch(/image/i)
+    expect(googleHelpText).toMatch(/image/i)
+    expect(googleHelpText).toMatch(/optional/i)
 
     expect(bingHelpText).toMatch(/platform/i)
     expect(bingHelpText).toMatch(/variant/i)

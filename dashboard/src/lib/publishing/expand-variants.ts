@@ -38,6 +38,15 @@ interface ContentValidationIssue {
   actionable_message: string
 }
 
+interface VariantImageCandidate {
+  gmc_offer_id: string
+  shopify_cdn_url: string | null
+  user_selected: boolean | null
+  ai_selected: boolean | null
+  generation_timestamp: string | null
+  created_at: string | null
+}
+
 const EXPECTED_FINISH_SENTENCE_COUNT = 28
 const GENERIC_FINISH_COUNT_PATTERNS = [
   /\bfinish options:\s*available in[^.!\n]*(?:designer\s+)?finishes[^.!\n]*[.!]?/i,
@@ -94,7 +103,7 @@ async function queryApprovedVariantImages(
 ): Promise<Map<string, string>> {
   const { data: images, error } = await supabase
     .from('variant_lifestyle_images')
-    .select('gmc_offer_id, shopify_cdn_url')
+    .select('gmc_offer_id, shopify_cdn_url, user_selected, ai_selected, generation_timestamp, created_at')
     .eq('master_sku', master_sku)
     .eq('approval_status', 'approved')
     .not('shopify_cdn_url', 'is', null)  // Must be migrated to CDN
@@ -104,14 +113,58 @@ async function queryApprovedVariantImages(
     return new Map()
   }
 
-  const imageMap = new Map<string, string>()
-  for (const img of images || []) {
-    if (img.shopify_cdn_url) {
-      imageMap.set(img.gmc_offer_id, img.shopify_cdn_url)
+  return selectPreferredVariantImages((images || []) as VariantImageCandidate[])
+}
+
+function toTimestampMs(value: string | null | undefined): number {
+  if (!value) return 0
+  const parsed = Date.parse(value)
+  return Number.isNaN(parsed) ? 0 : parsed
+}
+
+function candidatePriority(candidate: VariantImageCandidate): number {
+  if (candidate.user_selected) return 2
+  if (candidate.ai_selected) return 1
+  return 0
+}
+
+export function selectPreferredVariantImages(
+  candidates: VariantImageCandidate[],
+): Map<string, string> {
+  const byOffer = new Map<string, VariantImageCandidate[]>()
+
+  for (const candidate of candidates) {
+    if (!candidate.gmc_offer_id || !candidate.shopify_cdn_url) {
+      continue
+    }
+    const current = byOffer.get(candidate.gmc_offer_id)
+    if (current) {
+      current.push(candidate)
+    } else {
+      byOffer.set(candidate.gmc_offer_id, [candidate])
     }
   }
 
-  return imageMap
+  const selected = new Map<string, string>()
+
+  for (const [offerId, offerCandidates] of byOffer.entries()) {
+    offerCandidates.sort((a, b) => {
+      const priorityDelta = candidatePriority(b) - candidatePriority(a)
+      if (priorityDelta !== 0) return priorityDelta
+
+      const generationDelta = toTimestampMs(b.generation_timestamp) - toTimestampMs(a.generation_timestamp)
+      if (generationDelta !== 0) return generationDelta
+
+      return toTimestampMs(b.created_at) - toTimestampMs(a.created_at)
+    })
+
+    const best = offerCandidates[0]
+    if (best?.shopify_cdn_url) {
+      selected.set(offerId, best.shopify_cdn_url)
+    }
+  }
+
+  return selected
 }
 
 /**

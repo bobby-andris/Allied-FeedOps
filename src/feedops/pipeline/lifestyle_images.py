@@ -1663,10 +1663,11 @@ def save_lifestyle_image_to_db(
     """
     now = datetime.now().isoformat()
 
-    # Insert into product_lifestyle_images
+    # Upsert into product_lifestyle_images to keep generation idempotent on reruns.
+    # Unique key: (master_sku, variation_index)
     product_result = (
         supabase_client.table("product_lifestyle_images")
-        .insert(
+        .upsert(
             {
                 "master_sku": master_sku,
                 "shopify_product_id": shopify_product_id,
@@ -1679,16 +1680,19 @@ def save_lifestyle_image_to_db(
                 "prompt": prompt[:5000],
                 "generation_model": AI_SYSTEM_VERSION,
                 "generation_timestamp": now,
-            }
+            },
+            on_conflict="master_sku,variation_index",
+            ignore_duplicates=False,
         )
         .execute()
     )
     product_image_id = product_result.data[0]["id"] if product_result.data else ""
 
-    # Insert into variant_lifestyle_images
+    # Upsert into variant_lifestyle_images to keep generation idempotent on reruns.
+    # Unique key: (gmc_offer_id, variation_index)
     variant_result = (
         supabase_client.table("variant_lifestyle_images")
-        .insert(
+        .upsert(
             {
                 "master_sku": master_sku,
                 "gmc_offer_id": gmc_offer_id,
@@ -1703,7 +1707,9 @@ def save_lifestyle_image_to_db(
                 "prompt": prompt[:5000],
                 "generation_model": AI_SYSTEM_VERSION,
                 "generation_timestamp": now,
-            }
+            },
+            on_conflict="gmc_offer_id,variation_index",
+            ignore_duplicates=False,
         )
         .execute()
     )

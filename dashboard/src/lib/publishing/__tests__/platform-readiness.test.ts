@@ -57,7 +57,7 @@ describe('computePlatformReadiness + validateRequestedPlatformsReady', () => {
     expect(validateRequestedPlatformsReady(['bing'], readiness).ok).toBe(false)
   })
 
-  it('acceptance matrix: google and bing ready, shopify not ready', () => {
+  it('acceptance matrix: google and bing ready, shopify content approved without master image', () => {
     const readiness = computePlatformReadiness(
       makeState({
         content: {
@@ -76,8 +76,8 @@ describe('computePlatformReadiness + validateRequestedPlatformsReady', () => {
     expect(validateRequestedPlatformsReady(['google', 'bing'], readiness).ok).toBe(true)
 
     const shopifyGate = validateRequestedPlatformsReady(['shopify'], readiness)
-    expect(shopifyGate.ok).toBe(false)
-    expect(shopifyGate.errors.some((error) => error.platform === 'shopify')).toBe(true)
+    expect(shopifyGate.ok).toBe(true)
+    expect(shopifyGate.errors.length).toBe(0)
   })
 
   it('acceptance matrix: none ready fails closed with actionable errors', () => {
@@ -107,7 +107,7 @@ describe('computePlatformReadiness + validateRequestedPlatformsReady', () => {
     expect(readiness.bing.blockers.some((blocker) => blocker.code === 'bing_variant_image_not_selected')).toBe(true)
   })
 
-  it('shopify readiness is independent from variant image approvals', () => {
+  it('shopify readiness does not require a selected master image', () => {
     const readiness = computePlatformReadiness(
       makeState({
         content: {
@@ -121,9 +121,9 @@ describe('computePlatformReadiness + validateRequestedPlatformsReady', () => {
       }),
     )
 
-    expect(readiness.shopify.ready).toBe(false)
+    expect(readiness.shopify.ready).toBe(true)
     expect(
       readiness.shopify.blockers.some((blocker) => blocker.code === 'shopify_master_image_not_selected'),
-    ).toBe(true)
+    ).toBe(false)
   })
 })

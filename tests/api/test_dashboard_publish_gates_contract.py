@@ -12,7 +12,7 @@ def _read(path: Path) -> str:
 def test_sku_publish_route_uses_strict_shopify_validation_without_google_fallback() -> None:
     source = _read(SKU_ROUTE)
 
-    assert "validateContentForPublishing(master_sku, 'shopify')" in source
+    assert "validateContentForPublishing(master_sku, 'shopify'," in source
     assert "Try Google content as fallback" not in source
 
 

@@ -26,7 +26,7 @@ Readiness is computed from persisted data in `src/lib/publishing/platform-readin
 - `generated_content.approved_content` title+description per platform
 - `variant_approvals` finish coverage for Google/Bing
 - `variant_lifestyle_images` approved+selected coverage per finish for Bing
-- `product_lifestyle_images` approved+selected master image for Shopify
+- Shopify master image is optional and not a readiness blocker
 
 ### Publish gating by selected platform(s)
 
@@ -52,8 +52,27 @@ Readiness is computed from persisted data in `src/lib/publishing/platform-readin
 
 ### Shopify
 
-- Shopify publish readiness requires one approved+selected product-level master image.
-- Selecting a Shopify master image from variant candidates now supports cloning an approved+selected variant image into `product_lifestyle_images` in the same flow (`/api/review/images/select` + `master-selection.ts`).
+- Shopify publish readiness does not require a master image selection.
+- Selecting a Shopify master image from variant candidates still supports cloning an approved+selected variant image into `product_lifestyle_images` in the same flow (`/api/review/images/select` + `master-selection.ts`).
+
+### Default variant image selection fallback
+
+When multiple approved variant images exist for the same `gmc_offer_id`, publish selection is deterministic:
+
+1. `user_selected = true` wins
+2. else `ai_selected = true` wins (Google Ads-driven generation default)
+3. else most recent generated image wins
+
+This fallback keeps publish behavior deterministic even before manual image selection.
+
+### Idempotent image generation writes
+
+Cloud Run lifestyle generation reruns are idempotent to avoid duplicate-key failures:
+
+- `product_lifestyle_images` upsert on `(master_sku, variation_index)`
+- `variant_lifestyle_images` upsert on `(gmc_offer_id, variation_index)`
+
+This prevents `duplicate key value violates unique constraint product_lifestyle_images_master_sku_variation_index_key` on reruns.
 
 ## Key files
 
@@ -78,8 +97,12 @@ Vitest is configured in `vitest.config.ts`.
 
 - Platform readiness acceptance matrix:
   - `src/lib/publishing/__tests__/platform-readiness.test.ts`
+- Variant image fallback selection:
+  - `src/lib/publishing/__tests__/variant-image-selection.test.ts`
 - Approval copy/scope clarity regression:
   - `src/components/review/__tests__/approval-copy.test.ts`
+- Lifestyle review default finish selection:
+  - `src/components/review/__tests__/lifestyle-image-selection.test.ts`
 - Master image selection semantics:
   - `src/app/api/review/images/select/__tests__/master-selection.test.ts`
 

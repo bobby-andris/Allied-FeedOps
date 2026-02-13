@@ -80,14 +80,6 @@ function withPlatformSpecificBlockers(
     }
   }
 
-  if (platform === 'shopify' && !state.shopifyMasterImageReady) {
-    baseBlockers.push({
-      code: 'shopify_master_image_not_selected',
-      reason: 'Shopify master image is not selected',
-      actionableMessage: 'Select an approved Shopify master image before publishing Shopify.',
-    })
-  }
-
   return baseBlockers
 }
 

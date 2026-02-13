@@ -45,7 +45,7 @@ Platform readiness is computed from stored state (no hidden UI state):
 - Variant image readiness (Bing only):
   - `variant_lifestyle_images` has one approved + user-selected image per finish
 - Shopify image readiness:
-  - `product_lifestyle_images` has one approved + user-selected master image
+  - Optional (no blocking gate for publish readiness)
 
 ### Publish API behavior
 
@@ -70,10 +70,18 @@ It now computes readiness and validates only the requested platform subset.
 
 - Google: variant image approval/selection remains finish-level in review, but is **not required** for Google publish readiness.
 - Bing: variant image approval/selection remains finish-level and is required for readiness.
-- Shopify: master image readiness is product-level.
-  - Selecting a Shopify master image can now clone a previously approved+selected variant image into `product_lifestyle_images` when needed, removing the hidden “second approval” feeling.
+- Shopify: master image selection is product-level and optional for publish readiness.
+  - Selecting a Shopify master image can clone a previously approved+selected variant image into `product_lifestyle_images` when needed, without requiring a second hidden approval flow.
+- Variant image fallback for publish selection is deterministic:
+  - `user_selected` image first
+  - fallback to `ai_selected` image (default Google Ads-driven generation path)
+  - fallback to most recent generated image
+- Lifestyle image generation is idempotent on rerun:
+  - `product_lifestyle_images` writes now upsert on `(master_sku, variation_index)`
+  - `variant_lifestyle_images` writes now upsert on `(gmc_offer_id, variation_index)`
 
 See `docs/architecture/2026-02-11-platform-approval-publish-readiness.md` for full details.
+See `docs/architecture/2026-02-13-lifestyle-image-optional-gates-and-idempotent-generation.md` for the latest image readiness + generation updates.
 For operations, incident response, and rollback procedures, use:
 `docs/troubleshooting/2026-02-11-platform-readiness-ops-runbook.md`.
 
