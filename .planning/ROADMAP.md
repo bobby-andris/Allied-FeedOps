@@ -147,7 +147,7 @@ Plans:
 - [x] 08-02-PLAN.md — Stale SKU detection, incremental refresh logic, and Slack/email alert helpers
 - [x] 08-03-PLAN.md — Dashboard backfill monitoring page with Tremor (job status, coverage KPIs, freshness heatmap, API health)
 - [x] 08-04-PLAN.md — Cloud Scheduler setup for daily incremental refresh + notification channel configuration
-- [ ] 08-05-PLAN.md — Gap closure: Fix monitoring endpoints 500 errors (replace execute_sql RPC with direct table queries)
+- [x] 08-05-PLAN.md — Gap closure: Fix monitoring endpoints 500 errors (replace execute_sql RPC with direct table queries)
 
 ## Progress
 
@@ -163,7 +163,7 @@ Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 �
 | 1. Job Infrastructure & Foundation | v1.0 | 4/4 | Complete | 2026-02-13 |
 | 2. Data Collection Pipeline | v1.0 | 3/3 | Complete | 2026-02-13 |
 | 3. Data Quality & Validation | v1.0 | 4/4 | Complete | 2026-02-13 |
-| 4. Monitoring & Automation | v1.0 | 4/4 | Complete | 2026-02-13 |
+| 4. Monitoring & Automation | v1.0 | 5/5 | Complete | 2026-02-13 |
 
 ---
 *Phase 0 completed: 2026-02-13*
