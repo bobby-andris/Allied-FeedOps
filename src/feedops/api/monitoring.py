@@ -85,15 +85,15 @@ async def get_data_freshness():
         vi_result = supabase.table("variant_index").select("master_sku").execute()
         all_skus = sorted(set(row["master_sku"] for row in vi_result.data if row.get("master_sku")))
 
-        # 2. Get search_queries freshness (most recent collected_at per SKU)
-        sq_result = supabase.table("search_queries").select("master_sku, collected_at").execute()
+        # 2. Get search_queries freshness (most recent fetched_at per SKU)
+        sq_result = supabase.table("search_queries").select("master_sku, fetched_at").execute()
         search_freshness = {}
         for row in sq_result.data:
             sku = row.get("master_sku")
-            collected = row.get("collected_at")
-            if sku and collected:
+            fetched = row.get("fetched_at")
+            if sku and fetched:
                 # Parse ISO timestamp
-                ts = datetime.fromisoformat(collected.replace("Z", "+00:00"))
+                ts = datetime.fromisoformat(fetched.replace("Z", "+00:00"))
                 if sku not in search_freshness or ts > search_freshness[sku]:
                     search_freshness[sku] = ts
 
