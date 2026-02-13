@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 3 of 4 (Data Quality & Validation)
-Plan: 4 of 4
-Status: Complete
-Last activity: 2026-02-13 — Completed 07-04-PLAN.md (API integration & job lifecycle hooks)
+Phase: 8 of 8 (Monitoring & Automation)
+Plan: 2 of 4
+Status: In Progress
+Last activity: 2026-02-13 — Completed 08-02-PLAN.md (Scheduler & alert notifications)
 
 Progress: [████████░░] 75% (3/4 phases complete in v1.0 milestone)
 
@@ -33,9 +33,9 @@ Progress: [████████░░] 75% (3/4 phases complete in v1.0 mile
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 11
-- Average duration: 3.2 minutes
-- Total execution time: 35.0 minutes
+- Total plans completed: 13
+- Average duration: 3.3 minutes
+- Total execution time: 42.5 minutes
 
 **By Phase:**
 
@@ -44,12 +44,30 @@ Progress: [████████░░] 75% (3/4 phases complete in v1.0 mile
 | 5 Job Infrastructure & Foundation | 4 | 13.3 min | 3.3 min |
 | 6 Data Collection Pipeline | 3 | 11.4 min | 3.8 min |
 | 7 Data Quality & Validation | 4 | 10.4 min | 2.6 min |
+| 8 Monitoring & Automation | 2 | 7.5 min | 3.8 min |
 
 *Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
+
+**Phase 8 (Monitoring & Automation):**
+
+1. **SQL Aggregation for Stale Detection** (Plan 08-02)
+   - Use SQL aggregation with MAX() over timestamps rather than per-SKU loops
+   - Single query per data source with Python-side grouping
+   - Impact: Efficient at scale - O(n) complexity for full catalog stale detection
+
+2. **Fire-and-Forget Notification Pattern** (Plan 08-02)
+   - All notification calls wrapped in try/except, never raise exceptions
+   - Graceful degradation when env vars not configured (logs warning, returns False)
+   - Impact: Notification failures never affect job processing reliability
+
+3. **Incremental Mode Auto-Detection** (Plan 08-02)
+   - Allow empty SKU list when config.mode='incremental', auto-detect stale SKUs
+   - Alternative: Always require SKU list or separate endpoint
+   - Impact: Enables Cloud Scheduler to POST minimal payload for daily sync automation
 
 **Phase 7 (Data Quality & Validation):**
 
@@ -202,6 +220,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
    - Impact: DATA-09 requirement (collect where available)
 - [Phase 07]: Scipy as Optional Dependency - Outlier detection requires scipy, but system degrades gracefully without it
 - [Phase 07]: Direct DB Queries for Freshness - Use Supabase queries directly rather than RPC functions for flexibility
+- [Phase 08-01]: RPC execute_sql for freshness queries - Enables single-query freshness check for all SKUs via SQL aggregation instead of N queries
+- [Phase 08-01]: Separate coverage and freshness endpoints - Dashboard can fetch coverage frequently without transferring large freshness arrays
+- [Phase 08-01]: P95 calculation in Python (not database) - Faster response, no additional database load for health checks
 
 ### Pending Todos
 
@@ -218,8 +239,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 
 ## Session Continuity
 
-Last session: 2026-02-13 — Phase 7 plan execution
-Stopped at: Completed 07-04-PLAN.md (API integration & job lifecycle hooks) - Phase 7 complete
+Last session: 2026-02-13 — Phase 8 plan execution
+Stopped at: Completed 08-02-PLAN.md (Scheduler & alert notifications)
 Resume file: None
 
 ---
