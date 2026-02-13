@@ -117,10 +117,12 @@ from feedops.api.backfill import (
     StartBackfillRequest,
     BackfillJobResponse,
     BackfillJobListResponse,
+    ValidationReportResponse,
     start_backfill,
     get_backfill_status,
     resume_backfill,
     list_backfill_jobs,
+    get_validation_report,
 )
 
 
@@ -1874,6 +1876,16 @@ async def api_start_backfill(request: StartBackfillRequest):
     Maximum 3 concurrent jobs allowed.
     """
     return await start_backfill(request)
+
+
+@app.get("/backfill/validation-report", response_model=ValidationReportResponse)
+async def api_validation_report(job_id: str | None = None):
+    """Get data quality validation report.
+
+    Returns completeness (if job_id provided), freshness, and outlier metrics.
+    Dashboard uses this to display data quality indicators.
+    """
+    return await get_validation_report(job_id=job_id)
 
 
 @app.get("/backfill/status/{job_id}", response_model=BackfillJobResponse)

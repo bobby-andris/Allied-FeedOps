@@ -112,6 +112,15 @@ class BackfillJobListResponse(BaseModel):
     max_concurrent: int  # Always 3
 
 
+class ValidationReportResponse(BaseModel):
+    """Response for data quality validation report."""
+
+    completeness: dict | None = None
+    freshness: dict
+    outliers: dict
+    generated_at: str
+
+
 # =============================================================================
 # Helper Functions
 # =============================================================================
@@ -513,4 +522,29 @@ async def list_backfill_jobs(
         jobs=jobs,
         active_count=active_count,
         max_concurrent=3,
+    )
+
+
+async def get_validation_report(job_id: str | None = None) -> ValidationReportResponse:
+    """Get data quality validation report.
+
+    Returns completeness (if job_id provided), freshness, and outlier metrics.
+    Dashboard uses this to display data quality indicators.
+
+    Args:
+        job_id: Optional job ID for completeness check
+
+    Returns:
+        ValidationReportResponse with quality metrics
+    """
+    from feedops.jobs.quality_report import generate_full_quality_report
+    from datetime import datetime, timezone
+
+    report = generate_full_quality_report(job_id=job_id)
+
+    return ValidationReportResponse(
+        completeness=report.get("completeness"),
+        freshness=report["freshness"],
+        outliers=report["outliers"],
+        generated_at=datetime.now(timezone.utc).isoformat(),
     )
