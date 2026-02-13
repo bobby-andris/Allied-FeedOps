@@ -1364,6 +1364,326 @@ All data in this document was extracted from validated API testing across 3 phas
 
 ---
 
+## Data Value Assessment
+
+**Validated:** Phase 1-3
+**Purpose:** Rate each data source by content optimization relevance for FeedOps
+
+### Assessment Criteria
+
+Data sources are rated by their value for optimizing product content (titles, descriptions, images):
+
+- **HIGH**: Directly informs content optimization decisions (word choice, messaging, imagery)
+- **MEDIUM**: Provides useful context for optimization (performance trends, device targeting)
+- **LOW**: Primarily for campaign management; limited content optimization value
+
+### Data Source Value Matrix
+
+| Data Source | Value | Reason | Specific Use Case for FeedOps |
+|-------------|-------|--------|-------------------------------|
+| **search_term_view** | HIGH | Reveals exact customer language and search intent | Inform title/description word choice; identify customer pain points and questions |
+| **shopping_performance_view (CTR)** | HIGH | Directly measures content effectiveness | Identify underperforming products needing content refresh; A/B test validation |
+| **shopping_performance_view (impression/click share)** | HIGH | Shows competitive positioning in search results | Prioritize optimization for products losing share; validate content improvements |
+| **custom_label filtering (custom_attribute0-3)** | HIGH | Enables efficient batch segmentation by category/tier | Select product groups for batch optimization; category-specific strategies |
+| **Keyword Planner ideas** | HIGH | Reveals untapped search volume opportunities | Discover new keywords to incorporate in titles/descriptions; expand reach |
+| **shopping_performance_view (conversions)** | HIGH | Measures ultimate content effectiveness (purchase) | Identify products with high CTR but low CVR (content-product mismatch) |
+| **shopping_performance_view (cost/CPC)** | MEDIUM | Budget context for prioritization | Focus optimization on high-spend products with poor performance |
+| **segments.device** | MEDIUM | Device-specific performance differences | Optimize description length for mobile; adjust imagery for small screens |
+| **conversion_action metadata** | MEDIUM | Attribution model understanding | Interpret conversion data correctly (data-driven vs last-click) |
+| **shopping_performance_view (orders/revenue)** | MEDIUM | Business impact measurement | ROI calculation for content optimization efforts |
+| **campaign.advertising_channel_type** | MEDIUM | Performance Max vs Standard Shopping comparison | Identify which campaign type benefits most from content improvements |
+| **Performance Max asset groups** | LOW | Campaign structure metadata | Minimal content optimization value (asset groups not product-specific) |
+| **performance_max_placement_view** | LOW | Placement distribution (impressions only) | Limited actionability for product content (placements are campaign-level) |
+
+**Note:** Competitive metrics (impression/click share) rated HIGH despite 33% availability because they provide critical insights for products with sufficient volume.
+
+### Opportunity Gap Summary
+
+**Validated:** Phase 03-02 (SAMP-03, SAMP-04)
+
+Analysis of 5 sample SKUs comparing current Google Ads search terms to Keyword Planner high-volume ideas (100+ monthly searches):
+
+| Metric | Value |
+|--------|-------|
+| **Average coverage rate** | 57.0% |
+| **Total gap keywords** | 153 keywords |
+| **Total gap search volume** | 168,530 monthly searches |
+| **Coverage range** | 40.9% (bathroom hooks) to 75.6% (towel rail) |
+
+**Key Finding:** Current Google Ads search term data captures only ~57% of available high-volume keywords. Keyword Planner provides 168K monthly searches worth of optimization opportunities NOT reflected in current search data.
+
+**Top Gaps by SKU:**
+- **CL-20-6 (bathroom hooks):** "shower curtain hooks" (40,500/mo), "shower curtain rings" (8,100/mo), "mdesign shower curtain hooks" (2,400/mo)
+- **WP-2/16-GAL (glass shelf):** "wine glass rack" (12,100/mo), "floating glass shelves" (5,400/mo), "black curio cabinet" (3,600/mo)
+- **P-700-16-GB (grab bar):** "toilet rails" (2,900/mo), "bathroom grab rails for the elderly" (2,900/mo), "home depot grab bars" (2,400/mo)
+
+**Implication:** Keyword Planner data is ESSENTIAL for all SKUs (not just cold-start products). Relying solely on Google Ads search terms misses 43% of high-volume opportunities on average.
+
+### Content Optimization Priority
+
+**Recommended data collection order for backfill:**
+
+1. **Search terms** (search_term_view via campaign-join pattern)
+   - **Why first:** Direct customer language signals; immediate content optimization value
+   - **Coverage:** 100% of products with campaign activity
+   - **Query time:** ~2 API calls per product (campaign lookup + search term fetch)
+
+2. **Product CTR/conversion data** (shopping_performance_view core metrics)
+   - **Why second:** Performance measurement; identifies optimization priorities
+   - **Coverage:** 100% of products with impressions
+   - **Query time:** ~127ms per SKU at batch size 10 (optimal)
+
+3. **Keyword Planner ideas** (GenerateKeywordIdeas API)
+   - **Why third:** Opportunity discovery; fills 43% gap in search term coverage
+   - **Coverage:** 100% of products (use category terms as seeds)
+   - **Query time:** ~1-2s per SKU (rate limited, cache results)
+
+4. **Custom label segmentation** (shopping_performance_view with custom_attribute filters)
+   - **Why fourth:** Batch operation efficiency; category-specific strategies
+   - **Coverage:** 100% (labels 0-3 populated via Google Sheets)
+   - **Query time:** Same as core metrics (included in shopping_performance_view)
+
+5. **Competitive metrics** (shopping_performance_view impression/click share)
+   - **Why fifth:** Market share tracking for high-volume products
+   - **Coverage:** ~33% of products (sufficient volume threshold)
+   - **Query time:** Same as core metrics (included in shopping_performance_view)
+
+**Performance estimate:** Collecting all 5 data sources for 2,784 SKUs = ~7-10 minutes (batch size 10, plus Keyword Planner overhead).
+
+---
+
+## Alternative Strategies
+
+**Validated:** Phase 1-3
+**Purpose:** Document workarounds for discovered API limitations
+
+### 1. search_term_view Cannot Filter by Product (Decision #1)
+
+**Limitation:** API explicitly rejects `segments.product_item_id` in search_term_view WHERE clause
+```
+Error: "Cannot select or filter on segments.product_item_id (incompatible with SEARCH_TERM_VIEW)"
+```
+
+**Alternative:** Campaign-join pattern (2-step query)
+1. Query shopping_performance_view for product → extract campaign IDs
+2. Query search_term_view for those campaign IDs → get search terms
+
+**Status:** RESOLVED - working pattern validated in Phase 3 (60K+ search terms fetched)
+
+**Impact:** Two-step query adds ~1s overhead per product (negligible at scale)
+
+**Implementation:** See "Working Query Example 2: Search Term Fetching" section
+
+---
+
+### 2. Auction Insights Not Available via API (Decision #9)
+
+**Limitation:** API returns access restriction error for auction_insight_* metrics
+- `auction_insight_impression_share`
+- `auction_insight_overlap_rate`
+- `auction_insight_outranking_share`
+
+```
+Error: "Access restriction error for auction_insight_* metrics"
+```
+
+**Alternative:** Use own-account impression_share and click_share metrics instead
+- Available in shopping_performance_view: `metrics.search_impression_share`, `metrics.search_click_share`
+- Provides market share tracking (own position) but NOT competitor-specific data
+
+**Status:** PARTIAL - own metrics available, competitor-specific data requires UI export
+
+**Impact:** Can track own competitive position programmatically; cannot compare to specific competitors without manual export
+
+**Recommendation:** Focus on own impression/click share trends; use UI for ad-hoc competitor analysis
+
+---
+
+### 3. Three Metrics Incompatible with shopping_performance_view (Decisions #14-15)
+
+**Limitation:** API rejects 3 metrics when querying shopping_performance_view
+
+**Incompatible metrics:**
+1. `metrics.average_cpm` → Use `metrics.average_cpc` instead (available)
+2. `metrics.search_budget_lost_impression_share` → Not available for Shopping campaigns (campaign management metric)
+3. `metrics.search_rank_lost_impression_share` → Not available for Shopping campaigns (campaign management metric)
+
+**Alternative:**
+- CPM: Calculate manually from `cost_micros` and `impressions` if needed
+- Budget/rank lost IS: Not available at product level (Search/Display campaigns only)
+
+**Status:** RESOLVED - alternative metrics available; removed metrics are LOW value for content optimization
+
+**Impact:** No impact on content optimization workflow (budget/rank metrics are campaign-level, not product-level)
+
+---
+
+### 4. Competitive Metrics Partial Coverage (~33% of SKUs) (Decision from 03-03)
+
+**Limitation:** `metrics.search_impression_share` and `metrics.search_click_share` only populated when products have sufficient search volume
+
+**Sample data:** 2 out of 6 tested SKUs (33%) had competitive data
+- TD-23: impression_share=0.412 (41.2%), click_share=0.262 (26.2%)
+- WP-GTB-2: impression_share=0.636 (63.6%), click_share=0.144 (14.4%)
+- Other 4 SKUs: NULL values
+
+**Alternative:** Focus competitive tracking on top-performing SKUs; use CTR trend analysis for low-volume products
+
+**Status:** ACCEPTABLE - 33% coverage includes highest-value products (those with most impressions)
+
+**Impact:** Cannot track market share for all products; prioritize optimization based on CTR for products without competitive data
+
+**Implementation:** Handle NULL values gracefully in backfill:
+```python
+impression_share = row.metrics.search_impression_share or None
+click_share = row.metrics.search_click_share or None
+```
+
+---
+
+### 5. LAST_N_DAYS Syntax Not Supported (Decision #12)
+
+**Limitation:** API rejects date literals like `DURING LAST_90_DAYS`
+```
+Error: "Invalid value in date segment"
+```
+
+**Alternative:** Calculate explicit date ranges in Python code before building query string
+```python
+from datetime import datetime, timedelta
+end_date = datetime.now().date()
+start_date = end_date - timedelta(days=30)
+query = f"... WHERE segments.date BETWEEN '{start_date}' AND '{end_date}'"
+```
+
+**Status:** RESOLVED - trivial code change, all discovery scripts already use explicit dates
+
+**Impact:** None (explicit date calculation is 2 lines of Python code)
+
+---
+
+### 6. Asset Performance Labels Not Available in API v22 (from Phase 02-04)
+
+**Limitation:** `asset_group_asset.performance_label` field unrecognized in current API version
+```
+Error: "Field 'asset_group_asset.performance_label' not recognized"
+```
+
+**Alternative:** Use `ad_strength` metric from asset_group view instead
+- Provides asset quality score (POOR, AVERAGE, GOOD, EXCELLENT)
+- Available in `asset_group` resource
+
+**Status:** RESOLVED - ad_strength provides similar quality signal
+
+**Impact:** Cannot identify low/medium/high performing individual assets, but can assess overall asset group quality
+
+**Note:** performance_label may be available in newer API versions or requires special access; not critical for product content optimization
+
+---
+
+## Go/No-Go Recommendation
+
+**Validated:** Phase 1-3
+**Framework:** Weighted scoring matrix based on Phase 0 discovery findings
+
+### Scoring Matrix
+
+| Criterion | Weight | Score (1-5) | Weighted | Evidence |
+|-----------|--------|-------------|----------|----------|
+| **Technical Feasibility** | 30% | 5 | 1.50 | All 5 core API questions answered affirmatively (Phase 1): product filtering ✓, search term association ✓ (via campaign-join), batch queries ✓, historical data ✓, custom labels ✓ |
+| **Data Availability** | 25% | 4 | 1.00 | 14/17 metrics available (82% coverage, Phase 2-3); 3 incompatible metrics are LOW value for content optimization |
+| **Query Performance** | 20% | 5 | 1.00 | 7.1 min for 2,784 SKUs at batch size 10 (Phase 3); p95=1273ms, 127ms per SKU - acceptable for backfill |
+| **Data Value for Content Optimization** | 15% | 5 | 0.75 | HIGH-value data (search terms, CTR, Keyword Planner, competitive metrics) all accessible; 168K monthly search gap opportunity identified |
+| **Risk Mitigation** | 10% | 4 | 0.40 | Alternatives documented for all 6 limitations; workarounds validated with working queries |
+| **TOTAL** | **100%** | - | **4.65/5** | **Strong GO** |
+
+### Recommendation: **GO**
+
+**Proceed with Phases 1-5 backfill execution**
+
+**Confidence:** HIGH (4.65/5.0)
+
+### Rationale
+
+**Key strengths:**
+1. ✅ All core capabilities validated with working queries (23 views, 36 metrics, 10+ query patterns)
+2. ✅ Performance acceptable for production backfill (~7 minutes for full catalog)
+3. ✅ High-value data accessible (search terms via campaign-join, product CTR, Keyword Planner, competitive metrics)
+4. ✅ 82% metric coverage sufficient for content optimization workflow
+5. ✅ Workarounds exist for all 6 discovered limitations
+
+**Key risks (mitigated):**
+1. ⚠️ Competitive metrics partial coverage (33%) — **Mitigation:** Focus on high-volume products, use CTR trends for others
+2. ⚠️ Auction insights manual only — **Mitigation:** Use own impression/click share metrics programmatically
+3. ⚠️ Search term association requires 2-step query — **Mitigation:** Campaign-join pattern adds only 1s overhead
+
+### Recommended Modifications to Original Plan
+
+The following adjustments should be made to the original Phases 1-5 backfill plan based on discovery findings:
+
+1. **Use batch size 10 for all backfill queries** (not 50K LIMIT per query)
+   - Evidence: Phase 3 performance testing shows optimal throughput at batch 10 (127ms/SKU p95)
+   - Impact: 279 queries for 2,784 SKUs instead of ~6 queries; better error recovery granularity
+
+2. **Use campaign-join pattern for search terms** (not direct product filtering)
+   - Evidence: Phase 1 proved search_term_view cannot filter by product_item_id
+   - Impact: 2 API calls per product (1st: get campaigns, 2nd: get search terms); ~1s overhead per product
+
+3. **Skip auction insights API** (manual export only if needed)
+   - Evidence: Phase 2 confirmed API access restriction for auction_insight_* metrics
+   - Impact: Use own impression_share/click_share metrics instead; manual UI export for competitor analysis
+
+4. **Plan for ~33% competitive metric coverage** (not 100%)
+   - Evidence: Phase 3 found impression/click share only available for 2/6 sample SKUs (33%)
+   - Impact: Handle NULL values gracefully; prioritize competitive tracking for high-volume products
+
+5. **Use explicit date ranges in all code** (not LAST_N_DAYS)
+   - Evidence: Phase 1 proved LAST_N_DAYS syntax rejected by API
+   - Impact: Calculate dates in Python before building query strings (2 lines of code)
+
+6. **Include Keyword Planner for ALL SKUs** (not just cold-start)
+   - Evidence: Phase 3 found 43% gap in search term coverage (168K monthly searches)
+   - Impact: Keyword Planner essential for discovering optimization opportunities missed by Google Ads
+
+### Next Steps
+
+**Recommended Phase 1-5 execution order:**
+
+1. **Phase 1: Historical Performance Backfill**
+   - Query shopping_performance_view for all 2,784 SKUs (batch size 10)
+   - Date range: 2020-01-01 to present (~6 years)
+   - Estimated time: 7-10 minutes (279 queries + Keyword Planner overhead)
+
+2. **Phase 2: Search Term Backfill**
+   - Campaign-join pattern for all SKUs with campaign activity
+   - Date range: Last 12 months (attribution window + margin)
+   - Estimated time: ~10-15 minutes (2 queries per SKU)
+
+3. **Phase 3: Keyword Planner Idea Generation**
+   - Generic category term seeds for all SKUs
+   - Cache results (monthly refresh recommended)
+   - Estimated time: ~30-60 minutes (rate limited, 1-2s per SKU)
+
+4. **Phase 4: Competitive Metrics Backfill**
+   - Impression/click share for products with sufficient volume (~33%)
+   - Date range: Last 12 months
+   - Estimated time: Included in Phase 1 (same query)
+
+5. **Phase 5: Ongoing Delta Collection**
+   - Daily/weekly incremental updates
+   - Focus on active SKUs (recent impressions)
+   - Estimated time: <1 minute daily
+
+**Critical path items:**
+- Implement campaign-join pattern for search terms (Phase 2)
+- Set up Keyword Planner caching to avoid rate limits (Phase 3)
+- Handle NULL competitive metrics gracefully (Phase 4)
+- Define retention policy for historical data (backfill vs incremental)
+
+**Estimated total implementation time:** 2-3 weeks (including testing, error handling, validation)
+
+---
+
 **Document Version:** 1.0
 **Last Updated:** 2026-02-13
 **Maintained By:** Allied FeedOps Phase 0 Discovery Team
