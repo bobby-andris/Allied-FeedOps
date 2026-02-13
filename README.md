@@ -68,7 +68,7 @@ The review UI now surfaces platform progress at both list and detail levels usin
   - readiness state
   - blocker reason when blocked
   - latest production publish timestamp
-  - latest published title/description snapshot
+- latest published title/description snapshot
 
 Progress state is derived from:
 
@@ -76,6 +76,16 @@ Progress state is derived from:
 - `variant_approvals`
 - `variant_lifestyle_images`
 - latest successful production `publish_events`
+
+### Manual base title override (Google/Bing)
+
+When regenerate-with-feedback cannot produce the exact title you need, the review page supports manual base title edits for Google/Bing:
+
+- Use `Edit Base Title` from the Title block on `/review/[sku]`.
+- The finish token is locked as `{FINISH_NAME}` and cannot be manually edited.
+- Save updates the platform base title template and applies to all variants (variant rows derive from the base template).
+- Hardcoded finish names are blocked in manual templates.
+- Save clears `approved_content` for that platform title so the operator must re-approve before publish.
 
 ### Approval API behavior
 

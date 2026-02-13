@@ -16,6 +16,7 @@ import { PerformanceCard } from "@/components/review/PerformanceCard"
 import { ContentQualityCard } from "@/components/review/ContentQualityCard"
 import { VariantContentGrid } from "@/components/review/VariantContentGrid"
 import { PublishButton } from "@/components/review/PublishButton"
+import { ManualTitleEditor } from "@/components/review/ManualTitleEditor"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
@@ -133,6 +134,7 @@ function ContentBlock({
   type,
   platform,
   isTemplate,
+  onRefresh,
 }: {
   label: string
   current: string | null
@@ -142,6 +144,7 @@ function ContentBlock({
   type: 'title' | 'description'
   platform: 'google' | 'bing' | 'shopify'
   isTemplate: boolean
+  onRefresh: () => void
 }) {
   const [showHistory, setShowHistory] = useState(false)
 
@@ -159,6 +162,14 @@ function ContentBlock({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {type === 'title' && (platform === 'google' || platform === 'bing') && candidate && (
+            <ManualTitleEditor
+              sku={sku}
+              platform={platform}
+              currentTitle={candidate}
+              onSaved={() => onRefresh()}
+            />
+          )}
           <RegenerateButton
             sku={sku}
             contentType={type}
@@ -535,6 +546,7 @@ export function SkuReviewClient({
                   type="title"
                   platform={selectedPlatform}
                   isTemplate={titleIsTemplate}
+                  onRefresh={() => router.refresh()}
                 />
               )}
 
@@ -548,6 +560,7 @@ export function SkuReviewClient({
                   type="description"
                   platform={selectedPlatform}
                   isTemplate={descIsTemplate}
+                  onRefresh={() => router.refresh()}
                 />
               )}
             </div>

@@ -70,6 +70,22 @@ Status is computed from persisted data only:
 
 No API contract or schema changes were required.
 
+## Manual title override (2026-02-13)
+
+For Google/Bing variant templates, operators can manually edit the base title from SKU review:
+
+- UI entry point: `Edit Base Title` in the title content block.
+- Finish token lock: `{FINISH_NAME}` is fixed/non-editable.
+- Validation rules:
+  - template must contain exactly one `{FINISH_NAME}`
+  - hardcoded finish names are rejected
+- Save endpoint:
+  - `POST /api/review/manual-title`
+  - updates `generated_content.candidate_content` for `content_type='title'`
+  - clears `approved_content`/approval snapshot for that title so re-approval is required
+
+This preserves deterministic variant propagation while preventing accidental per-finish hardcoding.
+
 ## Lifestyle image behavior
 
 ### Google
