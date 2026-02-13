@@ -48,6 +48,9 @@ This document provides a comprehensive reference for all database tables, column
    - [competitor_scrape_jobs](#competitor_scrape_jobs)
 9. [Support Tables](#support-tables)
    - [shopify_products](#shopify_products)
+10. [Backfill Infrastructure Tables](#backfill-infrastructure-tables)
+   - [backfill_jobs](#backfill_jobs)
+   - [backfill_job_errors](#backfill_job_errors)
 
 ---
 
@@ -1541,6 +1544,146 @@ Tracks Shopify products. Currently stores minimal data.
 
 ---
 
+## Backfill Infrastructure Tables
+
+### backfill_jobs
+
+Manages historical data backfill jobs for v1.0 milestone. Supports full checkpoint/resume for long-running batch operations.
+
+**Columns**:
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | Primary key |
+| job_type | text | NO | - | Job type ('search_terms', 'performance_metrics', 'keyword_planner', 'custom_labels', 'full_backfill') |
+| status | text | NO | 'creating' | Job status |
+| total_items | integer | NO | - | Total items to process |
+| completed_items | integer | YES | 0 | Number completed |
+| failed_items | integer | YES | 0 | Number failed |
+| skus | jsonb | YES | - | Array of SKU strings to process |
+| checkpoint_data | jsonb | YES | - | Checkpoint state for resume |
+| config | jsonb | YES | '{}' | Job configuration |
+| created_at | timestamp with time zone | NO | now() | Job creation time |
+| started_at | timestamp with time zone | YES | - | Job start time |
+| completed_at | timestamp with time zone | YES | - | Job completion time |
+| eta_seconds | integer | YES | - | Estimated time remaining (seconds) |
+| created_by | text | YES | - | User who created job |
+
+**Primary Key**: `id`
+
+**Indexes**:
+- `idx_backfill_jobs_status` on `(status, created_at DESC)`
+- `idx_backfill_jobs_type` on `(job_type, created_at DESC)`
+
+**Check Constraints**:
+- `status IN ('creating', 'running', 'complete', 'failed', 'partial')`
+- `job_type IN ('search_terms', 'performance_metrics', 'keyword_planner', 'custom_labels', 'full_backfill')`
+
+**JSONB Structure Examples**:
+```json
+// skus (array of SKU strings)
+["WP-2/16-GAL", "920D-6", "DMF-2/2X"]
+
+// checkpoint_data (resume state)
+{
+  "batch_index": 50,
+  "last_sku": "920D-6",
+  "last_processed_at": "2026-02-13T12:34:56Z"
+}
+
+// config (job configuration)
+{
+  "batch_size": 10,
+  "days_lookback": 180,
+  "enrich_keyword_planner": true
+}
+```
+
+**Common Queries**:
+```sql
+-- Get active jobs
+SELECT id, job_type, status, completed_items, total_items, eta_seconds
+FROM backfill_jobs
+WHERE status IN ('creating', 'running')
+ORDER BY created_at;
+
+-- Get job progress
+SELECT
+    id,
+    job_type,
+    status,
+    ROUND(100.0 * completed_items / NULLIF(total_items, 0), 2) AS percent_complete,
+    eta_seconds
+FROM backfill_jobs
+WHERE id = 'abc-123';
+
+-- Find failed jobs with errors
+SELECT
+    bj.id,
+    bj.job_type,
+    bj.failed_items,
+    COUNT(bje.id) AS error_count
+FROM backfill_jobs bj
+LEFT JOIN backfill_job_errors bje ON bj.id = bje.job_id
+WHERE bj.status = 'failed'
+GROUP BY bj.id, bj.job_type, bj.failed_items
+ORDER BY bj.created_at DESC;
+```
+
+---
+
+### backfill_job_errors
+
+Per-item error logs for backfill jobs. Supports debugging and selective retry operations.
+
+**Columns**:
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigserial | NO | nextval() | Primary key |
+| job_id | uuid | NO | - | Foreign key to backfill_jobs |
+| item_id | text | NO | - | Failed item identifier (usually SKU) |
+| error_type | text | NO | - | Error category |
+| error_message | text | YES | - | Detailed error message |
+| retry_count | integer | YES | 0 | Number of retry attempts |
+| created_at | timestamp with time zone | NO | now() | Error timestamp |
+
+**Primary Key**: `id`
+
+**Foreign Keys**:
+- `job_id` references `backfill_jobs(id)` ON DELETE CASCADE
+
+**Indexes**:
+- `idx_backfill_job_errors_job` on `(job_id, created_at DESC)`
+
+**Common Queries**:
+```sql
+-- Get errors for a job
+SELECT
+    item_id,
+    error_type,
+    error_message,
+    retry_count,
+    created_at
+FROM backfill_job_errors
+WHERE job_id = 'abc-123'
+ORDER BY created_at DESC
+LIMIT 100;
+
+-- Group errors by type
+SELECT
+    error_type,
+    COUNT(*) AS error_count,
+    ARRAY_AGG(DISTINCT item_id) AS affected_items
+FROM backfill_job_errors
+WHERE job_id = 'abc-123'
+GROUP BY error_type
+ORDER BY error_count DESC;
+```
+
+**RPC Functions**:
+- `increment_backfill_failures(p_job_id UUID)`: Atomically increments failed_items counter
+
+---
+
 ## Key Relationships
 
 ### Foreign Key Relationships
@@ -1568,6 +1711,9 @@ Tracks Shopify products. Currently stores minimal data.
 
 8. **competitor_listings** → **competitor_scrape_jobs**
    - `scrape_job_id` references `competitor_scrape_jobs(id)`
+
+9. **backfill_job_errors** → **backfill_jobs**
+   - `job_id` references `backfill_jobs(id)` ON DELETE CASCADE
 
 ---
 
@@ -1723,8 +1869,8 @@ WHERE gc.master_sku = 'WP-2/16-GAL'
 
 ## Notes
 
-- **Version**: Schema documented 2026-02-08
-- **Total Tables**: 32
+- **Version**: Schema documented 2026-02-13 (updated with backfill infrastructure)
+- **Total Tables**: 34
 - **Backup Table**: `generated_images_backup_20260208` (historical data)
 - **Data Collection**: Automated via `ensureSkuData()` and `ensureAllData()` in dashboard
 - **Auto-Deploy**: Push to master triggers Cloud Run (Python) and Vercel (Dashboard) deploys
