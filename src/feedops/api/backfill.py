@@ -9,6 +9,30 @@ Endpoints:
 - GET /backfill/status/{job_id} - Get backfill job progress
 - POST /backfill/resume/{job_id} - Resume failed/partial job
 - GET /backfill/jobs - List backfill jobs
+
+Job Type Routing:
+The system routes each job_type to the appropriate worker and rate limiter:
+
+- search_terms: collect_search_terms_batch with google_ads_limiter (10 QPS)
+  - Uses campaign-join pattern for search term collection
+  - Saves to search_queries table with idempotent upserts
+
+- performance_metrics: collect_performance_batch with google_ads_limiter (10 QPS)
+  - Aggregates variant-level metrics to master_sku level
+  - Saves to performance_baselines with 180-day window
+
+- keyword_planner: collect_keyword_planner_batch with keyword_planner_limiter (2 QPS)
+  - Enriches keywords with search volume and competition data
+  - Uses 30-day cache to minimize API calls
+
+- custom_labels: collect_custom_labels_batch with no rate limiter
+  - Syncs GMC custom labels to variant_index.custom_labels JSONB
+  - Caches GMC data for 5 minutes (reused across batches)
+
+- full_backfill: collect_full_backfill_batch with google_ads_limiter (10 QPS)
+  - Composite worker that runs all 4 collection types sequentially
+  - Execution order: search_terms → performance_metrics → keyword_planner → custom_labels
+  - Single job, single processor, sequential sub-worker execution
 """
 
 from __future__ import annotations
@@ -30,7 +54,13 @@ logger = logging.getLogger(__name__)
 
 
 class StartBackfillRequest(BaseModel):
-    """Request to start a backfill job."""
+    """Request to start a backfill job.
+
+    Config Options:
+    - batch_size (default 10): Number of items processed per batch
+    - checkpoint_interval (default 100): Save checkpoint every N items
+    - days_lookback (default 180): Date range for data collection (search terms, performance)
+    """
 
     job_type: Literal[
         "search_terms",
@@ -47,7 +77,7 @@ class StartBackfillRequest(BaseModel):
     )
     config: dict = Field(
         default_factory=dict,
-        description="Job config: batch_size, days_lookback, etc.",
+        description="Job config: batch_size (10), checkpoint_interval (100), days_lookback (180)",
     )
 
 
