@@ -38,6 +38,38 @@ Readiness is computed from persisted data in `src/lib/publishing/platform-readin
   - `code: publish_platform_not_ready`
   - `readiness_errors[]` with platform-scoped blocker data
 
+## Review progress visibility (2026-02-13)
+
+The review UX now shows platform completion state in both queue and detail views.
+
+### Review Queue (`/review`)
+
+Each SKU card includes per-platform badges:
+
+- `Published` (with date) when latest successful production publish exists
+- `Ready` when readiness checks pass but publish has not occurred
+- `Needs action` when readiness blockers remain
+
+### SKU Detail (`/review/[sku]`)
+
+The page includes a platform progress panel that shows:
+
+- state (`Published`, `Ready to publish`, `Needs action`)
+- first actionable blocker for blocked states
+- latest published timestamp/version
+- latest published title and description snapshot per platform
+
+### Data source and determinism
+
+Status is computed from persisted data only:
+
+- `generated_content.approved_content`
+- `variant_approvals`
+- `variant_lifestyle_images`
+- successful production `publish_events`
+
+No API contract or schema changes were required.
+
 ## Lifestyle image behavior
 
 ### Google

@@ -9,6 +9,12 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { skuToUrlPath } from "@/lib/sku-utils"
 import { BatchRegenerateButton } from "@/components/review/BatchRegenerateButton"
+import {
+  buildPlatformProgress,
+  computePlatformReadinessForSku,
+  latestProductionPublishSnapshots,
+  type PlatformProgress,
+} from "@/lib/review/platform-progress"
 
 interface SkuWithContent {
   master_sku: string
@@ -18,51 +24,172 @@ interface SkuWithContent {
   image_approved: boolean | null
   content_count: number
   avg_quality_score: number | null
+  platform_progress: PlatformProgress[]
+}
+
+interface GeneratedContentRow {
+  master_sku: string
+  quality_score: number | null
+  platform: string | null
+  content_type: string | null
+  approved_content: string | null
+}
+
+interface VariantRow {
+  master_sku: string
+  finish: string | null
+}
+
+interface VariantApprovalRow {
+  master_sku: string
+  finish: string | null
+  approval_status: string | null
+  title_approved: boolean | number | string | null
+  description_approved: boolean | number | string | null
+}
+
+interface VariantImageRow {
+  master_sku: string
+  finish: string | null
+  approval_status: string | null
+  user_selected: boolean | null
+}
+
+interface PublishEventRow {
+  master_sku: string
+  platform: string | null
+  published_at: string | null
+  published_title: string | null
+  published_description: string | null
+  content_version: number | null
 }
 
 async function getSkusWithContent(): Promise<SkuWithContent[]> {
   const supabase = await createClient()
   
-  // Get all unique SKUs from generated_content with aggregated data
+  // Get generated content including per-platform approval snapshots.
   const { data: contentSkus, error: contentError } = await supabase
     .from('generated_content')
-    .select('master_sku, quality_score')
+    .select('master_sku, quality_score, platform, content_type, approved_content')
   
   if (contentError) {
     console.error('Error fetching content:', contentError)
     return []
   }
+
+  const skuList = [...new Set((contentSkus || []).map((row) => row.master_sku).filter(Boolean))]
+  if (skuList.length === 0) {
+    return []
+  }
   
-  // Get all approvals
+  // Get master-level approval rows.
   const { data: approvals, error: approvalsError } = await supabase
     .from('sku_approvals')
     .select('*')
+    .in('master_sku', skuList)
   
   if (approvalsError) {
     console.error('Error fetching approvals:', approvalsError)
   }
+
+  // Get variant readiness dependencies.
+  const { data: variants, error: variantsError } = await supabase
+    .from('variant_index')
+    .select('master_sku, finish')
+    .in('master_sku', skuList)
+
+  if (variantsError) {
+    console.error('Error fetching variants:', variantsError)
+  }
+
+  const { data: variantApprovals, error: variantApprovalsError } = await supabase
+    .from('variant_approvals')
+    .select('master_sku, finish, approval_status, title_approved, description_approved')
+    .in('master_sku', skuList)
+
+  if (variantApprovalsError) {
+    console.error('Error fetching variant approvals:', variantApprovalsError)
+  }
+
+  const { data: variantImages, error: variantImagesError } = await supabase
+    .from('variant_lifestyle_images')
+    .select('master_sku, finish, approval_status, user_selected')
+    .in('master_sku', skuList)
+
+  if (variantImagesError) {
+    console.error('Error fetching variant images:', variantImagesError)
+  }
+
+  // Get latest successful production publish snapshots.
+  const { data: publishEvents, error: publishEventsError } = await supabase
+    .from('publish_events')
+    .select('master_sku, platform, published_at, published_title, published_description, content_version')
+    .in('master_sku', skuList)
+    .eq('action', 'publish')
+    .eq('status', 'success')
+    .eq('environment', 'production')
+    .order('published_at', { ascending: false })
+
+  if (publishEventsError) {
+    console.error('Error fetching publish events:', publishEventsError)
+  }
   
-  // Aggregate by SKU
-  const skuMap = new Map<string, { scores: number[], count: number }>()
-  
-  for (const content of contentSkus || []) {
-    const existing = skuMap.get(content.master_sku) || { scores: [], count: 0 }
-    existing.count++
-    if (content.quality_score) {
-      existing.scores.push(content.quality_score)
-    }
-    skuMap.set(content.master_sku, existing)
+  const contentBySku = new Map<string, GeneratedContentRow[]>()
+  const variantsBySku = new Map<string, VariantRow[]>()
+  const variantApprovalsBySku = new Map<string, VariantApprovalRow[]>()
+  const variantImagesBySku = new Map<string, VariantImageRow[]>()
+  const publishEventsBySku = new Map<string, PublishEventRow[]>()
+
+  for (const row of contentSkus || []) {
+    const bucket = contentBySku.get(row.master_sku) || []
+    bucket.push(row)
+    contentBySku.set(row.master_sku, bucket)
+  }
+
+  for (const row of variants || []) {
+    const bucket = variantsBySku.get(row.master_sku) || []
+    bucket.push(row)
+    variantsBySku.set(row.master_sku, bucket)
+  }
+
+  for (const row of variantApprovals || []) {
+    const bucket = variantApprovalsBySku.get(row.master_sku) || []
+    bucket.push(row)
+    variantApprovalsBySku.set(row.master_sku, bucket)
+  }
+
+  for (const row of variantImages || []) {
+    const bucket = variantImagesBySku.get(row.master_sku) || []
+    bucket.push(row)
+    variantImagesBySku.set(row.master_sku, bucket)
+  }
+
+  for (const row of publishEvents || []) {
+    const bucket = publishEventsBySku.get(row.master_sku) || []
+    bucket.push(row)
+    publishEventsBySku.set(row.master_sku, bucket)
   }
   
   // Build result
   const approvalMap = new Map((approvals || []).map(a => [a.master_sku, a]))
   
   const result: SkuWithContent[] = []
-  for (const [sku, data] of skuMap) {
+  for (const [sku, skuContent] of contentBySku) {
     const approval = approvalMap.get(sku)
-    const avgScore = data.scores.length > 0 
-      ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length)
+    const scores = skuContent
+      .map((row) => row.quality_score)
+      .filter((score): score is number => typeof score === 'number')
+    const avgScore = scores.length > 0
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
       : null
+
+    const readiness = computePlatformReadinessForSku({
+      contentRecords: skuContent,
+      variants: variantsBySku.get(sku) || [],
+      variantApprovals: variantApprovalsBySku.get(sku) || [],
+      variantImages: variantImagesBySku.get(sku) || [],
+    })
+    const publishSnapshots = latestProductionPublishSnapshots(publishEventsBySku.get(sku) || [])
     
     result.push({
       master_sku: sku,
@@ -70,8 +197,9 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
       title_approved: approval?.title_approved || null,
       description_approved: approval?.description_approved || null,
       image_approved: approval?.image_approved || null,
-      content_count: data.count,
+      content_count: skuContent.length,
       avg_quality_score: avgScore,
+      platform_progress: buildPlatformProgress(readiness, publishSnapshots),
     })
   }
   
@@ -99,6 +227,49 @@ function getScoreColor(score: number | null): string {
   if (score >= 80) return 'text-green-600'
   if (score >= 60) return 'text-yellow-600'
   return 'text-red-600'
+}
+
+function formatPublishTimestamp(timestamp: string | null): string | null {
+  if (!timestamp) return null
+  try {
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(timestamp))
+  } catch {
+    return null
+  }
+}
+
+function getPlatformLabel(platform: PlatformProgress['platform']): string {
+  if (platform === 'google') return 'Google'
+  if (platform === 'bing') return 'Bing'
+  return 'Shopify'
+}
+
+function PlatformProgressRow({ progress }: { progress: PlatformProgress[] }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {progress.map((item) => {
+        const publishedDate = formatPublishTimestamp(item.publishedSnapshot?.publishedAt ?? null)
+        const labelPrefix = getPlatformLabel(item.platform)
+        const label = item.state === 'published'
+          ? `${labelPrefix}: Published${publishedDate ? ` (${publishedDate})` : ''}`
+          : item.state === 'ready'
+            ? `${labelPrefix}: Ready`
+            : `${labelPrefix}: Needs action`
+
+        const className = item.state === 'published'
+          ? 'bg-green-100 text-green-800'
+          : item.state === 'ready'
+            ? 'bg-blue-100 text-blue-800'
+            : 'bg-gray-100 text-gray-700'
+
+        return (
+          <Badge key={`${item.platform}-${item.state}`} className={className} title={item.blockerSummary || undefined}>
+            {label}
+          </Badge>
+        )
+      })}
+    </div>
+  )
 }
 
 export default async function ReviewPage() {
@@ -183,6 +354,7 @@ export default async function ReviewPage() {
                           : `Title: ${sku.title_approved ? '✓' : '○'} | Desc: ${sku.description_approved ? '✓' : '○'} | Image: ${sku.image_approved ? '✓' : '○'}`
                         }
                       </CardDescription>
+                      <PlatformProgressRow progress={sku.platform_progress} />
                     </div>
                     <div className="flex items-center gap-4">
                       {sku.avg_quality_score !== null && (
@@ -222,6 +394,7 @@ export default async function ReviewPage() {
                         {getStatusBadge(sku.approval_status || 'pending')}
                       </CardTitle>
                       <CardDescription>{sku.content_count} content items</CardDescription>
+                      <PlatformProgressRow progress={sku.platform_progress} />
                     </div>
                     <Link href={`/review/${skuToUrlPath(sku.master_sku)}`}>
                       <Button variant="outline">View Details</Button>
@@ -251,6 +424,7 @@ export default async function ReviewPage() {
                         {getStatusBadge('revision')}
                       </CardTitle>
                       <CardDescription>{sku.content_count} content items</CardDescription>
+                      <PlatformProgressRow progress={sku.platform_progress} />
                     </div>
                     <Link href={`/review/${skuToUrlPath(sku.master_sku)}`}>
                       <Button>Review</Button>
@@ -273,6 +447,7 @@ export default async function ReviewPage() {
                       {getStatusBadge(sku.approval_status || 'pending')}
                     </CardTitle>
                     <CardDescription>{sku.content_count} content items</CardDescription>
+                    <PlatformProgressRow progress={sku.platform_progress} />
                   </div>
                   <div className="flex items-center gap-4">
                     {sku.avg_quality_score !== null && (

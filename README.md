@@ -58,6 +58,25 @@ It now computes readiness and validates only the requested platform subset.
   - `step: "platform_readiness"`
   - `readiness_errors[]` containing `platform`, `code`, `reason`, `actionableMessage`
 
+### Review visibility indicators
+
+The review UI now surfaces platform progress at both list and detail levels using deterministic stored-state checks:
+
+- Review Queue (`/review`) shows per-SKU, per-platform status badges:
+  - `Published` (with date), `Ready`, or `Needs action`
+- SKU detail (`/review/[sku]`) shows a platform summary panel with:
+  - readiness state
+  - blocker reason when blocked
+  - latest production publish timestamp
+  - latest published title/description snapshot
+
+Progress state is derived from:
+
+- `generated_content.approved_content`
+- `variant_approvals`
+- `variant_lifestyle_images`
+- latest successful production `publish_events`
+
 ### Approval API behavior
 
 - `PATCH /api/approvals`
@@ -82,6 +101,7 @@ It now computes readiness and validates only the requested platform subset.
 
 See `docs/architecture/2026-02-11-platform-approval-publish-readiness.md` for full details.
 See `docs/architecture/2026-02-13-lifestyle-image-optional-gates-and-idempotent-generation.md` for the latest image readiness + generation updates.
+See `docs/architecture/2026-02-13-review-platform-progress-indicators.md` for queue/detail platform progress indicators.
 For operations, incident response, and rollback procedures, use:
 `docs/troubleshooting/2026-02-11-platform-readiness-ops-runbook.md`.
 

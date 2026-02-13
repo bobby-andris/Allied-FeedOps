@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { SkuReviewClient } from "@/components/review/SkuReviewClient"
 import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
+import { latestProductionPublishSnapshots } from "@/lib/review/platform-progress"
 
 interface ContentRecord {
   id: string
@@ -340,6 +341,21 @@ async function getSkuData(urlSku: string) {
     console.error('Error fetching performance snapshots:', snapshotsError)
   }
 
+  const { data: publishEvents, error: publishEventsError } = await supabase
+    .from('publish_events')
+    .select('platform, published_at, published_title, published_description, content_version')
+    .eq('master_sku', sku)
+    .eq('action', 'publish')
+    .eq('status', 'success')
+    .eq('environment', 'production')
+    .order('published_at', { ascending: false })
+
+  if (publishEventsError) {
+    console.error('Error fetching publish events:', publishEventsError)
+  }
+
+  const publishedSnapshots = latestProductionPublishSnapshots(publishEvents || [])
+
   return {
     content: (content || []) as ContentRecord[],
     images,
@@ -354,6 +370,7 @@ async function getSkuData(urlSku: string) {
     },
     performanceBaselines: performanceBaselines || [],
     performanceSnapshots: performanceSnapshots || [],
+    publishedSnapshots,
   }
 }
 
@@ -373,7 +390,8 @@ export default async function SkuReviewPage({
     variantCurrentContent,
     finishSentences,
     performanceBaselines,
-    performanceSnapshots
+    performanceSnapshots,
+    publishedSnapshots,
   } = await getSkuData(sku)
 
   if (content.length === 0) {
@@ -393,6 +411,7 @@ export default async function SkuReviewPage({
       finishSentences={finishSentences}
       performanceBaselines={performanceBaselines}
       performanceSnapshots={performanceSnapshots}
+      publishedSnapshots={publishedSnapshots}
     />
   )
 }

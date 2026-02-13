@@ -19,7 +19,7 @@ import { PublishButton } from "@/components/review/PublishButton"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
-import { computePlatformReadiness } from '@/lib/publishing/platform-readiness'
+import { buildPlatformProgress, computePlatformReadinessForSku, type LatestPublishSnapshot } from '@/lib/review/platform-progress'
 import { getPublishReadinessHelpText } from './approval-copy'
 
 interface ContentRecord {
@@ -112,6 +112,7 @@ interface SkuReviewClientProps {
   }
   performanceBaselines: PerformanceBaseline[]
   performanceSnapshots: PerformanceSnapshot[]
+  publishedSnapshots: Partial<Record<'google' | 'bing' | 'shopify', LatestPublishSnapshot>>
 }
 
 function getContentByPlatform(content: ContentRecord[], platform: string) {
@@ -296,6 +297,75 @@ function GenerationSourceBadge({
   )
 }
 
+function formatPublishedTimestamp(timestamp: string): string {
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(new Date(timestamp))
+  } catch {
+    return timestamp
+  }
+}
+
+function PlatformCompletionSummary({
+  progress,
+}: {
+  progress: ReturnType<typeof buildPlatformProgress>
+}) {
+  return (
+    <div className="mt-4 grid gap-3 md:grid-cols-3">
+      {progress.map((item) => {
+        const platformLabel = item.platform.charAt(0).toUpperCase() + item.platform.slice(1)
+        const snapshot = item.publishedSnapshot
+        const stateLabel = item.state === 'published'
+          ? 'Published'
+          : item.state === 'ready'
+            ? 'Ready to publish'
+            : 'Needs action'
+        const stateClass = item.state === 'published'
+          ? 'text-green-700 bg-green-50 border-green-200'
+          : item.state === 'ready'
+            ? 'text-blue-700 bg-blue-50 border-blue-200'
+            : 'text-amber-700 bg-amber-50 border-amber-200'
+
+        return (
+          <div key={`progress-${item.platform}`} className={`rounded-lg border p-3 ${stateClass}`}>
+            <div className="flex items-center justify-between gap-2">
+              <div className="font-semibold">{platformLabel}</div>
+              <Badge variant="outline" className="bg-white/80">{stateLabel}</Badge>
+            </div>
+            {item.state === 'blocked' && item.blockerSummary && (
+              <p className="mt-2 text-xs leading-relaxed">{item.blockerSummary}</p>
+            )}
+            {snapshot && (
+              <div className="mt-2 space-y-1 text-xs">
+                <div className="font-medium">
+                  Last published: {formatPublishedTimestamp(snapshot.publishedAt)}
+                  {snapshot.contentVersion !== null ? ` (v${snapshot.contentVersion})` : ''}
+                </div>
+                {snapshot.publishedTitle && (
+                  <div className="truncate" title={snapshot.publishedTitle}>
+                    Title: {snapshot.publishedTitle}
+                  </div>
+                )}
+                {snapshot.publishedDescription && (
+                  <div className="truncate" title={snapshot.publishedDescription}>
+                    Description: {snapshot.publishedDescription}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function SkuReviewClient({
   sku,
   content,
@@ -308,6 +378,7 @@ export function SkuReviewClient({
   finishSentences,
   performanceBaselines,
   performanceSnapshots,
+  publishedSnapshots,
 }: SkuReviewClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -337,56 +408,29 @@ export function SkuReviewClient({
   const { title, description } = getContentByPlatform(content, selectedPlatform)
   const currentContent = currentContentByPlatform[selectedPlatform]
 
-  const isApprovedFlag = (value: unknown) => value === true || value === 1 || value === '1'
-
-  const requiredVariantFinishes = new Set(
-    variants
-      .map((variant) => variant.finish)
-      .filter((finish): finish is string => Boolean(finish))
-  )
-
-  const approvedVariantContentFinishes = new Set(
-    variantApprovals
-      .filter((approval) =>
-        approval.finish
-        && approval.approval_status === 'approved'
-        && isApprovedFlag(approval.title_approved)
-        && isApprovedFlag(approval.description_approved)
-      )
-      .map((approval) => approval.finish)
-  )
-
-  const selectedVariantImageFinishes = new Set(
-    images
-      .filter((image) => image.finish && image.approval_status === 'approved' && image.user_selected)
-      .map((image) => image.finish as string)
-  )
-
-  const shopifyMasterImageReady = images.some(
-    (image) => image.use_for_master && image.approval_status === 'approved' && image.user_selected
-  )
-
-  const contentByPlatform = {
-    google: {
-      titleApproved: content.some((c) => c.platform === 'google' && c.content_type === 'title' && Boolean(c.approved_content)),
-      descriptionApproved: content.some((c) => c.platform === 'google' && c.content_type === 'description' && Boolean(c.approved_content)),
-    },
-    bing: {
-      titleApproved: content.some((c) => c.platform === 'bing' && c.content_type === 'title' && Boolean(c.approved_content)),
-      descriptionApproved: content.some((c) => c.platform === 'bing' && c.content_type === 'description' && Boolean(c.approved_content)),
-    },
-    shopify: {
-      titleApproved: content.some((c) => c.platform === 'shopify' && c.content_type === 'title' && Boolean(c.approved_content)),
-      descriptionApproved: content.some((c) => c.platform === 'shopify' && c.content_type === 'description' && Boolean(c.approved_content)),
-    },
-  } as const
-
-  const platformReadiness = computePlatformReadiness({
-    content: contentByPlatform,
-    variantApprovalsReady: requiredVariantFinishes.size > 0 && approvedVariantContentFinishes.size >= requiredVariantFinishes.size,
-    variantImagesReady: requiredVariantFinishes.size > 0 && selectedVariantImageFinishes.size >= requiredVariantFinishes.size,
-    shopifyMasterImageReady,
+  const platformReadiness = computePlatformReadinessForSku({
+    contentRecords: content.map((item) => ({
+      platform: item.platform,
+      content_type: item.content_type,
+      approved_content: item.approved_content,
+    })),
+    variants: variants.map((variant) => ({ finish: variant.finish })),
+    variantApprovals: variantApprovals.map((approval) => ({
+      finish: approval.finish,
+      approval_status: approval.approval_status,
+      title_approved: approval.title_approved,
+      description_approved: approval.description_approved,
+    })),
+    variantImages: images.map((image) => ({
+      finish: image.finish,
+      approval_status: image.approval_status,
+      user_selected: image.user_selected,
+    })),
+    shopifyMasterImageReady: images.some(
+      (image) => image.use_for_master && image.approval_status === 'approved' && image.user_selected,
+    ),
   })
+  const platformProgress = buildPlatformProgress(platformReadiness, publishedSnapshots)
 
   const titleIsTemplate = title?.candidate_content?.includes('{FINISH_NAME}') || false
   const descIsTemplate = description?.candidate_content?.includes('{FINISH_NAME}') || false
@@ -430,6 +474,7 @@ export function SkuReviewClient({
           titleScore={title?.quality_score || null}
           descScore={description?.quality_score || null}
         />
+        <PlatformCompletionSummary progress={platformProgress} />
 
         {/* Platform tabs */}
         <Tabs value={selectedPlatform} onValueChange={handlePlatformChange} className="mt-6">
