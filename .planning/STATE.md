@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 1 of 4 (Job Infrastructure & Foundation)
-Plan: Ready to plan
-Status: Phase planning not started
-Last activity: 2026-02-13 — v1.0 roadmap created, requirements mapped
+Phase: 5 of 4 (Job Infrastructure & Foundation)
+Plan: 2 of 4
+Status: Executing plans
+Last activity: 2026-02-13 — Completed 05-02-PLAN.md (rate limiter and batch processor)
 
 Progress: [████░░░░░░] 0% (0/4 phases complete)
 
@@ -33,14 +33,40 @@ Progress: [████░░░░░░] 0% (0/4 phases complete)
 | 0.4 Documentation & Decision | 2 | 8 min | 4.0 min |
 
 **v1.0 Velocity:**
-- Total plans completed: 0
-- Will be updated after first plan execution
+- Total plans completed: 2
+- Average duration: 2.0 minutes
+- Total execution time: 4 minutes
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| 5.1 Job Infrastructure & Foundation | 2 | 4 min | 2.0 min |
 
 *Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
+
+**Phase 5 (Job Infrastructure):**
+
+1. **Thread-Safe Rate Limiting with threading.Lock** (Plan 05-02)
+   - TokenBucket uses threading.Lock (not asyncio.Lock) for process-wide thread safety
+   - Multiple async tasks in same process can safely share token buckets
+   - Impact: Prevents race conditions in multi-task concurrent job execution
+
+2. **Dynamic Imports for Parallel Execution** (Plan 05-02)
+   - BatchProcessor imports job manager functions inside run() method (not module-level)
+   - Avoids circular import errors during Wave 1 parallel plan execution
+   - Impact: 05-01 and 05-02 can execute simultaneously without dependency issues
+
+3. **95% Success Threshold for Job Completion** (Plan 05-02)
+   - Jobs marked 'complete' if ≥95% of items succeed (some failures acceptable)
+   - Aligned with VALID-08 requirement
+   - Impact: Resilient to transient failures without blocking overall progress
+
+**Phase 0 (Discovery):**
 
 Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 
@@ -94,9 +120,9 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 
 ## Session Continuity
 
-Last session: 2026-02-13 — v1.0 roadmap creation
-Stopped at: ROADMAP.md and STATE.md written, REQUIREMENTS.md traceability pending update
+Last session: 2026-02-13 — Phase 5 plan execution
+Stopped at: Completed 05-02-PLAN.md (rate limiter and batch processor)
 Resume file: None
 
 ---
-*Next step:* Update REQUIREMENTS.md traceability section, then `/gsd:plan-phase 1` to begin Job Infrastructure & Foundation planning.
+*Next step:* Continue Phase 5 execution (plans 05-03 and 05-04 remaining).
