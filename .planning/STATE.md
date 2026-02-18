@@ -256,11 +256,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 
 ### Pending Todos
 
-**Post-Deployment Verification (Phase 08 Plan 05):**
-- Verify coverage endpoint returns valid JSON with total_skus, search_terms_coverage, performance_coverage, keywords_coverage
-- Verify freshness endpoint returns valid JSON with per-SKU data age arrays
-- Verify api-health endpoint returns valid JSON (precautionary check)
-- Commands in 08-05-SUMMARY.md Next Phase Readiness section
+| # | Title | Area | File |
+|---|-------|------|------|
+| 1 | Backfill performance snapshots and improve Performance page | ui | [2026-02-18-backfill-performance-snapshots-and-improve-performance-page.md](.planning/todos/pending/2026-02-18-backfill-performance-snapshots-and-improve-performance-page.md) |
 
 ### Quick Tasks Completed
 
