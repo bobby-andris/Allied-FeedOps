@@ -66,28 +66,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SKUR-01 | TBD | Pending |
-| SKUR-02 | TBD | Pending |
-| SKUR-03 | TBD | Pending |
-| SKUR-04 | TBD | Pending |
-| SKUR-05 | TBD | Pending |
-| IMG-01 | TBD | Pending |
-| IMG-02 | TBD | Pending |
-| IMG-03 | TBD | Pending |
-| IMG-04 | TBD | Pending |
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| PERF-03 | TBD | Pending |
-| DASH-01 | TBD | Pending |
-| DASH-02 | TBD | Pending |
-| DASH-03 | TBD | Pending |
-| VER-01 | All phases | Pending |
+| SKUR-01 | Phase 9 | Pending |
+| SKUR-02 | Phase 9 | Pending |
+| SKUR-03 | Phase 9 | Pending |
+| SKUR-04 | Phase 9 | Pending |
+| SKUR-05 | Phase 9 | Pending |
+| IMG-01 | Phase 10 | Pending |
+| IMG-02 | Phase 10 | Pending |
+| IMG-03 | Phase 10 | Pending |
+| IMG-04 | Phase 10 | Pending |
+| PERF-01 | Phase 11 | Pending |
+| PERF-02 | Phase 11 | Pending |
+| PERF-03 | Phase 11 | Pending |
+| DASH-01 | Phase 12 | Pending |
+| DASH-02 | Phase 12 | Pending |
+| DASH-03 | Phase 12 | Pending |
+| VER-01 | All phases (9–12) | Pending |
 
 **Coverage:**
 - v1.1 requirements: 16 total
-- Mapped to phases: TBD (roadmapper will assign)
-- Unmapped: 16 ⚠️ (pending roadmap)
+- Mapped to phases: 16/16 (100% coverage)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after initial v1.1 definition*
+*Last updated: 2026-02-18 — traceability filled in after roadmap creation*

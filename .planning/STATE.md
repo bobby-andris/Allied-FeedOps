@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Dashboard UX & Quality
+**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 9: SKU Review Revamp)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for v1.1
-Last activity: 2026-02-18 — Milestone v1.1 Dashboard UX & Quality started
+Phase: 9 — SKU Review Revamp
+Plan: Not started
+Status: Roadmap created, ready to plan Phase 9
+Last activity: 2026-02-18 — v1.1 roadmap created (Phases 9–12)
 
 Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 
@@ -47,10 +47,38 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 | 8 Monitoring & Automation | 5 | 14.5 min | 2.9 min |
 
 *Updated after each plan completion*
-| Phase 08 P04 | 5 | 2 tasks | 1 file |
-| Phase 08 P05 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
+
+### v1.1 Context
+
+**Key facts for implementation:**
+- 3 variants of SkuReviewClient exist (main, magazine, original) — all must be updated when changing props
+- Visual verification via agent-browser is required before marking any UI change complete (VER-01)
+- Performance data: 44 snapshots backfilled for 36 published SKUs (real data exists for comparison)
+- Dashboard lives at allied-feed-ops.vercel.app (Vercel auto-deploys on push to master)
+- agent-browser tool available for live verification: `agent-browser open <url>` → `agent-browser snapshot -i`
+
+**Phase 9 context:**
+- SKU review page uses SkuReviewClient — 3 variants must all be updated
+- Compact list means replacing the current scrolling per-SKU layout
+- Stats bar must aggregate approval counts per platform (Google / Bing)
+- Filter state lives in URL search params (existing pattern: `?platform=bing`)
+
+**Phase 10 context:**
+- Current auto-select logic uses a fixed heuristic ("first finish" or "fire engine red")
+- Fix: auto-select should query `search_queries` / `performance_snapshots` for highest-impressions variant
+- Manual selection must persist and not be overridden when image generation runs
+
+**Phase 11 context:**
+- `performance_baselines` table: 30-day pre-publish metrics
+- `performance_snapshots` table: post-publish tracking with `days_since_publish`
+- 44 real snapshots for 36 published SKUs available for testing
+
+**Phase 12 context:**
+- Audit is exploratory — do a full page walkthrough before fixing
+- Document every page status before touching code
+- Batch management is rarely used — simplify or remove if audit flags it
 
 ### Decisions
 
@@ -177,35 +205,25 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
    - Multiple async tasks in same process can safely share token buckets
    - Impact: Prevents race conditions in multi-task concurrent job execution
 
-2. **Dynamic Imports for Parallel Execution** (Plan 05-02)
+5. **Dynamic Imports for Parallel Execution** (Plan 05-02)
    - BatchProcessor imports job manager functions inside run() method (not module-level)
    - Avoids circular import errors during Wave 1 parallel plan execution
    - Impact: 05-01 and 05-02 can execute simultaneously without dependency issues
 
-3. **95% Success Threshold for Job Completion** (Plan 05-02)
+6. **95% Success Threshold for Job Completion** (Plan 05-02)
    - Jobs marked 'complete' if ≥95% of items succeed (some failures acceptable)
    - Aligned with VALID-08 requirement
    - Impact: Resilient to transient failures without blocking overall progress
 
-4. **Placeholder _noop_process for Phase 1** (Plan 05-03) - REPLACED in 06-02
+7. **Placeholder _noop_process for Phase 1** (Plan 05-03) - REPLACED in 06-02
    - Backfill endpoints used placeholder process function for Phase 1 testing
    - Replaced with job-type routing in Plan 06-02
    - Impact: Endpoints now route to real collection workers
 
-5. **Job Validation in Resume Endpoint** (Plan 05-03)
+8. **Job Validation in Resume Endpoint** (Plan 05-03)
    - Resume endpoint validates job status (only 'failed' or 'partial' can resume)
    - Prevents accidental duplicate processing of completed jobs
    - Impact: Clear contract for callers, safety against state errors
-
-6. **Fix Processor Async/Sync Mismatch** (Plan 05-04)
-   - Processor was calling sync manager functions with await
-   - Fixed to call manager functions directly (not async)
-   - Impact: Processor now works correctly with manager layer
-
-7. **Idempotent Upsert Contract Test** (Plan 05-04)
-   - Test validates and documents JOB-06 requirement for Phase 2
-   - Proves upsert pattern prevents duplicates during checkpoint/resume
-   - Impact: Executable documentation for Phase 2 collection worker implementors
 
 **Phase 0 (Discovery):**
 
@@ -245,14 +263,6 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
    - Impression/click share only available for products with sufficient volume
    - This is acceptable - high-value SKUs are what matter
    - Impact: DATA-09 requirement (collect where available)
-- [Phase 07]: Scipy as Optional Dependency - Outlier detection requires scipy, but system degrades gracefully without it
-- [Phase 07]: Direct DB Queries for Freshness - Use Supabase queries directly rather than RPC functions for flexibility
-- [Phase 08-01]: RPC execute_sql for freshness queries - Enables single-query freshness check for all SKUs via SQL aggregation instead of N queries
-- [Phase 08-01]: Separate coverage and freshness endpoints - Dashboard can fetch coverage frequently without transferring large freshness arrays
-- [Phase 08-01]: P95 calculation in Python (not database) - Faster response, no additional database load for health checks
-- [Phase 08-03]: Install Tremor with --legacy-peer-deps - React 19 compatibility workaround, no runtime issues
-- [Phase 08-03]: Separate polling for jobs vs. monitoring data - jobs refresh every 5s, monitoring data fetches once on mount
-- [Phase 08-03]: Limit freshness heatmap to 500 SKUs - performance optimization for browser rendering
 
 ### Pending Todos
 
@@ -267,18 +277,13 @@ None.
 
 ### Blockers/Concerns
 
-None. Phase 0 issued GO recommendation with 4.65/5 confidence.
-
-**Validation needed during Phase 1:**
-- Confirm rate limiting works at scale (100+ SKU test)
-- Verify connection pooling prevents exhaustion with 3 concurrent jobs
-- Test checkpoint recovery with actual Cloud Run container restart
+None.
 
 ## Session Continuity
 
-Last session: 2026-02-18 — Started v1.1 milestone (Dashboard UX & Quality)
-Stopped at: Requirements definition
+Last session: 2026-02-18 — v1.1 roadmap created (Phases 9–12)
+Stopped at: Roadmap creation complete
 Resume file: None
 
 ---
-*Next step:* Define requirements, create roadmap, then `/gsd:plan-phase 9`
+*Next step:* `/gsd:plan-phase 9`

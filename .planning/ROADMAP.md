@@ -1,14 +1,15 @@
-# Roadmap: Allied FeedOps v1.0
+# Roadmap: Allied FeedOps
 
 ## Milestones
 
 - ✅ **Phase 0 Discovery** - API validation and research (shipped 2026-02-13)
 - ✅ **v1.0 Historical Data Backfill** - Phases 1-4 (shipped 2026-02-13)
+- **v1.1 Dashboard UX & Quality** - Phases 9-12 (in progress)
 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3, 4): Planned milestone work
+- Integer phases (1, 2, 3, ...): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
@@ -57,7 +58,8 @@ Plans:
 
 </details>
 
-## v1.0 Historical Data Backfill — COMPLETE ✅
+<details>
+<summary>✅ v1.0 Historical Data Backfill — COMPLETE 2026-02-13</summary>
 
 **Milestone Goal:** Execute comprehensive Google Ads historical data backfill for all 2,784 SKUs with production-ready monitoring and validation.
 
@@ -149,10 +151,100 @@ Plans:
 - [x] 08-04-PLAN.md — Cloud Scheduler setup for daily incremental refresh + notification channel configuration
 - [x] 08-05-PLAN.md — Gap closure: Fix monitoring endpoints 500 errors (replace execute_sql RPC with direct table queries)
 
+</details>
+
+## v1.1 Dashboard UX & Quality — IN PROGRESS
+
+**Milestone Goal:** Revamp the dashboard to make the core review, image, and performance workflows fast, clear, and actually useful — with a full audit pass to fix broken pages and eliminate dead-end experiences.
+
+**Visual verification note:** VER-01 applies to all phases in this milestone. Every UI change must be inspected using agent-browser before being marked complete.
+
+### Phase 9: SKU Review Revamp
+**Goal**: Users can review SKU approval status across platforms in a compact list with filtering, eliminating per-SKU vertical scrolling
+
+**Depends on**: Phase 4 (v1.0 complete)
+
+**Requirements**: SKUR-01, SKUR-02, SKUR-03, SKUR-04, SKUR-05, VER-01
+
+**Success Criteria** (what must be TRUE):
+  1. User sees a stats summary bar at the top of the SKU review page showing counts by status (approved, pending, not started) broken out per platform (Google / Bing)
+  2. User can scan all SKUs at a glance in a compact list — per-platform status badges visible per row without vertical scrolling per SKU
+  3. User can filter the list by status (needs review, approved, all) and by platform, and the list updates immediately
+  4. User can click a SKU row to expand full detail inline while retaining list context (no full-page navigation away)
+  5. All three SkuReviewClient variants (main, magazine, original) render correctly and all UI changes verified via agent-browser in the live dashboard
+
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: Stats summary bar component — counts by status and platform at page top
+- [ ] 09-02: Compact list view with per-platform status badges — replace scrolling per-SKU layout
+- [ ] 09-03: Filter controls (status, platform) wired to list state
+- [ ] 09-04: Inline expand/collapse for SKU detail — keep list context visible
+
+### Phase 10: Image Workflow Improvements
+**Goal**: Users control which variant is used for lifestyle image generation, and can see which variants are missing images
+
+**Depends on**: Phase 9
+
+**Requirements**: IMG-01, IMG-02, IMG-03, IMG-04, VER-01
+
+**Success Criteria** (what must be TRUE):
+  1. User can manually select a specific finish/variant before triggering lifestyle image generation for a SKU
+  2. When no variant is manually selected, the system auto-selects the Google Ads variant with the highest impression count (not a hardcoded heuristic)
+  3. User can see a per-variant coverage view for a SKU — which Google Ads variants have a lifestyle image and which do not
+  4. Image generation uses the user's selected variant and does not override it with auto-selection logic after the user has chosen
+  5. Image generation UI changes verified via agent-browser — manual selection, auto-selection fallback, and coverage view all work end-to-end in the live dashboard
+
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: Variant selector UI for image generation — manual finish/variant selection before generate
+- [ ] 10-02: Auto-select logic fix — use highest-impressions Google Ads variant as fallback (not fixed heuristic)
+- [ ] 10-03: Variant image coverage view — show which variants have a lifestyle image vs. are missing one
+
+### Phase 11: Performance Page Enhancements
+**Goal**: Users can clearly see how published SKUs are performing relative to their pre-publish baseline, with trend direction at a glance
+
+**Depends on**: Phase 10
+
+**Requirements**: PERF-01, PERF-02, PERF-03, VER-01
+
+**Success Criteria** (what must be TRUE):
+  1. Performance page shows a side-by-side or delta comparison of baseline vs. latest snapshot metrics (CTR, impressions, clicks, CVR) for each published SKU
+  2. Each published SKU row shows days-since-publish alongside the metric deltas so the user can contextualize improvement timelines
+  3. Page visually distinguishes SKUs trending up vs. down since publish (e.g., color coding, icons) without requiring manual calculation
+  4. Performance changes verified via agent-browser against the 44 real snapshots for 36 published SKUs — comparisons reflect actual data
+
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01: Before/after comparison layout — baseline vs. latest snapshot with delta values per metric
+- [ ] 11-02: Days-since-publish column and trend indicators (up/down) on the performance page
+
+### Phase 12: Dashboard Audit & Cleanup
+**Goal**: Every dashboard page either shows useful current data or provides a clear next action — no dead ends, no stale broken states
+
+**Depends on**: Phase 11
+
+**Requirements**: DASH-01, DASH-02, DASH-03, VER-01
+
+**Success Criteria** (what must be TRUE):
+  1. Each dashboard page has been reviewed: pages showing useful current data are confirmed working, pages with stale or broken data are identified with a fix applied or a deferral noted
+  2. Pages or features that do not serve the current workflow are simplified, removed, or replaced with a clear redirect to something useful
+  3. No page in the dashboard results in an empty state with no path forward — every dead-end state has an action or informative message
+  4. Audit findings and changes verified via agent-browser walkthrough of all dashboard pages in the live environment
+
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01: Audit pass — document status of every dashboard page (working, broken, dead end, stale)
+- [ ] 12-02: Fix broken/stale pages identified in audit
+- [ ] 12-03: Remove or redirect dead-end features; add empty state actions where needed
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 → 4
+Phases execute in numeric order: 9 → 10 → 11 → 12
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -164,7 +256,12 @@ Phases execute in numeric order: 0.1 → 0.2 → 0.3 → 0.4 → 1 → 2 → 3 �
 | 2. Data Collection Pipeline | v1.0 | 3/3 | Complete | 2026-02-13 |
 | 3. Data Quality & Validation | v1.0 | 4/4 | Complete | 2026-02-13 |
 | 4. Monitoring & Automation | v1.0 | 5/5 | Complete | 2026-02-13 |
+| 9. SKU Review Revamp | v1.1 | 0/4 | Not started | - |
+| 10. Image Workflow Improvements | v1.1 | 0/3 | Not started | - |
+| 11. Performance Page Enhancements | v1.1 | 0/2 | Not started | - |
+| 12. Dashboard Audit & Cleanup | v1.1 | 0/3 | Not started | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
 *v1.0 milestone completed: 2026-02-13*
+*v1.1 milestone started: 2026-02-18*
