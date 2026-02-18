@@ -1,97 +1,64 @@
-# Requirements: Allied FeedOps v1.0
+# Requirements: Allied FeedOps v1.1
 
-**Defined:** 2026-02-13
+**Defined:** 2026-02-18
 **Core Value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
 
-## v1.0 Requirements
+## v1.0 Requirements (Complete — Archived)
 
-### Job Management & Foundation
+All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10) were completed in phases 5–8. See MILESTONES.md for details.
 
-- [ ] **JOB-01**: System can create batch job records with unique IDs and initial status
-- [ ] **JOB-02**: System can update job status (creating, running, complete, failed, partial)
-- [ ] **JOB-03**: System can track progress metrics (SKUs processed, percentage complete, ETA)
-- [ ] **JOB-04**: System can log errors with SKU ID, error type, and error message
-- [ ] **JOB-05**: System can resume interrupted jobs from last checkpoint
-- [ ] **JOB-06**: System implements idempotent upserts (ON CONFLICT) for all data writes
-- [ ] **JOB-07**: System implements exponential backoff for API rate limit errors
-- [ ] **JOB-08**: System implements token bucket rate limiting (10 QPS max)
-- [ ] **JOB-09**: System creates checkpoints every 100 SKUs processed
-- [ ] **JOB-10**: System limits concurrent batch jobs to 3 maximum
+## v1.1 Requirements
 
-### Data Collection
+### SKU Review (SKUR)
 
-- [ ] **DATA-01**: System can fetch search terms using campaign-join pattern (2-step query)
-- [ ] **DATA-02**: System can collect 180 days of performance metrics per SKU
-- [ ] **DATA-03**: System can generate Keyword Planner ideas for all 2,784 SKUs
-- [ ] **DATA-04**: System can sync custom_label_0 from Google Merchant Center
-- [ ] **DATA-05**: System can capture performance baselines with date range metadata
-- [ ] **DATA-06**: System processes SKUs in batches of 10 for optimal throughput
-- [ ] **DATA-07**: System uses explicit date ranges (YYYY-MM-DD) in all GAQL queries
-- [ ] **DATA-08**: System handles lowercase offer IDs (shopify_us_) per API format
-- [ ] **DATA-09**: System collects competitive metrics (impression/click share) where available
-- [ ] **DATA-10**: System stores all collected data with collection timestamps
+- [ ] **SKUR-01**: User sees a stats summary bar at the top of the SKU review page showing counts by status and platform (approved, pending, not started — per Google/Bing)
+- [ ] **SKUR-02**: SKUs display in a compact list format where status is visible without per-SKU vertical scrolling
+- [ ] **SKUR-03**: Per-platform approval status (Google / Bing) is visible inline for each SKU row in the list
+- [ ] **SKUR-04**: User can click into a SKU to expand full detail while keeping list context visible
+- [ ] **SKUR-05**: User can filter the SKU list by status (needs review, approved, all) and by platform
 
-### Data Quality & Validation
+### Image Workflow (IMG)
 
-- [ ] **VALID-01**: System validates completeness (actual SKU count vs expected 2,784)
-- [ ] **VALID-02**: System checks data freshness (baselines <60 days, search terms <7 days)
-- [ ] **VALID-03**: System detects multi-SKU families via product_id matching
-- [ ] **VALID-04**: System prevents baseline capture for SKUs published in last 30 days
-- [ ] **VALID-05**: System validates schema at collection time using Pydantic models
-- [ ] **VALID-06**: System performs range checks (CTR 0-1, clicks <= impressions)
-- [ ] **VALID-07**: System sets job status to 'partial' if success_count < 95%
-- [ ] **VALID-08**: System flags aggregated data for multi-SKU families in database
-- [ ] **VALID-09**: System validates date boundaries don't overlap publish events
-- [ ] **VALID-10**: System detects statistical outliers in collected metrics
+- [ ] **IMG-01**: User can manually select which finish/variant to use when generating a lifestyle image for a SKU
+- [ ] **IMG-02**: When no variant is manually selected, system auto-selects the Google Ads variant with the most impressions (not a fixed heuristic like "first finish" or "fire engine red")
+- [ ] **IMG-03**: User can see which Google Ads variants for a SKU have an associated lifestyle image vs. are missing one
+- [ ] **IMG-04**: Image generation uses user-selected variant instead of overriding with auto-selection logic
 
-### Monitoring & Automation
+### Performance Page (PERF)
 
-- [ ] **MON-01**: Dashboard displays batch job status and progress
-- [ ] **MON-02**: Dashboard shows coverage metrics (X/2,784 SKUs with data)
-- [ ] **MON-03**: Dashboard displays data freshness heatmap
-- [ ] **MON-04**: Dashboard tracks API health (latency, error rates, rate limits)
-- [ ] **MON-05**: System sends email alerts on job failure
-- [ ] **MON-06**: System sends Slack notifications on job completion
-- [ ] **MON-07**: System automatically triggers backfill for missing SKU data
-- [ ] **MON-08**: System implements incremental refresh (daily 1-day queries after initial 180-day backfill)
-- [ ] **MON-09**: System logs structured events with request_id context
-- [ ] **MON-10**: System exports Prometheus metrics (job progress, API latency, errors)
+- [ ] **PERF-01**: Performance page shows a clear before/after comparison (baseline vs. latest snapshot) per published SKU
+- [ ] **PERF-02**: User can see days-since-publish alongside metric deltas (CTR, impressions, clicks, CVR)
+- [ ] **PERF-03**: Page visually surfaces which SKUs are trending up vs. down since publish
+
+### Dashboard Audit (DASH)
+
+- [ ] **DASH-01**: Each dashboard page either displays useful, current data or surfaces a clear next action — no dead-end empty states
+- [ ] **DASH-02**: Pages with stale or broken data are identified and fixed
+- [ ] **DASH-03**: Pages or features that don't serve current workflow are simplified or removed
+
+### Visual Verification (VER)
+
+- [ ] **VER-01**: All UI changes are visually inspected using browser automation (agent-browser) before being marked complete — executor must confirm changes render correctly and features work end-to-end in the live dashboard
 
 ## v2 Requirements
 
-Deferred to future release. Tracked but not in current roadmap.
+### Image Coverage
+- **IMG-05**: Every Google Ads variant for published SKUs has an associated lifestyle image
+- **IMG-06**: Bulk image generation with per-variant targeting across catalog
 
-### Optimization
-
-- **OPT-01**: System adapts batch size based on API latency (smart batching)
-- **OPT-02**: System implements dead letter queue for failed items
-- **OPT-03**: System processes date ranges in parallel (parallel window processing)
-- **OPT-04**: System analyzes historical trends for pattern detection
-- **OPT-05**: System predicts SKU performance based on historical data
-
-### Advanced Monitoring
-
-- **ADV-01**: System detects anomalies in collected metrics
-- **ADV-02**: System provides SLA tracking dashboards
-- **ADV-03**: System generates automated quality reports
-- **ADV-04**: System implements canary deployments for backfill changes
+### Advanced Performance
+- **PERF-04**: Performance trend charts over time (7d, 30d, 90d windows)
+- **PERF-05**: Automated alerts when a published SKU underperforms baseline
 
 ## Out of Scope
 
-Explicitly excluded. Documented to prevent scope creep.
-
 | Feature | Reason |
 |---------|--------|
-| Real-time data streaming | Keyword Planner rate-limited, data updates monthly. Batch collection sufficient. |
-| Offset-based pagination | Google Ads API only supports token-based via SearchStream |
-| Parallel worker architecture | Sequential completes in 5-7 min. Parallelism adds 80% effort for 20% time savings at current scale. |
-| Granular job cancellation | Cloud Run background tasks don't support graceful cancellation |
-| Custom retry policies per API | Google Ads SDK already implements optimal exponential backoff |
-| Sub-second progress updates | Causes write amplification. Update every 10 SKUs or 5 seconds instead. |
-| Multi-account management | Single account (6253381786) sufficient for v1.0 |
-| Advanced ML models | Manual prompts first, defer ML to v2+ |
-| Mobile app | Web dashboard sufficient for v1.0 |
-| Competitive intelligence beyond own metrics | Auction insights API unavailable |
+| Batch management redesign | Rarely used — only simplify/remove if audit flags it |
+| Mobile app / native integrations | Web dashboard sufficient |
+| New content generation features | Separate milestone scope |
+| Multi-account Google Ads | Single account: 6253381786 |
+| Real-time data streaming | Batch collection sufficient |
 
 ## Traceability
 
@@ -99,55 +66,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| JOB-01 | Phase 1 | Pending |
-| JOB-02 | Phase 1 | Pending |
-| JOB-03 | Phase 1 | Pending |
-| JOB-04 | Phase 1 | Pending |
-| JOB-05 | Phase 1 | Pending |
-| JOB-06 | Phase 1 | Pending |
-| JOB-07 | Phase 1 | Pending |
-| JOB-08 | Phase 1 | Pending |
-| JOB-09 | Phase 1 | Pending |
-| JOB-10 | Phase 1 | Pending |
-| DATA-01 | Phase 2 | Pending |
-| DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
-| DATA-04 | Phase 2 | Pending |
-| DATA-05 | Phase 2 | Pending |
-| DATA-06 | Phase 1 | Pending |
-| DATA-07 | Phase 1 | Pending |
-| DATA-08 | Phase 1 | Pending |
-| DATA-09 | Phase 2 | Pending |
-| DATA-10 | Phase 2 | Pending |
-| VALID-01 | Phase 3 | Pending |
-| VALID-02 | Phase 3 | Pending |
-| VALID-03 | Phase 3 | Pending |
-| VALID-04 | Phase 3 | Pending |
-| VALID-05 | Phase 3 | Pending |
-| VALID-06 | Phase 3 | Pending |
-| VALID-07 | Phase 3 | Pending |
-| VALID-08 | Phase 3 | Pending |
-| VALID-09 | Phase 3 | Pending |
-| VALID-10 | Phase 3 | Pending |
-| MON-01 | Phase 4 | Pending |
-| MON-02 | Phase 4 | Pending |
-| MON-03 | Phase 4 | Pending |
-| MON-04 | Phase 4 | Pending |
-| MON-05 | Phase 4 | Pending |
-| MON-06 | Phase 4 | Pending |
-| MON-07 | Phase 4 | Pending |
-| MON-08 | Phase 4 | Pending |
-| MON-09 | Phase 4 | Pending |
-| MON-10 | Phase 4 | Pending |
+| SKUR-01 | TBD | Pending |
+| SKUR-02 | TBD | Pending |
+| SKUR-03 | TBD | Pending |
+| SKUR-04 | TBD | Pending |
+| SKUR-05 | TBD | Pending |
+| IMG-01 | TBD | Pending |
+| IMG-02 | TBD | Pending |
+| IMG-03 | TBD | Pending |
+| IMG-04 | TBD | Pending |
+| PERF-01 | TBD | Pending |
+| PERF-02 | TBD | Pending |
+| PERF-03 | TBD | Pending |
+| DASH-01 | TBD | Pending |
+| DASH-02 | TBD | Pending |
+| DASH-03 | TBD | Pending |
+| VER-01 | All phases | Pending |
 
 **Coverage:**
-- v1 requirements: 40 total
-- Mapped to phases: 40 (100% coverage)
-- Phase 1: 13 requirements
-- Phase 2: 7 requirements
-- Phase 3: 10 requirements
-- Phase 4: 10 requirements
+- v1.1 requirements: 16 total
+- Mapped to phases: TBD (roadmapper will assign)
+- Unmapped: 16 ⚠️ (pending roadmap)
 
 ---
-*Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 (roadmap created, 100% coverage validated)*
+*Requirements defined: 2026-02-18*
+*Last updated: 2026-02-18 after initial v1.1 definition*
