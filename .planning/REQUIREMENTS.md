@@ -14,7 +14,7 @@ All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10)
 - [x] **SKUR-01**: User sees a stats summary bar at the top of the SKU review page showing counts by status and platform (approved, pending, not started — per Google/Bing)
 - [x] **SKUR-02**: SKUs display in a compact list format where status is visible without per-SKU vertical scrolling
 - [x] **SKUR-03**: Per-platform approval status (Google / Bing) is visible inline for each SKU row in the list
-- [ ] **SKUR-04**: User can click into a SKU to expand full detail while keeping list context visible
+- [x] **SKUR-04**: User can click into a SKU to expand full detail while keeping list context visible
 - [x] **SKUR-05**: User can filter the SKU list by status (needs review, approved, all) and by platform
 
 ### Image Workflow (IMG)
@@ -38,7 +38,7 @@ All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10)
 
 ### Visual Verification (VER)
 
-- [ ] **VER-01**: All UI changes are visually inspected using browser automation (agent-browser) before being marked complete — executor must confirm changes render correctly and features work end-to-end in the live dashboard
+- [x] **VER-01**: All UI changes are visually inspected using browser automation (agent-browser) before being marked complete — executor must confirm changes render correctly and features work end-to-end in the live dashboard
 
 ## v2 Requirements
 
@@ -69,7 +69,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SKUR-01 | Phase 9 | Complete |
 | SKUR-02 | Phase 9 | Complete |
 | SKUR-03 | Phase 9 | Complete |
-| SKUR-04 | Phase 9 | Pending |
+| SKUR-04 | Phase 9 | Complete |
 | SKUR-05 | Phase 9 | Complete |
 | IMG-01 | Phase 10 | Pending |
 | IMG-02 | Phase 10 | Pending |
@@ -81,7 +81,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-01 | Phase 12 | Pending |
 | DASH-02 | Phase 12 | Pending |
 | DASH-03 | Phase 12 | Pending |
-| VER-01 | All phases (9–12) | Pending |
+| VER-01 | All phases (9–12) | Complete |
 
 **Coverage:**
 - v1.1 requirements: 16 total

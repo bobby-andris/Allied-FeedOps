@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 9 — SKU Review Revamp
-Plan: 3 of 5
-Status: Executing — Plan 09-02 complete
-Last activity: 2026-02-18 — Plan 09-02 complete (stats bar + filter controls wired to URL params)
+Plan: 3 of 5 — COMPLETE
+Status: Phase 9 complete (all 3 plans executed)
+Last activity: 2026-02-18 — Plan 09-03 complete (inline expand/collapse, quick approve, image lifecycle badges)
 
-Progress: [████░░░░░░] 40% (v1.1 milestone, 2/5 plans in Phase 9)
+Progress: [██████░░░░] 60% (v1.1 milestone, 3/5 plans in Phase 9)
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [████░░░░░░] 40% (v1.1 milestone, 2/5 plans in Pha
 *Updated after each plan completion*
 | Phase 09-sku-review-revamp P01 | 3 | 2 tasks | 3 files |
 | Phase 09-sku-review-revamp P02 | 3 | 2 tasks | 1 file |
+| Phase 09-sku-review-revamp P03 | 47 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -269,6 +270,10 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 09-sku-review-revamp]: ReviewListClient pattern: server page fetches enriched data, passes as props to 'use client' compact row component — replaces Tabs/Card layout (Plan 09-01)
 - [Phase 09-sku-review-revamp]: Filter state lives in URL search params (?status=...&platform=...) via router.replace; applyFilter shared by stats bar and dropdowns for consistent behavior (Plan 09-02)
 - [Phase 09-sku-review-revamp]: Stats computed client-side from platform_progress.state — no additional API calls; 4-state URL values: needs-review/partial/approved/published (Plan 09-02)
+- [Phase 09-sku-review-revamp]: Optimistic approval update with rollback — badge changes instantly on Mark Approved click; reverts if API fails (Plan 09-03)
+- [Phase 09-sku-review-revamp]: expandedSku as single string (not array) enforces one-row-open-at-a-time without extra logic (Plan 09-03)
+- [Phase 09-sku-review-revamp]: get_catalog_thumbnails RPC replaces direct product_catalog table query to bypass PostgREST 1000-row default limit (Plan 09-03)
+- [Phase 09-sku-review-revamp]: LifestyleImageLifecycle (total/approved/published) added inline as ImageRowBadge per row and LifestyleImageBadge in preview panel (Plan 09-03)
 
 ### Pending Todos
 
@@ -287,9 +292,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-18 — Plan 09-02 complete (stats bar + filter controls wired to URL params)
-Stopped at: Completed 09-sku-review-revamp-09-02-PLAN.md
+Last session: 2026-02-18 — Plan 09-03 complete (inline expand/collapse, quick approve, image lifecycle badges, RPC fix)
+Stopped at: Completed 09-sku-review-revamp-09-03-PLAN.md
 Resume file: None
 
 ---
-*Next step:* Execute Plan 09-03 (inline approval actions)
+*Next step:* Phase 9 complete — all 3 plans executed. Proceed to Phase 10 or next v1.1 phase.
