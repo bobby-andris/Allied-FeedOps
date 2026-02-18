@@ -8,24 +8,20 @@ A Google Ads feed optimization platform that automatically collects search perfo
 
 Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation, enabling data-driven optimization at scale for the entire catalog.
 
-## Current Milestone: v1.0 Historical Data Backfill
+## Current Milestone: v1.1 Dashboard UX & Quality
 
-**Goal:** Execute comprehensive Google Ads historical data backfill for all 2,784 SKUs with production-ready monitoring and validation.
+**Goal:** Revamp the dashboard to make the core review, image, and performance workflows fast, clear, and actually useful — with a full audit pass to fix broken pages and eliminate dead-end experiences.
 
-**Target capabilities:**
-- Campaign-join pattern for product-specific search term collection
-- Optimal batch sizing (size 10) for 127ms p95 query performance
-- Keyword Planner integration for ALL SKUs (addressing 43% coverage gap)
-- Custom label sync pipeline from Google Merchant Center
-- 180-day historical backfill across search terms and performance metrics
-- Monitoring & alerting pipeline with automated schedules
-- Data quality validation (completeness, accuracy, freshness)
-- Performance dashboards for tracking backfill progress
-- Incremental refresh strategy for ongoing data sync
+**Target features:**
+- SKU review page revamp: stats bar + compact list with per-platform status badges, dramatically less scrolling
+- Image workflow: user-controlled variant selection for lifestyle image generation; Google variant coverage view; auto-select by impressions only as fallback
+- Performance page: better before/after visualization using real snapshot data (44 snapshots, 36 SKUs)
+- Dashboard audit: fix pages with stale/broken data, rethink pages that don't serve current workflow
 
-**Timeline:** 2-3 weeks (comprehensive approach)
-
-**Success metric:** All 2,784 SKUs have 180 days of search terms, performance data, and Keyword Planner opportunities with ongoing automated collection.
+**Success criteria:**
+1. Can review and approve 10 SKUs in under 5 minutes
+2. Catalog health visible at a glance from any page
+3. Every page shows useful data or has a clear next action — no dead ends
 
 ## Requirements
 
@@ -42,9 +38,11 @@ Phase 0 validated Google Ads API capabilities with GO recommendation (4.65/5 con
 - ✓ **SAMP-01 through SAMP-06**: 6 sample SKUs tested, 60K+ search terms validated
 - ✓ **DOC-01 through DOC-06**: Comprehensive API reference created with Go/No-Go decision
 
-### Active (v1.0 - In Planning)
+### Validated (v1.0 - Complete)
 
-Currently defining requirements for v1.0 milestone. Will be populated during requirements gathering phase.
+- ✓ **v1.0**: Full Google Ads data pipeline operational — search terms, performance metrics, Keyword Planner for all 2,784 SKUs with monitoring, validation, and daily automated refresh
+
+### Active (v1.1 - In Progress)
 
 ### Out of Scope
 
@@ -114,4 +112,4 @@ Phase 0 validated API feasibility through 4 phases:
 | Batch size 10 (not 50K LIMIT) | Optimal throughput (127ms/SKU p95) vs retry granularity | — Pending (v1.0 will validate at scale) |
 
 ---
-*Last updated: 2026-02-13 after Phase 0 completion and v1.0 milestone initialization*
+*Last updated: 2026-02-18 after v1.0 completion and v1.1 milestone initialization*
