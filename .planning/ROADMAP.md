@@ -173,13 +173,12 @@ Plans:
   4. User can click a SKU row to expand full detail inline while retaining list context (no full-page navigation away)
   5. All three SkuReviewClient variants (main, magazine, original) render correctly and all UI changes verified via agent-browser in the live dashboard
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 09-01: Stats summary bar component — counts by status and platform at page top
-- [ ] 09-02: Compact list view with per-platform status badges — replace scrolling per-SKU layout
-- [ ] 09-03: Filter controls (status, platform) wired to list state
-- [ ] 09-04: Inline expand/collapse for SKU detail — keep list context visible
+- [ ] 09-01-PLAN.md — Compact list rows with per-platform status badges + ReviewListClient component
+- [ ] 09-02-PLAN.md — Stats summary bar + filter controls wired to URL state
+- [ ] 09-03-PLAN.md — Inline expand/collapse row preview + browser verification
 
 ### Phase 10: Image Workflow Improvements
 **Goal**: Users control which variant is used for lifestyle image generation, and can see which variants are missing images
