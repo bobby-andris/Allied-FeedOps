@@ -256,15 +256,14 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 
 ### Pending Todos
 
-| # | Title | Area | File |
-|---|-------|------|------|
-| 1 | Backfill performance snapshots and improve Performance page | ui | [2026-02-18-backfill-performance-snapshots-and-improve-performance-page.md](.planning/todos/pending/2026-02-18-backfill-performance-snapshots-and-improve-performance-page.md) |
+None.
 
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Add backfill monitoring to sidebar, check performance snapshots data, set up Cloud Scheduler for daily snapshot capture | 2026-02-18 | 758d344f | [1-add-backfill-monitoring-to-sidebar-check](.planning/quick/1-add-backfill-monitoring-to-sidebar-check/) |
+| 2 | Fix capture-snapshot bugs (published_at column, action filter), middleware bypass for cron, backfill 44 snapshots for 36 SKUs | 2026-02-18 | aebbc10e | [2-backfill-performance-snapshots-and-impro](.planning/quick/2-backfill-performance-snapshots-and-impro/) |
 
 ### Blockers/Concerns
 
@@ -277,8 +276,8 @@ None. Phase 0 issued GO recommendation with 4.65/5 confidence.
 
 ## Session Continuity
 
-Last session: 2026-02-18 — Completed quick task 1: sidebar + performance snapshots + Cloud Scheduler
-Stopped at: Quick task 1 complete
+Last session: 2026-02-18 — Completed quick task 2: fixed capture-snapshot bugs + backfilled 44 performance snapshots
+Stopped at: Quick task 2 complete
 Resume file: None
 
 ---
