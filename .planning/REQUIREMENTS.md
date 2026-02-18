@@ -12,8 +12,8 @@ All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10)
 ### SKU Review (SKUR)
 
 - [ ] **SKUR-01**: User sees a stats summary bar at the top of the SKU review page showing counts by status and platform (approved, pending, not started — per Google/Bing)
-- [ ] **SKUR-02**: SKUs display in a compact list format where status is visible without per-SKU vertical scrolling
-- [ ] **SKUR-03**: Per-platform approval status (Google / Bing) is visible inline for each SKU row in the list
+- [x] **SKUR-02**: SKUs display in a compact list format where status is visible without per-SKU vertical scrolling
+- [x] **SKUR-03**: Per-platform approval status (Google / Bing) is visible inline for each SKU row in the list
 - [ ] **SKUR-04**: User can click into a SKU to expand full detail while keeping list context visible
 - [ ] **SKUR-05**: User can filter the SKU list by status (needs review, approved, all) and by platform
 
@@ -67,8 +67,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SKUR-01 | Phase 9 | Pending |
-| SKUR-02 | Phase 9 | Pending |
-| SKUR-03 | Phase 9 | Pending |
+| SKUR-02 | Phase 9 | Complete |
+| SKUR-03 | Phase 9 | Complete |
 | SKUR-04 | Phase 9 | Pending |
 | SKUR-05 | Phase 9 | Pending |
 | IMG-01 | Phase 10 | Pending |
