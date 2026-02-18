@@ -1,8 +1,9 @@
 'use client'
 
+import { useMemo, useCallback } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -97,31 +98,136 @@ function SkuThumbnail({ url, sku }: { url: string | null; sku: string }) {
 }
 
 export function ReviewListClient({ skus }: ReviewListClientProps) {
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const activeStatus = searchParams.get('status') ?? 'all'
+  const activePlatform = searchParams.get('platform') ?? 'all'
+
+  const applyFilter = useCallback((status: string, platform: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (status === 'all') params.delete('status')
+    else params.set('status', status)
+    if (platform === 'all') params.delete('platform')
+    else params.set('platform', platform)
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }, [searchParams, pathname, router])
+
+  // Compute per-platform 4-state counts from already-fetched SKU data
+  const stats = useMemo(() => {
+    const platforms = ['google', 'bing', 'shopify'] as const
+    return platforms.map(platform => {
+      const platformProgress = skus.map(sku =>
+        sku.platform_progress.find(p => p.platform === platform)
+      )
+      return {
+        platform,
+        label: platform === 'google' ? 'Google' : platform === 'bing' ? 'Bing' : 'Shopify',
+        needsReview: platformProgress.filter(p => p?.state === 'blocked').length,
+        partial: platformProgress.filter(p => p?.state === 'partial').length,
+        approved: platformProgress.filter(p => p?.state === 'ready').length,
+        published: platformProgress.filter(p => p?.state === 'published').length,
+      }
+    })
+  }, [skus])
+
+  // Filter SKUs by active status and platform
+  const filteredSkus = useMemo(() => {
+    return skus.filter(sku => {
+      const platformsToCheck = activePlatform === 'all'
+        ? sku.platform_progress
+        : sku.platform_progress.filter(p => p.platform === activePlatform)
+
+      if (activeStatus === 'all') return true
+
+      const targetState = activeStatus === 'needs-review' ? 'blocked'
+        : activeStatus === 'partial' ? 'partial'
+        : activeStatus === 'approved' ? 'ready'
+        : 'published' // activeStatus === 'published'
+
+      return platformsToCheck.some(p => p.state === targetState)
+    })
+  }, [skus, activeStatus, activePlatform])
+
   return (
     <div>
-      {/* Filter bar (visual structure — wired in Plan 09-02) */}
-      <div className="flex items-center gap-3 mb-4">
-        <Input
-          placeholder="Search SKUs..."
-          className="max-w-sm"
-          readOnly
-        />
-        <Select defaultValue="all-status">
+      {/* Stats summary bar */}
+      <div className="grid grid-cols-3 gap-3 mb-4 p-4 bg-muted/30 rounded-lg">
+        {stats.map(s => (
+          <div key={s.platform} className="space-y-2">
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {s.label}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => applyFilter('needs-review', s.platform)}
+                className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                {s.needsReview} Needs Review
+              </button>
+              <button
+                onClick={() => applyFilter('partial', s.platform)}
+                className="text-xs px-2 py-1 rounded bg-yellow-100 hover:bg-yellow-200 transition-colors"
+              >
+                {s.partial} Partial
+              </button>
+              <button
+                onClick={() => applyFilter('approved', s.platform)}
+                className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 transition-colors"
+              >
+                {s.approved} Approved
+              </button>
+              <button
+                onClick={() => applyFilter('published', s.platform)}
+                className="text-xs px-2 py-1 rounded bg-green-100 hover:bg-green-200 transition-colors"
+              >
+                {s.published} Published
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter bar */}
+      <div className="flex gap-3 mb-4">
+        <Select value={activeStatus} onValueChange={v => applyFilter(v, activePlatform)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all-status">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="needs-review">Needs Review</SelectItem>
+            <SelectItem value="partial">Partial</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
           </SelectContent>
         </Select>
-        <Select defaultValue="all-platforms">
+
+        <Select value={activePlatform} onValueChange={v => applyFilter(activeStatus, v)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="All Platforms" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all-platforms">All Platforms</SelectItem>
+            <SelectItem value="all">All Platforms</SelectItem>
+            <SelectItem value="google">Google</SelectItem>
+            <SelectItem value="bing">Bing</SelectItem>
+            <SelectItem value="shopify">Shopify</SelectItem>
           </SelectContent>
         </Select>
+
+        {(activeStatus !== 'all' || activePlatform !== 'all') && (
+          <button
+            onClick={() => applyFilter('all', 'all')}
+            className="text-sm text-muted-foreground hover:text-foreground px-2"
+          >
+            Clear filters
+          </button>
+        )}
+
+        <span className="ml-auto text-sm text-muted-foreground self-center">
+          {filteredSkus.length} of {skus.length} SKUs
+        </span>
       </div>
 
       {/* Column header row */}
@@ -140,12 +246,12 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
 
       {/* SKU rows */}
       <div className="divide-y divide-border/40">
-        {skus.length === 0 ? (
+        {filteredSkus.length === 0 ? (
           <div className="px-4 py-8 text-center text-muted-foreground text-sm">
             No SKUs found
           </div>
         ) : (
-          skus.map((sku) => (
+          filteredSkus.map((sku) => (
             <Link
               key={sku.master_sku}
               href={`/review/${skuToUrlPath(sku.master_sku)}`}
