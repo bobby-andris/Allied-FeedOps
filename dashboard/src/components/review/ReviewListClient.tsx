@@ -15,6 +15,7 @@ import { skuToUrlPath } from "@/lib/sku-utils"
 import type { PlatformProgress } from "@/lib/review/platform-progress"
 import type { PlatformContentState } from "@/lib/review/platform-progress"
 import type { Platform } from "@/lib/publishing/types"
+import type { LifestyleImageLifecycle } from "@/app/(dashboard)/review/page"
 
 interface SkuRow {
   master_sku: string
@@ -24,6 +25,7 @@ interface SkuRow {
   avg_quality_score: number | null
   platform_progress: PlatformProgress[]
   per_platform_approval: Partial<Record<Platform, PlatformContentState>>
+  lifestyle_images: LifestyleImageLifecycle
 }
 
 interface ReviewListClientProps {
@@ -110,6 +112,84 @@ function SkuThumbnail({ url, sku }: { url: string | null; sku: string }) {
 
 const PLATFORMS: Platform[] = ['google', 'bing', 'shopify']
 
+// Compact inline badge for the list row
+function ImageRowBadge({ images }: { images: LifestyleImageLifecycle }) {
+  const { total, approved, published } = images
+  if (published > 0) {
+    return (
+      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
+        Img: Published
+      </span>
+    )
+  }
+  if (approved > 0) {
+    return (
+      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">
+        Img: Approved
+      </span>
+    )
+  }
+  if (total > 0) {
+    return (
+      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
+        Img: Generated
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">
+      Img: None
+    </span>
+  )
+}
+
+// Full panel badge with counts and guidance text
+function LifestyleImageBadge({ images }: { images: LifestyleImageLifecycle }) {
+  const { total, approved, published } = images
+
+  if (total === 0) {
+    return (
+      <div className="flex items-center gap-2 pt-1 border-t border-border/20">
+        <span className="text-xs text-muted-foreground">Lifestyle image:</span>
+        <span className="text-xs px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-500">
+          None generated
+        </span>
+      </div>
+    )
+  }
+
+  if (published > 0) {
+    return (
+      <div className="flex items-center gap-2 pt-1 border-t border-border/20">
+        <span className="text-xs text-muted-foreground">Lifestyle image:</span>
+        <span className="text-xs px-2 py-0.5 rounded font-medium bg-green-100 text-green-800">
+          ✓ Published — {published}/{total} variant{total !== 1 ? 's' : ''} on Shopify
+        </span>
+      </div>
+    )
+  }
+
+  if (approved > 0) {
+    return (
+      <div className="flex items-center gap-2 pt-1 border-t border-border/20">
+        <span className="text-xs text-muted-foreground">Lifestyle image:</span>
+        <span className="text-xs px-2 py-0.5 rounded font-medium bg-blue-100 text-blue-800">
+          Approved — {approved}/{total} variant{total !== 1 ? 's' : ''}, not yet published
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 pt-1 border-t border-border/20">
+      <span className="text-xs text-muted-foreground">Lifestyle image:</span>
+      <span className="text-xs px-2 py-0.5 rounded font-medium bg-yellow-100 text-yellow-800">
+        Generated — {total} variant{total !== 1 ? 's' : ''}, needs approval
+      </span>
+    </div>
+  )
+}
+
 function SkuPreviewPanel({
   sku,
   optimisticApprovals,
@@ -122,61 +202,69 @@ function SkuPreviewPanel({
   onClose: () => void
 }) {
   return (
-    <div className="border-l-4 border-primary/30 bg-muted/20 p-4 ml-4">
-      {/* Product title */}
-      <div className="mb-3">
-        <p className="text-sm font-semibold">{sku.product_title ?? sku.master_sku}</p>
-        {sku.avg_quality_score !== null && (
-          <p className={`text-xs mt-0.5 ${getScoreColor(sku.avg_quality_score)}`}>
-            Quality score: {sku.avg_quality_score}
-          </p>
-        )}
-      </div>
-
-      {/* Per-platform status + approval buttons */}
-      <div className="space-y-2 mb-4">
-        {PLATFORMS.map(platform => {
-          const progress = sku.platform_progress.find(p => p.platform === platform)
-          const alreadyPublished = progress?.state === 'published'
-          const alreadyApproved = progress?.state === 'ready' || optimisticApprovals.has(platform)
-          const { className: badgeClass, label: stateLabel } = getPlatformBadgeStyle(progress?.state ?? 'blocked')
-          const platformLabel = getPlatformLabel(platform)
-          return (
-            <div key={platform} className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded font-medium ${badgeClass}`}>
-                {platformLabel}: {stateLabel}
-              </span>
-              {!alreadyPublished && !alreadyApproved && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onApprove(platform) }}
-                  className="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                  Mark Approved
-                </button>
-              )}
-              {alreadyApproved && !alreadyPublished && (
-                <span className="text-xs text-blue-600 font-medium">Approved</span>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Actions row */}
-      <div className="flex items-center gap-4">
+    <div className="border-l-4 border-primary/30 bg-muted/20 ml-4">
+      {/* Header row: title + prominent Open Full Review button */}
+      <div className="flex items-start justify-between gap-4 px-4 pt-4 pb-3 border-b border-border/30">
+        <div>
+          <p className="text-sm font-semibold">{sku.product_title ?? sku.master_sku}</p>
+          {sku.avg_quality_score !== null && (
+            <p className={`text-xs mt-0.5 ${getScoreColor(sku.avg_quality_score)}`}>
+              Quality score: {sku.avg_quality_score}
+            </p>
+          )}
+        </div>
         <Link
           href={`/review/${skuToUrlPath(sku.master_sku)}`}
           onClick={(e) => e.stopPropagation()}
-          className="text-sm font-medium text-primary hover:underline"
+          className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
-          View full review →
+          Open Full Review
+          <ChevronRight className="h-3 w-3" />
         </Link>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClose() }}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          Close
-        </button>
+      </div>
+
+      <div className="px-4 py-3 space-y-3">
+        {/* Per-platform content status + approval buttons */}
+        <div className="space-y-2">
+          {PLATFORMS.map(platform => {
+            const progress = sku.platform_progress.find(p => p.platform === platform)
+            const alreadyPublished = progress?.state === 'published'
+            const alreadyApproved = progress?.state === 'ready' || optimisticApprovals.has(platform)
+            const { className: badgeClass, label: stateLabel } = getPlatformBadgeStyle(progress?.state ?? 'blocked')
+            const platformLabel = getPlatformLabel(platform)
+            return (
+              <div key={platform} className="flex items-center gap-2 flex-wrap">
+                <span className={`text-xs px-2 py-0.5 rounded font-medium ${badgeClass}`}>
+                  {platformLabel}: {stateLabel}
+                </span>
+                {!alreadyPublished && !alreadyApproved && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onApprove(platform) }}
+                    className="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  >
+                    Mark Approved
+                  </button>
+                )}
+                {alreadyApproved && !alreadyPublished && (
+                  <span className="text-xs text-blue-600 font-medium">Approved</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Lifestyle image lifecycle */}
+        <LifestyleImageBadge images={sku.lifestyle_images} />
+
+        {/* Close link */}
+        <div className="flex justify-end">
+          <button
+            onClick={(e) => { e.stopPropagation(); onClose() }}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -365,10 +453,11 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
         <div className="w-10 flex-shrink-0" />
         <div className="w-28 flex-shrink-0">SKU</div>
         <div className="flex-1 min-w-0">Product</div>
-        <div className="flex gap-1 flex-shrink-0 w-[210px]">
+        <div className="flex gap-1 flex-shrink-0">
           <span className="w-[66px] text-center">Google</span>
           <span className="w-[66px] text-center">Bing</span>
           <span className="w-[66px] text-center">Shopify</span>
+          <span className="w-[88px] text-center">Image</span>
         </div>
         <div className="w-8 text-right flex-shrink-0">Score</div>
         <div className="w-4 flex-shrink-0" />
@@ -397,6 +486,7 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
                   {sku.platform_progress.map((progress) => (
                     <PlatformBadge key={progress.platform} progress={progress} />
                   ))}
+                  <ImageRowBadge images={sku.lifestyle_images} />
                 </div>
                 <span className={`text-sm font-medium w-8 text-right flex-shrink-0 ${getScoreColor(sku.avg_quality_score)}`}>
                   {sku.avg_quality_score ?? '—'}

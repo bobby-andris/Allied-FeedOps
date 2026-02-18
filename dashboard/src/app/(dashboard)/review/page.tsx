@@ -11,6 +11,12 @@ import {
 import { ReviewListClient } from "@/components/review/ReviewListClient"
 import type { Platform } from "@/lib/publishing/types"
 
+export interface LifestyleImageLifecycle {
+  total: number      // variants with any lifestyle image
+  approved: number   // variants with approval_status = 'approved'
+  published: number  // variants uploaded to Shopify (shopify_media_id IS NOT NULL)
+}
+
 export interface SkuWithContent {
   master_sku: string
   approval_status: string | null
@@ -23,6 +29,7 @@ export interface SkuWithContent {
   product_title: string | null
   thumbnail_url: string | null
   per_platform_approval: Partial<Record<Platform, PlatformContentState>>
+  lifestyle_images: LifestyleImageLifecycle
 }
 
 interface GeneratedContentRow {
@@ -51,6 +58,7 @@ interface VariantImageRow {
   finish: string | null
   approval_status: string | null
   user_selected: boolean | null
+  shopify_media_id: string | null
 }
 
 interface PublishEventRow {
@@ -124,7 +132,7 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
 
   const { data: variantImages, error: variantImagesError } = await supabase
     .from('variant_lifestyle_images')
-    .select('master_sku, finish, approval_status, user_selected')
+    .select('master_sku, finish, approval_status, user_selected, shopify_media_id')
     .in('master_sku', skuList)
 
   if (variantImagesError) {
@@ -145,12 +153,12 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
     console.error('Error fetching publish events:', publishEventsError)
   }
 
-  // Get product catalog data (title + thumbnail).
+  // Get product catalog data (title + thumbnail) via RPC.
+  // Uses DISTINCT ON (master_sku) server-side so we get exactly one row per SKU regardless of
+  // how many finish variants exist — no PostgREST 1000-row limit issues.
+  // ABR (Antique Brass) is selected as the thumbnail: alphabetically first image URL per SKU.
   const { data: catalogRows } = await supabase
-    .from('product_catalog')
-    .select('master_sku, title, main_image_url')
-    .in('master_sku', skuList)
-    .not('main_image_url', 'is', null)
+    .rpc('get_catalog_thumbnails', { sku_list: skuList })
 
   // Get per-platform approval state (only approved content) for all SKUs.
   const { data: contentApprovalRows } = await supabase
@@ -202,12 +210,10 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
     contentApprovalBySku.set(row.master_sku, bucket)
   }
 
-  // Build catalog lookup by SKU.
+  // Build catalog lookup by SKU (RPC returns one row per SKU — no dedup needed).
   const catalogBySku = new Map<string, CatalogRow>()
   for (const row of catalogRows || []) {
-    if (!catalogBySku.has(row.master_sku)) {
-      catalogBySku.set(row.master_sku, row)
-    }
+    catalogBySku.set(row.master_sku, row)
   }
 
   // Build result
@@ -233,6 +239,13 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
     })
     const publishSnapshots = latestProductionPublishSnapshots(publishEventsBySku.get(sku) || [])
 
+    const skuVariantImages = variantImagesBySku.get(sku) || []
+    const lifestyleImages: LifestyleImageLifecycle = {
+      total: skuVariantImages.length,
+      approved: skuVariantImages.filter(img => img.approval_status === 'approved').length,
+      published: skuVariantImages.filter(img => img.shopify_media_id != null).length,
+    }
+
     result.push({
       master_sku: sku,
       approval_status: approval?.approval_status || 'pending',
@@ -245,6 +258,7 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
       product_title: catalogBySku.get(sku)?.title ?? null,
       thumbnail_url: catalogBySku.get(sku)?.main_image_url ?? null,
       per_platform_approval: perPlatformApproval,
+      lifestyle_images: lifestyleImages,
     })
   }
 
