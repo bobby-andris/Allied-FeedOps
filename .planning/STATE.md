@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 9 — SKU Review Revamp
-Plan: 2 of 5
-Status: Executing — Plan 09-01 complete
-Last activity: 2026-02-18 — Plan 09-01 complete (compact review list with 4-state badges)
+Plan: 3 of 5
+Status: Executing — Plan 09-02 complete
+Last activity: 2026-02-18 — Plan 09-02 complete (stats bar + filter controls wired to URL params)
 
-Progress: [██░░░░░░░░] 20% (v1.1 milestone, 1/5 plans in Phase 9)
+Progress: [████░░░░░░] 40% (v1.1 milestone, 2/5 plans in Phase 9)
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [██░░░░░░░░] 20% (v1.1 milestone, 1/5 plans in Pha
 
 *Updated after each plan completion*
 | Phase 09-sku-review-revamp P01 | 3 | 2 tasks | 3 files |
+| Phase 09-sku-review-revamp P02 | 3 | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -266,6 +267,8 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
    - Impact: DATA-09 requirement (collect where available)
 - [Phase 09-sku-review-revamp]: 4-state platform badge priority: published > ready > partial > blocked — partial only when one of title/description approved, not both (Plan 09-01)
 - [Phase 09-sku-review-revamp]: ReviewListClient pattern: server page fetches enriched data, passes as props to 'use client' compact row component — replaces Tabs/Card layout (Plan 09-01)
+- [Phase 09-sku-review-revamp]: Filter state lives in URL search params (?status=...&platform=...) via router.replace; applyFilter shared by stats bar and dropdowns for consistent behavior (Plan 09-02)
+- [Phase 09-sku-review-revamp]: Stats computed client-side from platform_progress.state — no additional API calls; 4-state URL values: needs-review/partial/approved/published (Plan 09-02)
 
 ### Pending Todos
 
@@ -284,9 +287,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-18 — Plan 09-01 complete (compact review list with 4-state badges)
-Stopped at: Completed 09-sku-review-revamp-09-01-PLAN.md
+Last session: 2026-02-18 — Plan 09-02 complete (stats bar + filter controls wired to URL params)
+Stopped at: Completed 09-sku-review-revamp-09-02-PLAN.md
 Resume file: None
 
 ---
-*Next step:* Execute Plan 09-02 (filter and search wiring)
+*Next step:* Execute Plan 09-03 (inline approval actions)
