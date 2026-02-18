@@ -45,10 +45,15 @@ export interface LatestPublishSnapshot {
 
 export interface PlatformProgress {
   platform: Platform
-  state: 'published' | 'ready' | 'blocked'
+  state: 'published' | 'partial' | 'ready' | 'blocked'
   ready: boolean
   blockerSummary: string | null
   publishedSnapshot: LatestPublishSnapshot | null
+}
+
+export interface PlatformContentState {
+  titleApproved: boolean
+  descriptionApproved: boolean
 }
 
 function isApprovedFlag(value: ApprovalFlag): boolean {
@@ -140,18 +145,43 @@ export function latestProductionPublishSnapshots(
   return snapshots
 }
 
+export function computeContentStateByPlatform(
+  contentRecords: ContentApprovalRecord[],
+): Partial<Record<Platform, PlatformContentState>> {
+  const result: Partial<Record<Platform, PlatformContentState>> = {}
+  for (const record of contentRecords) {
+    if (!isPlatform(record.platform)) continue
+    if (!result[record.platform]) result[record.platform] = { titleApproved: false, descriptionApproved: false }
+    if (record.content_type === 'title' && record.approved_content) result[record.platform]!.titleApproved = true
+    if (record.content_type === 'description' && record.approved_content) result[record.platform]!.descriptionApproved = true
+  }
+  return result
+}
+
 export function buildPlatformProgress(
   readiness: PlatformReadinessByPlatform,
   snapshots: Partial<Record<Platform, LatestPublishSnapshot>>,
+  contentState?: Partial<Record<Platform, PlatformContentState>>,
 ): PlatformProgress[] {
   return PLATFORM_ORDER.map((platform) => {
     const publishedSnapshot = snapshots[platform] ?? null
     const readinessResult = readiness[platform]
     const blockerSummary = readinessResult.blockers[0]?.actionableMessage ?? null
 
+    const cs = contentState?.[platform]
+    const isPartial = cs != null && (cs.titleApproved || cs.descriptionApproved) && !(cs.titleApproved && cs.descriptionApproved)
+
+    const state: PlatformProgress['state'] = publishedSnapshot
+      ? 'published'
+      : readinessResult.ready
+        ? 'ready'
+        : isPartial
+          ? 'partial'
+          : 'blocked'
+
     return {
       platform,
-      state: publishedSnapshot ? 'published' : readinessResult.ready ? 'ready' : 'blocked',
+      state,
       ready: readinessResult.ready,
       blockerSummary,
       publishedSnapshot,
