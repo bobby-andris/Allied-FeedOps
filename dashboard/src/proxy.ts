@@ -38,11 +38,16 @@ export async function proxy(request: NextRequest) {
   // - /login is always public
   // - /api GET requests are public (health checks, read-only queries)
   // - /api POST/PATCH/DELETE require authentication
+  // - Cron/scheduler endpoints are public (they use service role key internally)
   const isLoginPage = request.nextUrl.pathname.startsWith('/login')
   const isApiRoute = request.nextUrl.pathname.startsWith('/api')
   const isReadOnlyMethod = request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS'
+  const isCronEndpoint = [
+    '/api/performance/capture-snapshot',
+    '/api/monitoring/snapshot-capture',
+  ].includes(request.nextUrl.pathname)
 
-  const isPublicRoute = isLoginPage || (isApiRoute && isReadOnlyMethod)
+  const isPublicRoute = isLoginPage || (isApiRoute && isReadOnlyMethod) || isCronEndpoint
 
   // If not logged in and trying to access protected route, redirect to login
   if (!user && !isPublicRoute) {
