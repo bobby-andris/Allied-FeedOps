@@ -132,15 +132,27 @@ async def collect_search_terms_batch(batch: list[str]) -> list[dict]:
 
         logger.info(f"Validated {len(validated_terms)} terms (filtered out {len(filtered_terms) - len(validated_terms)} invalid)")
 
-        # Save to database with idempotent upserts
+        # Phase 13 fix: per-SKU delete before re-insert (clean slate strategy).
+        # Old rows used item_ids[0] for all terms — after fix, rows are per-variant.
+        # Deleting first ensures stale single-variant rows are removed.
+        # Safe for resume: only processed SKUs are deleted before their re-insert;
+        # un-processed SKUs retain original rows (distinguishable by synced_at=NULL).
         if validated_terms:
+            from feedops.db.supabase_client import get_client
+            supabase = get_client()
+
+            skus_with_data = list({t.get("master_sku") for t in validated_terms if t.get("master_sku")})
+            for sku in skus_with_data:
+                logger.info(f"Deleting existing search_queries rows for {sku} before re-insert")
+                supabase.table("search_queries").delete().eq("master_sku", sku).execute()
+
             saved_count = client.save_search_terms_to_db(
                 search_terms=validated_terms,
                 period_start=period_start,
                 period_end=period_end,
                 sync_job_id=None,  # Could pass job_id here if available
             )
-            logger.info(f"Saved {saved_count} search term records (upserted)")
+            logger.info(f"Saved {saved_count} search term records (delete + re-insert)")
 
         # Build result status for each SKU in batch
         results = []
