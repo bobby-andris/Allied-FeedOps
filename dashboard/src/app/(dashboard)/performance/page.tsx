@@ -3,12 +3,24 @@
 import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { TrendingUp, TrendingDown, RefreshCw, Download, AlertCircle, Loader2, Info } from "lucide-react"
+import {
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  AlertCircle,
+  Loader2,
+  Info,
+  Minus,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 
 // Types matching the API response
@@ -17,7 +29,10 @@ interface SkuPerformance {
   name: string
   platform: string
   publishedAt: string
-  shopifyProductId: string | null
+  daysSincePublish: number
+  hasSnapshot: boolean
+  baselineWindow: string
+  snapshotWindow: string
   baseline: {
     ctr: number
     cvr: number
@@ -35,6 +50,7 @@ interface SkuPerformance {
 interface PerformanceData {
   summary: {
     totalPublished: number
+    totalWithSnapshot: number
     avgCtrChange: number
     avgCvrChange: number
     totalImpressions: number
@@ -44,38 +60,87 @@ interface PerformanceData {
   warnings: string[]
 }
 
-function MetricChange({ baseline, current, format = 'percent' }: { 
+type SortColumn = 'impressions' | 'clicks' | 'ctr' | 'cvr' | 'days'
+type SortDir = 'asc' | 'desc'
+type FilterMode = 'published' | 'all'
+type TimeWindow = '7d' | '30d' | '60d'
+
+// ---- Sub-components ----
+
+function DeltaCell({
+  baseline,
+  current,
+  format,
+  hasSnapshot,
+}: {
   baseline: number
   current: number
-  format?: 'percent' | 'number' 
+  format: 'percent' | 'number'
+  hasSnapshot: boolean
 }) {
-  // Handle case where baseline is 0
-  if (baseline === 0) {
+  if (!hasSnapshot) {
+    const baselineStr = format === 'percent'
+      ? `${(baseline * 100).toFixed(2)}%`
+      : baseline.toLocaleString()
     return (
-      <div className="flex items-center gap-1">
-        <span className="text-muted-foreground">
-          {format === 'percent' ? `${current.toFixed(2)}%` : current.toLocaleString()}
-        </span>
-        <span className="text-xs text-muted-foreground">N/A</span>
+      <div className="space-y-0.5">
+        <div className="font-medium text-muted-foreground">{baselineStr}</div>
+        <Badge variant="outline" className="text-xs text-muted-foreground">No snapshot</Badge>
       </div>
     )
   }
 
-  const change = ((current - baseline) / baseline) * 100
-  const isPositive = change > 0
-  const isZero = change === 0
-  
+  // For percent format, values come as decimal (e.g. 0.045 = 4.5%)
+  const displayCurrent = format === 'percent'
+    ? `${(current * 100).toFixed(2)}%`
+    : current.toLocaleString()
+  const displayBaseline = format === 'percent'
+    ? `${(baseline * 100).toFixed(2)}%`
+    : baseline.toLocaleString()
+
+  const deltaPct = baseline > 0
+    ? ((current - baseline) / baseline) * 100
+    : null
+
+  const isPositive = deltaPct !== null && deltaPct >= 3
+  const isNegative = deltaPct !== null && deltaPct <= -3
+
+  const deltaColor = isPositive
+    ? 'text-green-600'
+    : isNegative
+    ? 'text-red-600'
+    : 'text-muted-foreground'
+
+  const deltaStr = deltaPct === null
+    ? '—'
+    : `${deltaPct >= 0 ? '+' : ''}${deltaPct.toFixed(1)}%`
+
   return (
-    <div className="flex items-center gap-1">
-      <span className={isZero ? 'text-muted-foreground' : isPositive ? 'text-green-600' : 'text-red-600'}>
-        {format === 'percent' ? `${current.toFixed(2)}%` : current.toLocaleString()}
-      </span>
-      <span className={`text-xs flex items-center ${isZero ? 'text-muted-foreground' : isPositive ? 'text-green-600' : 'text-red-600'}`}>
-        {!isZero && (isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />)}
-        {isZero ? '—' : `${change > 0 ? '+' : ''}${change.toFixed(1)}%`}
-      </span>
+    <div className="space-y-0.5">
+      <div className="font-medium">{displayCurrent}</div>
+      <div className="text-xs text-muted-foreground flex items-center gap-1">
+        <span>{displayBaseline} →</span>
+        <span className={deltaColor + ' font-medium'}>{deltaStr}</span>
+      </div>
     </div>
   )
+}
+
+function SortIcon({ column, sortColumn, sortDir }: { column: SortColumn; sortColumn: SortColumn; sortDir: SortDir }) {
+  if (sortColumn !== column) return <ArrowUpDown className="ml-1 h-3 w-3 inline text-muted-foreground" />
+  return sortDir === 'asc'
+    ? <ArrowUp className="ml-1 h-3 w-3 inline text-foreground" />
+    : <ArrowDown className="ml-1 h-3 w-3 inline text-foreground" />
+}
+
+function computeDelta(current: number, baseline: number): number {
+  return ((current - baseline) / Math.max(baseline, 0.0001)) * 100
+}
+
+function TrendIcon({ impressionsDelta }: { impressionsDelta: number }) {
+  if (impressionsDelta >= 3) return <TrendingUp className="h-4 w-4 text-green-600" />
+  if (impressionsDelta <= -3) return <TrendingDown className="h-4 w-4 text-red-600" />
+  return <Minus className="h-4 w-4 text-muted-foreground" />
 }
 
 function LoadingSkeleton() {
@@ -84,15 +149,15 @@ function LoadingSkeleton() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <Skeleton className="h-9 w-48 mb-2" />
-          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-5 w-72" />
         </div>
         <div className="flex gap-2">
-          <Skeleton className="h-10 w-[150px]" />
+          <Skeleton className="h-10 w-[120px]" />
+          <Skeleton className="h-10 w-[120px]" />
           <Skeleton className="h-10 w-24" />
-          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-32" />
         </div>
       </div>
-
       <div className="grid gap-4 md:grid-cols-5 mb-8">
         {[...Array(5)].map((_, i) => (
           <Card key={i}>
@@ -105,15 +170,13 @@ function LoadingSkeleton() {
           </Card>
         ))}
       </div>
-
       <Card>
         <CardHeader>
           <Skeleton className="h-6 w-32 mb-2" />
-          <Skeleton className="h-4 w-64" />
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
@@ -123,10 +186,9 @@ function LoadingSkeleton() {
   )
 }
 
-function ChangeIndicator({ value, label }: { value: number; label: string }) {
+function ChangeCard({ value, label }: { value: number; label: string }) {
   const isPositive = value > 0
   const isZero = value === 0 || isNaN(value)
-  
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -144,9 +206,175 @@ function ChangeIndicator({ value, label }: { value: number; label: string }) {
   )
 }
 
+function SortableHeader({
+  col,
+  sortColumn,
+  sortDir,
+  onSort,
+  children,
+}: {
+  col: SortColumn
+  sortColumn: SortColumn
+  sortDir: SortDir
+  onSort: (col: SortColumn) => void
+  children: React.ReactNode
+}) {
+  return (
+    <TableHead
+      className="cursor-pointer select-none hover:text-foreground whitespace-nowrap"
+      onClick={() => onSort(col)}
+    >
+      {children}
+      <SortIcon column={col} sortColumn={sortColumn} sortDir={sortDir} />
+    </TableHead>
+  )
+}
+
+function PerformanceTable({
+  skus,
+  filterMode,
+  sortColumn,
+  sortDir,
+  onSort,
+}: {
+  skus: SkuPerformance[]
+  filterMode: FilterMode
+  sortColumn: SortColumn
+  sortDir: SortDir
+  onSort: (col: SortColumn) => void
+}) {
+  // Apply filter
+  const filtered = filterMode === 'published'
+    ? skus.filter(s => s.hasSnapshot)
+    : skus
+
+  // Apply sort
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal: number
+    let bVal: number
+
+    if (sortColumn === 'days') {
+      aVal = a.daysSincePublish
+      bVal = b.daysSincePublish
+    } else if (sortColumn === 'impressions') {
+      aVal = computeDelta(a.current.impressions, a.baseline.impressions)
+      bVal = computeDelta(b.current.impressions, b.baseline.impressions)
+    } else if (sortColumn === 'clicks') {
+      aVal = computeDelta(a.current.clicks, a.baseline.clicks)
+      bVal = computeDelta(b.current.clicks, b.baseline.clicks)
+    } else if (sortColumn === 'ctr') {
+      aVal = computeDelta(a.current.ctr, a.baseline.ctr)
+      bVal = computeDelta(b.current.ctr, b.baseline.ctr)
+    } else {
+      // cvr
+      aVal = computeDelta(a.current.cvr, a.baseline.cvr)
+      bVal = computeDelta(b.current.cvr, b.baseline.cvr)
+    }
+
+    return sortDir === 'asc' ? aVal - bVal : bVal - aVal
+  })
+
+  if (sorted.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        No published SKUs with snapshot data for the selected window.
+        Try expanding the snapshot window or run capture-snapshot.
+      </div>
+    )
+  }
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[160px]">SKU</TableHead>
+          <TableHead>Platform</TableHead>
+          <SortableHeader col="days" sortColumn={sortColumn} sortDir={sortDir} onSort={onSort}>Published</SortableHeader>
+          <SortableHeader col="ctr" sortColumn={sortColumn} sortDir={sortDir} onSort={onSort}>CTR</SortableHeader>
+          <SortableHeader col="impressions" sortColumn={sortColumn} sortDir={sortDir} onSort={onSort}>Impressions</SortableHeader>
+          <SortableHeader col="clicks" sortColumn={sortColumn} sortDir={sortDir} onSort={onSort}>Clicks</SortableHeader>
+          <SortableHeader col="cvr" sortColumn={sortColumn} sortDir={sortDir} onSort={onSort}>CVR</SortableHeader>
+          <TableHead className="w-12">Trend</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sorted.map((sku) => {
+          const impressionsDelta = computeDelta(sku.current.impressions, sku.baseline.impressions)
+          return (
+            <TableRow
+              key={`${sku.sku}-${sku.platform}`}
+              className={!sku.hasSnapshot ? 'bg-muted/30' : undefined}
+            >
+              <TableCell>
+                <div className="font-medium">{sku.sku}</div>
+                <div className="text-xs text-muted-foreground truncate max-w-[150px]">{sku.name}</div>
+              </TableCell>
+              <TableCell>
+                <PlatformBadge platform={sku.platform as 'google' | 'bing' | 'shopify'} />
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                <div>{sku.publishedAt}</div>
+                <div className="text-xs text-muted-foreground">{sku.daysSincePublish}d ago</div>
+              </TableCell>
+              <TableCell>
+                <DeltaCell
+                  baseline={sku.baseline.ctr}
+                  current={sku.current.ctr}
+                  format="percent"
+                  hasSnapshot={sku.hasSnapshot}
+                />
+              </TableCell>
+              <TableCell>
+                <DeltaCell
+                  baseline={sku.baseline.impressions}
+                  current={sku.current.impressions}
+                  format="number"
+                  hasSnapshot={sku.hasSnapshot}
+                />
+              </TableCell>
+              <TableCell>
+                <DeltaCell
+                  baseline={sku.baseline.clicks}
+                  current={sku.current.clicks}
+                  format="number"
+                  hasSnapshot={sku.hasSnapshot}
+                />
+              </TableCell>
+              <TableCell>
+                {sku.baseline.cvr === 0 ? (
+                  <span className="text-muted-foreground text-sm" title="Low data">—</span>
+                ) : (
+                  <DeltaCell
+                    baseline={sku.baseline.cvr}
+                    current={sku.current.cvr}
+                    format="percent"
+                    hasSnapshot={sku.hasSnapshot}
+                  />
+                )}
+              </TableCell>
+              <TableCell>
+                {sku.hasSnapshot
+                  ? <TrendIcon impressionsDelta={impressionsDelta} />
+                  : <Minus className="h-4 w-4 text-muted-foreground opacity-40" />
+                }
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
+}
+
+// ---- Main Page ----
+
 export default function PerformancePage() {
-  const [dateRange, setDateRange] = useState<string>("30d")
-  const [platform, setPlatform] = useState<string>("all")
+  const [baselineWindow, setBaselineWindow] = useState<TimeWindow>('30d')
+  const [snapshotWindow, setSnapshotWindow] = useState<TimeWindow>('30d')
+  const [platform, setPlatform] = useState<string>('all')
+  const [filterMode, setFilterMode] = useState<FilterMode>('published')
+  const [sortColumn, setSortColumn] = useState<SortColumn>('days')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [data, setData] = useState<PerformanceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -161,14 +389,15 @@ export default function PerformancePage() {
     setError(null)
 
     try {
-      const platformParam = platform === 'all' ? '' : `&platform=${platform}`
-      const response = await fetch(`/api/performance?dateRange=${dateRange}${platformParam}`)
-      
+      const platformParam = platform !== 'all' ? `&platform=${platform}` : ''
+      const url = `/api/performance?baselineWindow=${baselineWindow}&snapshotWindow=${snapshotWindow}${platformParam}`
+      const response = await fetch(url)
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to fetch performance data')
       }
-      
+
       const result = await response.json()
       setData(result)
     } catch (err) {
@@ -177,47 +406,22 @@ export default function PerformancePage() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [dateRange, platform])
+  }, [baselineWindow, snapshotWindow, platform])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  const handleRefresh = () => {
-    fetchData(true)
+  const handleSort = (col: SortColumn) => {
+    if (sortColumn === col) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(col)
+      setSortDir('asc')
+    }
   }
 
-  const handleExport = () => {
-    if (!data) return
-    
-    // Create CSV content
-    const headers = ['SKU', 'Product', 'Platform', 'Published', 'Baseline CTR', 'Current CTR', 'Baseline CVR', 'Current CVR', 'Impressions', 'Clicks']
-    const rows = data.skus.map(sku => [
-      sku.sku,
-      sku.name,
-      sku.platform,
-      sku.publishedAt,
-      sku.baseline.ctr.toFixed(2),
-      sku.current.ctr.toFixed(2),
-      sku.baseline.cvr.toFixed(2),
-      sku.current.cvr.toFixed(2),
-      sku.current.impressions,
-      sku.current.clicks,
-    ])
-    
-    const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `performance-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  if (loading) {
-    return <LoadingSkeleton />
-  }
+  if (loading) return <LoadingSkeleton />
 
   if (error) {
     return (
@@ -236,59 +440,110 @@ export default function PerformancePage() {
   }
 
   const performanceData = data || {
-    summary: { totalPublished: 0, avgCtrChange: 0, avgCvrChange: 0, totalImpressions: 0, totalClicks: 0 },
+    summary: {
+      totalPublished: 0,
+      totalWithSnapshot: 0,
+      avgCtrChange: 0,
+      avgCvrChange: 0,
+      totalImpressions: 0,
+      totalClicks: 0,
+    },
     skus: [],
     warnings: [],
   }
 
-  // Filter SKUs by platform tab
-  const filteredSkus = platform === 'all' 
-    ? performanceData.skus 
-    : performanceData.skus.filter(sku => sku.platform === platform)
+  // Filter SKUs by platform tab (server already filters, but handle 'all' client-side too)
+  const tabSkus = platform === 'all'
+    ? performanceData.skus
+    : performanceData.skus.filter(s => s.platform === platform)
+
+  const windowOptions: { value: TimeWindow; label: string }[] = [
+    { value: '7d', label: '7 days' },
+    { value: '30d', label: '30 days' },
+    { value: '60d', label: '60 days' },
+  ]
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Performance</h1>
-          <p className="text-muted-foreground">
-            Track performance metrics for published master SKUs (aggregated across all variants/finishes)
+          <p className="text-muted-foreground mt-1">
+            Published SKU metrics: pre-publish baseline vs. post-publish snapshot
           </p>
         </div>
-        <div className="flex gap-2">
-          <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {/* Baseline window */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">Baseline</span>
+            <Select value={baselineWindow} onValueChange={(v) => setBaselineWindow(v as TimeWindow)}>
+              <SelectTrigger className="w-[110px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {windowOptions.map(o => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Snapshot window */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">Snapshot</span>
+            <Select value={snapshotWindow} onValueChange={(v) => setSnapshotWindow(v as TimeWindow)}>
+              <SelectTrigger className="w-[110px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {windowOptions.map(o => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Refresh */}
+          <Button variant="outline" onClick={() => fetchData(true)} disabled={refreshing}>
+            {refreshing
+              ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              : <RefreshCw className="h-4 w-4 mr-2" />
+            }
             Refresh
           </Button>
-          <Button variant="outline" onClick={handleExport} disabled={performanceData.skus.length === 0}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          {/* Filter toggle */}
+          <div className="flex rounded-md border overflow-hidden">
+            <button
+              className={`px-3 py-2 text-sm transition-colors ${
+                filterMode === 'published'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => setFilterMode('published')}
+            >
+              With snapshot
+            </button>
+            <button
+              className={`px-3 py-2 text-sm transition-colors ${
+                filterMode === 'all'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => setFilterMode('all')}
+            >
+              All SKUs
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Info Callout */}
+      {/* Info banner */}
       <Alert className="mb-4">
         <Info className="h-4 w-4" />
-        <AlertTitle>Master SKU Aggregated Performance</AlertTitle>
+        <AlertTitle>Snapshot-based comparison</AlertTitle>
         <AlertDescription>
-          Performance metrics are shown per master SKU and platform, aggregated across all finish variants.
-          Each master SKU typically has 28 variant finishes (e.g., Polished Brass, Satin Nickel, etc.).
-          For variant-level insights, see the <a href="/search-insights" className="underline font-medium">Search Insights</a> tab.
+          Metrics are sourced from stored performance snapshots, not live Google Ads data.
+          Baseline is the 30-day pre-publish window captured at optimization time.
+          The snapshot window shows the best snapshot captured within N days of publish.
         </AlertDescription>
       </Alert>
 
@@ -296,7 +551,7 @@ export default function PerformancePage() {
       {performanceData.warnings.length > 0 && (
         <div className="mb-4 space-y-2">
           {performanceData.warnings.map((warning, i) => (
-            <Alert key={i} variant="default">
+            <Alert key={i}>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{warning}</AlertDescription>
             </Alert>
@@ -304,27 +559,25 @@ export default function PerformancePage() {
         </div>
       )}
 
-      {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-5 mb-8">
+      {/* Summary cards */}
+      <div className="grid gap-4 md:grid-cols-5 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Published SKUs</CardTitle>
+            <CardTitle className="text-sm font-medium">SKUs with Snapshot</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{performanceData.summary.totalPublished}</div>
+            <div className="text-2xl font-bold">
+              {performanceData.summary.totalWithSnapshot}
+              <span className="text-sm font-normal text-muted-foreground ml-1">
+                / {performanceData.summary.totalPublished}
+              </span>
+            </div>
           </CardContent>
         </Card>
-        
-        <ChangeIndicator 
-          value={performanceData.summary.avgCtrChange} 
-          label="Avg CTR Change" 
-        />
-        
-        <ChangeIndicator 
-          value={performanceData.summary.avgCvrChange} 
-          label="Avg CVR Change" 
-        />
-        
+
+        <ChangeCard value={performanceData.summary.avgCtrChange} label="Avg CTR Change" />
+        <ChangeCard value={performanceData.summary.avgCvrChange} label="Avg CVR Change" />
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Impressions</CardTitle>
@@ -335,6 +588,7 @@ export default function PerformancePage() {
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
@@ -347,110 +601,74 @@ export default function PerformancePage() {
         </Card>
       </div>
 
-      {/* Platform Tabs */}
+      {/* Platform tabs */}
       <Tabs value={platform} onValueChange={setPlatform} className="space-y-4">
         <TabsList>
           <TabsTrigger value="all">All Platforms</TabsTrigger>
           <TabsTrigger value="google">Google</TabsTrigger>
           <TabsTrigger value="bing">Bing</TabsTrigger>
-          <TabsTrigger value="shopify">Shopify</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
-          <PerformanceTable skus={filteredSkus} />
+          <Card>
+            <CardHeader>
+              <CardTitle>SKU Performance</CardTitle>
+              <CardDescription>
+                Baseline vs. post-publish snapshot — all platforms
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PerformanceTable
+                skus={tabSkus}
+                filterMode={filterMode}
+                sortColumn={sortColumn}
+                sortDir={sortDir}
+                onSort={handleSort}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="google">
-          <PerformanceTable skus={filteredSkus} platform="google" />
+          <Card>
+            <CardHeader>
+              <CardTitle>Google SKU Performance</CardTitle>
+              <CardDescription>
+                Baseline vs. post-publish snapshot — Google Shopping
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PerformanceTable
+                skus={tabSkus}
+                filterMode={filterMode}
+                sortColumn={sortColumn}
+                sortDir={sortDir}
+                onSort={handleSort}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="bing">
-          <PerformanceTable skus={filteredSkus} platform="bing" />
-        </TabsContent>
-
-        <TabsContent value="shopify">
-          <PerformanceTable skus={filteredSkus} platform="shopify" />
+          <Card>
+            <CardHeader>
+              <CardTitle>Bing SKU Performance</CardTitle>
+              <CardDescription>
+                Baseline vs. post-publish snapshot — Bing Shopping
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PerformanceTable
+                skus={tabSkus}
+                filterMode={filterMode}
+                sortColumn={sortColumn}
+                sortDir={sortDir}
+                onSort={handleSort}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
-}
-
-function PerformanceTable({ skus, platform }: { skus: SkuPerformance[]; platform?: string }) {
-  const platformLabel = platform 
-    ? platform.charAt(0).toUpperCase() + platform.slice(1) 
-    : 'All Platforms'
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>SKU Performance</CardTitle>
-        <CardDescription>
-          Compare baseline vs current performance for {platformLabel.toLowerCase()} published SKUs
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {skus.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Master SKU</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Platform</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead>CTR</TableHead>
-                <TableHead>CVR</TableHead>
-                <TableHead>Impressions</TableHead>
-                <TableHead>Clicks</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {skus.map((sku) => (
-                <TableRow key={`${sku.sku}-${sku.platform}`}>
-                  <TableCell className="font-medium">{sku.sku}</TableCell>
-                  <TableCell>{sku.name}</TableCell>
-                  <TableCell>
-                    <PlatformBadge platform={sku.platform as 'google' | 'bing' | 'shopify'} />
-                  </TableCell>
-                  <TableCell>{sku.publishedAt}</TableCell>
-                  <TableCell>
-                    <MetricChange 
-                      baseline={sku.baseline.ctr} 
-                      current={sku.current.ctr} 
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <MetricChange 
-                      baseline={sku.baseline.cvr} 
-                      current={sku.current.cvr} 
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <MetricChange 
-                      baseline={sku.baseline.impressions} 
-                      current={sku.current.impressions}
-                      format="number"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <MetricChange 
-                      baseline={sku.baseline.clicks} 
-                      current={sku.current.clicks}
-                      format="number"
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            {platform 
-              ? `No published SKUs for ${platformLabel} yet. Approve and publish content to see performance data.`
-              : 'No published SKUs yet. Approve and publish content to see performance data.'}
-          </div>
-        )}
-      </CardContent>
-    </Card>
   )
 }
