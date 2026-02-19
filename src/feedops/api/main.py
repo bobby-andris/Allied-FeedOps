@@ -320,6 +320,10 @@ class GenerateImagesRequest(BaseModel):
     dry_run: bool = Field(
         default=False, description="If true, generate images but don't upload/save"
     )
+    selected_finish_code: str | None = Field(
+        default=None,
+        description="Force specific finish code (overrides auto-selection)",
+    )
 
 
 class GenerateImagesResponse(BaseModel):
@@ -1123,6 +1127,7 @@ async def generate_lifestyle_images(request: GenerateImagesRequest):
             master_sku=request.master_sku,
             num_variations=request.num_variations,
             dry_run=request.dry_run,
+            force_finish_code=request.selected_finish_code,
         )
 
         return GenerateImagesResponse(

@@ -1723,12 +1723,13 @@ def generate_lifestyle_images_for_sku(
     master_sku: str,
     num_variations: int = 3,
     dry_run: bool = False,
+    force_finish_code: str | None = None,
 ) -> dict:
     """Generate lifestyle images for a SKU with smart finish selection.
 
     Steps:
     1. Load product data from Supabase
-    2. Select best finish using Google Ads data
+    2. Select best finish using Google Ads data (or use force_finish_code if provided)
     3. Generate images using LifestyleImageGenerator (existing code)
     4. Score images and select best variation
     5. Upload to Supabase Storage
@@ -1738,6 +1739,7 @@ def generate_lifestyle_images_for_sku(
         master_sku: Master SKU to generate images for.
         num_variations: Number of image variations to generate (1-5).
         dry_run: If True, generate images but don't upload/save.
+        force_finish_code: If set, override auto-selection and use this finish_code directly.
 
     Returns:
         Dict with generation summary.
@@ -1773,10 +1775,31 @@ def generate_lifestyle_images_for_sku(
     print(f"  Title: {title}")
 
     # Step 2: Select best finish
-    print("\nSelecting best finish based on Google Ads data...")
-    selected_finish, selected_finish_code = select_best_finish_for_generation(
-        master_sku, supabase
-    )
+    if force_finish_code:
+        # User explicitly selected a finish — look it up in variant_index
+        vi_forced = (
+            supabase.table("variant_index")
+            .select("finish, finish_code")
+            .eq("master_sku", master_sku)
+            .eq("finish_code", force_finish_code)
+            .limit(1)
+            .execute()
+        )
+        if vi_forced.data:
+            selected_finish = vi_forced.data[0]["finish"]
+            selected_finish_code = vi_forced.data[0]["finish_code"]
+            print(f"  Using user-selected finish: {selected_finish} ({selected_finish_code})")
+        else:
+            print(f"  Forced finish_code {force_finish_code} not found, falling back to auto-select")
+            print("\nSelecting best finish based on Google Ads data...")
+            selected_finish, selected_finish_code = select_best_finish_for_generation(
+                master_sku, supabase
+            )
+    else:
+        print("\nSelecting best finish based on Google Ads data...")
+        selected_finish, selected_finish_code = select_best_finish_for_generation(
+            master_sku, supabase
+        )
 
     # Step 3: Get variant info for selected finish
     vi_result = (
