@@ -261,7 +261,8 @@ Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14
 | 11. Performance Page Enhancements | 3/3 | Complete   | 2026-02-19 | - |
 | 12. Dashboard Audit & Cleanup | 3/3 | Complete    | 2026-02-19 | - |
 | 13. Fix Google Ads Data Sourcing | 3/3 | Complete    | 2026-02-19 | - |
-| 14. Complete 180-day Backfill & Monitoring Fixes | 1/3 | In Progress|  | - |
+| 14. Complete 180-day Backfill & Monitoring Fixes | 3/3 | Complete    | 2026-02-19 | - |
+| 15. Google Ads Data Backfill & Monitoring Verification | 0/3 | Planned |  | - |
 
 ### Phase 13: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
 
@@ -288,12 +289,30 @@ Plans:
   3. Performance metrics backfill runs for all 2,784 SKUs via /backfill/start and completes successfully
   4. Monitoring page shows correct coverage (COUNT queries, not PostgREST 1000-row limit) and Active Jobs reads from search_query_sync_jobs and backfill_jobs
 
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans executed
 
 Plans:
-- [ ] 14-01-PLAN.md — Apply 026_backfill_jobs.sql migration + fix LAST_N_DAYS → BETWEEN in google_ads_search_terms.py + re-trigger 180-day search terms sync
-- [ ] 14-02-PLAN.md — Run performance_metrics backfill for all 2,784 SKUs via /backfill/start
-- [ ] 14-03-PLAN.md — Fix monitoring page: coverage COUNT queries + two Active Jobs sections (search_query_sync_jobs + backfill_jobs) + freshness heatmap accuracy
+- [x] 14-01-PLAN.md — Apply 026_backfill_jobs.sql migration + fix LAST_N_DAYS → BETWEEN in google_ads_search_terms.py + re-trigger 180-day search terms sync
+- [x] 14-02-PLAN.md — (rolled into Phase 15) Performance metrics backfill skipped — moved to Phase 15
+- [x] 14-03-PLAN.md — Fix monitoring page: coverage COUNT queries + two Active Jobs sections (search_query_sync_jobs + backfill_jobs) + freshness heatmap accuracy
+
+### Phase 15: Google Ads Data Backfill and Monitoring Verification
+
+**Goal:** Complete the 180-day search terms backfill using safe 30-day chunked windows, run the performance metrics backfill for all 2,784 SKUs, and verify monitoring page accuracy after both syncs complete.
+
+**Depends on:** Phase 14
+
+**Success Criteria** (what must be TRUE):
+  1. 180-day search terms backfill complete using 6 sequential 30-day windows — row count grows after each chunk; final count significantly above 7,891
+  2. Performance metrics backfill runs for all 2,784 SKUs via /backfill/start with job_type=performance_metrics and completes successfully
+  3. Monitoring page coverage numbers are accurate after both syncs — agent-browser confirms correct SKU counts in all coverage cards
+
+**Plans:** 3/3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Search terms backfill: smoke test (days=30) + full 180-day sync (days=180) with row count verification
+- [ ] 15-02-PLAN.md — Performance metrics backfill for all 2,784 SKUs via /backfill/start (job_type=performance_metrics)
+- [ ] 15-03-PLAN.md — Monitoring page verification via agent-browser after both syncs complete
 
 ---
 *Phase 0 completed: 2026-02-13*
