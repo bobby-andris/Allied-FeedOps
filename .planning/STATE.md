@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 10 — Image Workflow Improvements
-Plan: 1 of 3 — COMPLETE
-Status: In progress (plan 10-01 executed)
-Last activity: 2026-02-19 — Plan 10-01 complete (GET /api/images/variant-data endpoint)
+Plan: 2 of 3 — COMPLETE
+Status: In progress (plan 10-02 executed)
+Last activity: 2026-02-19 — Plan 10-02 complete (VariantSelectorModal + EmptyImageState finish selector + Python force_finish_code)
 
-Progress: [██████░░░░] 60% (v1.1 milestone, 1/3 plans in Phase 10)
+Progress: [███████░░░] 67% (v1.1 milestone, 2/3 plans in Phase 10)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████░░░░] 60% (v1.1 milestone, 1/3 plans in Pha
 | Phase 09-sku-review-revamp P02 | 3 | 2 tasks | 1 file |
 | Phase 09-sku-review-revamp P03 | 47 | 2 tasks | 3 files |
 | Phase 10-image-workflow-improvements P01 | 6 | 1 task | 1 file |
+| Phase 10-image-workflow-improvements P02 | 247 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -277,6 +278,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 09-sku-review-revamp]: LifestyleImageLifecycle (total/approved/published) added inline as ImageRowBadge per row and LifestyleImageBadge in preview panel (Plan 09-03)
 - [Phase 10-image-workflow-improvements]: JS-side aggregation for search_queries impressions/clicks (Supabase client lacks GROUP BY); variant_index as canonical finish list so finishes with zero impressions are not dropped (Plan 10-01)
 - [Phase 10-image-workflow-improvements]: Three-table merge pattern: variant_index + search_queries + variant_lifestyle_images merged in JS, sorted by total_impressions descending (Plan 10-01)
+- [Phase 10-image-workflow-improvements]: VariantDataEntry exported from VariantSelectorModal and imported into LifestyleImageReview — no type duplication (Plan 10-02)
+- [Phase 10-image-workflow-improvements]: Post-generation reset of manualFinishCode to null — one-time manual choice, next run returns to auto-select (Plan 10-02)
+- [Phase 10-image-workflow-improvements]: force_finish_code in Python pipeline falls back to auto-selection if finish_code not found in variant_index — graceful degradation (Plan 10-02)
 
 ### Pending Todos
 
@@ -295,9 +299,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Plan 10-01 complete (GET /api/images/variant-data endpoint for per-finish impression + coverage data)
-Stopped at: Completed 10-image-workflow-improvements-10-01-PLAN.md
+Last session: 2026-02-19 — Plan 10-02 complete (VariantSelectorModal component, EmptyImageState finish selector UI, Python force_finish_code support)
+Stopped at: Completed 10-image-workflow-improvements-10-02-PLAN.md
 Resume file: None
 
 ---
-*Next step:* Plan 10-02 — variant selector modal (auto-selects highest-impressions finish using the new variant-data API).
+*Next step:* Plan 10-03 — coverage view tab (shows which finishes have/lack lifestyle images using the variant-data API).
