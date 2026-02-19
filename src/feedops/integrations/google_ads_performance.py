@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 import os
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -294,6 +295,49 @@ def _fetch_performance_via_api(
     }
 
 
+MAX_PARALLEL_CHUNKS = 5  # Parallel GAQL workers — Google Ads gRPC is thread-safe for separate streams
+
+
+def _fetch_chunk_data(
+    client, customer_id: str, chunk: list[str], start_date: str, end_date: str
+) -> list[tuple[str, dict]]:
+    """Fetch GAQL data for a single chunk of offer IDs.
+
+    Returns list of (product_id, row) tuples for grouping in the caller.
+    Thread-safe: each call creates its own gRPC search_stream; the shared
+    client object is only read (not mutated) during stream creation.
+    """
+    ids_clause = ", ".join(f"'{oid}'" for oid in chunk)
+    query = f"""
+    SELECT
+      segments.product_item_id,
+      segments.date,
+      campaign.advertising_channel_type,
+      metrics.impressions,
+      metrics.clicks,
+      metrics.ctr,
+      metrics.conversions,
+      metrics.conversions_value,
+      metrics.cost_micros
+    FROM shopping_performance_view
+    WHERE segments.product_item_id IN ({ids_clause})
+      AND segments.date BETWEEN '{start_date}' AND '{end_date}'
+    ORDER BY segments.product_item_id, segments.date
+    """
+    try:
+        rows = _run_gaql_query(client, customer_id, query)
+        logger.info("Chunk of %d IDs returned %d rows", len(chunk), len(rows))
+        results = []
+        for row in rows:
+            product_id = row.get("segments", {}).get("product_item_id", "")
+            if product_id:
+                results.append((product_id, row))
+        return results
+    except Exception as e:
+        logger.error("Failed to fetch chunk of %d IDs: %s", len(chunk), e)
+        return []
+
+
 def fetch_batch_product_performance(
     offer_ids: list[str],
     start_date: str,
@@ -337,42 +381,27 @@ def fetch_batch_product_performance(
     # Chunking into groups of 25 keeps each query fast (~2-5 seconds).
     safe_ids = [oid.replace("'", "\\'") for oid in offer_ids]
 
+    chunks = list(_chunks(safe_ids, OFFER_ID_CHUNK_SIZE))
+    logger.info(
+        "Processing %d offer IDs in %d chunks (max %d parallel)",
+        len(safe_ids), len(chunks), MAX_PARALLEL_CHUNKS,
+    )
+
     grouped: dict[str, list[dict]] = defaultdict(list)
 
-    for chunk in _chunks(safe_ids, OFFER_ID_CHUNK_SIZE):
-        ids_clause = ", ".join(f"'{oid}'" for oid in chunk)
-
-        query = f"""
-        SELECT
-          segments.product_item_id,
-          segments.date,
-          campaign.advertising_channel_type,
-          metrics.impressions,
-          metrics.clicks,
-          metrics.ctr,
-          metrics.conversions,
-          metrics.conversions_value,
-          metrics.cost_micros
-        FROM shopping_performance_view
-        WHERE
-          segments.product_item_id IN ({ids_clause})
-          AND segments.date BETWEEN '{start_date}' AND '{end_date}'
-        ORDER BY segments.product_item_id, segments.date
-        """
-
-        try:
-            rows = _run_gaql_query(client, customer_id, query)
-            logger.info("Chunk of %d IDs returned %d rows", len(chunk), len(rows))
-        except Exception as e:
-            logger.error("Failed to fetch chunk of %d IDs: %s", len(chunk), e)
-            # Continue with remaining chunks — partial data is better than none
-            continue
-
-        for row in rows:
-            segments = row.get("segments", {})
-            product_id = segments.get("product_item_id", "")
-            if product_id:
-                grouped[product_id].append(row)
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CHUNKS) as executor:
+        futures = {
+            executor.submit(_fetch_chunk_data, client, customer_id, chunk, start_date, end_date): i
+            for i, chunk in enumerate(chunks)
+        }
+        for future in as_completed(futures):
+            chunk_idx = futures[future]
+            try:
+                chunk_results = future.result()
+                for product_id, row in chunk_results:
+                    grouped[product_id].append(row)
+            except Exception as e:
+                logger.error("Chunk %d raised exception: %s", chunk_idx, e)
 
     # Aggregate each product's metrics
     results: dict[str, dict[str, Any]] = {}

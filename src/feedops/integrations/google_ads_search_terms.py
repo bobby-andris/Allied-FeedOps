@@ -368,6 +368,50 @@ class SearchTermsClient:
             return match.group(1), match.group(2)
         return None, None
 
+    def _preload_variant_cache(self) -> int:
+        """Bulk-load all variant_index rows into _variant_cache.
+
+        Eliminates N+1 individual Supabase queries during search term processing.
+        variant_index has ~69,600 rows — loaded in paginated batches of 1000.
+
+        Returns:
+            Number of rows loaded into cache.
+        """
+        PAGE_SIZE = 1000
+        loaded = 0
+        offset = 0
+
+        while True:
+            result = (
+                self.supabase.table("variant_index")
+                .select("gmc_offer_id, master_sku, finish, finish_code, shopify_variant_id")
+                .range(offset, offset + PAGE_SIZE - 1)
+                .execute()
+            )
+
+            if not result.data:
+                break
+
+            for row in result.data:
+                gmc_offer_id = row.get("gmc_offer_id", "")
+                if gmc_offer_id:
+                    # Store with lowercase key (consistent with get_variant_info normalization)
+                    self._variant_cache[gmc_offer_id.lower()] = {
+                        "master_sku": row.get("master_sku"),
+                        "finish": row.get("finish"),
+                        "finish_code": row.get("finish_code"),
+                        "shopify_variant_id": row.get("shopify_variant_id"),
+                    }
+
+            loaded += len(result.data)
+            offset += PAGE_SIZE
+
+            if len(result.data) < PAGE_SIZE:
+                break
+
+        logger.info(f"Pre-loaded {loaded} variant_index rows into cache")
+        return loaded
+
     def get_variant_info(self, gmc_offer_id: str) -> dict:
         """Look up variant info from variant_index table.
 
@@ -575,6 +619,13 @@ class SearchTermsClient:
             days=days, start_date=start_date, end_date=end_date
         )
         logger.info(f"Found products across {len(campaign_products)} campaigns")
+
+        # Pre-load variant_index to eliminate N+1 lookups during search term processing.
+        # With ~10,000 search term results × up to 10 variants each, individual Supabase
+        # queries would add up to tens of thousands of round trips. Bulk pre-loading
+        # replaces all of those with 1-7 paginated queries of 1000 rows each.
+        if not self._variant_cache:
+            self._preload_variant_cache()
 
         # Step 2: Fetch search terms with campaign.id
         # Compute explicit date range — LAST_N_DAYS syntax only supports specific

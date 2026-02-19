@@ -338,7 +338,9 @@ async def collect_performance_batch(batch: list[str], force_backfill: bool = Fal
         logger.info(f"Detected {len(multi_sku_families)} SKUs in multi-SKU families")
 
         # Upsert to performance_baselines table
-        # Process eligible SKUs only
+        # Process eligible SKUs only — collect validated records for batch upsert
+        all_baseline_records = []
+
         for sku in eligible_skus:
             if sku not in sku_metrics:
                 results.append({"item_id": sku, "status": "no_data"})
@@ -421,17 +423,13 @@ async def collect_performance_batch(batch: list[str], force_backfill: bool = Fal
                 })
                 continue
 
-            # Upsert with ON CONFLICT (master_sku, platform) for idempotency (JOB-06)
-            # Use validated.model_dump() to ensure only validated data is written
-            supabase.table("performance_baselines").upsert(
-                validated.model_dump(exclude_none=True),
-                on_conflict="master_sku,platform"
-            ).execute()
-
             logger.info(
-                f"Saved baseline for {sku}: {metrics['total_impressions']} impressions, "
+                f"Validated baseline for {sku}: {metrics['total_impressions']} impressions, "
                 f"{metrics['total_clicks']} clicks"
             )
+
+            # Collect for batch upsert (reduces DB round trips from N per batch to 1)
+            all_baseline_records.append(validated.model_dump(exclude_none=True))
 
             # Build result with family info if applicable
             result_dict = {
@@ -445,6 +443,14 @@ async def collect_performance_batch(batch: list[str], force_backfill: bool = Fal
                 result_dict["family_size"] = metadata.get("family_size")
 
             results.append(result_dict)
+
+        # Batch upsert all validated baseline records — 1 call per batch instead of N
+        if all_baseline_records:
+            supabase.table("performance_baselines").upsert(
+                all_baseline_records,
+                on_conflict="master_sku,platform"
+            ).execute()
+            logger.info(f"Batch upserted {len(all_baseline_records)} performance baselines")
 
         return results
 
