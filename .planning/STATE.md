@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 11: Performance Page Enhancements)
+**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 12: Dashboard Audit & Cleanup)
 
 ## Current Position
 
-Phase: 11 — Performance Page Enhancements
-Plan: 1 of 1 — COMPLETE
-Status: Phase complete (1/1 plans executed)
-Last activity: 2026-02-19 — Plan 11-01 complete (performance page rewrite with dual time selectors, delta table, snapshot-only data sourcing)
+Phase: 12 — Dashboard Audit & Cleanup
+Plan: 0 of N — NOT YET PLANNED
+Status: Phase 11 complete, Phase 12 ready to plan
+Last activity: 2026-02-19 — Phase 11 complete (inline SKU detail, impressions/clicks normalization fix)
 
-Progress: [██████████] 100% (v1.1 milestone, 1/1 plans in Phase 11 — PHASE COMPLETE)
+Progress: [██████████] 100% of Phase 11 — PHASE COMPLETE → Phase 12 next
 
 ## Performance Metrics
 
@@ -290,6 +290,8 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 11-performance-page-enhancements]: JS-side window filtering for snapshot query — fetch all snapshots for published SKUs, filter by date window in JS (simpler than per-SKU SQL subqueries at this row count) (Plan 11-01)
 - [Phase 11-performance-page-enhancements]: Neutral threshold ±3% for delta badges and TrendIcon — avoids noise at near-zero deltas (Plan 11-01)
 - [Phase 11-performance-page-enhancements]: SortableHeader at module scope (not nested inside PerformanceTable) — props threaded through to satisfy react-hooks/static-components lint rule (Plan 11-01)
+- [Phase 11-performance-page-enhancements]: Snapshot impressions/clicks normalized to daily averages in API (÷ snapshotWindowDays) — baseline stores daily avg, snapshot stores cumulative total; normalization in route.ts means all downstream code (delta, sort, trend icons) gets correct values without change (Plan 11-02)
+- [Phase 11-performance-page-enhancements]: JS aggregation for variant breakdown (group by gmc_offer_id) and search term dedup (group by query_text) — Supabase client lacks GROUP BY; Math.round applied to normalized impression/click counts (Plan 11-02)
 
 ### Pending Todos
 
@@ -308,8 +310,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Plan 11-01 complete (performance page rewrite: dual time selectors, delta table, snapshot-only sourcing, trend indicators)
-Stopped at: Completed 11-performance-page-enhancements-11-01-PLAN.md
+Last session: 2026-02-19 — Phase 11 fully complete: inline SKU detail panel (11-02) + impressions/clicks normalization fix (ce465933)
+Stopped at: Phase 11 done, Phase 12 (Dashboard Audit & Cleanup) ready to plan
 Resume file: None
 
 ---
