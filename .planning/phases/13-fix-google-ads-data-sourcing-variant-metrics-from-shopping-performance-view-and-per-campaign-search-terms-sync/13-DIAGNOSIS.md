@@ -221,4 +221,84 @@ LIMIT 10;
 
 ## Empirical Evidence
 
-*This section will be populated by Task 2 (Supabase MCP queries).*
+**Queries run:** 2026-02-19 against Supabase project `qezuszwufortkiutlhym`
+
+**Published SKUs tested:** CL-24C, CL-22, CL-11, FR-23, A-20 (5 most recently published to Google)
+
+---
+
+### Query 1 + 2 Results: Distinct Variants in search_queries
+
+| SKU | Expected Variants (variant_index) | Distinct gmc_offer_ids in search_queries | Distinct finish_codes | Bug 1 Confirmed? |
+|-----|----------------------------------|------------------------------------------|-----------------------|-----------------|
+| FR-23 | 28 | **1** | 1 (UNL only) | YES — 27 of 28 variants have zero attribution |
+| CL-11 | 28 | **2** | 2 | YES — 26 of 28 variants have zero attribution |
+| A-20 | 28 | **1** | 1 | YES — 27 of 28 variants have zero attribution |
+| CL-24C | 28 | **3** | 3 | YES — 25 of 28 variants have zero attribution |
+| CL-22 | 28 | **1** | 1 (UNL only) | YES — 27 of 28 variants have zero attribution |
+
+**Interpretation:** Every tested SKU has far fewer distinct `gmc_offer_id` values than it has variants. A correct implementation would show 28 distinct offer IDs (one per finish). The current data shows 1-3 out of 28. Bug 1 is **definitively confirmed**.
+
+---
+
+### Concrete Example: FR-23 (Closet Rod, 28 variants)
+
+**What the data shows:**
+- 6 total rows in `search_queries` for FR-23
+- ALL 6 rows have `gmc_offer_id = shopify_US_4538702528644_32096233193604` (the UNL/Unlacquered Brass finish)
+- ALL 6 rows have `finish_code = UNL`
+- The `item_ids` JSON field on each row correctly contains 10 offer IDs from multiple variants AND multiple master_skus
+
+**Sample rows showing the problem:**
+```
+'unlacquered brass closet rod' -> impressions=194, finish_code=UNL
+'unlacquered brass closet rod' -> impressions=162, finish_code=UNL (duplicate from different ad_group)
+'pull out valet rod closet'    -> impressions=114, finish_code=UNL
+'pull out valet rod closet'    -> impressions=98,  finish_code=UNL (duplicate)
+'unlacquered brass closet rods' -> impressions=48, finish_code=UNL
+```
+
+**What this means:** The query "pull out valet rod closet" — which is finish-agnostic — is attributed entirely to UNL. In reality this query likely triggered impressions across many finishes (PC, SN, ORB, etc.). The dashboard shows UNL as the only variant with search data, which is wrong.
+
+**Additional finding from `item_ids` field:** The `item_ids` JSON array stored per row contains offer IDs for MULTIPLE master_skus (e.g., `shopify_US_4538703609988_...` = a different SKU sharing the same campaign). This reveals a secondary issue: a campaign can contain products from multiple SKU families. The current code `item_ids[0]` may even resolve to a different master_sku than the one that "owns" the search term.
+
+---
+
+### Query 3 Results: Performance Baselines
+
+| SKU | avg_impressions | avg_clicks | avg_ctr | Status |
+|-----|----------------|------------|---------|--------|
+| A-20 | **67.23** | 1.37 | 0.0203 | NON-ZERO |
+| FR-23 | **447.77** | 5.07 | 0.0113 | NON-ZERO |
+| CL-11 | **475.30** | 3.07 | 0.0065 | NON-ZERO |
+| CL-22 | **222.70** | 3.17 | 0.0142 | NON-ZERO |
+| CL-24C | **618.37** | 5.30 | 0.0086 | NON-ZERO |
+
+**Interpretation:** All 5 tested published SKUs have non-zero `avg_impressions` in `performance_baselines`. Bug 2 (performance case mismatch) is **NOT present**. The Google Ads API accepts lowercase `shopify_us_*` offer IDs correctly, consistent with Phase 0 Decision #4.
+
+---
+
+### Query 4 Results: Offer ID Case in variant_index
+
+All rows in `variant_index` use lowercase `shopify_us_*` format:
+```
+A-20/ABR: shopify_us_4542922064004_32118726099076  (lowercase)
+A-20/ABZ: shopify_us_4542922064004_32118726197380  (lowercase)
+FR-23/CA:  shopify_us_4538702528644_32096232636548  (lowercase)
+```
+
+However, Google Ads API returns uppercase `shopify_US_*` in both `shopping_performance_view` and `search_term_view`. The `get_variant_info()` method in `SearchTermsClient` correctly normalizes to lowercase at line 382 for DB lookups. The `save_search_terms_to_db()` method normalizes BACK to uppercase at line 901 before saving.
+
+**Net result:** `search_queries` rows have uppercase `shopify_US_*` `gmc_offer_id` values (confirmed: `shopify_US_4538702528644_32096233193604`). This is consistent behavior and not a bug.
+
+---
+
+### Conclusions from Empirical Evidence
+
+1. **Bug 1 CONFIRMED:** search_queries has 1-3 out of 28 expected variants attributed per SKU. The single variant attributed corresponds to the highest-impression finish (`item_ids[0]`). Fix is required.
+
+2. **Bug 2 RULED OUT:** performance_baselines are populated with non-zero values for all published SKUs. The lowercase offer ID approach works correctly with the Google Ads API. No fix needed for performance metrics collection.
+
+3. **performance_baselines do NOT need re-capture** — data is correct. Only `search_queries` needs to be deleted and re-synced.
+
+4. **Additional finding:** The `item_ids` field shows that campaigns contain products from MULTIPLE master_skus. The fix must attribute search terms to only the master_sku variants that belong to the target SKU (not all campaign items), otherwise the "fan-out" approach would create rows for wrong SKUs.
