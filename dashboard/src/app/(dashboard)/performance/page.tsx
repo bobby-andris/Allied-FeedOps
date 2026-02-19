@@ -258,6 +258,18 @@ function ExpandedSkuDetail({ detail, loading }: { detail: SkuDetail | null; load
   if (loading) return <div className="p-4"><Skeleton className="h-32 w-full" /></div>
   if (!detail) return <div className="p-4 text-muted-foreground">No detail data available.</div>
 
+  const hasNoData = detail.variants.length === 0 && detail.topSearchTerms.length === 0
+
+  if (hasNoData) {
+    return (
+      <div className="p-4 bg-muted/20 rounded-lg">
+        <p className="text-sm text-muted-foreground">
+          No Google Ads search query data for this SKU yet. Search terms populate once the ads receive impressions from user searches and are synced via <span className="font-medium">Backfill Monitoring → Sync Search Terms</span>.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-muted/20 rounded-lg">
       {/* Variant breakdown */}
@@ -281,13 +293,6 @@ function ExpandedSkuDetail({ detail, loading }: { detail: SkuDetail | null; load
                 <TableCell className="text-right text-sm">{v.ctr.toFixed(3)}%</TableCell>
               </TableRow>
             ))}
-            {detail.variants.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No variant data available
-                </TableCell>
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       </div>
