@@ -66,12 +66,6 @@ function parseWindowDays(window: string): number {
   return 30 // default '30d'
 }
 
-function addDays(dateStr: string, days: number): string {
-  const date = new Date(dateStr)
-  date.setDate(date.getDate() + days)
-  return date.toISOString().split('T')[0]
-}
-
 function daysBetween(publishedAt: string): number {
   const published = new Date(publishedAt)
   const today = new Date()
@@ -236,13 +230,12 @@ export async function GET(request: NextRequest) {
       const productName = skuToNameMap.get(skuId) || `SKU ${skuId}`
 
       const publishDate = publishInfo.publishedAt.split('T')[0]
-      const publishDatePlus = addDays(publishDate, snapshotWindowDays)
 
-      // Find the latest snapshot within the window [publishDate, publishDate + snapshotWindowDays]
+      // Use the most recent snapshot regardless of how long after publish it was captured.
+      // The array is sorted snapshot_date DESC so index 0 is always the most recent.
+      // This is resilient to backfilled snapshots captured months after the publish date.
       const snapshots = snapshotsByKey.get(key) || []
-      const windowSnapshot = snapshots.find(s =>
-        s.snapshot_date >= publishDate && s.snapshot_date <= publishDatePlus
-      )
+      const windowSnapshot = snapshots.length > 0 ? snapshots[0] : undefined
 
       const hasSnapshot = !!windowSnapshot
 
@@ -331,13 +324,50 @@ export async function GET(request: NextRequest) {
     let skuDetail: SkuDetail | null = null
 
     if (sku) {
-      // Fetch all search_queries rows for this master_sku
-      const { data: searchQueryRows } = await supabase
-        .from('search_queries')
-        .select('gmc_offer_id, finish, finish_code, query_text, impressions, clicks, ctr')
+      // Step 1: Get all gmc_offer_ids for this master_sku from variant_index.
+      // Querying search_queries by master_sku fails for historical rows where
+      // master_sku is null (synced before the lowercase fix). Using offer IDs
+      // from variant_index is resilient to that null.
+      const { data: variantRows } = await supabase
+        .from('variant_index')
+        .select('gmc_offer_id, finish, finish_code')
         .eq('master_sku', sku)
 
-      const rows = searchQueryRows || []
+      const offerIds = (variantRows || [])
+        .map(v => v.gmc_offer_id)
+        .filter(Boolean) as string[]
+
+      // Build finish/finish_code lookup by offer_id for enrichment of null-finish rows
+      const offerFinishMap = new Map<string, { finish: string | null; finish_code: string | null }>()
+      for (const v of variantRows || []) {
+        if (v.gmc_offer_id) {
+          offerFinishMap.set(v.gmc_offer_id, {
+            finish: v.finish ?? null,
+            finish_code: v.finish_code ?? null,
+          })
+        }
+      }
+
+      // Step 2: Query search_queries by gmc_offer_id (resilient to null master_sku in historical rows)
+      // variant_index stores lowercase shopify_us_ but search_queries stores uppercase shopify_US_
+      const upperOfferIds = offerIds.map(id => id.replace('shopify_us_', 'shopify_US_'))
+
+      const { data: searchQueryRows } = offerIds.length > 0
+        ? await supabase
+            .from('search_queries')
+            .select('gmc_offer_id, finish, finish_code, query_text, impressions, clicks, ctr')
+            .in('gmc_offer_id', upperOfferIds)
+        : { data: [] }
+
+      const rows = (searchQueryRows || []) as Array<{
+        gmc_offer_id: string
+        finish: string | null
+        finish_code: string | null
+        query_text: string
+        impressions: number
+        clicks: number
+        ctr: number
+      }>
 
       // --- Variant breakdown: group by gmc_offer_id, sum impressions/clicks ---
       const variantMap = new Map<string, {
@@ -348,6 +378,16 @@ export async function GET(request: NextRequest) {
       }>()
 
       for (const row of rows) {
+        // Enrich finish from variant_index if missing on the search_queries row (historical data)
+        if (!row.finish || !row.finish_code) {
+          const offerKey = offerFinishMap.get(row.gmc_offer_id)
+            ?? offerFinishMap.get(row.gmc_offer_id?.toLowerCase?.())
+          if (offerKey) {
+            if (!row.finish) row.finish = offerKey.finish
+            if (!row.finish_code) row.finish_code = offerKey.finish_code
+          }
+        }
+
         const offerId: string = row.gmc_offer_id
         if (!variantMap.has(offerId)) {
           variantMap.set(offerId, {

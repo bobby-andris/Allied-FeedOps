@@ -279,8 +279,14 @@ def _capture_google_baseline(
             return {}
 
         # Calculate averages
-        avg_impressions = total_impressions / variants_with_data
-        avg_clicks = total_clicks / variants_with_data
+        # avg_impressions and avg_clicks are DAILY averages (total / days_lookback),
+        # not per-variant averages. This matches what the snapshot normalization in
+        # route.ts expects (snapshot impressions / snapshotWindowDays vs baseline daily avg).
+        days_lookback = (
+            datetime.strptime(end_date, "%Y-%m-%d") - datetime.strptime(start_date, "%Y-%m-%d")
+        ).days
+        avg_impressions = total_impressions / days_lookback if days_lookback > 0 else 0.0
+        avg_clicks = total_clicks / days_lookback if days_lookback > 0 else 0.0
         avg_ctr = total_clicks / total_impressions if total_impressions > 0 else 0.0
         avg_conversions = total_conversions / variants_with_data
         avg_cost = total_cost / variants_with_data
