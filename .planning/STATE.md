@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 12 — Dashboard Audit & Cleanup
-Plan: 1 of 3 — 12-01 COMPLETE (audit)
-Status: Phase 12 in progress — plan 01 done, plans 02 and 03 remain
-Last activity: 2026-02-19 — Phase 12 Plan 01 complete (dashboard audit, 12-AUDIT.md committed)
+Plan: 2 of 3 — 12-02 COMPLETE (fixes)
+Status: Phase 12 in progress — plans 01 and 02 done, plan 03 (simplification) remains
+Last activity: 2026-02-19 — Phase 12 Plan 02 complete (monitoring/settings/overview fixes, commit 211053b9)
 
-Progress: [█░░░░░░░░░] 33% of Phase 12 — Plan 01 complete
+Progress: [██░░░░░░░░] 67% of Phase 12 — Plans 01-02 complete
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [█░░░░░░░░░] 33% of Phase 12 — Plan 01 complete
 | Phase 10-image-workflow-improvements P03 | 20 | 2 tasks | 3 files |
 | Phase 11-performance-page-enhancements P01 | 4 | 2 tasks | 2 files |
 | Phase 12-dashboard-audit-cleanup P12-01 | 2 | 2 tasks | 1 files |
+| Phase 12-dashboard-audit-cleanup P02 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -297,6 +298,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 12-dashboard-audit-cleanup]: /competitors DEAD-END — category-based scraping disconnected from SKU workflow; simplify or remove (Plan 12-01)
 - [Phase 12-dashboard-audit-cleanup]: /settings STALE — notification switches non-persisting, Danger Zone buttons have no handlers, Supabase URL hardcoded (Plan 12-01)
 - [Phase 12-dashboard-audit-cleanup]: Overview (/) STALE — pending review count from sku_approvals not generated_content; platform fallback shows same numbers across all platforms (Plan 12-01)
+- [Phase 12-dashboard-audit-cleanup]: Monitoring page split into two snapshot buttons (Search vs Performance) to make endpoint distinction explicit
+- [Phase 12-dashboard-audit-cleanup]: Settings notification switches removed — deferred wiring out-of-scope; static Slack webhook description added instead
+- [Phase 12-dashboard-audit-cleanup]: pendingReview in stats API uses generated_content count minus approved count — sku_approvals pending was misleading
 
 ### Pending Todos
 
@@ -315,9 +319,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Phase 12 Plan 01 complete: dashboard audit (3642e199)
-Stopped at: Phase 12 Plan 01 done — 12-AUDIT.md committed; Plans 12-02 (fixes) and 12-03 (simplification) ready
+Last session: 2026-02-19 — Phase 12 Plan 02 complete: monitoring/settings/overview fixes (211053b9)
+Stopped at: Phase 12 Plan 02 done — all FIX-action pages resolved; Plan 12-03 (competitors simplification) remains
 Resume file: None
 
 ---
-*Next step:* Phase 12 Plan 02 — Fix BROKEN and STALE pages per 12-AUDIT.md (monitoring alert(), settings non-functional UI, overview stats).
+*Next step:* Phase 12 Plan 03 — Simplify /competitors page (DEAD-END status, category-based workflow disconnected from SKU flow).
