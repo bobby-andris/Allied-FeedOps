@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 10 — Image Workflow Improvements
-Plan: 2 of 3 — COMPLETE
-Status: In progress (plan 10-02 executed)
-Last activity: 2026-02-19 — Plan 10-02 complete (VariantSelectorModal + EmptyImageState finish selector + Python force_finish_code)
+Plan: 3 of 3 — COMPLETE
+Status: Phase complete (all 3 plans executed and verified)
+Last activity: 2026-02-19 — Plan 10-03 complete (Coverage tab, gmc_offer_id impression fix, GenerateForNewFinish panel, browser-verified)
 
-Progress: [███████░░░] 67% (v1.1 milestone, 2/3 plans in Phase 10)
+Progress: [██████████] 100% (v1.1 milestone, 3/3 plans in Phase 10 — PHASE COMPLETE)
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [███████░░░] 67% (v1.1 milestone, 2/3 plans in Pha
 | Phase 09-sku-review-revamp P03 | 47 | 2 tasks | 3 files |
 | Phase 10-image-workflow-improvements P01 | 6 | 1 task | 1 file |
 | Phase 10-image-workflow-improvements P02 | 247 | 3 tasks | 4 files |
+| Phase 10-image-workflow-improvements P03 | 20 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -281,6 +282,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 10-image-workflow-improvements]: VariantDataEntry exported from VariantSelectorModal and imported into LifestyleImageReview — no type duplication (Plan 10-02)
 - [Phase 10-image-workflow-improvements]: Post-generation reset of manualFinishCode to null — one-time manual choice, next run returns to auto-select (Plan 10-02)
 - [Phase 10-image-workflow-improvements]: force_finish_code in Python pipeline falls back to auto-selection if finish_code not found in variant_index — graceful degradation (Plan 10-02)
+- [Phase 10-image-workflow-improvements]: Coverage tab badge shows missing count (not total) — actionable signal is how many finishes still need images (Plan 10-03)
+- [Phase 10-image-workflow-improvements]: gmc_offer_id reverse map via variant_index resolves null finish_code rows in search_queries — all finishes get correct impression totals (Plan 10-03)
+- [Phase 10-image-workflow-improvements]: GenerateForNewFinish placed in VariantImageSection (not a separate modal) — keeps generate workflow in context of the currently displayed finish (Plan 10-03)
 
 ### Pending Todos
 
@@ -299,9 +303,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Plan 10-02 complete (VariantSelectorModal component, EmptyImageState finish selector UI, Python force_finish_code support)
-Stopped at: Completed 10-image-workflow-improvements-10-02-PLAN.md
+Last session: 2026-02-19 — Plan 10-03 complete (Coverage tab, impression aggregation fix, GenerateForNewFinish panel, browser-verified end-to-end)
+Stopped at: Completed 10-image-workflow-improvements-10-03-PLAN.md
 Resume file: None
 
 ---
-*Next step:* Plan 10-03 — coverage view tab (shows which finishes have/lack lifestyle images using the variant-data API).
+*Next step:* Phase 11 — Performance Page (post-publish delta tracking UI, baseline vs snapshot comparison).
