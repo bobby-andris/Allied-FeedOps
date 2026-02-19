@@ -75,6 +75,15 @@ def _load_client():
     return GoogleAdsClient.load_from_storage()
 
 
+OFFER_ID_CHUNK_SIZE = 25  # Max offer IDs per GAQL IN() clause — prevents API hang
+
+
+def _chunks(lst: list, n: int):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+
 def _run_gaql_query(client, customer_id: str, query: str) -> list[dict]:
     """Execute a GAQL query and return results as dicts."""
     from google.protobuf.json_format import MessageToDict  # type: ignore[import-not-found]
@@ -323,41 +332,47 @@ def fetch_batch_product_performance(
         logger.error("Failed to load Google Ads client: %s", e)
         raise ValueError(f"Failed to load Google Ads client: {e}") from e
 
-    # Build IN clause for multiple offer IDs
+    # Chunk offer IDs to prevent oversized IN() clause (Bug 1: Phase 16)
+    # 250+ IDs in a single GAQL query causes the Google Ads API to hang indefinitely.
+    # Chunking into groups of 25 keeps each query fast (~2-5 seconds).
     safe_ids = [oid.replace("'", "\\'") for oid in offer_ids]
-    ids_clause = ", ".join(f"'{oid}'" for oid in safe_ids)
 
-    query = f"""
-    SELECT
-      segments.product_item_id,
-      segments.date,
-      campaign.advertising_channel_type,
-      metrics.impressions,
-      metrics.clicks,
-      metrics.ctr,
-      metrics.conversions,
-      metrics.conversions_value,
-      metrics.cost_micros
-    FROM shopping_performance_view
-    WHERE
-      segments.product_item_id IN ({ids_clause})
-      AND segments.date BETWEEN '{start_date}' AND '{end_date}'
-    ORDER BY segments.product_item_id, segments.date
-    """
-
-    try:
-        rows = _run_gaql_query(client, customer_id, query)
-    except Exception as e:
-        logger.error("Failed to fetch batch shopping performance: %s", e)
-        raise ValueError(f"Failed to fetch batch performance data: {e}") from e
-
-    # Group results by offer_id
     grouped: dict[str, list[dict]] = defaultdict(list)
-    for row in rows:
-        segments = row.get("segments", {})
-        product_id = segments.get("product_item_id", "")
-        if product_id:
-            grouped[product_id].append(row)
+
+    for chunk in _chunks(safe_ids, OFFER_ID_CHUNK_SIZE):
+        ids_clause = ", ".join(f"'{oid}'" for oid in chunk)
+
+        query = f"""
+        SELECT
+          segments.product_item_id,
+          segments.date,
+          campaign.advertising_channel_type,
+          metrics.impressions,
+          metrics.clicks,
+          metrics.ctr,
+          metrics.conversions,
+          metrics.conversions_value,
+          metrics.cost_micros
+        FROM shopping_performance_view
+        WHERE
+          segments.product_item_id IN ({ids_clause})
+          AND segments.date BETWEEN '{start_date}' AND '{end_date}'
+        ORDER BY segments.product_item_id, segments.date
+        """
+
+        try:
+            rows = _run_gaql_query(client, customer_id, query)
+            logger.info("Chunk of %d IDs returned %d rows", len(chunk), len(rows))
+        except Exception as e:
+            logger.error("Failed to fetch chunk of %d IDs: %s", len(chunk), e)
+            # Continue with remaining chunks — partial data is better than none
+            continue
+
+        for row in rows:
+            segments = row.get("segments", {})
+            product_id = segments.get("product_item_id", "")
+            if product_id:
+                grouped[product_id].append(row)
 
     # Aggregate each product's metrics
     results: dict[str, dict[str, Any]] = {}

@@ -582,7 +582,7 @@ async def resume_backfill(job_id: str) -> BackfillJobResponse:
     logger.info(f"Resuming backfill job: {job_id} from checkpoint")
 
     # Extract SKUs, config, and job_type from job
-    skus = job.item_ids if hasattr(job, "item_ids") else []
+    skus = job.skus or []
     config = job.config or {}
     job_type = job.job_type
 
