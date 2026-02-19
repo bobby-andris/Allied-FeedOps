@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { ImageApprovalCard } from "@/components/review/ImageApprovalCard"
 import { Check, Image as ImageIcon, RefreshCw, Sparkles, Upload } from "lucide-react"
 import { toast } from "sonner"
 import { resolveDefaultFinishSelection } from './lifestyle-image-selection'
+import { VariantSelectorModal, type VariantDataEntry } from './VariantSelectorModal'
 
 // Convert local file path to GitHub raw URL for archived images
 function getImageUrl(imagePath: string | null): string | null {
@@ -252,6 +253,26 @@ export function LifestyleImageReview({
 function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => void }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [variants, setVariants] = useState<VariantDataEntry[]>([])
+  const [manualFinishCode, setManualFinishCode] = useState<string | null>(null)
+  const [manualFinishName, setManualFinishName] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Fetch variant data on mount to populate finish selector and auto-select label
+  useEffect(() => {
+    fetch(`/api/images/variant-data?master_sku=${encodeURIComponent(sku)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.variants) setVariants(data.variants)
+      })
+      .catch(() => {}) // silent — not blocking
+  }, [sku])
+
+  // Derive active finish — manual overrides auto; auto = highest impressions (first in sorted list)
+  const autoSelectedFinish = variants[0] ?? null
+  const activeFinishCode = manualFinishCode ?? autoSelectedFinish?.finish_code ?? null
+  const activeFinishName = manualFinishName ?? autoSelectedFinish?.finish ?? null
+  const isManual = manualFinishCode !== null
 
   const handleGenerate = async () => {
     setIsGenerating(true)
@@ -268,6 +289,7 @@ function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => voi
           master_sku: sku,
           num_variations: 3,
           dry_run: false,
+          ...(activeFinishCode ? { selected_finish_code: activeFinishCode } : {}),
         }),
       })
 
@@ -282,6 +304,9 @@ function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => voi
         toast.success(
           `Generated ${data.images_generated} images for ${data.selected_finish} finish`
         )
+        // Reset manual selection after successful generation — next run uses auto-select
+        setManualFinishCode(null)
+        setManualFinishName(null)
         onRefresh()
       } else {
         throw new Error(data.message || 'Generation returned no images')
@@ -308,6 +333,26 @@ function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => voi
       {error && (
         <p className="text-destructive text-sm mb-4">{error}</p>
       )}
+
+      {/* Finish selection label + change button */}
+      {activeFinishName && (
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <Badge variant="outline" className="text-sm px-3 py-1">
+            {isManual ? `Manual: ${activeFinishName}` : `Highest impressions: ${activeFinishName}`}
+          </Badge>
+          {variants.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
+              disabled={isGenerating}
+            >
+              Change
+            </Button>
+          )}
+        </div>
+      )}
+
       <Button
         variant="outline"
         onClick={handleGenerate}
@@ -325,6 +370,17 @@ function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => voi
           </>
         )}
       </Button>
+
+      <VariantSelectorModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        variants={variants}
+        selectedFinishCode={manualFinishCode}
+        onSelect={(code, name) => {
+          setManualFinishCode(code)
+          setManualFinishName(name)
+        }}
+      />
     </div>
   )
 }
