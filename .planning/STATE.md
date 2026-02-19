@@ -61,6 +61,11 @@ Progress: [███████████] 100% of Phase 11 — All 3 plans c
 
 ## Accumulated Context
 
+### Roadmap Evolution
+- Phase 13 added: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
+
+
+
 ### v1.1 Context
 
 **Key facts for implementation:**
