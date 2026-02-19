@@ -71,7 +71,7 @@ class ApiHealthResponse(BaseModel):
 # =============================================================================
 
 
-def _paginate_all(supabase, table: str, columns: str, page_size: int = 5000) -> list[dict]:
+def _paginate_all(supabase, table: str, columns: str, page_size: int = 1000) -> list[dict]:
     """Fetch all rows from a table using range pagination to bypass the 1000-row PostgREST limit.
 
     Args:
@@ -137,7 +137,7 @@ async def get_data_freshness():
 
         # 3. Get performance_baselines freshness (most recent created_at per SKU)
         # performance_baselines has at most ~2784 rows — single paginated fetch is fine
-        pb_rows = _paginate_all(supabase, "performance_baselines", "master_sku,created_at", page_size=3000)
+        pb_rows = _paginate_all(supabase, "performance_baselines", "master_sku,created_at")
         perf_freshness = {}
         for row in pb_rows:
             sku = row.get("master_sku")
