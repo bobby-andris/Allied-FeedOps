@@ -346,9 +346,25 @@ None.
 - backfill_jobs table: does NOT exist in production (Phase 5-8 migrations never applied)
 - search_query_sync_jobs: EXISTS, has job history — this is the correct job tracker
 
-**Phase 14 scope:**
-- Plan 14-01: Fix explicit date ranges in google_ads_search_terms.py + bump sync endpoint max to 180 days + re-trigger 180-day sync
-- Plan 14-02: Fix monitoring page coverage queries (COUNT vs full fetch) + Active Jobs → search_query_sync_jobs
+**Phase 5-8 migration audit (what's missing from production):**
+- `backfill_jobs` table → NOT applied (only unapplied schema from Phase 5-8)
+- `backfill_job_errors` table → NOT applied
+- `increment_backfill_failures()` RPC → NOT applied
+- `execute_sql()` RPC → IS applied ✓ (026_create_execute_sql_function.sql was applied)
+- `search_query_sync_jobs` → IS applied ✓ (part of 010_search_query_insights.sql)
+- All other Phase 5-8 work is Python code in Cloud Run (no other DB tables needed)
+
+**Should we apply 026_backfill_jobs.sql?**
+- YES — it enables the `/backfill/start` endpoint for per-SKU performance_metrics backfill
+- Search terms are account-wide (sync approach is fine), but performance_metrics IS per-SKU
+- Currently only 96 SKUs have performance_baselines; a performance backfill for all 2,784 SKUs would populate more
+- The backfill endpoint has checkpoint/resume — better for long-running jobs than the sync endpoint
+- Fix needed first: replace LAST_N_DAYS with BETWEEN dates in workers.py too
+
+**Phase 14 scope (updated):**
+- Plan 14-01: Apply 026_backfill_jobs.sql migration + fix LAST_N_DAYS → BETWEEN in google_ads_search_terms.py + re-trigger 180-day search terms sync
+- Plan 14-02: Run performance_metrics backfill for all 2,784 SKUs via /backfill/start (now that migration is applied)
+- Plan 14-03: Fix monitoring page coverage queries (PostgREST 1000-row limit → COUNT queries) + Active Jobs → search_query_sync_jobs + freshness heatmap
 
 ### Quick Tasks Completed
 
