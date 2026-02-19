@@ -593,31 +593,46 @@ class SearchTermsClient:
                     # Step 3: Find products in this campaign
                     item_ids = campaign_products.get(campaign_id, [])
 
-                    # If we have products, look up variant info for the first one
-                    gmc_offer_id = None
-                    variant_info = {}
-
+                    # Phase 13 fix: emit one result per item_id so each variant gets
+                    # credited for the search term (previously used item_ids[0] which
+                    # attributed all terms to the single highest-impression variant).
                     if item_ids:
-                        # item_id format is already the GMC offer ID
-                        gmc_offer_id = item_ids[0]
-                        variant_info = self.get_variant_info(gmc_offer_id)
-
-                    results.append({
-                        "search_term": search_term,
-                        "impressions": int(metrics.get("impressions", 0) or 0),
-                        "clicks": int(metrics.get("clicks", 0) or 0),
-                        "conversions": float(metrics.get("conversions", 0) or 0),
-                        "conversion_value": float(metrics.get("conversions_value", 0) or 0),
-                        "cost_micros": int(metrics.get("cost_micros", 0) or 0),
-                        "campaign_id": campaign_id,
-                        "ad_group_id": ad_group_id,
-                        "item_ids": item_ids[:10],  # Include up to 10 item_ids for context
-                        "gmc_offer_id": gmc_offer_id,
-                        "master_sku": variant_info.get("master_sku"),
-                        "finish": variant_info.get("finish"),
-                        "finish_code": variant_info.get("finish_code"),
-                        "shopify_variant_id": variant_info.get("shopify_variant_id"),
-                    })
+                        for item_id in item_ids[:10]:  # up to 10 variants per campaign
+                            variant_info = self.get_variant_info(item_id)
+                            results.append({
+                                "search_term": search_term,
+                                "impressions": int(metrics.get("impressions", 0) or 0),
+                                "clicks": int(metrics.get("clicks", 0) or 0),
+                                "conversions": float(metrics.get("conversions", 0) or 0),
+                                "conversion_value": float(metrics.get("conversions_value", 0) or 0),
+                                "cost_micros": int(metrics.get("cost_micros", 0) or 0),
+                                "campaign_id": campaign_id,
+                                "ad_group_id": ad_group_id,
+                                "item_ids": item_ids[:10],
+                                "gmc_offer_id": item_id,
+                                "master_sku": variant_info.get("master_sku"),
+                                "finish": variant_info.get("finish"),
+                                "finish_code": variant_info.get("finish_code"),
+                                "shopify_variant_id": variant_info.get("shopify_variant_id"),
+                            })
+                    else:
+                        # No products in campaign — emit one row with null gmc_offer_id
+                        results.append({
+                            "search_term": search_term,
+                            "impressions": int(metrics.get("impressions", 0) or 0),
+                            "clicks": int(metrics.get("clicks", 0) or 0),
+                            "conversions": float(metrics.get("conversions", 0) or 0),
+                            "conversion_value": float(metrics.get("conversions_value", 0) or 0),
+                            "cost_micros": int(metrics.get("cost_micros", 0) or 0),
+                            "campaign_id": campaign_id,
+                            "ad_group_id": ad_group_id,
+                            "item_ids": [],
+                            "gmc_offer_id": None,
+                            "master_sku": None,
+                            "finish": None,
+                            "finish_code": None,
+                            "shopify_variant_id": None,
+                        })
 
         except Exception as e:
             logger.error(f"Google Ads API error: {e}")
@@ -932,6 +947,7 @@ class SearchTermsClient:
                     "period_end": period_end.isoformat(),
                     "sync_job_id": sync_job_id,
                     "fetched_at": datetime.utcnow().isoformat(),
+                    "synced_at": datetime.utcnow().isoformat(),
                 }
             else:
                 # Aggregate metrics for duplicate entries

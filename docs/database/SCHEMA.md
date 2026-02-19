@@ -681,6 +681,7 @@ Variant-level Google Ads search terms data. Enriched with Keyword Planner metric
 | period_start | date | NO | - | Query period start date |
 | period_end | date | NO | - | Query period end date |
 | fetched_at | timestamp with time zone | YES | now() | Data fetch timestamp |
+| synced_at | timestamp with time zone | YES | - | Timestamp of last sync with corrected Phase 13 logic; NULL = pre-fix data |
 | sync_job_id | uuid | YES | - | Foreign key to search_query_sync_jobs |
 
 **Primary Key**: `id`
@@ -695,6 +696,7 @@ Variant-level Google Ads search terms data. Enriched with Keyword Planner metric
 - `idx_search_queries_period` on `(period_start, period_end)`
 - `idx_search_queries_sync_job` on `sync_job_id`
 - `idx_search_queries_ad_group_id` on `ad_group_id`
+- `idx_search_queries_synced_at` on `synced_at`
 
 **Check Constraints**:
 - `competition IN ('LOW', 'MEDIUM', 'HIGH', 'UNSPECIFIED', NULL)`
