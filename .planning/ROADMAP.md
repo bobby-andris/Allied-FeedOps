@@ -261,6 +261,17 @@ Phases execute in numeric order: 9 → 10 → 11 → 12
 | 11. Performance Page Enhancements | 3/3 | Complete   | 2026-02-19 | - |
 | 12. Dashboard Audit & Cleanup | 3/3 | Complete    | 2026-02-19 | - |
 
+### Phase 13: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
+
+**Goal:** Fix how Google Ads data is fetched and stored — correct variant-level search term attribution (per-item instead of per-campaign-top-item) and confirm performance metrics use the right offer ID format for shopping_performance_view. Re-sync all 2,784 SKUs with corrected data.
+**Depends on:** Phase 12
+**Plans:** 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Diagnosis: code trace of both bugs + empirical data comparison + 13-DIAGNOSIS.md
+- [ ] 13-02-PLAN.md — Fix: fetch_search_terms() variant expansion, delete-before-insert worker, synced_at migration, offer ID case fix
+- [ ] 13-03-PLAN.md — Deploy + re-sync all 2,784 SKUs + human verification of corrected data
+
 ---
 *Phase 0 completed: 2026-02-13*
 *v1.0 milestone completed: 2026-02-13*
