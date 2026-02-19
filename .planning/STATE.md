@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 13 — Fix Google Ads Data Sourcing
-Plan: 1 of 3 — 13-01 COMPLETE (diagnosis: Bug 1 confirmed, Bug 2 ruled out)
-Status: Phase 13 In Progress — 1 of 3 plans done
-Last activity: 2026-02-19 — Phase 13 Plan 01 complete (13-DIAGNOSIS.md created, empirical evidence gathered, commits da24612f, dadc63c2)
+Plan: 2 of 3 — 13-02 COMPLETE (code fixes: variant fan-out, delete-before-insert, synced_at migration)
+Status: Phase 13 In Progress — 2 of 3 plans done
+Last activity: 2026-02-19 — Phase 13 Plan 02 complete (fixed fetch_search_terms fan-out, added per-SKU delete, migration 027, commits a2307ee8, 29a9ae5b)
 
-Progress: [████░░░░░░░] 33% of Phase 13 — Plan 1 complete
+Progress: [███████░░░░] 67% of Phase 13 — Plans 1-2 complete
 
 ## Performance Metrics
 
@@ -318,6 +318,10 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 13]: Bug 1 confirmed: fetch_search_terms() uses item_ids[0] — attributes all search terms to highest-impression variant instead of fan-out
 - [Phase 13]: Bug 2 ruled out: performance_baselines non-zero for all tested published SKUs — lowercase offer IDs work correctly
 - [Phase 13]: performance_baselines do NOT need re-capture — only search_queries needs delete + re-sync
+- [Phase 13 Plan 02]: Bug 1 fixed: replaced item_ids[0] with per-item_id loop (Option B fan-out) — each variant in a campaign gets its own search term row
+- [Phase 13 Plan 02]: Bug 2 fix skipped: confirmed not a bug by empirical data from Plan 01
+- [Phase 13 Plan 02]: Delete-before-insert strategy: per-SKU delete right before re-insert — resume-safe, only processed SKUs cleared
+- [Phase 13 Plan 02]: synced_at column (migration 027): NULL = pre-fix data, non-NULL = post-fix corrected data
 
 ### Pending Todos
 
@@ -336,9 +340,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Phase 12 Plan 03 complete: competitors simplified, agent-browser verified all 11 pages (5bb5196a)
-Stopped at: Phase 12 COMPLETE — all 3 plans done (audit, fixes, simplification + verification)
+Last session: 2026-02-19 — Phase 13 Plan 02 complete: variant attribution fixed, delete-before-insert added, migration 027 created (a2307ee8, 29a9ae5b)
+Stopped at: Phase 13 Plan 02 COMPLETE — code fixes done, re-sync pending in Plan 03
 Resume file: None
 
 ---
-*Next step:* Phase 13 or next planned phase — Phase 12 Dashboard Audit & Cleanup is complete.
+*Next step:* Phase 13 Plan 03 — apply migration 027 and run re-sync of search_queries

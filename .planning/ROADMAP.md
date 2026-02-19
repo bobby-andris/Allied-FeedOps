@@ -265,7 +265,7 @@ Phases execute in numeric order: 9 → 10 → 11 → 12
 
 **Goal:** Fix how Google Ads data is fetched and stored — correct variant-level search term attribution (per-item instead of per-campaign-top-item) and confirm performance metrics use the right offer ID format for shopping_performance_view. Re-sync all 2,784 SKUs with corrected data.
 **Depends on:** Phase 12
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 13-01-PLAN.md — Diagnosis: code trace of both bugs + empirical data comparison + 13-DIAGNOSIS.md
