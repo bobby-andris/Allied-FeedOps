@@ -341,9 +341,9 @@ Fix: Add diagnostic logging, test locally, identify empty-result cause, fix and 
 **Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 16-01-PLAN.md — Fix fetch_batch_product_performance chunking + run performance backfill for 2,784 SKUs
-- [ ] 16-02-PLAN.md — Debug and fix search terms date-range empty results + run 180-day chunked backfill
-- [ ] 16-03-PLAN.md — Monitoring page verification via agent-browser after both backfills complete
+- [x] 16-01-PLAN.md — Fix fetch_batch_product_performance chunking + run performance backfill for 2,784 SKUs
+- [ ] 16-02-PLAN.md — Parallelize GAQL chunks, batch variant_index lookups, batch upserts + restart backfills
+- [ ] 16-03-PLAN.md — Monitoring page verification via agent-browser after optimized backfills run
 
 ---
 *Phase 0 completed: 2026-02-13*
