@@ -12,9 +12,9 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 Phase: 12 — Dashboard Audit & Cleanup
 Plan: 3 of 3 — 12-03 COMPLETE (competitors simplification + live verification)
 Status: Phase 12 COMPLETE — all 3 plans done
-Last activity: 2026-02-19 — Phase 12 Plan 03 complete (competitors simplified, agent-browser verified all 11 pages, commit 5bb5196a)
+Last activity: 2026-02-19 — Phase 11 Plan 03 complete (4 UAT gaps closed, baselines recaptured for 37 published SKUs, commits 1b26dfd5, 499ed7a9)
 
-Progress: [███████████] 100% of Phase 12 — All plans complete
+Progress: [███████████] 100% of Phase 11 — All 3 plans complete
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [███████████] 100% of Phase 12 — All plans com
 | Phase 12-dashboard-audit-cleanup P12-01 | 2 | 2 tasks | 1 files |
 | Phase 12-dashboard-audit-cleanup P02 | 3 | 2 tasks | 4 files |
 | Phase 12 P03 | 8 | 2 tasks | 2 files |
+| Phase 11 P03 | 13 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -305,6 +306,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 12]: Competitors page SIMPLIFIED (not removed) — SERP tab retained, marketplace tab removed; functional scraping capability preserved for future use
 - [Phase 12]: Usage guidance banner added to /competitors pointing users to Search Insights for SKU-level keyword data
 - [Phase 12]: No shared EmptyState component created — only 1 DEAD-END page (threshold is 3+); applied inline
+- [Phase 11]: Daily-average baseline: avg_impressions/avg_clicks stored as total/days_lookback — matches snapshot normalization pattern (Plan 11-03)
+- [Phase 11]: snapshots[0] over .find() window filter: most recent snapshot always wins; backfilled snapshots captured months post-publish no longer excluded (Plan 11-03)
+- [Phase 11]: Offer-ID join for SKU detail: variant_index → gmc_offer_ids → uppercase → search_queries.in() — resilient to historical null master_sku rows (Plan 11-03)
 
 ### Pending Todos
 
