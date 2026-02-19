@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 12: COMPLETE)
+**Current focus:** v1.1 milestone — Phase 13 code deployed, Phase 14 planned
 
 ## Current Position
 
-Phase: 13 — Fix Google Ads Data Sourcing
-Plan: 2 of 3 — 13-02 COMPLETE (code fixes: variant fan-out, delete-before-insert, synced_at migration)
-Status: Phase 13 In Progress — 2 of 3 plans done
-Last activity: 2026-02-19 — Phase 13 Plan 02 complete (fixed fetch_search_terms fan-out, added per-SKU delete, migration 027, commits a2307ee8, 29a9ae5b)
+Phase: 13 — Fix Google Ads Data Sourcing — COMPLETE (code + deploy done; re-sync superseded by Phase 14)
+Plan: 3 of 3 — 13-03 COMPLETE (migration applied, code deployed, sync job triggered)
+Status: Phase 13 DONE — all code fixes deployed. Phase 14 needed for 180-day sync + monitoring fixes.
+Last activity: 2026-02-19 — Phase 13 fully deployed (commit 72c360b4), re-sync ran for 30d, Phase 14 scoped
 
-Progress: [███████░░░░] 67% of Phase 13 — Plans 1-2 complete
+Progress: [███████████] 100% of Phase 13 code — awaiting Phase 14 for full 180-day re-sync
 
 ## Performance Metrics
 
@@ -326,6 +326,29 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 ### Pending Todos
 
 None.
+
+### Phase 13 Key Findings (for Phase 14 planning)
+
+**Search terms date range bug:**
+- `DURING LAST_{days}_DAYS` GAQL syntax only supports specific enum values (LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS)
+- Values like LAST_90_DAYS, LAST_180_DAYS → `INVALID_ARGUMENT` from Google Ads API
+- Fix: replace with `BETWEEN 'YYYY-MM-DD' AND 'YYYY-MM-DD'` explicit date strings (same pattern used in google_ads_performance.py which successfully fetches 180 days)
+- Affected: ALL 4 occurrences of `DURING LAST_{days}_DAYS` in google_ads_search_terms.py
+
+**Monitoring page bugs:**
+- "Active Jobs" reads from `backfill_jobs` table (does not exist in production) → always empty
+- Coverage numbers wrong (shows 17/39 instead of 125/2784): PostgREST default 1000-row limit on `variant_index` query (72k rows) in monitoring.py get_data_coverage()
+- Fix: use SQL COUNT(DISTINCT master_sku) queries, redirect Active Jobs to search_query_sync_jobs
+
+**Production data reality:**
+- search_queries: 7,891 rows, 125 distinct SKUs — this is the real Google Ads universe (SKUs in active campaigns)
+- performance_baselines: 188 rows, 96 SKUs — correct, non-zero values confirmed
+- backfill_jobs table: does NOT exist in production (Phase 5-8 migrations never applied)
+- search_query_sync_jobs: EXISTS, has job history — this is the correct job tracker
+
+**Phase 14 scope:**
+- Plan 14-01: Fix explicit date ranges in google_ads_search_terms.py + bump sync endpoint max to 180 days + re-trigger 180-day sync
+- Plan 14-02: Fix monitoring page coverage queries (COUNT vs full fetch) + Active Jobs → search_query_sync_jobs
 
 ### Quick Tasks Completed
 
