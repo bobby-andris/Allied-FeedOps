@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 11-performance-page-enhancements
 source: [11-01-SUMMARY.md, 11-02-SUMMARY.md]
 started: 2026-02-19T12:30:00Z
@@ -66,31 +66,55 @@ skipped: 0
 
 ## Gaps
 
-- truth: "Changing time selectors updates metric values correctly for each master SKU"
+- truth: "Baseline avg_impressions and avg_clicks are accurate daily averages (not per-variant totals)"
   status: failed
   reason: "User reported: I think that there is something wrong with the variant sku data for each master SKU and therefore making all the metrics wrong"
   severity: major
   test: 2
-  artifacts: []
-  missing: []
-- truth: "Some published SKUs unexpectedly show 'No snapshot' — data coverage needs investigation"
-  status: failed
-  reason: "User reported: there are a few rows that show 'No Snapshot' which should be investigated"
-  severity: minor
-  test: 6
-  artifacts: []
-  missing: []
+  root_cause: "src/feedops/api/performance_baseline.py divides total_impressions by variants_with_data (variant count) instead of days_lookback (30 days). Stored baseline is a per-variant total, not a daily average. When route.ts normalizes the snapshot by snapshotWindowDays, the two values are on incompatible scales — baseline is inflated ~6x relative to current, making all deltas wrong."
+  artifacts:
+    - path: "src/feedops/api/performance_baseline.py"
+      issue: "avg_impressions = total_impressions / variants_with_data — wrong divisor, should be / days_lookback"
+    - path: "src/feedops/api/performance_baseline.py"
+      issue: "avg_clicks = total_clicks / variants_with_data — same wrong divisor"
+  missing:
+    - "Change divisor to days_lookback in _capture_google_baseline()"
+    - "Re-run baseline capture for all published SKUs to overwrite corrupt stored values"
 - truth: "Delta values show accurate non-zero percentages for published SKUs with snapshots"
   status: failed
   reason: "User reported: There are a decent amount of rows that show 0 so we need to check these numbers to ensure they are accurate"
   severity: major
   test: 5
-  artifacts: []
-  missing: []
+  root_cause: "route.ts snapshot window filter uses snapshot_date <= publishDate + snapshotWindowDays (absolute date ceiling). Snapshots are stored with snapshot_date = today's date (the API query end date). Any SKU published more than snapshotWindowDays (30d) before the snapshot capture date has its snapshot silently excluded. All 44 backfilled snapshots (captured Feb 2026 for SKUs published months earlier) are likely excluded — hasSnapshot=false → 0 deltas."
+  artifacts:
+    - path: "dashboard/src/app/api/performance/route.ts"
+      issue: "lines 241-245: snapshots.find() with s.snapshot_date <= publishDatePlus — upper bound excludes all valid snapshots for older publishes"
+  missing:
+    - "Replace window filter with snapshots[0] (already sorted DESC) — most recent snapshot, no date ceiling"
+- truth: "Some published SKUs unexpectedly show 'No snapshot' — data coverage needs investigation"
+  status: failed
+  reason: "User reported: there are a few rows that show 'No Snapshot' which should be investigated"
+  severity: minor
+  test: 6
+  root_cause: "Same root cause as test 5 — the snapshot_date <= publishDatePlus window filter excludes snapshots for SKUs published more than snapshotWindowDays before capture. Every SKU published before ~Jan 20 (30 days before Feb 19 backfill) would show No Snapshot. This is not a missing snapshot issue — the data exists, but the query throws it away."
+  artifacts:
+    - path: "dashboard/src/app/api/performance/route.ts"
+      issue: "lines 241-245: same upper-bound window filter as test 5"
+  missing:
+    - "Same fix as test 5 — use snapshots[0] instead of window filter"
 - truth: "Expanded inline panel shows variant breakdown (per-finish impressions/clicks) for each SKU"
   status: failed
   reason: "User reported: pass but a lot of SKUs show no variant data so we need to ensure that these queries are correct"
   severity: major
   test: 8
-  artifacts: []
-  missing: []
+  root_cause: "Two compounding issues: (1) google_ads_search_terms.py sync assigns search terms to item_ids[0] only (first product in campaign) — all other products in the campaign get master_sku=null in search_queries. (2) gmc_offer_id from Google Ads is uppercase (shopify_US_) but DB stores lowercase (shopify_us_), causing get_variant_info case-sensitive lookup to fail and write master_sku=null. Route.ts then queries .eq('master_sku', sku) which returns 0 rows for any SKU whose data has null master_sku."
+  artifacts:
+    - path: "src/feedops/integrations/google_ads_search_terms.py"
+      issue: "lines 595-598: campaign-level join uses item_ids[0] only — all other products in campaign get no variant attribution"
+    - path: "src/feedops/integrations/google_ads_search_terms.py"
+      issue: "line 387: .eq('gmc_offer_id', gmc_offer_id) is case-sensitive but Google Ads returns shopify_US_ (uppercase) vs DB shopify_us_ (lowercase)"
+    - path: "dashboard/src/app/api/performance/route.ts"
+      issue: "lines 334-338: .eq('master_sku', sku) returns empty for rows with null master_sku"
+  missing:
+    - "In route.ts: join through variant_index to get all gmc_offer_ids for the master_sku, then query search_queries .in('gmc_offer_id', offerIds) — resilient to null master_sku in historical data"
+    - "In google_ads_search_terms.py get_variant_info: lowercase the incoming gmc_offer_id before lookup (.eq('gmc_offer_id', gmc_offer_id.lower())) to fix future syncs"
