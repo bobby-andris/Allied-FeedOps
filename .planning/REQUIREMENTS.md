@@ -19,9 +19,9 @@ All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10)
 
 ### Image Workflow (IMG)
 
-- [ ] **IMG-01**: User can manually select which finish/variant to use when generating a lifestyle image for a SKU
-- [ ] **IMG-02**: When no variant is manually selected, system auto-selects the Google Ads variant with the most impressions (not a fixed heuristic like "first finish" or "fire engine red")
-- [ ] **IMG-03**: User can see which Google Ads variants for a SKU have an associated lifestyle image vs. are missing one
+- [x] **IMG-01**: User can manually select which finish/variant to use when generating a lifestyle image for a SKU
+- [x] **IMG-02**: When no variant is manually selected, system auto-selects the Google Ads variant with the most impressions (not a fixed heuristic like "first finish" or "fire engine red")
+- [x] **IMG-03**: User can see which Google Ads variants for a SKU have an associated lifestyle image vs. are missing one
 - [ ] **IMG-04**: Image generation uses user-selected variant instead of overriding with auto-selection logic
 
 ### Performance Page (PERF)
@@ -71,9 +71,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SKUR-03 | Phase 9 | Complete |
 | SKUR-04 | Phase 9 | Complete |
 | SKUR-05 | Phase 9 | Complete |
-| IMG-01 | Phase 10 | Pending |
-| IMG-02 | Phase 10 | Pending |
-| IMG-03 | Phase 10 | Pending |
+| IMG-01 | Phase 10 | Complete |
+| IMG-02 | Phase 10 | Complete |
+| IMG-03 | Phase 10 | Complete |
 | IMG-04 | Phase 10 | Pending |
 | PERF-01 | Phase 11 | Pending |
 | PERF-02 | Phase 11 | Pending |

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 9: SKU Review Revamp)
+**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 10: Image Workflow Improvements)
 
 ## Current Position
 
-Phase: 9 — SKU Review Revamp
-Plan: 3 of 5 — COMPLETE
-Status: Phase 9 complete (all 3 plans executed)
-Last activity: 2026-02-18 — Plan 09-03 complete (inline expand/collapse, quick approve, image lifecycle badges)
+Phase: 10 — Image Workflow Improvements
+Plan: 1 of 3 — COMPLETE
+Status: In progress (plan 10-01 executed)
+Last activity: 2026-02-19 — Plan 10-01 complete (GET /api/images/variant-data endpoint)
 
-Progress: [██████░░░░] 60% (v1.1 milestone, 3/5 plans in Phase 9)
+Progress: [██████░░░░] 60% (v1.1 milestone, 1/3 plans in Phase 10)
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████░░░░] 60% (v1.1 milestone, 3/5 plans in Pha
 | Phase 09-sku-review-revamp P01 | 3 | 2 tasks | 3 files |
 | Phase 09-sku-review-revamp P02 | 3 | 2 tasks | 1 file |
 | Phase 09-sku-review-revamp P03 | 47 | 2 tasks | 3 files |
+| Phase 10-image-workflow-improvements P01 | 6 | 1 task | 1 file |
 
 ## Accumulated Context
 
@@ -274,6 +275,8 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 09-sku-review-revamp]: expandedSku as single string (not array) enforces one-row-open-at-a-time without extra logic (Plan 09-03)
 - [Phase 09-sku-review-revamp]: get_catalog_thumbnails RPC replaces direct product_catalog table query to bypass PostgREST 1000-row default limit (Plan 09-03)
 - [Phase 09-sku-review-revamp]: LifestyleImageLifecycle (total/approved/published) added inline as ImageRowBadge per row and LifestyleImageBadge in preview panel (Plan 09-03)
+- [Phase 10-image-workflow-improvements]: JS-side aggregation for search_queries impressions/clicks (Supabase client lacks GROUP BY); variant_index as canonical finish list so finishes with zero impressions are not dropped (Plan 10-01)
+- [Phase 10-image-workflow-improvements]: Three-table merge pattern: variant_index + search_queries + variant_lifestyle_images merged in JS, sorted by total_impressions descending (Plan 10-01)
 
 ### Pending Todos
 
@@ -292,9 +295,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-18 — Plan 09-03 complete (inline expand/collapse, quick approve, image lifecycle badges, RPC fix)
-Stopped at: Completed 09-sku-review-revamp-09-03-PLAN.md
+Last session: 2026-02-19 — Plan 10-01 complete (GET /api/images/variant-data endpoint for per-finish impression + coverage data)
+Stopped at: Completed 10-image-workflow-improvements-10-01-PLAN.md
 Resume file: None
 
 ---
-*Next step:* Phase 9 complete — all 3 plans executed. Proceed to Phase 10 or next v1.1 phase.
+*Next step:* Plan 10-02 — variant selector modal (auto-selects highest-impressions finish using the new variant-data API).
