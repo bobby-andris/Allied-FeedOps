@@ -473,6 +473,12 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
+        # Compute explicit date range — LAST_N_DAYS syntax only supports specific
+        # enum values (LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS) and rejects
+        # arbitrary N values like 90 or 180 with INVALID_ARGUMENT errors.
+        end_date = date.today().strftime("%Y-%m-%d")
+        start_date = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+
         # Use shopping_performance_view to get products with impressions by campaign
         # Note: Must SELECT campaign.advertising_channel_type when filtering by it
         query = f"""
@@ -483,7 +489,7 @@ class SearchTermsClient:
                 campaign.advertising_channel_type,
                 metrics.impressions
             FROM shopping_performance_view
-            WHERE segments.date DURING LAST_{days}_DAYS
+            WHERE segments.date BETWEEN '{start_date}' AND '{end_date}'
                 AND campaign.advertising_channel_type = 'SHOPPING'
                 AND metrics.impressions > 0
             ORDER BY metrics.impressions DESC
@@ -551,6 +557,12 @@ class SearchTermsClient:
         logger.info(f"Found products across {len(campaign_products)} campaigns")
 
         # Step 2: Fetch search terms with campaign.id
+        # Compute explicit date range — LAST_N_DAYS syntax only supports specific
+        # enum values (LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS) and rejects
+        # arbitrary N values like 90 or 180 with INVALID_ARGUMENT errors.
+        st_end_date = date.today().strftime("%Y-%m-%d")
+        st_start_date = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+
         query = f"""
             SELECT
                 search_term_view.search_term,
@@ -563,7 +575,7 @@ class SearchTermsClient:
                 metrics.conversions_value,
                 metrics.cost_micros
             FROM search_term_view
-            WHERE segments.date DURING LAST_{days}_DAYS
+            WHERE segments.date BETWEEN '{st_start_date}' AND '{st_end_date}'
                 AND campaign.advertising_channel_type = 'SHOPPING'
             ORDER BY metrics.impressions DESC
             LIMIT {limit}
@@ -795,6 +807,12 @@ class SearchTermsClient:
 
         ga_service = self.client.get_service("GoogleAdsService")
 
+        # Compute explicit date range — LAST_N_DAYS syntax only supports specific
+        # enum values (LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS) and rejects
+        # arbitrary N values like 90 or 180 with INVALID_ARGUMENT errors.
+        sv_end_date = date.today().strftime("%Y-%m-%d")
+        sv_start_date = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+
         query = f"""
             SELECT
                 search_term_view.search_term,
@@ -803,7 +821,7 @@ class SearchTermsClient:
                 metrics.conversions,
                 metrics.conversions_value
             FROM search_term_view
-            WHERE segments.date DURING LAST_{days}_DAYS
+            WHERE segments.date BETWEEN '{sv_start_date}' AND '{sv_end_date}'
                 AND campaign.advertising_channel_type = 'SHOPPING'
                 AND segments.product_item_id = '{gmc_offer_id}'
             ORDER BY metrics.impressions DESC

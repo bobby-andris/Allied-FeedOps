@@ -33,7 +33,7 @@ class SyncSearchTermsRequest(BaseModel):
     """Request to sync search terms from Google Ads."""
 
     days: int = Field(
-        default=30, ge=7, le=90, description="Days of data to fetch"
+        default=30, ge=7, le=180, description="Days of data to fetch"
     )
     limit: int = Field(
         default=1000, ge=100, le=5000, description="Max search terms to fetch"
