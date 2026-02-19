@@ -19,12 +19,13 @@ import {
   FINISH_TOKEN,
   composeTemplateTitle,
   deriveEditableTemplateParts,
-  validateManualVariantTitleTemplate,
+  validateManualTitleForPlatform,
+  type ManualTitlePlatform,
 } from '@/lib/review/manual-title'
 
 interface ManualTitleEditorProps {
   sku: string
-  platform: 'google' | 'bing'
+  platform: ManualTitlePlatform
   currentTitle: string
   onSaved: (title: string) => void
 }
@@ -41,16 +42,28 @@ export function ManualTitleEditor({ sku, platform, currentTitle, onSaved }: Manu
   const [open, setOpen] = useState(false)
   const [prefix, setPrefix] = useState('')
   const [suffix, setSuffix] = useState('')
+  const [shopifyTitle, setShopifyTitle] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const previewTitle = useMemo(() => composeTemplateTitle(prefix, suffix), [prefix, suffix])
-  const validation = useMemo(() => validateManualVariantTitleTemplate(previewTitle), [previewTitle])
+  const isVariantTemplatePlatform = platform === 'google' || platform === 'bing'
+  const previewTitle = useMemo(
+    () => (isVariantTemplatePlatform ? composeTemplateTitle(prefix, suffix) : shopifyTitle.trim()),
+    [isVariantTemplatePlatform, prefix, shopifyTitle, suffix],
+  )
+  const validation = useMemo(
+    () => validateManualTitleForPlatform(previewTitle, platform),
+    [platform, previewTitle],
+  )
 
   const initializeFromCurrentTitle = () => {
-    const parts = deriveEditableTemplateParts(currentTitle)
-    setPrefix(parts.prefix)
-    setSuffix(parts.suffix)
+    if (isVariantTemplatePlatform) {
+      const parts = deriveEditableTemplateParts(currentTitle)
+      setPrefix(parts.prefix)
+      setSuffix(parts.suffix)
+    } else {
+      setShopifyTitle(currentTitle)
+    }
     setError(null)
   }
 
@@ -92,11 +105,13 @@ export function ManualTitleEditor({ sku, platform, currentTitle, onSaved }: Manu
 
       const savedTitle = payload.title || validation.normalizedTitle
       onSaved(savedTitle)
-      toast.success(
-        payload.state === 'no_change'
-          ? 'Title already matches current template.'
-          : `${platform.toUpperCase()} base title updated and applied to all variants.`,
-      )
+      if (payload.state === 'no_change') {
+        toast.success('Title already matches current content.')
+      } else if (isVariantTemplatePlatform) {
+        toast.success(`${platform.toUpperCase()} base title updated and applied to all variants.`)
+      } else {
+        toast.success('Shopify title updated.')
+      }
       setOpen(false)
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : 'Failed to save title.'
@@ -111,48 +126,66 @@ export function ManualTitleEditor({ sku, platform, currentTitle, onSaved }: Manu
     <>
       <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
         <Pencil className="h-4 w-4 mr-2" />
-        Edit Base Title
+        {isVariantTemplatePlatform ? 'Edit Base Title' : 'Edit Title'}
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[680px]">
           <DialogHeader>
-            <DialogTitle>Edit {platform.toUpperCase()} Base Title</DialogTitle>
+            <DialogTitle>
+              {isVariantTemplatePlatform ? `Edit ${platform.toUpperCase()} Base Title` : 'Edit Shopify Title'}
+            </DialogTitle>
             <DialogDescription>
-              This updates the base title template for this platform and applies to all finish variants.
-              The finish token is locked to prevent hardcoded finish edits.
+              {isVariantTemplatePlatform
+                ? 'This updates the base title template for this platform and applies to all finish variants. The finish token is locked to prevent hardcoded finish edits.'
+                : 'This updates the Shopify product-level title. Finish names and placeholders are blocked to keep Shopify content finish-agnostic.'}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="title-prefix">Title Prefix</Label>
-              <Input
-                id="title-prefix"
-                value={prefix}
-                onChange={(event) => setPrefix(event.target.value)}
-                disabled={saving}
-                placeholder="Text before finish token"
-              />
-            </div>
+            {isVariantTemplatePlatform ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="title-prefix">Title Prefix</Label>
+                  <Input
+                    id="title-prefix"
+                    value={prefix}
+                    onChange={(event) => setPrefix(event.target.value)}
+                    disabled={saving}
+                    placeholder="Text before finish token"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label>Finish Token (Locked)</Label>
-              <div className="rounded-md border bg-muted/40 px-3 py-2">
-                <Badge variant="outline">{FINISH_TOKEN}</Badge>
+                <div className="space-y-2">
+                  <Label>Finish Token (Locked)</Label>
+                  <div className="rounded-md border bg-muted/40 px-3 py-2">
+                    <Badge variant="outline">{FINISH_TOKEN}</Badge>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title-suffix">Title Suffix</Label>
+                  <Input
+                    id="title-suffix"
+                    value={suffix}
+                    onChange={(event) => setSuffix(event.target.value)}
+                    disabled={saving}
+                    placeholder="Text after finish token"
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="shopify-title">Shopify Title</Label>
+                <Input
+                  id="shopify-title"
+                  value={shopifyTitle}
+                  onChange={(event) => setShopifyTitle(event.target.value)}
+                  disabled={saving}
+                  placeholder="Product-level title for Shopify"
+                />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="title-suffix">Title Suffix</Label>
-              <Input
-                id="title-suffix"
-                value={suffix}
-                onChange={(event) => setSuffix(event.target.value)}
-                disabled={saving}
-                placeholder="Text after finish token"
-              />
-            </div>
+            )}
 
             <div className="space-y-2">
               <Label>Preview</Label>
@@ -182,9 +215,7 @@ export function ManualTitleEditor({ sku, platform, currentTitle, onSaved }: Manu
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
-              ) : (
-                'Save and Apply to All Variants'
-              )}
+              ) : isVariantTemplatePlatform ? 'Save and Apply to All Variants' : 'Save Title'}
             </Button>
           </DialogFooter>
         </DialogContent>

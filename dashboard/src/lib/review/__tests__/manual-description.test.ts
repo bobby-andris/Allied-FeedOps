@@ -4,6 +4,7 @@ import {
   FINISH_SENTENCE_TOKEN,
   composeDescriptionTemplate,
   deriveEditableDescriptionTemplateParts,
+  validateManualDescriptionForPlatform,
   validateManualVariantDescriptionTemplate,
 } from '../manual-description'
 
@@ -62,5 +63,33 @@ describe('manual description template helpers', () => {
 
     expect(validation.ok).toBe(true)
     expect(validation.normalizedDescription).toContain(FINISH_SENTENCE_TOKEN)
+  })
+
+  it('shopify validation allows finish-agnostic freeform description', () => {
+    const validation = validateManualDescriptionForPlatform(
+      'Crafted from solid brass with concealed mounting hardware for a clean, durable installation.',
+      'shopify',
+    )
+
+    expect(validation.ok).toBe(true)
+    expect(validation.normalizedDescription).toBe(
+      'Crafted from solid brass with concealed mounting hardware for a clean, durable installation.',
+    )
+  })
+
+  it('shopify validation rejects placeholders and hardcoded finish names', () => {
+    const withPlaceholder = validateManualDescriptionForPlatform(
+      'Solid brass bracket. {FINISH_SENTENCE} Built for durability.',
+      'shopify',
+    )
+    const withFinish = validateManualDescriptionForPlatform(
+      'Solid brass bracket in Fire Engine Red with concealed mounting.',
+      'shopify',
+    )
+
+    expect(withPlaceholder.ok).toBe(false)
+    expect(withPlaceholder.errors.some((error) => error.includes('placeholders'))).toBe(true)
+    expect(withFinish.ok).toBe(false)
+    expect(withFinish.errors.some((error) => error.includes('hardcoded finish'))).toBe(true)
   })
 })

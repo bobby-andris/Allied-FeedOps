@@ -164,7 +164,7 @@ function ContentBlock({
           )}
         </div>
         <div className="flex items-center gap-2">
-          {type === 'title' && (platform === 'google' || platform === 'bing') && candidate && (
+          {type === 'title' && candidate && (
             <ManualTitleEditor
               sku={sku}
               platform={platform}
@@ -172,7 +172,7 @@ function ContentBlock({
               onSaved={() => onRefresh()}
             />
           )}
-          {type === 'description' && (platform === 'google' || platform === 'bing') && candidate && (
+          {type === 'description' && candidate && (
             <ManualDescriptionEditor
               sku={sku}
               platform={platform}

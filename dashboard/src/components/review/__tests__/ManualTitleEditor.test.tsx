@@ -79,4 +79,40 @@ describe('ManualTitleEditor', () => {
     expect(init?.body).toContain('Designer Rod Brackets {FINISH_NAME} - Carolina Collection')
     expect(onSaved).toHaveBeenCalled()
   })
+
+  it('supports manual shopify title edit without finish token UI', async () => {
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    const fetchMock = vi.mocked(fetch)
+
+    render(
+      <ManualTitleEditor
+        sku="CS-1"
+        platform="shopify"
+        currentTitle="Carolina Collection 24-Inch Towel Bar"
+        onSaved={onSaved}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /edit/i }))
+
+    expect(screen.queryByText('{FINISH_NAME}')).not.toBeInTheDocument()
+    await user.clear(screen.getByLabelText(/^Shopify Title$/i))
+    await user.type(
+      screen.getByLabelText(/^Shopify Title$/i),
+      'Carolina Collection 24-Inch Towel Bar - Concealed Mount',
+    )
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/review/manual-title',
+        expect.objectContaining({ method: 'POST' }),
+      )
+    })
+
+    const [, init] = fetchMock.mock.calls.at(-1) || []
+    expect(init?.body).toContain('Carolina Collection 24-Inch Towel Bar - Concealed Mount')
+    expect(onSaved).toHaveBeenCalled()
+  })
 })

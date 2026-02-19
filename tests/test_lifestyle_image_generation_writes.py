@@ -1,33 +1,40 @@
 import sys
 from types import ModuleType
 
+try:  # pragma: no cover - import probe only
+    from google import genai as _genai_probe  # noqa: F401
+except Exception:  # pragma: no cover - fallback shim only
+    google_module = ModuleType("google")
+    google_genai_module = ModuleType("google.genai")
+    google_genai_types_module = ModuleType("google.genai.types")
+    google_genai_module.types = google_genai_types_module
+    google_module.genai = google_genai_module
 
-google_module = ModuleType("google")
-google_genai_module = ModuleType("google.genai")
-google_genai_types_module = ModuleType("google.genai.types")
-google_genai_module.types = google_genai_types_module
-google_module.genai = google_genai_module
+    sys.modules.setdefault("google", google_module)
+    sys.modules.setdefault("google.genai", google_genai_module)
+    sys.modules.setdefault("google.genai.types", google_genai_types_module)
 
-pil_module = ModuleType("PIL")
-pil_image_module = ModuleType("PIL.Image")
-pil_pnginfo_module = ModuleType("PIL.PngImagePlugin")
+try:  # pragma: no cover - import probe only
+    from PIL import Image as _pil_image_probe  # noqa: F401
+    from PIL.PngImagePlugin import PngInfo as _pil_png_probe  # noqa: F401
+except Exception:  # pragma: no cover - fallback shim only
+    pil_module = ModuleType("PIL")
+    pil_image_module = ModuleType("PIL.Image")
+    pil_pnginfo_module = ModuleType("PIL.PngImagePlugin")
 
-class _FakePngInfo:  # pragma: no cover - import shim only
-    pass
+    class _FakePngInfo:  # pragma: no cover - import shim only
+        pass
 
-class _FakeImage:  # pragma: no cover - import shim only
-    pass
+    class _FakeImage:  # pragma: no cover - import shim only
+        pass
 
-pil_pnginfo_module.PngInfo = _FakePngInfo
-pil_image_module.Image = _FakeImage
-pil_module.Image = pil_image_module
+    pil_pnginfo_module.PngInfo = _FakePngInfo
+    pil_image_module.Image = _FakeImage
+    pil_module.Image = pil_image_module
 
-sys.modules.setdefault("google", google_module)
-sys.modules.setdefault("google.genai", google_genai_module)
-sys.modules.setdefault("google.genai.types", google_genai_types_module)
-sys.modules.setdefault("PIL", pil_module)
-sys.modules.setdefault("PIL.Image", pil_image_module)
-sys.modules.setdefault("PIL.PngImagePlugin", pil_pnginfo_module)
+    sys.modules.setdefault("PIL", pil_module)
+    sys.modules.setdefault("PIL.Image", pil_image_module)
+    sys.modules.setdefault("PIL.PngImagePlugin", pil_pnginfo_module)
 
 from feedops.pipeline.lifestyle_images import save_lifestyle_image_to_db
 

@@ -85,4 +85,40 @@ describe('ManualDescriptionEditor', () => {
     expect(init?.body).toContain('{FINISH_SENTENCE}')
     expect(onSaved).toHaveBeenCalled()
   })
+
+  it('supports manual shopify description edit without finish token UI', async () => {
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    const fetchMock = vi.mocked(fetch)
+
+    render(
+      <ManualDescriptionEditor
+        sku="CS-1"
+        platform="shopify"
+        currentDescription="Crafted from solid brass with concealed mounting hardware."
+        onSaved={onSaved}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /edit/i }))
+
+    expect(screen.queryByText('{FINISH_SENTENCE}')).not.toBeInTheDocument()
+    await user.clear(screen.getByLabelText(/^Shopify Description$/i))
+    await user.type(
+      screen.getByLabelText(/^Shopify Description$/i),
+      'Crafted from solid brass with concealed mounting hardware for long-term durability.',
+    )
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/review/manual-description',
+        expect.objectContaining({ method: 'POST' }),
+      )
+    })
+
+    const [, init] = fetchMock.mock.calls.at(-1) || []
+    expect(init?.body).toContain('solid brass with concealed mounting hardware for long-term durability')
+    expect(onSaved).toHaveBeenCalled()
+  })
 })

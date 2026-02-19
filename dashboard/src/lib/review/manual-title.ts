@@ -1,6 +1,7 @@
 import { getAllFinishNames, PLACEHOLDERS } from '@/lib/finish-data'
 
 export const FINISH_TOKEN = PLACEHOLDERS.FINISH_NAME
+export type ManualTitlePlatform = 'google' | 'bing' | 'shopify'
 
 const FINISH_NAMES = getAllFinishNames().sort((a, b) => b.length - a.length)
 const TOKEN_REGEX = new RegExp(escapeRegex(FINISH_TOKEN), 'g')
@@ -109,4 +110,58 @@ export function validateManualVariantTitleTemplate(inputTitle: string): {
     normalizedTitle,
     errors,
   }
+}
+
+function validateManualShopifyTitle(inputTitle: string): {
+  ok: boolean
+  normalizedTitle: string
+  errors: string[]
+} {
+  const normalizedTitle = normalizeWhitespace(inputTitle)
+  const errors: string[] = []
+
+  if (!normalizedTitle) {
+    errors.push('Title is required.')
+    return { ok: false, normalizedTitle, errors }
+  }
+
+  const hasFinishPlaceholder = (
+    normalizedTitle.includes(PLACEHOLDERS.FINISH_NAME)
+    || normalizedTitle.includes(PLACEHOLDERS.FINISH_SENTENCE)
+    || normalizedTitle.includes(PLACEHOLDERS.FINISH_DESCRIPTION)
+  )
+  if (hasFinishPlaceholder) {
+    errors.push('Shopify title cannot include finish placeholders.')
+  }
+
+  const hardcodedFinishes = findHardcodedFinishes(normalizedTitle)
+  if (hardcodedFinishes.length > 0) {
+    errors.push(
+      `Title contains hardcoded finish names (${hardcodedFinishes.slice(0, 3).join(', ')}). Remove finish names for Shopify.`,
+    )
+  }
+
+  if (normalizedTitle.toLowerCase().includes('allied brass')) {
+    errors.push('Shopify title cannot include "Allied Brass".')
+  }
+
+  return {
+    ok: errors.length === 0,
+    normalizedTitle,
+    errors,
+  }
+}
+
+export function validateManualTitleForPlatform(
+  inputTitle: string,
+  platform: ManualTitlePlatform,
+): {
+  ok: boolean
+  normalizedTitle: string
+  errors: string[]
+} {
+  if (platform === 'shopify') {
+    return validateManualShopifyTitle(inputTitle)
+  }
+  return validateManualVariantTitleTemplate(inputTitle)
 }

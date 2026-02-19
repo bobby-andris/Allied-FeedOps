@@ -744,6 +744,61 @@ class LifestyleImageResult(BaseModel):
     error_message: Optional[str] = None
 
 
+def build_generation_failure_message(results: list["LifestyleImageResult"]) -> str:
+    """Build an actionable failure message from per-variation generation results."""
+    error_details: list[str] = []
+    for result in results:
+        if result.generation_success:
+            continue
+        err = (result.error_message or "Unknown generation error").strip()
+        error_details.append(f"var{result.variation_num}: {err}")
+
+    if not error_details:
+        return "All image generation attempts failed."
+
+    # Keep message concise but actionable in UI toasts/API responses.
+    detail_preview = "; ".join(error_details[:3])
+    if len(error_details) > 3:
+        detail_preview += f"; +{len(error_details) - 3} more"
+    return f"All image generation attempts failed. Details: {detail_preview}"
+
+
+def _generate_image_content_with_retry(
+    *,
+    client,
+    model: str,
+    contents: list,
+    config,
+) -> object:
+    """Generate image content with bounded retry/backoff for transient quota bursts."""
+    max_attempts = int(os.environ.get("LIFESTYLE_GENERATION_MAX_ATTEMPTS", "4"))
+    base_sleep = float(
+        os.environ.get("LIFESTYLE_GENERATION_RETRY_BASE_SECONDS", "1.0")
+    )
+
+    last_error: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=config,
+            )
+        except Exception as e:
+            last_error = e
+            if attempt >= max_attempts or not _is_resource_exhausted_error(e):
+                break
+            delay = base_sleep * (2 ** (attempt - 1))
+            delay += random.random() * 0.25 * delay
+            print(
+                f"  ⚠️  Generation rate-limited (attempt {attempt}/{max_attempts}); "
+                f"retrying in {delay:.1f}s"
+            )
+            time.sleep(delay)
+
+    raise last_error or RuntimeError("Image generation failed")
+
+
 class LifestyleImageGenerator:
     """Generates lifestyle images using Gemini Imagen API"""
 
@@ -846,13 +901,13 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
         try:
             print(f"  Generating variation {variation_num}...")
 
+            config = types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             try:
-                response = self.client.models.generate_content(
+                response = _generate_image_content_with_retry(
+                    client=self.client,
                     model="gemini-3-pro-image-preview",
                     contents=[prompt, *ref_images],
-                    config=types.GenerateContentConfig(
-                        response_modalities=["TEXT", "IMAGE"]
-                    ),
+                    config=config,
                 )
             except Exception:
                 if len(ref_images) == 1:
@@ -860,12 +915,11 @@ Remember: The product must be an EXACT REPLICA of the reference. Study every det
                 print(
                     "  ⚠️  Multi-image input failed, retrying with primary image only."
                 )
-                response = self.client.models.generate_content(
+                response = _generate_image_content_with_retry(
+                    client=self.client,
                     model="gemini-3-pro-image-preview",
                     contents=[prompt, ref_images[0]],
-                    config=types.GenerateContentConfig(
-                        response_modalities=["TEXT", "IMAGE"]
-                    ),
+                    config=config,
                 )
 
             # Extract and save image
@@ -1870,7 +1924,7 @@ def generate_lifestyle_images_for_sku(
             "images_generated": 0,
             "image_ids": [],
             "best_variation_num": None,
-            "message": "All image generation attempts failed",
+            "message": build_generation_failure_message(lifestyle_results),
         }
 
     # Step 7: Score images and select best

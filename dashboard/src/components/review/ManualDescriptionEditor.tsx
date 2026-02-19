@@ -19,12 +19,13 @@ import {
   FINISH_SENTENCE_TOKEN,
   composeDescriptionTemplate,
   deriveEditableDescriptionTemplateParts,
-  validateManualVariantDescriptionTemplate,
+  validateManualDescriptionForPlatform,
+  type ManualDescriptionPlatform,
 } from '@/lib/review/manual-description'
 
 interface ManualDescriptionEditorProps {
   sku: string
-  platform: 'google' | 'bing'
+  platform: ManualDescriptionPlatform
   currentDescription: string
   onSaved: (description: string) => void
 }
@@ -46,19 +47,28 @@ export function ManualDescriptionEditor({
   const [open, setOpen] = useState(false)
   const [prefix, setPrefix] = useState('')
   const [suffix, setSuffix] = useState('')
+  const [shopifyDescription, setShopifyDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const previewDescription = useMemo(() => composeDescriptionTemplate(prefix, suffix), [prefix, suffix])
+  const isVariantTemplatePlatform = platform === 'google' || platform === 'bing'
+  const previewDescription = useMemo(
+    () => (isVariantTemplatePlatform ? composeDescriptionTemplate(prefix, suffix) : shopifyDescription.trim()),
+    [isVariantTemplatePlatform, prefix, shopifyDescription, suffix],
+  )
   const validation = useMemo(
-    () => validateManualVariantDescriptionTemplate(previewDescription),
-    [previewDescription],
+    () => validateManualDescriptionForPlatform(previewDescription, platform),
+    [platform, previewDescription],
   )
 
   const initializeFromCurrentDescription = () => {
-    const parts = deriveEditableDescriptionTemplateParts(currentDescription)
-    setPrefix(parts.prefix)
-    setSuffix(parts.suffix)
+    if (isVariantTemplatePlatform) {
+      const parts = deriveEditableDescriptionTemplateParts(currentDescription)
+      setPrefix(parts.prefix)
+      setSuffix(parts.suffix)
+    } else {
+      setShopifyDescription(currentDescription)
+    }
     setError(null)
   }
 
@@ -100,11 +110,13 @@ export function ManualDescriptionEditor({
 
       const savedDescription = payload.description || validation.normalizedDescription
       onSaved(savedDescription)
-      toast.success(
-        payload.state === 'no_change'
-          ? 'Description already matches current template.'
-          : `${platform.toUpperCase()} base description updated and applied to all variants.`,
-      )
+      if (payload.state === 'no_change') {
+        toast.success('Description already matches current content.')
+      } else if (isVariantTemplatePlatform) {
+        toast.success(`${platform.toUpperCase()} base description updated and applied to all variants.`)
+      } else {
+        toast.success('Shopify description updated.')
+      }
       setOpen(false)
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : 'Failed to save description.'
@@ -119,50 +131,71 @@ export function ManualDescriptionEditor({
     <>
       <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
         <Pencil className="h-4 w-4 mr-2" />
-        Edit Base Description
+        {isVariantTemplatePlatform ? 'Edit Base Description' : 'Edit Description'}
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[760px]">
           <DialogHeader>
-            <DialogTitle>Edit {platform.toUpperCase()} Base Description</DialogTitle>
+            <DialogTitle>
+              {isVariantTemplatePlatform
+                ? `Edit ${platform.toUpperCase()} Base Description`
+                : 'Edit Shopify Description'}
+            </DialogTitle>
             <DialogDescription>
-              This updates the base description template for this platform and applies to all finish variants.
-              The finish sentence token is locked to prevent hardcoded finish edits.
+              {isVariantTemplatePlatform
+                ? 'This updates the base description template for this platform and applies to all finish variants. The finish sentence token is locked to prevent hardcoded finish edits.'
+                : 'This updates the Shopify product-level description. Finish names and placeholders are blocked to keep Shopify content finish-agnostic.'}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="description-prefix">Description Prefix</Label>
-              <Textarea
-                id="description-prefix"
-                value={prefix}
-                onChange={(event) => setPrefix(event.target.value)}
-                disabled={saving}
-                placeholder="Text before finish sentence token"
-                rows={5}
-              />
-            </div>
+            {isVariantTemplatePlatform ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="description-prefix">Description Prefix</Label>
+                  <Textarea
+                    id="description-prefix"
+                    value={prefix}
+                    onChange={(event) => setPrefix(event.target.value)}
+                    disabled={saving}
+                    placeholder="Text before finish sentence token"
+                    rows={5}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label>Finish Sentence Token (Locked)</Label>
-              <div className="rounded-md border bg-muted/40 px-3 py-2">
-                <Badge variant="outline">{FINISH_SENTENCE_TOKEN}</Badge>
+                <div className="space-y-2">
+                  <Label>Finish Sentence Token (Locked)</Label>
+                  <div className="rounded-md border bg-muted/40 px-3 py-2">
+                    <Badge variant="outline">{FINISH_SENTENCE_TOKEN}</Badge>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description-suffix">Description Suffix</Label>
+                  <Textarea
+                    id="description-suffix"
+                    value={suffix}
+                    onChange={(event) => setSuffix(event.target.value)}
+                    disabled={saving}
+                    placeholder="Text after finish sentence token"
+                    rows={5}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="shopify-description">Shopify Description</Label>
+                <Textarea
+                  id="shopify-description"
+                  value={shopifyDescription}
+                  onChange={(event) => setShopifyDescription(event.target.value)}
+                  disabled={saving}
+                  placeholder="Product-level description for Shopify"
+                  rows={8}
+                />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description-suffix">Description Suffix</Label>
-              <Textarea
-                id="description-suffix"
-                value={suffix}
-                onChange={(event) => setSuffix(event.target.value)}
-                disabled={saving}
-                placeholder="Text after finish sentence token"
-                rows={5}
-              />
-            </div>
+            )}
 
             <div className="space-y-2">
               <Label>Preview</Label>
@@ -194,9 +227,7 @@ export function ManualDescriptionEditor({
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
-              ) : (
-                'Save and Apply to All Variants'
-              )}
+              ) : isVariantTemplatePlatform ? 'Save and Apply to All Variants' : 'Save Description'}
             </Button>
           </DialogFooter>
         </DialogContent>

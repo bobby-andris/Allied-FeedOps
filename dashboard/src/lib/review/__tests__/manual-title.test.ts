@@ -4,6 +4,7 @@ import {
   FINISH_TOKEN,
   composeTemplateTitle,
   deriveEditableTemplateParts,
+  validateManualTitleForPlatform,
   validateManualVariantTitleTemplate,
 } from '../manual-title'
 
@@ -53,5 +54,31 @@ describe('manual title template helpers', () => {
 
     expect(validation.ok).toBe(true)
     expect(validation.normalizedTitle).toBe(`Wall Mount Towel Bar ${FINISH_TOKEN} - Allied Brass`)
+  })
+
+  it('shopify validation allows finish-agnostic freeform title', () => {
+    const validation = validateManualTitleForPlatform(
+      'Carolina Collection 24-Inch Towel Bar with Concealed Mount',
+      'shopify',
+    )
+
+    expect(validation.ok).toBe(true)
+    expect(validation.normalizedTitle).toBe('Carolina Collection 24-Inch Towel Bar with Concealed Mount')
+  })
+
+  it('shopify validation rejects title with hardcoded finish or brand', () => {
+    const withFinish = validateManualTitleForPlatform(
+      'Carolina Collection 24-Inch Towel Bar in Fire Engine Red',
+      'shopify',
+    )
+    const withBrand = validateManualTitleForPlatform(
+      'Allied Brass Carolina Collection 24-Inch Towel Bar',
+      'shopify',
+    )
+
+    expect(withFinish.ok).toBe(false)
+    expect(withFinish.errors.some((error) => error.includes('hardcoded finish'))).toBe(true)
+    expect(withBrand.ok).toBe(false)
+    expect(withBrand.errors.some((error) => error.includes('Allied Brass'))).toBe(true)
   })
 })

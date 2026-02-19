@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { createClient } from '@/lib/supabase/server'
 import { resolveCanonicalMasterSku } from '@/lib/master-sku'
-import { validateManualVariantTitleTemplate } from '@/lib/review/manual-title'
+import { validateManualTitleForPlatform, type ManualTitlePlatform } from '@/lib/review/manual-title'
 
 interface ManualTitleRequest {
   master_sku: string
-  platform: 'google' | 'bing'
+  platform: ManualTitlePlatform
   title: string
 }
 
@@ -33,21 +33,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (platform !== 'google' && platform !== 'bing') {
+    if (platform !== 'google' && platform !== 'bing' && platform !== 'shopify') {
       return NextResponse.json(
         {
-          error: 'Manual base title editing is only supported for google and bing.',
+          error: 'Manual title editing supports google, bing, or shopify.',
           code: 'manual_title_invalid_platform',
         },
         { status: 400 },
       )
     }
 
-    const validation = validateManualVariantTitleTemplate(title)
+    const validation = validateManualTitleForPlatform(title, platform)
     if (!validation.ok) {
       return NextResponse.json(
         {
-          error: 'Manual title template is invalid.',
+          error: 'Manual title is invalid.',
           code: 'manual_title_validation_failed',
           validation_errors: validation.errors,
         },
@@ -128,7 +128,10 @@ export async function POST(request: NextRequest) {
       content_type: 'title',
       platform,
       mode: 'simple',
-      feedback_text: 'Manual base title edit applied to variant template.',
+      feedback_text:
+        platform === 'shopify'
+          ? 'Manual Shopify title edit applied.'
+          : 'Manual base title edit applied to variant template.',
       previous_content: existingRow.candidate_content,
       new_content: validation.normalizedTitle,
       model_version: 'manual_title_override',

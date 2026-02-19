@@ -2,6 +2,7 @@ import { getAllFinishNames, PLACEHOLDERS } from '@/lib/finish-data'
 
 export const FINISH_SENTENCE_TOKEN = PLACEHOLDERS.FINISH_SENTENCE
 export const LEGACY_FINISH_SENTENCE_TOKEN = '[FINISH_SENTENCE]'
+export type ManualDescriptionPlatform = 'google' | 'bing' | 'shopify'
 
 const FINISH_NAMES = getAllFinishNames().sort((a, b) => b.length - a.length)
 const TOKEN_REGEX = new RegExp(escapeRegex(FINISH_SENTENCE_TOKEN), 'g')
@@ -139,4 +140,55 @@ export function validateManualVariantDescriptionTemplate(inputDescription: strin
     normalizedDescription,
     errors,
   }
+}
+
+function validateManualShopifyDescription(inputDescription: string): {
+  ok: boolean
+  normalizedDescription: string
+  errors: string[]
+} {
+  const normalizedDescription = normalizeTemplate(inputDescription)
+  const errors: string[] = []
+
+  if (!normalizedDescription) {
+    errors.push('Description is required.')
+    return { ok: false, normalizedDescription, errors }
+  }
+
+  const hasFinishPlaceholder = (
+    normalizedDescription.includes(PLACEHOLDERS.FINISH_NAME)
+    || normalizedDescription.includes(PLACEHOLDERS.FINISH_SENTENCE)
+    || normalizedDescription.includes(PLACEHOLDERS.FINISH_DESCRIPTION)
+    || normalizedDescription.includes(LEGACY_FINISH_SENTENCE_TOKEN)
+  )
+  if (hasFinishPlaceholder) {
+    errors.push('Shopify description cannot include finish placeholders.')
+  }
+
+  const hardcodedFinishes = findHardcodedFinishesInDescription(normalizedDescription)
+  if (hardcodedFinishes.length > 0) {
+    errors.push(
+      `Description contains hardcoded finish names (${hardcodedFinishes.slice(0, 3).join(', ')}). Remove finish names for Shopify.`,
+    )
+  }
+
+  return {
+    ok: errors.length === 0,
+    normalizedDescription,
+    errors,
+  }
+}
+
+export function validateManualDescriptionForPlatform(
+  inputDescription: string,
+  platform: ManualDescriptionPlatform,
+): {
+  ok: boolean
+  normalizedDescription: string
+  errors: string[]
+} {
+  if (platform === 'shopify') {
+    return validateManualShopifyDescription(inputDescription)
+  }
+  return validateManualVariantDescriptionTemplate(inputDescription)
 }

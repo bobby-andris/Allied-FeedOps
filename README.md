@@ -77,19 +77,27 @@ Progress state is derived from:
 - `variant_lifestyle_images`
 - latest successful production `publish_events`
 
-### Manual base content overrides (Google/Bing)
+### Manual base content overrides (Google/Bing/Shopify)
 
-When regenerate-with-feedback cannot produce the exact result you need, the review page supports manual base edits for Google/Bing:
+When regenerate-with-feedback cannot produce the exact result you need, the review page supports manual base edits:
 
-- `Edit Base Title` in the Title block:
+- `Edit Base Title` in the Title block (Google/Bing):
   - locked token: `{FINISH_NAME}`
   - applies template updates across all variants
   - blocks hardcoded finish names
   - clears `approved_content` for title so re-approval is required
-- `Edit Base Description` in the Description block:
+- `Edit Base Description` in the Description block (Google/Bing):
   - locked token: `{FINISH_SENTENCE}` (legacy `[FINISH_SENTENCE]` is normalized on save)
   - applies template updates across all variants
   - blocks hardcoded finish names
+  - clears `approved_content` for description so re-approval is required
+- `Edit Title` in the Title block (Shopify):
+  - freeform product-level title editor (no finish token UI)
+  - blocks hardcoded finish names and `Allied Brass` in Shopify title content
+  - clears `approved_content` for title so re-approval is required
+- `Edit Description` in the Description block (Shopify):
+  - freeform product-level description editor (no finish sentence token UI)
+  - blocks hardcoded finish names and finish placeholders
   - clears `approved_content` for description so re-approval is required
 
 ### Approval API behavior
@@ -100,9 +108,9 @@ When regenerate-with-feedback cannot produce the exact result you need, the revi
 - `POST /api/variants/approvals/bulk`
   - Supports optional `platform` (currently `google | bing`) for clearer scope and messaging.
 - `POST /api/review/manual-title`
-  - Manual base title override for Google/Bing variant templates.
+  - Manual title override for Google/Bing variant templates and Shopify product-level title content.
 - `POST /api/review/manual-description`
-  - Manual base description override for Google/Bing variant templates.
+  - Manual description override for Google/Bing variant templates and Shopify product-level description content.
 
 ### Lifestyle image semantics
 
@@ -117,10 +125,13 @@ When regenerate-with-feedback cannot produce the exact result you need, the revi
 - Lifestyle image generation is idempotent on rerun:
   - `product_lifestyle_images` writes now upsert on `(master_sku, variation_index)`
   - `variant_lifestyle_images` writes now upsert on `(gmc_offer_id, variation_index)`
+- Lifestyle image generation now retries transient `RESOURCE_EXHAUSTED`/`429` errors with backoff.
+- If all image variations fail, the API message now includes per-variation error details for debugging.
 
 See `docs/architecture/2026-02-11-platform-approval-publish-readiness.md` for full details.
 See `docs/architecture/2026-02-13-lifestyle-image-optional-gates-and-idempotent-generation.md` for the latest image readiness + generation updates.
 See `docs/architecture/2026-02-13-review-platform-progress-indicators.md` for queue/detail platform progress indicators.
+See `docs/architecture/2026-02-19-shopify-manual-overrides-and-lifestyle-retry-debugging.md` for Shopify manual edit behavior and the lifestyle generation retry/debugging update.
 For operations, incident response, and rollback procedures, use:
 `docs/troubleshooting/2026-02-11-platform-readiness-ops-runbook.md`.
 

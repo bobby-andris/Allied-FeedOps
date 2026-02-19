@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { createClient } from '@/lib/supabase/server'
 import { resolveCanonicalMasterSku } from '@/lib/master-sku'
-import { validateManualVariantDescriptionTemplate } from '@/lib/review/manual-description'
+import {
+  validateManualDescriptionForPlatform,
+  type ManualDescriptionPlatform,
+} from '@/lib/review/manual-description'
 
 interface ManualDescriptionRequest {
   master_sku: string
-  platform: 'google' | 'bing'
+  platform: ManualDescriptionPlatform
   description: string
 }
 
@@ -33,21 +36,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (platform !== 'google' && platform !== 'bing') {
+    if (platform !== 'google' && platform !== 'bing' && platform !== 'shopify') {
       return NextResponse.json(
         {
-          error: 'Manual base description editing is only supported for google and bing.',
+          error: 'Manual description editing supports google, bing, or shopify.',
           code: 'manual_description_invalid_platform',
         },
         { status: 400 },
       )
     }
 
-    const validation = validateManualVariantDescriptionTemplate(description)
+    const validation = validateManualDescriptionForPlatform(description, platform)
     if (!validation.ok) {
       return NextResponse.json(
         {
-          error: 'Manual description template is invalid.',
+          error: 'Manual description is invalid.',
           code: 'manual_description_validation_failed',
           validation_errors: validation.errors,
         },
@@ -128,7 +131,10 @@ export async function POST(request: NextRequest) {
       content_type: 'description',
       platform,
       mode: 'simple',
-      feedback_text: 'Manual base description edit applied to variant template.',
+      feedback_text:
+        platform === 'shopify'
+          ? 'Manual Shopify description edit applied.'
+          : 'Manual base description edit applied to variant template.',
       previous_content: existingRow.candidate_content,
       new_content: validation.normalizedDescription,
       model_version: 'manual_description_override',
