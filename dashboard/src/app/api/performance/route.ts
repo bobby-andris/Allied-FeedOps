@@ -25,6 +25,27 @@ interface SkuPerformance {
   }
 }
 
+interface VariantPerformance {
+  gmc_offer_id: string
+  finish: string | null
+  finish_code: string | null
+  impressions: number
+  clicks: number
+  ctr: number
+}
+
+interface SearchTerm {
+  query_text: string
+  impressions: number
+  clicks: number
+  ctr: number
+}
+
+interface SkuDetail {
+  variants: VariantPerformance[]
+  topSearchTerms: SearchTerm[]
+}
+
 interface PerformanceResponse {
   summary: {
     totalPublished: number
@@ -35,6 +56,7 @@ interface PerformanceResponse {
     totalClicks: number
   }
   skus: SkuPerformance[]
+  skuDetail: SkuDetail | null
   warnings: string[]
 }
 
@@ -301,6 +323,104 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 6. If sku param is provided, build skuDetail (variant breakdown + top search terms)
+    let skuDetail: SkuDetail | null = null
+
+    if (sku) {
+      // Fetch all search_queries rows for this master_sku
+      const { data: searchQueryRows } = await supabase
+        .from('search_queries')
+        .select('gmc_offer_id, finish, finish_code, query_text, impressions, clicks, ctr')
+        .eq('master_sku', sku)
+
+      const rows = searchQueryRows || []
+
+      // --- Variant breakdown: group by gmc_offer_id, sum impressions/clicks ---
+      const variantMap = new Map<string, {
+        finish: string | null
+        finish_code: string | null
+        impressions: number
+        clicks: number
+      }>()
+
+      for (const row of rows) {
+        const offerId: string = row.gmc_offer_id
+        if (!variantMap.has(offerId)) {
+          variantMap.set(offerId, {
+            finish: row.finish ?? null,
+            finish_code: row.finish_code ?? null,
+            impressions: 0,
+            clicks: 0,
+          })
+        }
+        const entry = variantMap.get(offerId)!
+        entry.impressions += row.impressions || 0
+        entry.clicks += row.clicks || 0
+        // Use finish from this row if we haven't set it yet
+        if (!entry.finish && row.finish) {
+          entry.finish = row.finish
+        }
+        if (!entry.finish_code && row.finish_code) {
+          entry.finish_code = row.finish_code
+        }
+      }
+
+      const variants: VariantPerformance[] = []
+      for (const [offerId, data] of variantMap) {
+        if (data.impressions === 0) continue // skip zero-impression variants
+        const ctr = data.impressions > 0
+          ? Math.round((data.clicks / data.impressions) * 10000) / 100
+          : 0
+        variants.push({
+          gmc_offer_id: offerId,
+          finish: data.finish,
+          finish_code: data.finish_code,
+          impressions: data.impressions,
+          clicks: data.clicks,
+          ctr,
+        })
+      }
+
+      // Sort by impressions descending, take top 20
+      variants.sort((a, b) => b.impressions - a.impressions)
+      const topVariants = variants.slice(0, 20)
+
+      // --- Top search terms: group by query_text, sum impressions/clicks ---
+      const termMap = new Map<string, { impressions: number; clicks: number }>()
+
+      for (const row of rows) {
+        const qt: string = row.query_text
+        if (!termMap.has(qt)) {
+          termMap.set(qt, { impressions: 0, clicks: 0 })
+        }
+        const entry = termMap.get(qt)!
+        entry.impressions += row.impressions || 0
+        entry.clicks += row.clicks || 0
+      }
+
+      const allTerms: SearchTerm[] = []
+      for (const [queryText, data] of termMap) {
+        const termCtr = data.impressions > 0
+          ? Math.round((data.clicks / data.impressions) * 10000) / 100
+          : 0
+        allTerms.push({
+          query_text: queryText,
+          impressions: data.impressions,
+          clicks: data.clicks,
+          ctr: termCtr,
+        })
+      }
+
+      // Sort by impressions descending, take top 10 after dedup
+      allTerms.sort((a, b) => b.impressions - a.impressions)
+      const topSearchTerms = allTerms.slice(0, 10)
+
+      skuDetail = {
+        variants: topVariants,
+        topSearchTerms,
+      }
+    }
+
     const response: PerformanceResponse = {
       summary: {
         totalPublished: skuPerformanceList.length,
@@ -311,6 +431,7 @@ export async function GET(request: NextRequest) {
         totalClicks,
       },
       skus: skuPerformanceList,
+      skuDetail,
       warnings,
     }
 
