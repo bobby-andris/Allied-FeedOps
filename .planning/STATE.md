@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Phase 13 code deployed, Phase 14 planned
+**Current focus:** v1.1 milestone — Phase 14 in progress (monitoring fixes complete)
 
 ## Current Position
 
-Phase: 13 — Fix Google Ads Data Sourcing — COMPLETE (code + deploy done; re-sync superseded by Phase 14)
-Plan: 3 of 3 — 13-03 COMPLETE (migration applied, code deployed, sync job triggered)
-Status: Phase 13 DONE — all code fixes deployed. Phase 14 needed for 180-day sync + monitoring fixes.
-Last activity: 2026-02-19 — Phase 13 fully deployed (commit 72c360b4), re-sync ran for 30d, Phase 14 scoped
+Phase: 14 — Complete 180-Day Backfill and Monitoring Fixes — IN PROGRESS
+Plan: 3 of 3 — 14-03 COMPLETE (monitoring.py pagination fix + two Active Jobs sections)
+Status: Phase 14 Plan 03 done — monitoring coverage queries fixed, Active Jobs split into two sections
+Last activity: 2026-02-19 — Plan 14-03 complete (commits 41c1cebf, c21703c2)
 
-Progress: [███████████] 100% of Phase 13 code — awaiting Phase 14 for full 180-day re-sync
+Progress: [████████░░░] Plans 1-3 complete — monitoring and backfill fixes done
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [███████████] 100% of Phase 13 code — awaiting
 | Phase 12 P03 | 8 | 2 tasks | 2 files |
 | Phase 11 P03 | 13 | 2 tasks | 3 files |
 | Phase 13 P01 | 4 | 2 tasks | 1 files |
+| Phase 14 P03 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -322,6 +323,8 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 13 Plan 02]: Bug 2 fix skipped: confirmed not a bug by empirical data from Plan 01
 - [Phase 13 Plan 02]: Delete-before-insert strategy: per-SKU delete right before re-insert — resume-safe, only processed SKUs cleared
 - [Phase 13 Plan 02]: synced_at column (migration 027): NULL = pre-fix data, non-NULL = post-fix corrected data
+- [Phase 14]: Paginated range queries (5000 rows/page) replace unbounded .execute() calls on variant_index (72k rows) in monitoring.py
+- [Phase 14]: Active Jobs section split into Search Term Sync Jobs (search_query_sync_jobs) and Performance Backfill Jobs (backfill_jobs)
 
 ### Pending Todos
 
@@ -379,9 +382,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Phase 13 Plan 02 complete: variant attribution fixed, delete-before-insert added, migration 027 created (a2307ee8, 29a9ae5b)
-Stopped at: Phase 13 Plan 02 COMPLETE — code fixes done, re-sync pending in Plan 03
+Last session: 2026-02-19 — Phase 14 Plan 03 complete: monitoring.py paginated queries + backfill page two Active Jobs sections (41c1cebf, c21703c2)
+Stopped at: Phase 14 Plan 03 COMPLETE — all 3 Phase 14 plans done
 Resume file: None
 
 ---
-*Next step:* Phase 13 Plan 03 — apply migration 027 and run re-sync of search_queries
+*Next step:* Phase 14 complete — all monitoring fixes and backfill infrastructure deployed

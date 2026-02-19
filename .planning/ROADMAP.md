@@ -261,7 +261,7 @@ Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14
 | 11. Performance Page Enhancements | 3/3 | Complete   | 2026-02-19 | - |
 | 12. Dashboard Audit & Cleanup | 3/3 | Complete    | 2026-02-19 | - |
 | 13. Fix Google Ads Data Sourcing | 3/3 | Complete    | 2026-02-19 | - |
-| 14. Complete 180-day Backfill & Monitoring Fixes | 0/3 | Pending | - | - |
+| 14. Complete 180-day Backfill & Monitoring Fixes | 1/3 | In Progress|  | - |
 
 ### Phase 13: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
 
@@ -288,7 +288,7 @@ Plans:
   3. Performance metrics backfill runs for all 2,784 SKUs via /backfill/start and completes successfully
   4. Monitoring page shows correct coverage (COUNT queries, not PostgREST 1000-row limit) and Active Jobs reads from search_query_sync_jobs and backfill_jobs
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 14-01-PLAN.md — Apply 026_backfill_jobs.sql migration + fix LAST_N_DAYS → BETWEEN in google_ads_search_terms.py + re-trigger 180-day search terms sync
