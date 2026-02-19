@@ -243,9 +243,11 @@ export function LifestyleImageReview({
                 currentFinish={currentFinish}
                 currentFinishImages={currentFinishImages}
                 sku={sku}
+                variantData={variantData}
                 onApprove={handleImageApprove}
                 onReject={handleImageReject}
                 onUserSelect={handleUserSelect}
+                onRefresh={onRefresh}
               />
             </TabsContent>
 
@@ -482,19 +484,22 @@ function VariantImageSection({
   imagesByFinish,
   currentFinish,
   currentFinishImages,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sku,
+  variantData,
   onApprove,
   onReject,
   onUserSelect,
+  onRefresh,
 }: {
   imagesByFinish: Record<string, LifestyleImage[]>
   currentFinish: string | null
   currentFinishImages: LifestyleImage[]
   sku: string
+  variantData: VariantDataEntry[]
   onApprove: (imageId: string, imageType: 'product' | 'variant') => Promise<void>
   onReject: (imageId: string, imageType: 'product' | 'variant', reason?: string) => Promise<void>
   onUserSelect: (imageId: string, finish: string) => Promise<void>
+  onRefresh: () => void
 }) {
   const finishesWithImages = Object.keys(imagesByFinish)
 
@@ -636,6 +641,109 @@ function VariantImageSection({
                 )
               })}
           </div>
+        </div>
+      )}
+
+      {/* Generate images for another finish */}
+      <GenerateForNewFinish sku={sku} variants={variantData} onRefresh={onRefresh} />
+    </div>
+  )
+}
+
+function GenerateForNewFinish({ sku, variants, onRefresh }: { sku: string; variants: VariantDataEntry[]; onRefresh: () => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [manualFinishCode, setManualFinishCode] = useState<string | null>(null)
+  const [manualFinishName, setManualFinishName] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const autoSelectedFinish = variants[0] ?? null
+  const activeFinishCode = manualFinishCode ?? autoSelectedFinish?.finish_code ?? null
+  const activeFinishName = manualFinishName ?? autoSelectedFinish?.finish ?? null
+  const isManual = manualFinishCode !== null
+
+  const handleGenerate = async () => {
+    setIsGenerating(true)
+    setError(null)
+    try {
+      const cloudRunUrl = process.env.NEXT_PUBLIC_CLOUD_RUN_URL ||
+        'https://feedops-pipeline-623866089882.us-east1.run.app'
+      const response = await fetch(`${cloudRunUrl}/generate-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          master_sku: sku,
+          num_variations: 3,
+          dry_run: false,
+          ...(activeFinishCode ? { selected_finish_code: activeFinishCode } : {}),
+        }),
+      })
+      if (!response.ok) {
+        const detail = await response.text()
+        throw new Error(detail || `Generation failed (${response.status})`)
+      }
+      const data = await response.json()
+      if (data.success) {
+        toast.success(`Generated ${data.images_generated} images for ${data.selected_finish} finish`)
+        setManualFinishCode(null)
+        setManualFinishName(null)
+        setIsOpen(false)
+        onRefresh()
+      } else {
+        throw new Error(data.message || 'Generation returned no images')
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
+      toast.error(`Image generation failed: ${message}`)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  return (
+    <div className="mt-6 border-t pt-4">
+      <button
+        className="text-sm text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+        onClick={() => setIsOpen(prev => !prev)}
+      >
+        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        Generate images for another finish
+      </button>
+
+      {isOpen && (
+        <div className="mt-4 p-4 border rounded-lg bg-muted/30">
+          {error && <p className="text-destructive text-sm mb-3">{error}</p>}
+          {activeFinishName && (
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                {isManual ? `Manual: ${activeFinishName}` : `Highest impressions: ${activeFinishName}`}
+              </Badge>
+              {variants.length > 0 && (
+                <Button variant="ghost" size="sm" onClick={() => setIsModalOpen(true)} disabled={isGenerating}>
+                  Change
+                </Button>
+              )}
+            </div>
+          )}
+          <Button onClick={handleGenerate} disabled={isGenerating} variant="outline">
+            {isGenerating ? (
+              <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Generating...</>
+            ) : (
+              <><Sparkles className="h-4 w-4 mr-2" />Generate Lifestyle Images</>
+            )}
+          </Button>
+          <VariantSelectorModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            variants={variants}
+            selectedFinishCode={manualFinishCode}
+            onSelect={(code, name) => {
+              setManualFinishCode(code)
+              setManualFinishName(name)
+            }}
+          />
         </div>
       )}
     </div>

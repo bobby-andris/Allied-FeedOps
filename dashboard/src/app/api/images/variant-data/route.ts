@@ -30,9 +30,10 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
 
     // 1. Get full list of finishes from variant_index (source of truth)
+    // Include gmc_offer_id to build reverse map for resolving search_queries with null finish_code
     const { data: variantIndexData, error: variantIndexError } = await supabase
       .from('variant_index')
-      .select('finish, finish_code')
+      .select('finish, finish_code, gmc_offer_id')
       .eq('master_sku', masterSku)
       .not('finish', 'is', null)
       .not('finish_code', 'is', null)
@@ -46,7 +47,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Deduplicate finishes from variant_index (multiple variants can share same finish)
+    // Also build gmc_offer_id → finish_code map for resolving search_queries rows with null finish_code
     const finishMap = new Map<string, { finish: string; finish_code: string }>()
+    const offerIdToFinishCode = new Map<string, string>()
     for (const row of variantIndexData ?? []) {
       if (row.finish_code && !finishMap.has(row.finish_code)) {
         finishMap.set(row.finish_code, {
@@ -54,15 +57,17 @@ export async function GET(request: NextRequest) {
           finish_code: row.finish_code,
         })
       }
+      if (row.gmc_offer_id && row.finish_code) {
+        offerIdToFinishCode.set(row.gmc_offer_id, row.finish_code)
+      }
     }
 
     // 2. Query search_queries for impression/click data
+    // Fetch all rows (including those with null finish_code) — resolve via gmc_offer_id if needed
     const { data: searchData, error: searchError } = await supabase
       .from('search_queries')
-      .select('finish, finish_code, impressions, clicks')
+      .select('finish_code, gmc_offer_id, impressions, clicks')
       .eq('master_sku', masterSku)
-      .not('finish', 'is', null)
-      .not('finish_code', 'is', null)
 
     if (searchError) {
       console.error('Error querying search_queries:', searchError)
@@ -73,17 +78,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Aggregate impressions/clicks by finish_code in JS
+    // For rows with null finish_code, resolve via gmc_offer_id → variant_index lookup
     const impressionsByFinish = new Map<
       string,
       { total_impressions: number; total_clicks: number }
     >()
     for (const row of searchData ?? []) {
-      if (!row.finish_code) continue
-      const existing = impressionsByFinish.get(row.finish_code) ?? {
+      const finishCode =
+        row.finish_code ??
+        (row.gmc_offer_id ? offerIdToFinishCode.get(row.gmc_offer_id) : null)
+      if (!finishCode) continue
+      const existing = impressionsByFinish.get(finishCode) ?? {
         total_impressions: 0,
         total_clicks: 0,
       }
-      impressionsByFinish.set(row.finish_code, {
+      impressionsByFinish.set(finishCode, {
         total_impressions: existing.total_impressions + (row.impressions ?? 0),
         total_clicks: existing.total_clicks + (row.clicks ?? 0),
       })
