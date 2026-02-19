@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 ## Current Position
 
-Phase: 12 — Dashboard Audit & Cleanup
-Plan: 3 of 3 — 12-03 COMPLETE (competitors simplification + live verification)
-Status: Phase 12 COMPLETE — all 3 plans done
-Last activity: 2026-02-19 — Phase 11 Plan 03 complete (4 UAT gaps closed, baselines recaptured for 37 published SKUs, commits 1b26dfd5, 499ed7a9)
+Phase: 13 — Fix Google Ads Data Sourcing
+Plan: 1 of 3 — 13-01 COMPLETE (diagnosis: Bug 1 confirmed, Bug 2 ruled out)
+Status: Phase 13 In Progress — 1 of 3 plans done
+Last activity: 2026-02-19 — Phase 13 Plan 01 complete (13-DIAGNOSIS.md created, empirical evidence gathered, commits da24612f, dadc63c2)
 
-Progress: [███████████] 100% of Phase 11 — All 3 plans complete
+Progress: [████░░░░░░░] 33% of Phase 13 — Plan 1 complete
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [███████████] 100% of Phase 11 — All 3 plans c
 | Phase 12-dashboard-audit-cleanup P02 | 3 | 2 tasks | 4 files |
 | Phase 12 P03 | 8 | 2 tasks | 2 files |
 | Phase 11 P03 | 13 | 2 tasks | 3 files |
+| Phase 13 P01 | 4 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -314,6 +315,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 11]: Daily-average baseline: avg_impressions/avg_clicks stored as total/days_lookback — matches snapshot normalization pattern (Plan 11-03)
 - [Phase 11]: snapshots[0] over .find() window filter: most recent snapshot always wins; backfilled snapshots captured months post-publish no longer excluded (Plan 11-03)
 - [Phase 11]: Offer-ID join for SKU detail: variant_index → gmc_offer_ids → uppercase → search_queries.in() — resilient to historical null master_sku rows (Plan 11-03)
+- [Phase 13]: Bug 1 confirmed: fetch_search_terms() uses item_ids[0] — attributes all search terms to highest-impression variant instead of fan-out
+- [Phase 13]: Bug 2 ruled out: performance_baselines non-zero for all tested published SKUs — lowercase offer IDs work correctly
+- [Phase 13]: performance_baselines do NOT need re-capture — only search_queries needs delete + re-sync
 
 ### Pending Todos
 
