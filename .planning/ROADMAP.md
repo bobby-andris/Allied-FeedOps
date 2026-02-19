@@ -214,11 +214,12 @@ Plans:
   3. Page visually distinguishes SKUs trending up vs. down since publish (e.g., color coding, icons) without requiring manual calculation
   4. Performance changes verified via agent-browser against the 44 real snapshots for 36 published SKUs — comparisons reflect actual data
 
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [ ] 11-01-PLAN.md — Enhanced API (dual time windows, daysSincePublish, snapshot-only data source) + rewritten page (delta table, dual selectors, filter toggle, sortable columns, trend indicators)
 - [ ] 11-02-PLAN.md — Inline SKU detail expansion (variant breakdown + search terms) + browser verification of all phase success criteria
+- [ ] 11-03-PLAN.md — Gap closure: fix baseline divisor, snapshot window filter, SKU detail query via offer ID join, search term sync case fix, baseline re-capture
 
 ### Phase 12: Dashboard Audit & Cleanup
 **Goal**: Every dashboard page either shows useful current data or provides a clear next action — no dead ends, no stale broken states
