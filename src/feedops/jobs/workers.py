@@ -99,9 +99,15 @@ async def collect_search_terms_batch(batch: list[str]) -> list[dict]:
         period_end = date.fromisoformat(end_date_str)
 
         # Fetch all search terms using campaign-join pattern (DATA-01)
-        # The fetch_search_terms method uses LAST_N_DAYS internally but we'll
-        # use the explicit dates for saving
-        all_terms = client.fetch_search_terms(days=180, limit=10000)
+        # Pass explicit start_date/end_date so the GAQL query uses the same
+        # date window as the DB save operation. Previously hard-coded days=180
+        # caused the worker to ignore the computed period_start/period_end.
+        all_terms = client.fetch_search_terms(
+            days=180,
+            start_date=period_start,
+            end_date=period_end,
+            limit=10000,
+        )
 
         logger.info(f"Fetched {len(all_terms)} total search terms from Google Ads")
 
