@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   TrendingUp,
   TrendingDown,
@@ -14,7 +15,10 @@ import {
   Search,
   Activity,
   RefreshCw,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react'
+import Link from 'next/link'
 
 interface PerformanceDelta {
   master_sku: string
@@ -48,6 +52,12 @@ interface SearchQueryDelta {
   competition: string | null
 }
 
+interface SnapshotResult {
+  created: number
+  type: 'search' | 'performance'
+  error?: string
+}
+
 export default function MonitoringPage() {
   const [performanceDeltas, setPerformanceDeltas] = useState<PerformanceDelta[]>([])
   const [searchDeltas, setSearchDeltas] = useState<SearchQueryDelta[]>([])
@@ -55,6 +65,7 @@ export default function MonitoringPage() {
   const [loadingSearch, setLoadingSearch] = useState(false)
   const [skuFilter, setSkuFilter] = useState('')
   const [activeTab, setActiveTab] = useState('performance')
+  const [snapshotResult, setSnapshotResult] = useState<SnapshotResult | null>(null)
 
   const fetchPerformanceDeltas = async () => {
     setLoadingPerformance(true)
@@ -92,7 +103,8 @@ export default function MonitoringPage() {
     }
   }
 
-  const captureSnapshots = async () => {
+  const captureSearchSnapshots = async () => {
+    setSnapshotResult(null)
     try {
       const params = new URLSearchParams()
       if (skuFilter) params.set('master_sku', skuFilter)
@@ -104,14 +116,38 @@ export default function MonitoringPage() {
       if (!res.ok) throw new Error('Failed to capture snapshots')
 
       const data = await res.json()
-      alert(`Captured ${data.snapshots_created} snapshots`)
+      setSnapshotResult({ created: data.snapshots_created, type: 'search' })
 
       // Refresh data
       fetchPerformanceDeltas()
       fetchSearchDeltas()
     } catch (err) {
-      console.error('Failed to capture snapshots:', err)
-      alert('Failed to capture snapshots')
+      console.error('Failed to capture search snapshots:', err)
+      setSnapshotResult({ created: 0, type: 'search', error: 'Failed to capture search snapshots' })
+    }
+  }
+
+  const capturePerformanceSnapshots = async () => {
+    setSnapshotResult(null)
+    try {
+      const params = new URLSearchParams()
+      if (skuFilter) params.set('master_sku', skuFilter)
+
+      const res = await fetch(`/api/performance/capture-snapshot?${params}`, {
+        method: 'POST',
+      })
+
+      if (!res.ok) throw new Error('Failed to capture performance snapshots')
+
+      const data = await res.json()
+      setSnapshotResult({ created: data.snapshots_created ?? data.captured ?? 0, type: 'performance' })
+
+      // Refresh data
+      fetchPerformanceDeltas()
+      fetchSearchDeltas()
+    } catch (err) {
+      console.error('Failed to capture performance snapshots:', err)
+      setSnapshotResult({ created: 0, type: 'performance', error: 'Failed to capture performance snapshots' })
     }
   }
 
@@ -180,7 +216,7 @@ export default function MonitoringPage() {
         <CardHeader>
           <CardTitle>Monitoring Controls</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex gap-4">
             <div className="flex-1">
               <Input
@@ -189,11 +225,29 @@ export default function MonitoringPage() {
                 onChange={(e) => setSkuFilter(e.target.value)}
               />
             </div>
-            <Button onClick={captureSnapshots} variant="outline">
+            <Button onClick={captureSearchSnapshots} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Capture Snapshots
+              Capture Search Snapshots
+            </Button>
+            <Button onClick={capturePerformanceSnapshots} variant="outline">
+              <Activity className="h-4 w-4 mr-2" />
+              Capture Performance Snapshots
             </Button>
           </div>
+          {snapshotResult && (
+            <Alert variant={snapshotResult.error ? 'destructive' : 'default'}>
+              {snapshotResult.error ? (
+                <XCircle className="h-4 w-4" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
+              <AlertDescription>
+                {snapshotResult.error
+                  ? snapshotResult.error
+                  : `Captured ${snapshotResult.created} ${snapshotResult.type} snapshot${snapshotResult.created !== 1 ? 's' : ''}`}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
@@ -227,8 +281,15 @@ export default function MonitoringPage() {
                   ))}
                 </div>
               ) : performanceDeltas.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No performance data available. Publish some content and wait 7+ days.
+                <div className="text-center py-8 space-y-3">
+                  <p className="text-muted-foreground">No performance delta data available yet.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Performance deltas appear after content is published and at least 7 days have passed.
+                    Snapshots are captured automatically each night.
+                  </p>
+                  <Link href="/performance" className="text-sm text-primary underline underline-offset-2">
+                    View performance snapshots →
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -319,8 +380,14 @@ export default function MonitoringPage() {
                   ))}
                 </div>
               ) : searchDeltas.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No search query data available. Run search insights sync first.
+                <div className="text-center py-8 space-y-3">
+                  <p className="text-muted-foreground">No search query delta data yet.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Search query changes appear after content is published and search terms have been synced.
+                  </p>
+                  <Link href="/search-insights" className="text-sm text-primary underline underline-offset-2">
+                    Go to Search Insights to sync →
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-3">

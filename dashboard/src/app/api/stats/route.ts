@@ -31,10 +31,14 @@ export async function GET() {
     const variantApprovals = variantApprovalsResult.data || []
 
     // Overview stats
+    // pendingReview = SKUs that have generated content but are not yet approved
+    // Uses generated_content as the source of truth for "needs review"
+    const totalGenerated = generatedContent.length
+    const totalApproved = approvals.filter((s) => s.approval_status === 'approved').length
     const overview = {
-      totalSkus: approvals.length,
-      pendingReview: approvals.filter((s) => s.approval_status === 'pending').length,
-      approved: approvals.filter((s) => s.approval_status === 'approved').length,
+      totalSkus: Math.max(approvals.length, totalGenerated),
+      pendingReview: Math.max(0, totalGenerated - totalApproved),
+      approved: totalApproved,
       rejected: approvals.filter((s) => s.approval_status === 'rejected').length,
       published: new Set(
         publishEvents
@@ -49,20 +53,13 @@ export async function GET() {
 
     for (const platform of platforms) {
       const platformApprovals = variantApprovals.filter((v) => v.platform === platform)
+      // When no variant_approvals exist for a platform, return zeros (not a fallback to overall totals)
+      // This makes the "0 approved" state explicit rather than showing misleading duplicate counts
       byPlatform[platform] = {
-        total: platformApprovals.length || overview.totalSkus,
+        total: platformApprovals.length,
         approved: platformApprovals.filter((v) => v.approval_status === 'approved').length,
         pending: platformApprovals.filter((v) => v.approval_status === 'pending').length,
         rejected: platformApprovals.filter((v) => v.approval_status === 'rejected').length,
-      }
-      // If no variant_approvals, fall back to sku_approvals counts
-      if (platformApprovals.length === 0) {
-        byPlatform[platform] = {
-          total: overview.totalSkus,
-          approved: overview.approved,
-          pending: overview.pendingReview,
-          rejected: overview.rejected,
-        }
       }
     }
 

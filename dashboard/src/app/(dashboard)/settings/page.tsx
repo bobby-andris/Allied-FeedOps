@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
 import { Database, Key, Bell, Shield, RefreshCw, ShoppingCart, BarChart3, TrendingUp } from "lucide-react"
 import { ApiStatusCard, type ServiceStatusType } from "@/components/settings/ApiStatusCard"
 
@@ -122,10 +121,11 @@ export default function SettingsPage() {
             <Separator />
             <div className="space-y-2">
               <Label htmlFor="supabase-url">Supabase URL</Label>
-              <Input 
-                id="supabase-url" 
-                value="https://qezuszwufortkiutlhym.supabase.co" 
-                disabled 
+              <Input
+                id="supabase-url"
+                value={process.env.NEXT_PUBLIC_SUPABASE_URL || ''}
+                disabled
+                placeholder="Configured via NEXT_PUBLIC_SUPABASE_URL"
               />
             </div>
           </CardContent>
@@ -204,32 +204,28 @@ export default function SettingsPage() {
               Notifications
             </CardTitle>
             <CardDescription>
-              Configure notification preferences
+              Current notification configuration
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Batch completion alerts</p>
-                <p className="text-sm text-muted-foreground">Get notified when batches finish publishing</p>
-              </div>
-              <Switch defaultChecked />
+            <p className="text-sm text-muted-foreground">
+              Notifications are configured via the <code className="text-xs bg-muted px-1 py-0.5 rounded">SLACK_WEBHOOK_URL</code> environment variable on Cloud Run.
+              When set, the pipeline sends alerts for batch completions, errors, and performance changes.
+            </p>
+            <Separator />
+            <div>
+              <p className="font-medium text-sm">Batch completion alerts</p>
+              <p className="text-sm text-muted-foreground">Sent when batch jobs complete (success or failure)</p>
             </div>
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Performance alerts</p>
-                <p className="text-sm text-muted-foreground">Alert when performance changes significantly</p>
-              </div>
-              <Switch defaultChecked />
+            <div>
+              <p className="font-medium text-sm">Performance alerts</p>
+              <p className="text-sm text-muted-foreground">Sent when significant performance changes are detected post-publish</p>
             </div>
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Error notifications</p>
-                <p className="text-sm text-muted-foreground">Get notified of publishing errors</p>
-              </div>
-              <Switch defaultChecked />
+            <div>
+              <p className="font-medium text-sm">Error notifications</p>
+              <p className="text-sm text-muted-foreground">Sent for publishing errors and pipeline failures</p>
             </div>
           </CardContent>
         </Card>
@@ -242,25 +238,17 @@ export default function SettingsPage() {
               Danger Zone
             </CardTitle>
             <CardDescription>
-              Irreversible actions
+              Destructive database operations
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Clear all approvals</p>
-                <p className="text-sm text-muted-foreground">Reset all SKU approval statuses</p>
-              </div>
-              <Button variant="destructive" size="sm">Clear</Button>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Clear performance data</p>
-                <p className="text-sm text-muted-foreground">Remove all performance snapshots</p>
-              </div>
-              <Button variant="destructive" size="sm">Clear</Button>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Destructive operations (clearing approvals, removing performance data) must be performed
+              directly via Supabase. Use the Supabase dashboard or run SQL queries against the
+              <code className="text-xs bg-muted px-1 py-0.5 rounded mx-1">sku_approvals</code>,
+              <code className="text-xs bg-muted px-1 py-0.5 rounded mx-1">performance_snapshots</code>, and
+              <code className="text-xs bg-muted px-1 py-0.5 rounded mx-1">performance_baselines</code> tables.
+            </p>
           </CardContent>
         </Card>
       </div>

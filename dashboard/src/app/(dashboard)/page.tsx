@@ -175,7 +175,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle>Quality Distribution</CardTitle>
             <CardDescription>
-              {qualityScores.average > 0
+              {qualityScores.distribution.reduce((sum, d) => sum + d.count, 0) > 0
                 ? `Average score: ${qualityScores.average}`
                 : 'No scores yet'}
             </CardDescription>
