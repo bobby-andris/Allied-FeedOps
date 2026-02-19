@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { RefreshCw, Search, AlertCircle, Loader2, Eye } from 'lucide-react'
 import { CompetitorCard } from '@/components/competitors/CompetitorCard'
@@ -22,6 +21,7 @@ import type {
   CompetitorPattern,
   CompetitorScrapeJob,
 } from '@/lib/supabase/types'
+import Link from 'next/link'
 
 const CATEGORIES = [
   { value: 'towel bars', label: 'Towel Bars' },
@@ -31,14 +31,6 @@ const CATEGORIES = [
   { value: 'soap dispensers', label: 'Soap Dispensers' },
   { value: 'glass shelves', label: 'Glass Shelves' },
   { value: 'mirrors', label: 'Mirrors' },
-]
-
-const SOURCES = [
-  { value: 'all', label: 'All Sources' },
-  { value: 'google', label: 'Google SERP' },
-  { value: 'amazon', label: 'Amazon' },
-  { value: 'wayfair', label: 'Wayfair' },
-  { value: 'homedepot', label: 'Home Depot' },
 ]
 
 interface CompetitorData {
@@ -54,14 +46,12 @@ interface CompetitorData {
 
 export default function CompetitorsPage() {
   const [category, setCategory] = useState('towel bars')
-  const [source, setSource] = useState('all')
-  const [activeTab, setActiveTab] = useState<'serp' | 'marketplace'>('serp')
   const [data, setData] = useState<CompetitorData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Scraping state
-  const [scraping, setScraping] = useState<Record<string, boolean>>({})
+  const [scraping, setScraping] = useState(false)
   const [scrapeStatus, setScrapeStatus] = useState<string | null>(null)
 
   // Comparison state
@@ -73,8 +63,7 @@ export default function CompetitorsPage() {
     try {
       const params = new URLSearchParams({
         category,
-        ...(source !== 'all' && { source }),
-        sourceType: activeTab,
+        sourceType: 'serp',
       })
 
       const res = await fetch(`/api/competitors?${params}`)
@@ -89,13 +78,13 @@ export default function CompetitorsPage() {
     } finally {
       setLoading(false)
     }
-  }, [category, source, activeTab])
+  }, [category])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  const pollJobStatus = useCallback(async (jobId: string, jobSource: string) => {
+  const pollJobStatus = useCallback(async (jobId: string) => {
     const maxAttempts = 60 // 5 minutes with 5 second intervals
     let attempts = 0
 
@@ -103,55 +92,53 @@ export default function CompetitorsPage() {
       attempts++
       try {
         const res = await fetch(`/api/competitors/scrape/${jobId}`)
-        const data = await res.json()
+        const jobData = await res.json()
 
-        if (data.status === 'completed') {
-          setScrapeStatus(`Completed! ${data.message}`)
-          setScraping((prev) => ({ ...prev, [jobSource]: false }))
+        if (jobData.status === 'completed') {
+          setScrapeStatus(`Completed! ${jobData.message}`)
+          setScraping(false)
           fetchData()
           setTimeout(() => setScrapeStatus(null), 5000)
           return
         }
 
-        if (data.status === 'failed') {
-          setError(data.message || 'Scrape failed')
+        if (jobData.status === 'failed') {
+          setError(jobData.message || 'Scrape failed')
           setScrapeStatus(null)
-          setScraping((prev) => ({ ...prev, [jobSource]: false }))
+          setScraping(false)
           return
         }
 
         // Still running
-        setScrapeStatus(data.message || `Running... (${attempts * 5}s)`)
+        setScrapeStatus(jobData.message || `Running... (${attempts * 5}s)`)
 
         if (attempts < maxAttempts) {
-          setTimeout(poll, 5000) // Poll every 5 seconds
+          setTimeout(poll, 5000)
         } else {
           setScrapeStatus('Scrape is taking longer than expected. Check Recent Jobs for status.')
-          setScraping((prev) => ({ ...prev, [jobSource]: false }))
+          setScraping(false)
         }
       } catch {
         setError('Error checking job status')
-        setScraping((prev) => ({ ...prev, [jobSource]: false }))
+        setScraping(false)
       }
     }
 
-    // Start polling after initial delay
     setTimeout(poll, 3000)
   }, [fetchData])
 
-  const startScrape = async (jobSource: string, jobType: 'serp' | 'marketplace') => {
-    setScraping((prev) => ({ ...prev, [jobSource]: true }))
-    setScrapeStatus(`Starting ${jobSource} scrape...`)
+  const startScrape = async () => {
+    setScraping(true)
+    setScrapeStatus(`Starting Google SERP scrape for "${category}"...`)
 
     try {
-      // Start scrape job (now calls Apify directly)
       const createRes = await fetch('/api/competitors/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category,
-          jobType,
-          source: jobSource,
+          jobType: 'serp',
+          source: 'google',
         }),
       })
 
@@ -163,18 +150,15 @@ export default function CompetitorsPage() {
       const { job, message } = await createRes.json()
       setScrapeStatus(message || 'Scrape started, waiting for results...')
 
-      // Start polling for job completion
-      pollJobStatus(job.id, jobSource)
+      pollJobStatus(job.id)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Scrape failed')
       setScrapeStatus(null)
-      setScraping((prev) => ({ ...prev, [jobSource]: false }))
+      setScraping(false)
     }
   }
 
-  const filteredListings = data?.listings.filter((l) =>
-    activeTab === 'serp' ? l.source_type === 'serp' : l.source_type === 'marketplace'
-  ) || []
+  const serpListings = data?.listings.filter((l) => l.source_type === 'serp') || []
 
   return (
     <div className="p-6 space-y-6">
@@ -183,7 +167,7 @@ export default function CompetitorsPage() {
         <div>
           <h1 className="text-2xl font-bold">Competitor Intelligence</h1>
           <p className="text-muted-foreground">
-            Analyze competitor listings and extract winning patterns
+            Analyze Google SERP results to see who ranks for your product categories
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -199,18 +183,18 @@ export default function CompetitorsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={source} onValueChange={setSource}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SOURCES.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Button
+            variant="outline"
+            onClick={startScrape}
+            disabled={scraping}
+          >
+            {scraping ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Scrape Google SERP
+          </Button>
         </div>
       </div>
 
@@ -229,204 +213,111 @@ export default function CompetitorsPage() {
         </div>
       )}
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'serp' | 'marketplace')}>
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="serp">
-              <Search className="h-4 w-4 mr-2" />
-              SERP Analysis
-            </TabsTrigger>
-            <TabsTrigger value="marketplace">
-              <Eye className="h-4 w-4 mr-2" />
-              Marketplace Details
-            </TabsTrigger>
-          </TabsList>
-          <div className="flex items-center gap-2">
-            {activeTab === 'serp' && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => startScrape('google', 'serp')}
-                disabled={scraping.google}
-              >
-                {scraping.google ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Scrape Google
-              </Button>
-            )}
-            {activeTab === 'marketplace' && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => startScrape('amazon', 'marketplace')}
-                  disabled={scraping.amazon}
-                >
-                  {scraping.amazon ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Amazon'
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => startScrape('wayfair', 'marketplace')}
-                  disabled={scraping.wayfair}
-                >
-                  {scraping.wayfair ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Wayfair'
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => startScrape('homedepot', 'marketplace')}
-                  disabled={scraping.homedepot}
-                >
-                  {scraping.homedepot ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Home Depot'
-                  )}
-                </Button>
-              </>
-            )}
-          </div>
+      {/* Usage guidance */}
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+        <Search className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+        <div className="text-sm text-amber-800">
+          <p className="font-medium mb-1">When to use Competitor Intelligence</p>
+          <p>
+            Use this page to understand who dominates Google Shopping results for a product category
+            and what title patterns they use. For SKU-level keyword data from your own campaigns,
+            use{' '}
+            <Link href="/search-insights" className="underline underline-offset-2 font-medium">
+              Search Insights
+            </Link>{' '}
+            instead.
+          </p>
         </div>
+      </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <>
-            <TabsContent value="serp" className="space-y-6">
-              {/* Search Query Display */}
-              {data?.searchQuery && (
-                <Card className="bg-muted/50">
-                  <CardContent className="py-3">
-                    <div className="flex items-center gap-3">
-                      <Search className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Search query used: </span>
-                        <span className="font-medium">{data.searchQuery}</span>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Search Query Display */}
+          {data?.searchQuery && (
+            <Card className="bg-muted/50">
+              <CardContent className="py-3">
+                <div className="flex items-center gap-3">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <span className="text-sm text-muted-foreground">Search query used: </span>
+                    <span className="font-medium">{data.searchQuery}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid grid-cols-3 gap-6">
+            {/* SERP Overview + Patterns */}
+            <div className="col-span-1 space-y-4">
+              <SerpOverview
+                domainStats={data?.domainStats || []}
+                totalListings={serpListings.length}
+              />
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Winning Patterns</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PatternAnalysis
+                    patterns={data?.patterns || []}
+                    ourContent={data?.ourContent}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Listings */}
+            <div className="col-span-2 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">
+                  Search Results{' '}
+                  <Badge variant="secondary">{serpListings.length}</Badge>
+                </h3>
+                {data?.lastScraped && (
+                  <span className="text-xs text-muted-foreground">
+                    Last scraped: {new Date(data.lastScraped).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+              {serpListings.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center space-y-4">
+                    <div className="flex justify-center">
+                      <div className="rounded-full bg-muted p-4">
+                        <Eye className="h-8 w-8 text-muted-foreground" />
                       </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">No SERP data for this category yet</p>
+                      <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                        Click &quot;Scrape Google SERP&quot; above to analyze search results for{' '}
+                        <strong>{category}</strong>. Scrapes take 2–5 minutes and use your Apify
+                        account.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {serpListings.slice(0, 12).map((listing) => (
+                    <CompetitorCard
+                      key={listing.id}
+                      listing={listing}
+                      onSelect={() => setSelectedListing(listing)}
+                      selected={selectedListing?.id === listing.id}
+                    />
+                  ))}
+                </div>
               )}
-
-              <div className="grid grid-cols-3 gap-6">
-                {/* SERP Overview */}
-                <div className="col-span-1 space-y-4">
-                  <SerpOverview
-                    domainStats={data?.domainStats || []}
-                    totalListings={filteredListings.length}
-                  />
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Winning Patterns</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PatternAnalysis
-                        patterns={data?.patterns || []}
-                        ourContent={data?.ourContent}
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Listings */}
-                <div className="col-span-2 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">
-                      Search Results{' '}
-                      <Badge variant="secondary">{filteredListings.length}</Badge>
-                    </h3>
-                    {data?.lastScraped && (
-                      <span className="text-xs text-muted-foreground">
-                        Last scraped: {new Date(data.lastScraped).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                  {filteredListings.length === 0 ? (
-                    <Card>
-                      <CardContent className="p-8 text-center text-muted-foreground">
-                        No SERP data yet. Click &quot;Scrape Google&quot; to analyze search results.
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                      {filteredListings.slice(0, 12).map((listing) => (
-                        <CompetitorCard
-                          key={listing.id}
-                          listing={listing}
-                          onSelect={() => setSelectedListing(listing)}
-                          selected={selectedListing?.id === listing.id}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="marketplace" className="space-y-6">
-              <div className="grid grid-cols-3 gap-6">
-                {/* Patterns */}
-                <div className="col-span-1">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Winning Patterns</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PatternAnalysis
-                        patterns={data?.patterns || []}
-                        ourContent={data?.ourContent}
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Listings */}
-                <div className="col-span-2 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">
-                      Marketplace Listings{' '}
-                      <Badge variant="secondary">{filteredListings.length}</Badge>
-                    </h3>
-                  </div>
-                  {filteredListings.length === 0 ? (
-                    <Card>
-                      <CardContent className="p-8 text-center text-muted-foreground">
-                        No marketplace data yet. Click a marketplace button above to scrape listings.
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                      {filteredListings.slice(0, 12).map((listing) => (
-                        <CompetitorCard
-                          key={listing.id}
-                          listing={listing}
-                          onSelect={() => setSelectedListing(listing)}
-                          selected={selectedListing?.id === listing.id}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-          </>
-        )}
-      </Tabs>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Comparison view */}
       {selectedListing && data?.ourContent && (
