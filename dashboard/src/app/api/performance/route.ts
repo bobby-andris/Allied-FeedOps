@@ -1,11 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  fetchShoppingPerformance, 
-  getDateRange, 
-  isGoogleAdsConfigured,
-  type ProductPerformance 
-} from '@/lib/google-ads'
 
 // Types for the API response
 interface SkuPerformance {
@@ -13,7 +7,10 @@ interface SkuPerformance {
   name: string
   platform: string
   publishedAt: string
-  shopifyProductId: string | null
+  daysSincePublish: number
+  hasSnapshot: boolean
+  baselineWindow: string
+  snapshotWindow: string
   baseline: {
     ctr: number
     cvr: number
@@ -31,6 +28,7 @@ interface SkuPerformance {
 interface PerformanceResponse {
   summary: {
     totalPublished: number
+    totalWithSnapshot: number
     avgCtrChange: number
     avgCvrChange: number
     totalImpressions: number
@@ -40,28 +38,48 @@ interface PerformanceResponse {
   warnings: string[]
 }
 
-// SKU to Shopify Product ID mapping is now queried from variant_index table
+function parseWindowDays(window: string): number {
+  if (window === '7d') return 7
+  if (window === '60d') return 60
+  return 30 // default '30d'
+}
+
+function addDays(dateStr: string, days: number): string {
+  const date = new Date(dateStr)
+  date.setDate(date.getDate() + days)
+  return date.toISOString().split('T')[0]
+}
+
+function daysBetween(publishedAt: string): number {
+  const published = new Date(publishedAt)
+  const today = new Date()
+  const msPerDay = 1000 * 60 * 60 * 24
+  return Math.floor((today.getTime() - published.getTime()) / msPerDay)
+}
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const sku = searchParams.get('sku')
   const platform = searchParams.get('platform') || 'google'
-  const dateRange = searchParams.get('dateRange') || '30d'
+  const baselineWindow = searchParams.get('baselineWindow') || '30d'
+  const snapshotWindow = searchParams.get('snapshotWindow') || '30d'
+
+  const snapshotWindowDays = parseWindowDays(snapshotWindow)
 
   const warnings: string[] = []
 
   try {
     const supabase = await createClient()
-    
+
     // 1. Query publish_events for successful publishes
     let publishQuery = supabase
       .from('publish_events')
-      .select('*')
+      .select('master_sku, platform, published_at')
       .eq('status', 'success')
       .eq('action', 'publish')
       .order('published_at', { ascending: false })
 
-    if (platform) {
+    if (platform && platform !== 'all') {
       publishQuery = publishQuery.eq('platform', platform)
     }
 
@@ -76,10 +94,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: publishError.message }, { status: 500 })
     }
 
-    // Get unique SKUs that have been published
+    // Get unique SKUs that have been published (first publish per SKU-platform)
     const publishedSkuMap = new Map<string, { publishedAt: string; platform: string }>()
     for (const event of publishEvents || []) {
-      const key = `${event.master_sku}-${event.platform}`
+      const key = `${event.master_sku}|||${event.platform}`
       if (!publishedSkuMap.has(key)) {
         publishedSkuMap.set(key, {
           publishedAt: event.published_at,
@@ -90,38 +108,35 @@ export async function GET(request: NextRequest) {
 
     const uniqueSkus = [...new Set((publishEvents || []).map(e => e.master_sku))]
 
-    // 2. Query variant_index to get Shopify product IDs and product titles
+    // 2. Query variant_index to get product titles
     const { data: variantIndexData, error: variantIndexError } = await supabase
       .from('variant_index')
-      .select('master_sku, shopify_product_id, product_title')
-      .in('master_sku', uniqueSkus)
+      .select('master_sku, product_title')
+      .in('master_sku', uniqueSkus.length > 0 ? uniqueSkus : ['__none__'])
 
     if (variantIndexError) {
       console.error('Failed to fetch variant index:', variantIndexError)
       warnings.push('Failed to fetch product mapping data')
     }
 
-    // Build SKU to product mapping from variant_index (take first variant per master_sku)
-    const skuToProductMap = new Map<string, { shopifyProductId: string; name: string }>()
+    // Build SKU to product title mapping (first variant per master_sku)
+    const skuToNameMap = new Map<string, string>()
     for (const variant of variantIndexData || []) {
-      if (!skuToProductMap.has(variant.master_sku)) {
-        skuToProductMap.set(variant.master_sku, {
-          shopifyProductId: variant.shopify_product_id,
-          name: variant.product_title || `SKU ${variant.master_sku}`,
-        })
+      if (!skuToNameMap.has(variant.master_sku)) {
+        skuToNameMap.set(variant.master_sku, variant.product_title || `SKU ${variant.master_sku}`)
       }
     }
 
     // 3. Query performance_baselines for these SKUs
     let baselineQuery = supabase
       .from('performance_baselines')
-      .select('*')
+      .select('master_sku, platform, avg_ctr, avg_cvr, avg_impressions, avg_clicks')
 
     if (uniqueSkus.length > 0) {
       baselineQuery = baselineQuery.in('master_sku', uniqueSkus)
     }
 
-    if (platform) {
+    if (platform && platform !== 'all') {
       baselineQuery = baselineQuery.eq('platform', platform)
     }
 
@@ -129,7 +144,6 @@ export async function GET(request: NextRequest) {
 
     if (baselineError) {
       console.error('Failed to fetch baselines:', baselineError)
-      // Don't fail the request, just note the warning
       warnings.push('Failed to fetch baseline data')
     }
 
@@ -142,7 +156,7 @@ export async function GET(request: NextRequest) {
     }>()
 
     for (const baseline of baselines || []) {
-      const key = `${baseline.master_sku}-${baseline.platform}`
+      const key = `${baseline.master_sku}|||${baseline.platform}`
       baselineMap.set(key, {
         avgCtr: baseline.avg_ctr || 0,
         avgCvr: baseline.avg_cvr || 0,
@@ -151,100 +165,72 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // 4. Fetch current performance from Google Ads (for google platform)
-    let googleAdsData = new Map<string, ProductPerformance>()
-    
-    if (platform === 'google' && isGoogleAdsConfigured()) {
-      // Get Shopify product IDs for the published SKUs
-      const shopifyProductIds: string[] = []
-      const skuToProductId = new Map<string, string>()
-
-      for (const skuId of uniqueSkus) {
-        const mapping = skuToProductMap.get(skuId)
-        if (mapping) {
-          shopifyProductIds.push(mapping.shopifyProductId)
-          skuToProductId.set(skuId, mapping.shopifyProductId)
-        }
-      }
-
-      if (shopifyProductIds.length > 0) {
-        try {
-          const { startDate, endDate } = getDateRange(dateRange)
-          googleAdsData = await fetchShoppingPerformance(
-            shopifyProductIds,
-            startDate,
-            endDate
-          )
-        } catch (error) {
-          console.error('Failed to fetch Google Ads data:', error)
-          warnings.push('Failed to fetch live Google Ads data. Showing cached data only.')
-        }
-      }
-
-      // Distribute Google Ads product-level data to all master_skus sharing that product
-      // (handles multi-SKU products like DMF-2/2X, DMF-2/3X sharing same product_id)
-      const skuToGoogleAdsData = new Map<string, ProductPerformance>()
-      for (const [skuId, mapping] of skuToProductMap) {
-        if (googleAdsData.has(mapping.shopifyProductId)) {
-          skuToGoogleAdsData.set(skuId, googleAdsData.get(mapping.shopifyProductId)!)
-        }
-      }
-      googleAdsData = skuToGoogleAdsData
-    } else if (platform === 'google' && !isGoogleAdsConfigured()) {
-      warnings.push('Google Ads API is not configured. Using cached data only.')
-    }
-
-    // 5. Query performance_snapshots for fallback/additional data
-    const { startDate, endDate } = getDateRange(dateRange)
-    
+    // 4. For each published SKU, find the latest snapshot within the snapshotWindow
+    //    snapshot_date >= publish_date AND snapshot_date <= publish_date + snapshotWindowDays
+    //    We do a single query for all SKUs and then filter in JS
     let snapshotQuery = supabase
       .from('performance_snapshots')
-      .select('*')
-      .gte('snapshot_date', startDate)
-      .lte('snapshot_date', endDate)
+      .select('master_sku, platform, snapshot_date, impressions, clicks, ctr, cvr, days_since_publish')
       .order('snapshot_date', { ascending: false })
 
     if (uniqueSkus.length > 0) {
       snapshotQuery = snapshotQuery.in('master_sku', uniqueSkus)
     }
 
-    if (platform) {
+    if (platform && platform !== 'all') {
       snapshotQuery = snapshotQuery.eq('platform', platform)
     }
 
-    const { data: snapshots } = await snapshotQuery
+    const { data: allSnapshots } = await snapshotQuery
 
-    // Create a map of latest snapshots by SKU-platform
-    const snapshotMap = new Map<string, {
-      ctr: number
-      cvr: number
+    // Group snapshots by SKU-platform key
+    const snapshotsByKey = new Map<string, Array<{
+      snapshot_date: string
       impressions: number
       clicks: number
-    }>()
+      ctr: number
+      cvr: number
+      days_since_publish: number | null
+    }>>()
 
-    for (const snapshot of snapshots || []) {
-      const key = `${snapshot.master_sku}-${snapshot.platform}`
-      if (!snapshotMap.has(key)) {
-        snapshotMap.set(key, {
-          ctr: snapshot.ctr || 0,
-          cvr: snapshot.cvr || 0,
-          impressions: snapshot.impressions || 0,
-          clicks: snapshot.clicks || 0,
-        })
+    for (const snap of allSnapshots || []) {
+      const key = `${snap.master_sku}|||${snap.platform}`
+      if (!snapshotsByKey.has(key)) {
+        snapshotsByKey.set(key, [])
       }
+      snapshotsByKey.get(key)!.push(snap)
     }
 
-    // 6. Build the response
+    // Check if any snapshots exist at all
+    if ((allSnapshots || []).length === 0 && uniqueSkus.length > 0) {
+      warnings.push('No performance snapshots found. Run capture-snapshot to populate data.')
+    }
+
+    // 5. Build the response
     const skuPerformanceList: SkuPerformance[] = []
 
     for (const [key, publishInfo] of publishedSkuMap) {
-      const skuId = key.substring(0, key.lastIndexOf('-' + publishInfo.platform))
-      const skuMapping = skuToProductMap.get(skuId)
-      const shopifyProductId = skuMapping?.shopifyProductId || null
-      const productName = skuMapping?.name || `SKU ${skuId}`
+      const skuId = key.split('|||')[0]
+      const productName = skuToNameMap.get(skuId) || `SKU ${skuId}`
+
+      const publishDate = publishInfo.publishedAt.split('T')[0]
+      const publishDatePlus = addDays(publishDate, snapshotWindowDays)
+
+      // Find the latest snapshot within the window [publishDate, publishDate + snapshotWindowDays]
+      const snapshots = snapshotsByKey.get(key) || []
+      const windowSnapshot = snapshots.find(s =>
+        s.snapshot_date >= publishDate && s.snapshot_date <= publishDatePlus
+      )
+
+      const hasSnapshot = !!windowSnapshot
+
+      // daysSincePublish: from snapshot record if available, otherwise compute from today
+      const daysSincePublish = hasSnapshot && windowSnapshot!.days_since_publish != null
+        ? windowSnapshot!.days_since_publish
+        : daysBetween(publishInfo.publishedAt)
 
       // Get baseline data
-      const baselineKey = `${skuId}-${publishInfo.platform}`
+      const baselineKey = key
       const baseline = baselineMap.get(baselineKey) || {
         avgCtr: 0,
         avgCvr: 0,
@@ -252,40 +238,30 @@ export async function GET(request: NextRequest) {
         avgClicks: 0,
       }
 
-      // Get current data - prefer Google Ads live data, fall back to snapshots
-      let current = {
-        ctr: 0,
-        cvr: 0,
-        impressions: 0,
-        clicks: 0,
-      }
-
-      if (googleAdsData.has(skuId)) {
-        const gadsData = googleAdsData.get(skuId)!
-        current = {
-          ctr: gadsData.ctr * 100, // Convert to percentage
-          cvr: gadsData.conversions > 0 && gadsData.clicks > 0
-            ? (gadsData.conversions / gadsData.clicks) * 100
-            : 0,
-          impressions: gadsData.impressions,
-          clicks: gadsData.clicks,
-        }
-      } else if (snapshotMap.has(baselineKey)) {
-        const snapshot = snapshotMap.get(baselineKey)!
-        current = {
-          ctr: snapshot.ctr,
-          cvr: snapshot.cvr,
-          impressions: snapshot.impressions,
-          clicks: snapshot.clicks,
-        }
-      }
+      // Current metrics: from the matched snapshot, or zero if no snapshot
+      const current = hasSnapshot
+        ? {
+            ctr: windowSnapshot!.ctr || 0,
+            cvr: windowSnapshot!.cvr || 0,
+            impressions: windowSnapshot!.impressions || 0,
+            clicks: windowSnapshot!.clicks || 0,
+          }
+        : {
+            ctr: 0,
+            cvr: 0,
+            impressions: 0,
+            clicks: 0,
+          }
 
       skuPerformanceList.push({
         sku: skuId,
         name: productName,
         platform: publishInfo.platform,
-        publishedAt: publishInfo.publishedAt.split('T')[0], // Format as YYYY-MM-DD
-        shopifyProductId,
+        publishedAt: publishDate,
+        daysSincePublish,
+        hasSnapshot,
+        baselineWindow,
+        snapshotWindow,
         baseline: {
           ctr: baseline.avgCtr,
           cvr: baseline.avgCvr,
@@ -296,34 +272,39 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Calculate summary stats
+    // Calculate summary stats (only count hasSnapshot SKUs for avg changes)
     let totalCtrChange = 0
     let totalCvrChange = 0
     let validCtrCount = 0
     let validCvrCount = 0
     let totalImpressions = 0
     let totalClicks = 0
+    let totalWithSnapshot = 0
 
     for (const skuPerf of skuPerformanceList) {
-      totalImpressions += skuPerf.current.impressions
-      totalClicks += skuPerf.current.clicks
+      if (skuPerf.hasSnapshot) {
+        totalWithSnapshot++
+        totalImpressions += skuPerf.current.impressions
+        totalClicks += skuPerf.current.clicks
 
-      if (skuPerf.baseline.ctr > 0) {
-        const ctrChange = ((skuPerf.current.ctr - skuPerf.baseline.ctr) / skuPerf.baseline.ctr) * 100
-        totalCtrChange += ctrChange
-        validCtrCount++
-      }
+        if (skuPerf.baseline.ctr > 0) {
+          const ctrChange = ((skuPerf.current.ctr - skuPerf.baseline.ctr) / skuPerf.baseline.ctr) * 100
+          totalCtrChange += ctrChange
+          validCtrCount++
+        }
 
-      if (skuPerf.baseline.cvr > 0) {
-        const cvrChange = ((skuPerf.current.cvr - skuPerf.baseline.cvr) / skuPerf.baseline.cvr) * 100
-        totalCvrChange += cvrChange
-        validCvrCount++
+        if (skuPerf.baseline.cvr > 0) {
+          const cvrChange = ((skuPerf.current.cvr - skuPerf.baseline.cvr) / skuPerf.baseline.cvr) * 100
+          totalCvrChange += cvrChange
+          validCvrCount++
+        }
       }
     }
 
     const response: PerformanceResponse = {
       summary: {
         totalPublished: skuPerformanceList.length,
+        totalWithSnapshot,
         avgCtrChange: validCtrCount > 0 ? totalCtrChange / validCtrCount : 0,
         avgCvrChange: validCvrCount > 0 ? totalCvrChange / validCvrCount : 0,
         totalImpressions,
