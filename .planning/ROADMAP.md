@@ -244,7 +244,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 9 → 10 → 11 → 12
+Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -260,17 +260,40 @@ Phases execute in numeric order: 9 → 10 → 11 → 12
 | 10. Image Workflow Improvements | 3/3 | Complete    | 2026-02-19 | - |
 | 11. Performance Page Enhancements | 3/3 | Complete   | 2026-02-19 | - |
 | 12. Dashboard Audit & Cleanup | 3/3 | Complete    | 2026-02-19 | - |
+| 13. Fix Google Ads Data Sourcing | 3/3 | Complete    | 2026-02-19 | - |
+| 14. Complete 180-day Backfill & Monitoring Fixes | 0/3 | Pending | - | - |
 
 ### Phase 13: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
 
 **Goal:** Fix how Google Ads data is fetched and stored — correct variant-level search term attribution (per-item instead of per-campaign-top-item) and confirm performance metrics use the right offer ID format for shopping_performance_view. Re-sync all 2,784 SKUs with corrected data.
 **Depends on:** Phase 12
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed
 
 Plans:
-- [ ] 13-01-PLAN.md — Diagnosis: code trace of both bugs + empirical data comparison + 13-DIAGNOSIS.md
-- [ ] 13-02-PLAN.md — Fix: fetch_search_terms() variant expansion, delete-before-insert worker, synced_at migration, offer ID case fix
-- [ ] 13-03-PLAN.md — Deploy + re-sync all 2,784 SKUs + human verification of corrected data
+- [x] 13-01-PLAN.md — Diagnosis: code trace of both bugs + empirical data comparison + 13-DIAGNOSIS.md
+- [x] 13-02-PLAN.md — Fix: fetch_search_terms() variant expansion, delete-before-insert worker, synced_at migration, offer ID case fix
+- [x] 13-03-PLAN.md — Deploy + re-sync all 2,784 SKUs + human verification of corrected data
+
+### Phase 14: Complete 180-day data backfill and fix monitoring page accuracy
+
+**Goal:** Complete the full 180-day Google Ads data sync for all 2,784 SKUs using the corrected pipeline from Phase 13, and fix the monitoring dashboard to show accurate coverage numbers and active job status.
+
+**Depends on:** Phase 13
+
+**Requirements:** SYNC-01, SYNC-02, MON-FIX-01, MON-FIX-02
+
+**Success Criteria** (what must be TRUE):
+  1. 026_backfill_jobs.sql migration applied to production — `backfill_jobs` and `backfill_job_errors` tables exist
+  2. LAST_N_DAYS syntax bug fixed in google_ads_search_terms.py — all occurrences replaced with explicit BETWEEN date strings; 180-day sync completes without INVALID_ARGUMENT errors
+  3. Performance metrics backfill runs for all 2,784 SKUs via /backfill/start and completes successfully
+  4. Monitoring page shows correct coverage (COUNT queries, not PostgREST 1000-row limit) and Active Jobs reads from search_query_sync_jobs and backfill_jobs
+
+**Plans:** 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Apply 026_backfill_jobs.sql migration + fix LAST_N_DAYS → BETWEEN in google_ads_search_terms.py + re-trigger 180-day search terms sync
+- [ ] 14-02-PLAN.md — Run performance_metrics backfill for all 2,784 SKUs via /backfill/start
+- [ ] 14-03-PLAN.md — Fix monitoring page: coverage COUNT queries + two Active Jobs sections (search_query_sync_jobs + backfill_jobs) + freshness heatmap accuracy
 
 ---
 *Phase 0 completed: 2026-02-13*
