@@ -1007,15 +1007,23 @@ class SearchTermsClient:
         logger.info(f"Deduped {len(search_terms)} search terms to {len(rows)} unique entries")
 
         try:
-            # Use proper Supabase upsert with ignoreDuplicates to handle conflicts
-            # The unique constraint is (query_text, gmc_offer_id, period_start, period_end)
-            result = self.supabase.table("search_queries").upsert(
-                rows,
-                on_conflict="query_text,gmc_offer_id,period_start,period_end",
-                ignore_duplicates=False  # Update existing rows instead of ignoring
-            ).execute()
+            # Batch upserts to avoid HTTP/2 StreamReset on large payloads.
+            # A single upsert of 10,000+ rows causes Supabase to reset the stream.
+            # 500 rows per batch is safe and fast (verified against production).
+            UPSERT_BATCH_SIZE = 500
+            total_saved = 0
+            for i in range(0, len(rows), UPSERT_BATCH_SIZE):
+                batch = rows[i:i + UPSERT_BATCH_SIZE]
+                result = self.supabase.table("search_queries").upsert(
+                    batch,
+                    on_conflict="query_text,gmc_offer_id,period_start,period_end",
+                    ignore_duplicates=False  # Update existing rows instead of ignoring
+                ).execute()
+                batch_saved = len(result.data) if result.data else 0
+                total_saved += batch_saved
+                logger.info(f"Upserted batch {i // UPSERT_BATCH_SIZE + 1}/{(len(rows) + UPSERT_BATCH_SIZE - 1) // UPSERT_BATCH_SIZE}: {batch_saved} rows")
 
-            return len(result.data) if result.data else 0
+            return total_saved
         except Exception as e:
             logger.error(f"Error saving search terms: {e}")
             raise
