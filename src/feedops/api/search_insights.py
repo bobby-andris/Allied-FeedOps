@@ -41,6 +41,15 @@ class SyncSearchTermsRequest(BaseModel):
     enrich_with_keyword_planner: bool = Field(
         default=True, description="Enrich with Keyword Planner search volume data"
     )
+    start_date: date | None = Field(
+        default=None, description="Explicit start date (overrides days-based calculation)"
+    )
+    end_date: date | None = Field(
+        default=None, description="Explicit end date (overrides days-based calculation)"
+    )
+    filter_skus: list[str] | None = Field(
+        default=None, description="If set, only save results for these master_skus"
+    )
 
 
 class EnrichKeywordsRequest(BaseModel):
@@ -126,6 +135,9 @@ async def sync_search_terms(request: SyncSearchTermsRequest):
             days=request.days,
             limit=request.limit,
             enrich=request.enrich_with_keyword_planner,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            filter_skus=request.filter_skus,
         )
 
         return SyncJobResponse(
@@ -360,6 +372,9 @@ async def process_sync_job(
     days: int,
     limit: int,
     enrich: bool,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    filter_skus: list[str] | None = None,
 ):
     """Background task to sync search terms from Google Ads.
 
@@ -382,13 +397,21 @@ async def process_sync_job(
         # Initialize client
         client = SearchTermsClient()
 
-        # Calculate period
-        period_end = date.today()
-        period_start = period_end - timedelta(days=days)
+        # Calculate period — respect explicit dates if provided
+        period_end = end_date or date.today()
+        period_start = start_date or (period_end - timedelta(days=days))
 
         # Fetch search terms
-        logger.info(f"Fetching search terms for last {days} days...")
-        search_terms = client.fetch_search_terms(days=days, limit=limit)
+        date_desc = f"{period_start} to {period_end}" if start_date or end_date else f"last {days} days"
+        sku_desc = f" (filter_skus: {filter_skus})" if filter_skus else ""
+        logger.info(f"Fetching search terms for {date_desc}{sku_desc}...")
+        search_terms = client.fetch_search_terms(
+            days=days,
+            limit=limit,
+            start_date=start_date,
+            end_date=end_date,
+            filter_skus=filter_skus,
+        )
 
         queries_fetched = len(search_terms)
         logger.info(f"Fetched {queries_fetched} search terms")

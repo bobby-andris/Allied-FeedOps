@@ -459,12 +459,22 @@ class SearchTermsClient:
 
         return campaigns
 
-    def _fetch_campaign_products(self, days: int = 30) -> dict[str, list[str]]:
+    def _fetch_campaign_products(
+        self,
+        days: int = 30,
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> dict[str, list[str]]:
         """Fetch product item_ids grouped by campaign.
 
         Uses shopping_performance_view to get products that have had impressions,
         grouped by campaign. This is more reliable than shopping_product which
         has strict filter requirements.
+
+        Args:
+            days: Number of days to look back (used if start_date/end_date not provided)
+            start_date: Explicit start date (overrides days-based calculation)
+            end_date: Explicit end date (overrides days-based calculation)
 
         Returns:
             Dict mapping campaign.id -> list of item_ids in that campaign
@@ -476,8 +486,10 @@ class SearchTermsClient:
         # Compute explicit date range — LAST_N_DAYS syntax only supports specific
         # enum values (LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS) and rejects
         # arbitrary N values like 90 or 180 with INVALID_ARGUMENT errors.
-        end_date = date.today().strftime("%Y-%m-%d")
-        start_date = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+        _end_date = end_date or date.today()
+        _start_date = start_date or (_end_date - timedelta(days=days))
+        end_date_str = _end_date.strftime("%Y-%m-%d")
+        start_date_str = _start_date.strftime("%Y-%m-%d")
 
         # Use shopping_performance_view to get products with impressions by campaign
         # Note: Must SELECT campaign.advertising_channel_type when filtering by it
@@ -489,7 +501,7 @@ class SearchTermsClient:
                 campaign.advertising_channel_type,
                 metrics.impressions
             FROM shopping_performance_view
-            WHERE segments.date BETWEEN '{start_date}' AND '{end_date}'
+            WHERE segments.date BETWEEN '{start_date_str}' AND '{end_date_str}'
                 AND campaign.advertising_channel_type = 'SHOPPING'
                 AND metrics.impressions > 0
             ORDER BY metrics.impressions DESC
@@ -532,6 +544,9 @@ class SearchTermsClient:
         self,
         days: int = 30,
         limit: int = 1000,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        filter_skus: list[str] | None = None,
     ) -> list[dict]:
         """Fetch search terms from Shopping campaigns WITH variant-level tracking.
 
@@ -541,8 +556,11 @@ class SearchTermsClient:
         3. Join via campaign to associate search terms with products
 
         Args:
-            days: Number of days to look back
+            days: Number of days to look back (used if start_date/end_date not provided)
             limit: Maximum results to return
+            start_date: Explicit start date (overrides days-based calculation)
+            end_date: Explicit end date (overrides days-based calculation)
+            filter_skus: If set, only return results for these master_skus
 
         Returns:
             List of dicts with search term data including variant info
@@ -553,15 +571,19 @@ class SearchTermsClient:
 
         # Step 1: Fetch products grouped by campaign
         logger.info("Fetching products by campaign...")
-        campaign_products = self._fetch_campaign_products(days)
+        campaign_products = self._fetch_campaign_products(
+            days=days, start_date=start_date, end_date=end_date
+        )
         logger.info(f"Found products across {len(campaign_products)} campaigns")
 
         # Step 2: Fetch search terms with campaign.id
         # Compute explicit date range — LAST_N_DAYS syntax only supports specific
         # enum values (LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS) and rejects
         # arbitrary N values like 90 or 180 with INVALID_ARGUMENT errors.
-        st_end_date = date.today().strftime("%Y-%m-%d")
-        st_start_date = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+        _end_date = end_date or date.today()
+        _start_date = start_date or (_end_date - timedelta(days=days))
+        st_end_date = _end_date.strftime("%Y-%m-%d")
+        st_start_date = _start_date.strftime("%Y-%m-%d")
 
         query = f"""
             SELECT
@@ -649,6 +671,12 @@ class SearchTermsClient:
         except Exception as e:
             logger.error(f"Google Ads API error: {e}")
             raise
+
+        # Apply filter_skus if provided — limits results to specified master_skus only
+        if filter_skus:
+            filter_set = set(filter_skus)
+            results = [r for r in results if r.get("master_sku") in filter_set]
+            logger.info(f"filter_skus applied: kept {len(results)} results for {len(filter_set)} SKUs")
 
         return results
 
