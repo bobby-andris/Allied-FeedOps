@@ -376,6 +376,11 @@ class SearchTermsClient:
         if not gmc_offer_id:
             return {"master_sku": None, "finish": None, "finish_code": None, "shopify_variant_id": None}
 
+        # Normalize to lowercase before lookup and caching.
+        # Google Ads returns uppercase shopify_US_ but variant_index stores lowercase shopify_us_.
+        # Without this normalization every lookup is a cache miss and DB query returns no results.
+        gmc_offer_id = gmc_offer_id.lower()
+
         # Check cache
         if gmc_offer_id in self._variant_cache:
             return self._variant_cache[gmc_offer_id]
