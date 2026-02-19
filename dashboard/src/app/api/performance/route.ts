@@ -260,13 +260,17 @@ export async function GET(request: NextRequest) {
         avgClicks: 0,
       }
 
-      // Current metrics: from the matched snapshot, or zero if no snapshot
+      // Current metrics: from the matched snapshot, or zero if no snapshot.
+      // impressions/clicks in snapshots are cumulative totals over the window period,
+      // while baseline stores daily averages (avg_impressions = total / 30).
+      // Divide by snapshotWindowDays to normalize to daily averages for valid delta comparison.
+      // CTR and CVR are already rates — no normalization needed.
       const current = hasSnapshot
         ? {
             ctr: windowSnapshot!.ctr || 0,
             cvr: windowSnapshot!.cvr || 0,
-            impressions: windowSnapshot!.impressions || 0,
-            clicks: windowSnapshot!.clicks || 0,
+            impressions: Math.round((windowSnapshot!.impressions || 0) / snapshotWindowDays),
+            clicks: Math.round((windowSnapshot!.clicks || 0) / snapshotWindowDays),
           }
         : {
             ctr: 0,

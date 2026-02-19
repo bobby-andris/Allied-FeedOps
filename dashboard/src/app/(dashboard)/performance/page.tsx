@@ -675,7 +675,8 @@ export default function PerformancePage() {
         <AlertDescription>
           Metrics are sourced from stored performance snapshots, not live Google Ads data.
           Baseline is the 30-day pre-publish window captured at optimization time.
-          The snapshot window shows the best snapshot captured within N days of publish.
+          Impressions and clicks are shown as daily averages (snapshot total ÷ window days) for valid comparison.
+          CTR and CVR are rates and compared directly.
         </AlertDescription>
       </Alert>
 
