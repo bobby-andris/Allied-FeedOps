@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageApprovalCard } from "@/components/review/ImageApprovalCard"
-import { Check, Image as ImageIcon, RefreshCw, Sparkles, Upload } from "lucide-react"
+import { Check, ChevronDown, Image as ImageIcon, RefreshCw, Sparkles, Upload } from "lucide-react"
 import { toast } from "sonner"
 import { resolveDefaultFinishSelection } from './lifestyle-image-selection'
 import { VariantSelectorModal, type VariantDataEntry } from './VariantSelectorModal'
@@ -66,7 +66,15 @@ export function LifestyleImageReview({
   selectedFinish,
   onRefresh,
 }: LifestyleImageReviewProps) {
-  const [activeTab, setActiveTab] = useState<'variant' | 'master'>('variant')
+  const [activeTab, setActiveTab] = useState<'variant' | 'master' | 'coverage'>('variant')
+  const [variantData, setVariantData] = useState<VariantDataEntry[]>([])
+
+  useEffect(() => {
+    fetch(`/api/images/variant-data?master_sku=${encodeURIComponent(sku)}`)
+      .then(r => r.json())
+      .then(data => { if (data.variants) setVariantData(data.variants) })
+      .catch(() => {})
+  }, [sku])
 
   // Display all images (both product and variant)
   // Product images: use_for_master=true, no finish field
@@ -203,9 +211,9 @@ export function LifestyleImageReview({
 
       <CardContent>
         {images.length === 0 ? (
-          <EmptyImageState sku={sku} onRefresh={onRefresh} />
+          <EmptyImageState sku={sku} onRefresh={onRefresh} variants={variantData} />
         ) : (
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'variant' | 'master')}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'variant' | 'master' | 'coverage')}>
             <TabsList className="mb-4">
               <TabsTrigger value="variant" className="gap-2">
                 Variant Images
@@ -220,6 +228,12 @@ export function LifestyleImageReview({
                 ) : (
                   <Badge variant="secondary" className="ml-1">Not set</Badge>
                 )}
+              </TabsTrigger>
+              <TabsTrigger value="coverage" className="gap-2">
+                Coverage
+                <Badge variant="secondary" className="ml-1">
+                  {variantData.filter(v => !v.has_lifestyle_image).length} missing
+                </Badge>
               </TabsTrigger>
             </TabsList>
 
@@ -243,6 +257,10 @@ export function LifestyleImageReview({
                 onUseForMaster={handleUseForMaster}
               />
             </TabsContent>
+
+            <TabsContent value="coverage">
+              <CoverageSection variants={variantData} />
+            </TabsContent>
           </Tabs>
         )}
       </CardContent>
@@ -250,23 +268,13 @@ export function LifestyleImageReview({
   )
 }
 
-function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => void }) {
+function EmptyImageState({ sku, onRefresh, variants }: { sku: string; onRefresh: () => void; variants: VariantDataEntry[] }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [variants, setVariants] = useState<VariantDataEntry[]>([])
   const [manualFinishCode, setManualFinishCode] = useState<string | null>(null)
   const [manualFinishName, setManualFinishName] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // Fetch variant data on mount to populate finish selector and auto-select label
-  useEffect(() => {
-    fetch(`/api/images/variant-data?master_sku=${encodeURIComponent(sku)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.variants) setVariants(data.variants)
-      })
-      .catch(() => {}) // silent — not blocking
-  }, [sku])
+  const [showCoverage, setShowCoverage] = useState(false)
 
   // Derive active finish — manual overrides auto; auto = highest impressions (first in sorted list)
   const autoSelectedFinish = variants[0] ?? null
@@ -381,6 +389,91 @@ function EmptyImageState({ sku, onRefresh }: { sku: string; onRefresh: () => voi
           setManualFinishName(name)
         }}
       />
+
+      {variants.length > 0 && (
+        <div className="mt-4 border-t pt-4 text-left">
+          <button
+            className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors mx-auto"
+            onClick={() => setShowCoverage(prev => !prev)}
+          >
+            <ChevronDown className={`h-3 w-3 transition-transform ${showCoverage ? 'rotate-180' : ''}`} />
+            {showCoverage ? 'Hide' : 'View'} coverage ({variants.length} variants)
+          </button>
+          {showCoverage && (
+            <div className="mt-3">
+              <CoverageSection variants={variants} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CoverageSection({ variants }: { variants: VariantDataEntry[] }) {
+  if (variants.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground text-sm">
+        No Google Ads variant data available for this SKU.
+      </div>
+    )
+  }
+
+  const withImages = variants.filter(v => v.has_lifestyle_image).length
+  const total = variants.length
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <span>{withImages} of {total} variants have lifestyle images</span>
+      </div>
+
+      <div className="divide-y">
+        {variants.map(variant => (
+          <div key={variant.finish_code} className="flex items-center gap-4 py-3">
+            {/* Thumbnail or placeholder */}
+            <div className="w-16 h-12 flex-shrink-0 rounded border bg-muted flex items-center justify-center overflow-hidden">
+              {variant.has_lifestyle_image && variant.lifestyle_image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={variant.lifestyle_image_url}
+                  alt={variant.finish}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+              )}
+            </div>
+
+            {/* Finish name, impression count, and date generated */}
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm">{variant.finish}</div>
+              <div className="text-xs text-muted-foreground">
+                {variant.total_impressions.toLocaleString()} impressions
+              </div>
+              {variant.has_lifestyle_image && variant.lifestyle_image_created_at && (
+                <div className="text-xs text-muted-foreground">
+                  Generated{' '}
+                  {new Date(variant.lifestyle_image_created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Status badge */}
+            <div>
+              {variant.has_lifestyle_image ? (
+                <Badge variant="default" className="bg-green-600 text-xs">Has image</Badge>
+              ) : (
+                <Badge variant="secondary" className="text-xs">No image</Badge>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

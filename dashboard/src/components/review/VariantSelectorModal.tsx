@@ -21,7 +21,10 @@ export interface VariantDataEntry {
   finish: string
   finish_code: string
   total_impressions: number
+  total_clicks: number
   has_lifestyle_image: boolean
+  lifestyle_image_url: string | null
+  lifestyle_image_created_at: string | null
 }
 
 interface VariantSelectorModalProps {
