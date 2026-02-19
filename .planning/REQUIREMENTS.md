@@ -26,9 +26,9 @@ All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10)
 
 ### Performance Page (PERF)
 
-- [ ] **PERF-01**: Performance page shows a clear before/after comparison (baseline vs. latest snapshot) per published SKU
-- [ ] **PERF-02**: User can see days-since-publish alongside metric deltas (CTR, impressions, clicks, CVR)
-- [ ] **PERF-03**: Page visually surfaces which SKUs are trending up vs. down since publish
+- [x] **PERF-01**: Performance page shows a clear before/after comparison (baseline vs. latest snapshot) per published SKU
+- [x] **PERF-02**: User can see days-since-publish alongside metric deltas (CTR, impressions, clicks, CVR)
+- [x] **PERF-03**: Page visually surfaces which SKUs are trending up vs. down since publish
 
 ### Dashboard Audit (DASH)
 
@@ -75,9 +75,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IMG-02 | Phase 10 | Complete |
 | IMG-03 | Phase 10 | Complete |
 | IMG-04 | Phase 10 | Complete |
-| PERF-01 | Phase 11 | Pending |
-| PERF-02 | Phase 11 | Pending |
-| PERF-03 | Phase 11 | Pending |
+| PERF-01 | Phase 11 | Complete |
+| PERF-02 | Phase 11 | Complete |
+| PERF-03 | Phase 11 | Complete |
 | DASH-01 | Phase 12 | Pending |
 | DASH-02 | Phase 12 | Pending |
 | DASH-03 | Phase 12 | Pending |

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 10: Image Workflow Improvements)
+**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 11: Performance Page Enhancements)
 
 ## Current Position
 
-Phase: 10 — Image Workflow Improvements
-Plan: 3 of 3 — COMPLETE
-Status: Phase complete (all 3 plans executed and verified)
-Last activity: 2026-02-19 — Plan 10-03 complete (Coverage tab, gmc_offer_id impression fix, GenerateForNewFinish panel, browser-verified)
+Phase: 11 — Performance Page Enhancements
+Plan: 1 of 1 — COMPLETE
+Status: Phase complete (1/1 plans executed)
+Last activity: 2026-02-19 — Plan 11-01 complete (performance page rewrite with dual time selectors, delta table, snapshot-only data sourcing)
 
-Progress: [██████████] 100% (v1.1 milestone, 3/3 plans in Phase 10 — PHASE COMPLETE)
+Progress: [██████████] 100% (v1.1 milestone, 1/1 plans in Phase 11 — PHASE COMPLETE)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██████████] 100% (v1.1 milestone, 3/3 plans in Ph
 | Phase 10-image-workflow-improvements P01 | 6 | 1 task | 1 file |
 | Phase 10-image-workflow-improvements P02 | 247 | 3 tasks | 4 files |
 | Phase 10-image-workflow-improvements P03 | 20 | 2 tasks | 3 files |
+| Phase 11-performance-page-enhancements P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -285,6 +286,10 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 10-image-workflow-improvements]: Coverage tab badge shows missing count (not total) — actionable signal is how many finishes still need images (Plan 10-03)
 - [Phase 10-image-workflow-improvements]: gmc_offer_id reverse map via variant_index resolves null finish_code rows in search_queries — all finishes get correct impression totals (Plan 10-03)
 - [Phase 10-image-workflow-improvements]: GenerateForNewFinish placed in VariantImageSection (not a separate modal) — keeps generate workflow in context of the currently displayed finish (Plan 10-03)
+- [Phase 11-performance-page-enhancements]: Snapshot-only data sourcing — removed live Google Ads API call entirely; performance page reads exclusively from performance_baselines + performance_snapshots (Plan 11-01)
+- [Phase 11-performance-page-enhancements]: JS-side window filtering for snapshot query — fetch all snapshots for published SKUs, filter by date window in JS (simpler than per-SKU SQL subqueries at this row count) (Plan 11-01)
+- [Phase 11-performance-page-enhancements]: Neutral threshold ±3% for delta badges and TrendIcon — avoids noise at near-zero deltas (Plan 11-01)
+- [Phase 11-performance-page-enhancements]: SortableHeader at module scope (not nested inside PerformanceTable) — props threaded through to satisfy react-hooks/static-components lint rule (Plan 11-01)
 
 ### Pending Todos
 
@@ -303,9 +308,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Plan 10-03 complete (Coverage tab, impression aggregation fix, GenerateForNewFinish panel, browser-verified end-to-end)
-Stopped at: Completed 10-image-workflow-improvements-10-03-PLAN.md
+Last session: 2026-02-19 — Plan 11-01 complete (performance page rewrite: dual time selectors, delta table, snapshot-only sourcing, trend indicators)
+Stopped at: Completed 11-performance-page-enhancements-11-01-PLAN.md
 Resume file: None
 
 ---
-*Next step:* Phase 11 — Performance Page (post-publish delta tracking UI, baseline vs snapshot comparison).
+*Next step:* Phase 12 — Dashboard Audit (full page walkthrough, document status, fix/remove low-value pages).
