@@ -2,24 +2,25 @@
 
 **Audited:** 2026-02-19
 **Method:** Code inspection — page files, API routes, and component logic
+**Verified:** 2026-02-19 — agent-browser walkthrough on live Vercel URL after all 3 plans complete
 
 ---
 
 ## Status Summary
 
-| Page | Route | Status | Issue Summary | Action |
-|------|-------|--------|---------------|--------|
-| Overview | / | STALE | "Pending Review" count reads from `sku_approvals.approval_status = 'pending'` but the actual workflow uses the review queue (generated_content), not a pending approval status. Also shows no "pending" guidance if count is 0, and platform breakdown falls back to overall counts when variant_approvals is empty, showing duplicate data | FIX |
-| Generate | /generate | WORKING | Multi-step wizard with tier-based SKU selection, progress polling, past jobs tab. Error handling is inline. No issues. | KEEP |
-| Review Queue | /review | WORKING | Server component fetches enriched SKU data with platform progress, lifestyle image lifecycle. ReviewListClient renders compact expandable rows with filtering. Well-structured. | KEEP |
-| Review [SKU] | /review/[sku] | WORKING | Full SKU detail view with platform tabs, content cards, variant accordions, lifestyle image review. Well-implemented. | KEEP |
-| Competitors | /competitors | DEAD-END | Page loads and shows empty state correctly when no data. Scraping requires Apify API key configured. If no recent scrape has run, all tabs show empty. Category-based workflow doesn't connect to current SKU-specific optimization flow. No guidance on when to use this vs search insights. | SIMPLIFY |
-| Batches | /batches | WORKING | Server component with reconciliation logic. Batch creation, publish, status tracking all functional. `draft` status issue was fixed (migration 025). | KEEP |
-| Performance | /performance | WORKING | Snapshot-based comparison, sortable table, inline SKU detail panel, delta badges. Recently updated in Phase 11. | KEEP |
-| Search Insights | /search-insights | WORKING | SKU-level search query analysis with variant breakdown, gap analysis, keyword planner metrics. Requires manual SKU entry — no browse/list mode. Sync status banner present. | KEEP |
-| Backfill Monitoring | /backfill | WORKING | Shows active Cloud Run backfill jobs, coverage KPIs, freshness heatmap, API health panel. Depends on `@tremor/react` for `Metric` + `ProgressBar` components. Coverage panel requires `/api/monitoring/backfill-health` working. No action to start a backfill from the UI (informational only). | KEEP |
-| Settings | /settings | STALE | Notification switches (`Switch defaultChecked`) have no persistence — they reset on page reload. Danger Zone "Clear" buttons are wired up but have no confirmation dialog. Supabase URL is hardcoded in the UI (not a runtime env var display). | FIX |
-| Post-Publish Monitoring | /monitoring | BROKEN | Uses `alert()` for snapshot capture feedback (line 107). Empty state says "wait 7+ days" with no link to take action. Search delta empty state says "Run search insights sync first" with no link. Snapshot capture calls `/api/monitoring/snapshot-capture` which queries `search_query_snapshots` table — but performance snapshot capture (the one that's actually automated via Cloud Scheduler) lives at `/api/performance/capture-snapshot`. The monitoring page's snapshot button captures SEARCH query snapshots, not performance snapshots — this is likely confusing and may be why the monitoring page shows no data even when the Performance page has data. | FIX |
+| Page | Route | Initial Status | Action | Final Status (Verified) |
+|------|-------|----------------|--------|-------------------------|
+| Overview | / | STALE | FIX (plan 12-02) | VERIFIED — stats cards render, quality distribution correct, quick-action links work |
+| Generate | /generate | WORKING | KEEP | VERIFIED — multi-step wizard loads, tier distribution visible, past jobs tab present |
+| Review Queue | /review | WORKING | KEEP | VERIFIED — 97 SKUs listed, platform filter stats correct, expandable rows work |
+| Review [SKU] | /review/[sku] | WORKING | KEEP | VERIFIED — SKU detail view loads (tested /review/1016) |
+| Competitors | /competitors | DEAD-END | SIMPLIFY (plan 12-03) | VERIFIED — SERP-only layout, Marketplace tab removed, usage guidance banner present, contextual empty state for no-data |
+| Batches | /batches | WORKING | KEEP | VERIFIED — batch table renders, stats (6 total, 5 published) visible |
+| Performance | /performance | WORKING | KEEP | VERIFIED — sortable table with delta badges, 36 SKUs with snapshot data |
+| Search Insights | /search-insights | WORKING | KEEP | VERIFIED — page loads, "Enter a Master SKU" guidance visible |
+| Backfill Monitoring | /backfill | WORKING | KEEP | VERIFIED — "No backfill jobs found" empty state, freshness heatmap and API health sections visible |
+| Settings | /settings | STALE | FIX (plan 12-02) | VERIFIED — notification switches removed, Danger Zone has text guidance, Supabase URL shows env var value |
+| Post-Publish Monitoring | /monitoring | BROKEN | FIX (plan 12-02) | VERIFIED — no alert() dialogs, two separate snapshot buttons, performance delta data showing |
 
 ---
 

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation
-**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 12: Dashboard Audit & Cleanup)
+**Current focus:** v1.1 milestone — Dashboard UX & Quality (Phase 12: COMPLETE)
 
 ## Current Position
 
 Phase: 12 — Dashboard Audit & Cleanup
-Plan: 2 of 3 — 12-02 COMPLETE (fixes)
-Status: Phase 12 in progress — plans 01 and 02 done, plan 03 (simplification) remains
-Last activity: 2026-02-19 — Phase 12 Plan 02 complete (monitoring/settings/overview fixes, commit 211053b9)
+Plan: 3 of 3 — 12-03 COMPLETE (competitors simplification + live verification)
+Status: Phase 12 COMPLETE — all 3 plans done
+Last activity: 2026-02-19 — Phase 12 Plan 03 complete (competitors simplified, agent-browser verified all 11 pages, commit 5bb5196a)
 
-Progress: [██░░░░░░░░] 67% of Phase 12 — Plans 01-02 complete
+Progress: [███████████] 100% of Phase 12 — All plans complete
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [██░░░░░░░░] 67% of Phase 12 — Plans 01-02 compl
 | Phase 11-performance-page-enhancements P01 | 4 | 2 tasks | 2 files |
 | Phase 12-dashboard-audit-cleanup P12-01 | 2 | 2 tasks | 1 files |
 | Phase 12-dashboard-audit-cleanup P02 | 3 | 2 tasks | 4 files |
+| Phase 12 P03 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -301,6 +302,9 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 12-dashboard-audit-cleanup]: Monitoring page split into two snapshot buttons (Search vs Performance) to make endpoint distinction explicit
 - [Phase 12-dashboard-audit-cleanup]: Settings notification switches removed — deferred wiring out-of-scope; static Slack webhook description added instead
 - [Phase 12-dashboard-audit-cleanup]: pendingReview in stats API uses generated_content count minus approved count — sku_approvals pending was misleading
+- [Phase 12]: Competitors page SIMPLIFIED (not removed) — SERP tab retained, marketplace tab removed; functional scraping capability preserved for future use
+- [Phase 12]: Usage guidance banner added to /competitors pointing users to Search Insights for SKU-level keyword data
+- [Phase 12]: No shared EmptyState component created — only 1 DEAD-END page (threshold is 3+); applied inline
 
 ### Pending Todos
 
@@ -319,9 +323,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Phase 12 Plan 02 complete: monitoring/settings/overview fixes (211053b9)
-Stopped at: Phase 12 Plan 02 done — all FIX-action pages resolved; Plan 12-03 (competitors simplification) remains
+Last session: 2026-02-19 — Phase 12 Plan 03 complete: competitors simplified, agent-browser verified all 11 pages (5bb5196a)
+Stopped at: Phase 12 COMPLETE — all 3 plans done (audit, fixes, simplification + verification)
 Resume file: None
 
 ---
-*Next step:* Phase 12 Plan 03 — Simplify /competitors page (DEAD-END status, category-based workflow disconnected from SKU flow).
+*Next step:* Phase 13 or next planned phase — Phase 12 Dashboard Audit & Cleanup is complete.
