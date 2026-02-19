@@ -186,7 +186,7 @@ async def collect_search_terms_batch(batch: list[str]) -> list[dict]:
 # =============================================================================
 
 
-async def collect_performance_batch(batch: list[str]) -> list[dict]:
+async def collect_performance_batch(batch: list[str], force_backfill: bool = False) -> list[dict]:
     """Collect 180-day performance metrics for a batch of master SKUs.
 
     Fetches metrics from Google Ads shopping_performance_view, aggregates variant-level
@@ -194,6 +194,7 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
 
     Data Flow:
     1. Check contamination eligibility (VALID-04) - skip SKUs published <30 days
+       (skipped when force_backfill=True — use for historical backfills)
     2. For each master_sku: query variant_index to get all gmc_offer_id values
     3. Call fetch_batch_product_performance() with all offer IDs for the batch
     4. Aggregate variant metrics to master_sku level (sum impressions/clicks, weighted avg CTR)
@@ -236,29 +237,33 @@ async def collect_performance_batch(batch: list[str]) -> list[dict]:
         num_days = 180
 
         # STEP 1: Check contamination eligibility (VALID-04)
-        # Skip SKUs published within last 30 days to avoid mixing pre/post data
-        eligibility = check_batch_eligibility(batch, platform="google")
-
-        ineligible_skus = [sku for sku, (eligible, _) in eligibility.items() if not eligible]
-        eligible_skus = [sku for sku, (eligible, _) in eligibility.items() if eligible]
-
+        # Skip SKUs published within last 30 days to avoid mixing pre/post data.
+        # When force_backfill=True (historical backfills), bypass this check entirely.
         results = []
+        if force_backfill:
+            eligible_skus = batch
+            logger.info(f"force_backfill=True: skipping contamination check for all {len(batch)} SKUs")
+        else:
+            eligibility = check_batch_eligibility(batch, platform="google")
 
-        # Add skipped status for ineligible SKUs
-        for sku in ineligible_skus:
-            _, reason = eligibility[sku]
-            logger.info(f"Skipping {sku}: {reason}")
-            results.append({
-                "item_id": sku,
-                "status": "skipped",
-                "reason": reason,
-            })
+            ineligible_skus = [sku for sku, (eligible, _) in eligibility.items() if not eligible]
+            eligible_skus = [sku for sku, (eligible, _) in eligibility.items() if eligible]
 
-        if not eligible_skus:
-            logger.warning(f"All {len(batch)} SKUs in batch are ineligible due to recent publish events")
-            return results
+            # Add skipped status for ineligible SKUs
+            for sku in ineligible_skus:
+                _, reason = eligibility[sku]
+                logger.info(f"Skipping {sku}: {reason}")
+                results.append({
+                    "item_id": sku,
+                    "status": "skipped",
+                    "reason": reason,
+                })
 
-        logger.info(f"Skipped {len(ineligible_skus)} SKUs due to recent publish events, processing {len(eligible_skus)} eligible SKUs")
+            if not eligible_skus:
+                logger.warning(f"All {len(batch)} SKUs in batch are ineligible due to recent publish events")
+                return results
+
+            logger.info(f"Skipped {len(ineligible_skus)} SKUs due to recent publish events, processing {len(eligible_skus)} eligible SKUs")
 
         # Build mapping of offer_id -> master_sku for eligible SKUs only
         offer_to_sku: dict[str, str] = {}

@@ -333,6 +333,13 @@ async def _start_background_processing(job_id: str, skus: list[str], config: dic
         # Get worker function and rate limiter for this job type
         process_fn, rate_limiter = _get_worker_config(job_type)
 
+        # If force_backfill is set in config, wrap the performance worker to bypass
+        # the contamination check (designed for historical backfills, not live captures)
+        if config.get("force_backfill") and job_type in ("performance_metrics", "full_backfill"):
+            _base_fn = process_fn
+            async def process_fn(batch: list[str]) -> list[dict]:
+                return await _base_fn(batch, force_backfill=True)
+
         # Create processor with job-type-specific worker and rate limiter
         processor = BatchProcessor(
             job_id=job_id,
