@@ -20,6 +20,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { PlatformBadge } from "@/components/shared/PlatformBadge"
 
@@ -47,6 +49,27 @@ interface SkuPerformance {
   }
 }
 
+interface VariantPerformance {
+  gmc_offer_id: string
+  finish: string | null
+  finish_code: string | null
+  impressions: number
+  clicks: number
+  ctr: number
+}
+
+interface SearchTerm {
+  query_text: string
+  impressions: number
+  clicks: number
+  ctr: number
+}
+
+interface SkuDetail {
+  variants: VariantPerformance[]
+  topSearchTerms: SearchTerm[]
+}
+
 interface PerformanceData {
   summary: {
     totalPublished: number
@@ -57,6 +80,7 @@ interface PerformanceData {
     totalClicks: number
   }
   skus: SkuPerformance[]
+  skuDetail?: SkuDetail | null
   warnings: string[]
 }
 
@@ -230,18 +254,83 @@ function SortableHeader({
   )
 }
 
+function ExpandedSkuDetail({ detail, loading }: { detail: SkuDetail | null; loading: boolean }) {
+  if (loading) return <div className="p-4"><Skeleton className="h-32 w-full" /></div>
+  if (!detail) return <div className="p-4 text-muted-foreground">No detail data available.</div>
+
+  return (
+    <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-muted/20 rounded-lg">
+      {/* Variant breakdown */}
+      <div>
+        <h4 className="font-semibold text-sm mb-3">Variant Performance (by finish)</h4>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Finish</TableHead>
+              <TableHead className="text-right">Impressions</TableHead>
+              <TableHead className="text-right">Clicks</TableHead>
+              <TableHead className="text-right">CTR</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {detail.variants.map((v) => (
+              <TableRow key={v.gmc_offer_id}>
+                <TableCell className="text-sm">{v.finish ?? v.gmc_offer_id.split('_').pop()}</TableCell>
+                <TableCell className="text-right text-sm">{v.impressions.toLocaleString()}</TableCell>
+                <TableCell className="text-right text-sm">{v.clicks.toLocaleString()}</TableCell>
+                <TableCell className="text-right text-sm">{v.ctr.toFixed(3)}%</TableCell>
+              </TableRow>
+            ))}
+            {detail.variants.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  No variant data available
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Top search terms */}
+      <div>
+        <h4 className="font-semibold text-sm mb-3">Top Search Terms</h4>
+        <div className="space-y-2">
+          {detail.topSearchTerms.map((term, i) => (
+            <div key={i} className="flex items-center justify-between text-sm py-1 border-b last:border-0">
+              <span className="text-foreground truncate max-w-[60%]">{term.query_text}</span>
+              <span className="text-muted-foreground text-xs">{term.impressions.toLocaleString()} impr</span>
+            </div>
+          ))}
+          {detail.topSearchTerms.length === 0 && (
+            <p className="text-muted-foreground text-sm">No search term data available</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PerformanceTable({
   skus,
   filterMode,
   sortColumn,
   sortDir,
   onSort,
+  expandedSku,
+  skuDetail,
+  detailLoading,
+  onRowClick,
 }: {
   skus: SkuPerformance[]
   filterMode: FilterMode
   sortColumn: SortColumn
   sortDir: SortDir
   onSort: (col: SortColumn) => void
+  expandedSku: string | null
+  skuDetail: SkuDetail | null
+  detailLoading: boolean
+  onRowClick: (skuKey: string) => void
 }) {
   // Apply filter
   const filtered = filterMode === 'published'
@@ -299,66 +388,86 @@ function PerformanceTable({
       </TableHeader>
       <TableBody>
         {sorted.map((sku) => {
+          const skuKey = `${sku.sku}::${sku.platform}`
+          const isExpanded = expandedSku === skuKey
           const impressionsDelta = computeDelta(sku.current.impressions, sku.baseline.impressions)
           return (
-            <TableRow
-              key={`${sku.sku}-${sku.platform}`}
-              className={!sku.hasSnapshot ? 'bg-muted/30' : undefined}
-            >
-              <TableCell>
-                <div className="font-medium">{sku.sku}</div>
-                <div className="text-xs text-muted-foreground truncate max-w-[150px]">{sku.name}</div>
-              </TableCell>
-              <TableCell>
-                <PlatformBadge platform={sku.platform as 'google' | 'bing' | 'shopify'} />
-              </TableCell>
-              <TableCell className="whitespace-nowrap">
-                <div>{sku.publishedAt}</div>
-                <div className="text-xs text-muted-foreground">{sku.daysSincePublish}d ago</div>
-              </TableCell>
-              <TableCell>
-                <DeltaCell
-                  baseline={sku.baseline.ctr}
-                  current={sku.current.ctr}
-                  format="percent"
-                  hasSnapshot={sku.hasSnapshot}
-                />
-              </TableCell>
-              <TableCell>
-                <DeltaCell
-                  baseline={sku.baseline.impressions}
-                  current={sku.current.impressions}
-                  format="number"
-                  hasSnapshot={sku.hasSnapshot}
-                />
-              </TableCell>
-              <TableCell>
-                <DeltaCell
-                  baseline={sku.baseline.clicks}
-                  current={sku.current.clicks}
-                  format="number"
-                  hasSnapshot={sku.hasSnapshot}
-                />
-              </TableCell>
-              <TableCell>
-                {sku.baseline.cvr === 0 ? (
-                  <span className="text-muted-foreground text-sm" title="Low data">—</span>
-                ) : (
+            <>
+              <TableRow
+                key={skuKey}
+                className={`cursor-pointer hover:bg-muted/50 transition-colors ${!sku.hasSnapshot ? 'bg-muted/30' : ''}`}
+                onClick={() => onRowClick(skuKey)}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    {isExpanded
+                      ? <ChevronUp className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      : <ChevronDown className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                    }
+                    <div>
+                      <div className="font-medium">{sku.sku}</div>
+                      <div className="text-xs text-muted-foreground truncate max-w-[130px]">{sku.name}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <PlatformBadge platform={sku.platform as 'google' | 'bing' | 'shopify'} />
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <div>{sku.publishedAt}</div>
+                  <div className="text-xs text-muted-foreground">{sku.daysSincePublish}d ago</div>
+                </TableCell>
+                <TableCell>
                   <DeltaCell
-                    baseline={sku.baseline.cvr}
-                    current={sku.current.cvr}
+                    baseline={sku.baseline.ctr}
+                    current={sku.current.ctr}
                     format="percent"
                     hasSnapshot={sku.hasSnapshot}
                   />
-                )}
-              </TableCell>
-              <TableCell>
-                {sku.hasSnapshot
-                  ? <TrendIcon impressionsDelta={impressionsDelta} />
-                  : <Minus className="h-4 w-4 text-muted-foreground opacity-40" />
-                }
-              </TableCell>
-            </TableRow>
+                </TableCell>
+                <TableCell>
+                  <DeltaCell
+                    baseline={sku.baseline.impressions}
+                    current={sku.current.impressions}
+                    format="number"
+                    hasSnapshot={sku.hasSnapshot}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DeltaCell
+                    baseline={sku.baseline.clicks}
+                    current={sku.current.clicks}
+                    format="number"
+                    hasSnapshot={sku.hasSnapshot}
+                  />
+                </TableCell>
+                <TableCell>
+                  {sku.baseline.cvr === 0 ? (
+                    <span className="text-muted-foreground text-sm" title="Low data">—</span>
+                  ) : (
+                    <DeltaCell
+                      baseline={sku.baseline.cvr}
+                      current={sku.current.cvr}
+                      format="percent"
+                      hasSnapshot={sku.hasSnapshot}
+                    />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {sku.hasSnapshot
+                    ? <TrendIcon impressionsDelta={impressionsDelta} />
+                    : <Minus className="h-4 w-4 text-muted-foreground opacity-40" />
+                  }
+                </TableCell>
+              </TableRow>
+              {isExpanded && (
+                <TableRow key={`${skuKey}--detail`}>
+                  <TableCell colSpan={8} className="p-0">
+                    <ExpandedSkuDetail detail={skuDetail} loading={detailLoading} />
+                  </TableCell>
+                </TableRow>
+              )}
+            </>
           )
         })}
       </TableBody>
@@ -379,6 +488,11 @@ export default function PerformancePage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Inline SKU detail state
+  const [expandedSku, setExpandedSku] = useState<string | null>(null)
+  const [skuDetail, setSkuDetail] = useState<SkuDetail | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
 
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -420,6 +534,24 @@ export default function PerformancePage() {
       setSortDir('asc')
     }
   }
+
+  const handleRowClick = useCallback(async (skuKey: string) => {
+    if (expandedSku === skuKey) {
+      setExpandedSku(null)
+      setSkuDetail(null)
+      return
+    }
+    setExpandedSku(skuKey)
+    setDetailLoading(true)
+    try {
+      const masterSku = skuKey.split('::')[0]
+      const res = await fetch(`/api/performance?sku=${encodeURIComponent(masterSku)}&snapshotWindow=${snapshotWindow}&baselineWindow=${baselineWindow}`)
+      const json = await res.json()
+      setSkuDetail(json.skuDetail)
+    } finally {
+      setDetailLoading(false)
+    }
+  }, [expandedSku, snapshotWindow, baselineWindow])
 
   if (loading) return <LoadingSkeleton />
 
@@ -614,7 +746,7 @@ export default function PerformancePage() {
             <CardHeader>
               <CardTitle>SKU Performance</CardTitle>
               <CardDescription>
-                Baseline vs. post-publish snapshot — all platforms
+                Baseline vs. post-publish snapshot — all platforms. Click a row to view variant breakdown.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -624,6 +756,10 @@ export default function PerformancePage() {
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 onSort={handleSort}
+                expandedSku={expandedSku}
+                skuDetail={skuDetail}
+                detailLoading={detailLoading}
+                onRowClick={handleRowClick}
               />
             </CardContent>
           </Card>
@@ -634,7 +770,7 @@ export default function PerformancePage() {
             <CardHeader>
               <CardTitle>Google SKU Performance</CardTitle>
               <CardDescription>
-                Baseline vs. post-publish snapshot — Google Shopping
+                Baseline vs. post-publish snapshot — Google Shopping. Click a row to view variant breakdown.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -644,6 +780,10 @@ export default function PerformancePage() {
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 onSort={handleSort}
+                expandedSku={expandedSku}
+                skuDetail={skuDetail}
+                detailLoading={detailLoading}
+                onRowClick={handleRowClick}
               />
             </CardContent>
           </Card>
@@ -654,7 +794,7 @@ export default function PerformancePage() {
             <CardHeader>
               <CardTitle>Bing SKU Performance</CardTitle>
               <CardDescription>
-                Baseline vs. post-publish snapshot — Bing Shopping
+                Baseline vs. post-publish snapshot — Bing Shopping. Click a row to view variant breakdown.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -664,6 +804,10 @@ export default function PerformancePage() {
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 onSort={handleSort}
+                expandedSku={expandedSku}
+                skuDetail={skuDetail}
+                detailLoading={detailLoading}
+                onRowClick={handleRowClick}
               />
             </CardContent>
           </Card>
