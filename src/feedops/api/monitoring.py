@@ -47,10 +47,13 @@ class FreshnessResponse(BaseModel):
 class CoverageResponse(BaseModel):
     """Coverage endpoint response."""
 
-    total_skus: int
-    search_terms_coverage: int
-    performance_coverage: int
-    keywords_coverage: int
+    total_skus: int                    # distinct master_skus in variant_index
+    total_offer_ids: int               # distinct gmc_offer_ids in variant_index
+    search_terms_coverage: int         # master SKUs with any search term data (backwards compat alias)
+    search_terms_sku_coverage: int     # master SKUs with any search term data (explicit name)
+    search_terms_offer_coverage: int   # distinct gmc_offer_ids in search_queries
+    performance_coverage: int          # master SKUs with performance_baselines
+    keywords_coverage: int             # master SKUs with keyword metrics in search_queries
 
 
 class ApiHealthResponse(BaseModel):
@@ -61,6 +64,41 @@ class ApiHealthResponse(BaseModel):
     latency_p95_ms: float
     rate_limit_hits: int
     sample_size: int
+
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+
+def _paginate_all(supabase, table: str, columns: str, page_size: int = 5000) -> list[dict]:
+    """Fetch all rows from a table using range pagination to bypass the 1000-row PostgREST limit.
+
+    Args:
+        supabase: Supabase client
+        table: Table name
+        columns: Columns to select (comma-separated string)
+        page_size: Rows per page (default 5000)
+
+    Returns:
+        All rows as a list of dicts
+    """
+    all_rows = []
+    offset = 0
+    while True:
+        result = (
+            supabase.table(table)
+            .select(columns)
+            .range(offset, offset + page_size - 1)
+            .execute()
+        )
+        if not result.data:
+            break
+        all_rows.extend(result.data)
+        if len(result.data) < page_size:
+            break
+        offset += page_size
+    return all_rows
 
 
 # =============================================================================
@@ -75,32 +113,33 @@ async def get_data_freshness():
     Returns age in days for each data collection type per SKU.
     Age defaults to 999 if no data has been collected.
 
-    Uses direct Supabase table queries (not RPC).
+    Uses paginated Supabase table queries to bypass the 1000-row PostgREST limit.
     """
     try:
         supabase = get_client()
         now = datetime.now(timezone.utc)
 
-        # 1. Get all distinct master_skus
-        vi_result = supabase.table("variant_index").select("master_sku").execute()
-        all_skus = sorted(set(row["master_sku"] for row in vi_result.data if row.get("master_sku")))
+        # 1. Get all distinct master_skus (variant_index has ~72k rows — must paginate)
+        vi_rows = _paginate_all(supabase, "variant_index", "master_sku")
+        all_skus = sorted(set(row["master_sku"] for row in vi_rows if row.get("master_sku")))
 
         # 2. Get search_queries freshness (most recent fetched_at per SKU)
-        sq_result = supabase.table("search_queries").select("master_sku, fetched_at").execute()
+        # search_queries can have many rows — paginate to ensure we get all
+        sq_rows = _paginate_all(supabase, "search_queries", "master_sku,fetched_at")
         search_freshness = {}
-        for row in sq_result.data:
+        for row in sq_rows:
             sku = row.get("master_sku")
             fetched = row.get("fetched_at")
             if sku and fetched:
-                # Parse ISO timestamp
                 ts = datetime.fromisoformat(fetched.replace("Z", "+00:00"))
                 if sku not in search_freshness or ts > search_freshness[sku]:
                     search_freshness[sku] = ts
 
         # 3. Get performance_baselines freshness (most recent created_at per SKU)
-        pb_result = supabase.table("performance_baselines").select("master_sku, created_at").execute()
+        # performance_baselines has at most ~2784 rows — single paginated fetch is fine
+        pb_rows = _paginate_all(supabase, "performance_baselines", "master_sku,created_at", page_size=3000)
         perf_freshness = {}
-        for row in pb_result.data:
+        for row in pb_rows:
             sku = row.get("master_sku")
             created = row.get("created_at")
             if sku and created:
@@ -109,14 +148,16 @@ async def get_data_freshness():
                     perf_freshness[sku] = ts
 
         # 4. Get keyword metrics freshness (most recent keyword_metrics_updated_at per SKU)
-        kw_result = (
+        # Only rows where keyword_metrics_updated_at is not null
+        kw_rows = (
             supabase.table("search_queries")
-            .select("master_sku, keyword_metrics_updated_at")
+            .select("master_sku,keyword_metrics_updated_at")
             .not_.is_("keyword_metrics_updated_at", "null")
+            .range(0, 9999)
             .execute()
-        )
+        ).data or []
         kw_freshness = {}
-        for row in kw_result.data:
+        for row in kw_rows:
             sku = row.get("master_sku")
             updated = row.get("keyword_metrics_updated_at")
             if sku and updated:
@@ -166,49 +207,81 @@ async def get_data_coverage():
 
     Returns:
     - total_skus: Total distinct master_skus in variant_index
-    - search_terms_coverage: SKUs with at least one search query
-    - performance_coverage: SKUs with at least one performance baseline
-    - keywords_coverage: SKUs with keyword metrics collected
+    - total_offer_ids: Total distinct gmc_offer_ids in variant_index
+    - search_terms_coverage: Master SKUs with at least one search query (backwards compat)
+    - search_terms_sku_coverage: Master SKUs with at least one search query
+    - search_terms_offer_coverage: Distinct gmc_offer_ids in search_queries
+    - performance_coverage: Master SKUs with at least one performance baseline
+    - keywords_coverage: Master SKUs with keyword metrics collected
 
-    Uses direct Supabase table queries (not RPC).
+    Uses paginated Supabase table queries to bypass the 1000-row PostgREST limit.
+    variant_index has ~72k rows; must paginate to get accurate counts.
     """
     try:
         supabase = get_client()
 
-        # 1. Total SKUs - get all distinct master_skus from variant_index
-        vi_result = supabase.table("variant_index").select("master_sku").execute()
-        total_skus = len(set(row["master_sku"] for row in vi_result.data if row.get("master_sku")))
+        # 1. Total distinct master_skus and gmc_offer_ids in variant_index
+        # variant_index has ~72k rows — paginate to get all
+        vi_rows = _paginate_all(supabase, "variant_index", "master_sku,gmc_offer_id")
+        all_vi_skus = set()
+        all_vi_offer_ids = set()
+        for row in vi_rows:
+            if row.get("master_sku"):
+                all_vi_skus.add(row["master_sku"])
+            if row.get("gmc_offer_id"):
+                all_vi_offer_ids.add(row["gmc_offer_id"])
+        total_skus = len(all_vi_skus)
+        total_offer_ids = len(all_vi_offer_ids)
 
-        # 2. Search terms coverage - SKUs with at least one search query
-        sq_result = (
-            supabase.table("search_queries")
+        # 2. Search terms SKU coverage — distinct master_skus with any search term data
+        # Also collect distinct gmc_offer_ids for offer-level coverage
+        sq_rows = _paginate_all(supabase, "search_queries", "master_sku,gmc_offer_id")
+        sq_skus = set()
+        sq_offer_ids = set()
+        for row in sq_rows:
+            if row.get("master_sku"):
+                sq_skus.add(row["master_sku"])
+            if row.get("gmc_offer_id"):
+                sq_offer_ids.add(row["gmc_offer_id"])
+        search_sku_coverage = len(sq_skus)
+        search_offer_coverage = len(sq_offer_ids)
+
+        # 3. Performance coverage — distinct master_skus with at least one performance baseline
+        # performance_baselines has at most ~2784 rows — range(0, 2999) is sufficient
+        pb_result = (
+            supabase.table("performance_baselines")
             .select("master_sku")
-            .not_.is_("master_sku", "null")
+            .range(0, 2999)
             .execute()
         )
-        search_coverage = len(set(row["master_sku"] for row in sq_result.data if row.get("master_sku")))
+        perf_coverage = len(set(
+            row["master_sku"] for row in (pb_result.data or []) if row.get("master_sku")
+        ))
 
-        # 3. Performance coverage - SKUs with at least one performance baseline
-        pb_result = supabase.table("performance_baselines").select("master_sku").execute()
-        perf_coverage = len(set(row["master_sku"] for row in pb_result.data if row.get("master_sku")))
-
-        # 4. Keywords coverage - SKUs with keyword metrics collected
+        # 4. Keywords coverage — distinct master_skus with keyword metrics collected
         kw_result = (
             supabase.table("search_queries")
             .select("master_sku")
             .not_.is_("keyword_metrics_updated_at", "null")
+            .range(0, 9999)
             .execute()
         )
-        kw_coverage = len(set(row["master_sku"] for row in kw_result.data if row.get("master_sku")))
+        kw_coverage = len(set(
+            row["master_sku"] for row in (kw_result.data or []) if row.get("master_sku")
+        ))
 
         logger.info(
-            f"Coverage: {search_coverage}/{total_skus} search terms, "
+            f"Coverage: {search_sku_coverage}/{total_skus} SKUs with search terms, "
+            f"{search_offer_coverage}/{total_offer_ids} offer IDs with search terms, "
             f"{perf_coverage}/{total_skus} performance, {kw_coverage}/{total_skus} keywords"
         )
 
         return CoverageResponse(
             total_skus=total_skus,
-            search_terms_coverage=search_coverage,
+            total_offer_ids=total_offer_ids,
+            search_terms_coverage=search_sku_coverage,       # backwards compat alias
+            search_terms_sku_coverage=search_sku_coverage,
+            search_terms_offer_coverage=search_offer_coverage,
             performance_coverage=perf_coverage,
             keywords_coverage=kw_coverage,
         )
