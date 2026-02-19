@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 12 — Dashboard Audit & Cleanup
-Plan: 0 of N — NOT YET PLANNED
-Status: Phase 11 complete, Phase 12 ready to plan
-Last activity: 2026-02-19 — Phase 11 complete (inline SKU detail, impressions/clicks normalization fix)
+Plan: 1 of 3 — 12-01 COMPLETE (audit)
+Status: Phase 12 in progress — plan 01 done, plans 02 and 03 remain
+Last activity: 2026-02-19 — Phase 12 Plan 01 complete (dashboard audit, 12-AUDIT.md committed)
 
-Progress: [██████████] 100% of Phase 11 — PHASE COMPLETE → Phase 12 next
+Progress: [█░░░░░░░░░] 33% of Phase 12 — Plan 01 complete
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [██████████] 100% of Phase 11 — PHASE COMPLETE �
 | Phase 10-image-workflow-improvements P02 | 247 | 3 tasks | 4 files |
 | Phase 10-image-workflow-improvements P03 | 20 | 2 tasks | 3 files |
 | Phase 11-performance-page-enhancements P01 | 4 | 2 tasks | 2 files |
+| Phase 12-dashboard-audit-cleanup P12-01 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -292,6 +293,10 @@ Key decisions from Phase 0 (discovery) affecting v1.0 implementation:
 - [Phase 11-performance-page-enhancements]: SortableHeader at module scope (not nested inside PerformanceTable) — props threaded through to satisfy react-hooks/static-components lint rule (Plan 11-01)
 - [Phase 11-performance-page-enhancements]: Snapshot impressions/clicks normalized to daily averages in API (÷ snapshotWindowDays) — baseline stores daily avg, snapshot stores cumulative total; normalization in route.ts means all downstream code (delta, sort, trend icons) gets correct values without change (Plan 11-02)
 - [Phase 11-performance-page-enhancements]: JS aggregation for variant breakdown (group by gmc_offer_id) and search term dedup (group by query_text) — Supabase client lacks GROUP BY; Math.round applied to normalized impression/click counts (Plan 11-02)
+- [Phase 12-dashboard-audit-cleanup]: /monitoring BROKEN — alert() for snapshot feedback + Capture Snapshots only captures search_query_snapshots not performance_snapshots; these are separate endpoints for different tables (Plan 12-01)
+- [Phase 12-dashboard-audit-cleanup]: /competitors DEAD-END — category-based scraping disconnected from SKU workflow; simplify or remove (Plan 12-01)
+- [Phase 12-dashboard-audit-cleanup]: /settings STALE — notification switches non-persisting, Danger Zone buttons have no handlers, Supabase URL hardcoded (Plan 12-01)
+- [Phase 12-dashboard-audit-cleanup]: Overview (/) STALE — pending review count from sku_approvals not generated_content; platform fallback shows same numbers across all platforms (Plan 12-01)
 
 ### Pending Todos
 
@@ -310,9 +315,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-19 — Phase 11 fully complete: inline SKU detail panel (11-02) + impressions/clicks normalization fix (ce465933)
-Stopped at: Phase 11 done, Phase 12 (Dashboard Audit & Cleanup) ready to plan
+Last session: 2026-02-19 — Phase 12 Plan 01 complete: dashboard audit (3642e199)
+Stopped at: Phase 12 Plan 01 done — 12-AUDIT.md committed; Plans 12-02 (fixes) and 12-03 (simplification) ready
 Resume file: None
 
 ---
-*Next step:* Phase 12 — Dashboard Audit (full page walkthrough, document status, fix/remove low-value pages).
+*Next step:* Phase 12 Plan 02 — Fix BROKEN and STALE pages per 12-AUDIT.md (monitoring alert(), settings non-functional UI, overview stats).

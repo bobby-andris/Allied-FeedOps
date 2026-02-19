@@ -32,9 +32,9 @@ All 40 v1.0 requirements (JOB-01–10, DATA-01–10, VALID-01–10, MON-01–10)
 
 ### Dashboard Audit (DASH)
 
-- [ ] **DASH-01**: Each dashboard page either displays useful, current data or surfaces a clear next action — no dead-end empty states
-- [ ] **DASH-02**: Pages with stale or broken data are identified and fixed
-- [ ] **DASH-03**: Pages or features that don't serve current workflow are simplified or removed
+- [x] **DASH-01**: Each dashboard page either displays useful, current data or surfaces a clear next action — no dead-end empty states
+- [x] **DASH-02**: Pages with stale or broken data are identified and fixed
+- [x] **DASH-03**: Pages or features that don't serve current workflow are simplified or removed
 
 ### Visual Verification (VER)
 
@@ -78,9 +78,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-01 | Phase 11 | Complete |
 | PERF-02 | Phase 11 | Complete |
 | PERF-03 | Phase 11 | Complete |
-| DASH-01 | Phase 12 | Pending |
-| DASH-02 | Phase 12 | Pending |
-| DASH-03 | Phase 12 | Pending |
+| DASH-01 | Phase 12 | Complete |
+| DASH-02 | Phase 12 | Complete |
+| DASH-03 | Phase 12 | Complete |
 | VER-01 | All phases (9–12) | Complete |
 
 **Coverage:**
