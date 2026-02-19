@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **Phase 0 Discovery** - API validation and research (shipped 2026-02-13)
-- ✅ **v1.0 Historical Data Backfill** - Phases 1-4 (shipped 2026-02-13)
+- ✅ **v1.0 Historical Data Backfill** - Phases 05-08 (shipped 2026-02-13)
 - **v1.1 Dashboard UX & Quality** - Phases 9-12 (in progress)
 
 ## Phases
@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 <details>
 <summary>✅ Phase 0 Discovery - SHIPPED 2026-02-13</summary>
 
-### Phase 0.1: API Capability Validation
+### Phase 01: API Capability Validation
 **Goal**: Confirm Google Ads API can support product-level backfill strategy with validated query patterns and documented constraints
 **Requirements**: API-01, API-02, API-03, API-04, API-05
 **Plans**: 2 plans
@@ -26,7 +26,7 @@ Plans:
 - [x] 00.1-01-PLAN.md — Validate core views (API-01: search_term_view limitation, API-02: shopping_performance_view product queries)
 - [x] 00.1-02-PLAN.md — Test query boundaries and custom labels (API-03: LIMIT values, API-04: data retention, API-05: custom_label_0)
 
-### Phase 0.2: Comprehensive Data Discovery
+### Phase 02: Comprehensive Data Discovery
 **Goal**: Complete inventory of all available Google Ads API data sources with documented fields, filtering capabilities, and use cases
 **Requirements**: DISC-01 through DISC-12
 **Plans**: 4 plans
@@ -37,7 +37,7 @@ Plans:
 - [x] 00.2-03-PLAN.md — Discover bidding, attribution, and competitive metrics
 - [x] 00.2-04-PLAN.md — Discover audience segmentation, asset performance, and ML insights
 
-### Phase 0.3: Sample Testing & Analysis
+### Phase 03: Sample Testing & Analysis
 **Goal**: Validated backfill approach with real API responses from diverse product categories
 **Requirements**: SAMP-01 through SAMP-06
 **Plans**: 3 plans
@@ -47,7 +47,7 @@ Plans:
 - [x] 00.3-02-PLAN.md — Generate Keyword Planner ideas and calculate opportunity gaps
 - [x] 00.3-03-PLAN.md — Measure query performance and validate comprehensive metric retrieval
 
-### Phase 0.4: Documentation & Decision
+### Phase 04: Documentation & Decision
 **Goal**: Comprehensive API reference document and clear Go/No-Go recommendation
 **Requirements**: DOC-01 through DOC-06
 **Plans**: 2 plans
@@ -63,7 +63,7 @@ Plans:
 
 **Milestone Goal:** Execute comprehensive Google Ads historical data backfill for all 2,784 SKUs with production-ready monitoring and validation.
 
-### Phase 1: Job Infrastructure & Foundation
+### Phase 05: Job Infrastructure & Foundation
 **Goal**: Establish robust job-based async processing infrastructure with rate limiting, error handling, and resumability
 
 **Depends on**: Phase 0 (complete)
@@ -85,7 +85,7 @@ Plans:
 - [x] 05-03-PLAN.md — FastAPI backfill endpoints (start, status, resume, list) with concurrent job limiting
 - [x] 05-04-PLAN.md — Test suite for rate limiter, job manager, and batch processor
 
-### Phase 2: Data Collection Pipeline
+### Phase 06: Data Collection Pipeline
 **Goal**: Implement all data collection endpoints using campaign-join pattern for search terms and direct queries for performance metrics
 
 **Depends on**: Phase 1
@@ -106,7 +106,7 @@ Plans:
 - [x] 06-02-PLAN.md -- Wire workers into backfill API endpoints (replace _noop_process with job-type routing)
 - [x] 06-03-PLAN.md -- Unit tests for all 4 collection workers
 
-### Phase 3: Data Quality & Validation
+### Phase 07: Data Quality & Validation
 **Goal**: Ensure data completeness, freshness, and accuracy through validation layers and contamination prevention
 
 **Depends on**: Phase 2
@@ -128,7 +128,7 @@ Plans:
 - [x] 07-03-PLAN.md -- Quality report module: completeness, freshness, outlier detection (VALID-01, VALID-02, VALID-07, VALID-10)
 - [x] 07-04-PLAN.md -- API endpoint + job status correction wiring (VALID-07 enforcement)
 
-### Phase 4: Monitoring & Automation
+### Phase 08: Monitoring & Automation
 **Goal**: Enable production observability with dashboards, alerting, and automated incremental refresh for ongoing data sync
 
 **Depends on**: Phase 3
@@ -162,7 +162,7 @@ Plans:
 ### Phase 9: SKU Review Revamp
 **Goal**: Users can review SKU approval status across platforms in a compact list with filtering, eliminating per-SKU vertical scrolling
 
-**Depends on**: Phase 4 (v1.0 complete)
+**Depends on**: Phase 08 (v1.0 complete)
 
 **Requirements**: SKUR-01, SKUR-02, SKUR-03, SKUR-04, SKUR-05, VER-01
 
@@ -248,21 +248,22 @@ Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 0.1 API Capability Validation | Phase 0 | 2/2 | Complete | 2026-02-12 |
-| 0.2 Comprehensive Data Discovery | Phase 0 | 4/4 | Complete | 2026-02-12 |
-| 0.3 Sample Testing & Analysis | Phase 0 | 3/3 | Complete | 2026-02-13 |
-| 0.4 Documentation & Decision | Phase 0 | 2/2 | Complete | 2026-02-13 |
-| 1. Job Infrastructure & Foundation | v1.0 | 4/4 | Complete | 2026-02-13 |
-| 2. Data Collection Pipeline | v1.0 | 3/3 | Complete | 2026-02-13 |
-| 3. Data Quality & Validation | v1.0 | 4/4 | Complete | 2026-02-13 |
-| 4. Monitoring & Automation | v1.0 | 5/5 | Complete | 2026-02-13 |
+| 01. API Capability Validation | Phase 0 | 2/2 | Complete | 2026-02-12 |
+| 02. Comprehensive Data Discovery | Phase 0 | 4/4 | Complete | 2026-02-12 |
+| 03. Sample Testing & Analysis | Phase 0 | 3/3 | Complete | 2026-02-13 |
+| 04. Documentation & Decision | Phase 0 | 2/2 | Complete | 2026-02-13 |
+| 05. Job Infrastructure & Foundation | v1.0 | 4/4 | Complete | 2026-02-13 |
+| 06. Data Collection Pipeline | v1.0 | 3/3 | Complete | 2026-02-13 |
+| 07. Data Quality & Validation | v1.0 | 4/4 | Complete | 2026-02-13 |
+| 08. Monitoring & Automation | v1.0 | 5/5 | Complete | 2026-02-13 |
 | 9. SKU Review Revamp | 3/3 | Complete    | 2026-02-18 | - |
 | 10. Image Workflow Improvements | 3/3 | Complete    | 2026-02-19 | - |
 | 11. Performance Page Enhancements | 3/3 | Complete   | 2026-02-19 | - |
 | 12. Dashboard Audit & Cleanup | 3/3 | Complete    | 2026-02-19 | - |
 | 13. Fix Google Ads Data Sourcing | 3/3 | Complete    | 2026-02-19 | - |
 | 14. Complete 180-day Backfill & Monitoring Fixes | 3/3 | Complete    | 2026-02-19 | - |
-| 15. Google Ads Data Backfill & Monitoring Verification | 0/3 | Planned |  | - |
+| 15. Google Ads Data Backfill & Monitoring Verification | 0/3 | Partial — bugs found |  | - |
+| 16. Fix Google Ads Backfill Pipeline | 0/3 | Planned |  | - |
 
 ### Phase 13: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
 
@@ -313,6 +314,36 @@ Plans:
 - [ ] 15-01-PLAN.md — Search terms backfill: smoke test (days=30) + full 180-day sync (days=180) with row count verification
 - [ ] 15-02-PLAN.md — Performance metrics backfill for all 2,784 SKUs via /backfill/start (job_type=performance_metrics)
 - [ ] 15-03-PLAN.md — Monitoring page verification via agent-browser after both syncs complete
+
+### Phase 16: Fix Google Ads Backfill Pipeline — Search Terms + Performance Metrics
+
+**Goal:** Fix two root-cause bugs blocking full 2,784-SKU data backfill, then run both syncs to completion and verify with monitoring page.
+
+**Depends on:** Phase 15
+
+**Research approach:** Use `mcp__plugin_context7_context7__query-docs` to look up correct Google Ads API GAQL patterns and query limits, and/or reference the google-ads-developer-assistant repo for working examples before writing any fixes.
+
+**Bug 1 — Performance metrics: oversized GAQL IN() clause**
+`fetch_batch_product_performance` in `google_ads_performance.py` sends all offer IDs for a batch (~250+) in a single GAQL `IN (...)` clause for a 180-day window. Google Ads API hangs indefinitely.
+Fix: chunk offer IDs into groups of ≤25 per GAQL query, run sequentially per chunk, merge results.
+
+**Bug 2 — Search terms: date-range jobs return 0 queries**
+Jobs using new `start_date`/`end_date` params (enabled in Phase 15-01) hang or return empty results. The `days=30` default approach worked (10,000 queries, 424 SKUs). Root cause unknown — likely the campaign-product join in `_fetch_campaign_products` returns nothing for historical date windows.
+Fix: Add diagnostic logging, test locally, identify empty-result cause, fix and verify.
+
+**Success Criteria** (what must be TRUE):
+  1. `fetch_batch_product_performance` correctly chunks offer IDs — a batch of 10 SKUs with 250 offer IDs runs in <60 seconds
+  2. Search terms sync with explicit `start_date`/`end_date` returns results matching `days=N` equivalent — root cause identified and fixed
+  3. Performance metrics backfill for all 2,784 SKUs completes (job reaches terminal status, success rate ≥80%)
+  4. Search terms 180-day backfill using 6 × 30-day windows completes — search_queries rows >> 7,891, oldest period ~180 days ago
+  5. Monitoring page coverage cards reflect post-backfill numbers (>>424 SKUs search terms, >>96 SKUs performance)
+
+**Plans:** 3 plans
+
+Plans:
+- [ ] 16-01-PLAN.md — Fix fetch_batch_product_performance chunking + run performance backfill for 2,784 SKUs
+- [ ] 16-02-PLAN.md — Debug and fix search terms date-range empty results + run 180-day chunked backfill
+- [ ] 16-03-PLAN.md — Monitoring page verification via agent-browser after both backfills complete
 
 ---
 *Phase 0 completed: 2026-02-13*
