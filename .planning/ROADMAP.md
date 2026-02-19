@@ -233,12 +233,12 @@ Plans:
   3. No page in the dashboard results in an empty state with no path forward — every dead-end state has an action or informative message
   4. Audit findings and changes verified via agent-browser walkthrough of all dashboard pages in the live environment
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 12-01: Audit pass — document status of every dashboard page (working, broken, dead end, stale)
-- [ ] 12-02: Fix broken/stale pages identified in audit
-- [ ] 12-03: Remove or redirect dead-end features; add empty state actions where needed
+- [ ] 12-01-PLAN.md — Audit pass: code inspection + local dev walkthrough of all 11 pages, produce 12-AUDIT.md
+- [ ] 12-02-PLAN.md — Fix all FIX-status pages from audit (alert() removal, stale data, broken APIs)
+- [ ] 12-03-PLAN.md — Empty state actions for DEAD-END pages + agent-browser verification on live Vercel URL
 
 ## Progress
 
