@@ -194,12 +194,12 @@ Plans:
   4. Image generation uses the user's selected variant and does not override it with auto-selection logic after the user has chosen
   5. Image generation UI changes verified via agent-browser — manual selection, auto-selection fallback, and coverage view all work end-to-end in the live dashboard
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: Variant selector UI for image generation — manual finish/variant selection before generate
-- [ ] 10-02: Auto-select logic fix — use highest-impressions Google Ads variant as fallback (not fixed heuristic)
-- [ ] 10-03: Variant image coverage view — show which variants have a lifestyle image vs. are missing one
+- [ ] 10-01-PLAN.md — GET /api/images/variant-data endpoint: per-finish impression totals + lifestyle image coverage
+- [ ] 10-02-PLAN.md — Variant selector modal + auto-select label + generate integration (selected_finish_code to Cloud Run)
+- [ ] 10-03-PLAN.md — Coverage tab in LifestyleImageReview + browser verification of complete workflow
 
 ### Phase 11: Performance Page Enhancements
 **Goal**: Users can clearly see how published SKUs are performing relative to their pre-publish baseline, with trend direction at a glance
