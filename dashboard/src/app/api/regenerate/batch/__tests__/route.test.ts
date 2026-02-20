@@ -90,8 +90,49 @@ describe('POST /api/regenerate/batch', () => {
     )
   })
 
-  it('exposes a long-running duration budget for full segment regeneration', () => {
-    expect(maxDuration).toBeGreaterThanOrEqual(420)
+  it('uses the maximum allowed hobby serverless duration budget', () => {
+    expect(maxDuration).toBe(300)
+  })
+
+  it('processes batch operations concurrently to reduce end-to-end request time', async () => {
+    let inFlight = 0
+    let maxInFlight = 0
+    const fetchMock = vi.fn().mockImplementation(async () => {
+      inFlight += 1
+      maxInFlight = Math.max(maxInFlight, inFlight)
+      await new Promise((resolve) => setTimeout(resolve, 30))
+      inFlight -= 1
+      return new Response(
+        JSON.stringify({
+          state: 'completed',
+          content: 'ok',
+          version: 1,
+        }),
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }
+      )
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const request = new NextRequest('http://localhost/api/regenerate/batch', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        skus: ['PTH-1'],
+        platforms: ['google', 'bing'],
+        content_types: ['title'],
+      }),
+    })
+
+    const response = await POST(request)
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.summary.total_operations).toBe(2)
+    expect(body.summary.successful).toBe(2)
+    expect(maxInFlight).toBeGreaterThanOrEqual(2)
   })
 
   it('returns a structured auth error when internal regenerate responds with redirect auth status', async () => {

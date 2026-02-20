@@ -39,10 +39,11 @@ const CONTENT_TYPES: ContentType[] = ['title', 'description']
 const DELAY_BETWEEN_CALLS_MS = 250
 const PAGE_SIZE = 1000
 const REGENERATE_AUTH_FORWARD_HEADERS = ['cookie', 'authorization'] as const
+const BATCH_OPERATION_CONCURRENCY = 2
 
-// Batch regeneration can take several minutes when processing full segment scopes.
-// Raising this route budget avoids gateway timeouts while keeping logic unchanged.
-export const maxDuration = 800
+// Hobby plan requires maxDuration <= 300s.
+// We pair the max budget with small bounded concurrency to keep full segment runs under limit.
+export const maxDuration = 300
 
 interface GeneratedContentSkuCount {
   skuCounts: Map<string, number>
@@ -61,6 +62,13 @@ interface ResolvedTargetSkus {
   targetSkus: string[]
   totalContentItems: number
   scope: RegenerateSelectionScope
+}
+
+interface BatchRegenerateOperation {
+  sku: string
+  platform: Platform
+  contentType: ContentType
+  index: number
 }
 
 async function sleep(ms: number) {
@@ -93,6 +101,31 @@ function isInternalRegenerateAuthFailure(response: Response): boolean {
     return true
   }
   return response.redirected
+}
+
+function buildBatchOperations(args: {
+  targetSkus: string[]
+  targetPlatforms: Platform[]
+  targetContentTypes: ContentType[]
+}): BatchRegenerateOperation[] {
+  const operations: BatchRegenerateOperation[] = []
+  let index = 0
+
+  for (const sku of args.targetSkus) {
+    for (const platform of args.targetPlatforms) {
+      for (const contentType of args.targetContentTypes) {
+        operations.push({
+          sku,
+          platform,
+          contentType,
+          index,
+        })
+        index += 1
+      }
+    }
+  }
+
+  return operations
 }
 
 function extractSegmentLabel(row: VariantLabelRow): string | null {
@@ -348,125 +381,147 @@ export async function POST(request: NextRequest) {
 
     const targetPlatforms = platforms || [...PLATFORMS]
     const targetContentTypes = content_types || [...CONTENT_TYPES]
-    const totalOperations =
-      targetSkus.length * targetPlatforms.length * targetContentTypes.length
+    const operations = buildBatchOperations({
+      targetSkus,
+      targetPlatforms,
+      targetContentTypes,
+    })
+    const totalOperations = operations.length
 
     const regenerateEndpoint = getRegenerateEndpoint(request)
     const regenerateHeaders = getForwardedRegenerateHeaders(request)
 
-    const results: RegenerateResult[] = []
+    const results: RegenerateResult[] = new Array(totalOperations)
     let completed = 0
     let successful = 0
     let failed = 0
 
-    for (const sku of targetSkus) {
-      for (const platform of targetPlatforms) {
-        for (const contentType of targetContentTypes) {
-          try {
-            const regenerateResponse = await fetch(regenerateEndpoint, {
-              method: 'POST',
-              headers: regenerateHeaders,
-              body: JSON.stringify({
-                master_sku: sku,
-                content_type: contentType,
-                platform,
-                mode: 'simple',
-              }),
-            })
+    const operationQueue = [...operations]
 
-            const payload = await regenerateResponse
-              .json()
-              .catch(() => null)
-            const parsedPayload: ParsedRegenerateErrorPayload | null =
-              payload && typeof payload === 'object'
-                ? (payload as ParsedRegenerateErrorPayload)
-                : null
+    const runSingleOperation = async (
+      operation: BatchRegenerateOperation,
+    ): Promise<RegenerateResult> => {
+      const { sku, platform, contentType } = operation
+      try {
+        const regenerateResponse = await fetch(regenerateEndpoint, {
+          method: 'POST',
+          headers: regenerateHeaders,
+          body: JSON.stringify({
+            master_sku: sku,
+            content_type: contentType,
+            platform,
+            mode: 'simple',
+          }),
+        })
 
-            if (!regenerateResponse.ok) {
-              const authFailure = isInternalRegenerateAuthFailure(regenerateResponse)
-              const errorMessage = authFailure
-                ? 'Internal regenerate request was not authenticated'
-                : (typeof parsedPayload?.error === 'string'
-                  ? parsedPayload.error
-                  : `Regeneration failed with status ${regenerateResponse.status}`)
-              const actionableMessage = authFailure
-                ? 'Refresh your dashboard session and retry. If this persists, inspect auth forwarding and middleware redirects.'
-                : (typeof parsedPayload?.actionable_message === 'string'
-                  ? parsedPayload.actionable_message
-                  : 'Inspect API validation details for this SKU and retry.')
-              results.push({
-                sku,
-                platform,
-                content_type: contentType,
-                success: false,
-                error: errorMessage,
-                actionable_message: actionableMessage,
-                code: authFailure
-                  ? 'batch_regenerate_internal_auth_required'
-                  : (typeof parsedPayload?.code === 'string' ? parsedPayload.code : null),
-                step: authFailure
-                  ? 'internal_regenerate_auth'
-                  : (typeof parsedPayload?.step === 'string' ? parsedPayload.step : null),
-                validation_errors: Array.isArray(parsedPayload?.validation_errors)
-                  ? parsedPayload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
-                  : [],
-              })
-              failed++
-            } else {
-              results.push({
-                sku,
-                platform,
-                content_type: contentType,
-                success: true,
-                state:
-                  payload?.state === 'no_change'
-                    ? 'no_change'
-                    : 'completed',
-                idempotent: payload?.idempotent === true,
-                content:
-                  typeof payload?.content === 'string'
-                    ? payload.content
-                    : undefined,
-                version:
-                  typeof payload?.version === 'number'
-                    ? payload.version
-                    : undefined,
-                validation_errors: Array.isArray(payload?.validation_errors)
-                  ? payload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
-                  : [],
-                actionable_message:
-                  typeof payload?.actionable_message === 'string'
-                    ? payload.actionable_message
-                    : null,
-              })
-              successful++
-            }
-          } catch (error) {
-            results.push({
-              sku,
-              platform,
-              content_type: contentType,
-              success: false,
-              error:
-                error instanceof Error ? error.message : 'Unknown error',
-              actionable_message:
-                'Retry this SKU. If it keeps failing, inspect dashboard API logs for this operation.',
-              code: 'batch_regenerate_operation_exception',
-              step: 'batch_regenerate_operation',
-            })
-            failed++
+        const payload = await regenerateResponse
+          .json()
+          .catch(() => null)
+        const parsedPayload: ParsedRegenerateErrorPayload | null =
+          payload && typeof payload === 'object'
+            ? (payload as ParsedRegenerateErrorPayload)
+            : null
+
+        if (!regenerateResponse.ok) {
+          const authFailure = isInternalRegenerateAuthFailure(regenerateResponse)
+          const errorMessage = authFailure
+            ? 'Internal regenerate request was not authenticated'
+            : (typeof parsedPayload?.error === 'string'
+              ? parsedPayload.error
+              : `Regeneration failed with status ${regenerateResponse.status}`)
+          const actionableMessage = authFailure
+            ? 'Refresh your dashboard session and retry. If this persists, inspect auth forwarding and middleware redirects.'
+            : (typeof parsedPayload?.actionable_message === 'string'
+              ? parsedPayload.actionable_message
+              : 'Inspect API validation details for this SKU and retry.')
+          return {
+            sku,
+            platform,
+            content_type: contentType,
+            success: false,
+            error: errorMessage,
+            actionable_message: actionableMessage,
+            code: authFailure
+              ? 'batch_regenerate_internal_auth_required'
+              : (typeof parsedPayload?.code === 'string' ? parsedPayload.code : null),
+            step: authFailure
+              ? 'internal_regenerate_auth'
+              : (typeof parsedPayload?.step === 'string' ? parsedPayload.step : null),
+            validation_errors: Array.isArray(parsedPayload?.validation_errors)
+              ? parsedPayload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
+              : [],
           }
+        }
 
-          completed++
-          if (completed % 10 === 0) {
-            console.log(
-              `Batch regeneration progress: ${completed}/${totalOperations} (${successful} success, ${failed} failed)`
-            )
-          }
-          await sleep(DELAY_BETWEEN_CALLS_MS)
+        return {
+          sku,
+          platform,
+          content_type: contentType,
+          success: true,
+          state:
+            payload?.state === 'no_change'
+              ? 'no_change'
+              : 'completed',
+          idempotent: payload?.idempotent === true,
+          content:
+            typeof payload?.content === 'string'
+              ? payload.content
+              : undefined,
+          version:
+            typeof payload?.version === 'number'
+              ? payload.version
+              : undefined,
+          validation_errors: Array.isArray(payload?.validation_errors)
+            ? payload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
+            : [],
+          actionable_message:
+            typeof payload?.actionable_message === 'string'
+              ? payload.actionable_message
+              : null,
+        }
+      } catch (error) {
+        return {
+          sku,
+          platform,
+          content_type: contentType,
+          success: false,
+          error:
+            error instanceof Error ? error.message : 'Unknown error',
+          actionable_message:
+            'Retry this SKU. If it keeps failing, inspect dashboard API logs for this operation.',
+          code: 'batch_regenerate_operation_exception',
+          step: 'batch_regenerate_operation',
         }
       }
     }
+
+    const workerCount = Math.min(BATCH_OPERATION_CONCURRENCY, operationQueue.length)
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (operationQueue.length > 0) {
+        const operation = operationQueue.shift()
+        if (!operation) return
+
+        const operationResult = await runSingleOperation(operation)
+        results[operation.index] = operationResult
+
+        completed++
+        if (operationResult.success) {
+          successful++
+        } else {
+          failed++
+        }
+
+        if (completed % 10 === 0 || completed === totalOperations) {
+          console.log(
+            `Batch regeneration progress: ${completed}/${totalOperations} (${successful} success, ${failed} failed)`
+          )
+        }
+        await sleep(DELAY_BETWEEN_CALLS_MS)
+      }
+    })
+
+    await Promise.all(workers)
+    const finalizedResults = results.filter((result): result is RegenerateResult => Boolean(result))
 
     return NextResponse.json({
       success: true,
@@ -477,12 +532,12 @@ export async function POST(request: NextRequest) {
         total_operations: totalOperations,
         successful,
         failed,
-        with_validation_warnings: results.filter(
+        with_validation_warnings: finalizedResults.filter(
           (r) => r.success && Array.isArray(r.validation_errors) && r.validation_errors.length > 0
         ).length,
-        no_change: results.filter((r) => r.state === 'no_change').length,
+        no_change: finalizedResults.filter((r) => r.state === 'no_change').length,
       },
-      results,
+      results: finalizedResults,
     })
   } catch (error) {
     console.error('Batch regeneration error:', error)
