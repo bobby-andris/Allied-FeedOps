@@ -34,7 +34,9 @@ import {
 } from '@/lib/optimization/decomposition/config'
 import {
   computeDecompositionArtifact,
+  createValueScoringContext,
   scoreTermAggregate,
+  scoreTermFromPairValues,
 } from '@/lib/optimization/decomposition/engine'
 import {
   getLatestArtifactsByPairs,
@@ -907,6 +909,7 @@ async function runNeedsDecisionDecompositionPipeline(
   }
 
   const pairInputs = [...pairInputMap.values()]
+  const valueScoringContext = createValueScoringContext(pairInputs.map((pair) => pair.assignment))
   const latest = await getLatestArtifactsByPairs(
     pairInputs.map((pair) => ({ searchTerm: pair.searchTerm, customLabel0: pair.customLabel0 })),
     DECOMPOSITION_VERSIONS
@@ -941,6 +944,7 @@ async function runNeedsDecisionDecompositionPipeline(
       customLabel0: pair.customLabel0,
       assignment: pair.assignment,
       labelCount: pair.labelCount,
+      valueScoringContext,
     })
     artifactsByPair.set(key, recomputed)
     recomputedArtifacts.push(recomputed)
@@ -959,13 +963,16 @@ async function runNeedsDecisionDecompositionPipeline(
     const primaryArtifact = primary
       ? artifactsByPair.get(pairKey(term.search_term, primary.custom_label_0)) ?? null
       : null
+    const pairValueScores = orderedAssignments
+      .map((assignment) => artifactsByPair.get(pairKey(term.search_term, assignment.custom_label_0))?.value ?? null)
+      .filter((value): value is NonNullable<typeof value> => Boolean(value))
 
     const fallback = enrichNeedsDecisionTerm(term)
     return {
       ...term,
       intent_features: primaryArtifact?.intent ?? fallback.intent_features,
       recommendation: primaryArtifact?.recommendation ?? fallback.recommendation,
-      value_score: scoreTermAggregate(term.custom_label_0s),
+      value_score: pairValueScores.length > 0 ? scoreTermFromPairValues(pairValueScores) : scoreTermAggregate(term.custom_label_0s),
     }
   })
 

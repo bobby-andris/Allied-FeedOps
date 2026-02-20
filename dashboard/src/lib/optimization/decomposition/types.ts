@@ -21,6 +21,32 @@ export interface DecompositionPairInput {
   customLabel0: string
   assignment: SearchTermSourceAssignment
   labelCount: number
+  valueScoringContext?: ValueScoringContext
+}
+
+export interface ValueMetricStats {
+  impressions: number
+  clicks: number
+  conversions: number
+  cost: number
+  conversionValue: number
+  ctr: number
+  cvr: number
+  cpc: number
+  valuePerConversion: number
+  valuePerClick: number
+}
+
+export interface ValueScoringContext {
+  global: ValueMetricStats
+  byTier: Partial<Record<string, ValueMetricStats>>
+  byLabel: Map<string, ValueMetricStats>
+  byLabelTier: Map<string, ValueMetricStats>
+}
+
+export interface PairValueScoreResult {
+  value: QueryValueScore
+  modelInputs: Record<string, unknown>
 }
 
 export interface DecompositionDiagnostics {

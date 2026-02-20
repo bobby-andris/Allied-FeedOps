@@ -5,6 +5,7 @@ import { POST } from '@/app/api/optimization/decomposition/backfill/route'
 const mocks = vi.hoisted(() => ({
   getNeedsDecisionTerms: vi.fn(),
   computeDecompositionArtifact: vi.fn(),
+  createValueScoringContext: vi.fn(),
   insertArtifactsBatch: vi.fn(),
 }))
 
@@ -18,6 +19,7 @@ vi.mock('@/lib/shopping-funnel/service', () => ({
 
 vi.mock('@/lib/optimization/decomposition/engine', () => ({
   computeDecompositionArtifact: mocks.computeDecompositionArtifact,
+  createValueScoringContext: mocks.createValueScoringContext,
 }))
 
 vi.mock('@/lib/optimization/decomposition/repository', () => ({
@@ -118,6 +120,24 @@ describe('POST /api/optimization/decomposition/backfill', () => {
       },
       modelInputs: {},
       recommendationMetadata: {},
+    })
+
+    mocks.createValueScoringContext.mockReturnValue({
+      global: {
+        impressions: 56,
+        clicks: 4,
+        conversions: 0,
+        cost: 19.26,
+        conversionValue: 0,
+        ctr: 0.0714,
+        cvr: 0.002,
+        cpc: 4.815,
+        valuePerConversion: 20,
+        valuePerClick: 0.1,
+      },
+      byTier: {},
+      byLabel: new Map(),
+      byLabelTier: new Map(),
     })
 
     mocks.insertArtifactsBatch.mockResolvedValue({

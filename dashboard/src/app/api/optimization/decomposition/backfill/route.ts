@@ -6,7 +6,10 @@ import {
   sanitizeDateInput,
   sanitizeMinImpressions,
 } from '@/lib/shopping-funnel/service'
-import { computeDecompositionArtifact } from '@/lib/optimization/decomposition/engine'
+import {
+  computeDecompositionArtifact,
+  createValueScoringContext,
+} from '@/lib/optimization/decomposition/engine'
 import { insertArtifactsBatch } from '@/lib/optimization/decomposition/repository'
 
 interface BackfillRequestBody {
@@ -129,6 +132,7 @@ export async function POST(request: NextRequest) {
     }
 
     const selectedPairs = [...pairMap.values()].slice(0, maxPairs)
+    const valueScoringContext = createValueScoringContext(selectedPairs.map((pair) => pair.assignment))
 
     const artifacts = selectedPairs.map((pair) =>
       computeDecompositionArtifact({
@@ -136,6 +140,7 @@ export async function POST(request: NextRequest) {
         customLabel0: pair.customLabel0,
         assignment: pair.assignment,
         labelCount: pair.labelCount,
+        valueScoringContext,
       })
     )
 

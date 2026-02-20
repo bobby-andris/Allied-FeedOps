@@ -3,6 +3,7 @@ import {
   computeDecompositionArtifact,
   decomposeSearchTermIntent,
   recommendActionForPair,
+  scoreTermFromPairValues,
 } from '@/lib/optimization/decomposition/engine'
 import type { SearchTermSourceAssignment } from '@/lib/shopping-funnel/types'
 
@@ -84,5 +85,33 @@ describe('decomposition engine', () => {
     // 0.55 + (80/2000) + (7/100) + (3*0.03) = 0.75
     expect(artifact.recommendation.action_type).toBe('funnel')
     expect(artifact.recommendation.confidence).toBeCloseTo(0.75, 4)
+  })
+
+  it('aggregates term value score from calibrated pair values', () => {
+    const aggregate = scoreTermFromPairValues([
+      {
+        impact_score: 90,
+        expected_clicks: 20,
+        expected_cvr: 0.08,
+        expected_conversion_value: 220,
+        expected_profit_proxy: 110,
+        uncertainty: 0.2,
+      },
+      {
+        impact_score: 60,
+        expected_clicks: 10,
+        expected_cvr: 0.05,
+        expected_conversion_value: 80,
+        expected_profit_proxy: 30,
+        uncertainty: 0.4,
+      },
+    ])
+
+    expect(aggregate.impact_score).toBe(150)
+    expect(aggregate.expected_clicks).toBe(30)
+    expect(aggregate.expected_conversion_value).toBe(300)
+    expect(aggregate.expected_profit_proxy).toBe(140)
+    expect(aggregate.expected_cvr).toBeCloseTo(0.07, 4)
+    expect(aggregate.uncertainty).toBeCloseTo(0.2667, 4)
   })
 })

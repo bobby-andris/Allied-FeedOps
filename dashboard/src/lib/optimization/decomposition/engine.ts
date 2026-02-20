@@ -19,10 +19,15 @@ import {
   PRODUCT_OBJECT_HINTS,
   USE_CASE_HINTS,
 } from '@/lib/optimization/decomposition/config'
+import {
+  createValueScoringContext,
+  scorePairValueWithContext,
+} from '@/lib/optimization/decomposition/value-scoring'
 import type {
   DecompositionArtifact,
   DecompositionDiagnostics,
   DecompositionPairInput,
+  ValueScoringContext,
 } from '@/lib/optimization/decomposition/types'
 
 function tokenizePhraseSet(searchTerm: string, candidates: string[]): string[] {
@@ -203,27 +208,12 @@ export function recommendActionForPair(
   }
 }
 
-export function scorePairValue(assignment: SearchTermSourceAssignment): QueryValueScore {
-  const safeClicks = Math.max(assignment.clicks, 1)
-  const cost = assignment.cost_micros / 1_000_000
-  const cvr = assignment.conversions / safeClicks
-  const ctr = assignment.impressions > 0 ? assignment.clicks / assignment.impressions : 0
-  const conversionValuePerClick = assignment.conversions_value / safeClicks
-  const expectedClicks = Math.max(assignment.clicks, assignment.impressions * Math.max(ctr, 0.01))
-  const expectedConversionValue = expectedClicks * conversionValuePerClick
-  const expectedProfitProxy = expectedConversionValue - cost
-  const confidence = Math.min(assignment.clicks / 50, 1)
-  const uncertainty = 1 - confidence
-  const impactScore = expectedProfitProxy * (1 - uncertainty * 0.5)
-
-  return {
-    impact_score: Number(impactScore.toFixed(2)),
-    expected_clicks: Number(expectedClicks.toFixed(2)),
-    expected_cvr: Number(cvr.toFixed(4)),
-    expected_conversion_value: Number(expectedConversionValue.toFixed(2)),
-    expected_profit_proxy: Number(expectedProfitProxy.toFixed(2)),
-    uncertainty: Number(uncertainty.toFixed(4)),
-  }
+export function scorePairValue(
+  assignment: SearchTermSourceAssignment,
+  customLabel0: string,
+  context?: ValueScoringContext
+): QueryValueScore {
+  return scorePairValueWithContext(assignment, customLabel0, context).value
 }
 
 export function scoreTermAggregate(assignments: SearchTermSourceAssignment[]): QueryValueScore {
@@ -267,6 +257,53 @@ export function scoreTermAggregate(assignments: SearchTermSourceAssignment[]): Q
   }
 }
 
+export function scoreTermFromPairValues(values: QueryValueScore[]): QueryValueScore {
+  if (values.length === 0) {
+    return {
+      impact_score: 0,
+      expected_clicks: 0,
+      expected_cvr: 0,
+      expected_conversion_value: 0,
+      expected_profit_proxy: 0,
+      uncertainty: 1,
+    }
+  }
+
+  const totals = values.reduce(
+    (acc, value) => {
+      const clicks = Math.max(value.expected_clicks, 0)
+      acc.expectedClicks += clicks
+      acc.weightedCvr += clicks * Math.max(value.expected_cvr, 0)
+      acc.expectedConversionValue += Math.max(value.expected_conversion_value, 0)
+      acc.expectedProfitProxy += value.expected_profit_proxy
+      acc.weightedUncertainty += clicks * clamp(value.uncertainty, 0, 1)
+      acc.impactScore += value.impact_score
+      return acc
+    },
+    {
+      expectedClicks: 0,
+      weightedCvr: 0,
+      expectedConversionValue: 0,
+      expectedProfitProxy: 0,
+      weightedUncertainty: 0,
+      impactScore: 0,
+    }
+  )
+
+  const expectedClicks = totals.expectedClicks
+  const expectedCvr = expectedClicks > 0 ? totals.weightedCvr / expectedClicks : 0
+  const uncertainty = expectedClicks > 0 ? totals.weightedUncertainty / expectedClicks : 1
+
+  return {
+    impact_score: Number(totals.impactScore.toFixed(2)),
+    expected_clicks: Number(expectedClicks.toFixed(2)),
+    expected_cvr: Number(expectedCvr.toFixed(4)),
+    expected_conversion_value: Number(totals.expectedConversionValue.toFixed(2)),
+    expected_profit_proxy: Number(totals.expectedProfitProxy.toFixed(2)),
+    uncertainty: Number(uncertainty.toFixed(4)),
+  }
+}
+
 export function computeDecompositionArtifact(input: DecompositionPairInput): DecompositionArtifact {
   const { intent, intentConfidence, diagnostics } = decomposeSearchTermIntent(input.searchTerm)
   const recommendation = recommendActionForPair(
@@ -275,7 +312,11 @@ export function computeDecompositionArtifact(input: DecompositionPairInput): Dec
     input.labelCount,
     intent
   )
-  const value = scorePairValue(input.assignment)
+  const valueScoring = scorePairValueWithContext(
+    input.assignment,
+    input.customLabel0,
+    input.valueScoringContext
+  )
 
   return {
     searchTerm: input.searchTerm,
@@ -286,7 +327,7 @@ export function computeDecompositionArtifact(input: DecompositionPairInput): Dec
     intent,
     intentConfidence,
     recommendation,
-    value,
+    value: valueScoring.value,
     diagnostics,
     modelInputs: {
       impressions: input.assignment.impressions,
@@ -295,6 +336,7 @@ export function computeDecompositionArtifact(input: DecompositionPairInput): Dec
       conversions: input.assignment.conversions,
       conversions_value: input.assignment.conversions_value,
       label_count: input.labelCount,
+      ...valueScoring.modelInputs,
     },
     recommendationMetadata: {
       source_campaign: input.assignment.source_campaign,
@@ -303,3 +345,5 @@ export function computeDecompositionArtifact(input: DecompositionPairInput): Dec
     },
   }
 }
+
+export { createValueScoringContext }
