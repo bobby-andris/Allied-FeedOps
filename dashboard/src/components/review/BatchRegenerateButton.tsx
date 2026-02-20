@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,12 +14,22 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { RefreshCw, Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { CATCHALL_CUSTOM_LABEL } from '@/lib/regeneration/custom-label'
 
 interface BatchRegenerateButtonProps {
   totalSkus: number
   /** Called when regeneration completes (successfully or not) */
   onComplete?: () => void
 }
+
+type RegenerateScope = 'all' | 'custom_label_0'
 
 interface BatchResult {
   summary: {
@@ -51,6 +61,17 @@ type BatchRegenerateErrorPayload = {
   step?: string | null
 }
 
+interface BatchPreviewResponse {
+  total_skus: number
+  total_content_items: number
+  estimated_time_minutes: number
+  catchall_value?: string
+}
+
+interface CustomLabelsListResponse {
+  custom_labels: string[]
+}
+
 function formatFailureMessage(payload: BatchRegenerateErrorPayload, fallback: string): string {
   const parts: string[] = [payload.error || fallback]
   if (payload.actionable_message) {
@@ -67,6 +88,13 @@ export function BatchRegenerateButton({
   onComplete,
 }: BatchRegenerateButtonProps) {
   const [open, setOpen] = useState(false)
+  const [scope, setScope] = useState<RegenerateScope>('all')
+  const [customLabels, setCustomLabels] = useState<string[]>([])
+  const [customLabelsLoading, setCustomLabelsLoading] = useState(false)
+  const [selectedCustomLabel, setSelectedCustomLabel] = useState<string>('')
+  const [preview, setPreview] = useState<BatchPreviewResponse | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewError, setPreviewError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState<{
     phase: 'idle' | 'running' | 'complete'
@@ -75,21 +103,111 @@ export function BatchRegenerateButton({
   }>({ phase: 'idle', message: '', percent: 0 })
   const [result, setResult] = useState<BatchResult | null>(null)
 
+  const targetSkus = preview?.total_skus ?? totalSkus
   // Estimate time: ~2 seconds per operation (6 ops per SKU: 3 platforms x 2 content types)
-  const estimatedOperations = totalSkus * 6
+  const estimatedOperations = targetSkus * 6
   const estimatedMinutes = Math.ceil((estimatedOperations * 2) / 60)
+  const canStart = (scope === 'all' || Boolean(selectedCustomLabel)) && !previewLoading && !previewError
+
+  useEffect(() => {
+    if (!open) return
+
+    let cancelled = false
+    const loadCustomLabels = async () => {
+      setCustomLabelsLoading(true)
+      try {
+        const response = await fetch('/api/custom-labels/list')
+        const payload = (await response.json()) as CustomLabelsListResponse & BatchRegenerateErrorPayload
+        if (!response.ok) {
+          throw new Error(formatFailureMessage(payload, 'Failed to load custom labels'))
+        }
+
+        if (cancelled) return
+        const labels = Array.isArray(payload.custom_labels) ? payload.custom_labels : []
+        setCustomLabels(labels)
+        if (labels.length > 0) {
+          setSelectedCustomLabel((current) => current || labels[0])
+        }
+      } catch (error) {
+        if (cancelled) return
+        toast.error(error instanceof Error ? error.message : 'Failed to load custom labels')
+      } finally {
+        if (!cancelled) {
+          setCustomLabelsLoading(false)
+        }
+      }
+    }
+
+    void loadCustomLabels()
+    return () => {
+      cancelled = true
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    if (scope === 'custom_label_0' && !selectedCustomLabel) {
+      setPreview(null)
+      setPreviewError(null)
+      return
+    }
+
+    let cancelled = false
+    const loadPreview = async () => {
+      setPreviewLoading(true)
+      setPreviewError(null)
+
+      try {
+        const params = new URLSearchParams()
+        if (scope === 'custom_label_0') {
+          params.set('custom_label_0', selectedCustomLabel)
+        }
+        const query = params.toString()
+        const endpoint = query ? `/api/regenerate/batch?${query}` : '/api/regenerate/batch'
+
+        const response = await fetch(endpoint)
+        const payload = (await response.json()) as BatchPreviewResponse & BatchRegenerateErrorPayload
+        if (!response.ok) {
+          throw new Error(formatFailureMessage(payload, 'Failed to fetch regeneration preview'))
+        }
+
+        if (!cancelled) {
+          setPreview(payload)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPreviewError(error instanceof Error ? error.message : 'Failed to fetch regeneration preview')
+          setPreview(null)
+        }
+      } finally {
+        if (!cancelled) {
+          setPreviewLoading(false)
+        }
+      }
+    }
+
+    void loadPreview()
+    return () => {
+      cancelled = true
+    }
+  }, [open, scope, selectedCustomLabel])
 
   const handleRegenerate = async () => {
+    if (!canStart) return
     setLoading(true)
     setProgress({ phase: 'running', message: 'Starting batch regeneration...', percent: 0 })
     setResult(null)
 
     try {
-      // Call the batch API with all SKUs
+      const requestBody = scope === 'custom_label_0'
+        ? { custom_label_0: selectedCustomLabel }
+        : { all: true }
+
+      // Call the batch API with selected scope.
       const response = await fetch('/api/regenerate/batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ all: true }),
+        body: JSON.stringify(requestBody),
       })
 
       // Simulate progress updates (the actual API doesn't stream progress)
@@ -151,6 +269,7 @@ export function BatchRegenerateButton({
     if (!loading) {
       setProgress({ phase: 'idle', message: '', percent: 0 })
       setResult(null)
+      setPreviewError(null)
     }
   }
 
@@ -167,9 +286,9 @@ export function BatchRegenerateButton({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Regenerate All Content</DialogTitle>
+          <DialogTitle>Batch Regenerate Content</DialogTitle>
           <DialogDescription>
-            This will regenerate titles and descriptions for all {totalSkus} SKUs across Google, Bing, and Shopify platforms.
+            Regenerate titles and descriptions across Google, Bing, and Shopify for all SKUs or a specific <code>custom_label_0</code> segment.
           </DialogDescription>
         </DialogHeader>
 
@@ -177,18 +296,65 @@ export function BatchRegenerateButton({
           {/* Pre-run info */}
           {progress.phase === 'idle' && (
             <div className="space-y-3">
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Scope</div>
+                <Select value={scope} onValueChange={(value) => setScope(value as RegenerateScope)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All regeneratable SKUs</SelectItem>
+                    <SelectItem value="custom_label_0">By custom_label_0 segment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {scope === 'custom_label_0' && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">custom_label_0</div>
+                  <Select
+                    value={selectedCustomLabel}
+                    onValueChange={setSelectedCustomLabel}
+                    disabled={customLabelsLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={customLabelsLoading ? 'Loading labels…' : 'Select custom_label_0'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={CATCHALL_CUSTOM_LABEL}>Catchall (blank custom_label_0)</SelectItem>
+                      {customLabels.map((label) => (
+                        <SelectItem key={label} value={label}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="text-sm">
+                <span className="font-medium">Target SKUs:</span>{' '}
+                <span className="text-muted-foreground">
+                  {previewLoading ? 'Calculating…' : targetSkus}
+                </span>
+              </div>
               <div className="text-sm">
                 <span className="font-medium">Total operations:</span>{' '}
                 <span className="text-muted-foreground">
-                  ~{estimatedOperations} (3 platforms × 2 content types × {totalSkus} SKUs)
+                  ~{estimatedOperations} (3 platforms × 2 content types × {targetSkus} SKUs)
                 </span>
               </div>
               <div className="text-sm">
                 <span className="font-medium">Estimated time:</span>{' '}
                 <span className="text-muted-foreground">~{estimatedMinutes} minutes</span>
               </div>
+              {previewError && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200">
+                  {previewError}
+                </div>
+              )}
               <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
-                This will update <code>candidate_content</code> for all SKUs. Approved content will not be affected until you re-approve.
+                This updates <code>candidate_content</code> for the selected scope only. Approved content will not change until re-approved.
               </div>
             </div>
           )}
@@ -272,7 +438,7 @@ export function BatchRegenerateButton({
               Done
             </Button>
           ) : (
-            <Button onClick={handleRegenerate} disabled={loading}>
+            <Button onClick={handleRegenerate} disabled={loading || !canStart}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

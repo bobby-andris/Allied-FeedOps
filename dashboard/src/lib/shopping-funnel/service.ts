@@ -54,6 +54,8 @@ const SHARED_LIST_NAME_BY_ACTION = {
 
 const CAMPAIGN_NAME_PATTERN = /^AVD - Shopping - US - (.+?) - (HIGH|MEDIUM|LOW)$/i
 const TEST_CAMPAIGN_PATTERN = /tst/i
+const EXCLUDED_CAMPAIGN_NAMES = new Set(['avd - shopping - branded - us'])
+const EXCLUDED_CUSTOM_LABELS = new Set(['catchall', 'branded - us'])
 const CACHE_TTL_MS = 2 * 60 * 1000
 export const SHOPPING_FUNNEL_DATA_SOURCE = 'google_ads_api_live'
 export const SHOPPING_FUNNEL_CACHE_TTL_MS = CACHE_TTL_MS
@@ -198,8 +200,37 @@ function normalizeSearchTerm(value: string): string {
   return value.toLowerCase().trim().replace(/\s+/g, ' ')
 }
 
+function normalizeCampaignName(value: string): string {
+  return value.toLowerCase().trim().replace(/\s+/g, ' ')
+}
+
+function isExcludedCampaignName(campaignName: string): boolean {
+  return EXCLUDED_CAMPAIGN_NAMES.has(normalizeCampaignName(campaignName))
+}
+
+function isExcludedCustomLabel(customLabel: string): boolean {
+  return EXCLUDED_CUSTOM_LABELS.has(customLabel.toLowerCase().trim())
+}
+
+function isExcludedCampaign(campaignName: string): boolean {
+  if (!campaignName) {
+    return false
+  }
+
+  if (isExcludedCampaignName(campaignName)) {
+    return true
+  }
+
+  const match = campaignName.match(CAMPAIGN_NAME_PATTERN)
+  if (!match) {
+    return false
+  }
+
+  return isExcludedCustomLabel(match[1].trim())
+}
+
 function parseCampaign(name: string): ParsedCampaign | null {
-  if (!name || TEST_CAMPAIGN_PATTERN.test(name)) {
+  if (!name || TEST_CAMPAIGN_PATTERN.test(name) || isExcludedCampaign(name)) {
     return null
   }
 
@@ -222,9 +253,10 @@ export function summarizeCampaignSetIntegrity(
   const tiers: FunnelTier[] = ['HIGH', 'MEDIUM', 'LOW']
   const labelTiers = new Map<string, Set<FunnelTier>>()
   const nonPatternCampaigns: string[] = []
+  const includedCampaignNames = campaignNames.filter((campaignName) => !isExcludedCampaign(campaignName))
 
   let parsedFunnelCampaigns = 0
-  for (const campaignName of campaignNames) {
+  for (const campaignName of includedCampaignNames) {
     const parsed = parseCampaign(campaignName)
     if (!parsed) {
       nonPatternCampaigns.push(campaignName)
@@ -245,6 +277,9 @@ export function summarizeCampaignSetIntegrity(
     }
     const campaignName = pairKey.slice(0, separatorIndex)
     const adGroupName = pairKey.slice(separatorIndex + 1)
+    if (isExcludedCampaign(campaignName)) {
+      continue
+    }
     if (campaignName !== adGroupName) {
       adGroupNameMismatchCount += 1
     }
@@ -264,7 +299,7 @@ export function summarizeCampaignSetIntegrity(
     .sort((a, b) => a.custom_label_0.localeCompare(b.custom_label_0))
 
   return {
-    enabled_shopping_campaigns: campaignNames.length,
+    enabled_shopping_campaigns: includedCampaignNames.length,
     parsed_funnel_campaigns: parsedFunnelCampaigns,
     non_pattern_campaign_count: nonPatternCampaigns.length,
     non_pattern_campaigns: nonPatternCampaigns.sort((a, b) => a.localeCompare(b)),
@@ -562,7 +597,7 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
     const campaign = (row.campaign ?? {}) as Record<string, string>
     const campaignName = campaign.name
     const campaignId = campaign.id
-    if (!campaignName || !campaignId) {
+    if (!campaignName || !campaignId || isExcludedCampaign(campaignName)) {
       continue
     }
 
@@ -584,7 +619,7 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
   for (const row of adGroupRows as Array<Record<string, unknown>>) {
     const campaign = (row.campaign ?? {}) as Record<string, string>
     const adGroup = (row.ad_group ?? {}) as Record<string, string>
-    if (!campaign.name || !adGroup.name || !adGroup.id) {
+    if (!campaign.name || !adGroup.name || !adGroup.id || isExcludedCampaign(campaign.name)) {
       continue
     }
 
@@ -669,7 +704,7 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
     const campaign = (row.campaign ?? {}) as Record<string, string>
     const criterion = (row.campaign_criterion ?? {}) as Record<string, unknown>
     const keyword = (criterion.keyword ?? {}) as Record<string, string>
-    if (!campaign.name || !keyword.text) {
+    if (!campaign.name || !keyword.text || isExcludedCampaign(campaign.name)) {
       continue
     }
     const normalized = normalizeSearchTerm(keyword.text)
@@ -691,7 +726,7 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
     const adGroup = (row.ad_group ?? {}) as Record<string, string>
     const criterion = (row.ad_group_criterion ?? {}) as Record<string, unknown>
     const keyword = (criterion.keyword ?? {}) as Record<string, string>
-    if (!campaign.name || !adGroup.name || !keyword.text) {
+    if (!campaign.name || !adGroup.name || !keyword.text || isExcludedCampaign(campaign.name)) {
       continue
     }
     const normalized = normalizeSearchTerm(keyword.text)
@@ -712,6 +747,9 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
     const adGroup = (row.ad_group ?? {}) as Record<string, string>
     const searchTermView = (row.search_term_view ?? {}) as Record<string, string>
     const metrics = (row.metrics ?? {}) as Record<string, string | number>
+    if (isExcludedCampaign(campaign.name)) {
+      continue
+    }
 
     const parsed = parseCampaign(campaign.name)
     if (!parsed || !searchTermView.search_term) {

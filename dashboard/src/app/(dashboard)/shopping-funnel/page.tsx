@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, useTransition } from 'react'
 import {
   AlertCircle,
   CheckCircle2,
@@ -42,6 +42,9 @@ import {
   computeReviewerPriorityScore,
   isHighImpactValueScore,
 } from '@/lib/shopping-funnel/reviewer-priority'
+  EXISTING_FUNNEL_UI_LIMIT,
+  NEEDS_DECISION_UI_LIMIT,
+} from '@/lib/shopping-funnel/ui-performance'
 
 type DateRangePreset = '7d' | '30d' | '60d' | '90d'
 
@@ -111,8 +114,8 @@ const TIER_OPTIONS: Array<{ value: AssignmentTier; label: string }> = [
   { value: 'low', label: 'Low' },
 ]
 
-const NEEDS_DECISION_LIMIT = 3000
-const EXISTING_FUNNEL_LIMIT = 5000
+const NEEDS_DECISION_LIMIT = NEEDS_DECISION_UI_LIMIT
+const EXISTING_FUNNEL_LIMIT = EXISTING_FUNNEL_UI_LIMIT
 
 const EXISTING_ASSIGNMENT_OPTIONS: Array<{
   value: AssignmentTier | 'global_block' | 'competitor' | 'branded'
@@ -239,6 +242,7 @@ function applyStagedDecisionToState(
 }
 
 export default function ShoppingFunnelPage() {
+  const [isTransitionPending, startTransition] = useTransition()
   const [activeTab, setActiveTab] = useState<'needs-decision' | 'existing-funnel'>('needs-decision')
   const [range, setRange] = useState<DateRangePreset>('30d')
   const [customLabelFilter, setCustomLabelFilter] = useState<string>('all')
@@ -277,6 +281,8 @@ export default function ShoppingFunnelPage() {
 
   const [message, setMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const deferredNeedsSearch = useDeferredValue(needsSearch)
+  const deferredExistingSearch = useDeferredValue(existingSearch)
 
   const activeDataSource = useMemo(
     () =>
@@ -535,7 +541,7 @@ export default function ShoppingFunnelPage() {
   )
 
   const needsRows = useMemo(() => {
-    const normalizedSearch = needsSearch.trim().toLowerCase()
+    const normalizedSearch = deferredNeedsSearch.trim().toLowerCase()
     const rows =
       needsData?.terms
         .map((term) => {
@@ -619,16 +625,17 @@ export default function ShoppingFunnelPage() {
       }
       return b.metrics.impressions - a.metrics.impressions
     })
-  }, [
-    maxUncertaintyNum,
-    minPriorityScoreNum,
-    needsData?.terms,
-    needsSearch,
-    needsSort,
-    needsState,
-    showHighImpactOnly,
-    showSelectedNeedsOnly,
-  ])
+    }, [
+      deferredNeedsSearch,
+      maxUncertaintyNum,
+      minPriorityScoreNum,
+      needsData?.terms,
+      needsSort,
+      needsState,
+      showHighImpactOnly,
+      showSelectedNeedsOnly,
+    ])
+
 
   const selectedVisibleNeedsCount = useMemo(
     () => needsRows.filter((row) => row.state.selected).length,
@@ -663,7 +670,7 @@ export default function ShoppingFunnelPage() {
   )
 
   const existingRows = useMemo(() => {
-    const normalizedSearch = existingSearch.trim().toLowerCase()
+    const normalizedSearch = deferredExistingSearch.trim().toLowerCase()
     const rows =
       existingData?.terms.map((term) => {
         const pendingCount = term.funnels.reduce(
@@ -706,7 +713,17 @@ export default function ShoppingFunnelPage() {
       }
       return b.term.total_impressions - a.term.total_impressions
     })
-  }, [existingData?.terms, existingSearch, existingSort, existingUpdates, showPendingExistingOnly])
+  }, [deferredExistingSearch, existingData?.terms, existingSort, existingUpdates, showPendingExistingOnly])
+
+  const existingTierByKey = useMemo(() => {
+    const tierByKey: Record<string, AssignmentTier | null> = {}
+    for (const term of existingData?.terms ?? []) {
+      for (const funnel of term.funnels) {
+        tierByKey[updateKey(term.search_term, funnel.custom_label_0)] = fromExistingTierLabel(funnel.tier)
+      }
+    }
+    return tierByKey
+  }, [existingData?.terms])
 
   const needsTotal = needsData?.total_count ?? 0
   const needsReturned = needsData?.returned_count ?? 0
@@ -721,67 +738,77 @@ export default function ShoppingFunnelPage() {
   const existingRangeEnd = existingData ? (existingData.offset ?? 0) + existingReturned : 0
 
   function toggleNeedsSelection(searchTerm: string, selected: boolean) {
-    setNeedsState((current) => ({
-      ...current,
-      [searchTerm]: {
-        ...current[searchTerm],
-        selected,
-      },
-    }))
+    startTransition(() => {
+      setNeedsState((current) => ({
+        ...current,
+        [searchTerm]: {
+          ...current[searchTerm],
+          selected,
+        },
+      }))
+    })
   }
 
   function updateNeedsAction(searchTerm: string, actionType: DecisionActionType) {
-    setNeedsState((current) => ({
-      ...current,
-      [searchTerm]: {
-        ...current[searchTerm],
-        actionType,
-      },
-    }))
+    startTransition(() => {
+      setNeedsState((current) => ({
+        ...current,
+        [searchTerm]: {
+          ...current[searchTerm],
+          actionType,
+        },
+      }))
+    })
   }
 
   function updateNeedsAssignment(searchTerm: string, customLabel0: string, tier: AssignmentTier) {
-    setNeedsState((current) => ({
-      ...current,
-      [searchTerm]: {
-        ...current[searchTerm],
-        assignments: {
-          ...current[searchTerm].assignments,
-          [customLabel0]: tier,
+    startTransition(() => {
+      setNeedsState((current) => ({
+        ...current,
+        [searchTerm]: {
+          ...current[searchTerm],
+          assignments: {
+            ...current[searchTerm].assignments,
+            [customLabel0]: tier,
+          },
         },
-      },
-    }))
+      }))
+    })
   }
 
   function selectAllNeeds(selected: boolean) {
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => [
-          searchTerm,
-          {
-            ...state,
-            selected,
-          },
-        ])
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => [
+            searchTerm,
+            {
+              ...state,
+              selected,
+            },
+          ])
+        )
       )
-    )
+    })
   }
 
   function selectVisibleNeeds(selected: boolean) {
     const visibleTerms = new Set(needsRows.map((row) => row.term.search_term))
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => [
-          searchTerm,
-          visibleTerms.has(searchTerm)
-            ? {
-                ...state,
-                selected,
-              }
-            : state,
-        ])
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => [
+            searchTerm,
+            visibleTerms.has(searchTerm)
+              ? {
+                  ...state,
+                  selected,
+                }
+              : state,
+          ])
+        )
       )
-    )
+    })
   }
 
   function applyBulkActionToSelectedNeeds() {
@@ -791,19 +818,21 @@ export default function ShoppingFunnelPage() {
       return
     }
 
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => [
-          searchTerm,
-          selectedTerms.has(searchTerm)
-            ? {
-                ...state,
-                actionType: bulkActionType,
-              }
-            : state,
-        ])
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => [
+            searchTerm,
+            selectedTerms.has(searchTerm)
+              ? {
+                  ...state,
+                  actionType: bulkActionType,
+                }
+              : state,
+          ])
+        )
       )
-    )
+    })
     setMessage(`Applied "${bulkActionType}" to ${selectedTerms.size.toLocaleString()} selected term(s).`)
   }
 
@@ -814,45 +843,51 @@ export default function ShoppingFunnelPage() {
       return
     }
 
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => {
-          if (!selectedTerms.has(searchTerm) || state.actionType !== 'funnel') {
-            return [searchTerm, state]
-          }
-          const row = needsRowsByTerm[searchTerm]
-          return [
-            searchTerm,
-            {
-              ...state,
-              assignments: Object.fromEntries(
-                (row?.term.custom_label_0s ?? []).map((assignment) => [
-                  assignment.custom_label_0,
-                  bulkAssignmentTier,
-                ])
-              ),
-            },
-          ]
-        })
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => {
+            if (!selectedTerms.has(searchTerm) || state.actionType !== 'funnel') {
+              return [searchTerm, state]
+            }
+            const row = needsRowsByTerm[searchTerm]
+            return [
+              searchTerm,
+              {
+                ...state,
+                assignments: Object.fromEntries(
+                  (row?.term.custom_label_0s ?? []).map((assignment) => [
+                    assignment.custom_label_0,
+                    bulkAssignmentTier,
+                  ])
+                ),
+              },
+            ]
+          })
+        )
       )
-    )
+    })
     setMessage(
       `Applied "${bulkAssignmentTier}" to funnel assignments for ${selectedTerms.size.toLocaleString()} selected term(s).`
     )
   }
 
   function toggleNeedsExpanded(searchTerm: string) {
-    setExpandedNeedsTerms((current) => ({
-      ...current,
-      [searchTerm]: !current[searchTerm],
-    }))
+    startTransition(() => {
+      setExpandedNeedsTerms((current) => ({
+        ...current,
+        [searchTerm]: !current[searchTerm],
+      }))
+    })
   }
 
   function toggleExistingExpanded(searchTerm: string) {
-    setExpandedExistingTerms((current) => ({
-      ...current,
-      [searchTerm]: !current[searchTerm],
-    }))
+    startTransition(() => {
+      setExpandedExistingTerms((current) => ({
+        ...current,
+        [searchTerm]: !current[searchTerm],
+      }))
+    })
   }
 
   function confirmPublishStaged(stagedCount: number): boolean {
@@ -1013,31 +1048,31 @@ export default function ShoppingFunnelPage() {
     value: AssignmentTier | 'global_block' | 'competitor' | 'branded'
   ) {
     const key = updateKey(searchTerm, customLabel0)
-    const currentTerm = existingData?.terms.find((term) => term.search_term === searchTerm)
-    const currentFunnel = currentTerm?.funnels.find((funnel) => funnel.custom_label_0 === customLabel0)
-    const currentTier = currentFunnel ? fromExistingTierLabel(currentFunnel.tier) : null
+    const currentTier = existingTierByKey[key]
 
-    setExistingUpdates((current) => {
-      const next = { ...current }
-      if (value === 'global_block' || value === 'competitor' || value === 'branded') {
-        next[key] = {
-          search_term: searchTerm,
-          custom_label_0: customLabel0,
-          new_action: value,
-        }
-      } else {
-        next[key] = {
-          search_term: searchTerm,
-          custom_label_0: customLabel0,
-          new_tier: value,
-        }
+    startTransition(() => {
+      setExistingUpdates((current) => {
+        const next = { ...current }
+        if (value === 'global_block' || value === 'competitor' || value === 'branded') {
+          next[key] = {
+            search_term: searchTerm,
+            custom_label_0: customLabel0,
+            new_action: value,
+          }
+        } else {
+          next[key] = {
+            search_term: searchTerm,
+            custom_label_0: customLabel0,
+            new_tier: value,
+          }
 
-        // If the user chooses the existing tier, remove pending change for this row.
-        if (currentTier && value === currentTier) {
-          delete next[key]
+          // If the user chooses the existing tier, remove pending change for this row.
+          if (currentTier && value === currentTier) {
+            delete next[key]
+          }
         }
-      }
-      return next
+        return next
+      })
     })
   }
 
@@ -1095,9 +1130,11 @@ export default function ShoppingFunnelPage() {
               <Select
                 value={range}
                 onValueChange={(value) => {
-                  setRange(value as DateRangePreset)
-                  setNeedsOffset(0)
-                  setExistingOffset(0)
+                  startTransition(() => {
+                    setRange(value as DateRangePreset)
+                    setNeedsOffset(0)
+                    setExistingOffset(0)
+                  })
                 }}
               >
                 <SelectTrigger className="w-44">
@@ -1118,9 +1155,11 @@ export default function ShoppingFunnelPage() {
               <Select
                 value={customLabelFilter}
                 onValueChange={(value) => {
-                  setCustomLabelFilter(value)
-                  setNeedsOffset(0)
-                  setExistingOffset(0)
+                  startTransition(() => {
+                    setCustomLabelFilter(value)
+                    setNeedsOffset(0)
+                    setExistingOffset(0)
+                  })
                 }}
               >
                 <SelectTrigger className="w-72">
@@ -1142,9 +1181,12 @@ export default function ShoppingFunnelPage() {
               <Input
                 value={minImpressions}
                 onChange={(event) => {
-                  setMinImpressions(event.target.value)
-                  setNeedsOffset(0)
-                  setExistingOffset(0)
+                  const nextValue = event.target.value
+                  startTransition(() => {
+                    setMinImpressions(nextValue)
+                    setNeedsOffset(0)
+                    setExistingOffset(0)
+                  })
                 }}
                 className="w-36"
               />
@@ -1174,6 +1216,9 @@ export default function ShoppingFunnelPage() {
               <span className="text-xs text-muted-foreground">
                 Last pulled: {new Date(activeGeneratedAt).toLocaleString()}
               </span>
+            )}
+            {isTransitionPending && (
+              <span className="text-xs text-muted-foreground">Updating filters...</span>
             )}
           </div>
         </CardContent>
@@ -1336,7 +1381,12 @@ export default function ShoppingFunnelPage() {
         </Card>
       )}
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          startTransition(() => setActiveTab(value as typeof activeTab))
+        }
+      >
         <TabsList>
           <TabsTrigger value="needs-decision">Needs Decision</TabsTrigger>
           <TabsTrigger value="existing-funnel">Existing Funnel</TabsTrigger>
@@ -1361,7 +1411,10 @@ export default function ShoppingFunnelPage() {
                     <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       value={needsSearch}
-                      onChange={(event) => setNeedsSearch(event.target.value)}
+                      onChange={(event) => {
+                        const nextValue = event.target.value
+                        startTransition(() => setNeedsSearch(nextValue))
+                      }}
                       placeholder="Filter visible rows..."
                       className="pl-8"
                     />
@@ -1369,7 +1422,12 @@ export default function ShoppingFunnelPage() {
                 </div>
                 <div className="space-y-1">
                   <Label>Sort by</Label>
-                  <Select value={needsSort} onValueChange={(value) => setNeedsSort(value as NeedsSortOption)}>
+                  <Select
+                    value={needsSort}
+                    onValueChange={(value) =>
+                      startTransition(() => setNeedsSort(value as NeedsSortOption))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1386,7 +1444,9 @@ export default function ShoppingFunnelPage() {
                   <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                     <Checkbox
                       checked={showSelectedNeedsOnly}
-                      onCheckedChange={(checked) => setShowSelectedNeedsOnly(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        startTransition(() => setShowSelectedNeedsOnly(Boolean(checked)))
+                      }
                     />
                     Show selected only
                   </label>
@@ -1540,7 +1600,11 @@ export default function ShoppingFunnelPage() {
                   variant="outline"
                   size="sm"
                   disabled={needsOffset === 0 || staging || publishingStaged || needsLoading}
-                  onClick={() => setNeedsOffset((current) => Math.max(0, current - needsLimit))}
+                  onClick={() =>
+                    startTransition(() =>
+                      setNeedsOffset((current) => Math.max(0, current - needsLimit))
+                    )
+                  }
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Prev
@@ -1549,7 +1613,9 @@ export default function ShoppingFunnelPage() {
                   variant="outline"
                   size="sm"
                   disabled={!needsData?.has_next || staging || publishingStaged || needsLoading}
-                  onClick={() => setNeedsOffset((current) => current + needsLimit)}
+                  onClick={() =>
+                    startTransition(() => setNeedsOffset((current) => current + needsLimit))
+                  }
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -1942,7 +2008,10 @@ export default function ShoppingFunnelPage() {
                     <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       value={existingSearch}
-                      onChange={(event) => setExistingSearch(event.target.value)}
+                      onChange={(event) => {
+                        const nextValue = event.target.value
+                        startTransition(() => setExistingSearch(nextValue))
+                      }}
                       placeholder="Filter visible rows..."
                       className="pl-8"
                     />
@@ -1953,7 +2022,9 @@ export default function ShoppingFunnelPage() {
                   <Label>Sort by</Label>
                   <Select
                     value={existingSort}
-                    onValueChange={(value) => setExistingSort(value as ExistingSortOption)}
+                    onValueChange={(value) =>
+                      startTransition(() => setExistingSort(value as ExistingSortOption))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -1972,7 +2043,9 @@ export default function ShoppingFunnelPage() {
                   <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                     <Checkbox
                       checked={showPendingExistingOnly}
-                      onCheckedChange={(checked) => setShowPendingExistingOnly(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        startTransition(() => setShowPendingExistingOnly(Boolean(checked)))
+                      }
                     />
                     Show pending only
                   </label>
@@ -1982,7 +2055,9 @@ export default function ShoppingFunnelPage() {
                   <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                     <Checkbox
                       checked={showErrorsOnly}
-                      onCheckedChange={(checked) => setShowErrorsOnly(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        startTransition(() => setShowErrorsOnly(Boolean(checked)))
+                      }
                     />
                     Show errors only
                   </label>
@@ -2015,7 +2090,11 @@ export default function ShoppingFunnelPage() {
                     variant="outline"
                     size="sm"
                     disabled={existingOffset === 0 || posting || existingLoading}
-                    onClick={() => setExistingOffset((current) => Math.max(0, current - existingLimit))}
+                    onClick={() =>
+                      startTransition(() =>
+                        setExistingOffset((current) => Math.max(0, current - existingLimit))
+                      )
+                    }
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Prev
@@ -2024,7 +2103,9 @@ export default function ShoppingFunnelPage() {
                     variant="outline"
                     size="sm"
                     disabled={!existingData?.has_next || posting || existingLoading}
-                    onClick={() => setExistingOffset((current) => current + existingLimit)}
+                    onClick={() =>
+                      startTransition(() => setExistingOffset((current) => current + existingLimit))
+                    }
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />

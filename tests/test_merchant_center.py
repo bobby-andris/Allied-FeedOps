@@ -5,6 +5,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import httpx
+import pytest
+
 
 def test_write_merchant_center_snapshot_jsonl(monkeypatch, tmp_path):
     from feedops.integrations import merchant_center
@@ -61,12 +64,15 @@ def test_fetch_merchant_center_items_normalizes(monkeypatch):
     products = [
         {
             "offerId": "shopify_US_1_2",
-            "productAttributes": {
-                "customLabel0": "label0",
+            "attributes": {
                 "customLabel1": "label1",
                 "googleProductCategory": "Home & Garden",
                 "productTypes": ["Bath"],
             },
+            "customAttributes": [
+                {"name": "custom_label_0", "value": "label0"},
+                {"attributeName": "customLabel2", "attributeValue": "label2"},
+            ],
             "productStatus": {
                 "destinationStatuses": [
                     {"destination": "Shopping", "status": "approved"}
@@ -88,6 +94,7 @@ def test_fetch_merchant_center_items_normalizes(monkeypatch):
     assert len(normalized) == 1
     assert normalized[0]["offerId"] == "shopify_US_1_2"
     assert normalized[0]["customLabel0"] == "label0"
+    assert normalized[0]["customLabel2"] == "label2"
     assert normalized[0]["destinationStatuses"][0]["status"] == "approved"
 
 
@@ -180,7 +187,7 @@ def test_load_credentials_falls_back_to_creds_dir(monkeypatch, tmp_path):
 
 
 def test_load_credentials_uses_google_ads_config(tmp_path):
-    from google.oauth2.credentials import Credentials
+    Credentials = pytest.importorskip("google.oauth2.credentials").Credentials
 
     from feedops.integrations import merchant_center
 
@@ -202,3 +209,116 @@ def test_load_credentials_uses_google_ads_config(tmp_path):
     assert source == "google_ads_config"
     assert isinstance(creds, Credentials)
     assert isinstance(creds, Credentials)
+
+
+def test_load_credentials_invalid_service_account_fails_fast_without_adc_fallback(monkeypatch):
+    from feedops.integrations import merchant_center
+
+    def fail_from_info(_info, scopes=None):
+        raise ValueError("Invalid private key")
+
+    def fail_adc(*_args, **_kwargs):
+        raise AssertionError("ADC fallback should not be used")
+
+    monkeypatch.setattr(
+        merchant_center.service_account.Credentials,
+        "from_service_account_info",
+        fail_from_info,
+    )
+    monkeypatch.setattr(merchant_center.google.auth, "default", fail_adc)
+
+    with pytest.raises(ValueError, match="Merchant credential loading failed"):
+        merchant_center._load_credentials(
+            {
+                "GOOGLE_SERVICE_ACCOUNT_KEY": '{"type":"service_account","private_key":"bad","client_email":"x@example.com"}',
+            }
+        )
+
+
+def test_load_credentials_can_use_adc_fallback_when_opted_in(monkeypatch):
+    from feedops.integrations import merchant_center
+
+    class DummyCred:
+        token = None
+
+        def refresh(self, _request) -> None:
+            return None
+
+    def fail_from_info(_info, scopes=None):
+        raise ValueError("Invalid private key")
+
+    def fake_adc(*_args, **_kwargs):
+        return DummyCred(), "project-id"
+
+    monkeypatch.setattr(
+        merchant_center.service_account.Credentials,
+        "from_service_account_info",
+        fail_from_info,
+    )
+    monkeypatch.setattr(merchant_center.google.auth, "default", fake_adc)
+
+    creds, source = merchant_center._load_credentials(
+        {
+            "GOOGLE_SERVICE_ACCOUNT_KEY": '{"type":"service_account","private_key":"bad","client_email":"x@example.com"}',
+            "FEEDOPS_ALLOW_ADC_FALLBACK": "1",
+        }
+    )
+
+    assert isinstance(creds, DummyCred)
+    assert source == "adc_default"
+
+
+def test_request_page_with_retries_timeout_then_success(monkeypatch):
+    from feedops.integrations import merchant_center
+
+    request = httpx.Request("GET", "https://example.test/products")
+    attempts = {"count": 0}
+
+    class FakeClient:
+        def get(self, _endpoint, headers=None, params=None):
+            attempts["count"] += 1
+            if attempts["count"] == 1:
+                raise httpx.ReadTimeout("timed out", request=request)
+            return httpx.Response(200, json={"products": []}, request=request)
+
+    monkeypatch.setattr(merchant_center.time, "sleep", lambda _seconds: None)
+
+    response = merchant_center._request_page_with_retries(
+        FakeClient(),
+        "https://example.test/products",
+        {"Authorization": "Bearer token"},
+        {"pageSize": 1000},
+        max_attempts=3,
+        backoff_seconds=0.01,
+    )
+
+    assert response.status_code == 200
+    assert attempts["count"] == 2
+
+
+def test_request_page_with_retries_retries_on_503_then_succeeds(monkeypatch):
+    from feedops.integrations import merchant_center
+
+    request = httpx.Request("GET", "https://example.test/products")
+    attempts = {"count": 0}
+
+    class FakeClient:
+        def get(self, _endpoint, headers=None, params=None):
+            attempts["count"] += 1
+            if attempts["count"] == 1:
+                return httpx.Response(503, json={"error": "temporary"}, request=request)
+            return httpx.Response(200, json={"products": [{"offerId": "x"}]}, request=request)
+
+    monkeypatch.setattr(merchant_center.time, "sleep", lambda _seconds: None)
+
+    response = merchant_center._request_page_with_retries(
+        FakeClient(),
+        "https://example.test/products",
+        {"Authorization": "Bearer token"},
+        {"pageSize": 1000},
+        max_attempts=3,
+        backoff_seconds=0.01,
+    )
+
+    assert response.status_code == 200
+    assert attempts["count"] == 2

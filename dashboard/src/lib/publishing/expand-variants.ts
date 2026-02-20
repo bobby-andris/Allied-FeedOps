@@ -283,6 +283,7 @@ export async function validateContentForPublishing(
   isValid: boolean
   title: string | null
   description: string | null
+  prompt_hash: string | null
   errors: string[]
   issues: ContentValidationIssue[]
 }> {
@@ -294,7 +295,7 @@ export async function validateContentForPublishing(
   // Get approved content for both title and description
   const { data, error } = await supabase
     .from('generated_content')
-    .select('content_type, approved_content')
+    .select('content_type, approved_content, generation_prompt_hash')
     .eq('master_sku', canonicalMasterSku)
     .eq('platform', platform)
     .in('content_type', ['title', 'description'])
@@ -309,18 +310,24 @@ export async function validateContentForPublishing(
       isValid: false,
       title: null,
       description: null,
+      prompt_hash: null,
       errors: issues.map((issue) => issue.message),
       issues,
     }
   }
 
   const contentMap = new Map<string, string | null>()
+  const promptHashMap = new Map<string, string | null>()
   data?.forEach((row) => {
     contentMap.set(row.content_type, row.approved_content)
+    promptHashMap.set(row.content_type, row.generation_prompt_hash || null)
   })
 
   const title = contentMap.get('title') || null
   const description = contentMap.get('description') || null
+  const promptHash = promptHashMap.get('description')
+    || promptHashMap.get('title')
+    || null
 
   if (!title) {
     issues.push({
@@ -467,6 +474,7 @@ export async function validateContentForPublishing(
     isValid: issues.length === 0,
     title,
     description,
+    prompt_hash: promptHash,
     errors: issues.map((issue) => issue.message),
     issues,
   }

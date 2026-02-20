@@ -147,4 +147,9 @@ export interface PublishEventInsert {
   published_description?: string
   variant_count?: number
   content_version?: number
+  final_payload_snapshot?: Record<string, unknown>
+  final_payload_hash?: string
+  prompt_hash?: string
+  evidence_hash?: string
+  segment_key?: string
 }

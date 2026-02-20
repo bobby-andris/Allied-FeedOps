@@ -6,7 +6,11 @@ where SQLite isn't persistent.
 
 Configuration:
 - SUPABASE_URL: Supabase project URL
-- SUPABASE_KEY: Supabase anon key (from Streamlit secrets or env var)
+- SUPABASE_KEY: Supabase key (service role preferred, anon fallback)
+- Vercel equivalents are also supported:
+  - NEXT_PUBLIC_SUPABASE_URL
+  - SUPABASE_SERVICE_ROLE_KEY
+  - NEXT_PUBLIC_SUPABASE_ANON_KEY
 """
 
 from __future__ import annotations
@@ -74,16 +78,27 @@ def _get_supabase_config() -> tuple[str, str] | None:
         import streamlit as st
 
         if hasattr(st, "secrets"):
-            url = st.secrets.get("SUPABASE_URL")
-            key = st.secrets.get("SUPABASE_KEY")
+            url = st.secrets.get("SUPABASE_URL") or st.secrets.get(
+                "NEXT_PUBLIC_SUPABASE_URL"
+            )
+            key = (
+                st.secrets.get("SUPABASE_KEY")
+                or st.secrets.get("SUPABASE_SERVICE_ROLE_KEY")
+                or st.secrets.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+            )
             if url and key:
                 return url, key
     except Exception:
         pass
 
     # Fall back to environment variables
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
+    url = os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+    key = (
+        os.environ.get("SUPABASE_KEY")
+        or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+        or os.environ.get("SUPABASE_SERVICE_KEY")
+    )
     if url and key:
         return url, key
 
@@ -104,7 +119,8 @@ def get_client() -> Client:
         config = _get_supabase_config()
         if not config:
             raise RuntimeError(
-                "Supabase not configured. Set SUPABASE_URL and SUPABASE_KEY."
+                "Supabase not configured. Set SUPABASE_URL+SUPABASE_KEY "
+                "or NEXT_PUBLIC_SUPABASE_URL+SUPABASE_SERVICE_ROLE_KEY."
             )
         url, key = config
         _client = create_client(url, key)

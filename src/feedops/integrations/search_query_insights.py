@@ -10,12 +10,261 @@ that customers actually use when searching.
 from __future__ import annotations
 
 import logging
+import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from feedops.pipeline.enrichment import Evidence
 
 logger = logging.getLogger(__name__)
+
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
+_URL_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
+_PLACEHOLDER_RE = re.compile(r"\{[^}]+\}")
+
+_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "for",
+    "in",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "with",
+}
+
+_EXCLUDED_BRAND_TERMS = {
+    "amazon",
+    "delta",
+    "home depot",
+    "homedepot",
+    "ikea",
+    "kohler",
+    "lowes",
+    "moen",
+    "wayfair",
+}
+
+
+def _tokenize(text: str) -> list[str]:
+    return _TOKEN_RE.findall((text or "").lower())
+
+
+def build_relevance_anchor_terms(*texts: str | None) -> set[str]:
+    """Build normalized anchor terms used to keep query evidence relevant."""
+    anchors: set[str] = set()
+    for text in texts:
+        for token in _tokenize(text or ""):
+            if token in _STOPWORDS or len(token) < 3:
+                continue
+            anchors.add(token)
+    return anchors
+
+
+def _looks_like_query_noise(query_text: str) -> bool:
+    """Reject terms that are not useful for LLM keyword guidance."""
+    text = (query_text or "").strip().lower()
+    if not text:
+        return True
+    if len(text) < 3 or len(text) > 100:
+        return True
+    if _URL_RE.search(text) or _PLACEHOLDER_RE.search(text):
+        return True
+    for brand in _EXCLUDED_BRAND_TERMS:
+        if brand in text:
+            return True
+    tokens = [t for t in _tokenize(text) if t not in _STOPWORDS]
+    if len(tokens) < 2:
+        return True
+    return False
+
+
+def _metric_value(row: dict, *keys: str) -> float:
+    for key in keys:
+        value = row.get(key)
+        if value in (None, ""):
+            continue
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            continue
+    return 0.0
+
+
+def _normalize_metric(values: list[float]) -> list[float]:
+    if not values:
+        return []
+    min_value = min(values)
+    max_value = max(values)
+    if max_value <= min_value:
+        return [1.0 if v > 0 else 0.0 for v in values]
+    denom = max_value - min_value
+    return [(v - min_value) / denom for v in values]
+
+
+def curate_search_queries_by_relevance(
+    queries: list[dict],
+    anchor_terms: set[str] | None = None,
+    *,
+    min_keep: int = 3,
+    max_keep: int = 15,
+) -> tuple[list[dict], dict[str, object]]:
+    """Curate and rank query insights to reduce off-intent prompt noise.
+
+    Score formula (fixed):
+    score = 0.45*impressions_norm + 0.35*clicks_norm + 0.20*keyword_volume_norm + anchor_overlap_bonus
+    anchor_overlap_bonus = +0.15 when >=2 anchor token overlaps
+    """
+    anchors = set(anchor_terms or set())
+    deduped: list[dict] = []
+    keep: list[dict] = []
+    fallback: list[dict] = []
+    seen: set[str] = set()
+    reason_counts: dict[str, int] = {}
+    dropped_noise = 0
+    dropped_duplicates = 0
+
+    for row in queries:
+        text = (row.get("query_text") or "").strip()
+        normalized = " ".join(_tokenize(text))
+        if not normalized:
+            continue
+        if normalized in seen:
+            dropped_duplicates += 1
+            continue
+        seen.add(normalized)
+
+        if _looks_like_query_noise(text):
+            dropped_noise += 1
+            reason_counts["noise_or_competitor"] = (
+                reason_counts.get("noise_or_competitor", 0) + 1
+            )
+            continue
+
+        cleaned_tokens = {t for t in _tokenize(text) if t not in _STOPWORDS}
+        if not cleaned_tokens:
+            reason_counts["no_clean_tokens"] = reason_counts.get("no_clean_tokens", 0) + 1
+            continue
+
+        overlap_count = len(cleaned_tokens & anchors) if anchors else 0
+        candidate = dict(row)
+        candidate["query_text"] = text
+        candidate["_cleaned_tokens"] = cleaned_tokens
+        candidate["_overlap_count"] = overlap_count
+        deduped.append(candidate)
+
+    if not deduped:
+        diagnostics = {
+            "query_filter_kept_count": 0,
+            "query_filter_dropped_count": dropped_noise + dropped_duplicates,
+            "query_filter_reason_top": "no_valid_queries",
+        }
+        return [], diagnostics
+
+    impressions = [
+        _metric_value(row, "total_impressions", "impressions")
+        for row in deduped
+    ]
+    clicks = [
+        _metric_value(row, "total_clicks", "clicks")
+        for row in deduped
+    ]
+    volumes = [
+        _metric_value(row, "avg_monthly_searches", "keyword_volume", "search_volume")
+        for row in deduped
+    ]
+    impressions_norm = _normalize_metric(impressions)
+    clicks_norm = _normalize_metric(clicks)
+    volumes_norm = _normalize_metric(volumes)
+
+    for idx, row in enumerate(deduped):
+        overlap_count = int(row.get("_overlap_count", 0))
+        anchor_overlap_bonus = 0.15 if overlap_count >= 2 else 0.0
+        score = (
+            0.45 * impressions_norm[idx]
+            + 0.35 * clicks_norm[idx]
+            + 0.20 * volumes_norm[idx]
+            + anchor_overlap_bonus
+        )
+        row["_relevance_score"] = round(score, 6)
+
+        fallback.append(row)
+        if not anchors or overlap_count >= 1:
+            keep.append(row)
+        else:
+            reason_counts["anchor_mismatch"] = reason_counts.get("anchor_mismatch", 0) + 1
+
+    keep.sort(
+        key=lambda r: (
+            float(r.get("_relevance_score", 0.0)),
+            _metric_value(r, "total_clicks", "clicks"),
+            _metric_value(r, "total_impressions", "impressions"),
+        ),
+        reverse=True,
+    )
+    fallback.sort(
+        key=lambda r: (
+            float(r.get("_relevance_score", 0.0)),
+            _metric_value(r, "total_clicks", "clicks"),
+            _metric_value(r, "total_impressions", "impressions"),
+        ),
+        reverse=True,
+    )
+
+    if len(keep) >= min_keep:
+        curated = keep[:max_keep]
+    else:
+        curated = list(keep)
+        for row in fallback:
+            if row in curated:
+                continue
+            curated.append(row)
+            if len(curated) >= min(max_keep, max(min_keep, len(fallback))):
+                break
+
+    cleaned_output: list[dict] = []
+    for row in curated:
+        item = dict(row)
+        item.pop("_cleaned_tokens", None)
+        item.pop("_overlap_count", None)
+        item.pop("_relevance_score", None)
+        cleaned_output.append(item)
+
+    dropped_count = max(0, len(queries) - len(cleaned_output))
+    top_reason = "none"
+    if reason_counts:
+        top_reason = max(reason_counts.items(), key=lambda kv: kv[1])[0]
+    diagnostics = {
+        "query_filter_kept_count": len(cleaned_output),
+        "query_filter_dropped_count": dropped_count,
+        "query_filter_reason_top": top_reason,
+        "query_filter_noise_dropped": dropped_noise,
+        "query_filter_duplicate_dropped": dropped_duplicates,
+    }
+    return cleaned_output, diagnostics
+
+
+def filter_search_queries_by_relevance(
+    queries: list[dict],
+    anchor_terms: set[str] | None = None,
+    *,
+    min_keep: int = 3,
+) -> list[dict]:
+    """Filter and dedupe query insights to reduce off-intent prompt noise.
+
+    The model should receive only query evidence that is likely relevant to the
+    product category/custom_label intent cluster. We keep a small fallback set
+    to avoid starving the prompt when anchor overlap is sparse.
+    """
+    curated, _diagnostics = curate_search_queries_by_relevance(
+        queries,
+        anchor_terms,
+        min_keep=min_keep,
+    )
+    return curated
 
 
 def fetch_search_queries_for_master_sku(
@@ -112,9 +361,40 @@ def fetch_search_queries_for_variant(
         return []
 
 
+def fetch_variant_queries_for_master_sku(
+    master_sku: str,
+    limit: int = 120,
+) -> list[dict]:
+    """Fetch variant-level query rows across all finishes for a master SKU.
+
+    This is used to build variant-aware query evidence without per-finish N+1 calls.
+    """
+    try:
+        from feedops.db.supabase_client import get_client, is_supabase_available
+
+        if not is_supabase_available():
+            logger.debug("Supabase not available, skipping variant query fetch")
+            return []
+
+        client = get_client()
+        result = (
+            client.table("search_queries")
+            .select("query_text, impressions, clicks, finish_code")
+            .eq("master_sku", master_sku)
+            .order("impressions", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return result.data if result.data else []
+    except Exception as e:
+        logger.warning(f"Failed to fetch variant query pool for {master_sku}: {e}")
+        return []
+
+
 def format_search_queries_for_evidence(
     queries: list[dict],
     context: str = "master",
+    max_rows: int | None = None,
 ) -> list["Evidence"]:
     """Convert search queries to Evidence rows for LLM prompt.
 
@@ -131,11 +411,12 @@ def format_search_queries_for_evidence(
         return []
 
     evidence_rows: list[Evidence] = []
+    row_limit = max_rows if max_rows is not None else (12 if context == "master" else 6)
 
     if context == "master":
         # Format top queries with search volume when available
         query_parts: list[str] = []
-        for q in queries[:10]:  # Top 10 for evidence
+        for q in queries[:row_limit]:
             text = q.get("query_text", "")
             if not text:
                 continue
@@ -176,16 +457,18 @@ def format_search_queries_for_evidence(
     elif context == "variant":
         # Variant-specific queries (shorter format)
         query_parts: list[str] = []
-        for q in queries[:5]:  # Top 5 for variants
+        for q in queries[:row_limit]:
             text = q.get("query_text", "")
             if not text:
                 continue
-            impressions = q.get("impressions", 0)
+            impressions = q.get("impressions", q.get("total_impressions", 0))
             if impressions >= 1000:
                 imp_str = f"{impressions / 1000:.1f}K"
             else:
                 imp_str = str(impressions)
-            query_parts.append(f'"{text}" ({imp_str} imp)')
+            finish_code = (q.get("finish_code") or "").strip()
+            finish_suffix = f", {finish_code}" if finish_code else ""
+            query_parts.append(f'"{text}" ({imp_str} imp{finish_suffix})')
 
         if query_parts:
             evidence_rows.append(Evidence(

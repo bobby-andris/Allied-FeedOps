@@ -4,6 +4,12 @@ import { publishToShopify } from '@/lib/publishing/shopify'
 import { expandVariantsForPublish, validateContentForPublishing } from '@/lib/publishing/expand-variants'
 import { uploadProductImage } from '@/lib/publishing/shopify-images'
 import { captureBaseline } from '@/lib/baseline-capture'
+import {
+  buildPublishLineageHashes,
+  buildGoogleFinalPayloadSnapshot,
+  buildShopifyFinalPayloadSnapshot,
+  normalizeSegmentKey,
+} from '@/lib/publishing/final-payload'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
 import type {
   BatchPublishRequest,
@@ -21,9 +27,11 @@ interface SkuContent {
   google_title?: string
   google_description?: string
   google_version?: number
+  google_prompt_hash?: string
   shopify_title?: string
   shopify_description?: string
   shopify_version?: number
+  shopify_prompt_hash?: string
   offer_ids: string[]
   shopify_product_id?: string
 }
@@ -120,6 +128,52 @@ function resolveAssignmentStatus(outcome: AssignmentOutcome | undefined): BatchA
     return 'failed'
   }
   return 'partial'
+}
+
+function extractSegmentLabel(row: Record<string, unknown>): string | null {
+  const direct = typeof row.custom_label_0 === 'string' ? row.custom_label_0 : null
+  if (direct && direct.trim()) return direct.trim()
+  if (row.custom_labels && typeof row.custom_labels === 'object') {
+    const labels = row.custom_labels as Record<string, unknown>
+    const nested = typeof labels.custom_label_0 === 'string'
+      ? labels.custom_label_0
+      : (typeof labels.customLabel0 === 'string' ? labels.customLabel0 : null)
+    if (nested && nested.trim()) return nested.trim()
+  }
+  return null
+}
+
+async function buildSegmentKeyMap(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  skuList: string[],
+): Promise<Map<string, string | null>> {
+  const segmentMap = new Map<string, string | null>()
+  for (const sku of skuList) {
+    segmentMap.set(sku, null)
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('variant_index')
+      .select('master_sku, custom_label_0, custom_labels')
+      .in('master_sku', skuList)
+
+    if (error || !data) return segmentMap
+
+    for (const row of data as Record<string, unknown>[]) {
+      const sku = typeof row.master_sku === 'string' ? row.master_sku : null
+      if (!sku || segmentMap.get(sku)) continue
+      const label = extractSegmentLabel(row)
+      const key = normalizeSegmentKey(label)
+      if (key) {
+        segmentMap.set(sku, key)
+      }
+    }
+  } catch {
+    // Ignore lineage enrichment failures to keep publish path non-blocking.
+  }
+
+  return segmentMap
 }
 
 function extractValidationFailureDetails(
@@ -320,7 +374,7 @@ export async function POST(request: NextRequest) {
     // 2. Get APPROVED content for each SKU (not candidate_content)
     const { data: contentData, error: contentError } = await supabase
       .from('generated_content')
-      .select('master_sku, platform, content_type, approved_content, approved_version')
+      .select('master_sku, platform, content_type, approved_content, approved_version, generation_prompt_hash')
       .in('master_sku', skuList)
 
     if (contentError) {
@@ -366,7 +420,14 @@ export async function POST(request: NextRequest) {
 
     // Add APPROVED content data (not candidate_content!)
     if (contentData) {
-      for (const row of contentData as { master_sku: string; platform: string; content_type: string; approved_content: string | null; approved_version: number | null }[]) {
+      for (const row of contentData as {
+        master_sku: string
+        platform: string
+        content_type: string
+        approved_content: string | null
+        approved_version: number | null
+        generation_prompt_hash: string | null
+      }[]) {
         const content = skuContentMap.get(row.master_sku)
         if (!content) continue
 
@@ -374,15 +435,19 @@ export async function POST(request: NextRequest) {
           if (row.platform === 'google') {
             content.google_title = row.approved_content || undefined
             content.google_version = row.approved_version || undefined
+            content.google_prompt_hash = row.generation_prompt_hash || undefined
           } else if (row.platform === 'shopify') {
             content.shopify_title = row.approved_content || undefined
             content.shopify_version = row.approved_version || undefined
+            content.shopify_prompt_hash = row.generation_prompt_hash || undefined
           }
         } else if (row.content_type === 'description') {
           if (row.platform === 'google') {
             content.google_description = row.approved_content || undefined
+            content.google_prompt_hash = row.generation_prompt_hash || content.google_prompt_hash
           } else if (row.platform === 'shopify') {
             content.shopify_description = row.approved_content || undefined
+            content.shopify_prompt_hash = row.generation_prompt_hash || content.shopify_prompt_hash
           }
         }
       }
@@ -407,6 +472,7 @@ export async function POST(request: NextRequest) {
     // 4. Execute publishing for each platform and SKU
     const results: PublishResult[] = []
     const assignmentOutcomes = new Map<string, AssignmentOutcome>()
+    const segmentKeyMap = await buildSegmentKeyMap(supabase, skuList)
     let successCount = 0
     let failedCount = 0
 
@@ -604,6 +670,16 @@ export async function POST(request: NextRequest) {
                 })),
                 environment
               )
+              const googleSnapshot = buildGoogleFinalPayloadSnapshot(
+                expandedVariants.map((v) => ({
+                  gmc_offer_id: v.gmc_offer_id,
+                  finish: v.finish,
+                  finish_code: v.finish_code,
+                  title: v.title,
+                  description: v.description,
+                  image_url: v.image_url,
+                }))
+              )
 
               const result: PublishResult = {
                 success: googleResult.success,
@@ -638,6 +714,20 @@ export async function POST(request: NextRequest) {
                 published_description: validation.description,
                 variant_count: expandedVariants.length,
                 content_version: content.google_version,
+                final_payload_snapshot: googleSnapshot,
+                ...buildPublishLineageHashes({
+                  finalPayloadSnapshot: googleSnapshot,
+                  promptHash: content.google_prompt_hash,
+                  evidenceInput: {
+                    master_sku: sku,
+                    platform: 'google',
+                    title: validation.title,
+                    description: validation.description,
+                    offer_ids: content.offer_ids,
+                    variant_count: expandedVariants.length,
+                  },
+                  segmentKey: segmentKeyMap.get(sku) || null,
+                }),
                 published_by: guard.actorId || undefined,
               })
             }
@@ -813,6 +903,11 @@ export async function POST(request: NextRequest) {
                 validation.description,
                 environment
               )
+              const shopifySnapshot = buildShopifyFinalPayloadSnapshot({
+                shopify_product_id: content.shopify_product_id,
+                title: validation.title,
+                description: validation.description,
+              })
 
               const result: PublishResult = {
                 success: shopifyResult.success,
@@ -843,6 +938,19 @@ export async function POST(request: NextRequest) {
                 published_title: validation.title,
                 published_description: validation.description,
                 content_version: content.shopify_version || content.google_version,
+                final_payload_snapshot: shopifySnapshot,
+                ...buildPublishLineageHashes({
+                  finalPayloadSnapshot: shopifySnapshot,
+                  promptHash: content.shopify_prompt_hash,
+                  evidenceInput: {
+                    master_sku: sku,
+                    platform: 'shopify',
+                    title: validation.title,
+                    description: validation.description,
+                    shopify_product_id: content.shopify_product_id,
+                  },
+                  segmentKey: segmentKeyMap.get(sku) || null,
+                }),
                 published_by: guard.actorId || undefined,
               })
             }
@@ -976,10 +1084,30 @@ async function logPublishEvent(
   event: PublishEventInsert
 ): Promise<void> {
   try {
-    await supabase.from('publish_events').insert({
+    const payload = {
       ...event,
       published_at: new Date().toISOString(),
-    })
+    }
+    const { error } = await supabase.from('publish_events').insert(payload)
+    if (
+      error
+      && (
+        event.final_payload_snapshot
+        || event.final_payload_hash
+        || event.prompt_hash
+        || event.evidence_hash
+        || event.segment_key
+      )
+      && /final_payload_snapshot|final_payload_hash|prompt_hash|evidence_hash|segment_key/i.test(error.message)
+    ) {
+      const legacyPayload: Record<string, unknown> = { ...payload }
+      delete legacyPayload.final_payload_snapshot
+      delete legacyPayload.final_payload_hash
+      delete legacyPayload.prompt_hash
+      delete legacyPayload.evidence_hash
+      delete legacyPayload.segment_key
+      await supabase.from('publish_events').insert(legacyPayload)
+    }
   } catch (error) {
     console.error('Failed to log publish event:', error)
   }

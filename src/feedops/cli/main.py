@@ -1,15 +1,51 @@
 """FeedOps CLI entry point."""
 
 import asyncio
+import csv
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
 
-# Load .env file before any other imports that depend on env vars
-load_dotenv()
+
+def _resolve_primary_checkout_root(repo_root: Path) -> Path | None:
+    """Resolve the primary checkout root when running from a git worktree."""
+    git_ref = repo_root / ".git"
+    if not git_ref.exists() or not git_ref.is_file():
+        return None
+    try:
+        content = git_ref.read_text(encoding="utf-8").strip()
+        if not content.startswith("gitdir:"):
+            return None
+        gitdir_path = Path(content.split(":", 1)[1].strip()).expanduser()
+        # In worktrees: <main>/.git/worktrees/<name>
+        if len(gitdir_path.parts) >= 3 and gitdir_path.parts[-2] == "worktrees":
+            return gitdir_path.parents[2]
+    except Exception:
+        return None
+    return None
+
+
+def _load_environment_files() -> None:
+    """Load env files with worktree-aware fallback to primary checkout root."""
+    repo_root = Path(__file__).resolve().parents[3]
+    roots = [repo_root]
+    primary_root = _resolve_primary_checkout_root(repo_root)
+    if primary_root and primary_root not in roots:
+        roots.append(primary_root)
+
+    # Priority (last wins): .env -> .env.local -> .env.vercel
+    # Across roots: worktree first, primary checkout second.
+    for root in roots:
+        load_dotenv(root / ".env", override=False)
+        load_dotenv(root / ".env.local", override=True)
+        load_dotenv(root / ".env.vercel", override=True)
+
+
+_load_environment_files()
 
 import typer
 from rich.console import Console
@@ -36,6 +72,8 @@ app = typer.Typer(
 )
 console = Console()
 
+_SHOPIFY_REGION_PREFIX_RE = re.compile(r"^shopify_([a-z]{2})_", re.IGNORECASE)
+
 # Register publish-related commands
 for command in publish_app.registered_commands:
     app.registered_commands.append(command)
@@ -50,6 +88,97 @@ def _parse_bool_env(name: str, default: bool = True) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _normalize_offer_id(value: str | None) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    match = _SHOPIFY_REGION_PREFIX_RE.match(raw)
+    if not match:
+        return raw
+    return raw.replace(match.group(0), f"shopify_{match.group(1).lower()}_", 1)
+
+
+def _extract_label0(custom_labels: object) -> str:
+    if not isinstance(custom_labels, dict):
+        return ""
+    raw = custom_labels.get("customLabel0")
+    if raw in (None, ""):
+        raw = custom_labels.get("custom_label_0")
+    return str(raw or "").strip()
+
+
+def _classify_missing_label_queue(
+    *,
+    exists_in_gmc: bool | None,
+    treat_gmc_blank_as_catchall: bool,
+) -> str:
+    if exists_in_gmc is True:
+        return (
+            "queue_b_expected_catchall_blank"
+            if treat_gmc_blank_as_catchall
+            else "queue_b_blank_label_upstream"
+        )
+    if exists_in_gmc is False:
+        return "queue_a_missing_offer_mapping"
+    return "queue_unknown_no_gmc_check"
+
+
+def _compute_reconcile_coverage_metrics(
+    *,
+    offer_linked_total: int,
+    missing_total: int,
+    queue_a_missing_offer_mapping: int,
+    queue_b_expected_catchall_blank: int,
+    treat_gmc_blank_as_catchall: bool,
+) -> dict[str, float]:
+    if offer_linked_total <= 0:
+        return {
+            "strict_label_coverage_pct": 0.0,
+            "actionable_coverage_pct": 0.0,
+        }
+
+    strict_label_coverage_pct = round(
+        ((offer_linked_total - missing_total) / offer_linked_total) * 100.0,
+        2,
+    )
+    actionable_missing = max(0, queue_a_missing_offer_mapping)
+    if not treat_gmc_blank_as_catchall:
+        actionable_missing += max(0, queue_b_expected_catchall_blank)
+    actionable_coverage_pct = round(
+        ((offer_linked_total - actionable_missing) / offer_linked_total) * 100.0,
+        2,
+    )
+    return {
+        "strict_label_coverage_pct": strict_label_coverage_pct,
+        "actionable_coverage_pct": actionable_coverage_pct,
+    }
+
+
+def _fetch_variant_index_rows(supabase, page_size: int = 1000) -> list[dict]:
+    """Fetch variant_index rows using Supabase-safe pagination.
+
+    Supabase/PostgREST commonly caps response rows at 1000. Using a larger page
+    size can cause false "last page" detection if only 1000 rows are returned.
+    """
+    rows: list[dict] = []
+    start = 0
+    while True:
+        result = (
+            supabase.table("variant_index")
+            .select("master_sku,gmc_offer_id,custom_labels")
+            .range(start, start + page_size - 1)
+            .execute()
+        )
+        page = result.data or []
+        if not page:
+            break
+        rows.extend(page)
+        if len(page) < page_size:
+            break
+        start += page_size
+    return rows
 
 
 def _get_cache_ttl_hours() -> float:
@@ -335,6 +464,179 @@ def sync_catalog_command(
     console.print(f"\n[bold]Catalog sync complete[/bold]")
     console.print(f"Shopify catalog: {result.catalog_path} ({catalog_status})")
     console.print(f"Merchant Center metadata: {result.mc_metadata_path} ({mc_status})")
+
+
+@app.command(name="reconcile-custom-labels")
+def reconcile_custom_labels(
+    output_dir: str = typer.Option(
+        "reports/merchant_center",
+        "--output-dir",
+        help="Directory where reconciliation CSVs are written",
+    ),
+    include_gmc_lookup: bool = typer.Option(
+        True,
+        "--include-gmc-lookup/--skip-gmc-lookup",
+        help="Check each missing offer against live Merchant Center products",
+    ),
+    treat_gmc_blank_as_catchall: bool = typer.Option(
+        True,
+        "--treat-gmc-blank-as-catchall/--treat-gmc-blank-as-upstream-gap",
+        help=(
+            "When true, classify in-GMC blank custom_label_0 offers as expected catchall "
+            "inventory (non-actionable for segmentation)."
+        ),
+    ),
+):
+    """Reconcile missing custom_label_0 coverage for offer-linked variants.
+
+    Outputs:
+    - Missing variants CSV (by gmc_offer_id)
+    - Missing masters CSV (grouped by master_sku)
+    - Queue split counts for exists_in_gmc=true/false
+    """
+    from feedops.db.supabase_client import get_client, is_supabase_available
+    from feedops.integrations.merchant_center import fetch_merchant_center_items
+
+    if not is_supabase_available():
+        console.print("[red]Supabase is not configured. Cannot run reconciliation.[/red]")
+        raise typer.Exit(1)
+
+    supabase = get_client()
+    rows = _fetch_variant_index_rows(supabase)
+    offer_rows = [r for r in rows if str(r.get("gmc_offer_id") or "").strip()]
+    missing_rows = [r for r in offer_rows if not _extract_label0(r.get("custom_labels"))]
+
+    gmc_offers: set[str] = set()
+    if include_gmc_lookup:
+        console.print("Fetching Merchant Center products for existence checks...")
+        items = fetch_merchant_center_items(limit=None)
+        gmc_offers = {
+            _normalize_offer_id(item.get("offerId"))
+            for item in items
+            if item.get("offerId")
+        }
+
+    missing_variants: list[dict] = []
+    masters: dict[str, dict[str, object]] = {}
+    for row in missing_rows:
+        master_sku = str(row.get("master_sku") or "").strip()
+        offer_id = str(row.get("gmc_offer_id") or "").strip()
+        norm_offer = _normalize_offer_id(offer_id)
+        exists_in_gmc = bool(norm_offer and norm_offer in gmc_offers) if include_gmc_lookup else None
+        missing_variants.append(
+            {
+                "master_sku": master_sku,
+                "gmc_offer_id": offer_id,
+                "normalized_offer_id": norm_offer,
+                "exists_in_gmc": exists_in_gmc,
+                "queue": (
+                    _classify_missing_label_queue(
+                        exists_in_gmc=exists_in_gmc,
+                        treat_gmc_blank_as_catchall=treat_gmc_blank_as_catchall,
+                    )
+                ),
+            }
+        )
+
+        bucket = masters.setdefault(
+            master_sku,
+            {
+                "master_sku": master_sku,
+                "missing_variant_count": 0,
+                "exists_true_count": 0,
+                "exists_false_count": 0,
+                "exists_unknown_count": 0,
+            },
+        )
+        bucket["missing_variant_count"] = int(bucket["missing_variant_count"]) + 1
+        if exists_in_gmc is True:
+            bucket["exists_true_count"] = int(bucket["exists_true_count"]) + 1
+        elif exists_in_gmc is False:
+            bucket["exists_false_count"] = int(bucket["exists_false_count"]) + 1
+        else:
+            bucket["exists_unknown_count"] = int(bucket["exists_unknown_count"]) + 1
+
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    variants_path = out_dir / f"custom-label-no-match-variants-{ts}.csv"
+    masters_path = out_dir / f"custom-label-no-match-master-skus-{ts}.csv"
+
+    with variants_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "master_sku",
+                "gmc_offer_id",
+                "normalized_offer_id",
+                "exists_in_gmc",
+                "queue",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(missing_variants)
+
+    master_rows = []
+    for row in masters.values():
+        total = int(row["missing_variant_count"])
+        exists_false = int(row["exists_false_count"])
+        all_missing = total > 0 and exists_false == total
+        partial_missing = exists_false > 0 and exists_false < total
+        master_rows.append(
+            {
+                **row,
+                "all_missing_in_gmc": all_missing,
+                "partially_missing_in_gmc": partial_missing,
+            }
+        )
+
+    with masters_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "master_sku",
+                "missing_variant_count",
+                "exists_true_count",
+                "exists_false_count",
+                "exists_unknown_count",
+                "all_missing_in_gmc",
+                "partially_missing_in_gmc",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(sorted(master_rows, key=lambda r: (r["missing_variant_count"], r["master_sku"]), reverse=True))
+
+    queue_a = sum(1 for row in missing_variants if row["exists_in_gmc"] is False)
+    queue_b = sum(1 for row in missing_variants if row["exists_in_gmc"] is True)
+    queue_unknown = sum(1 for row in missing_variants if row["exists_in_gmc"] is None)
+    coverage = _compute_reconcile_coverage_metrics(
+        offer_linked_total=len(offer_rows),
+        missing_total=len(missing_rows),
+        queue_a_missing_offer_mapping=queue_a,
+        queue_b_expected_catchall_blank=queue_b,
+        treat_gmc_blank_as_catchall=treat_gmc_blank_as_catchall,
+    )
+
+    console.print("\n[bold]Custom label reconciliation complete[/bold]")
+    console.print(f"Timestamp: {ts}")
+    console.print(f"Offer-linked variants scanned: {len(offer_rows)}")
+    console.print(f"Missing custom_label_0 variants: {len(missing_rows)}")
+    console.print(f"Strict label coverage: {coverage['strict_label_coverage_pct']}%")
+    actionable_label = (
+        "Actionable coverage (excluding expected catchall blanks)"
+        if treat_gmc_blank_as_catchall
+        else "Actionable coverage (Queue B treated as upstream gap)"
+    )
+    console.print(f"{actionable_label}: {coverage['actionable_coverage_pct']}%")
+    console.print(f"Queue A (missing/stale offer mapping): {queue_a}")
+    if treat_gmc_blank_as_catchall:
+        console.print(f"Queue B (offer exists, expected catchall blank): {queue_b}")
+    else:
+        console.print(f"Queue B (offer exists, upstream label blank): {queue_b}")
+    if queue_unknown:
+        console.print(f"Queue unknown (no GMC existence check): {queue_unknown}")
+    console.print(f"Missing variants CSV: {variants_path}")
+    console.print(f"Missing masters CSV: {masters_path}")
 
 
 @app.command(name="refresh-cache")

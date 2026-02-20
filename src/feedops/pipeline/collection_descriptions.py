@@ -8,12 +8,13 @@ finish counts) that may not apply to every SKU.
 from __future__ import annotations
 
 import csv
+import os
 import re
 from functools import lru_cache
 from pathlib import Path
 
 
-_COLLECTION_DESCRIPTIONS_PATH = (
+_DEFAULT_COLLECTION_DESCRIPTIONS_PATH = (
     Path(__file__).parent.parent.parent.parent
     / "data"
     / "Collection_Descriptions_Complete_All_41_20260124.csv"
@@ -25,11 +26,18 @@ _AVAILABLE_IN_RE = re.compile(
 )
 
 
+def _collection_descriptions_path() -> Path:
+    override = os.getenv("FEEDOPS_COLLECTION_DESCRIPTIONS_PATH")
+    if override:
+        return Path(override).expanduser()
+    return _DEFAULT_COLLECTION_DESCRIPTIONS_PATH
+
+
 @lru_cache(maxsize=1)
 def _load_collection_descriptions() -> dict[str, dict[str, str]]:
     """Return mapping of normalized collection name -> row dict."""
     try:
-        with _COLLECTION_DESCRIPTIONS_PATH.open(newline="", encoding="utf-8") as f:
+        with _collection_descriptions_path().open(newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             rows = {}
             for row in reader:
