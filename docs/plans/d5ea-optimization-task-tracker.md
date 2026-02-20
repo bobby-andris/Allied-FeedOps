@@ -1,6 +1,6 @@
 # Branch Workstream Tracker — d5ea (`codex/shopping-funnel-integration-20260220`)
 
-Last updated: 2026-02-20 (Task 7 complete: GA4+Shopify supplemental confidence gates)
+Last updated: 2026-02-20 (Task 8 complete: guardrail incidents + experiment instrumentation)
 
 ## Purpose
 Track progress for the 8-step Google Ads optimization implementation sequence on this branch, including what is complete, what is pending, and key implementation notes.
@@ -13,7 +13,7 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Task 5: complete
 - Task 6: complete
 - Task 7: complete
-- Task 8: pending
+- Task 8: complete
 
 ## 8-Task Execution Checklist
 1. **Implement decomposition pipeline v1 (deterministic parser, persistence, health/backfill ops)** — ✅ Complete
@@ -23,7 +23,7 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 5. **Implement adaptive tROAS recommender by `custom_label_0 × tier` (recommend-only mode)** — ✅ Complete
 6. **Add opportunity cluster miner v1 and launch-brief generation workflow** — ✅ Complete
 7. **Integrate GA4+Shopify supplemental value signals into scoring confidence gates** — ✅ Complete
-8. **Add guardrail incidents and experiment instrumentation for safe rollout decisions** — ⏳ Pending
+8. **Add guardrail incidents and experiment instrumentation for safe rollout decisions** — ✅ Complete
 
 ---
 
@@ -248,6 +248,40 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 ### Main commit status
 - Task 7 implementation is complete in the branch working tree and ready to commit.
 
+## Task 8 — Guardrail Incidents + Experiment Instrumentation
+### What was implemented
+- Added deterministic optimization guardrail evaluation engine:
+  - `/dashboard/src/lib/optimization/guardrails.ts`
+  - outputs severity-tagged incidents and rollout decisions (`go`/`hold`/`blocked`) with confidence and rationale.
+- Added optimization guardrails API with safe persistence path:
+  - `/api/optimization/guardrails` (GET evaluate, POST persist)
+  - computes incidents from:
+    - recommendation queue risk concentration
+    - tROAS actionable share
+    - opportunity overlap risk
+    - supplemental confidence degradation
+    - audience high-priority risk concentration
+- Added experiment instrumentation persistence on POST:
+  - writes guardrail incidents into `guardrail_incidents` (deduplicated by rule/date)
+  - writes decision snapshots into `optimization_experiment_snapshots`
+  - warns safely if required DB tables are missing (no hard crash).
+- Added migration for experiment snapshots:
+  - `/supabase/migrations/035_optimization_experiment_snapshots.sql`
+  - includes RLS + permissive policy + indexes.
+- Integrated Optimization Control Center UI with live guardrail decision feed:
+  - now calls `/api/optimization/guardrails`
+  - surfaces rollout status, confidence, guardrail metrics, and active incidents in Guardrails tab.
+
+### Validation
+- Tests passed:
+  - `src/lib/optimization/__tests__/guardrails.test.ts`
+  - `src/app/api/optimization/guardrails/__tests__/route.test.ts`
+- Full production build passed:
+  - `npm run build`
+
+### Main commit status
+- Task 8 implementation is complete in the branch working tree and ready to commit.
+
 ---
 
 ## Notes / Operational Constraints
@@ -257,13 +291,15 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Backfill `dry_run=true` remains the safe rehearsal mode and writes nothing.
 
 ## Recommended Next Step
-Proceed with **Task 8**:
-- add guardrail incidents and experiment instrumentation for safe rollout decisions.
+With all 8 tasks complete:
+- ✅ migration `035_optimization_experiment_snapshots.sql` has been applied to Supabase project `qezuszwufortkiutlhym`,
+- run one guardrail persistence call (`POST /api/optimization/guardrails?persist=true`) in a trusted context,
+- then proceed to PR + merge + production validation.
 - leverage existing recommendation diagnostics to trigger measurable rollout-go/no-go signals.
 
 ## Session Log (Latest)
-- Implemented and verified Task 6 opportunity miner + launch brief workflow.
+- Implemented and verified Task 8 guardrail incidents + experiment instrumentation.
 - Validation evidence captured:
-  - targeted and regression test success
-  - lint success (warnings only)
+  - targeted guardrail tests success
   - full production build success.
+- Supabase migration audit confirmed `033`, `034`, and `035` present in migration history.

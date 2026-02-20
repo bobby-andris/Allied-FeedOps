@@ -200,6 +200,40 @@ function overlapRiskBadgeVariant(risk: 'low' | 'medium' | 'high') {
   return 'secondary' as const
 }
 
+function guardrailStatusBadgeVariant(status: 'go' | 'hold' | 'blocked') {
+  if (status === 'blocked') return 'destructive' as const
+  if (status === 'hold') return 'outline' as const
+  return 'secondary' as const
+}
+
+interface GuardrailsResponse {
+  guardrail_decision: {
+    status: 'go' | 'hold' | 'blocked'
+    confidence: number
+    rationale: string
+  }
+  incidents: Array<{
+    ruleId: string
+    severity: 'low' | 'medium' | 'high' | 'critical'
+    status: 'open' | 'acknowledged' | 'resolved' | 'ignored'
+    message: string
+    suggestedAction: string
+  }>
+  metrics: {
+    queue_total: number
+    queue_high_impact_count: number
+    queue_low_confidence_high_impact_count: number
+    roas_total: number
+    roas_actionable_count: number
+    opportunities_total: number
+    opportunities_high_overlap_count: number
+    audience_high_priority_count: number
+    low_confidence_high_impact_share: number
+    roas_actionable_share: number
+    high_overlap_cluster_share: number
+  }
+}
+
 export default function OptimizationControlCenterPage() {
   const [range, setRange] = useState<DateRangePreset>('30d')
   const [loading, setLoading] = useState<boolean>(true)
@@ -216,6 +250,7 @@ export default function OptimizationControlCenterPage() {
   const [audienceRecommendations, setAudienceRecommendations] =
     useState<AudienceRecommendationsResponse | null>(null)
   const [shopifySignals, setShopifySignals] = useState<ShopifyValueSignalsResponse | null>(null)
+  const [guardrails, setGuardrails] = useState<GuardrailsResponse | null>(null)
 
   const highPriorityAudienceRecommendations = useMemo(
     () => audienceRecommendations?.recommendations.filter((item) => item.priority === 'high') ?? [],
@@ -298,7 +333,13 @@ export default function OptimizationControlCenterPage() {
       ),
     ])
 
-    const [ga4AttributionResult, audienceWatchlistResult, audienceRecommendationsResult, shopifySignalsResult] =
+    const [
+      ga4AttributionResult,
+      audienceWatchlistResult,
+      audienceRecommendationsResult,
+      shopifySignalsResult,
+      guardrailsResult,
+    ] =
       await Promise.all([
         fetchOptionalJson<Ga4AttributionResponse>(`/api/ga4/attribution-quality`, 'GA4 attribution'),
         fetchOptionalJson<AudienceWatchlistResponse>(`/api/audiences/watchlist`, 'Audience watchlist'),
@@ -310,6 +351,10 @@ export default function OptimizationControlCenterPage() {
           `/api/shopify/value-signals`,
           'Shopify value signals'
         ),
+        fetchOptionalJson<GuardrailsResponse>(
+          `/api/optimization/guardrails?${qs}`,
+          'Optimization guardrails'
+        ),
       ])
 
     const warnings = [
@@ -318,6 +363,7 @@ export default function OptimizationControlCenterPage() {
       ...audienceWatchlistResult.warnings,
       ...audienceRecommendationsResult.warnings,
       ...shopifySignalsResult.warnings,
+      ...guardrailsResult.warnings,
     ]
 
     setSupplementalWarnings(Array.from(new Set(warnings)))
@@ -330,6 +376,7 @@ export default function OptimizationControlCenterPage() {
     setAudienceWatchlist(audienceWatchlistResult.data)
     setAudienceRecommendations(audienceRecommendationsResult.data)
     setShopifySignals(shopifySignalsResult.data)
+    setGuardrails(guardrailsResult.data)
   }, [range])
 
   const refresh = useCallback(async () => {
@@ -424,7 +471,7 @@ export default function OptimizationControlCenterPage() {
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Terms Evaluated</CardTitle>
@@ -465,6 +512,21 @@ export default function OptimizationControlCenterPage() {
             {ga4Attribution?.riskLevel && (
               <Badge variant={riskBadgeVariant(ga4Attribution.riskLevel)}>
                 {ga4Attribution.riskLevel.toUpperCase()} risk
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Guardrail Decision</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            <p className="text-2xl font-bold">
+              {guardrails?.guardrail_decision ? guardrails.guardrail_decision.status.toUpperCase() : '—'}
+            </p>
+            {guardrails?.guardrail_decision && (
+              <Badge variant={guardrailStatusBadgeVariant(guardrails.guardrail_decision.status)}>
+                {Math.round(guardrails.guardrail_decision.confidence * 100)}% confidence
               </Badge>
             )}
           </CardContent>
@@ -728,14 +790,53 @@ export default function OptimizationControlCenterPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-amber-600" />
-                <span className="text-sm">
-                  Unassigned revenue share: {((ga4Attribution?.unassignedRevenueShare ?? 0) * 100).toFixed(1)}%
-                </span>
-                <span className="text-sm">
-                  (not set) campaign share: {((ga4Attribution?.notSetCampaignRevenueShare ?? 0) * 100).toFixed(1)}%
-                </span>
+              {guardrails?.guardrail_decision ? (
+                <div className="rounded-md border p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <ShieldAlert className="h-4 w-4 text-amber-600" />
+                      Rollout status
+                    </p>
+                    <Badge variant={guardrailStatusBadgeVariant(guardrails.guardrail_decision.status)}>
+                      {guardrails.guardrail_decision.status.toUpperCase()}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{guardrails.guardrail_decision.rationale}</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span>
+                      Low-conf high-impact share:{' '}
+                      {(guardrails.metrics.low_confidence_high_impact_share * 100).toFixed(1)}%
+                    </span>
+                    <span>tROAS actionable share: {(guardrails.metrics.roas_actionable_share * 100).toFixed(1)}%</span>
+                    <span>
+                      High-overlap cluster share: {(guardrails.metrics.high_overlap_cluster_share * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-md border p-3 text-sm text-muted-foreground">
+                  Guardrail decision feed is unavailable for this window.
+                </div>
+              )}
+              <div className="space-y-2">
+                {guardrails?.incidents?.length ? (
+                  guardrails.incidents.slice(0, 12).map((incident) => (
+                    <div key={`${incident.ruleId}-${incident.message}`} className="rounded-md border p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-medium">{incident.ruleId}</p>
+                        <Badge variant={riskBadgeVariant(incident.severity === 'critical' ? 'high' : incident.severity)}>
+                          {incident.severity}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{incident.message}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Action: {incident.suggestedAction}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-md border p-3 text-sm text-muted-foreground">
+                    No active optimization guardrail incidents for this window.
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 {highPriorityAudienceRecommendations.length === 0 ? (
