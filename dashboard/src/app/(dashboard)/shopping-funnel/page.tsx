@@ -643,6 +643,16 @@ export default function ShoppingFunnelPage() {
     })
   }, [deferredExistingSearch, existingData?.terms, existingSort, existingUpdates, showPendingExistingOnly])
 
+  const existingTierByKey = useMemo(() => {
+    const tierByKey: Record<string, AssignmentTier | null> = {}
+    for (const term of existingData?.terms ?? []) {
+      for (const funnel of term.funnels) {
+        tierByKey[updateKey(term.search_term, funnel.custom_label_0)] = fromExistingTierLabel(funnel.tier)
+      }
+    }
+    return tierByKey
+  }, [existingData?.terms])
+
   const needsTotal = needsData?.total_count ?? 0
   const needsReturned = needsData?.returned_count ?? 0
   const needsLimit = needsData?.limit ?? NEEDS_DECISION_LIMIT
@@ -656,67 +666,77 @@ export default function ShoppingFunnelPage() {
   const existingRangeEnd = existingData ? (existingData.offset ?? 0) + existingReturned : 0
 
   function toggleNeedsSelection(searchTerm: string, selected: boolean) {
-    setNeedsState((current) => ({
-      ...current,
-      [searchTerm]: {
-        ...current[searchTerm],
-        selected,
-      },
-    }))
+    startTransition(() => {
+      setNeedsState((current) => ({
+        ...current,
+        [searchTerm]: {
+          ...current[searchTerm],
+          selected,
+        },
+      }))
+    })
   }
 
   function updateNeedsAction(searchTerm: string, actionType: DecisionActionType) {
-    setNeedsState((current) => ({
-      ...current,
-      [searchTerm]: {
-        ...current[searchTerm],
-        actionType,
-      },
-    }))
+    startTransition(() => {
+      setNeedsState((current) => ({
+        ...current,
+        [searchTerm]: {
+          ...current[searchTerm],
+          actionType,
+        },
+      }))
+    })
   }
 
   function updateNeedsAssignment(searchTerm: string, customLabel0: string, tier: AssignmentTier) {
-    setNeedsState((current) => ({
-      ...current,
-      [searchTerm]: {
-        ...current[searchTerm],
-        assignments: {
-          ...current[searchTerm].assignments,
-          [customLabel0]: tier,
+    startTransition(() => {
+      setNeedsState((current) => ({
+        ...current,
+        [searchTerm]: {
+          ...current[searchTerm],
+          assignments: {
+            ...current[searchTerm].assignments,
+            [customLabel0]: tier,
+          },
         },
-      },
-    }))
+      }))
+    })
   }
 
   function selectAllNeeds(selected: boolean) {
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => [
-          searchTerm,
-          {
-            ...state,
-            selected,
-          },
-        ])
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => [
+            searchTerm,
+            {
+              ...state,
+              selected,
+            },
+          ])
+        )
       )
-    )
+    })
   }
 
   function selectVisibleNeeds(selected: boolean) {
     const visibleTerms = new Set(needsRows.map((row) => row.term.search_term))
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => [
-          searchTerm,
-          visibleTerms.has(searchTerm)
-            ? {
-                ...state,
-                selected,
-              }
-            : state,
-        ])
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => [
+            searchTerm,
+            visibleTerms.has(searchTerm)
+              ? {
+                  ...state,
+                  selected,
+                }
+              : state,
+          ])
+        )
       )
-    )
+    })
   }
 
   function applyBulkActionToSelectedNeeds() {
@@ -726,19 +746,21 @@ export default function ShoppingFunnelPage() {
       return
     }
 
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => [
-          searchTerm,
-          selectedTerms.has(searchTerm)
-            ? {
-                ...state,
-                actionType: bulkActionType,
-              }
-            : state,
-        ])
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => [
+            searchTerm,
+            selectedTerms.has(searchTerm)
+              ? {
+                  ...state,
+                  actionType: bulkActionType,
+                }
+              : state,
+          ])
+        )
       )
-    )
+    })
     setMessage(`Applied "${bulkActionType}" to ${selectedTerms.size.toLocaleString()} selected term(s).`)
   }
 
@@ -749,45 +771,51 @@ export default function ShoppingFunnelPage() {
       return
     }
 
-    setNeedsState((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([searchTerm, state]) => {
-          if (!selectedTerms.has(searchTerm) || state.actionType !== 'funnel') {
-            return [searchTerm, state]
-          }
-          const row = needsRowsByTerm[searchTerm]
-          return [
-            searchTerm,
-            {
-              ...state,
-              assignments: Object.fromEntries(
-                (row?.term.custom_label_0s ?? []).map((assignment) => [
-                  assignment.custom_label_0,
-                  bulkAssignmentTier,
-                ])
-              ),
-            },
-          ]
-        })
+    startTransition(() => {
+      setNeedsState((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([searchTerm, state]) => {
+            if (!selectedTerms.has(searchTerm) || state.actionType !== 'funnel') {
+              return [searchTerm, state]
+            }
+            const row = needsRowsByTerm[searchTerm]
+            return [
+              searchTerm,
+              {
+                ...state,
+                assignments: Object.fromEntries(
+                  (row?.term.custom_label_0s ?? []).map((assignment) => [
+                    assignment.custom_label_0,
+                    bulkAssignmentTier,
+                  ])
+                ),
+              },
+            ]
+          })
+        )
       )
-    )
+    })
     setMessage(
       `Applied "${bulkAssignmentTier}" to funnel assignments for ${selectedTerms.size.toLocaleString()} selected term(s).`
     )
   }
 
   function toggleNeedsExpanded(searchTerm: string) {
-    setExpandedNeedsTerms((current) => ({
-      ...current,
-      [searchTerm]: !current[searchTerm],
-    }))
+    startTransition(() => {
+      setExpandedNeedsTerms((current) => ({
+        ...current,
+        [searchTerm]: !current[searchTerm],
+      }))
+    })
   }
 
   function toggleExistingExpanded(searchTerm: string) {
-    setExpandedExistingTerms((current) => ({
-      ...current,
-      [searchTerm]: !current[searchTerm],
-    }))
+    startTransition(() => {
+      setExpandedExistingTerms((current) => ({
+        ...current,
+        [searchTerm]: !current[searchTerm],
+      }))
+    })
   }
 
   function confirmPublishStaged(stagedCount: number): boolean {
@@ -948,31 +976,31 @@ export default function ShoppingFunnelPage() {
     value: AssignmentTier | 'global_block' | 'competitor' | 'branded'
   ) {
     const key = updateKey(searchTerm, customLabel0)
-    const currentTerm = existingData?.terms.find((term) => term.search_term === searchTerm)
-    const currentFunnel = currentTerm?.funnels.find((funnel) => funnel.custom_label_0 === customLabel0)
-    const currentTier = currentFunnel ? fromExistingTierLabel(currentFunnel.tier) : null
+    const currentTier = existingTierByKey[key]
 
-    setExistingUpdates((current) => {
-      const next = { ...current }
-      if (value === 'global_block' || value === 'competitor' || value === 'branded') {
-        next[key] = {
-          search_term: searchTerm,
-          custom_label_0: customLabel0,
-          new_action: value,
-        }
-      } else {
-        next[key] = {
-          search_term: searchTerm,
-          custom_label_0: customLabel0,
-          new_tier: value,
-        }
+    startTransition(() => {
+      setExistingUpdates((current) => {
+        const next = { ...current }
+        if (value === 'global_block' || value === 'competitor' || value === 'branded') {
+          next[key] = {
+            search_term: searchTerm,
+            custom_label_0: customLabel0,
+            new_action: value,
+          }
+        } else {
+          next[key] = {
+            search_term: searchTerm,
+            custom_label_0: customLabel0,
+            new_tier: value,
+          }
 
-        // If the user chooses the existing tier, remove pending change for this row.
-        if (currentTier && value === currentTier) {
-          delete next[key]
+          // If the user chooses the existing tier, remove pending change for this row.
+          if (currentTier && value === currentTier) {
+            delete next[key]
+          }
         }
-      }
-      return next
+        return next
+      })
     })
   }
 
@@ -1281,7 +1309,12 @@ export default function ShoppingFunnelPage() {
         </Card>
       )}
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          startTransition(() => setActiveTab(value as typeof activeTab))
+        }
+      >
         <TabsList>
           <TabsTrigger value="needs-decision">Needs Decision</TabsTrigger>
           <TabsTrigger value="existing-funnel">Existing Funnel</TabsTrigger>
@@ -1454,7 +1487,11 @@ export default function ShoppingFunnelPage() {
                   variant="outline"
                   size="sm"
                   disabled={needsOffset === 0 || staging || publishingStaged || needsLoading}
-                  onClick={() => setNeedsOffset((current) => Math.max(0, current - needsLimit))}
+                  onClick={() =>
+                    startTransition(() =>
+                      setNeedsOffset((current) => Math.max(0, current - needsLimit))
+                    )
+                  }
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Prev
@@ -1463,7 +1500,9 @@ export default function ShoppingFunnelPage() {
                   variant="outline"
                   size="sm"
                   disabled={!needsData?.has_next || staging || publishingStaged || needsLoading}
-                  onClick={() => setNeedsOffset((current) => current + needsLimit)}
+                  onClick={() =>
+                    startTransition(() => setNeedsOffset((current) => current + needsLimit))
+                  }
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -1756,7 +1795,11 @@ export default function ShoppingFunnelPage() {
                     variant="outline"
                     size="sm"
                     disabled={existingOffset === 0 || posting || existingLoading}
-                    onClick={() => setExistingOffset((current) => Math.max(0, current - existingLimit))}
+                    onClick={() =>
+                      startTransition(() =>
+                        setExistingOffset((current) => Math.max(0, current - existingLimit))
+                      )
+                    }
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Prev
@@ -1765,7 +1808,9 @@ export default function ShoppingFunnelPage() {
                     variant="outline"
                     size="sm"
                     disabled={!existingData?.has_next || posting || existingLoading}
-                    onClick={() => setExistingOffset((current) => current + existingLimit)}
+                    onClick={() =>
+                      startTransition(() => setExistingOffset((current) => current + existingLimit))
+                    }
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />
