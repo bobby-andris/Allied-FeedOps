@@ -23,10 +23,26 @@ interface RecommendationQueueResponse {
   total_terms_evaluated: number
   queue_count: number
   action_distribution: Record<string, number>
+  warnings?: string[]
+  supplemental_confidence?: {
+    multiplier: number
+    reasons: string[]
+    diagnostics: {
+      ga4RiskLevel: 'low' | 'medium' | 'high' | 'unavailable'
+      ga4QualityScore: number | null
+      ga4UnassignedRevenueShare: number | null
+      ga4NotSetCampaignRevenueShare: number | null
+      shopifyMappedSkuCoverage: number | null
+      shopifyUnmappedRevenueShare: number | null
+    }
+  }
   queue: Array<{
     searchTerm: string
     impactScore: number
+    baseConfidence: number
     confidence: number
+    confidenceMultiplier: number
+    confidenceAdjustmentReasons: string[]
     actionType: string
     defaultTier?: string
     reasonCodes: string[]
@@ -297,6 +313,7 @@ export default function OptimizationControlCenterPage() {
       ])
 
     const warnings = [
+      ...(recommendationPayload.warnings ?? []),
       ...ga4AttributionResult.warnings,
       ...audienceWatchlistResult.warnings,
       ...audienceRecommendationsResult.warnings,
@@ -489,12 +506,22 @@ export default function OptimizationControlCenterPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline">Impact {item.impactScore.toFixed(2)}</Badge>
                       <Badge variant="outline">{Math.round(item.confidence * 100)}% confidence</Badge>
+                      {item.confidence !== item.baseConfidence && (
+                        <Badge variant="outline">
+                          gated from {Math.round(item.baseConfidence * 100)}%
+                        </Badge>
+                      )}
                       <Badge variant="secondary">
                         {item.actionType}
                         {item.defaultTier ? ` (${item.defaultTier})` : ''}
                       </Badge>
                     </div>
                   </div>
+                  {item.confidenceAdjustmentReasons.length > 0 && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Supplemental confidence gates: {item.confidenceAdjustmentReasons.join(', ')}
+                    </p>
+                  )}
                 </div>
               ))}
             </CardContent>

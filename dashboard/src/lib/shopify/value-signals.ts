@@ -1,3 +1,5 @@
+import { createAdminClient } from '@/lib/supabase/admin'
+
 const SHOPIFY_API_VERSION = '2026-01'
 
 export interface ShopifyLineItemSnapshot {
@@ -30,6 +32,11 @@ export interface ShopifyValueSignalsSummary {
   topCustomLabels: ShopifyCustomLabelRevenue[]
   topSkus: Array<{ sku: string; revenue: number; quantity: number }>
   unmappedSkuRevenue: number
+}
+
+export interface ShopifyValueSignalsWithMapping extends ShopifyValueSignalsSummary {
+  mappedSkuCount: number
+  skuCountInOrders: number
 }
 
 interface ShopifyGraphQLResponse<T = unknown> {
@@ -79,6 +86,26 @@ function normalizeStoreHost(storeUrl: string): string {
 function parseAmount(value: string | undefined | null): number {
   const parsed = Number(value ?? 0)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+function resolveCustomLabel0(value: unknown, fallbackCategory: string | null): string | null {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const objectValue = value as Record<string, unknown>
+    const direct =
+      objectValue.customLabel0 ??
+      objectValue.custom_label_0 ??
+      objectValue.customlabel0 ??
+      null
+    if (typeof direct === 'string' && direct.trim()) {
+      return direct.trim()
+    }
+  }
+
+  if (typeof fallbackCategory === 'string' && fallbackCategory.trim()) {
+    return fallbackCategory.trim()
+  }
+
+  return null
 }
 
 async function shopifyGraphQL<T>(
@@ -290,6 +317,49 @@ export function summarizeShopifyOrders(
   }
 }
 
+export async function fetchCustomLabelBySku(
+  skus: string[],
+  options?: { batchSize?: number }
+): Promise<Record<string, string>> {
+  const customLabelBySku: Record<string, string> = {}
+  const batchSize = Math.max(1, Math.min(options?.batchSize ?? 400, 1000))
+  if (skus.length === 0) {
+    return customLabelBySku
+  }
+
+  const supabase = createAdminClient()
+  const uniqueSkus = Array.from(new Set(skus.filter((sku) => typeof sku === 'string' && sku.trim())))
+
+  for (let index = 0; index < uniqueSkus.length; index += batchSize) {
+    const batch = uniqueSkus.slice(index, index + batchSize)
+    if (batch.length === 0) {
+      continue
+    }
+
+    const { data, error } = await supabase
+      .from('variant_index')
+      .select('option_sku, custom_labels, product_category')
+      .in('option_sku', batch)
+
+    if (error) {
+      throw error
+    }
+
+    for (const row of data ?? []) {
+      const optionSku = row.option_sku
+      if (!optionSku) {
+        continue
+      }
+      const customLabel0 = resolveCustomLabel0(row.custom_labels, row.product_category ?? null)
+      if (customLabel0) {
+        customLabelBySku[optionSku] = customLabel0
+      }
+    }
+  }
+
+  return customLabelBySku
+}
+
 export async function fetchShopifyValueSignals(options?: {
   lookbackDays?: number
   maxOrders?: number
@@ -303,5 +373,23 @@ export async function fetchShopifyValueSignals(options?: {
     lookbackDays: options?.lookbackDays ?? 90,
     maxOrders: options?.maxOrders ?? 500,
     ...summary,
+  }
+}
+
+export async function fetchShopifyValueSignalsWithLabelMapping(options?: {
+  lookbackDays?: number
+  maxOrders?: number
+}): Promise<ShopifyValueSignalsWithMapping> {
+  const orders = await fetchShopifyOrderSnapshots(options)
+  const skus = Array.from(
+    new Set(orders.flatMap((order) => order.lineItems.map((lineItem) => lineItem.sku)).filter(Boolean))
+  )
+  const customLabelBySku = await fetchCustomLabelBySku(skus)
+  const summary = summarizeShopifyOrders(orders, customLabelBySku)
+
+  return {
+    ...summary,
+    mappedSkuCount: Object.keys(customLabelBySku).length,
+    skuCountInOrders: skus.length,
   }
 }

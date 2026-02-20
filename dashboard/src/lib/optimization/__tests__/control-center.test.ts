@@ -455,4 +455,81 @@ describe('query intelligence regressions', () => {
     expect(summary.avgUncertainty).toBe(0.15)
     expect(summary.topImpactTerms[0]).toEqual({ searchTerm: 'term one', impactScore: 100 })
   })
+
+  it('applies supplemental confidence gates without changing core queue ranking', () => {
+    const terms: NeedsDecisionTerm[] = [
+      {
+        search_term: 'soap dishes for shower',
+        custom_label_0s: [
+          {
+            custom_label_0: 'Soap Dishes & Holders',
+            source_campaign: 'AVD - Shopping - US - Soap Dishes & Holders - HIGH',
+            source_tier: 'HIGH',
+            impressions: 56,
+            clicks: 4,
+            cost_micros: 19_260_000,
+            conversions: 0,
+            conversions_value: 0,
+          },
+        ],
+        recommendation: {
+          action_type: 'funnel',
+          default_tier: 'high',
+          confidence: 0.8,
+          reason_codes: ['performance_weighted_tiering'],
+        },
+        value_score: {
+          impact_score: 80,
+          expected_clicks: 4,
+          expected_cvr: 0,
+          expected_conversion_value: 0,
+          expected_profit_proxy: 40,
+          uncertainty: 0.9,
+        },
+      },
+      {
+        search_term: 'wall mounted towel bar brass',
+        custom_label_0s: [
+          {
+            custom_label_0: 'Wall Mounted Towel Bars',
+            source_campaign: 'AVD - Shopping - US - Wall Mounted Towel Bars - MEDIUM',
+            source_tier: 'MEDIUM',
+            impressions: 500,
+            clicks: 40,
+            cost_micros: 12_000_000,
+            conversions: 4,
+            conversions_value: 800,
+          },
+        ],
+        recommendation: {
+          action_type: 'funnel',
+          default_tier: 'low',
+          confidence: 0.9,
+          reason_codes: ['performance_weighted_tiering'],
+        },
+        value_score: {
+          impact_score: 170,
+          expected_clicks: 44,
+          expected_cvr: 0.1,
+          expected_conversion_value: 900,
+          expected_profit_proxy: 220,
+          uncertainty: 0.22,
+        },
+      },
+    ]
+
+    const queue = buildRecommendationQueue(terms, 10, {
+      supplementalGate: {
+        multiplier: 0.82,
+        reasons: ['ga4_attribution_high_risk', 'shopify_low_sku_label_coverage'],
+      },
+    })
+
+    expect(queue).toHaveLength(2)
+    expect(queue[0].searchTerm).toBe('wall mounted towel bar brass')
+    expect(queue[0].baseConfidence).toBeCloseTo(0.9, 4)
+    expect(queue[0].confidence).toBeCloseTo(0.738, 4)
+    expect(queue[0].confidenceMultiplier).toBeCloseTo(0.82, 4)
+    expect(queue[0].confidenceAdjustmentReasons).toContain('ga4_attribution_high_risk')
+  })
 })

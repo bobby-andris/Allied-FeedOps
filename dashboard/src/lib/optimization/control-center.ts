@@ -1,5 +1,6 @@
 import type { NeedsDecisionTerm } from '@/lib/shopping-funnel/types'
 import { computeReviewerPriorityScore } from '@/lib/shopping-funnel/reviewer-priority'
+import type { SupplementalConfidenceGate } from '@/lib/optimization/supplemental-confidence'
 
 const BASELINE_TARGET_ROAS = {
   HIGH: 3.6,
@@ -64,7 +65,10 @@ export interface RecommendationQueueItem {
   searchTerm: string
   priorityScore: number
   impactScore: number
+  baseConfidence: number
   confidence: number
+  confidenceMultiplier: number
+  confidenceAdjustmentReasons: string[]
   actionType: 'funnel' | 'global_block' | 'competitor' | 'branded'
   defaultTier?: 'campaign_negative' | 'high' | 'medium' | 'low'
   reasonCodes: string[]
@@ -82,6 +86,10 @@ export interface QueryScoreSummary {
   avgExpectedProfitProxy: number
   avgUncertainty: number
   topImpactTerms: Array<{ searchTerm: string; impactScore: number }>
+}
+
+export interface RecommendationQueueOptions {
+  supplementalGate?: Pick<SupplementalConfidenceGate, 'multiplier' | 'reasons'>
 }
 
 export interface RoasRecommendation {
@@ -324,8 +332,12 @@ export function buildOpportunityLaunchBriefs(
 
 export function buildRecommendationQueue(
   terms: NeedsDecisionTerm[],
-  limit = 100
+  limit = 100,
+  options?: RecommendationQueueOptions
 ): RecommendationQueueItem[] {
+  const confidenceMultiplier = clamp(options?.supplementalGate?.multiplier ?? 1, 0.6, 1)
+  const confidenceAdjustmentReasons = options?.supplementalGate?.reasons ?? []
+
   const queue = terms
     .map((term) => {
       const aggregates = term.custom_label_0s.reduce(
@@ -346,11 +358,17 @@ export function buildRecommendationQueue(
         }
       )
 
+      const baseConfidence = term.recommendation?.confidence ?? 0
+      const gatedConfidence = clamp(baseConfidence * confidenceMultiplier, 0, 0.99)
+
       return {
         searchTerm: term.search_term,
         priorityScore: computeReviewerPriorityScore(term.value_score),
         impactScore: term.value_score?.impact_score ?? 0,
-        confidence: term.recommendation?.confidence ?? 0,
+        baseConfidence: Number(baseConfidence.toFixed(4)),
+        confidence: Number(gatedConfidence.toFixed(4)),
+        confidenceMultiplier: Number(confidenceMultiplier.toFixed(4)),
+        confidenceAdjustmentReasons,
         actionType: term.recommendation?.action_type ?? 'funnel',
         defaultTier: term.recommendation?.default_tier,
         reasonCodes: term.recommendation?.reason_codes ?? [],

@@ -1,6 +1,6 @@
 # Branch Workstream Tracker — d5ea (`codex/shopping-funnel-integration-20260220`)
 
-Last updated: 2026-02-20 (Task 6 complete: opportunity cluster miner + launch briefs)
+Last updated: 2026-02-20 (Task 7 complete: GA4+Shopify supplemental confidence gates)
 
 ## Purpose
 Track progress for the 8-step Google Ads optimization implementation sequence on this branch, including what is complete, what is pending, and key implementation notes.
@@ -12,7 +12,8 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Task 4: complete
 - Task 5: complete
 - Task 6: complete
-- Tasks 7-8: pending
+- Task 7: complete
+- Task 8: pending
 
 ## 8-Task Execution Checklist
 1. **Implement decomposition pipeline v1 (deterministic parser, persistence, health/backfill ops)** — ✅ Complete
@@ -21,7 +22,7 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 4. **Ship recommendation explainability panel (reason codes, confidence components, diagnostics)** — ✅ Complete
 5. **Implement adaptive tROAS recommender by `custom_label_0 × tier` (recommend-only mode)** — ✅ Complete
 6. **Add opportunity cluster miner v1 and launch-brief generation workflow** — ✅ Complete
-7. **Integrate GA4+Shopify supplemental value signals into scoring confidence gates** — ⏳ Pending
+7. **Integrate GA4+Shopify supplemental value signals into scoring confidence gates** — ✅ Complete
 8. **Add guardrail incidents and experiment instrumentation for safe rollout decisions** — ⏳ Pending
 
 ---
@@ -210,6 +211,43 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Local Task 6 code is implemented and verified in the branch working tree.
 - Next checkpoint commit will include Task 6 changes + tracker update.
 
+## Task 7 — GA4+Shopify Supplemental Value Signals into Confidence Gates
+### What was implemented
+- Added deterministic supplemental confidence gate utility:
+  - `/dashboard/src/lib/optimization/supplemental-confidence.ts`
+  - consumes GA4 attribution quality + Shopify mapping coverage diagnostics.
+  - computes bounded multiplier + reason codes + warnings + diagnostics.
+- Integrated gate-aware queue scoring in optimization control-center logic:
+  - `buildRecommendationQueue` now accepts optional supplemental gate input.
+  - queue rows now include:
+    - `baseConfidence`
+    - gated `confidence`
+    - `confidenceMultiplier`
+    - `confidenceAdjustmentReasons`
+- Wired `/api/shopping-funnel/recommendations` to fetch supplemental signals safely:
+  - GA4: `fetchGa4AttributionQuality(...)`
+  - Shopify: `fetchShopifyValueSignalsWithLabelMapping(...)`
+  - failures degrade gracefully to warnings (no hard-fail on recommendations route).
+- Added reusable Shopify mapping/value helper in core library:
+  - `fetchCustomLabelBySku(...)`
+  - `fetchShopifyValueSignalsWithLabelMapping(...)`
+- Refactored `/api/shopify/value-signals` to use shared helper and keep output contract stable.
+- Updated Optimization Control Center UI to expose confidence gating context:
+  - shows gated confidence vs base confidence.
+  - displays supplemental confidence gate reason codes.
+  - ingests recommendation-route warnings into supplemental warning panel.
+
+### Validation
+- New tests passed:
+  - `src/lib/optimization/__tests__/supplemental-confidence.test.ts`
+- Updated tests passed:
+  - `src/lib/optimization/__tests__/control-center.test.ts`
+- Lint passed (existing unrelated warnings only).
+- Full Next.js production build passed.
+
+### Main commit status
+- Task 7 implementation is complete in the branch working tree and ready to commit.
+
 ---
 
 ## Notes / Operational Constraints
@@ -219,9 +257,9 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Backfill `dry_run=true` remains the safe rehearsal mode and writes nothing.
 
 ## Recommended Next Step
-Proceed with **Task 7**:
-- integrate GA4 + Shopify supplemental value signals into confidence gating.
-- keep Google Ads decisioning primary; supplemental signals should modulate confidence, not replace core routing logic.
+Proceed with **Task 8**:
+- add guardrail incidents and experiment instrumentation for safe rollout decisions.
+- leverage existing recommendation diagnostics to trigger measurable rollout-go/no-go signals.
 
 ## Session Log (Latest)
 - Implemented and verified Task 6 opportunity miner + launch brief workflow.
