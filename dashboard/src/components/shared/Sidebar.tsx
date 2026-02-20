@@ -14,6 +14,7 @@ import {
   Eye,
   Search,
   Activity,
+  Funnel,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Batches', href: '/batches', icon: Layers },
   { name: 'Performance', href: '/performance', icon: BarChart3 },
   { name: 'Search Insights', href: '/search-insights', icon: Search },
+  { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
   { name: 'Backfill Monitoring', href: '/backfill', icon: Activity },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
