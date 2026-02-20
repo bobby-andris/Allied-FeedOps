@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, useTransition } from 'react'
 import {
   AlertCircle,
   CheckCircle2,
@@ -38,6 +38,10 @@ import {
   createDecisionSignature,
   getDecisionCompletion,
 } from '@/lib/shopping-funnel/decision-staging'
+import {
+  EXISTING_FUNNEL_UI_LIMIT,
+  NEEDS_DECISION_UI_LIMIT,
+} from '@/lib/shopping-funnel/ui-performance'
 
 type DateRangePreset = '7d' | '30d' | '60d' | '90d'
 
@@ -105,8 +109,8 @@ const TIER_OPTIONS: Array<{ value: AssignmentTier; label: string }> = [
   { value: 'low', label: 'Low' },
 ]
 
-const NEEDS_DECISION_LIMIT = 3000
-const EXISTING_FUNNEL_LIMIT = 5000
+const NEEDS_DECISION_LIMIT = NEEDS_DECISION_UI_LIMIT
+const EXISTING_FUNNEL_LIMIT = EXISTING_FUNNEL_UI_LIMIT
 
 const EXISTING_ASSIGNMENT_OPTIONS: Array<{
   value: AssignmentTier | 'global_block' | 'competitor' | 'branded'
@@ -221,6 +225,7 @@ function applyStagedDecisionToState(
 }
 
 export default function ShoppingFunnelPage() {
+  const [isTransitionPending, startTransition] = useTransition()
   const [activeTab, setActiveTab] = useState<'needs-decision' | 'existing-funnel'>('needs-decision')
   const [range, setRange] = useState<DateRangePreset>('30d')
   const [customLabelFilter, setCustomLabelFilter] = useState<string>('all')
@@ -256,6 +261,8 @@ export default function ShoppingFunnelPage() {
 
   const [message, setMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const deferredNeedsSearch = useDeferredValue(needsSearch)
+  const deferredExistingSearch = useDeferredValue(existingSearch)
 
   const activeDataSource = useMemo(
     () =>
@@ -502,7 +509,7 @@ export default function ShoppingFunnelPage() {
   )
 
   const needsRows = useMemo(() => {
-    const normalizedSearch = needsSearch.trim().toLowerCase()
+    const normalizedSearch = deferredNeedsSearch.trim().toLowerCase()
     const rows =
       needsData?.terms
         .map((term) => {
@@ -567,7 +574,7 @@ export default function ShoppingFunnelPage() {
       }
       return b.metrics.impressions - a.metrics.impressions
     })
-  }, [needsData?.terms, needsSearch, needsSort, needsState, showSelectedNeedsOnly])
+  }, [deferredNeedsSearch, needsData?.terms, needsSort, needsState, showSelectedNeedsOnly])
 
   const selectedVisibleNeedsCount = useMemo(
     () => needsRows.filter((row) => row.state.selected).length,
@@ -591,7 +598,7 @@ export default function ShoppingFunnelPage() {
   )
 
   const existingRows = useMemo(() => {
-    const normalizedSearch = existingSearch.trim().toLowerCase()
+    const normalizedSearch = deferredExistingSearch.trim().toLowerCase()
     const rows =
       existingData?.terms.map((term) => {
         const pendingCount = term.funnels.reduce(
@@ -634,7 +641,7 @@ export default function ShoppingFunnelPage() {
       }
       return b.term.total_impressions - a.term.total_impressions
     })
-  }, [existingData?.terms, existingSearch, existingSort, existingUpdates, showPendingExistingOnly])
+  }, [deferredExistingSearch, existingData?.terms, existingSort, existingUpdates, showPendingExistingOnly])
 
   const needsTotal = needsData?.total_count ?? 0
   const needsReturned = needsData?.returned_count ?? 0
@@ -1023,9 +1030,11 @@ export default function ShoppingFunnelPage() {
               <Select
                 value={range}
                 onValueChange={(value) => {
-                  setRange(value as DateRangePreset)
-                  setNeedsOffset(0)
-                  setExistingOffset(0)
+                  startTransition(() => {
+                    setRange(value as DateRangePreset)
+                    setNeedsOffset(0)
+                    setExistingOffset(0)
+                  })
                 }}
               >
                 <SelectTrigger className="w-44">
@@ -1046,9 +1055,11 @@ export default function ShoppingFunnelPage() {
               <Select
                 value={customLabelFilter}
                 onValueChange={(value) => {
-                  setCustomLabelFilter(value)
-                  setNeedsOffset(0)
-                  setExistingOffset(0)
+                  startTransition(() => {
+                    setCustomLabelFilter(value)
+                    setNeedsOffset(0)
+                    setExistingOffset(0)
+                  })
                 }}
               >
                 <SelectTrigger className="w-72">
@@ -1070,9 +1081,12 @@ export default function ShoppingFunnelPage() {
               <Input
                 value={minImpressions}
                 onChange={(event) => {
-                  setMinImpressions(event.target.value)
-                  setNeedsOffset(0)
-                  setExistingOffset(0)
+                  const nextValue = event.target.value
+                  startTransition(() => {
+                    setMinImpressions(nextValue)
+                    setNeedsOffset(0)
+                    setExistingOffset(0)
+                  })
                 }}
                 className="w-36"
               />
@@ -1102,6 +1116,9 @@ export default function ShoppingFunnelPage() {
               <span className="text-xs text-muted-foreground">
                 Last pulled: {new Date(activeGeneratedAt).toLocaleString()}
               </span>
+            )}
+            {isTransitionPending && (
+              <span className="text-xs text-muted-foreground">Updating filters...</span>
             )}
           </div>
         </CardContent>
@@ -1289,7 +1306,10 @@ export default function ShoppingFunnelPage() {
                     <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       value={needsSearch}
-                      onChange={(event) => setNeedsSearch(event.target.value)}
+                      onChange={(event) => {
+                        const nextValue = event.target.value
+                        startTransition(() => setNeedsSearch(nextValue))
+                      }}
                       placeholder="Filter visible rows..."
                       className="pl-8"
                     />
@@ -1297,7 +1317,12 @@ export default function ShoppingFunnelPage() {
                 </div>
                 <div className="space-y-1">
                   <Label>Sort by</Label>
-                  <Select value={needsSort} onValueChange={(value) => setNeedsSort(value as NeedsSortOption)}>
+                  <Select
+                    value={needsSort}
+                    onValueChange={(value) =>
+                      startTransition(() => setNeedsSort(value as NeedsSortOption))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1314,7 +1339,9 @@ export default function ShoppingFunnelPage() {
                   <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                     <Checkbox
                       checked={showSelectedNeedsOnly}
-                      onCheckedChange={(checked) => setShowSelectedNeedsOnly(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        startTransition(() => setShowSelectedNeedsOnly(Boolean(checked)))
+                      }
                     />
                     Show selected only
                   </label>
@@ -1647,7 +1674,10 @@ export default function ShoppingFunnelPage() {
                     <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       value={existingSearch}
-                      onChange={(event) => setExistingSearch(event.target.value)}
+                      onChange={(event) => {
+                        const nextValue = event.target.value
+                        startTransition(() => setExistingSearch(nextValue))
+                      }}
                       placeholder="Filter visible rows..."
                       className="pl-8"
                     />
@@ -1658,7 +1688,9 @@ export default function ShoppingFunnelPage() {
                   <Label>Sort by</Label>
                   <Select
                     value={existingSort}
-                    onValueChange={(value) => setExistingSort(value as ExistingSortOption)}
+                    onValueChange={(value) =>
+                      startTransition(() => setExistingSort(value as ExistingSortOption))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -1677,7 +1709,9 @@ export default function ShoppingFunnelPage() {
                   <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                     <Checkbox
                       checked={showPendingExistingOnly}
-                      onCheckedChange={(checked) => setShowPendingExistingOnly(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        startTransition(() => setShowPendingExistingOnly(Boolean(checked)))
+                      }
                     />
                     Show pending only
                   </label>
@@ -1687,7 +1721,9 @@ export default function ShoppingFunnelPage() {
                   <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                     <Checkbox
                       checked={showErrorsOnly}
-                      onCheckedChange={(checked) => setShowErrorsOnly(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        startTransition(() => setShowErrorsOnly(Boolean(checked)))
+                      }
                     />
                     Show errors only
                   </label>
