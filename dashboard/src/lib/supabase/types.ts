@@ -61,6 +61,11 @@ export interface PublishEvent {
   published_description: string | null
   variant_count: number | null
   content_version: number | null
+  final_payload_snapshot: Record<string, unknown> | null
+  final_payload_hash: string | null
+  prompt_hash: string | null
+  evidence_hash: string | null
+  segment_key: string | null
 }
 
 export interface GeneratedContent {
@@ -304,6 +309,8 @@ export interface VariantIndex {
   dimensions: string | null
   product_title: string | null
   product_category: string | null
+  custom_label_0?: string | null
+  custom_labels?: Record<string, unknown> | null
   created_at: string
   updated_at: string
 }

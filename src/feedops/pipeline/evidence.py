@@ -5,13 +5,26 @@ from feedops.models import ParentSKU
 from feedops.integrations.keyword_bank import get_external_keywords
 from feedops.integrations.google_ads import fetch_master_sku_keywords
 from feedops.integrations.search_query_insights import (
+    build_relevance_anchor_terms,
+    curate_search_queries_by_relevance,
     fetch_search_queries_for_master_sku,
+    fetch_variant_queries_for_master_sku,
+    filter_search_queries_by_relevance,
     format_search_queries_for_evidence,
 )
 # Import Evidence from enrichment to avoid duplication
 from feedops.pipeline.enrichment import Evidence, enrich_product
-from feedops.pipeline.collection_descriptions import is_known_collection_name
+from feedops.pipeline.collection_descriptions import (
+    get_collection_description,
+    is_known_collection_name,
+    sanitize_collection_description,
+)
+from feedops.pipeline.segment_strategy import resolve_segment_strategy
 from feedops.pipeline.size_matrix import build_size_matrix
+from feedops.pipeline.feature_flags import (
+    is_intent_curator_v1_enabled,
+    is_segment_strategy_v1_enabled,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +96,33 @@ def _is_finish_specific_keyword(
         return True
     tokens = set(_tokenize(keyword))
     return bool(tokens & finish_tokens)
+
+
+def _extract_custom_label_0_values(parent_sku: ParentSKU) -> list[str]:
+    """Extract unique custom_label_0 values from Merchant Center payloads.
+
+    Supports both normalized keys (customLabel0/custom_label_0) and nested
+    attribute payloads used by some loaders.
+    """
+    seen: set[str] = set()
+    values: list[str] = []
+    for item in parent_sku.merchant_center_items or []:
+        raw = item.get("customLabel0") or item.get("custom_label_0")
+        if not raw and isinstance(item.get("attributes"), dict):
+            attrs = item["attributes"]
+            raw = attrs.get("customLabel0") or attrs.get("custom_label_0")
+        if not raw and isinstance(item.get("custom_labels"), dict):
+            labels = item["custom_labels"]
+            raw = labels.get("customLabel0") or labels.get("custom_label_0")
+        value = str(raw or "").strip()
+        if not value:
+            continue
+        key = value.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        values.append(value)
+    return values
 
 
 def _format_number(value: object) -> str:
@@ -247,6 +287,29 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
                     source=field_name,  # Use attribute name for verifier compatibility
                 ))
 
+    custom_label_0_values = _extract_custom_label_0_values(parent_sku)
+    if custom_label_0_values:
+        evidence.append(
+            Evidence(
+                field="custom_label_0",
+                value=", ".join(custom_label_0_values),
+                source="merchant_center_items.customLabel0",
+            )
+        )
+
+    if is_known_collection_name(parent_sku.collection):
+        collection_desc = get_collection_description(parent_sku.collection)
+        if collection_desc:
+            cleaned_collection_desc = sanitize_collection_description(collection_desc)
+            if cleaned_collection_desc:
+                evidence.append(
+                    Evidence(
+                        field="collection_description",
+                        value=cleaned_collection_desc,
+                        source="collection_descriptions_csv",
+                    )
+                )
+
     # Optional: add high-performing keywords from Google Ads MCP (if available)
     item_ids = [v.item_id for v in parent_sku.variants] if parent_sku.variants else []
     ads_keywords = fetch_master_sku_keywords(
@@ -282,24 +345,164 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
                 source="keyword_intent_master",
             ))
 
+    segment_strategy_enabled = is_segment_strategy_v1_enabled()
+    segment_strategy = resolve_segment_strategy(
+        custom_label_0_values,
+        enabled=segment_strategy_enabled,
+    )
+
     # Search query insights: actual search terms customers use (from Google Ads)
     search_queries: list[dict] = []
+    search_queries_for_keyword_gaps: list[dict] = []
     try:
-        search_queries = fetch_search_queries_for_master_sku(parent_sku.master_sku)
+        anchor_terms = build_relevance_anchor_terms(
+            parent_sku.category,
+            parent_sku.current_title,
+            parent_sku.material,
+            parent_sku.mounting_type,
+            ", ".join(custom_label_0_values),
+        )
+        master_query_rows = fetch_search_queries_for_master_sku(
+            parent_sku.master_sku, limit=40
+        )
+        variant_query_rows = fetch_variant_queries_for_master_sku(
+            parent_sku.master_sku, limit=120
+        )
+        if is_intent_curator_v1_enabled():
+            search_queries, master_diagnostics = curate_search_queries_by_relevance(
+                master_query_rows,
+                anchor_terms,
+                min_keep=3,
+                max_keep=12,
+            )
+            search_queries_for_keyword_gaps = list(search_queries)
+            variant_queries, variant_diagnostics = curate_search_queries_by_relevance(
+                variant_query_rows,
+                anchor_terms,
+                min_keep=3,
+                max_keep=6,
+            )
+        else:
+            search_queries = filter_search_queries_by_relevance(
+                master_query_rows,
+                anchor_terms,
+                min_keep=3,
+            )[:12]
+            search_queries_for_keyword_gaps = list(search_queries)
+            variant_queries = filter_search_queries_by_relevance(
+                variant_query_rows,
+                anchor_terms,
+                min_keep=3,
+            )[:6]
+            master_diagnostics = {
+                "query_filter_kept_count": len(search_queries),
+                "query_filter_dropped_count": max(
+                    0, len(master_query_rows) - len(search_queries)
+                ),
+                "query_filter_reason_top": "legacy_filter",
+            }
+            variant_diagnostics = {
+                "query_filter_kept_count": len(variant_queries),
+                "query_filter_dropped_count": max(
+                    0, len(variant_query_rows) - len(variant_queries)
+                ),
+                "query_filter_reason_top": "legacy_filter",
+            }
+
+        def _inject_segment_fallback(
+            rows: list[dict],
+            *,
+            max_keep: int,
+            impression_key: str,
+        ) -> list[dict]:
+            if len(rows) >= 3:
+                return rows[:max_keep]
+            seen = {_normalize_phrase(str(r.get("query_text", ""))) for r in rows}
+            for fallback in segment_strategy.fallback_queries:
+                norm = _normalize_phrase(fallback)
+                if not norm or norm in seen:
+                    continue
+                rows.append(
+                    {
+                        "query_text": fallback,
+                        impression_key: 0,
+                        "total_clicks": 0,
+                        "avg_monthly_searches": 0,
+                    }
+                )
+                seen.add(norm)
+                if len(rows) >= max_keep:
+                    break
+            return rows
+
+        if segment_strategy_enabled and segment_strategy.fallback_queries:
+            search_queries = _inject_segment_fallback(
+                search_queries, max_keep=12, impression_key="total_impressions"
+            )
+            variant_queries = _inject_segment_fallback(
+                variant_queries, max_keep=6, impression_key="impressions"
+            )
+
         if search_queries:
-            search_evidence = format_search_queries_for_evidence(search_queries, "master")
-            evidence.extend(search_evidence)
+            evidence.extend(
+                format_search_queries_for_evidence(
+                    search_queries,
+                    "master",
+                    max_rows=12,
+                )
+            )
+        if variant_queries:
+            evidence.extend(
+                format_search_queries_for_evidence(
+                    variant_queries,
+                    "variant",
+                    max_rows=6,
+                )
+            )
+
+        kept_count = int(master_diagnostics.get("query_filter_kept_count", 0)) + int(
+            variant_diagnostics.get("query_filter_kept_count", 0)
+        )
+        dropped_count = int(
+            master_diagnostics.get("query_filter_dropped_count", 0)
+        ) + int(variant_diagnostics.get("query_filter_dropped_count", 0))
+        master_dropped = int(master_diagnostics.get("query_filter_dropped_count", 0))
+        variant_dropped = int(variant_diagnostics.get("query_filter_dropped_count", 0))
+        if master_dropped >= variant_dropped:
+            reason_top = f"master:{master_diagnostics.get('query_filter_reason_top', 'none')}"
+        else:
+            reason_top = f"variant:{variant_diagnostics.get('query_filter_reason_top', 'none')}"
+
+        evidence.extend(
+            [
+                Evidence(
+                    field="query_filter_kept_count",
+                    value=str(kept_count),
+                    source="search_insights_diagnostics",
+                ),
+                Evidence(
+                    field="query_filter_dropped_count",
+                    value=str(dropped_count),
+                    source="search_insights_diagnostics",
+                ),
+                Evidence(
+                    field="query_filter_reason_top",
+                    value=reason_top,
+                    source="search_insights_diagnostics",
+                ),
+            ]
+        )
     except Exception as e:
         logger.warning(f"Failed to fetch search queries: {e}")
 
     # Keyword gaps: high-volume category-relevant terms missing from the current title.
     # Search-intent guidance only (not product specification claims).
     try:
-        if search_queries:
+        if search_queries_for_keyword_gaps:
             from feedops.pipeline.keyword_gaps import build_keyword_gap_evidence_rows
 
             evidence.extend(
-                build_keyword_gap_evidence_rows(parent_sku, search_queries)
+                build_keyword_gap_evidence_rows(parent_sku, search_queries_for_keyword_gaps)
             )
     except Exception as e:
         logger.warning(f"Failed to build keyword gap evidence: {e}")

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 // Python Cloud Run pipeline URL
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
@@ -19,7 +19,7 @@ function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   }).finally(() => clearTimeout(timer))
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Fetch all 3 monitoring endpoints in parallel, each with its own timeout.
     // Freshness has a short timeout so slow queries don't block coverage cards from rendering.

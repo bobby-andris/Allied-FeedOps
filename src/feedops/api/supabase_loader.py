@@ -16,6 +16,58 @@ from feedops.models.variant import Variant
 logger = logging.getLogger(__name__)
 
 
+def _normalize_custom_labels(value) -> dict[str, str | None]:
+    """Normalize variant_index.custom_labels payload into canonical camel-case keys."""
+    if not isinstance(value, dict):
+        return {}
+
+    out: dict[str, str | None] = {}
+    aliases = {
+        "customLabel0": ("customLabel0", "custom_label_0"),
+        "customLabel1": ("customLabel1", "custom_label_1"),
+        "customLabel2": ("customLabel2", "custom_label_2"),
+        "customLabel3": ("customLabel3", "custom_label_3"),
+        "customLabel4": ("customLabel4", "custom_label_4"),
+    }
+    for canonical, keys in aliases.items():
+        raw = None
+        for key in keys:
+            if key in value:
+                raw = value.get(key)
+                break
+        cleaned = str(raw).strip() if raw not in (None, "") else None
+        out[canonical] = cleaned if cleaned else None
+    return out
+
+
+def _load_custom_labels_from_variant_index(client, master_sku: str) -> list[dict]:
+    """Load Merchant Center-like custom label payloads from variant_index."""
+    try:
+        result = (
+            client.table("variant_index")
+            .select("gmc_offer_id,custom_labels")
+            .eq("master_sku", master_sku)
+            .execute()
+        )
+    except Exception as exc:
+        logger.warning("Failed loading custom labels from variant_index: %s", exc)
+        return []
+
+    rows = result.data or []
+    merchant_center_items: list[dict] = []
+    for row in rows:
+        labels = _normalize_custom_labels(row.get("custom_labels"))
+        if not any(labels.values()):
+            continue
+        merchant_center_items.append(
+            {
+                "offerId": row.get("gmc_offer_id"),
+                **labels,
+            }
+        )
+    return merchant_center_items
+
+
 def load_parent_sku_from_supabase(master_sku: str) -> ParentSKU | None:
     """Load ParentSKU from Supabase product_catalog table.
 
@@ -119,6 +171,9 @@ def load_parent_sku_from_supabase(master_sku: str) -> ParentSKU | None:
         item_number=first.get("item_number"),
         # Variants
         variants=variants,
+        merchant_center_items=_load_custom_labels_from_variant_index(
+            client, canonical_master_sku
+        ),
         # Data source
         data_source="supabase",
     )
