@@ -29,6 +29,7 @@ export interface SkuWithContent {
   product_title: string | null
   thumbnail_url: string | null
   per_platform_approval: Partial<Record<Platform, PlatformContentState>>
+  legacy_published_by_platform: Partial<Record<Platform, boolean>>
   lifestyle_images: LifestyleImageLifecycle
 }
 
@@ -68,6 +69,9 @@ interface PublishEventRow {
   published_title: string | null
   published_description: string | null
   content_version: number | null
+  final_payload_hash: string | null
+  prompt_hash: string | null
+  evidence_hash: string | null
 }
 
 interface ContentApprovalRow {
@@ -81,6 +85,36 @@ interface CatalogRow {
   master_sku: string
   title: string | null
   main_image_url: string | null
+}
+
+function isPlatform(value: string | null | undefined): value is Platform {
+  return value === 'google' || value === 'bing' || value === 'shopify'
+}
+
+function hasPublishLineage(event: PublishEventRow): boolean {
+  return Boolean(
+    event.final_payload_hash?.trim()
+    && event.prompt_hash?.trim()
+    && event.evidence_hash?.trim()
+  )
+}
+
+function latestPublishEventsByPlatform(
+  events: PublishEventRow[],
+): Partial<Record<Platform, PublishEventRow>> {
+  const latest: Partial<Record<Platform, PublishEventRow>> = {}
+
+  for (const event of events) {
+    if (!isPlatform(event.platform) || !event.published_at) {
+      continue
+    }
+    const existing = latest[event.platform]
+    if (!existing || new Date(event.published_at).getTime() > new Date(existing.published_at || 0).getTime()) {
+      latest[event.platform] = event
+    }
+  }
+
+  return latest
 }
 
 async function getSkusWithContent(): Promise<SkuWithContent[]> {
@@ -139,15 +173,48 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
     console.error('Error fetching variant images:', variantImagesError)
   }
 
-  // Get latest successful production publish snapshots.
-  const { data: publishEvents, error: publishEventsError } = await supabase
+  // Get latest successful production publish snapshots + lineage hashes.
+  let publishEvents: PublishEventRow[] | null = null
+  let publishEventsError: { message: string } | null = null
+  const publishEventsWithLineage = await supabase
     .from('publish_events')
-    .select('master_sku, platform, published_at, published_title, published_description, content_version')
+    .select(
+      'master_sku, platform, published_at, published_title, published_description, content_version, final_payload_hash, prompt_hash, evidence_hash',
+    )
     .in('master_sku', skuList)
     .eq('action', 'publish')
     .eq('status', 'success')
     .eq('environment', 'production')
     .order('published_at', { ascending: false })
+
+  publishEvents = (publishEventsWithLineage.data as PublishEventRow[] | null) ?? null
+  publishEventsError = publishEventsWithLineage.error
+
+  // Backward-compatible fallback for environments that do not yet have lineage columns.
+  if (
+    publishEventsError
+    && /final_payload_hash|prompt_hash|evidence_hash/i.test(publishEventsError.message)
+  ) {
+    const legacyPublishEvents = await supabase
+      .from('publish_events')
+      .select('master_sku, platform, published_at, published_title, published_description, content_version')
+      .in('master_sku', skuList)
+      .eq('action', 'publish')
+      .eq('status', 'success')
+      .eq('environment', 'production')
+      .order('published_at', { ascending: false })
+
+    publishEvents = ((legacyPublishEvents.data as Omit<
+      PublishEventRow,
+      'final_payload_hash' | 'prompt_hash' | 'evidence_hash'
+    >[] | null) ?? []).map((row) => ({
+      ...row,
+      final_payload_hash: null,
+      prompt_hash: null,
+      evidence_hash: null,
+    }))
+    publishEventsError = legacyPublishEvents.error
+  }
 
   if (publishEventsError) {
     console.error('Error fetching publish events:', publishEventsError)
@@ -238,6 +305,14 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
       variantImages: variantImagesBySku.get(sku) || [],
     })
     const publishSnapshots = latestProductionPublishSnapshots(publishEventsBySku.get(sku) || [])
+    const latestEventsByPlatform = latestPublishEventsByPlatform(publishEventsBySku.get(sku) || [])
+    const legacyPublishedByPlatform: Partial<Record<Platform, boolean>> = {}
+    for (const platform of ['google', 'bing', 'shopify'] as const) {
+      const latestEvent = latestEventsByPlatform[platform]
+      if (latestEvent && !hasPublishLineage(latestEvent)) {
+        legacyPublishedByPlatform[platform] = true
+      }
+    }
 
     const skuVariantImages = variantImagesBySku.get(sku) || []
     const lifestyleImages: LifestyleImageLifecycle = {
@@ -258,6 +333,7 @@ async function getSkusWithContent(): Promise<SkuWithContent[]> {
       product_title: catalogBySku.get(sku)?.title ?? null,
       thumbnail_url: catalogBySku.get(sku)?.main_image_url ?? null,
       per_platform_approval: perPlatformApproval,
+      legacy_published_by_platform: legacyPublishedByPlatform,
       lifestyle_images: lifestyleImages,
     })
   }

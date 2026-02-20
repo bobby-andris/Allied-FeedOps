@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveCanonicalMasterSkuList } from '@/lib/master-sku'
+import {
+  CATCHALL_CUSTOM_LABEL,
+  isCatchallCustomLabel,
+  normalizeCustomLabelValue,
+} from '@/lib/regeneration/custom-label'
 
 interface BatchRegenerateRequest {
   skus?: string[]
   all?: boolean
+  custom_label_0?: string
   platforms?: Platform[]
   content_types?: ContentType[]
 }
@@ -31,6 +37,26 @@ type ContentType = 'title' | 'description'
 const PLATFORMS: Platform[] = ['google', 'bing', 'shopify']
 const CONTENT_TYPES: ContentType[] = ['title', 'description']
 const DELAY_BETWEEN_CALLS_MS = 250
+const PAGE_SIZE = 1000
+
+interface GeneratedContentSkuCount {
+  skuCounts: Map<string, number>
+  totalItems: number
+}
+
+interface VariantLabelRow {
+  master_sku: string | null
+  custom_label_0: string | null
+  custom_labels: Record<string, unknown> | null
+}
+
+type RegenerateSelectionScope = 'all' | 'skus' | 'custom_label_0'
+
+interface ResolvedTargetSkus {
+  targetSkus: string[]
+  totalContentItems: number
+  scope: RegenerateSelectionScope
+}
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -40,51 +66,233 @@ function getRegenerateEndpoint(request: NextRequest): string {
   return new URL('/api/regenerate', request.url).toString()
 }
 
+function extractSegmentLabel(row: VariantLabelRow): string | null {
+  const direct = typeof row.custom_label_0 === 'string' ? row.custom_label_0 : null
+  if (direct && direct.trim()) return direct.trim()
+
+  if (row.custom_labels && typeof row.custom_labels === 'object') {
+    const labels = row.custom_labels as Record<string, unknown>
+    const nested = typeof labels.custom_label_0 === 'string'
+      ? labels.custom_label_0
+      : (typeof labels.customLabel0 === 'string' ? labels.customLabel0 : null)
+    if (nested && nested.trim()) return nested.trim()
+  }
+  return null
+}
+
+function uniqueMasterSkus(rows: VariantLabelRow[]): string[] {
+  return [...new Set(rows.map((row) => row.master_sku).filter((sku): sku is string => Boolean(sku)))]
+}
+
+function sumItemCountForSkus(skuCounts: Map<string, number>, skus: string[]): number {
+  return skus.reduce((acc, sku) => acc + (skuCounts.get(sku) ?? 0), 0)
+}
+
+async function fetchGeneratedContentSkuCounts(
+  supabase: ReturnType<typeof createAdminClient>,
+): Promise<GeneratedContentSkuCount> {
+  const skuCounts = new Map<string, number>()
+  let totalItems = 0
+  let offset = 0
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('generated_content')
+      .select('master_sku')
+      .not('candidate_content', 'is', null)
+      .order('master_sku', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1)
+
+    if (error) {
+      throw error
+    }
+
+    const rows = (data ?? []) as Array<{ master_sku: string | null }>
+    if (rows.length === 0) break
+
+    for (const row of rows) {
+      if (!row.master_sku) continue
+      totalItems += 1
+      skuCounts.set(row.master_sku, (skuCounts.get(row.master_sku) ?? 0) + 1)
+    }
+
+    if (rows.length < PAGE_SIZE) break
+    offset += PAGE_SIZE
+  }
+
+  return { skuCounts, totalItems }
+}
+
+async function fetchVariantRowsByQuery(
+  supabase: ReturnType<typeof createAdminClient>,
+  configure: (query: unknown) => unknown,
+): Promise<VariantLabelRow[]> {
+  const rows: VariantLabelRow[] = []
+  let offset = 0
+
+  while (true) {
+    const query = supabase
+      .from('variant_index')
+      .select('master_sku, custom_label_0, custom_labels')
+      .order('master_sku', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1)
+
+    const configuredQuery = configure(query) as typeof query
+    const { data, error } = await configuredQuery
+    if (error) {
+      throw error
+    }
+
+    const page = (data ?? []) as VariantLabelRow[]
+    rows.push(...page)
+    if (page.length < PAGE_SIZE) break
+    offset += PAGE_SIZE
+  }
+
+  return rows
+}
+
+async function fetchBlankDirectLabelRows(
+  supabase: ReturnType<typeof createAdminClient>,
+): Promise<VariantLabelRow[]> {
+  const nullRows = await fetchVariantRowsByQuery(
+    supabase,
+    (query) => query.is('custom_label_0', null),
+  )
+  const emptyRows = await fetchVariantRowsByQuery(
+    supabase,
+    (query) => query.eq('custom_label_0', ''),
+  )
+
+  const deduped = new Map<string, VariantLabelRow>()
+  for (const row of [...nullRows, ...emptyRows]) {
+    const key = `${row.master_sku ?? ''}::${JSON.stringify(row.custom_labels ?? {})}`
+    deduped.set(key, row)
+  }
+  return [...deduped.values()]
+}
+
+async function fetchVariantMasterSkusByCustomLabel(
+  supabase: ReturnType<typeof createAdminClient>,
+  customLabel: string,
+): Promise<string[]> {
+  if (isCatchallCustomLabel(customLabel)) {
+    const blankRows = await fetchBlankDirectLabelRows(supabase)
+    return uniqueMasterSkus(blankRows.filter((row) => !extractSegmentLabel(row)))
+  }
+
+  const normalizedTarget = normalizeCustomLabelValue(customLabel)
+  if (!normalizedTarget) return []
+
+  const directRows = await fetchVariantRowsByQuery(
+    supabase,
+    (query) => query.ilike('custom_label_0', customLabel),
+  )
+
+  // Include backward-compatible nested-label matches when direct column is blank.
+  const nestedFallbackRows = await fetchBlankDirectLabelRows(supabase)
+  const nestedMatches = nestedFallbackRows.filter((row) => {
+    const extracted = extractSegmentLabel(row)
+    return extracted && normalizeCustomLabelValue(extracted) === normalizedTarget
+  })
+
+  return uniqueMasterSkus([...directRows, ...nestedMatches])
+}
+
+async function resolveTargetSkus(args: {
+  supabase: ReturnType<typeof createAdminClient>
+  skus?: string[]
+  all?: boolean
+  customLabel0?: string
+}): Promise<ResolvedTargetSkus> {
+  const { supabase, skus, all, customLabel0 } = args
+  const { skuCounts, totalItems } = await fetchGeneratedContentSkuCounts(supabase)
+  const regeneratableSkus = new Set([...skuCounts.keys()])
+
+  let rawTargetSkus: string[] = []
+  let scope: RegenerateSelectionScope = 'skus'
+
+  if (all) {
+    rawTargetSkus = [...regeneratableSkus]
+    scope = 'all'
+  } else if (Array.isArray(skus) && skus.length > 0) {
+    rawTargetSkus = skus
+    scope = 'skus'
+  } else if (customLabel0) {
+    rawTargetSkus = await fetchVariantMasterSkusByCustomLabel(supabase, customLabel0)
+    scope = 'custom_label_0'
+  } else {
+    return {
+      targetSkus: [],
+      totalContentItems: 0,
+      scope: 'skus',
+    }
+  }
+
+  const canonicalSkus = await resolveCanonicalMasterSkuList(supabase, rawTargetSkus)
+  const dedupedCanonicalSkus = [...new Set(canonicalSkus.filter((sku) => sku))]
+
+  if (scope === 'skus') {
+    return {
+      targetSkus: dedupedCanonicalSkus,
+      totalContentItems: sumItemCountForSkus(skuCounts, dedupedCanonicalSkus),
+      scope,
+    }
+  }
+
+  const filteredSkus = dedupedCanonicalSkus.filter((sku) => regeneratableSkus.has(sku))
+  const selectedTotalItems = scope === 'all'
+    ? totalItems
+    : sumItemCountForSkus(skuCounts, filteredSkus)
+
+  return {
+    targetSkus: filteredSkus,
+    totalContentItems: selectedTotalItems,
+    scope,
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: BatchRegenerateRequest = await request.json()
-    const { skus, all, platforms, content_types } = body
+    const { skus, all, custom_label_0, platforms, content_types } = body
+    const customLabel0 = typeof custom_label_0 === 'string' ? custom_label_0.trim() : ''
 
-    if (!skus && !all) {
+    if (!skus && !all && !customLabel0) {
       return NextResponse.json(
         {
-          error: 'Must provide either "skus" array or "all: true"',
+          error: 'Must provide one of: "skus" array, "all: true", or "custom_label_0"',
           code: 'batch_regenerate_missing_selection',
           step: 'request_validation',
-          actionable_message: 'Pass an explicit SKU list or set all=true and retry.',
+          actionable_message: 'Pass an explicit SKU list, set all=true, or provide custom_label_0 and retry.',
         },
         { status: 400 }
       )
     }
 
     const supabase = createAdminClient()
-    let targetSkus: string[] = []
-
-    if (all) {
-      const { data, error } = await supabase
-        .from('generated_content')
-        .select('master_sku')
-        .not('candidate_content', 'is', null)
-
-      if (error) {
-        return NextResponse.json(
-          {
-            error: 'Failed to fetch SKUs from database',
-            code: 'batch_regenerate_sku_fetch_failed',
-            step: 'target_sku_lookup',
-            actionable_message: 'Retry. If this persists, inspect generated_content table access.',
-          },
-          { status: 500 }
-        )
-      }
-
-      targetSkus = [...new Set(data?.map((record) => record.master_sku) || [])]
-    } else if (skus) {
-      targetSkus = skus
+    let resolvedTargets: ResolvedTargetSkus
+    try {
+      resolvedTargets = await resolveTargetSkus({
+        supabase,
+        skus,
+        all,
+        customLabel0: customLabel0 || undefined,
+      })
+    } catch (error) {
+      console.error('Failed to resolve batch regenerate target SKUs:', error)
+      return NextResponse.json(
+        {
+          error: 'Failed to fetch SKUs from database',
+          code: 'batch_regenerate_sku_fetch_failed',
+          step: 'target_sku_lookup',
+          actionable_message: 'Retry. If this persists, inspect generated_content and variant_index access.',
+        },
+        { status: 500 }
+      )
     }
 
-    const canonicalSkus = await resolveCanonicalMasterSkuList(supabase, targetSkus)
-    targetSkus = [...new Set(canonicalSkus.filter((sku) => sku))]
+    const targetSkus = resolvedTargets.targetSkus
 
     if (targetSkus.length === 0) {
       return NextResponse.json(
@@ -210,6 +418,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      selection_scope: resolvedTargets.scope,
+      selected_custom_label_0: customLabel0 || null,
       summary: {
         total_skus: targetSkus.length,
         total_operations: totalOperations,
@@ -236,28 +446,36 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams
+    const customLabel0Raw = searchParams.get('custom_label_0')
+    const customLabel0 = customLabel0Raw?.trim()
+
     const supabase = createAdminClient()
-
-    const { data, error } = await supabase
-      .from('generated_content')
-      .select('master_sku, platform, content_type, candidate_content')
-      .not('candidate_content', 'is', null)
-      .order('master_sku')
-
-    if (error) {
+    let resolvedTargets: ResolvedTargetSkus
+    try {
+      resolvedTargets = await resolveTargetSkus({
+        supabase,
+        all: !customLabel0,
+        customLabel0: customLabel0 || undefined,
+      })
+    } catch (error) {
+      console.error('Failed to fetch regeneration stats:', error)
       return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 })
     }
 
-    const skus = [...new Set(data?.map((record) => record.master_sku) || [])]
-    const totalItems = data?.length || 0
+    const skus = resolvedTargets.targetSkus
+    const totalItems = resolvedTargets.totalContentItems
 
     return NextResponse.json({
       skus,
+      selection_scope: resolvedTargets.scope,
+      selected_custom_label_0: customLabel0 ?? null,
       total_skus: skus.length,
       total_content_items: totalItems,
       estimated_time_minutes: Math.ceil((totalItems * 1.5) / 60),
+      catchall_value: CATCHALL_CUSTOM_LABEL,
     })
   } catch (error) {
     return NextResponse.json(

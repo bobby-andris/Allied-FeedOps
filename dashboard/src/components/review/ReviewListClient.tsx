@@ -25,6 +25,7 @@ interface SkuRow {
   avg_quality_score: number | null
   platform_progress: PlatformProgress[]
   per_platform_approval: Partial<Record<Platform, PlatformContentState>>
+  legacy_published_by_platform: Partial<Record<Platform, boolean>>
   lifestyle_images: LifestyleImageLifecycle
 }
 
@@ -33,13 +34,18 @@ interface ReviewListClientProps {
 }
 
 type BadgeState = PlatformProgress['state']
+type StatusFilter = 'all' | 'needs-review' | 'partial' | 'approved' | 'published' | 'published-legacy'
+const STATUS_FILTERS: StatusFilter[] = ['all', 'needs-review', 'partial', 'approved', 'published', 'published-legacy']
 
 interface BadgeStyle {
   className: string
   label: string
 }
 
-function getPlatformBadgeStyle(state: BadgeState): BadgeStyle {
+function getPlatformBadgeStyle(state: BadgeState, isLegacyMethod = false): BadgeStyle {
+  if (state === 'published' && isLegacyMethod) {
+    return { className: 'bg-orange-100 text-orange-800', label: 'Published (Legacy)' }
+  }
   switch (state) {
     case 'published':
       return { className: 'bg-green-100 text-green-800', label: 'Published' }
@@ -51,6 +57,10 @@ function getPlatformBadgeStyle(state: BadgeState): BadgeStyle {
     default:
       return { className: 'bg-gray-100 text-gray-600', label: 'Review' }
   }
+}
+
+function isPlatform(value: string): value is Platform {
+  return value === 'google' || value === 'bing' || value === 'shopify'
 }
 
 function getPlatformAbbrev(platform: Platform): string {
@@ -82,9 +92,15 @@ function getScoreColor(score: number | null): string {
   return 'text-red-600'
 }
 
-function PlatformBadge({ progress }: { progress: PlatformProgress }) {
+function PlatformBadge({
+  progress,
+  isLegacyMethod = false,
+}: {
+  progress: PlatformProgress
+  isLegacyMethod?: boolean
+}) {
   const abbrev = getPlatformAbbrev(progress.platform)
-  const { className, label } = getPlatformBadgeStyle(progress.state)
+  const { className, label } = getPlatformBadgeStyle(progress.state, isLegacyMethod)
   return (
     <span
       className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${className}`}
@@ -230,7 +246,11 @@ function SkuPreviewPanel({
             const progress = sku.platform_progress.find(p => p.platform === platform)
             const alreadyPublished = progress?.state === 'published'
             const alreadyApproved = progress?.state === 'ready' || optimisticApprovals.has(platform)
-            const { className: badgeClass, label: stateLabel } = getPlatformBadgeStyle(progress?.state ?? 'blocked')
+            const isLegacyPublished = Boolean(sku.legacy_published_by_platform[platform])
+            const { className: badgeClass, label: stateLabel } = getPlatformBadgeStyle(
+              progress?.state ?? 'blocked',
+              isLegacyPublished,
+            )
             const platformLabel = getPlatformLabel(platform)
             return (
               <div key={platform} className="flex items-center gap-2 flex-wrap">
@@ -275,7 +295,10 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
   const pathname = usePathname()
   const router = useRouter()
 
-  const activeStatus = searchParams.get('status') ?? 'all'
+  const statusParam = searchParams.get('status')
+  const activeStatus: StatusFilter = STATUS_FILTERS.includes(statusParam as StatusFilter)
+    ? (statusParam as StatusFilter)
+    : 'all'
   const activePlatform = searchParams.get('platform') ?? 'all'
 
   // Inline expand state
@@ -291,7 +314,7 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
     }
   }, [expandedSku])
 
-  const applyFilter = useCallback((status: string, platform: string) => {
+  const applyFilter = useCallback((status: StatusFilter, platform: string) => {
     const params = new URLSearchParams(searchParams.toString())
     if (status === 'all') params.delete('status')
     else params.set('status', status)
@@ -346,6 +369,7 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
         partial: platformProgress.filter(p => p?.state === 'partial').length,
         approved: platformProgress.filter(p => p?.state === 'ready').length,
         published: platformProgress.filter(p => p?.state === 'published').length,
+        legacyPublished: skus.filter(sku => Boolean(sku.legacy_published_by_platform[platform])).length,
       }
     })
   }, [skus])
@@ -358,6 +382,12 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
         : sku.platform_progress.filter(p => p.platform === activePlatform)
 
       if (activeStatus === 'all') return true
+      if (activeStatus === 'published-legacy') {
+        if (activePlatform === 'all') {
+          return Object.values(sku.legacy_published_by_platform).some(Boolean)
+        }
+        return isPlatform(activePlatform) && Boolean(sku.legacy_published_by_platform[activePlatform])
+      }
 
       const targetState = activeStatus === 'needs-review' ? 'blocked'
         : activeStatus === 'partial' ? 'partial'
@@ -402,6 +432,12 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
               >
                 {s.published} Published
               </button>
+              <button
+                onClick={() => applyFilter('published-legacy', s.platform)}
+                className="text-xs px-2 py-1 rounded bg-orange-100 hover:bg-orange-200 transition-colors"
+              >
+                {s.legacyPublished} Legacy
+              </button>
             </div>
           </div>
         ))}
@@ -409,8 +445,8 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
 
       {/* Filter bar */}
       <div className="flex gap-3 mb-4">
-        <Select value={activeStatus} onValueChange={v => applyFilter(v, activePlatform)}>
-          <SelectTrigger className="w-[160px]">
+        <Select value={activeStatus} onValueChange={v => applyFilter(v as StatusFilter, activePlatform)}>
+          <SelectTrigger className="w-[220px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
@@ -419,6 +455,7 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
             <SelectItem value="partial">Partial</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="published-legacy">Published (Legacy Method)</SelectItem>
           </SelectContent>
         </Select>
 
@@ -484,7 +521,11 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
                 </span>
                 <div className="flex gap-1 flex-shrink-0">
                   {sku.platform_progress.map((progress) => (
-                    <PlatformBadge key={progress.platform} progress={progress} />
+                    <PlatformBadge
+                      key={progress.platform}
+                      progress={progress}
+                      isLegacyMethod={Boolean(sku.legacy_published_by_platform[progress.platform])}
+                    />
                   ))}
                   <ImageRowBadge images={sku.lifestyle_images} />
                 </div>
