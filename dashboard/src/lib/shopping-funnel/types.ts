@@ -4,6 +4,31 @@ export type AssignmentTier = 'campaign_negative' | 'high' | 'medium' | 'low'
 
 export type DecisionActionType = 'global_block' | 'competitor' | 'branded' | 'funnel'
 
+export interface QueryIntentFeatures {
+  product_object: string | null
+  modifier_tokens: string[]
+  use_case_tokens: string[]
+  is_branded: boolean
+  is_competitor: boolean
+  has_mismatch_risk: boolean
+}
+
+export interface QueryRecommendation {
+  action_type: DecisionActionType
+  default_tier?: AssignmentTier
+  confidence: number
+  reason_codes: string[]
+}
+
+export interface QueryValueScore {
+  impact_score: number
+  expected_clicks: number
+  expected_cvr: number
+  expected_conversion_value: number
+  expected_profit_proxy: number
+  uncertainty: number
+}
+
 export interface DateWindow {
   startDate: string
   endDate: string
@@ -23,6 +48,9 @@ export interface SearchTermSourceAssignment {
 export interface NeedsDecisionTerm {
   search_term: string
   custom_label_0s: SearchTermSourceAssignment[]
+  intent_features?: QueryIntentFeatures
+  recommendation?: QueryRecommendation
+  value_score?: QueryValueScore
 }
 
 export interface ExistingFunnelAssignment {
@@ -49,6 +77,7 @@ export interface GetNeedsDecisionOptions {
   minImpressions?: number
   limit?: number
   offset?: number
+  sortBy?: 'impressions_desc' | 'impact_desc'
 }
 
 export interface GetExistingFunnelOptions {
@@ -163,6 +192,26 @@ export interface ShoppingFunnelLineageResponse {
   cache_ttl_ms: number
   date_window: DateWindow
   integrity: CampaignSetIntegritySummary
+}
+
+export interface LabelTierPerformance {
+  custom_label_0: string
+  tier: FunnelTier
+  impressions: number
+  clicks: number
+  cost_micros: number
+  conversions: number
+  conversions_value: number
+  roas: number
+}
+
+export interface LabelTierPerformanceResponse {
+  rows: LabelTierPerformance[]
+  total_rows: number
+  date_window: DateWindow
+  data_source: 'google_ads_api_live'
+  generated_at: string
+  cache_ttl_ms: number
 }
 
 export interface SaveDecisionItem {

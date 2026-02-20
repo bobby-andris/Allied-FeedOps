@@ -11,6 +11,7 @@ import type {
   FunnelTier,
   GetExistingFunnelOptions,
   GetNeedsDecisionOptions,
+  LabelTierPerformanceResponse,
   NeedsDecisionResponse,
   NeedsDecisionTerm,
   PostDecisionItem,
@@ -24,6 +25,7 @@ import {
   GoogleAdsRetryError,
   runWithGoogleAdsRetry,
 } from '@/lib/shopping-funnel/retry'
+import { enrichNeedsDecisionTerm } from '@/lib/optimization/query-intelligence'
 
 const SHARED_LIST_NAME_BY_ACTION = {
   global_block: 'AVD - Global Block',
@@ -790,6 +792,7 @@ export async function getNeedsDecisionTerms(
   const minImpressions = options.minImpressions ?? 0
   const limit = options.limit ?? 500
   const offset = options.offset ?? 0
+  const sortBy = options.sortBy ?? 'impressions_desc'
 
   const terms: NeedsDecisionTerm[] = []
 
@@ -832,21 +835,26 @@ export async function getNeedsDecisionTerms(
     }
   }
 
-  terms.sort((a, b) => {
+  const enrichedTerms = terms.map(enrichNeedsDecisionTerm)
+
+  enrichedTerms.sort((a, b) => {
+    if (sortBy === 'impact_desc') {
+      return (b.value_score?.impact_score ?? 0) - (a.value_score?.impact_score ?? 0)
+    }
     const aImpressions = a.custom_label_0s.reduce((sum, value) => sum + value.impressions, 0)
     const bImpressions = b.custom_label_0s.reduce((sum, value) => sum + value.impressions, 0)
     return bImpressions - aImpressions
   })
 
-  const pagedTerms = terms.slice(offset, offset + limit)
+  const pagedTerms = enrichedTerms.slice(offset, offset + limit)
 
   return {
     terms: pagedTerms,
-    total_count: terms.length,
+    total_count: enrichedTerms.length,
     returned_count: pagedTerms.length,
     limit,
     offset,
-    has_next: offset + pagedTerms.length < terms.length,
+    has_next: offset + pagedTerms.length < enrichedTerms.length,
     custom_labels: [...context.labelCampaigns.keys()].sort((a, b) => a.localeCompare(b)),
     date_window: dateWindow,
     data_source: SHOPPING_FUNNEL_DATA_SOURCE,
@@ -949,6 +957,67 @@ export async function getExistingFunnelTerms(
     has_next: offset + pagedTerms.length < terms.length,
     error_count: errorTermCount,
     custom_labels: [...context.labelCampaigns.keys()].sort((a, b) => a.localeCompare(b)),
+    date_window: dateWindow,
+    data_source: SHOPPING_FUNNEL_DATA_SOURCE,
+    generated_at: new Date().toISOString(),
+    cache_ttl_ms: SHOPPING_FUNNEL_CACHE_TTL_MS,
+  }
+}
+
+export async function getLabelTierPerformance(options: {
+  startDate?: string
+  endDate?: string
+}): Promise<LabelTierPerformanceResponse> {
+  const dateWindow = buildDateWindow(options.startDate, options.endDate)
+  const context = await fetchAdsContext(dateWindow)
+
+  const rowsByKey = new Map<
+    string,
+    {
+      custom_label_0: string
+      tier: 'HIGH' | 'MEDIUM' | 'LOW'
+      impressions: number
+      clicks: number
+      cost_micros: number
+      conversions: number
+      conversions_value: number
+    }
+  >()
+
+  for (const row of context.searchRows) {
+    const key = `${row.customLabel0}|${row.sourceTier}`
+    const current = rowsByKey.get(key) ?? {
+      custom_label_0: row.customLabel0,
+      tier: row.sourceTier,
+      impressions: 0,
+      clicks: 0,
+      cost_micros: 0,
+      conversions: 0,
+      conversions_value: 0,
+    }
+
+    current.impressions += row.impressions
+    current.clicks += row.clicks
+    current.cost_micros += row.costMicros
+    current.conversions += row.conversions
+    current.conversions_value += row.conversionsValue
+    rowsByKey.set(key, current)
+  }
+
+  const rows = [...rowsByKey.values()]
+    .map((row) => {
+      const spend = row.cost_micros / 1_000_000
+      const roas = spend > 0 ? row.conversions_value / spend : 0
+      return {
+        ...row,
+        roas: Number(roas.toFixed(4)),
+      }
+    })
+    .sort((a, b) => b.conversions_value - a.conversions_value)
+
+  return {
+    rows,
+    total_rows: rows.length,
     date_window: dateWindow,
     data_source: SHOPPING_FUNNEL_DATA_SOURCE,
     generated_at: new Date().toISOString(),
