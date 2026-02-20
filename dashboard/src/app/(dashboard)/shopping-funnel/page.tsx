@@ -42,6 +42,7 @@ import {
   computeReviewerPriorityScore,
   isHighImpactValueScore,
 } from '@/lib/shopping-funnel/reviewer-priority'
+import {
   EXISTING_FUNNEL_UI_LIMIT,
   NEEDS_DECISION_UI_LIMIT,
 } from '@/lib/shopping-funnel/ui-performance'
