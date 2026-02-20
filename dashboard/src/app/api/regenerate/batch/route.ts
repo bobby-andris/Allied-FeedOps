@@ -38,6 +38,7 @@ const PLATFORMS: Platform[] = ['google', 'bing', 'shopify']
 const CONTENT_TYPES: ContentType[] = ['title', 'description']
 const DELAY_BETWEEN_CALLS_MS = 250
 const PAGE_SIZE = 1000
+const REGENERATE_AUTH_FORWARD_HEADERS = ['cookie', 'authorization'] as const
 
 interface GeneratedContentSkuCount {
   skuCounts: Map<string, number>
@@ -64,6 +65,30 @@ async function sleep(ms: number) {
 
 function getRegenerateEndpoint(request: NextRequest): string {
   return new URL('/api/regenerate', request.url).toString()
+}
+
+function getForwardedRegenerateHeaders(request: NextRequest): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  for (const headerName of REGENERATE_AUTH_FORWARD_HEADERS) {
+    const value = request.headers.get(headerName)
+    if (value) headers[headerName] = value
+  }
+  return headers
+}
+
+type ParsedRegenerateErrorPayload = {
+  error?: unknown
+  actionable_message?: unknown
+  code?: unknown
+  step?: unknown
+  validation_errors?: unknown
+}
+
+function isInternalRegenerateAuthFailure(response: Response): boolean {
+  if (response.status === 401 || response.status === 403 || response.status === 307) {
+    return true
+  }
+  return response.redirected
 }
 
 function extractSegmentLabel(row: VariantLabelRow): string | null {
@@ -323,6 +348,7 @@ export async function POST(request: NextRequest) {
       targetSkus.length * targetPlatforms.length * targetContentTypes.length
 
     const regenerateEndpoint = getRegenerateEndpoint(request)
+    const regenerateHeaders = getForwardedRegenerateHeaders(request)
 
     const results: RegenerateResult[] = []
     let completed = 0
@@ -335,7 +361,7 @@ export async function POST(request: NextRequest) {
           try {
             const regenerateResponse = await fetch(regenerateEndpoint, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: regenerateHeaders,
               body: JSON.stringify({
                 master_sku: sku,
                 content_type: contentType,
@@ -346,17 +372,24 @@ export async function POST(request: NextRequest) {
 
             const payload = await regenerateResponse
               .json()
-              .catch(() => ({ error: 'Invalid regenerate response' }))
+              .catch(() => null)
+            const parsedPayload: ParsedRegenerateErrorPayload | null =
+              payload && typeof payload === 'object'
+                ? (payload as ParsedRegenerateErrorPayload)
+                : null
 
             if (!regenerateResponse.ok) {
-              const errorMessage =
-                typeof payload?.error === 'string'
-                  ? payload.error
-                  : `Regeneration failed with status ${regenerateResponse.status}`
-              const actionableMessage =
-                typeof payload?.actionable_message === 'string'
-                  ? payload.actionable_message
-                  : 'Inspect API validation details for this SKU and retry.'
+              const authFailure = isInternalRegenerateAuthFailure(regenerateResponse)
+              const errorMessage = authFailure
+                ? 'Internal regenerate request was not authenticated'
+                : (typeof parsedPayload?.error === 'string'
+                  ? parsedPayload.error
+                  : `Regeneration failed with status ${regenerateResponse.status}`)
+              const actionableMessage = authFailure
+                ? 'Refresh your dashboard session and retry. If this persists, inspect auth forwarding and middleware redirects.'
+                : (typeof parsedPayload?.actionable_message === 'string'
+                  ? parsedPayload.actionable_message
+                  : 'Inspect API validation details for this SKU and retry.')
               results.push({
                 sku,
                 platform,
@@ -364,10 +397,14 @@ export async function POST(request: NextRequest) {
                 success: false,
                 error: errorMessage,
                 actionable_message: actionableMessage,
-                code: typeof payload?.code === 'string' ? payload.code : null,
-                step: typeof payload?.step === 'string' ? payload.step : null,
-                validation_errors: Array.isArray(payload?.validation_errors)
-                  ? payload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
+                code: authFailure
+                  ? 'batch_regenerate_internal_auth_required'
+                  : (typeof parsedPayload?.code === 'string' ? parsedPayload.code : null),
+                step: authFailure
+                  ? 'internal_regenerate_auth'
+                  : (typeof parsedPayload?.step === 'string' ? parsedPayload.step : null),
+                validation_errors: Array.isArray(parsedPayload?.validation_errors)
+                  ? parsedPayload.validation_errors.filter((v: unknown): v is string => typeof v === 'string')
                   : [],
               })
               failed++
