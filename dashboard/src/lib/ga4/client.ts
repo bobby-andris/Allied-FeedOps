@@ -33,7 +33,27 @@ export interface Ga4AttributionQuality {
   riskLevel: 'low' | 'medium' | 'high'
 }
 
-function normalizePropertyId(raw: string): string {
+export interface RunGa4ReportOptions {
+  propertyId?: string
+  startDate?: string
+  endDate?: string
+  limit?: number
+  dimensions: string[]
+  metrics: string[]
+  orderBys?: Array<{
+    metric?: { metricName: string }
+    dimension?: { dimensionName: string; orderType?: string }
+    desc?: boolean
+  }>
+  dimensionFilter?: object
+}
+
+export interface RunGa4ReportRow {
+  dimensions: string[]
+  metrics: number[]
+}
+
+export function normalizePropertyId(raw: string): string {
   if (raw.startsWith('properties/')) {
     return raw
   }
@@ -48,12 +68,12 @@ export function getCanonicalGa4PropertyId(): string {
   return normalizePropertyId(raw)
 }
 
-function isNotSetValue(value: string): boolean {
+export function isNotSetValue(value: string): boolean {
   const normalized = value.toLowerCase().replace(/\s+/g, '')
   return normalized === '(notset)' || normalized === 'notset' || normalized === 'notprovided'
 }
 
-function isUnassignedChannel(channelGroup: string): boolean {
+export function isUnassignedChannel(channelGroup: string): boolean {
   return channelGroup.toLowerCase().trim() === 'unassigned'
 }
 
@@ -126,39 +146,37 @@ function getAnalyticsDataClient() {
   })
 }
 
-export async function fetchGa4CampaignPerformance(options?: {
-  propertyId?: string
-  startDate?: string
-  endDate?: string
-  limit?: number
-}): Promise<Ga4CampaignReportResult> {
-  const propertyId = normalizePropertyId(options?.propertyId ?? getCanonicalGa4PropertyId())
-  const startDate = options?.startDate ?? '30daysAgo'
-  const endDate = options?.endDate ?? 'yesterday'
-  const limit = options?.limit ?? 200
+export async function runGa4Report(
+  options: RunGa4ReportOptions
+): Promise<{
+  propertyId: string
+  startDate: string
+  endDate: string
+  rows: RunGa4ReportRow[]
+  generatedAt: string
+}> {
+  const propertyId = normalizePropertyId(options.propertyId ?? getCanonicalGa4PropertyId())
+  const startDate = options.startDate ?? '30daysAgo'
+  const endDate = options.endDate ?? 'yesterday'
+  const limit = options.limit ?? 2000
 
   const analyticsData = getAnalyticsDataClient()
   const response = await analyticsData.properties.runReport({
     property: propertyId,
     requestBody: {
       dateRanges: [{ startDate, endDate }],
-      dimensions: [{ name: 'sessionDefaultChannelGroup' }, { name: 'sessionCampaignName' }],
-      metrics: [{ name: 'sessions' }, { name: 'transactions' }, { name: 'purchaseRevenue' }],
+      dimensions: options.dimensions.map((name) => ({ name })),
+      metrics: options.metrics.map((name) => ({ name })),
       limit: String(limit),
-      orderBys: [{ metric: { metricName: 'purchaseRevenue' }, desc: true }],
+      orderBys: options.orderBys,
+      dimensionFilter: options.dimensionFilter,
     },
   })
 
-  const rows = (response.data.rows ?? []).map((row) => {
-    const [channelGroup, campaignName] = row.dimensionValues ?? []
-    const [sessions, transactions, purchaseRevenue] = row.metricValues ?? []
-    return {
-      channelGroup: channelGroup?.value ?? '(unknown)',
-      campaignName: campaignName?.value ?? '(unknown)',
-      sessions: Number(sessions?.value ?? 0),
-      transactions: Number(transactions?.value ?? 0),
-      purchaseRevenue: Number(purchaseRevenue?.value ?? 0),
-    } satisfies Ga4CampaignRow
+  const rows: RunGa4ReportRow[] = (response.data.rows ?? []).map((row) => {
+    const dimensions = (row.dimensionValues ?? []).map((value) => value.value ?? '')
+    const metrics = (row.metricValues ?? []).map((value) => Number(value.value ?? 0))
+    return { dimensions, metrics }
   })
 
   return {
@@ -167,6 +185,43 @@ export async function fetchGa4CampaignPerformance(options?: {
     endDate,
     rows,
     generatedAt: new Date().toISOString(),
+  }
+}
+
+export async function fetchGa4CampaignPerformance(options?: {
+  propertyId?: string
+  startDate?: string
+  endDate?: string
+  limit?: number
+}): Promise<Ga4CampaignReportResult> {
+  const report = await runGa4Report({
+    propertyId: options?.propertyId,
+    startDate: options?.startDate,
+    endDate: options?.endDate,
+    limit: options?.limit ?? 200,
+    dimensions: ['sessionDefaultChannelGroup', 'sessionCampaignName'],
+    metrics: ['sessions', 'transactions', 'purchaseRevenue'],
+    orderBys: [{ metric: { metricName: 'purchaseRevenue' }, desc: true }],
+  })
+
+  const rows = report.rows.map((row) => {
+    const [channelGroup, campaignName] = row.dimensions
+    const [sessions, transactions, purchaseRevenue] = row.metrics
+    return {
+      channelGroup: channelGroup ?? '(unknown)',
+      campaignName: campaignName ?? '(unknown)',
+      sessions: Number(sessions ?? 0),
+      transactions: Number(transactions ?? 0),
+      purchaseRevenue: Number(purchaseRevenue ?? 0),
+    } satisfies Ga4CampaignRow
+  })
+
+  return {
+    propertyId: report.propertyId,
+    startDate: report.startDate,
+    endDate: report.endDate,
+    rows,
+    generatedAt: report.generatedAt,
   }
 }
 
@@ -207,39 +262,32 @@ export async function fetchGa4AudiencePerformance(options?: {
   rows: Ga4AudienceRow[]
   generatedAt: string
 }> {
-  const propertyId = normalizePropertyId(options?.propertyId ?? getCanonicalGa4PropertyId())
-  const startDate = options?.startDate ?? '30daysAgo'
-  const endDate = options?.endDate ?? 'yesterday'
-  const limit = options?.limit ?? 100
-
-  const analyticsData = getAnalyticsDataClient()
-  const response = await analyticsData.properties.runReport({
-    property: propertyId,
-    requestBody: {
-      dateRanges: [{ startDate, endDate }],
-      dimensions: [{ name: 'audienceName' }],
-      metrics: [{ name: 'sessions' }, { name: 'transactions' }, { name: 'purchaseRevenue' }],
-      limit: String(limit),
-      orderBys: [{ metric: { metricName: 'purchaseRevenue' }, desc: true }],
-    },
+  const report = await runGa4Report({
+    propertyId: options?.propertyId,
+    startDate: options?.startDate,
+    endDate: options?.endDate,
+    limit: options?.limit ?? 100,
+    dimensions: ['audienceName'],
+    metrics: ['sessions', 'transactions', 'purchaseRevenue'],
+    orderBys: [{ metric: { metricName: 'purchaseRevenue' }, desc: true }],
   })
 
-  const rows = (response.data.rows ?? []).map((row) => {
-    const [audienceName] = row.dimensionValues ?? []
-    const [sessions, transactions, purchaseRevenue] = row.metricValues ?? []
+  const rows = report.rows.map((row) => {
+    const [audienceName] = row.dimensions
+    const [sessions, transactions, purchaseRevenue] = row.metrics
     return {
-      audienceName: audienceName?.value ?? '(unknown)',
-      sessions: Number(sessions?.value ?? 0),
-      transactions: Number(transactions?.value ?? 0),
-      purchaseRevenue: Number(purchaseRevenue?.value ?? 0),
+      audienceName: audienceName ?? '(unknown)',
+      sessions: Number(sessions ?? 0),
+      transactions: Number(transactions ?? 0),
+      purchaseRevenue: Number(purchaseRevenue ?? 0),
     } satisfies Ga4AudienceRow
   })
 
   return {
-    propertyId,
-    startDate,
-    endDate,
+    propertyId: report.propertyId,
+    startDate: report.startDate,
+    endDate: report.endDate,
     rows,
-    generatedAt: new Date().toISOString(),
+    generatedAt: report.generatedAt,
   }
 }

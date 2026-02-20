@@ -3,5 +3,11 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/ga4/snapshot-capture",
+      "schedule": "15 8 * * *"
+    }
+  ]
 }

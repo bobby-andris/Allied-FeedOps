@@ -590,6 +590,72 @@ export interface FinishSearchPattern {
   updated_at: string
 }
 
+// ============================================================================
+// GA4 Attribution Forensics Types
+// ============================================================================
+
+export type Ga4SourceMediumQualityBucket = 'not_set' | 'data_not_available' | 'valid'
+export type Ga4LandingPageQualityBucket = 'blank' | 'not_set' | 'valid'
+export type Ga4RootCauseType = 'source_medium' | 'campaign_pattern' | 'landing_page'
+
+export interface Ga4SourceMediumDaily {
+  id: string
+  property_id: string
+  report_date: string
+  source_medium: string
+  quality_bucket: Ga4SourceMediumQualityBucket
+  sessions: number
+  transactions: number
+  purchase_revenue: number
+  revenue_share: number
+  session_share: number
+  source_payload: Record<string, unknown>
+  created_at: string
+}
+
+export interface Ga4LandingPageQualityDaily {
+  id: string
+  property_id: string
+  report_date: string
+  landing_page: string
+  quality_bucket: Ga4LandingPageQualityBucket
+  sessions: number
+  transactions: number
+  purchase_revenue: number
+  revenue_share: number
+  session_share: number
+  source_payload: Record<string, unknown>
+  created_at: string
+}
+
+export interface Ga4AttributionRootCauseDaily {
+  id: string
+  property_id: string
+  report_date: string
+  root_cause_type: Ga4RootCauseType
+  root_cause_key: string
+  sessions: number
+  transactions: number
+  purchase_revenue: number
+  revenue_share: number
+  session_share: number
+  source_payload: Record<string, unknown>
+  created_at: string
+}
+
+export interface Ga4ShopifyReconciliationDaily {
+  id: string
+  property_id: string
+  report_date: string
+  ga4_revenue: number
+  shopify_revenue: number
+  revenue_delta: number
+  revenue_ratio: number | null
+  order_count: number
+  source_payload: Record<string, unknown>
+  created_at: string
+}
+
 // Database schema type
 export interface Database {
   public: {
@@ -663,6 +729,26 @@ export interface Database {
         Row: BatchGenerationJobSku
         Insert: Omit<BatchGenerationJobSku, 'id' | 'created_at'>
         Update: Partial<Omit<BatchGenerationJobSku, 'id' | 'created_at'>>
+      }
+      ga4_source_medium_daily: {
+        Row: Ga4SourceMediumDaily
+        Insert: Omit<Ga4SourceMediumDaily, 'id' | 'created_at'>
+        Update: Partial<Omit<Ga4SourceMediumDaily, 'id' | 'created_at'>>
+      }
+      ga4_landing_page_quality_daily: {
+        Row: Ga4LandingPageQualityDaily
+        Insert: Omit<Ga4LandingPageQualityDaily, 'id' | 'created_at'>
+        Update: Partial<Omit<Ga4LandingPageQualityDaily, 'id' | 'created_at'>>
+      }
+      ga4_attribution_root_cause_daily: {
+        Row: Ga4AttributionRootCauseDaily
+        Insert: Omit<Ga4AttributionRootCauseDaily, 'id' | 'created_at'>
+        Update: Partial<Omit<Ga4AttributionRootCauseDaily, 'id' | 'created_at'>>
+      }
+      ga4_shopify_reconciliation_daily: {
+        Row: Ga4ShopifyReconciliationDaily
+        Insert: Omit<Ga4ShopifyReconciliationDaily, 'id' | 'created_at'>
+        Update: Partial<Omit<Ga4ShopifyReconciliationDaily, 'id' | 'created_at'>>
       }
     }
   }

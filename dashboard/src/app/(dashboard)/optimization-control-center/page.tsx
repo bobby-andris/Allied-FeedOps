@@ -147,6 +147,7 @@ export default function OptimizationControlCenterPage() {
   const [loading, setLoading] = useState<boolean>(true)
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [supplementalWarnings, setSupplementalWarnings] = useState<string[]>([])
 
   const [recommendations, setRecommendations] = useState<RecommendationQueueResponse | null>(null)
   const [scores, setScores] = useState<ScoresResponse | null>(null)
@@ -166,12 +167,56 @@ export default function OptimizationControlCenterPage() {
   const loadData = useCallback(async () => {
     const qs = new URLSearchParams({ range }).toString()
 
-    const fetchJson = async <T,>(url: string): Promise<T> => {
+    const fetchRequiredJson = async <T,>(url: string, label: string): Promise<T> => {
       const response = await fetch(url)
       if (!response.ok) {
-        throw new Error(await response.text())
+        const detail = await response.text()
+        throw new Error(`${label} unavailable: ${detail || `HTTP ${response.status}`}`)
       }
       return (await response.json()) as T
+    }
+
+    const fetchOptionalJson = async <T,>(
+      url: string,
+      label: string
+    ): Promise<{ data: T | null; warnings: string[] }> => {
+      try {
+        const response = await fetch(url)
+        if (!response.ok) {
+          const detail = await response.text()
+          return {
+            data: null,
+            warnings: [`${label} unavailable: ${detail || `HTTP ${response.status}`}`],
+          }
+        }
+
+        const payload = (await response.json()) as T & {
+          available?: boolean
+          warnings?: unknown
+        }
+        const warnings: string[] = []
+
+        if (payload.available === false) {
+          warnings.push(`${label} is currently reporting degraded availability.`)
+        }
+
+        if (Array.isArray(payload.warnings)) {
+          for (const warning of payload.warnings) {
+            if (typeof warning === 'string' && warning.trim()) {
+              warnings.push(`${label}: ${warning}`)
+            }
+          }
+        }
+
+        return { data: payload as T, warnings }
+      } catch (error) {
+        return {
+          data: null,
+          warnings: [
+            `${label} unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          ],
+        }
+      }
     }
 
     const [
@@ -179,29 +224,53 @@ export default function OptimizationControlCenterPage() {
       scorePayload,
       opportunitiesPayload,
       roasPayload,
-      ga4AttributionPayload,
-      audienceWatchlistPayload,
-      audienceRecommendationsPayload,
-      shopifySignalsPayload,
     ] = await Promise.all([
-      fetchJson<RecommendationQueueResponse>(`/api/shopping-funnel/recommendations?${qs}`),
-      fetchJson<ScoresResponse>(`/api/shopping-funnel/scores?${qs}`),
-      fetchJson<OpportunitiesResponse>(`/api/shopping-funnel/opportunities?${qs}`),
-      fetchJson<RoasResponse>(`/api/shopping-funnel/roas-recommendations?${qs}`),
-      fetchJson<Ga4AttributionResponse>(`/api/ga4/attribution-quality`),
-      fetchJson<AudienceWatchlistResponse>(`/api/audiences/watchlist`),
-      fetchJson<AudienceRecommendationsResponse>(`/api/audiences/recommendations`),
-      fetchJson<ShopifyValueSignalsResponse>(`/api/shopify/value-signals`),
+      fetchRequiredJson<RecommendationQueueResponse>(
+        `/api/shopping-funnel/recommendations?${qs}`,
+        'Shopping recommendations'
+      ),
+      fetchRequiredJson<ScoresResponse>(`/api/shopping-funnel/scores?${qs}`, 'Query scores'),
+      fetchRequiredJson<OpportunitiesResponse>(
+        `/api/shopping-funnel/opportunities?${qs}`,
+        'Opportunity clusters'
+      ),
+      fetchRequiredJson<RoasResponse>(
+        `/api/shopping-funnel/roas-recommendations?${qs}`,
+        'ROAS recommendations'
+      ),
     ])
+
+    const [ga4AttributionResult, audienceWatchlistResult, audienceRecommendationsResult, shopifySignalsResult] =
+      await Promise.all([
+        fetchOptionalJson<Ga4AttributionResponse>(`/api/ga4/attribution-quality`, 'GA4 attribution'),
+        fetchOptionalJson<AudienceWatchlistResponse>(`/api/audiences/watchlist`, 'Audience watchlist'),
+        fetchOptionalJson<AudienceRecommendationsResponse>(
+          `/api/audiences/recommendations`,
+          'Audience recommendations'
+        ),
+        fetchOptionalJson<ShopifyValueSignalsResponse>(
+          `/api/shopify/value-signals`,
+          'Shopify value signals'
+        ),
+      ])
+
+    const warnings = [
+      ...ga4AttributionResult.warnings,
+      ...audienceWatchlistResult.warnings,
+      ...audienceRecommendationsResult.warnings,
+      ...shopifySignalsResult.warnings,
+    ]
+
+    setSupplementalWarnings(Array.from(new Set(warnings)))
 
     setRecommendations(recommendationPayload)
     setScores(scorePayload)
     setOpportunities(opportunitiesPayload)
     setRoas(roasPayload)
-    setGa4Attribution(ga4AttributionPayload)
-    setAudienceWatchlist(audienceWatchlistPayload)
-    setAudienceRecommendations(audienceRecommendationsPayload)
-    setShopifySignals(shopifySignalsPayload)
+    setGa4Attribution(ga4AttributionResult.data)
+    setAudienceWatchlist(audienceWatchlistResult.data)
+    setAudienceRecommendations(audienceRecommendationsResult.data)
+    setShopifySignals(shopifySignalsResult.data)
   }, [range])
 
   const refresh = useCallback(async () => {
@@ -219,6 +288,7 @@ export default function OptimizationControlCenterPage() {
   useEffect(() => {
     setLoading(true)
     setErrorMessage(null)
+    setSupplementalWarnings([])
     void loadData()
       .catch((error) => {
         setErrorMessage(error instanceof Error ? error.message : 'Failed to load optimization control center')
@@ -247,6 +317,7 @@ export default function OptimizationControlCenterPage() {
           <h1 className="text-2xl font-bold">Optimization Control Center</h1>
           <p className="text-muted-foreground">
             Closed-loop Google Ads optimization: intelligence, opportunities, bidding policy, and guardrails.
+            GA4 and Shopify are supplemental.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -274,6 +345,22 @@ export default function OptimizationControlCenterPage() {
           <CardContent className="flex items-center gap-2 pt-6 text-sm text-destructive">
             <AlertCircle className="h-4 w-4" />
             {errorMessage}
+          </CardContent>
+        </Card>
+      )}
+
+      {supplementalWarnings.length > 0 && (
+        <Card className="border-amber-300/70 bg-amber-50/40">
+          <CardContent className="space-y-1 pt-6 text-sm text-amber-900">
+            <p className="font-medium">Supplemental signals degraded</p>
+            {supplementalWarnings.map((warning) => (
+              <p key={warning} className="text-xs">
+                {warning}
+              </p>
+            ))}
+            <p className="pt-1 text-xs text-amber-800">
+              Core Google Ads optimization data is still live and actionable.
+            </p>
           </CardContent>
         </Card>
       )}
@@ -557,10 +644,10 @@ export default function OptimizationControlCenterPage() {
       <Card>
         <CardContent className="flex flex-wrap items-center gap-2 pt-6 text-xs text-muted-foreground">
           <TrendingUp className="h-3.5 w-3.5" />
-          <span>Canonical GA4 property: `properties/342525135` (override via env if needed).</span>
+          <span>Primary decision source: live Google Ads Shopping data.</span>
+          <span>Canonical GA4 property: `properties/342525135` (supplemental diagnostics).</span>
         </CardContent>
       </Card>
     </div>
   )
 }
-
