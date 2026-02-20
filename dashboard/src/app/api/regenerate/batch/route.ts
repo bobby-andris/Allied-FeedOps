@@ -125,20 +125,30 @@ async function fetchGeneratedContentSkuCounts(
 
 async function fetchVariantRowsByQuery(
   supabase: ReturnType<typeof createAdminClient>,
-  configure: (query: unknown) => unknown,
+  filter:
+    | { type: 'is'; column: 'custom_label_0'; value: null }
+    | { type: 'eq'; column: 'custom_label_0'; value: string }
+    | { type: 'ilike'; column: 'custom_label_0'; value: string },
 ): Promise<VariantLabelRow[]> {
   const rows: VariantLabelRow[] = []
   let offset = 0
 
   while (true) {
-    const query = supabase
+    let query = supabase
       .from('variant_index')
       .select('master_sku, custom_label_0, custom_labels')
       .order('master_sku', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1)
 
-    const configuredQuery = configure(query) as typeof query
-    const { data, error } = await configuredQuery
+    if (filter.type === 'is') {
+      query = query.is(filter.column, filter.value)
+    } else if (filter.type === 'eq') {
+      query = query.eq(filter.column, filter.value)
+    } else {
+      query = query.ilike(filter.column, filter.value)
+    }
+
+    const { data, error } = await query
     if (error) {
       throw error
     }
@@ -157,11 +167,11 @@ async function fetchBlankDirectLabelRows(
 ): Promise<VariantLabelRow[]> {
   const nullRows = await fetchVariantRowsByQuery(
     supabase,
-    (query) => query.is('custom_label_0', null),
+    { type: 'is', column: 'custom_label_0', value: null },
   )
   const emptyRows = await fetchVariantRowsByQuery(
     supabase,
-    (query) => query.eq('custom_label_0', ''),
+    { type: 'eq', column: 'custom_label_0', value: '' },
   )
 
   const deduped = new Map<string, VariantLabelRow>()
@@ -186,7 +196,7 @@ async function fetchVariantMasterSkusByCustomLabel(
 
   const directRows = await fetchVariantRowsByQuery(
     supabase,
-    (query) => query.ilike('custom_label_0', customLabel),
+    { type: 'ilike', column: 'custom_label_0', value: customLabel },
   )
 
   // Include backward-compatible nested-label matches when direct column is blank.
