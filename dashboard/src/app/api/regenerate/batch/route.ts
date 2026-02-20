@@ -123,37 +123,64 @@ async function fetchGeneratedContentSkuCounts(
   return { skuCounts, totalItems }
 }
 
-async function fetchVariantRowsByQuery(
+function isMissingCustomLabelColumnError(error: unknown): boolean {
+  const message = error instanceof Error
+    ? error.message
+    : (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string'
+      ? (error as { message: string }).message
+      : '')
+  return message.toLowerCase().includes('column variant_index.custom_label_0 does not exist')
+}
+
+async function fetchAllVariantRows(
   supabase: ReturnType<typeof createAdminClient>,
-  filter:
-    | { type: 'is'; column: 'custom_label_0'; value: null }
-    | { type: 'eq'; column: 'custom_label_0'; value: string }
-    | { type: 'ilike'; column: 'custom_label_0'; value: string },
 ): Promise<VariantLabelRow[]> {
   const rows: VariantLabelRow[] = []
   let offset = 0
+  let includeDirectLabelColumn = true
 
   while (true) {
-    let query = supabase
+    if (includeDirectLabelColumn) {
+      const { data, error } = await supabase
+        .from('variant_index')
+        .select('master_sku, custom_label_0, custom_labels')
+        .order('master_sku', { ascending: true })
+        .range(offset, offset + PAGE_SIZE - 1)
+
+      if (error && isMissingCustomLabelColumnError(error)) {
+        includeDirectLabelColumn = false
+        offset = 0
+        rows.length = 0
+        continue
+      }
+
+      if (error) {
+        throw error
+      }
+
+      const page = (data ?? []) as VariantLabelRow[]
+      rows.push(...page)
+      if (page.length < PAGE_SIZE) break
+      offset += PAGE_SIZE
+      continue
+    }
+
+    const { data, error } = await supabase
       .from('variant_index')
-      .select('master_sku, custom_label_0, custom_labels')
+      .select('master_sku, custom_labels')
       .order('master_sku', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1)
 
-    if (filter.type === 'is') {
-      query = query.is(filter.column, filter.value)
-    } else if (filter.type === 'eq') {
-      query = query.eq(filter.column, filter.value)
-    } else {
-      query = query.ilike(filter.column, filter.value)
-    }
-
-    const { data, error } = await query
     if (error) {
       throw error
     }
 
-    const page = (data ?? []) as VariantLabelRow[]
+    const page = ((data ?? []) as Array<{ master_sku: string | null; custom_labels: Record<string, unknown> | null }>)
+      .map((row) => ({
+          master_sku: row.master_sku,
+          custom_label_0: null,
+          custom_labels: row.custom_labels,
+        }))
     rows.push(...page)
     if (page.length < PAGE_SIZE) break
     offset += PAGE_SIZE
@@ -162,51 +189,25 @@ async function fetchVariantRowsByQuery(
   return rows
 }
 
-async function fetchBlankDirectLabelRows(
-  supabase: ReturnType<typeof createAdminClient>,
-): Promise<VariantLabelRow[]> {
-  const nullRows = await fetchVariantRowsByQuery(
-    supabase,
-    { type: 'is', column: 'custom_label_0', value: null },
-  )
-  const emptyRows = await fetchVariantRowsByQuery(
-    supabase,
-    { type: 'eq', column: 'custom_label_0', value: '' },
-  )
-
-  const deduped = new Map<string, VariantLabelRow>()
-  for (const row of [...nullRows, ...emptyRows]) {
-    const key = `${row.master_sku ?? ''}::${JSON.stringify(row.custom_labels ?? {})}`
-    deduped.set(key, row)
-  }
-  return [...deduped.values()]
-}
-
 async function fetchVariantMasterSkusByCustomLabel(
   supabase: ReturnType<typeof createAdminClient>,
   customLabel: string,
 ): Promise<string[]> {
+  const variantRows = await fetchAllVariantRows(supabase)
+
   if (isCatchallCustomLabel(customLabel)) {
-    const blankRows = await fetchBlankDirectLabelRows(supabase)
-    return uniqueMasterSkus(blankRows.filter((row) => !extractSegmentLabel(row)))
+    return uniqueMasterSkus(variantRows.filter((row) => !extractSegmentLabel(row)))
   }
 
   const normalizedTarget = normalizeCustomLabelValue(customLabel)
   if (!normalizedTarget) return []
 
-  const directRows = await fetchVariantRowsByQuery(
-    supabase,
-    { type: 'ilike', column: 'custom_label_0', value: customLabel },
-  )
-
-  // Include backward-compatible nested-label matches when direct column is blank.
-  const nestedFallbackRows = await fetchBlankDirectLabelRows(supabase)
-  const nestedMatches = nestedFallbackRows.filter((row) => {
+  const matches = variantRows.filter((row) => {
     const extracted = extractSegmentLabel(row)
     return extracted && normalizeCustomLabelValue(extracted) === normalizedTarget
   })
 
-  return uniqueMasterSkus([...directRows, ...nestedMatches])
+  return uniqueMasterSkus(matches)
 }
 
 async function resolveTargetSkus(args: {
