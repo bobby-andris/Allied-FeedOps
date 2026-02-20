@@ -15,6 +15,8 @@ import {
   Search,
   Activity,
   Funnel,
+  Gauge,
+  Siren,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -30,6 +32,8 @@ const navigation = [
   { name: 'Performance', href: '/performance', icon: BarChart3 },
   { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
+  { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge },
+  { name: 'Attribution Forensics', href: '/attribution-forensics', icon: Siren },
   { name: 'Backfill Monitoring', href: '/backfill', icon: Activity },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]

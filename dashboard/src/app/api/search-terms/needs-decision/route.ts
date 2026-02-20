@@ -21,6 +21,8 @@ export async function GET(request: NextRequest) {
     const minImpressions = sanitizeMinImpressions(searchParams.get('min_impressions'))
     const limit = sanitizeLimit(searchParams.get('limit'), 500, 3000)
     const offset = sanitizeOffset(searchParams.get('offset'))
+    const sortByRaw = searchParams.get('sort_by')
+    const sortBy = sortByRaw === 'impact_desc' ? 'impact_desc' : 'impressions_desc'
 
     const result = await getNeedsDecisionTerms({
       startDate,
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest) {
       minImpressions,
       limit,
       offset,
+      sortBy,
     })
 
     return NextResponse.json(result)

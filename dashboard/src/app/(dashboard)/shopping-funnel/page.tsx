@@ -61,6 +61,7 @@ interface ExistingUpdateState {
 }
 
 type NeedsSortOption =
+  | 'impact_desc'
   | 'impressions_desc'
   | 'cost_desc'
   | 'conversions_desc'
@@ -126,6 +127,7 @@ const EXISTING_ASSIGNMENT_OPTIONS: Array<{
 ]
 
 const NEEDS_SORT_OPTIONS: Array<{ value: NeedsSortOption; label: string }> = [
+  { value: 'impact_desc', label: 'Impact score (high to low)' },
   { value: 'impressions_desc', label: 'Impressions (high to low)' },
   { value: 'cost_desc', label: 'Cost (high to low)' },
   { value: 'conversions_desc', label: 'Conversions (high to low)' },
@@ -173,11 +175,21 @@ function aggregateNeedsMetrics(term: NeedsDecisionTerm): NeedsTermMetrics {
   )
 }
 
-function createEmptyNeedsState(): NeedsDecisionState {
+function createRecommendedNeedsState(term: NeedsDecisionTerm): NeedsDecisionState {
+  const recommendedAction = term.recommendation?.action_type ?? 'funnel'
+  const defaultTier = term.recommendation?.default_tier
+  const assignments: Partial<Record<string, AssignmentTier>> = {}
+
+  if (recommendedAction === 'funnel' && defaultTier) {
+    for (const assignment of term.custom_label_0s) {
+      assignments[assignment.custom_label_0] = defaultTier
+    }
+  }
+
   return {
     selected: false,
-    actionType: 'funnel',
-    assignments: {},
+    actionType: recommendedAction,
+    assignments,
     stagedSignature: null,
     stagedAt: null,
   }
@@ -233,7 +245,7 @@ export default function ShoppingFunnelPage() {
   const [showErrorsOnly, setShowErrorsOnly] = useState<boolean>(false)
   const [needsSearch, setNeedsSearch] = useState<string>('')
   const [existingSearch, setExistingSearch] = useState<string>('')
-  const [needsSort, setNeedsSort] = useState<NeedsSortOption>('impressions_desc')
+  const [needsSort, setNeedsSort] = useState<NeedsSortOption>('impact_desc')
   const [existingSort, setExistingSort] = useState<ExistingSortOption>('errors_first')
   const [showSelectedNeedsOnly, setShowSelectedNeedsOnly] = useState<boolean>(false)
   const [showPendingExistingOnly, setShowPendingExistingOnly] = useState<boolean>(false)
@@ -336,6 +348,7 @@ export default function ShoppingFunnelPage() {
         min_impressions: String(minImpressionsNum),
         limit: String(NEEDS_DECISION_LIMIT),
         offset: String(needsOffset),
+        sort_by: needsSort === 'impact_desc' ? 'impact_desc' : 'impressions_desc',
       })
       if (customLabelFilter !== 'all') {
         params.set('custom_label_0', customLabelFilter)
@@ -358,7 +371,7 @@ export default function ShoppingFunnelPage() {
       for (const term of payload.terms) {
         nextState[term.search_term] = applyStagedDecisionToState(
           term,
-          createEmptyNeedsState(),
+          createRecommendedNeedsState(term),
           stagedByTerm[term.search_term]
         )
       }
@@ -369,7 +382,7 @@ export default function ShoppingFunnelPage() {
     } finally {
       setNeedsLoading(false)
     }
-  }, [customLabelFilter, fetchStagedDecisions, minImpressionsNum, needsOffset, range])
+  }, [customLabelFilter, fetchStagedDecisions, minImpressionsNum, needsOffset, needsSort, range])
 
   const fetchExistingWithParams = useCallback(
     async ({
@@ -560,6 +573,9 @@ export default function ShoppingFunnelPage() {
       .filter((row) => !showSelectedNeedsOnly || row.state.selected)
 
     return filtered.sort((a, b) => {
+      if (needsSort === 'impact_desc') {
+        return (b.term.value_score?.impact_score ?? 0) - (a.term.value_score?.impact_score ?? 0)
+      }
       if (needsSort === 'search_asc') {
         return a.term.search_term.localeCompare(b.term.search_term)
       }
@@ -1566,10 +1582,26 @@ export default function ShoppingFunnelPage() {
                               <span>{metrics.clicks.toLocaleString()} clicks</span>
                               <span>${(metrics.costMicros / 1_000_000).toFixed(2)} cost</span>
                               <span>{metrics.conversions.toFixed(2)} conv</span>
+                              {typeof term.value_score?.impact_score === 'number' && (
+                                <span>Impact {term.value_score.impact_score.toFixed(2)}</span>
+                              )}
                             </div>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2">
+                            {term.recommendation && (
+                              <Badge variant="outline">
+                                Rec: {ACTION_LABEL_BY_VALUE[term.recommendation.action_type]}
+                                {term.recommendation.default_tier
+                                  ? ` (${term.recommendation.default_tier.toUpperCase()})`
+                                  : ''}
+                              </Badge>
+                            )}
+                            {typeof term.recommendation?.confidence === 'number' && (
+                              <Badge variant="outline">
+                                {Math.round(term.recommendation.confidence * 100)}% confidence
+                              </Badge>
+                            )}
                             {state.actionType === 'funnel' && (
                               <Badge variant={completion.complete ? 'secondary' : 'destructive'}>
                                 {completion.selectedCount}/{completion.requiredCount} labels selected
@@ -1641,6 +1673,11 @@ export default function ShoppingFunnelPage() {
 
                         {state.actionType === 'funnel' && isExpanded && (
                           <div className="mt-3 grid gap-2">
+                            {term.recommendation?.reason_codes && term.recommendation.reason_codes.length > 0 && (
+                              <div className="rounded-md border bg-muted/30 p-2 text-xs text-muted-foreground">
+                                Recommendation rationale: {term.recommendation.reason_codes.join(', ')}
+                              </div>
+                            )}
                             {!completion.complete && (
                               <p className="text-xs text-amber-700">
                                 Select a funnel tier for every custom_label_0 before confirming this term.
