@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import json
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping
@@ -21,12 +24,105 @@ from feedops.db.schema import (
 )
 
 MAPI_SCOPE = "https://www.googleapis.com/auth/content"
-MAPI_PRODUCTS_ENDPOINT = (
-    "https://merchantapi.googleapis.com/products/v1/accounts/{account}/products"
+# Merchant API list endpoint (current REST form):
+#   GET https://merchantapi.googleapis.com/products/v1beta/{parent=accounts/*}/products
+# Keep a legacy fallback because some environments still expose v1/account form.
+MAPI_PRODUCTS_ENDPOINTS = (
+    "https://merchantapi.googleapis.com/products/v1beta/{parent}/products",
+    "https://merchantapi.googleapis.com/products/v1/accounts/{account}/products",
 )
 DEFAULT_MC_METADATA_PATH = (
     Path.home() / ".cache" / "feedops" / "merchant_center" / "items.jsonl"
 )
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+
+
+def _load_service_account_info(value: str) -> tuple[dict, str] | None:
+    """Parse service account JSON from raw JSON or base64-encoded JSON."""
+    raw = (value or "").strip()
+    if not raw:
+        return None
+
+    if raw.startswith("{"):
+        return json.loads(raw), "json"
+
+    compact = "".join(raw.split())
+    try:
+        decoded = base64.b64decode(compact, validate=True)
+    except (binascii.Error, ValueError):
+        return None
+
+    payload = decoded.decode("utf-8").strip()
+    if not payload.startswith("{"):
+        return None
+    return json.loads(payload), "base64"
+
+
+def _is_truthy(value: str | None) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _get_positive_int_env(
+    env: Mapping[str, str], key: str, default: int
+) -> int:
+    raw = str(env.get(key) or "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+def _get_positive_float_env(
+    env: Mapping[str, str], key: str, default: float
+) -> float:
+    raw = str(env.get(key) or "").strip()
+    if not raw:
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+def _build_http_timeout(env: Mapping[str, str]) -> httpx.Timeout:
+    connect = _get_positive_float_env(env, "GMC_HTTP_CONNECT_TIMEOUT_SECONDS", 15.0)
+    read = _get_positive_float_env(env, "GMC_HTTP_READ_TIMEOUT_SECONDS", 120.0)
+    write = _get_positive_float_env(env, "GMC_HTTP_WRITE_TIMEOUT_SECONDS", 30.0)
+    pool = _get_positive_float_env(env, "GMC_HTTP_POOL_TIMEOUT_SECONDS", 30.0)
+    return httpx.Timeout(connect=connect, read=read, write=write, pool=pool)
+
+
+def _request_page_with_retries(
+    client: httpx.Client,
+    endpoint: str,
+    headers: dict[str, str],
+    params: dict[str, str | int],
+    *,
+    max_attempts: int,
+    backoff_seconds: float,
+) -> httpx.Response:
+    """Fetch a page with retry logic for transient HTTP/network failures."""
+    for attempt in range(max_attempts):
+        try:
+            response = client.get(endpoint, headers=headers, params=params)
+            status_code = response.status_code
+            if status_code in RETRYABLE_STATUS_CODES and attempt < (max_attempts - 1):
+                sleep_seconds = backoff_seconds * (2**attempt)
+                time.sleep(sleep_seconds)
+                continue
+            response.raise_for_status()
+            return response
+        except (httpx.TimeoutException, httpx.TransportError):
+            if attempt >= (max_attempts - 1):
+                raise
+            sleep_seconds = backoff_seconds * (2**attempt)
+            time.sleep(sleep_seconds)
+
+    raise RuntimeError("Merchant Center request retries exhausted without response.")
 
 
 def _get_access_token(env: Mapping[str, str]) -> str:
@@ -39,6 +135,7 @@ def _get_access_token(env: Mapping[str, str]) -> str:
 
 
 def _load_credentials(env: Mapping[str, str]):
+    credential_errors: list[str] = []
     gmc_key = (env.get("GMC_API_KEY") or "").strip()
     gac = (env.get("GOOGLE_APPLICATION_CREDENTIALS") or "").strip()
 
@@ -63,13 +160,59 @@ def _load_credentials(env: Mapping[str, str]):
                 ),
                 "gmc_api_key_path",
             )
-        if gmc_key.startswith("{"):
-            info = json.loads(gmc_key)
+        parsed = _load_service_account_info(gmc_key)
+        if parsed:
+            info, encoding = parsed
+            try:
+                return (
+                    service_account.Credentials.from_service_account_info(
+                        info, scopes=[MAPI_SCOPE]
+                    ),
+                    f"gmc_api_key_{encoding}",
+                )
+            except Exception as exc:
+                credential_errors.append(f"GMC_API_KEY ({encoding}): {exc}")
+
+    gsa_key = (env.get("GOOGLE_SERVICE_ACCOUNT_KEY") or "").strip()
+    if gsa_key:
+        parsed = _load_service_account_info(gsa_key)
+        if parsed:
+            info, encoding = parsed
+            try:
+                return (
+                    service_account.Credentials.from_service_account_info(
+                        info, scopes=[MAPI_SCOPE]
+                    ),
+                    f"google_service_account_key_{encoding}",
+                )
+            except Exception as exc:
+                credential_errors.append(
+                    f"GOOGLE_SERVICE_ACCOUNT_KEY ({encoding}): {exc}"
+                )
+
+    gsa_email = (env.get("GOOGLE_SERVICE_ACCOUNT_EMAIL") or "").strip()
+    gsa_private_key = (env.get("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY") or "").strip()
+    if not gsa_private_key:
+        gsa_private_key = (env.get("GOOGLE_SERVICE_ACCOUNT_KEY") or "").strip()
+    if gsa_email and gsa_private_key and gsa_private_key.startswith("-----BEGIN"):
+        info = {
+            "type": "service_account",
+            "project_id": (env.get("GOOGLE_PROJECT_ID") or "").strip(),
+            "private_key": gsa_private_key.replace("\\n", "\n"),
+            "client_email": gsa_email,
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+        try:
             return (
                 service_account.Credentials.from_service_account_info(
                     info, scopes=[MAPI_SCOPE]
                 ),
-                "gmc_api_key_json",
+                "google_service_account_env_split",
+            )
+        except Exception as exc:
+            credential_errors.append(
+                "GOOGLE_SERVICE_ACCOUNT_EMAIL/GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: "
+                f"{exc}"
             )
 
     ads_config_value = (
@@ -120,6 +263,14 @@ def _load_credentials(env: Mapping[str, str]):
                 "creds_dir_fallback",
             )
 
+    if credential_errors and not _is_truthy(env.get("FEEDOPS_ALLOW_ADC_FALLBACK")):
+        joined = " | ".join(credential_errors)
+        raise ValueError(
+            "Merchant credential loading failed for explicit env credentials. "
+            f"{joined}. "
+            "Set FEEDOPS_ALLOW_ADC_FALLBACK=1 to allow ADC fallback."
+        )
+
     credentials, _project_id = google.auth.default(scopes=[MAPI_SCOPE])
     return credentials, "adc_default"
 
@@ -165,21 +316,81 @@ def _get_field(source: dict, *keys: str):
     return None
 
 
+def _extract_custom_attribute_from_list(
+    custom_attributes: list[dict] | None,
+    *field_aliases: str,
+):
+    """Extract attribute value from Merchant API customAttributes list.
+
+    Different API payloads represent custom attributes with slightly different
+    keys (name/value, attributeName/attributeValue, etc.), so we normalize here.
+    """
+    if not custom_attributes:
+        return None
+
+    wanted = {alias.casefold() for alias in field_aliases}
+    for entry in custom_attributes:
+        if not isinstance(entry, dict):
+            continue
+        name = (
+            entry.get("name")
+            or entry.get("attributeName")
+            or entry.get("attribute")
+            or entry.get("key")
+        )
+        if str(name or "").casefold() not in wanted:
+            continue
+
+        for value_key in ("value", "attributeValue", "textValue", "valueText"):
+            value = entry.get(value_key)
+            if value not in (None, ""):
+                return value
+
+        if isinstance(entry.get("value"), dict):
+            nested = entry["value"]
+            for nested_key in ("value", "text", "stringValue"):
+                value = nested.get(nested_key)
+                if value not in (None, ""):
+                    return value
+
+    return None
+
+
+def _extract_custom_label(
+    attributes: dict,
+    custom_attributes: list[dict] | None,
+    index: int,
+):
+    camel = f"customLabel{index}"
+    snake = f"custom_label_{index}"
+    return (
+        _get_field(attributes, camel, snake)
+        or _extract_custom_attribute_from_list(custom_attributes, camel, snake)
+    )
+
+
 def _normalize_product(product: dict, fetched_at: str) -> dict | None:
     offer_id = product.get("offerId")
     if not offer_id:
         return None
 
-    attributes = product.get("productAttributes", {}) or {}
+    attributes = (
+        product.get("productAttributes")
+        or product.get("attributes")
+        or {}
+    )
+    if not isinstance(attributes, dict):
+        attributes = {}
+    custom_attributes = product.get("customAttributes") or []
     status = product.get("productStatus", {}) or {}
 
     return {
         "offerId": offer_id,
-        "customLabel0": _get_field(attributes, "customLabel0", "custom_label_0"),
-        "customLabel1": _get_field(attributes, "customLabel1", "custom_label_1"),
-        "customLabel2": _get_field(attributes, "customLabel2", "custom_label_2"),
-        "customLabel3": _get_field(attributes, "customLabel3", "custom_label_3"),
-        "customLabel4": _get_field(attributes, "customLabel4", "custom_label_4"),
+        "customLabel0": _extract_custom_label(attributes, custom_attributes, 0),
+        "customLabel1": _extract_custom_label(attributes, custom_attributes, 1),
+        "customLabel2": _extract_custom_label(attributes, custom_attributes, 2),
+        "customLabel3": _extract_custom_label(attributes, custom_attributes, 3),
+        "customLabel4": _extract_custom_label(attributes, custom_attributes, 4),
         "googleProductCategory": _get_field(
             attributes, "googleProductCategory", "google_product_category"
         ),
@@ -212,35 +423,61 @@ def fetch_merchant_center_products(
 
     token = _get_access_token(env)
     headers = {"Authorization": f"Bearer {token}"}
-    endpoint = MAPI_PRODUCTS_ENDPOINT.format(account=merchant_id)
+    parent = f"accounts/{merchant_id}"
+    page_size_default = _get_positive_int_env(env, "GMC_HTTP_PAGE_SIZE", 1000)
+    max_attempts = _get_positive_int_env(env, "GMC_HTTP_MAX_ATTEMPTS", 3)
+    retry_backoff_seconds = _get_positive_float_env(
+        env, "GMC_HTTP_RETRY_BACKOFF_SECONDS", 1.0
+    )
+    timeout = _build_http_timeout(env)
+    endpoints = [
+        MAPI_PRODUCTS_ENDPOINTS[0].format(parent=parent),
+        MAPI_PRODUCTS_ENDPOINTS[1].format(account=merchant_id),
+    ]
 
     products: list[dict] = []
-    page_token: str | None = None
 
-    with httpx.Client(timeout=httpx.Timeout(30.0)) as client:
-        while True:
-            page_size = 1000
-            if limit is not None:
-                remaining = max(limit - len(products), 0)
-                if remaining == 0:
-                    break
-                page_size = min(page_size, remaining)
+    last_error: Exception | None = None
+    with httpx.Client(timeout=timeout) as client:
+        for endpoint in endpoints:
+            page_token: str | None = None
+            products.clear()
+            try:
+                while True:
+                    page_size = page_size_default
+                    if limit is not None:
+                        remaining = max(limit - len(products), 0)
+                        if remaining == 0:
+                            break
+                        page_size = min(page_size, remaining)
 
-            params = {"pageSize": page_size}
-            if page_token:
-                params["pageToken"] = page_token
+                    params = {"pageSize": page_size}
+                    if page_token:
+                        params["pageToken"] = page_token
 
-            response = client.get(endpoint, headers=headers, params=params)
-            response.raise_for_status()
+                    response = _request_page_with_retries(
+                        client,
+                        endpoint,
+                        headers,
+                        params,
+                        max_attempts=max_attempts,
+                        backoff_seconds=retry_backoff_seconds,
+                    )
 
-            payload = response.json()
-            products.extend(payload.get("products", []) or [])
+                    payload = response.json()
+                    products.extend(payload.get("products", []) or [])
 
-            page_token = payload.get("nextPageToken")
-            if not page_token:
-                break
+                    page_token = payload.get("nextPageToken")
+                    if not page_token:
+                        break
+            except Exception as exc:
+                last_error = exc
+                continue
+            return products
 
-    return products
+    if last_error:
+        raise last_error
+    return []
 
 
 def fetch_merchant_center_items(

@@ -4,13 +4,13 @@ import asyncio
 import json
 import logging
 import os
+import re
 
 from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_system_prompt,
 )
 from feedops.models import Candidate, Claim, ParentSKU, Score
-from feedops.pipeline.collection_descriptions import is_known_collection_name
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.finish_injection import get_finish_metadata
 from feedops.pipeline.images import fetch_image
@@ -28,7 +28,17 @@ from feedops.pipeline.prompts import (
     VARIANT_USER_PROMPT_TEMPLATE,
     build_category_guidance,
 )
+from feedops.pipeline.segment_strategy import (
+    SegmentStrategy,
+    format_segment_strategy_guidance,
+    resolve_segment_strategy,
+)
+from feedops.pipeline.feature_flags import is_segment_strategy_v1_enabled
+from feedops.pipeline.title_normalization import trim_title_to_length
 from feedops.providers.base import LLMProvider
+
+logger = logging.getLogger(__name__)
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def _trim_google_short_title(title: str, max_len: int = 70) -> str:
@@ -57,72 +67,38 @@ def _trim_google_short_title(title: str, max_len: int = 70) -> str:
     return cleaned or title.strip()[:max_len]
 
 
-def _normalize_title_separators(title: str) -> str:
-    """Normalize separators for readability and policy compliance.
+def _normalize_segment_token(value: str) -> str:
+    return " ".join(_TOKEN_RE.findall((value or "").lower()))
 
-    - Convert pipes to commas (avoid symbol-heavy separators).
-    - Remove empty segments and dangling punctuation.
-    - Ensure 'Allied Brass' appears once as the last segment when present.
-    """
-    raw = (title or "").strip()
-    if not raw:
-        return ""
 
-    cleaned = raw.replace("|", ",")
-    parts = []
-    saw_brand = False
-    for chunk in cleaned.split(","):
-        part = chunk.strip().strip("-–—").strip()
-        if not part:
+def _extract_custom_label_0_values(parent_sku: ParentSKU) -> list[str]:
+    """Extract unique custom_label_0 values from merchant_center_items."""
+    values: list[str] = []
+    seen: set[str] = set()
+    for item in parent_sku.merchant_center_items or []:
+        raw = item.get("customLabel0") or item.get("custom_label_0")
+        if not raw and isinstance(item.get("attributes"), dict):
+            attrs = item["attributes"]
+            raw = attrs.get("customLabel0") or attrs.get("custom_label_0")
+        if not raw and isinstance(item.get("custom_labels"), dict):
+            labels = item["custom_labels"]
+            raw = labels.get("customLabel0") or labels.get("custom_label_0")
+        value = str(raw or "").strip()
+        if not value:
             continue
-        if part.lower().endswith(" collection"):
-            name = part[: -len(" collection")].strip()
-            if not is_known_collection_name(name):
-                continue
-            part = f"{name} Collection"
-        if part.lower() == "allied brass":
-            saw_brand = True
+        key = _normalize_segment_token(value)
+        if not key or key in seen:
             continue
-        parts.append(part)
-
-    if saw_brand:
-        parts.append("Allied Brass")
-
-    return ", ".join(parts).strip(" ,")
+        seen.add(key)
+        values.append(value)
+    return values
 
 
-def _trim_title_to_length(title: str, max_len: int) -> str:
-    """Trim a comma-separated title to max_len without leaving trailing separators."""
-    cleaned = _normalize_title_separators(title)
-    if len(cleaned) <= max_len:
-        return cleaned
-
-    parts = [p.strip() for p in cleaned.split(",") if p.strip()]
-    brand = None
-    if parts and parts[-1].lower() == "allied brass":
-        brand = parts.pop()
-
-    # Drop least-critical trailing segments first.
-    while parts and len(", ".join(parts + ([brand] if brand else []))) > max_len:
-        if len(parts) <= 1:
-            break
-        parts.pop()
-
-    rebuilt = ", ".join(parts + ([brand] if brand else []))
-    if len(rebuilt) <= max_len:
-        return rebuilt.strip(" ,")
-
-    # Final fallback: hard truncate while preserving whole words and brand if present.
-    suffix = f", {brand}" if brand else ""
-    budget = max_len - len(suffix)
-    head = ", ".join(parts)
-    head = head[: max(budget, 0)].rstrip()
-    if " " in head:
-        head = head.rsplit(" ", 1)[0].rstrip()
-    if suffix and head.endswith(","):
-        head = head.rstrip(", ").rstrip()
-    final = f"{head}{suffix}" if head else (brand or "")
-    return final.strip()[:max_len].strip(" ,")
+def _resolve_segment_strategy(parent_sku: ParentSKU) -> SegmentStrategy:
+    return resolve_segment_strategy(
+        _extract_custom_label_0_values(parent_sku),
+        enabled=is_segment_strategy_v1_enabled(),
+    )
 
 
 def build_prompt(parent_sku: ParentSKU) -> str:
@@ -142,6 +118,7 @@ def build_prompt(parent_sku: ParentSKU) -> str:
     evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
+    segment_strategy = _resolve_segment_strategy(parent_sku)
     gold_examples = format_gold_standard_examples_bundle(max_examples=2)
     gold_examples_section = (
         f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
@@ -152,6 +129,7 @@ def build_prompt(parent_sku: ParentSKU) -> str:
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
+        segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
         gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
@@ -176,6 +154,7 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
     evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
+    segment_strategy = _resolve_segment_strategy(parent_sku)
     gold_examples = format_gold_standard_examples_bundle(max_examples=2)
     gold_examples_section = (
         f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
@@ -185,6 +164,7 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
+        segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
         gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
@@ -220,9 +200,9 @@ def parse_candidate_response(response: dict) -> Candidate:
         factual_accuracy=score_data.get("factual_accuracy", 5),
     )
 
-    google_title = _trim_title_to_length(response["google_title"], 150)
-    bing_title = _trim_title_to_length(response["bing_title"], 150)
-    shopify_title = _trim_title_to_length(response["shopify_title"], 255)
+    google_title = trim_title_to_length(response["google_title"], 150)
+    bing_title = trim_title_to_length(response["bing_title"], 150)
+    shopify_title = trim_title_to_length(response["shopify_title"], 255)
     google_short_title = _trim_google_short_title(response["google_short_title"])
 
     # Get shopify_meta_description, generate fallback from description if not provided
@@ -319,6 +299,19 @@ async def generate_candidates(
     """
     count = max(1, n)
     system_prompt, user_prompt = build_split_prompt(parent_sku)
+    segment_strategy = _resolve_segment_strategy(parent_sku)
+    strategy_metadata = {
+        "segment_strategy_id": segment_strategy.id,
+        "segment_strategy_name": segment_strategy.name,
+    }
+    logger.info(
+        "Applied segment strategy for generation",
+        extra={
+            "master_sku": parent_sku.master_sku,
+            "segment_strategy_id": segment_strategy.id,
+            "segment_strategy_name": segment_strategy.name,
+        },
+    )
     keyword_plan = build_keyword_placement_plan(
         parent_sku, build_evidence_table(parent_sku)
     )
@@ -338,7 +331,11 @@ async def generate_candidates(
         )
         candidate = parse_candidate_response(response)
         return candidate.model_copy(
-            update={"candidate_index": idx, "num_candidates": count}
+            update={
+                "candidate_index": idx,
+                "num_candidates": count,
+                "generation_metadata": strategy_metadata,
+            }
         )
 
     if count == 1:
@@ -464,6 +461,7 @@ def build_variant_prompt(
     evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
     keyword_placement = format_keyword_placement_section(keyword_plan)
+    segment_strategy = _resolve_segment_strategy(parent_sku)
     gold_examples = format_gold_standard_examples_bundle(max_examples=2)
     gold_examples_section = (
         f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
@@ -500,6 +498,7 @@ def build_variant_prompt(
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
         category_guidance=build_category_guidance(parent_sku.category),
+        segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
         finish_context=finish_context,
         gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
@@ -547,6 +546,24 @@ async def generate_variant_candidate(
     )
 
     candidate = parse_candidate_response(response)
+    strategy = _resolve_segment_strategy(parent_sku)
+    candidate = candidate.model_copy(
+        update={
+            "generation_metadata": {
+                "segment_strategy_id": strategy.id,
+                "segment_strategy_name": strategy.name,
+            }
+        }
+    )
+    logger.info(
+        "Applied segment strategy for variant generation",
+        extra={
+            "master_sku": parent_sku.master_sku,
+            "finish_name": finish_name,
+            "segment_strategy_id": strategy.id,
+            "segment_strategy_name": strategy.name,
+        },
+    )
 
     # Validate that finish appears in the description
     desc_lower = candidate.google_description.lower()

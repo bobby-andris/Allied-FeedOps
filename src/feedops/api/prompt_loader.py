@@ -17,9 +17,14 @@ from datetime import datetime, timezone
 from typing import Any, TypedDict
 
 from feedops.db.supabase_client import get_client, is_supabase_available
+from feedops.pipeline.feature_flags import is_prompt_contract_v2_enabled
 from feedops.pipeline.prompts import SYSTEM_PROMPT as CANONICAL_SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
+
+SYSTEM_PROMPT_WARN_THRESHOLD_CHARS = 20_000
+SYSTEM_PROMPT_CI_MAX_CHARS = 24_000
+_prompt_size_warning_emitted = False
 
 
 class GoldStandardExample(TypedDict, total=False):
@@ -138,7 +143,31 @@ def get_system_prompt() -> str:
     Returns:
         System prompt string.
     """
-    return CANONICAL_SYSTEM_PROMPT
+    global _prompt_size_warning_emitted
+
+    prompt = CANONICAL_SYSTEM_PROMPT
+    if not is_prompt_contract_v2_enabled():
+        template = load_active_prompt_template()
+        db_prompt = template.get("system_prompt") if template else None
+        if isinstance(db_prompt, str) and db_prompt.strip():
+            prompt = db_prompt.strip()
+            logger.warning(
+                "PROMPT_CONTRACT_V2 disabled: using Supabase system_prompt fallback for rollback."
+            )
+
+    prompt_len = len(prompt)
+    if (
+        prompt_len > SYSTEM_PROMPT_WARN_THRESHOLD_CHARS
+        and not _prompt_size_warning_emitted
+    ):
+        logger.warning(
+            "SYSTEM_PROMPT length is %s chars (> %s). Consider reducing prompt entropy.",
+            prompt_len,
+            SYSTEM_PROMPT_WARN_THRESHOLD_CHARS,
+        )
+        _prompt_size_warning_emitted = True
+
+    return prompt
 
 
 def get_system_prompt_hash() -> str:

@@ -91,6 +91,9 @@ class Candidate(BaseModel):
     selected_lifestyle_image: Optional[int] = None
     """Which variation number is selected (1-3)."""
 
+    generation_metadata: dict[str, str] | None = None
+    """Generation lineage metadata (for example applied segment strategy)."""
+
     @field_validator("google_title")
     @classmethod
     def validate_google_title_length(cls, v: str) -> str:

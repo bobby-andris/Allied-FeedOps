@@ -15,6 +15,13 @@ from feedops.monitoring.significance import (
     test_ctr_significance,
     test_significance,
 )
+from feedops.monitoring.segment_rollout import (
+    RolloutCheckpoint,
+    RolloutGateDecision,
+    assign_holdout,
+    evaluate_rollout_checkpoint,
+    should_trigger_rollback,
+)
 
 __all__ = [
     "test_significance",
@@ -24,4 +31,9 @@ __all__ = [
     "auto_review_performance",
     "generate_review_summary",
     "format_review_report",
+    "RolloutCheckpoint",
+    "RolloutGateDecision",
+    "assign_holdout",
+    "evaluate_rollout_checkpoint",
+    "should_trigger_rollback",
 ]

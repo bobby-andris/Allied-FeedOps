@@ -32,7 +32,11 @@ Data Collection Requirements (from Phase 0 research):
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
+import os
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -599,6 +603,66 @@ _gmc_cache_time: datetime | None = None
 _GMC_CACHE_TTL_SECONDS = 300  # 5 minutes
 
 
+_SHOPIFY_REGION_PREFIX_RE = re.compile(r"^shopify_([a-z]{2})_", re.IGNORECASE)
+
+
+def _normalize_offer_id(value: str | None) -> str:
+    """Normalize offer IDs to match variant_index format (shopify_us_*)."""
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    match = _SHOPIFY_REGION_PREFIX_RE.match(raw)
+    if not match:
+        return raw
+    return raw.replace(match.group(0), f"shopify_{match.group(1).lower()}_", 1)
+
+
+def _extract_label0(custom_labels: dict[str, Any] | None) -> str:
+    if not isinstance(custom_labels, dict):
+        return ""
+    raw = custom_labels.get("customLabel0")
+    if raw in (None, ""):
+        raw = custom_labels.get("custom_label_0")
+    return str(raw or "").strip()
+
+
+async def _fetch_gmc_items_with_worker_retry() -> list[dict]:
+    """Worker-level retry wrapper around full-catalog fetch.
+
+    Network/page retries already happen inside `merchant_center.py` for each request.
+    This wrapper retries the *entire pagination run* to handle rare full-run failures.
+    """
+    from feedops.integrations.merchant_center import fetch_merchant_center_items
+
+    attempts_raw = os.environ.get("GMC_WORKER_MAX_ATTEMPTS", "2")
+    backoff_raw = os.environ.get("GMC_WORKER_RETRY_BACKOFF_SECONDS", "1.5")
+    try:
+        max_attempts = max(1, int(attempts_raw))
+    except ValueError:
+        max_attempts = 2
+    try:
+        backoff_seconds = max(0.1, float(backoff_raw))
+    except ValueError:
+        backoff_seconds = 1.5
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return fetch_merchant_center_items()
+        except Exception:
+            if attempt >= max_attempts:
+                raise
+            sleep_seconds = backoff_seconds * (2 ** (attempt - 1))
+            logger.warning(
+                "GMC full-catalog fetch failed on attempt %s/%s, retrying in %.1fs",
+                attempt,
+                max_attempts,
+                sleep_seconds,
+            )
+            await asyncio.sleep(sleep_seconds)
+
+    return []
+
+
 async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
     """Collect custom labels 0-4 from Google Merchant Center for a batch of master SKUs.
 
@@ -626,7 +690,6 @@ async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
         - Idempotent via .update().eq("gmc_offer_id", offer_id)
         - Timestamps auto-included via updated_at field (DATA-10)
     """
-    from feedops.integrations.merchant_center import fetch_merchant_center_items
     from feedops.db.supabase_client import get_client
 
     global _gmc_cache, _gmc_cache_time
@@ -649,7 +712,7 @@ async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
 
         if cache_expired:
             logger.info("Fetching GMC items (cache miss or expired)")
-            gmc_items = fetch_merchant_center_items()
+            gmc_items = await _fetch_gmc_items_with_worker_retry()
             logger.info(f"Fetched {len(gmc_items)} GMC items")
 
             # Build lookup dict keyed by offerId
@@ -658,7 +721,7 @@ async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
                 offer_id = item.get("offerId")
                 if offer_id:
                     # Normalize offer ID to lowercase for lookup (DATA-08)
-                    offer_id_lower = offer_id.replace("shopify_US_", "shopify_us_")
+                    offer_id_lower = _normalize_offer_id(offer_id)
                     _gmc_cache[offer_id_lower] = {
                         "customLabel0": item.get("customLabel0"),
                         "customLabel1": item.get("customLabel1"),
@@ -687,16 +750,24 @@ async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
                 continue
 
             variants_updated = 0
+            variants_scanned = 0
+            variants_no_data = 0
+            variants_blank_label0 = 0
+            total_variants = len(variant_result.data)
+            labels_by_offer: dict[str, dict] = {}
 
             for row in variant_result.data:
                 offer_id = row.get("gmc_offer_id")
                 if not offer_id:
                     continue
+                variants_scanned += 1
 
                 # Lookup custom labels from GMC cache
-                custom_labels = _gmc_cache.get(offer_id)
+                custom_labels = _gmc_cache.get(_normalize_offer_id(offer_id))
 
                 if custom_labels:
+                    if not _extract_label0(custom_labels):
+                        variants_blank_label0 += 1
                     # Validate before update
                     try:
                         ValidatedCustomLabels(
@@ -707,25 +778,67 @@ async def collect_custom_labels_batch(batch: list[str]) -> list[dict]:
                         logger.warning(f"Invalid custom labels for {offer_id}: {e}")
                         continue
 
-                    # Update variant_index with custom_labels JSONB
-                    # Idempotent: update by unique gmc_offer_id (JOB-06)
-                    supabase.table("variant_index").update({
-                        "custom_labels": custom_labels,
-                        "updated_at": datetime.now(timezone.utc).isoformat(),  # DATA-10
-                    }).eq("gmc_offer_id", offer_id).execute()
+                    labels_by_offer[offer_id] = custom_labels
+                else:
+                    variants_no_data += 1
 
-                    variants_updated += 1
+            if labels_by_offer:
+                now_iso = datetime.now(timezone.utc).isoformat()
+                label_groups: dict[str, dict[str, Any]] = {}
+                for offer_id, custom_labels in labels_by_offer.items():
+                    group_key = json.dumps(custom_labels, sort_keys=True)
+                    group = label_groups.get(group_key)
+                    if group is None:
+                        label_groups[group_key] = {
+                            "custom_labels": custom_labels,
+                            "offer_ids": [offer_id],
+                        }
+                    else:
+                        group["offer_ids"].append(offer_id)
+
+                # Fast path: all variants in this master SKU share one label set.
+                if len(label_groups) == 1 and len(labels_by_offer) == total_variants:
+                    only_group = next(iter(label_groups.values()))
+                    supabase.table("variant_index").update({
+                        "custom_labels": only_group["custom_labels"],
+                        "updated_at": now_iso,
+                    }).eq("master_sku", sku).execute()
+                    variants_updated = total_variants
+                else:
+                    for group in label_groups.values():
+                        offer_ids = group["offer_ids"]
+                        query = supabase.table("variant_index").update({
+                            "custom_labels": group["custom_labels"],
+                            "updated_at": now_iso,
+                        })
+                        if len(offer_ids) == 1:
+                            query.eq("gmc_offer_id", offer_ids[0]).execute()
+                        else:
+                            query.in_("gmc_offer_id", offer_ids).execute()
+                        variants_updated += len(offer_ids)
 
             if variants_updated > 0:
                 logger.info(f"Updated {variants_updated} variants for {sku}")
                 results.append({
                     "item_id": sku,
                     "status": "ok",
+                    "masters_scanned": 1,
+                    "variants_scanned": variants_scanned,
                     "variants_updated": variants_updated,
+                    "variants_no_data": variants_no_data,
+                    "variants_blank_label0": variants_blank_label0,
                 })
             else:
                 logger.warning(f"No custom labels found in GMC for {sku}")
-                results.append({"item_id": sku, "status": "no_data"})
+                results.append({
+                    "item_id": sku,
+                    "status": "no_data",
+                    "masters_scanned": 1,
+                    "variants_scanned": variants_scanned,
+                    "variants_updated": 0,
+                    "variants_no_data": variants_no_data,
+                    "variants_blank_label0": variants_blank_label0,
+                })
 
         return results
 
