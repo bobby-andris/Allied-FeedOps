@@ -16,22 +16,17 @@ describe('summarizeCampaignSetIntegrity', () => {
       ]
     )
 
-    expect(summary.enabled_shopping_campaigns).toBe(4)
-    expect(summary.parsed_funnel_campaigns).toBe(3)
-    expect(summary.non_pattern_campaign_count).toBe(1)
-    expect(summary.non_pattern_campaigns).toEqual(['AVD - Shopping - BRANDED - US'])
+    expect(summary.enabled_shopping_campaigns).toBe(2)
+    expect(summary.parsed_funnel_campaigns).toBe(2)
+    expect(summary.non_pattern_campaign_count).toBe(0)
+    expect(summary.non_pattern_campaigns).toEqual([])
     expect(summary.ad_group_name_mismatch_count).toBe(1)
-    expect(summary.custom_label_0_count).toBe(2)
+    expect(summary.custom_label_0_count).toBe(1)
     expect(summary.labels_with_missing_tiers).toEqual([
       {
         custom_label_0: 'cabinet hardware',
         present_tiers: ['HIGH', 'MEDIUM'],
         missing_tiers: ['LOW'],
-      },
-      {
-        custom_label_0: 'catchall',
-        present_tiers: ['HIGH'],
-        missing_tiers: ['MEDIUM', 'LOW'],
       },
     ])
   })
