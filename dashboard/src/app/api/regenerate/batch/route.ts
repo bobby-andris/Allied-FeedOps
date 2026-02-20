@@ -40,6 +40,10 @@ const DELAY_BETWEEN_CALLS_MS = 250
 const PAGE_SIZE = 1000
 const REGENERATE_AUTH_FORWARD_HEADERS = ['cookie', 'authorization'] as const
 
+// Batch regeneration can take several minutes when processing full segment scopes.
+// Raising this route budget avoids gateway timeouts while keeping logic unchanged.
+export const maxDuration = 800
+
 interface GeneratedContentSkuCount {
   skuCounts: Map<string, number>
   totalItems: number

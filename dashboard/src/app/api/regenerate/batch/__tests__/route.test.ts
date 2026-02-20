@@ -14,7 +14,7 @@ vi.mock('@/lib/master-sku', () => ({
   resolveCanonicalMasterSkuList: mocks.resolveCanonicalMasterSkuList,
 }))
 
-import { POST } from '@/app/api/regenerate/batch/route'
+import { POST, maxDuration } from '@/app/api/regenerate/batch/route'
 
 function createGeneratedContentSupabase(rows: Array<{ master_sku: string | null }>) {
   const range = vi.fn().mockResolvedValue({ data: rows, error: null })
@@ -88,6 +88,10 @@ describe('POST /api/regenerate/batch', () => {
         }),
       })
     )
+  })
+
+  it('exposes a long-running duration budget for full segment regeneration', () => {
+    expect(maxDuration).toBeGreaterThanOrEqual(420)
   })
 
   it('returns a structured auth error when internal regenerate responds with redirect auth status', async () => {
