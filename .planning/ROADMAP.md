@@ -263,7 +263,7 @@ Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14
 | 13. Fix Google Ads Data Sourcing | 3/3 | Complete    | 2026-02-19 | - |
 | 14. Complete 180-day Backfill & Monitoring Fixes | 3/3 | Complete    | 2026-02-19 | - |
 | 15. Google Ads Data Backfill & Monitoring Verification | 0/3 | Partial — bugs found |  | - |
-| 16. Fix Google Ads Backfill Pipeline | 2/3 | In Progress|  | - |
+| 16. Fix Google Ads Backfill Pipeline | 3/3 | Complete   | 2026-02-20 | - |
 
 ### Phase 13: Fix Google Ads data sourcing: variant metrics from shopping_performance_view and per-campaign search terms sync
 
@@ -338,7 +338,7 @@ Fix: Add diagnostic logging, test locally, identify empty-result cause, fix and 
   4. Search terms 180-day backfill using 6 × 30-day windows completes — search_queries rows >> 7,891, oldest period ~180 days ago
   5. Monitoring page coverage cards reflect post-backfill numbers (>>424 SKUs search terms, >>96 SKUs performance)
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 16-01-PLAN.md — Fix fetch_batch_product_performance chunking + run performance backfill for 2,784 SKUs
