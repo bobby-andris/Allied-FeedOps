@@ -14,6 +14,7 @@ import type {
   LabelTierPerformanceResponse,
   NeedsDecisionResponse,
   NeedsDecisionTerm,
+  PipelineMetadata,
   PostDecisionItem,
   PostDecisionResult,
   PostDecisionsResponse,
@@ -26,6 +27,21 @@ import {
   runWithGoogleAdsRetry,
 } from '@/lib/shopping-funnel/retry'
 import { enrichNeedsDecisionTerm } from '@/lib/optimization/query-intelligence'
+import {
+  DEFAULT_STALE_THRESHOLD_HOURS,
+  DECOMPOSITION_VERSIONS,
+  FEATURE_FLAG_DECOMPOSITION_PIPELINE,
+} from '@/lib/optimization/decomposition/config'
+import {
+  computeDecompositionArtifact,
+  scoreTermAggregate,
+} from '@/lib/optimization/decomposition/engine'
+import {
+  getLatestArtifactsByPairs,
+  hydrateArtifactFromRows,
+  insertArtifactsBatch,
+} from '@/lib/optimization/decomposition/repository'
+import { pairKey } from '@/lib/optimization/decomposition/types'
 
 const SHARED_LIST_NAME_BY_ACTION = {
   global_block: 'AVD - Global Block',
@@ -782,6 +798,199 @@ function aggregateByTermAndLabel(searchRows: SearchTermRow[]): Map<string, Map<s
   return result
 }
 
+function isWithinStaleThreshold(createdAt: string, staleThresholdHours: number): boolean {
+  const createdTime = Date.parse(createdAt)
+  if (Number.isNaN(createdTime)) {
+    return false
+  }
+  const staleCutoff = Date.now() - staleThresholdHours * 60 * 60 * 1000
+  return createdTime >= staleCutoff
+}
+
+function arePairArtifactsFresh(
+  artifacts: {
+    intentRow: { created_at: string } | null
+    valueRow: { created_at: string } | null
+    recommendationRow: { created_at: string } | null
+  },
+  staleThresholdHours: number
+): boolean {
+  if (!artifacts.intentRow || !artifacts.valueRow || !artifacts.recommendationRow) {
+    return false
+  }
+
+  return (
+    isWithinStaleThreshold(artifacts.intentRow.created_at, staleThresholdHours) &&
+    isWithinStaleThreshold(artifacts.valueRow.created_at, staleThresholdHours) &&
+    isWithinStaleThreshold(artifacts.recommendationRow.created_at, staleThresholdHours)
+  )
+}
+
+function computeLatestArtifactTimestamp(
+  artifactsByPair: Map<
+    string,
+    {
+      intentRow: { created_at: string } | null
+      valueRow: { created_at: string } | null
+      recommendationRow: { created_at: string } | null
+    }
+  >,
+  fallbackTimestamp: string | null
+): string | null {
+  let latest = fallbackTimestamp
+
+  for (const artifacts of artifactsByPair.values()) {
+    const timestamps = [artifacts.intentRow?.created_at, artifacts.valueRow?.created_at, artifacts.recommendationRow?.created_at].filter(
+      (value): value is string => Boolean(value)
+    )
+
+    for (const timestamp of timestamps) {
+      if (!latest || Date.parse(timestamp) > Date.parse(latest)) {
+        latest = timestamp
+      }
+    }
+  }
+
+  return latest
+}
+
+async function runNeedsDecisionDecompositionPipeline(
+  terms: NeedsDecisionTerm[],
+  options: GetNeedsDecisionOptions['pipeline']
+): Promise<{ enrichedTerms: NeedsDecisionTerm[]; pipelineMetadata: PipelineMetadata }> {
+  const enabled = options?.enabled ?? FEATURE_FLAG_DECOMPOSITION_PIPELINE
+  const staleThresholdHours = options?.staleThresholdHours ?? DEFAULT_STALE_THRESHOLD_HOURS
+  const persist = options?.persist ?? true
+  const forceRecompute = options?.forceRecompute ?? false
+
+  if (!enabled || terms.length === 0) {
+    return {
+      enrichedTerms: terms.map(enrichNeedsDecisionTerm),
+      pipelineMetadata: {
+        enabled,
+        parser_version: DECOMPOSITION_VERSIONS.parserVersion,
+        score_version: DECOMPOSITION_VERSIONS.scoreVersion,
+        recommendation_version: DECOMPOSITION_VERSIONS.recommendationVersion,
+        stale_threshold_hours: staleThresholdHours,
+        pairs_total: 0,
+        pairs_cached: 0,
+        pairs_recomputed: 0,
+        warnings: enabled ? [] : ['Decomposition pipeline disabled by feature flag.'],
+        latest_artifact_created_at: null,
+      },
+    }
+  }
+
+  const pairInputMap = new Map<
+    string,
+    {
+      searchTerm: string
+      customLabel0: string
+      assignment: NeedsDecisionTerm['custom_label_0s'][number]
+      labelCount: number
+    }
+  >()
+
+  for (const term of terms) {
+    for (const assignment of term.custom_label_0s) {
+      const key = pairKey(term.search_term, assignment.custom_label_0)
+      if (pairInputMap.has(key)) {
+        continue
+      }
+      pairInputMap.set(key, {
+        searchTerm: term.search_term,
+        customLabel0: assignment.custom_label_0,
+        assignment,
+        labelCount: term.custom_label_0s.length,
+      })
+    }
+  }
+
+  const pairInputs = [...pairInputMap.values()]
+  const latest = await getLatestArtifactsByPairs(
+    pairInputs.map((pair) => ({ searchTerm: pair.searchTerm, customLabel0: pair.customLabel0 })),
+    DECOMPOSITION_VERSIONS
+  )
+
+  const warnings = [...latest.warnings]
+  const artifactsByPair = new Map<string, ReturnType<typeof computeDecompositionArtifact>>()
+
+  let pairsCached = 0
+  const recomputedArtifacts: Array<ReturnType<typeof computeDecompositionArtifact>> = []
+
+  for (const pair of pairInputs) {
+    const key = pairKey(pair.searchTerm, pair.customLabel0)
+    const latestRows = latest.byPair.get(key) ?? {
+      intentRow: null,
+      valueRow: null,
+      recommendationRow: null,
+    }
+
+    const hydrated = hydrateArtifactFromRows(pair.searchTerm, pair.customLabel0, latestRows)
+    const cacheUsable =
+      !forceRecompute && Boolean(hydrated) && arePairArtifactsFresh(latestRows, staleThresholdHours)
+
+    if (cacheUsable && hydrated) {
+      artifactsByPair.set(key, hydrated)
+      pairsCached += 1
+      continue
+    }
+
+    const recomputed = computeDecompositionArtifact({
+      searchTerm: pair.searchTerm,
+      customLabel0: pair.customLabel0,
+      assignment: pair.assignment,
+      labelCount: pair.labelCount,
+    })
+    artifactsByPair.set(key, recomputed)
+    recomputedArtifacts.push(recomputed)
+  }
+
+  if (persist && recomputedArtifacts.length > 0) {
+    const insertResult = await insertArtifactsBatch(recomputedArtifacts)
+    warnings.push(...insertResult.warnings)
+  } else if (!persist && recomputedArtifacts.length > 0) {
+    warnings.push('Pipeline running in dry-run mode; recomputed artifacts were not persisted.')
+  }
+
+  const enrichedTerms = terms.map((term) => {
+    const orderedAssignments = [...term.custom_label_0s].sort((a, b) => b.impressions - a.impressions)
+    const primary = orderedAssignments[0]
+    const primaryArtifact = primary
+      ? artifactsByPair.get(pairKey(term.search_term, primary.custom_label_0)) ?? null
+      : null
+
+    const fallback = enrichNeedsDecisionTerm(term)
+    return {
+      ...term,
+      intent_features: primaryArtifact?.intent ?? fallback.intent_features,
+      recommendation: primaryArtifact?.recommendation ?? fallback.recommendation,
+      value_score: scoreTermAggregate(term.custom_label_0s),
+    }
+  })
+
+  const latestArtifactCreatedAt = computeLatestArtifactTimestamp(
+    latest.byPair,
+    recomputedArtifacts.length > 0 ? new Date().toISOString() : null
+  )
+
+  return {
+    enrichedTerms,
+    pipelineMetadata: {
+      enabled: true,
+      parser_version: DECOMPOSITION_VERSIONS.parserVersion,
+      score_version: DECOMPOSITION_VERSIONS.scoreVersion,
+      recommendation_version: DECOMPOSITION_VERSIONS.recommendationVersion,
+      stale_threshold_hours: staleThresholdHours,
+      pairs_total: pairInputs.length,
+      pairs_cached: pairsCached,
+      pairs_recomputed: recomputedArtifacts.length,
+      warnings: Array.from(new Set(warnings)),
+      latest_artifact_created_at: latestArtifactCreatedAt,
+    },
+  }
+}
+
 export async function getNeedsDecisionTerms(
   options: GetNeedsDecisionOptions
 ): Promise<NeedsDecisionResponse> {
@@ -835,7 +1044,10 @@ export async function getNeedsDecisionTerms(
     }
   }
 
-  const enrichedTerms = terms.map(enrichNeedsDecisionTerm)
+  const { enrichedTerms, pipelineMetadata } = await runNeedsDecisionDecompositionPipeline(
+    terms,
+    options.pipeline
+  )
 
   enrichedTerms.sort((a, b) => {
     if (sortBy === 'impact_desc') {
@@ -860,6 +1072,7 @@ export async function getNeedsDecisionTerms(
     data_source: SHOPPING_FUNNEL_DATA_SOURCE,
     generated_at: new Date().toISOString(),
     cache_ttl_ms: SHOPPING_FUNNEL_CACHE_TTL_MS,
+    pipeline: pipelineMetadata,
   }
 }
 

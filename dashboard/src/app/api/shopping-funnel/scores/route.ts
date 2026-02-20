@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       generated_at: new Date().toISOString(),
       date_window: termsResult.date_window,
+      pipeline: termsResult.pipeline,
       summary,
       score_distribution: scoreDistribution,
     })
@@ -64,4 +65,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-

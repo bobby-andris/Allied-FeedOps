@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       generated_at: new Date().toISOString(),
       date_window: termsResult.date_window,
+      pipeline: termsResult.pipeline,
       cluster_count: clusters.length,
       clusters,
       launch_briefs: launchBriefs,
@@ -67,4 +68,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-

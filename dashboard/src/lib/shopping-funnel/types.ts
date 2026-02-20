@@ -34,6 +34,26 @@ export interface DateWindow {
   endDate: string
 }
 
+export interface NeedsDecisionPipelineOptions {
+  enabled?: boolean
+  persist?: boolean
+  forceRecompute?: boolean
+  staleThresholdHours?: number
+}
+
+export interface PipelineMetadata {
+  enabled: boolean
+  parser_version: string
+  score_version: string
+  recommendation_version: string
+  stale_threshold_hours: number
+  pairs_total: number
+  pairs_cached: number
+  pairs_recomputed: number
+  warnings: string[]
+  latest_artifact_created_at: string | null
+}
+
 export interface SearchTermSourceAssignment {
   custom_label_0: string
   source_campaign: string
@@ -78,6 +98,7 @@ export interface GetNeedsDecisionOptions {
   limit?: number
   offset?: number
   sortBy?: 'impressions_desc' | 'impact_desc'
+  pipeline?: NeedsDecisionPipelineOptions
 }
 
 export interface GetExistingFunnelOptions {
@@ -103,6 +124,7 @@ export interface NeedsDecisionResponse {
   data_source: 'google_ads_api_live'
   generated_at: string
   cache_ttl_ms: number
+  pipeline?: PipelineMetadata
 }
 
 export interface ExistingFunnelResponse {

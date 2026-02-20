@@ -656,6 +656,53 @@ export interface Ga4ShopifyReconciliationDaily {
   created_at: string
 }
 
+export interface QueryIntentFeatureRow {
+  id: string
+  search_term: string
+  custom_label_0: string
+  parser_version: string
+  product_object: string | null
+  modifier_tokens: string[]
+  use_case_tokens: string[]
+  is_branded: boolean
+  is_competitor: boolean
+  has_mismatch_risk: boolean
+  confidence: number
+  extracted: Record<string, unknown>
+  created_at: string
+}
+
+export interface QueryValueScoreRow {
+  id: string
+  search_term: string
+  custom_label_0: string
+  score_version: string
+  expected_clicks: number
+  expected_cvr: number
+  expected_conversion_value: number
+  expected_profit_proxy: number
+  uncertainty: number
+  impact_score: number
+  model_inputs: Record<string, unknown>
+  created_at: string
+}
+
+export interface RoutingRecommendationRow {
+  id: string
+  search_term: string
+  custom_label_0: string
+  recommended_action: 'global_block' | 'competitor' | 'branded' | 'funnel'
+  recommended_tier: 'campaign_negative' | 'high' | 'medium' | 'low' | null
+  reason_codes: string[]
+  confidence: number
+  review_status: 'pending' | 'accepted' | 'rejected' | 'expired'
+  accepted: boolean | null
+  accepted_at: string | null
+  accepted_by: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
 // Database schema type
 export interface Database {
   public: {
