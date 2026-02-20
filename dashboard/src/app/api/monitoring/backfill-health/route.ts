@@ -3,28 +3,33 @@ import { NextRequest, NextResponse } from 'next/server'
 // Python Cloud Run pipeline URL
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
 
+// Per-endpoint timeouts — freshness can be slow (2784-SKU query), coverage/apiHealth are fast
+// Freshness timeout is kept short so coverage cards don't block behind the slow freshness query
+const FRESHNESS_TIMEOUT_MS = 10_000  // 10s: fail fast if freshness is slow
+const FAST_ENDPOINT_TIMEOUT_MS = 10_000  // 10s for coverage + api-health
+
+function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  return fetch(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timer))
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Fetch all 3 monitoring endpoints in parallel
+    // Fetch all 3 monitoring endpoints in parallel, each with its own timeout.
+    // Freshness has a short timeout so slow queries don't block coverage cards from rendering.
     const [freshnessRes, coverageRes, apiHealthRes] = await Promise.allSettled([
-      fetch(`${PIPELINE_URL}/monitoring/freshness`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-      }),
-      fetch(`${PIPELINE_URL}/monitoring/coverage`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-      }),
-      fetch(`${PIPELINE_URL}/monitoring/api-health`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-      }),
+      fetchWithTimeout(`${PIPELINE_URL}/monitoring/freshness`, FRESHNESS_TIMEOUT_MS),
+      fetchWithTimeout(`${PIPELINE_URL}/monitoring/coverage`, FAST_ENDPOINT_TIMEOUT_MS),
+      fetchWithTimeout(`${PIPELINE_URL}/monitoring/api-health`, FAST_ENDPOINT_TIMEOUT_MS),
     ])
 
-    // Extract data from settled promises (null if failed)
+    // Extract data from settled promises (null if failed or timed out)
     const freshness = freshnessRes.status === 'fulfilled' && freshnessRes.value.ok
       ? await freshnessRes.value.json()
       : null
@@ -38,9 +43,9 @@ export async function GET(request: NextRequest) {
       : null
 
     // Log any failures
-    if (!freshness) console.warn('Freshness endpoint failed')
-    if (!coverage) console.warn('Coverage endpoint failed')
-    if (!apiHealth) console.warn('API health endpoint failed')
+    if (!freshness) console.warn('Freshness endpoint failed or timed out')
+    if (!coverage) console.warn('Coverage endpoint failed or timed out')
+    if (!apiHealth) console.warn('API health endpoint failed or timed out')
 
     // Return combined response (null sections if failed)
     return NextResponse.json({
