@@ -74,9 +74,19 @@ interface RoasResponse {
     tier: 'HIGH' | 'MEDIUM' | 'LOW'
     currentTargetRoas: number
     observedRoas: number
+    roasGapRatio: number
     recommendedTargetRoas: number
+    appliedStepPct: number
+    maxAllowedStepPct: number
     direction: 'increase' | 'decrease' | 'hold'
+    guardrailStatus: 'actionable' | 'insufficient_data' | 'near_target_band'
     confidence: number
+    confidenceComponents: {
+      clickConfidence: number
+      conversionConfidence: number
+      spendConfidence: number
+      final: number
+    }
     rationale: string
   }>
 }
@@ -505,9 +515,29 @@ export default function OptimizationControlCenterPage() {
                       <Badge variant="outline">
                         {item.currentTargetRoas.toFixed(2)}x → {item.recommendedTargetRoas.toFixed(2)}x
                       </Badge>
+                      <Badge variant="outline">
+                        Step {(item.appliedStepPct * 100).toFixed(1)}% (cap {(item.maxAllowedStepPct * 100).toFixed(0)}%)
+                      </Badge>
                       <Badge variant="secondary">{item.direction}</Badge>
+                      <Badge
+                        variant={
+                          item.guardrailStatus === 'actionable'
+                            ? 'secondary'
+                            : item.guardrailStatus === 'near_target_band'
+                              ? 'outline'
+                              : 'destructive'
+                        }
+                      >
+                        {item.guardrailStatus}
+                      </Badge>
                       <Badge variant="outline">{Math.round(item.confidence * 100)}% confidence</Badge>
                     </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span>ROAS gap {(item.roasGapRatio * 100).toFixed(1)}%</span>
+                    <span>click conf {(item.confidenceComponents.clickConfidence * 100).toFixed(0)}%</span>
+                    <span>conv conf {(item.confidenceComponents.conversionConfidence * 100).toFixed(0)}%</span>
+                    <span>spend conf {(item.confidenceComponents.spendConfidence * 100).toFixed(0)}%</span>
                   </div>
                 </div>
               ))}

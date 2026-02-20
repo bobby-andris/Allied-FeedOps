@@ -164,47 +164,117 @@ export function recommendActionForPair(
   labelCount: number,
   intent: QueryIntentFeatures
 ): QueryRecommendation {
+  return computeRecommendationDecision(searchTerm, assignment, labelCount, intent).recommendation
+}
+
+function computeRecommendationDecision(
+  searchTerm: string,
+  assignment: SearchTermSourceAssignment,
+  labelCount: number,
+  intent: QueryIntentFeatures
+): {
+  recommendation: QueryRecommendation
+  decisionPath: QueryRecommendation['action_type']
+  confidenceComponents: {
+    base: number
+    clicks_bonus: number
+    conversions_bonus: number
+    label_count_bonus: number
+    override_bonus: number
+    final: number
+  }
+} {
   const normalized = normalizeSearchTermValue(searchTerm)
 
   if (intent.is_branded) {
+    const final = 0.96
     return {
-      action_type: 'branded',
-      confidence: 0.96,
-      reason_codes: ['brand_token_detected'],
+      recommendation: {
+        action_type: 'branded',
+        confidence: final,
+        reason_codes: ['brand_token_detected'],
+      },
+      decisionPath: 'branded',
+      confidenceComponents: {
+        base: 0,
+        clicks_bonus: 0,
+        conversions_bonus: 0,
+        label_count_bonus: 0,
+        override_bonus: final,
+        final,
+      },
     }
   }
 
   if (intent.is_competitor) {
+    const final = 0.9
     return {
-      action_type: 'competitor',
-      confidence: 0.9,
-      reason_codes: ['competitor_token_detected'],
+      recommendation: {
+        action_type: 'competitor',
+        confidence: final,
+        reason_codes: ['competitor_token_detected'],
+      },
+      decisionPath: 'competitor',
+      confidenceComponents: {
+        base: 0,
+        clicks_bonus: 0,
+        conversions_bonus: 0,
+        label_count_bonus: 0,
+        override_bonus: final,
+        final,
+      },
     }
   }
 
   if (intent.has_mismatch_risk) {
+    const final = 0.78
     return {
-      action_type: 'global_block',
-      confidence: 0.78,
-      reason_codes: ['negative_risk_token_detected'],
+      recommendation: {
+        action_type: 'global_block',
+        confidence: final,
+        reason_codes: ['negative_risk_token_detected'],
+      },
+      decisionPath: 'global_block',
+      confidenceComponents: {
+        base: 0,
+        clicks_bonus: 0,
+        conversions_bonus: 0,
+        label_count_bonus: 0,
+        override_bonus: final,
+        final,
+      },
     }
   }
 
   const defaultTier = estimateTierFromAssignment(assignment, normalized, intent)
+  const clicksBonus = Math.min(assignment.clicks, 200) / 2000
+  const conversionsBonus = Math.min(assignment.conversions, 20) / 100
+  const labelCountBonus = Math.min(labelCount, 5) * 0.03
   const confidence = clamp(
     BASE_FUNNEL_CONFIDENCE +
-      Math.min(assignment.clicks, 200) / 2000 +
-      Math.min(assignment.conversions, 20) / 100 +
-      Math.min(labelCount, 5) * 0.03,
+      clicksBonus +
+      conversionsBonus +
+      labelCountBonus,
     0.05,
     0.99
   )
 
   return {
-    action_type: 'funnel',
-    default_tier: defaultTier,
-    confidence: Number(confidence.toFixed(4)),
-    reason_codes: ['performance_weighted_tiering', 'funnel_default'],
+    recommendation: {
+      action_type: 'funnel',
+      default_tier: defaultTier,
+      confidence: Number(confidence.toFixed(4)),
+      reason_codes: ['performance_weighted_tiering', 'funnel_default'],
+    },
+    decisionPath: 'funnel',
+    confidenceComponents: {
+      base: BASE_FUNNEL_CONFIDENCE,
+      clicks_bonus: Number(clicksBonus.toFixed(4)),
+      conversions_bonus: Number(conversionsBonus.toFixed(4)),
+      label_count_bonus: Number(labelCountBonus.toFixed(4)),
+      override_bonus: 0,
+      final: Number(confidence.toFixed(4)),
+    },
   }
 }
 
@@ -306,12 +376,13 @@ export function scoreTermFromPairValues(values: QueryValueScore[]): QueryValueSc
 
 export function computeDecompositionArtifact(input: DecompositionPairInput): DecompositionArtifact {
   const { intent, intentConfidence, diagnostics } = decomposeSearchTermIntent(input.searchTerm)
-  const recommendation = recommendActionForPair(
+  const recommendationDecision = computeRecommendationDecision(
     input.searchTerm,
     input.assignment,
     input.labelCount,
     intent
   )
+  const recommendation = recommendationDecision.recommendation
   const valueScoring = scorePairValueWithContext(
     input.assignment,
     input.customLabel0,
@@ -341,6 +412,8 @@ export function computeDecompositionArtifact(input: DecompositionPairInput): Dec
     recommendationMetadata: {
       source_campaign: input.assignment.source_campaign,
       source_tier: input.assignment.source_tier,
+      decision_path: recommendationDecision.decisionPath,
+      recommendation_confidence_components: recommendationDecision.confidenceComponents,
       versions: DECOMPOSITION_VERSIONS,
     },
   }

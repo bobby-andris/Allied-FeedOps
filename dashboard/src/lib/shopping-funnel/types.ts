@@ -29,6 +29,45 @@ export interface QueryValueScore {
   uncertainty: number
 }
 
+export interface ConfidenceComponents {
+  base: number
+  clicks_bonus?: number
+  conversions_bonus?: number
+  label_count_bonus?: number
+  override_bonus?: number
+  final: number
+}
+
+export interface NeedsDecisionExplainability {
+  parser_version: string
+  score_version: string
+  recommendation_version: string
+  primary_custom_label_0: string | null
+  reason_codes: string[]
+  intent_confidence: number | null
+  recommendation_confidence: number | null
+  intent_confidence_components?: {
+    base: number
+    product_object_bonus: number
+    modifier_or_use_case_bonus: number
+    explicit_brand_or_competitor_bonus: number
+    ambiguity_penalty: number
+    final: number
+  }
+  recommendation_confidence_components?: ConfidenceComponents
+  diagnostics?: {
+    normalized_search_term: string
+    selected_product_object: string | null
+    product_object_candidates: string[]
+    modifier_tokens: string[]
+    use_case_tokens: string[]
+    brand_tokens: string[]
+    competitor_tokens: string[]
+    risk_tokens: string[]
+    ambiguity_multiple_product_objects: boolean
+  }
+}
+
 export interface DateWindow {
   startDate: string
   endDate: string
@@ -71,6 +110,7 @@ export interface NeedsDecisionTerm {
   intent_features?: QueryIntentFeatures
   recommendation?: QueryRecommendation
   value_score?: QueryValueScore
+  explainability?: NeedsDecisionExplainability
 }
 
 export interface ExistingFunnelAssignment {

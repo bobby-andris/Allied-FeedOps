@@ -1,4 +1,6 @@
 import { computeDecompositionArtifact, decomposeSearchTermIntent, scoreTermAggregate } from '@/lib/optimization/decomposition/engine'
+import { DECOMPOSITION_VERSIONS } from '@/lib/optimization/decomposition/config'
+import { buildNeedsDecisionExplainability } from '@/lib/shopping-funnel/explainability'
 import type {
   NeedsDecisionTerm,
   QueryIntentFeatures,
@@ -39,10 +41,40 @@ function deriveFallbackValue(term: NeedsDecisionTerm): QueryValueScore {
 }
 
 export function enrichNeedsDecisionTerm(term: NeedsDecisionTerm): NeedsDecisionTerm {
+  const primaryAssignment = [...term.custom_label_0s].sort((a, b) => b.impressions - a.impressions)[0]
+  if (primaryAssignment) {
+    const artifact = computeDecompositionArtifact({
+      searchTerm: term.search_term,
+      customLabel0: primaryAssignment.custom_label_0,
+      assignment: primaryAssignment,
+      labelCount: term.custom_label_0s.length,
+    })
+
+    return {
+      ...term,
+      intent_features: artifact.intent,
+      recommendation: artifact.recommendation,
+      value_score: scoreTermAggregate(term.custom_label_0s),
+      explainability: buildNeedsDecisionExplainability({
+        artifact,
+        primaryCustomLabel0: primaryAssignment.custom_label_0,
+      }),
+    }
+  }
+
   return {
     ...term,
     intent_features: deriveFallbackIntent(term),
     recommendation: deriveFallbackRecommendation(term),
     value_score: deriveFallbackValue(term),
+    explainability: {
+      parser_version: DECOMPOSITION_VERSIONS.parserVersion,
+      score_version: DECOMPOSITION_VERSIONS.scoreVersion,
+      recommendation_version: DECOMPOSITION_VERSIONS.recommendationVersion,
+      primary_custom_label_0: null,
+      reason_codes: ['fallback_no_assignment'],
+      intent_confidence: null,
+      recommendation_confidence: null,
+    },
   }
 }

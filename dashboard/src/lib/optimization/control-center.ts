@@ -1,10 +1,19 @@
 import type { NeedsDecisionTerm } from '@/lib/shopping-funnel/types'
+import { computeReviewerPriorityScore } from '@/lib/shopping-funnel/reviewer-priority'
 
 const BASELINE_TARGET_ROAS = {
   HIGH: 3.6,
   MEDIUM: 3.1,
   LOW: 2.6,
 } as const
+
+const MAX_ROAS_STEP_PCT = 0.1
+const NEAR_TARGET_BAND_PCT = 0.08
+const ADAPTIVE_ADJUSTMENT_GAIN = 0.6
+const MIN_SPEND_FOR_ACTION = 100
+const MIN_CLICKS_FOR_ACTION = 40
+const MIN_CONVERSIONS_FOR_ACTION = 3
+const MIN_CONFIDENCE_FOR_ACTION = 0.35
 
 export interface OpportunityCluster {
   clusterKey: string
@@ -29,6 +38,7 @@ export interface LabelTierPerformanceRow {
 
 export interface RecommendationQueueItem {
   searchTerm: string
+  priorityScore: number
   impactScore: number
   confidence: number
   actionType: 'funnel' | 'global_block' | 'competitor' | 'branded'
@@ -55,9 +65,19 @@ export interface RoasRecommendation {
   tier: keyof typeof BASELINE_TARGET_ROAS
   currentTargetRoas: number
   observedRoas: number
+  roasGapRatio: number
   recommendedTargetRoas: number
+  appliedStepPct: number
+  maxAllowedStepPct: number
   direction: 'increase' | 'decrease' | 'hold'
+  guardrailStatus: 'actionable' | 'insufficient_data' | 'near_target_band'
   confidence: number
+  confidenceComponents: {
+    clickConfidence: number
+    conversionConfidence: number
+    spendConfidence: number
+    final: number
+  }
   rationale: string
 }
 
@@ -178,6 +198,7 @@ export function buildRecommendationQueue(
 
       return {
         searchTerm: term.search_term,
+        priorityScore: computeReviewerPriorityScore(term.value_score),
         impactScore: term.value_score?.impact_score ?? 0,
         confidence: term.recommendation?.confidence ?? 0,
         actionType: term.recommendation?.action_type ?? 'funnel',
@@ -191,7 +212,11 @@ export function buildRecommendationQueue(
         conversionValue: Number(aggregates.conversionValue.toFixed(2)),
       } satisfies RecommendationQueueItem
     })
-    .sort((a, b) => b.impactScore - a.impactScore)
+    .sort((a, b) => {
+      const priorityDelta = b.priorityScore - a.priorityScore
+      if (priorityDelta !== 0) return priorityDelta
+      return b.impactScore - a.impactScore
+    })
 
   return queue.slice(0, Math.max(1, limit))
 }
@@ -235,15 +260,31 @@ export function buildQueryScoreSummary(terms: NeedsDecisionTerm[]): QueryScoreSu
 }
 
 function boundChange(next: number, current: number): number {
-  const lower = current * 0.9
-  const upper = current * 1.1
+  const lower = current * (1 - MAX_ROAS_STEP_PCT)
+  const upper = current * (1 + MAX_ROAS_STEP_PCT)
   return Math.min(Math.max(next, lower), upper)
 }
 
-function normalizeConfidence(clicks: number, conversions: number): number {
-  const clickConfidence = Math.min(clicks / 500, 1)
-  const conversionConfidence = Math.min(conversions / 20, 1)
-  return Number((clickConfidence * 0.5 + conversionConfidence * 0.5).toFixed(4))
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
+}
+
+function normalizeConfidence(spend: number, clicks: number, conversions: number): {
+  clickConfidence: number
+  conversionConfidence: number
+  spendConfidence: number
+  final: number
+} {
+  const clickConfidence = clamp(clicks / 500, 0, 1)
+  const conversionConfidence = clamp(conversions / 20, 0, 1)
+  const spendConfidence = clamp(spend / 1000, 0, 1)
+  const final = clickConfidence * 0.35 + conversionConfidence * 0.45 + spendConfidence * 0.2
+  return {
+    clickConfidence: Number(clickConfidence.toFixed(4)),
+    conversionConfidence: Number(conversionConfidence.toFixed(4)),
+    spendConfidence: Number(spendConfidence.toFixed(4)),
+    final: Number(final.toFixed(4)),
+  }
 }
 
 export function buildRoasRecommendations(
@@ -253,20 +294,37 @@ export function buildRoasRecommendations(
     .map((row) => {
       const currentTargetRoas: number = BASELINE_TARGET_ROAS[row.tier]
       const observedRoas = row.spend > 0 ? row.conversionValue / row.spend : 0
-      const confidence = normalizeConfidence(row.clicks, row.conversions)
+      const roasGapRatio = currentTargetRoas > 0 ? observedRoas / currentTargetRoas - 1 : 0
+      const confidenceComponents = normalizeConfidence(row.spend, row.clicks, row.conversions)
+      const confidence = confidenceComponents.final
 
       let direction: RoasRecommendation['direction'] = 'hold'
       let recommendedTargetRoas: number = currentTargetRoas
+      let appliedStepPct = 0
+      let guardrailStatus: RoasRecommendation['guardrailStatus'] = 'actionable'
       let rationale = 'Observed ROAS is near baseline target.'
+      const insufficientSignals: string[] = []
 
-      if (observedRoas >= currentTargetRoas * 1.2 && row.conversions >= 10) {
-        direction = 'decrease'
-        recommendedTargetRoas = boundChange(currentTargetRoas * 0.95, currentTargetRoas)
-        rationale = 'ROAS is materially above target. Lowering target can safely unlock incremental volume.'
-      } else if (observedRoas <= currentTargetRoas * 0.8 && row.conversions >= 5) {
-        direction = 'increase'
-        recommendedTargetRoas = boundChange(currentTargetRoas * 1.05, currentTargetRoas)
-        rationale = 'ROAS is materially below target. Raising target can reduce low-quality spend.'
+      if (row.spend < MIN_SPEND_FOR_ACTION) insufficientSignals.push('low spend')
+      if (row.clicks < MIN_CLICKS_FOR_ACTION) insufficientSignals.push('low clicks')
+      if (row.conversions < MIN_CONVERSIONS_FOR_ACTION) insufficientSignals.push('low conversions')
+      if (confidence < MIN_CONFIDENCE_FOR_ACTION) insufficientSignals.push('low confidence')
+
+      if (insufficientSignals.length > 0) {
+        guardrailStatus = 'insufficient_data'
+        rationale = `Insufficient evidence for tROAS change (${insufficientSignals.join(', ')}).`
+      } else if (Math.abs(roasGapRatio) <= NEAR_TARGET_BAND_PCT) {
+        guardrailStatus = 'near_target_band'
+        rationale = `Observed ROAS is within ±${Math.round(NEAR_TARGET_BAND_PCT * 100)}% of target; holding to reduce policy churn.`
+      } else {
+        const rawStepPct = clamp(-roasGapRatio * ADAPTIVE_ADJUSTMENT_GAIN, -MAX_ROAS_STEP_PCT, MAX_ROAS_STEP_PCT)
+        appliedStepPct = Number(rawStepPct.toFixed(4))
+        recommendedTargetRoas = boundChange(currentTargetRoas * (1 + rawStepPct), currentTargetRoas)
+        direction = rawStepPct > 0 ? 'increase' : 'decrease'
+        rationale =
+          rawStepPct > 0
+            ? 'Observed ROAS is below target. Increasing tROAS can tighten traffic quality with bounded risk.'
+            : 'Observed ROAS is above target. Decreasing tROAS can unlock incremental volume with bounded risk.'
       }
 
       return {
@@ -274,11 +332,24 @@ export function buildRoasRecommendations(
         tier: row.tier,
         currentTargetRoas,
         observedRoas: Number(observedRoas.toFixed(4)),
+        roasGapRatio: Number(roasGapRatio.toFixed(4)),
         recommendedTargetRoas: Number(recommendedTargetRoas.toFixed(4)),
+        appliedStepPct,
+        maxAllowedStepPct: MAX_ROAS_STEP_PCT,
         direction,
+        guardrailStatus,
         confidence,
+        confidenceComponents,
         rationale,
       }
     })
-    .sort((a, b) => Math.abs(b.observedRoas - b.currentTargetRoas) - Math.abs(a.observedRoas - a.currentTargetRoas))
+    .sort((a, b) => {
+      const actionableA = a.guardrailStatus === 'actionable' ? 1 : 0
+      const actionableB = b.guardrailStatus === 'actionable' ? 1 : 0
+      if (actionableA !== actionableB) return actionableB - actionableA
+
+      const weightedGapA = Math.abs(a.roasGapRatio) * a.confidence
+      const weightedGapB = Math.abs(b.roasGapRatio) * b.confidence
+      return weightedGapB - weightedGapA
+    })
 }

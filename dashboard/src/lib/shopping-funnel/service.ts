@@ -27,6 +27,7 @@ import {
   runWithGoogleAdsRetry,
 } from '@/lib/shopping-funnel/retry'
 import { enrichNeedsDecisionTerm } from '@/lib/optimization/query-intelligence'
+import { buildNeedsDecisionExplainability } from '@/lib/shopping-funnel/explainability'
 import {
   DEFAULT_STALE_THRESHOLD_HOURS,
   DECOMPOSITION_VERSIONS,
@@ -973,6 +974,12 @@ async function runNeedsDecisionDecompositionPipeline(
       intent_features: primaryArtifact?.intent ?? fallback.intent_features,
       recommendation: primaryArtifact?.recommendation ?? fallback.recommendation,
       value_score: pairValueScores.length > 0 ? scoreTermFromPairValues(pairValueScores) : scoreTermAggregate(term.custom_label_0s),
+      explainability: primaryArtifact
+        ? buildNeedsDecisionExplainability({
+            artifact: primaryArtifact,
+            primaryCustomLabel0: primary?.custom_label_0 ?? null,
+          })
+        : fallback.explainability,
     }
   })
 

@@ -85,6 +85,16 @@ describe('decomposition engine', () => {
     // 0.55 + (80/2000) + (7/100) + (3*0.03) = 0.75
     expect(artifact.recommendation.action_type).toBe('funnel')
     expect(artifact.recommendation.confidence).toBeCloseTo(0.75, 4)
+    expect(artifact.recommendationMetadata.decision_path).toBe('funnel')
+    expect(
+      artifact.recommendationMetadata.recommendation_confidence_components
+    ).toMatchObject({
+      base: 0.55,
+      clicks_bonus: 0.04,
+      conversions_bonus: 0.07,
+      label_count_bonus: 0.09,
+      final: 0.75,
+    })
   })
 
   it('aggregates term value score from calibrated pair values', () => {

@@ -134,10 +134,50 @@ describe('buildRoasRecommendations', () => {
     expect(recommendations[0].recommendedTargetRoas).toBeGreaterThan(2.6)
     expect(recommendations[0].direction).toBe('increase')
   })
+
+  it('holds recommendation and flags insufficient evidence when traffic/conversions are too low', () => {
+    const rows: LabelTierPerformanceRow[] = [
+      {
+        customLabel0: 'Wall Mounted Guest Towel Holder',
+        tier: 'MEDIUM',
+        spend: 25,
+        conversionValue: 400,
+        conversions: 1,
+        clicks: 18,
+      },
+    ]
+
+    const recommendations = buildRoasRecommendations(rows)
+    expect(recommendations).toHaveLength(1)
+    expect(recommendations[0].direction).toBe('hold')
+    expect(recommendations[0].recommendedTargetRoas).toBe(3.1)
+    expect(recommendations[0].rationale.toLowerCase()).toContain('insufficient')
+    expect(recommendations[0].guardrailStatus).toBe('insufficient_data')
+  })
+
+  it('caps adaptive tROAS step changes to 10% even for extreme ROAS gaps', () => {
+    const rows: LabelTierPerformanceRow[] = [
+      {
+        customLabel0: 'Soap Dispensers',
+        tier: 'HIGH',
+        spend: 900,
+        conversionValue: 270,
+        conversions: 11,
+        clicks: 710,
+      },
+    ]
+
+    const recommendations = buildRoasRecommendations(rows)
+    expect(recommendations).toHaveLength(1)
+    expect(recommendations[0].direction).toBe('increase')
+    expect(recommendations[0].recommendedTargetRoas).toBe(3.96)
+    expect(recommendations[0].appliedStepPct).toBeCloseTo(0.1, 4)
+    expect(recommendations[0].maxAllowedStepPct).toBeCloseTo(0.1, 4)
+  })
 })
 
 describe('query intelligence regressions', () => {
-  it('keeps recommendation queue ordering stable by impact score', () => {
+  it('prioritizes recommendation queue by profit-weighted certainty score', () => {
     const terms: NeedsDecisionTerm[] = [
       {
         search_term: 'soap dishes for shower',
@@ -160,12 +200,12 @@ describe('query intelligence regressions', () => {
           reason_codes: ['performance_weighted_tiering'],
         },
         value_score: {
-          impact_score: 12,
+          impact_score: 280,
           expected_clicks: 4,
           expected_cvr: 0,
           expected_conversion_value: 0,
-          expected_profit_proxy: -19.26,
-          uncertainty: 0.92,
+          expected_profit_proxy: 45,
+          uncertainty: 0.94,
         },
       },
       {
@@ -189,12 +229,12 @@ describe('query intelligence regressions', () => {
           reason_codes: ['performance_weighted_tiering'],
         },
         value_score: {
-          impact_score: 210,
+          impact_score: 170,
           expected_clicks: 44,
           expected_cvr: 0.1,
           expected_conversion_value: 900,
-          expected_profit_proxy: 450,
-          uncertainty: 0.18,
+          expected_profit_proxy: 220,
+          uncertainty: 0.22,
         },
       },
     ]

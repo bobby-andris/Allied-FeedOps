@@ -38,6 +38,10 @@ import {
   createDecisionSignature,
   getDecisionCompletion,
 } from '@/lib/shopping-funnel/decision-staging'
+import {
+  computeReviewerPriorityScore,
+  isHighImpactValueScore,
+} from '@/lib/shopping-funnel/reviewer-priority'
 
 type DateRangePreset = '7d' | '30d' | '60d' | '90d'
 
@@ -57,6 +61,7 @@ interface ExistingUpdateState {
 }
 
 type NeedsSortOption =
+  | 'priority_desc'
   | 'impact_desc'
   | 'impressions_desc'
   | 'cost_desc'
@@ -123,6 +128,7 @@ const EXISTING_ASSIGNMENT_OPTIONS: Array<{
 ]
 
 const NEEDS_SORT_OPTIONS: Array<{ value: NeedsSortOption; label: string }> = [
+  { value: 'priority_desc', label: 'Profit priority (high to low)' },
   { value: 'impact_desc', label: 'Impact score (high to low)' },
   { value: 'impressions_desc', label: 'Impressions (high to low)' },
   { value: 'cost_desc', label: 'Cost (high to low)' },
@@ -240,9 +246,12 @@ export default function ShoppingFunnelPage() {
   const [showErrorsOnly, setShowErrorsOnly] = useState<boolean>(false)
   const [needsSearch, setNeedsSearch] = useState<string>('')
   const [existingSearch, setExistingSearch] = useState<string>('')
-  const [needsSort, setNeedsSort] = useState<NeedsSortOption>('impact_desc')
+  const [needsSort, setNeedsSort] = useState<NeedsSortOption>('priority_desc')
   const [existingSort, setExistingSort] = useState<ExistingSortOption>('errors_first')
   const [showSelectedNeedsOnly, setShowSelectedNeedsOnly] = useState<boolean>(false)
+  const [showHighImpactOnly, setShowHighImpactOnly] = useState<boolean>(false)
+  const [minPriorityScore, setMinPriorityScore] = useState<string>('50')
+  const [maxUncertainty, setMaxUncertainty] = useState<string>('0.6')
   const [showPendingExistingOnly, setShowPendingExistingOnly] = useState<boolean>(false)
   const [bulkActionType, setBulkActionType] = useState<DecisionActionType>('funnel')
   const [bulkAssignmentTier, setBulkAssignmentTier] = useState<AssignmentTier>('campaign_negative')
@@ -298,6 +307,17 @@ export default function ShoppingFunnelPage() {
     return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0
   }, [minImpressions])
 
+  const minPriorityScoreNum = useMemo(() => {
+    const parsed = Number(minPriorityScore)
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+  }, [minPriorityScore])
+
+  const maxUncertaintyNum = useMemo(() => {
+    const parsed = Number(maxUncertainty)
+    if (!Number.isFinite(parsed)) return 1
+    return Math.max(0, Math.min(1, parsed))
+  }, [maxUncertainty])
+
   const fetchStagedDecisions = useCallback(async (searchTerms?: string[]) => {
     const fetchPayload = async (terms?: string[]) => {
       const response = await fetch('/api/search-terms/staged-decisions', {
@@ -341,7 +361,7 @@ export default function ShoppingFunnelPage() {
         min_impressions: String(minImpressionsNum),
         limit: String(NEEDS_DECISION_LIMIT),
         offset: String(needsOffset),
-        sort_by: needsSort === 'impact_desc' ? 'impact_desc' : 'impressions_desc',
+        sort_by: needsSort === 'impressions_desc' ? 'impressions_desc' : 'impact_desc',
       })
       if (customLabelFilter !== 'all') {
         params.set('custom_label_0', customLabelFilter)
@@ -531,6 +551,7 @@ export default function ShoppingFunnelPage() {
             term,
             state,
             metrics: aggregateNeedsMetrics(term),
+            priorityScore: computeReviewerPriorityScore(term.value_score),
             completion,
             decisionItem,
             signature,
@@ -545,6 +566,7 @@ export default function ShoppingFunnelPage() {
             term: NeedsDecisionTerm
             state: NeedsDecisionState
             metrics: NeedsTermMetrics
+            priorityScore: number
             completion: ReturnType<typeof getDecisionCompletion>
             decisionItem: ReturnType<typeof buildDecisionItem>
             signature: string | null
@@ -563,9 +585,23 @@ export default function ShoppingFunnelPage() {
           )
         )
       })
+      .filter(
+        (row) =>
+          !showHighImpactOnly ||
+          isHighImpactValueScore(row.term.value_score, {
+            minPriorityScore: minPriorityScoreNum,
+            maxUncertainty: maxUncertaintyNum,
+          })
+      )
       .filter((row) => !showSelectedNeedsOnly || row.state.selected)
 
     return filtered.sort((a, b) => {
+      if (needsSort === 'priority_desc') {
+        if (b.priorityScore !== a.priorityScore) {
+          return b.priorityScore - a.priorityScore
+        }
+        return (b.term.value_score?.impact_score ?? 0) - (a.term.value_score?.impact_score ?? 0)
+      }
       if (needsSort === 'impact_desc') {
         return (b.term.value_score?.impact_score ?? 0) - (a.term.value_score?.impact_score ?? 0)
       }
@@ -583,11 +619,31 @@ export default function ShoppingFunnelPage() {
       }
       return b.metrics.impressions - a.metrics.impressions
     })
-  }, [needsData?.terms, needsSearch, needsSort, needsState, showSelectedNeedsOnly])
+  }, [
+    maxUncertaintyNum,
+    minPriorityScoreNum,
+    needsData?.terms,
+    needsSearch,
+    needsSort,
+    needsState,
+    showHighImpactOnly,
+    showSelectedNeedsOnly,
+  ])
 
   const selectedVisibleNeedsCount = useMemo(
     () => needsRows.filter((row) => row.state.selected).length,
     [needsRows]
+  )
+
+  const highImpactNeedsCount = useMemo(
+    () =>
+      needsRows.filter((row) =>
+        isHighImpactValueScore(row.term.value_score, {
+          minPriorityScore: minPriorityScoreNum,
+          maxUncertainty: maxUncertaintyNum,
+        })
+      ).length,
+    [maxUncertaintyNum, minPriorityScoreNum, needsRows]
   )
 
   const confirmedNeedsTerms = useMemo(
@@ -1337,6 +1393,46 @@ export default function ShoppingFunnelPage() {
                 </div>
               </div>
 
+              <div className="flex flex-wrap items-end gap-3 rounded-md border bg-muted/15 p-3">
+                <label className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm">
+                  <Checkbox
+                    checked={showHighImpactOnly}
+                    onCheckedChange={(checked) => setShowHighImpactOnly(Boolean(checked))}
+                  />
+                  High-impact only
+                </label>
+                <div className="space-y-1">
+                  <Label>Min priority score</Label>
+                  <Input
+                    value={minPriorityScore}
+                    onChange={(event) => setMinPriorityScore(event.target.value)}
+                    className="w-40"
+                    inputMode="decimal"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Max uncertainty (0-1)</Label>
+                  <Input
+                    value={maxUncertainty}
+                    onChange={(event) => setMaxUncertainty(event.target.value)}
+                    className="w-40"
+                    inputMode="decimal"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowHighImpactOnly(false)
+                    setMinPriorityScore('50')
+                    setMaxUncertainty('0.6')
+                  }}
+                >
+                  Reset impact filters
+                </Button>
+              </div>
+
               <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/25 p-3">
                 <Button variant="outline" size="sm" onClick={() => selectVisibleNeeds(true)}>
                   Select Visible
@@ -1356,6 +1452,7 @@ export default function ShoppingFunnelPage() {
                   {selectedConfirmableNeedsCount.toLocaleString()} ready to confirm
                 </Badge>
                 <Badge variant="outline">{confirmedNeedsTerms.length.toLocaleString()} confirmed</Badge>
+                <Badge variant="outline">{highImpactNeedsCount.toLocaleString()} high-impact in view</Badge>
                 <Badge variant="secondary">{stagedQueueCount.toLocaleString()} staged</Badge>
                 <Badge variant="outline">{needsRows.length.toLocaleString()} rows in view</Badge>
               </div>
@@ -1483,8 +1580,12 @@ export default function ShoppingFunnelPage() {
             <Card>
               <CardContent className="pt-4">
                 <div className="max-h-[68vh] space-y-2 overflow-y-auto pr-1">
-                  {needsRows.map(({ term, state, metrics, completion, isConfirmed, needsReconfirm }) => {
+                  {needsRows.map(({ term, state, metrics, priorityScore, completion, isConfirmed, needsReconfirm }) => {
                     const isExpanded = expandedNeedsTerms[term.search_term] ?? false
+                    const isHighImpact = isHighImpactValueScore(term.value_score, {
+                      minPriorityScore: minPriorityScoreNum,
+                      maxUncertainty: maxUncertaintyNum,
+                    })
                     let confirmButtonLabel = 'Confirm Choices'
                     if (needsReconfirm) {
                       confirmButtonLabel = 'Reconfirm Choices'
@@ -1516,13 +1617,18 @@ export default function ShoppingFunnelPage() {
                               <span>{metrics.clicks.toLocaleString()} clicks</span>
                               <span>${(metrics.costMicros / 1_000_000).toFixed(2)} cost</span>
                               <span>{metrics.conversions.toFixed(2)} conv</span>
+                              {priorityScore > 0 && <span>Priority {priorityScore.toFixed(2)}</span>}
                               {typeof term.value_score?.impact_score === 'number' && (
                                 <span>Impact {term.value_score.impact_score.toFixed(2)}</span>
+                              )}
+                              {typeof term.value_score?.uncertainty === 'number' && (
+                                <span>Uncertainty {term.value_score.uncertainty.toFixed(2)}</span>
                               )}
                             </div>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2">
+                            {isHighImpact && <Badge variant="secondary">High impact</Badge>}
                             {term.recommendation && (
                               <Badge variant="outline">
                                 Rec: {ACTION_LABEL_BY_VALUE[term.recommendation.action_type]}
@@ -1605,13 +1711,165 @@ export default function ShoppingFunnelPage() {
                           </div>
                         </div>
 
-                        {state.actionType === 'funnel' && isExpanded && (
-                          <div className="mt-3 grid gap-2">
-                            {term.recommendation?.reason_codes && term.recommendation.reason_codes.length > 0 && (
-                              <div className="rounded-md border bg-muted/30 p-2 text-xs text-muted-foreground">
-                                Recommendation rationale: {term.recommendation.reason_codes.join(', ')}
+                        {isExpanded && (
+                          <div className="mt-3 space-y-2 rounded-md border bg-muted/20 p-3">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Recommendation Explainability
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs">
+                              <Badge variant="outline">
+                                Rec confidence:{' '}
+                                {typeof term.explainability?.recommendation_confidence === 'number'
+                                  ? `${Math.round(term.explainability.recommendation_confidence * 100)}%`
+                                  : term.recommendation?.confidence
+                                    ? `${Math.round(term.recommendation.confidence * 100)}%`
+                                    : 'n/a'}
+                              </Badge>
+                              <Badge variant="outline">
+                                Intent confidence:{' '}
+                                {typeof term.explainability?.intent_confidence === 'number'
+                                  ? `${Math.round(term.explainability.intent_confidence * 100)}%`
+                                  : 'n/a'}
+                              </Badge>
+                              {term.explainability?.primary_custom_label_0 && (
+                                <Badge variant="secondary">
+                                  Primary label: {term.explainability.primary_custom_label_0}
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Reason codes</p>
+                              <div className="flex flex-wrap gap-1">
+                                {(term.explainability?.reason_codes?.length
+                                  ? term.explainability.reason_codes
+                                  : term.recommendation?.reason_codes ?? []
+                                ).map((reasonCode) => (
+                                  <Badge key={reasonCode} variant="outline" className="text-[11px]">
+                                    {reasonCode}
+                                  </Badge>
+                                ))}
+                                {!(term.explainability?.reason_codes?.length || term.recommendation?.reason_codes?.length) && (
+                                  <span className="text-xs text-muted-foreground">No reason codes available.</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {(term.explainability?.recommendation_confidence_components ||
+                              term.explainability?.intent_confidence_components) && (
+                              <div className="grid gap-2 md:grid-cols-2">
+                                {term.explainability?.recommendation_confidence_components && (
+                                  <div className="rounded-md border bg-background p-2 text-xs">
+                                    <p className="mb-1 font-medium">Recommendation confidence components</p>
+                                    <div className="space-y-1 text-muted-foreground">
+                                      <p>
+                                        base:{' '}
+                                        {term.explainability.recommendation_confidence_components.base.toFixed(2)}
+                                      </p>
+                                      {typeof term.explainability.recommendation_confidence_components.clicks_bonus ===
+                                        'number' && (
+                                        <p>
+                                          clicks bonus:{' '}
+                                          {term.explainability.recommendation_confidence_components.clicks_bonus.toFixed(2)}
+                                        </p>
+                                      )}
+                                      {typeof term.explainability.recommendation_confidence_components
+                                        .conversions_bonus === 'number' && (
+                                        <p>
+                                          conversions bonus:{' '}
+                                          {term.explainability.recommendation_confidence_components.conversions_bonus.toFixed(2)}
+                                        </p>
+                                      )}
+                                      {typeof term.explainability.recommendation_confidence_components
+                                        .label_count_bonus === 'number' && (
+                                        <p>
+                                          label bonus:{' '}
+                                          {term.explainability.recommendation_confidence_components.label_count_bonus.toFixed(2)}
+                                        </p>
+                                      )}
+                                      {typeof term.explainability.recommendation_confidence_components.override_bonus ===
+                                        'number' &&
+                                        term.explainability.recommendation_confidence_components.override_bonus > 0 && (
+                                          <p>
+                                            override bonus:{' '}
+                                            {term.explainability.recommendation_confidence_components.override_bonus.toFixed(
+                                              2
+                                            )}
+                                          </p>
+                                        )}
+                                      <p className="font-medium text-foreground">
+                                        final:{' '}
+                                        {term.explainability.recommendation_confidence_components.final.toFixed(2)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                                {term.explainability?.intent_confidence_components && (
+                                  <div className="rounded-md border bg-background p-2 text-xs">
+                                    <p className="mb-1 font-medium">Intent confidence components</p>
+                                    <div className="space-y-1 text-muted-foreground">
+                                      <p>base: {term.explainability.intent_confidence_components.base.toFixed(2)}</p>
+                                      <p>
+                                        product bonus:{' '}
+                                        {term.explainability.intent_confidence_components.product_object_bonus.toFixed(
+                                          2
+                                        )}
+                                      </p>
+                                      <p>
+                                        modifier/use-case bonus:{' '}
+                                        {term.explainability.intent_confidence_components.modifier_or_use_case_bonus.toFixed(
+                                          2
+                                        )}
+                                      </p>
+                                      <p>
+                                        brand/competitor bonus:{' '}
+                                        {term.explainability.intent_confidence_components.explicit_brand_or_competitor_bonus.toFixed(
+                                          2
+                                        )}
+                                      </p>
+                                      <p>
+                                        ambiguity penalty:{' '}
+                                        {term.explainability.intent_confidence_components.ambiguity_penalty.toFixed(2)}
+                                      </p>
+                                      <p className="font-medium text-foreground">
+                                        final: {term.explainability.intent_confidence_components.final.toFixed(2)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
+
+                            {term.explainability?.diagnostics && (
+                              <div className="rounded-md border bg-background p-2 text-xs text-muted-foreground">
+                                <p className="mb-1 font-medium text-foreground">Diagnostics</p>
+                                <p>
+                                  normalized: <span className="font-mono">{term.explainability.diagnostics.normalized_search_term}</span>
+                                </p>
+                                <p>selected object: {term.explainability.diagnostics.selected_product_object ?? 'none'}</p>
+                                <p>
+                                  object candidates:{' '}
+                                  {term.explainability.diagnostics.product_object_candidates.join(', ') || 'none'}
+                                </p>
+                                <p>modifier tokens: {term.explainability.diagnostics.modifier_tokens.join(', ') || 'none'}</p>
+                                <p>use-case tokens: {term.explainability.diagnostics.use_case_tokens.join(', ') || 'none'}</p>
+                                <p>brand tokens: {term.explainability.diagnostics.brand_tokens.join(', ') || 'none'}</p>
+                                <p>
+                                  competitor tokens:{' '}
+                                  {term.explainability.diagnostics.competitor_tokens.join(', ') || 'none'}
+                                </p>
+                                <p>risk tokens: {term.explainability.diagnostics.risk_tokens.join(', ') || 'none'}</p>
+                                <p>
+                                  ambiguous object match:{' '}
+                                  {term.explainability.diagnostics.ambiguity_multiple_product_objects ? 'yes' : 'no'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {state.actionType === 'funnel' && isExpanded && (
+                          <div className="mt-3 grid gap-2">
                             {!completion.complete && (
                               <p className="text-xs text-amber-700">
                                 Select a funnel tier for every custom_label_0 before confirming this term.
