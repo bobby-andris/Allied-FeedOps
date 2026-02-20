@@ -11,7 +11,7 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from feedops.api.sku_alias import resolve_canonical_master_sku
@@ -21,6 +21,11 @@ from feedops.integrations.google_ads_performance import (
     _load_client,
     _run_gaql_query,
 )
+from feedops.monitoring.performance_impact import (
+    collect_daily_performance_snapshots,
+    compute_and_store_impact_scores,
+)
+from feedops.observability.alerts import send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +68,83 @@ class BaselineStatusResponse(BaseModel):
     master_sku: str
     platforms: dict[str, dict]  # platform -> baseline metrics
     last_updated: str | None
+
+
+class DailyCollectorRequest(BaseModel):
+    """Request payload for daily durable snapshot collection."""
+
+    run_date: date | None = Field(
+        default=None,
+        description="Collection run date (defaults to today).",
+    )
+    platform: Literal["google"] = Field(default="google")
+    environment: str = Field(default="production")
+    master_skus: list[str] | None = Field(
+        default=None,
+        description="Optional SKU scope. Controls are still auto-selected.",
+    )
+    days_to_refresh: int = Field(
+        default=3,
+        ge=1,
+        le=7,
+        description="Rolling lag-correction window in days (D-1..D-n).",
+    )
+    max_controls: int = Field(
+        default=500,
+        ge=0,
+        le=5000,
+        description="Maximum control SKUs to include.",
+    )
+
+
+class ImpactComputeRequest(BaseModel):
+    """Request payload for persisted diff-in-diff impact computation."""
+
+    run_date: date | None = Field(
+        default=None,
+        description="Computation run date (defaults to today).",
+    )
+    platform: Literal["google"] = Field(default="google")
+    environment: str = Field(default="production")
+    master_skus: list[str] | None = Field(default=None)
+    pre_window_days: int = Field(default=30, ge=7, le=90)
+    post_window_days: int = Field(default=30, ge=7, le=90)
+
+
+class CaptureSnapshotCompatRequest(BaseModel):
+    """Backward-compatible snapshot capture request."""
+
+    master_sku: str | None = Field(default=None)
+    publish_event_id: str | int | None = Field(default=None)
+    platform: Literal["google"] = Field(default="google")
+    environment: str = Field(default="production")
+    run_date: date | None = Field(default=None)
+
+
+def _canonicalize_master_skus(
+    supabase,
+    master_skus: list[str] | None,
+    *,
+    tables: tuple[str, ...],
+) -> list[str] | None:
+    if not master_skus:
+        return None
+
+    canonicalized = [
+        resolve_canonical_master_sku(supabase, sku, tables=tables)
+        for sku in master_skus
+    ]
+    # De-duplicate while preserving order.
+    return list(dict.fromkeys(canonicalized))
+
+
+def _to_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 # =============================================================================
@@ -212,6 +294,285 @@ async def get_baseline_status(master_sku: str):
 
     except Exception as e:
         logger.error(f"Failed to get baseline status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/collect-daily")
+async def collect_daily_snapshots(request: DailyCollectorRequest):
+    """Collect daily shopping performance snapshots at durable daily grain."""
+    if not is_supabase_available():
+        raise HTTPException(status_code=503, detail="Supabase is not configured")
+
+    try:
+        supabase = get_client()
+        canonical_skus = _canonicalize_master_skus(
+            supabase,
+            request.master_skus,
+            tables=("variant_index", "publish_events", "product_catalog"),
+        )
+        run_date = request.run_date or date.today()
+
+        result = collect_daily_performance_snapshots(
+            run_date=run_date,
+            platform=request.platform,
+            environment=request.environment,
+            master_skus=canonical_skus,
+            days_to_refresh=request.days_to_refresh,
+            max_controls=request.max_controls,
+        )
+        return result
+    except Exception as e:
+        logger.exception("Daily snapshot collection failed: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/compute-impact")
+async def compute_impact_scores(request: ImpactComputeRequest):
+    """Compute and persist diff-in-diff impact scores from daily snapshots."""
+    if not is_supabase_available():
+        raise HTTPException(status_code=503, detail="Supabase is not configured")
+
+    try:
+        supabase = get_client()
+        canonical_skus = _canonicalize_master_skus(
+            supabase,
+            request.master_skus,
+            tables=("variant_index", "publish_events", "product_catalog"),
+        )
+        run_date = request.run_date or date.today()
+
+        result = compute_and_store_impact_scores(
+            run_date=run_date,
+            platform=request.platform,
+            environment=request.environment,
+            master_skus=canonical_skus,
+            pre_window_days=request.pre_window_days,
+            post_window_days=request.post_window_days,
+        )
+        return result
+    except Exception as e:
+        logger.exception("Impact computation failed: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/capture-snapshot")
+async def capture_snapshot_compat(request: CaptureSnapshotCompatRequest):
+    """Backward-compatible alias for manual snapshot capture.
+
+    This now triggers the durable collector + impact computation pipeline.
+    """
+    if not is_supabase_available():
+        raise HTTPException(status_code=503, detail="Supabase is not configured")
+
+    try:
+        supabase = get_client()
+        requested_skus = [request.master_sku] if request.master_sku else None
+        canonical_skus = _canonicalize_master_skus(
+            supabase,
+            requested_skus,
+            tables=("variant_index", "publish_events", "product_catalog"),
+        )
+        run_date = request.run_date or date.today()
+
+        collect_result = collect_daily_performance_snapshots(
+            run_date=run_date,
+            platform=request.platform,
+            environment=request.environment,
+            master_skus=canonical_skus,
+            days_to_refresh=3,
+            max_controls=500,
+        )
+        compute_result = compute_and_store_impact_scores(
+            run_date=run_date,
+            platform=request.platform,
+            environment=request.environment,
+            master_skus=canonical_skus,
+            pre_window_days=30,
+            post_window_days=30,
+        )
+
+        snapshots_created = int(collect_result.get("rows_upserted", 0) or 0)
+        impact_rows_upserted = int(compute_result.get("rows_upserted", 0) or 0)
+
+        send_slack_notification(
+            (
+                "Daily snapshot capture succeeded "
+                f"({request.platform}/{request.environment}, run_date={run_date.isoformat()}): "
+                f"snapshots={snapshots_created}, impact_rows={impact_rows_upserted}, "
+                f"treated={int(collect_result.get('treated_skus', 0) or 0)}, "
+                f"controls={int(collect_result.get('control_skus', 0) or 0)}"
+            )
+        )
+
+        return {
+            "success": True,
+            "message": (
+                f"Collected {snapshots_created} daily snapshots and computed "
+                f"{impact_rows_upserted} impact rows"
+            ),
+            "run_date": run_date.isoformat(),
+            "captured": snapshots_created,
+            "snapshots_created": snapshots_created,
+            "impact_rows_upserted": impact_rows_upserted,
+            "treated_skus": int(collect_result.get("treated_skus", 0) or 0),
+            "control_skus": int(collect_result.get("control_skus", 0) or 0),
+            "scope_master_skus": canonical_skus or [],
+        }
+    except Exception as e:
+        logger.exception("capture-snapshot compatibility flow failed: %s", e)
+        send_slack_notification(
+            (
+                "Daily snapshot capture FAILED "
+                f"({request.platform}/{request.environment}, "
+                f"run_date={(request.run_date or date.today()).isoformat()}): {e}"
+            )
+        )
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/impact-scores")
+async def get_impact_scores(
+    publish_event_id: int | None = Query(default=None),
+    master_sku: str | None = Query(default=None),
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+    platform: Literal["google"] = Query(default="google"),
+    environment: str = Query(default="production"),
+    limit: int = Query(default=5000, ge=1, le=10000),
+):
+    """Read persisted impact scorecards by publish event / SKU / date range."""
+    if not is_supabase_available():
+        raise HTTPException(status_code=503, detail="Supabase is not configured")
+
+    try:
+        supabase = get_client()
+        canonical_master_sku = None
+        if master_sku:
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase,
+                master_sku,
+                tables=("performance_impact_scores", "variant_index", "publish_events"),
+            )
+
+        query = (
+            supabase.table("performance_impact_scores")
+            .select("*")
+            .eq("platform", platform)
+            .eq("environment", environment)
+        )
+        if publish_event_id is not None:
+            query = query.eq("publish_event_id", publish_event_id)
+        if canonical_master_sku:
+            query = query.eq("master_sku", canonical_master_sku)
+        if start_date:
+            query = query.gte("run_date", start_date.isoformat())
+        if end_date:
+            query = query.lte("run_date", end_date.isoformat())
+
+        impact_result = query.order("computed_at", desc=True).limit(limit).execute()
+        impact_rows = impact_result.data or []
+
+        latest_snapshot_date: date | None = None
+        latest_snapshot_result = (
+            supabase.table("performance_snapshots")
+            .select("snapshot_date")
+            .eq("platform", platform)
+            .eq("environment", environment)
+            .order("snapshot_date", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if latest_snapshot_result.data:
+            raw_snapshot_date = latest_snapshot_result.data[0].get("snapshot_date")
+            if isinstance(raw_snapshot_date, date):
+                latest_snapshot_date = raw_snapshot_date
+            elif raw_snapshot_date:
+                latest_snapshot_date = datetime.fromisoformat(
+                    str(raw_snapshot_date).replace("Z", "+00:00")
+                ).date()
+
+        days_stale = (
+            (date.today() - latest_snapshot_date).days
+            if latest_snapshot_date is not None
+            else None
+        )
+        staleness = {
+            "latest_snapshot_date": (
+                latest_snapshot_date.isoformat() if latest_snapshot_date else None
+            ),
+            "days_stale": days_stale,
+            "is_stale": days_stale is None or days_stale > 2,
+        }
+
+        scorecards_by_event: dict[int, dict[str, Any]] = {}
+        for row in impact_rows:
+            event_id = int(row["publish_event_id"])
+            metric_name = str(row.get("metric_name") or "")
+            if not metric_name:
+                continue
+
+            scorecard = scorecards_by_event.get(event_id)
+            if not scorecard:
+                scorecard = {
+                    "publish_event_id": event_id,
+                    "master_sku": row.get("master_sku"),
+                    "platform": row.get("platform"),
+                    "environment": row.get("environment"),
+                    "label": row.get("label"),
+                    "confidence": _to_float(row.get("confidence")) or 0.0,
+                    "sample_size_treated": int(row.get("sample_size_treated") or 0),
+                    "sample_size_control": int(row.get("sample_size_control") or 0),
+                    "window_pre_days": int(row.get("window_pre_days") or 0),
+                    "window_post_days": int(row.get("window_post_days") or 0),
+                    "run_date": row.get("run_date"),
+                    "computed_at": row.get("computed_at"),
+                    "metrics": {},
+                    "primary_roas_did_lift_pct": None,
+                }
+                scorecards_by_event[event_id] = scorecard
+
+            metric_payload = {
+                "pre_value": _to_float(row.get("pre_value")),
+                "post_value": _to_float(row.get("post_value")),
+                "control_pre": _to_float(row.get("control_pre")),
+                "control_post": _to_float(row.get("control_post")),
+                "did_lift_pct": _to_float(row.get("did_lift_pct")),
+            }
+            scorecard["metrics"][metric_name] = metric_payload
+
+            if metric_name == "roas":
+                scorecard["primary_roas_did_lift_pct"] = metric_payload["did_lift_pct"]
+                scorecard["label"] = row.get("label")
+                scorecard["confidence"] = _to_float(row.get("confidence")) or 0.0
+                scorecard["sample_size_treated"] = int(row.get("sample_size_treated") or 0)
+                scorecard["sample_size_control"] = int(row.get("sample_size_control") or 0)
+                scorecard["window_pre_days"] = int(row.get("window_pre_days") or 0)
+                scorecard["window_post_days"] = int(row.get("window_post_days") or 0)
+                scorecard["run_date"] = row.get("run_date")
+                scorecard["computed_at"] = row.get("computed_at")
+
+        scorecards = sorted(
+            scorecards_by_event.values(),
+            key=lambda card: str(card.get("computed_at") or ""),
+            reverse=True,
+        )
+
+        return {
+            "success": True,
+            "count": len(scorecards),
+            "filters": {
+                "publish_event_id": publish_event_id,
+                "master_sku": canonical_master_sku,
+                "start_date": start_date.isoformat() if start_date else None,
+                "end_date": end_date.isoformat() if end_date else None,
+                "platform": platform,
+                "environment": environment,
+            },
+            "staleness": staleness,
+            "scorecards": scorecards,
+        }
+    except Exception as e:
+        logger.exception("Failed to fetch impact scores: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
