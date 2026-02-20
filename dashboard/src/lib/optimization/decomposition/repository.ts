@@ -173,6 +173,7 @@ export async function getLatestArtifactsByPairs(
 ): Promise<LatestArtifactsResult> {
   const uniquePairs = Array.from(new Map(pairs.map((pair) => [pairKey(pair.searchTerm, pair.customLabel0), pair])).values())
   const pairSet = new Set(uniquePairs.map((pair) => pairKey(pair.searchTerm, pair.customLabel0)))
+  const readChunkSize = 120
 
   if (uniquePairs.length === 0) {
     return { byPair: new Map<string, PairArtifacts>(), warnings: [] }
@@ -180,50 +181,63 @@ export async function getLatestArtifactsByPairs(
 
   const supabase = createAdminClient()
   const warnings: string[] = []
-  const searchTerms = Array.from(new Set(uniquePairs.map((pair) => pair.searchTerm)))
-  const customLabels = Array.from(new Set(uniquePairs.map((pair) => pair.customLabel0)))
-  const maxRows = Math.max(uniquePairs.length * 8, 500)
+  const intentRows: QueryIntentFeatureRow[] = []
+  const valueRows: QueryValueScoreRow[] = []
+  const recommendationRows: RoutingRecommendationRow[] = []
 
-  const [intentResult, valueResult, recommendationResult] = await Promise.all([
-    supabase
-      .from('query_intent_features')
-      .select('*')
-      .in('search_term', searchTerms)
-      .in('custom_label_0', customLabels)
-      .order('created_at', { ascending: false })
-      .limit(maxRows),
-    supabase
-      .from('query_value_scores')
-      .select('*')
-      .in('search_term', searchTerms)
-      .in('custom_label_0', customLabels)
-      .order('created_at', { ascending: false })
-      .limit(maxRows),
-    supabase
-      .from('routing_recommendations')
-      .select('*')
-      .in('search_term', searchTerms)
-      .in('custom_label_0', customLabels)
-      .order('created_at', { ascending: false })
-      .limit(maxRows),
-  ])
+  const pairChunks = chunk(uniquePairs, readChunkSize)
+  for (let index = 0; index < pairChunks.length; index += 1) {
+    const pairChunk = pairChunks[index]
+    const searchTerms = Array.from(new Set(pairChunk.map((pair) => pair.searchTerm)))
+    const customLabels = Array.from(new Set(pairChunk.map((pair) => pair.customLabel0)))
+    const maxRows = Math.max(pairChunk.length * 8, 250)
 
-  if (intentResult.error) {
-    warnings.push(`query_intent_features lookup failed: ${intentResult.error.message}`)
-  }
-  if (valueResult.error) {
-    warnings.push(`query_value_scores lookup failed: ${valueResult.error.message}`)
-  }
-  if (recommendationResult.error) {
-    warnings.push(`routing_recommendations lookup failed: ${recommendationResult.error.message}`)
+    const [intentResult, valueResult, recommendationResult] = await Promise.all([
+      supabase
+        .from('query_intent_features')
+        .select('*')
+        .in('search_term', searchTerms)
+        .in('custom_label_0', customLabels)
+        .order('created_at', { ascending: false })
+        .limit(maxRows),
+      supabase
+        .from('query_value_scores')
+        .select('*')
+        .in('search_term', searchTerms)
+        .in('custom_label_0', customLabels)
+        .order('created_at', { ascending: false })
+        .limit(maxRows),
+      supabase
+        .from('routing_recommendations')
+        .select('*')
+        .in('search_term', searchTerms)
+        .in('custom_label_0', customLabels)
+        .order('created_at', { ascending: false })
+        .limit(maxRows),
+    ])
+
+    if (intentResult.error) {
+      warnings.push(`query_intent_features lookup failed (chunk ${index + 1}/${pairChunks.length}): ${intentResult.error.message}`)
+    } else {
+      intentRows.push(...((intentResult.data ?? []) as QueryIntentFeatureRow[]))
+    }
+
+    if (valueResult.error) {
+      warnings.push(`query_value_scores lookup failed (chunk ${index + 1}/${pairChunks.length}): ${valueResult.error.message}`)
+    } else {
+      valueRows.push(...((valueResult.data ?? []) as QueryValueScoreRow[]))
+    }
+
+    if (recommendationResult.error) {
+      warnings.push(`routing_recommendations lookup failed (chunk ${index + 1}/${pairChunks.length}): ${recommendationResult.error.message}`)
+    } else {
+      recommendationRows.push(...((recommendationResult.data ?? []) as RoutingRecommendationRow[]))
+    }
   }
 
-  const intentByPair = latestByPair((intentResult.data ?? []) as QueryIntentFeatureRow[], pairSet)
-  const valueByPair = latestByPair((valueResult.data ?? []) as QueryValueScoreRow[], pairSet)
-  const recommendationByPair = latestByPair(
-    (recommendationResult.data ?? []) as RoutingRecommendationRow[],
-    pairSet
-  )
+  const intentByPair = latestByPair(intentRows, pairSet)
+  const valueByPair = latestByPair(valueRows, pairSet)
+  const recommendationByPair = latestByPair(recommendationRows, pairSet)
 
   const byPair = new Map<string, PairArtifacts>()
   for (const pair of uniquePairs) {
