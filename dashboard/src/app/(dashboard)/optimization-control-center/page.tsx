@@ -56,14 +56,40 @@ interface ScoresResponse {
 
 interface OpportunitiesResponse {
   cluster_count: number
+  account_median_roas?: number
   clusters: Array<{
     clusterKey: string
     termCount: number
     totalImpressions: number
     totalClicks: number
+    totalCost: number
+    aggregateImpactScore: number
     averageCpc: number
     attractivenessScore: number
+    overlapRiskScore: number
+    overlapRiskLevel: 'low' | 'medium' | 'high'
+    averageRecommendationConfidence: number
+    averageUncertainty: number
+    uniqueLabelCount: number
+    topCustomLabels: string[]
     topSearchTerms: string[]
+  }>
+  launch_briefs: Array<{
+    clusterKey: string
+    pilotName: string
+    priority: 'high' | 'medium' | 'low'
+    strategySummary: string
+    budgetCapUsd: number
+    observationWindowDays: number
+    topTerms: string[]
+    negativeControls: string[]
+    buildoutChecklist: string[]
+    successCriteria: {
+      targetRoas: number
+      minClicks: number
+      minConversions: number
+    }
+    stopConditions: string[]
   }>
 }
 
@@ -149,6 +175,12 @@ function riskBadgeVariant(risk: 'low' | 'medium' | 'high') {
 function recommendationPriorityVariant(priority: 'low' | 'medium' | 'high') {
   if (priority === 'high') return 'destructive' as const
   if (priority === 'medium') return 'outline' as const
+  return 'secondary' as const
+}
+
+function overlapRiskBadgeVariant(risk: 'low' | 'medium' | 'high') {
+  if (risk === 'high') return 'destructive' as const
+  if (risk === 'medium') return 'outline' as const
   return 'secondary' as const
 }
 
@@ -472,7 +504,7 @@ export default function OptimizationControlCenterPage() {
             <CardHeader>
               <CardTitle>Opportunity Clusters</CardTitle>
               <CardDescription>
-                Low-CPC, high-attractiveness clusters for pilot campaign/ad-group expansion.
+                Low-CPC, high-attractiveness clusters with overlap risk scoring for safe pilot expansion.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -484,9 +516,55 @@ export default function OptimizationControlCenterPage() {
                     <span>{cluster.totalImpressions.toLocaleString()} impressions</span>
                     <span>${cluster.averageCpc.toFixed(2)} avg CPC</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Attractiveness {cluster.attractivenessScore.toFixed(2)}</Badge>
+                    <Badge variant={overlapRiskBadgeVariant(cluster.overlapRiskLevel)}>
+                      Overlap {cluster.overlapRiskLevel}
+                    </Badge>
+                    <Badge variant="outline">{Math.round(cluster.averageRecommendationConfidence * 100)}% conf</Badge>
                   </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Labels: {cluster.topCustomLabels.slice(0, 3).join(', ')}
+                  </p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Launch Briefs</CardTitle>
+              <CardDescription>
+                Pilot-ready campaign/ad-group briefs with budget caps, overlap controls, and stop rules.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {(opportunities?.launch_briefs ?? []).slice(0, 6).map((brief) => (
+                <div key={brief.clusterKey} className="rounded-md border p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{brief.pilotName}</p>
+                      <p className="text-xs text-muted-foreground">{brief.strategySummary}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={recommendationPriorityVariant(brief.priority)}>
+                        {brief.priority.toUpperCase()} priority
+                      </Badge>
+                      <Badge variant="outline">${brief.budgetCapUsd} cap</Badge>
+                      <Badge variant="outline">{brief.observationWindowDays}d window</Badge>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span>Target ROAS: {brief.successCriteria.targetRoas.toFixed(2)}x</span>
+                    <span>Min clicks: {brief.successCriteria.minClicks}</span>
+                    <span>Min conversions: {brief.successCriteria.minConversions}</span>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Terms: {brief.topTerms.slice(0, 3).join(' • ')}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Controls: {brief.negativeControls.slice(0, 2).join(' • ')}
+                  </p>
                 </div>
               ))}
             </CardContent>

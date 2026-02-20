@@ -6,7 +6,7 @@ import {
   sanitizeDateInput,
   sanitizeMinImpressions,
 } from '@/lib/shopping-funnel/service'
-import { buildOpportunityClusters } from '@/lib/optimization/control-center'
+import { buildOpportunityClusters, buildOpportunityLaunchBriefs } from '@/lib/optimization/control-center'
 
 function sanitizeLimit(input: string | null, fallback = 25, max = 200): number {
   const value = Number(input)
@@ -14,6 +14,14 @@ function sanitizeLimit(input: string | null, fallback = 25, max = 200): number {
     return fallback
   }
   return Math.min(Math.floor(value), max)
+}
+
+function sanitizeMedianRoas(input: string | null, fallback = 3.1): number {
+  const value = Number(input)
+  if (!Number.isFinite(value) || value <= 0) {
+    return fallback
+  }
+  return Math.min(Math.max(value, 0.5), 20)
 }
 
 export async function GET(request: NextRequest) {
@@ -27,6 +35,7 @@ export async function GET(request: NextRequest) {
     const customLabel0 = sanitizeCustomLabel(params.get('custom_label_0'))
     const minImpressions = sanitizeMinImpressions(params.get('min_impressions'))
     const limit = sanitizeLimit(params.get('limit'))
+    const accountMedianRoas = sanitizeMedianRoas(params.get('account_median_roas'))
 
     const termsResult = await getNeedsDecisionTerms({
       startDate,
@@ -39,18 +48,10 @@ export async function GET(request: NextRequest) {
     })
 
     const clusters = buildOpportunityClusters(termsResult.terms).slice(0, limit)
-
-    const launchBriefs = clusters.slice(0, 10).map((cluster) => ({
-      cluster_key: cluster.clusterKey,
-      rationale:
-        'Low-CPC/high-impact cluster detected. Consider a budget-capped pilot with overlap guardrails.',
-      suggested_actions: [
-        'Create pilot campaign/ad group for this cluster.',
-        'Apply strict negative overlap controls with existing funnel labels.',
-        'Track pilot ROAS against account median and stop after 14 days if underperforming.',
-      ],
-      top_terms: cluster.topSearchTerms.slice(0, 5),
-    }))
+    const launchBriefs = buildOpportunityLaunchBriefs(clusters, {
+      accountMedianRoas,
+      maxBriefs: Math.min(limit, 10),
+    })
 
     return NextResponse.json({
       generated_at: new Date().toISOString(),
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       cluster_count: clusters.length,
       clusters,
       launch_briefs: launchBriefs,
+      account_median_roas: accountMedianRoas,
     })
   } catch (error) {
     console.error('Shopping funnel opportunities fetch failed:', error)

@@ -24,7 +24,31 @@ export interface OpportunityCluster {
   aggregateImpactScore: number
   averageCpc: number
   attractivenessScore: number
+  overlapRiskScore: number
+  overlapRiskLevel: 'low' | 'medium' | 'high'
+  averageRecommendationConfidence: number
+  averageUncertainty: number
+  uniqueLabelCount: number
+  topCustomLabels: string[]
   topSearchTerms: string[]
+}
+
+export interface OpportunityLaunchBrief {
+  clusterKey: string
+  pilotName: string
+  priority: 'high' | 'medium' | 'low'
+  strategySummary: string
+  budgetCapUsd: number
+  observationWindowDays: number
+  topTerms: string[]
+  negativeControls: string[]
+  buildoutChecklist: string[]
+  successCriteria: {
+    targetRoas: number
+    minClicks: number
+    minConversions: number
+  }
+  stopConditions: string[]
 }
 
 export interface LabelTierPerformanceRow {
@@ -110,6 +134,16 @@ function aggregateTermMetrics(term: NeedsDecisionTerm): {
   )
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
+}
+
+function deriveOverlapRiskLevel(score: number): OpportunityCluster['overlapRiskLevel'] {
+  if (score >= 0.6) return 'high'
+  if (score >= 0.35) return 'medium'
+  return 'low'
+}
+
 export function buildOpportunityClusters(terms: NeedsDecisionTerm[]): OpportunityCluster[] {
   const byCluster = new Map<
     string,
@@ -119,6 +153,10 @@ export function buildOpportunityClusters(terms: NeedsDecisionTerm[]): Opportunit
       clicks: number
       cost: number
       impact: number
+      confidence: number
+      uncertainty: number
+      mismatchCount: number
+      labelCounts: Map<string, number>
     }
   >()
 
@@ -138,6 +176,10 @@ export function buildOpportunityClusters(terms: NeedsDecisionTerm[]): Opportunit
       clicks: 0,
       cost: 0,
       impact: 0,
+      confidence: 0,
+      uncertainty: 0,
+      mismatchCount: 0,
+      labelCounts: new Map<string, number>(),
     }
 
     aggregate.terms.push(term.search_term)
@@ -145,6 +187,17 @@ export function buildOpportunityClusters(terms: NeedsDecisionTerm[]): Opportunit
     aggregate.clicks += metrics.clicks
     aggregate.cost += metrics.cost
     aggregate.impact += term.value_score?.impact_score ?? 0
+    aggregate.confidence += term.recommendation?.confidence ?? 0
+    aggregate.uncertainty += term.value_score?.uncertainty ?? 0
+    if (term.intent_features?.has_mismatch_risk) {
+      aggregate.mismatchCount += 1
+    }
+    for (const assignment of term.custom_label_0s) {
+      aggregate.labelCounts.set(
+        assignment.custom_label_0,
+        (aggregate.labelCounts.get(assignment.custom_label_0) ?? 0) + assignment.impressions
+      )
+    }
 
     byCluster.set(key, aggregate)
   }
@@ -154,7 +207,24 @@ export function buildOpportunityClusters(terms: NeedsDecisionTerm[]): Opportunit
     const termCount = aggregate.terms.length
     const averageCpc = aggregate.clicks > 0 ? aggregate.cost / aggregate.clicks : 0
     const lowCpcFactor = 1 / (1 + Math.max(averageCpc, 0))
-    const attractivenessScore = (aggregate.impact / Math.max(termCount, 1)) * lowCpcFactor
+    const avgImpact = aggregate.impact / Math.max(termCount, 1)
+    const averageRecommendationConfidence = aggregate.confidence / Math.max(termCount, 1)
+    const averageUncertainty = aggregate.uncertainty / Math.max(termCount, 1)
+    const mismatchRate = aggregate.mismatchCount / Math.max(termCount, 1)
+    const uniqueLabelCount = aggregate.labelCounts.size
+    const labelDispersionScore = clamp((uniqueLabelCount - 1) / 3, 0, 1)
+    const overlapRiskScore = clamp(
+      labelDispersionScore * 0.45 + mismatchRate * 0.35 + averageUncertainty * 0.2,
+      0,
+      1
+    )
+    const confidenceFactor = 0.6 + averageRecommendationConfidence * 0.4
+    const overlapPenaltyFactor = 1 - overlapRiskScore * 0.55
+    const attractivenessScore = avgImpact * lowCpcFactor * confidenceFactor * overlapPenaltyFactor
+    const topCustomLabels = Array.from(aggregate.labelCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([label]) => label)
 
     clusters.push({
       clusterKey,
@@ -165,11 +235,91 @@ export function buildOpportunityClusters(terms: NeedsDecisionTerm[]): Opportunit
       aggregateImpactScore: Number(aggregate.impact.toFixed(2)),
       averageCpc: Number(averageCpc.toFixed(4)),
       attractivenessScore: Number(attractivenessScore.toFixed(4)),
+      overlapRiskScore: Number(overlapRiskScore.toFixed(4)),
+      overlapRiskLevel: deriveOverlapRiskLevel(overlapRiskScore),
+      averageRecommendationConfidence: Number(averageRecommendationConfidence.toFixed(4)),
+      averageUncertainty: Number(averageUncertainty.toFixed(4)),
+      uniqueLabelCount,
+      topCustomLabels,
       topSearchTerms: aggregate.terms.slice(0, 10),
     })
   }
 
   return clusters.sort((a, b) => b.attractivenessScore - a.attractivenessScore)
+}
+
+function normalizeClusterPriority(cluster: OpportunityCluster): OpportunityLaunchBrief['priority'] {
+  if (cluster.attractivenessScore >= 90 && cluster.overlapRiskLevel !== 'high') {
+    return 'high'
+  }
+  if (cluster.attractivenessScore >= 45 || cluster.overlapRiskLevel === 'medium') {
+    return 'medium'
+  }
+  return 'low'
+}
+
+function buildNegativeControls(cluster: OpportunityCluster): string[] {
+  const controls = [
+    `Apply negatives to prevent overlap with existing ${cluster.clusterKey} funnel tiers.`,
+    'Add branded and competitor exclusions for this pilot unless intentionally testing those segments.',
+  ]
+  for (const label of cluster.topCustomLabels.slice(0, 3)) {
+    controls.push(`Apply overlap negatives for "${label}" outside the pilot scope.`)
+  }
+  return Array.from(new Set(controls))
+}
+
+function computeBudgetCap(cluster: OpportunityCluster): number {
+  const seeded = Math.round(cluster.totalCost * 1.5)
+  return clamp(seeded, 75, 650)
+}
+
+export function buildOpportunityLaunchBriefs(
+  clusters: OpportunityCluster[],
+  options?: {
+    accountMedianRoas?: number
+    maxBriefs?: number
+  }
+): OpportunityLaunchBrief[] {
+  const medianRoas = options?.accountMedianRoas ?? 3
+  const maxBriefs = options?.maxBriefs ?? 10
+
+  return clusters.slice(0, Math.max(1, maxBriefs)).map((cluster) => {
+    const priority = normalizeClusterPriority(cluster)
+    const budgetCapUsd = computeBudgetCap(cluster)
+    const targetRoas = Number((medianRoas * 1.2).toFixed(2))
+    const minClicks = cluster.termCount >= 3 ? 80 : 50
+    const minConversions = cluster.termCount >= 3 ? 3 : 2
+
+    return {
+      clusterKey: cluster.clusterKey,
+      pilotName: `Pilot - ${cluster.clusterKey}`,
+      priority,
+      strategySummary:
+        cluster.overlapRiskLevel === 'high'
+          ? 'High overlap risk cluster. Launch with strict negatives and conservative budget while validating incremental lift.'
+          : 'Low-CPC/high-intent cluster. Launch a constrained pilot to validate incremental volume before scale-up.',
+      budgetCapUsd,
+      observationWindowDays: 14,
+      topTerms: cluster.topSearchTerms.slice(0, 5),
+      negativeControls: buildNegativeControls(cluster),
+      buildoutChecklist: [
+        'Create dedicated pilot campaign or ad group for this query cluster.',
+        'Apply shared negative lists and cluster-specific overlap controls.',
+        'Tag pilot assets and budget for holdout comparison.',
+      ],
+      successCriteria: {
+        targetRoas,
+        minClicks,
+        minConversions,
+      },
+      stopConditions: [
+        `Pause if spend exceeds $${budgetCapUsd} before reaching ${minConversions} conversions.`,
+        `Pause if ROAS remains below ${(targetRoas * 0.75).toFixed(2)}x after 14 days.`,
+        'Pause immediately if overlap/cannibalization signals are confirmed.',
+      ],
+    }
+  })
 }
 
 export function buildRecommendationQueue(
@@ -263,10 +413,6 @@ function boundChange(next: number, current: number): number {
   const lower = current * (1 - MAX_ROAS_STEP_PCT)
   const upper = current * (1 + MAX_ROAS_STEP_PCT)
   return Math.min(Math.max(next, lower), upper)
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
 }
 
 function normalizeConfidence(spend: number, clicks: number, conversions: number): {

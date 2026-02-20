@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildOpportunityClusters,
+  buildOpportunityLaunchBriefs,
   buildQueryScoreSummary,
   buildRecommendationQueue,
   buildRoasRecommendations,
@@ -93,6 +94,156 @@ describe('buildOpportunityClusters', () => {
     expect(clusters[0]?.clusterKey).toBe('towel bar')
     expect(clusters[0]?.termCount).toBe(2)
     expect(clusters[0]?.attractivenessScore).toBeGreaterThan(0)
+  })
+
+  it('penalizes high-overlap clusters and exposes overlap risk metadata', () => {
+    const terms: NeedsDecisionTerm[] = [
+      {
+        search_term: 'solid brass towel bar 24 inch',
+        custom_label_0s: [
+          {
+            custom_label_0: 'Wall Mounted Towel Bars',
+            source_campaign: 'AVD - Shopping - US - Wall Mounted Towel Bars - HIGH',
+            source_tier: 'HIGH',
+            impressions: 410,
+            clicks: 32,
+            cost_micros: 9800000,
+            conversions: 3,
+            conversions_value: 720,
+          },
+        ],
+        intent_features: {
+          product_object: 'towel bar',
+          modifier_tokens: ['solid brass'],
+          use_case_tokens: ['bathroom'],
+          is_branded: false,
+          is_competitor: false,
+          has_mismatch_risk: false,
+        },
+        recommendation: {
+          action_type: 'funnel',
+          default_tier: 'low',
+          confidence: 0.82,
+          reason_codes: ['performance_weighted_tiering'],
+        },
+        value_score: {
+          impact_score: 190,
+          expected_clicks: 35,
+          expected_cvr: 0.09,
+          expected_conversion_value: 780,
+          expected_profit_proxy: 310,
+          uncertainty: 0.16,
+        },
+      },
+      {
+        search_term: 'bathroom holder shelf combo',
+        custom_label_0s: [
+          {
+            custom_label_0: 'Soap Dishes & Holders',
+            source_campaign: 'AVD - Shopping - US - Soap Dishes & Holders - HIGH',
+            source_tier: 'HIGH',
+            impressions: 390,
+            clicks: 31,
+            cost_micros: 12000000,
+            conversions: 2,
+            conversions_value: 420,
+          },
+          {
+            custom_label_0: 'Baskets',
+            source_campaign: 'AVD - Shopping - US - baskets - HIGH',
+            source_tier: 'HIGH',
+            impressions: 390,
+            clicks: 31,
+            cost_micros: 12000000,
+            conversions: 2,
+            conversions_value: 420,
+          },
+        ],
+        intent_features: {
+          product_object: 'holder',
+          modifier_tokens: ['combo'],
+          use_case_tokens: ['bathroom'],
+          is_branded: false,
+          is_competitor: false,
+          has_mismatch_risk: true,
+        },
+        recommendation: {
+          action_type: 'funnel',
+          default_tier: 'medium',
+          confidence: 0.58,
+          reason_codes: ['performance_weighted_tiering'],
+        },
+        value_score: {
+          impact_score: 220,
+          expected_clicks: 37,
+          expected_cvr: 0.05,
+          expected_conversion_value: 480,
+          expected_profit_proxy: 190,
+          uncertainty: 0.52,
+        },
+      },
+    ]
+
+    const clusters = buildOpportunityClusters(terms)
+
+    expect(clusters).toHaveLength(2)
+    expect(clusters[0].clusterKey).toBe('towel bar')
+    expect(clusters[1].overlapRiskLevel).toBe('high')
+    expect(clusters[1].overlapRiskScore).toBeGreaterThan(clusters[0].overlapRiskScore)
+  })
+})
+
+describe('buildOpportunityLaunchBriefs', () => {
+  it('generates pilot-ready launch briefs with overlap controls and measurable success criteria', () => {
+    const terms: NeedsDecisionTerm[] = [
+      {
+        search_term: 'solid brass towel bar 24 inch',
+        custom_label_0s: [
+          {
+            custom_label_0: 'Wall Mounted Towel Bars',
+            source_campaign: 'AVD - Shopping - US - Wall Mounted Towel Bars - HIGH',
+            source_tier: 'HIGH',
+            impressions: 410,
+            clicks: 32,
+            cost_micros: 9800000,
+            conversions: 3,
+            conversions_value: 720,
+          },
+        ],
+        intent_features: {
+          product_object: 'towel bar',
+          modifier_tokens: ['solid brass'],
+          use_case_tokens: ['bathroom'],
+          is_branded: false,
+          is_competitor: false,
+          has_mismatch_risk: false,
+        },
+        recommendation: {
+          action_type: 'funnel',
+          default_tier: 'low',
+          confidence: 0.82,
+          reason_codes: ['performance_weighted_tiering'],
+        },
+        value_score: {
+          impact_score: 190,
+          expected_clicks: 35,
+          expected_cvr: 0.09,
+          expected_conversion_value: 780,
+          expected_profit_proxy: 310,
+          uncertainty: 0.16,
+        },
+      },
+    ]
+
+    const briefs = buildOpportunityLaunchBriefs(buildOpportunityClusters(terms), { accountMedianRoas: 3.2 })
+
+    expect(briefs).toHaveLength(1)
+    expect(briefs[0].clusterKey).toBe('towel bar')
+    expect(briefs[0].pilotName.toLowerCase()).toContain('pilot')
+    expect(briefs[0].negativeControls.length).toBeGreaterThan(0)
+    expect(briefs[0].successCriteria.targetRoas).toBeGreaterThan(3)
+    expect(briefs[0].budgetCapUsd).toBeGreaterThan(0)
+    expect(briefs[0].stopConditions.length).toBeGreaterThan(0)
   })
 })
 

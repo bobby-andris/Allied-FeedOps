@@ -1,6 +1,6 @@
 # Branch Workstream Tracker — d5ea (`codex/shopping-funnel-integration-20260220`)
 
-Last updated: 2026-02-20 (Task 5 complete: adaptive tROAS recommender)
+Last updated: 2026-02-20 (Task 6 complete: opportunity cluster miner + launch briefs)
 
 ## Purpose
 Track progress for the 8-step Google Ads optimization implementation sequence on this branch, including what is complete, what is pending, and key implementation notes.
@@ -11,7 +11,8 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Task 3: complete
 - Task 4: complete
 - Task 5: complete
-- Tasks 6-8: pending
+- Task 6: complete
+- Tasks 7-8: pending
 
 ## 8-Task Execution Checklist
 1. **Implement decomposition pipeline v1 (deterministic parser, persistence, health/backfill ops)** — ✅ Complete
@@ -19,7 +20,7 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 3. **Add profit-weighted reviewer queue defaults and high-impact filters in Shopping Funnel UI** — ✅ Complete
 4. **Ship recommendation explainability panel (reason codes, confidence components, diagnostics)** — ✅ Complete
 5. **Implement adaptive tROAS recommender by `custom_label_0 × tier` (recommend-only mode)** — ✅ Complete
-6. **Add opportunity cluster miner v1 and launch-brief generation workflow** — ⏳ Pending
+6. **Add opportunity cluster miner v1 and launch-brief generation workflow** — ✅ Complete
 7. **Integrate GA4+Shopify supplemental value signals into scoring confidence gates** — ⏳ Pending
 8. **Add guardrail incidents and experiment instrumentation for safe rollout decisions** — ⏳ Pending
 
@@ -172,8 +173,42 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
   - `npm run lint` (0 errors, existing baseline warnings only)
 
 ### Main commit status
-- Local changes are implemented and verified in the branch working tree.
-- Commit to be created in the next checkpoint commit (with tracker update included).
+- `a904154f` — feat: ship explainability and adaptive tROAS recommendations
+
+## Task 6 — Opportunity Cluster Miner v1 + Launch-Brief Workflow
+### What was implemented
+- Expanded opportunity cluster miner with overlap/cannibalization risk intelligence:
+  - overlap risk score + risk level (`low`/`medium`/`high`)
+  - recommendation confidence and uncertainty rollups
+  - custom label dispersion and top label extraction
+  - attractiveness scoring now risk-adjusted (not just impact × CPC)
+- Added deterministic launch-brief generator:
+  - pilot naming and priority (`high`/`medium`/`low`)
+  - budget cap, observation window, target ROAS/min traffic criteria
+  - negative-control guidance and stop conditions
+  - buildout checklist for campaign/ad-group pilots
+- Wired opportunities API to return richer launch briefs:
+  - supports `account_median_roas` input for KPI threshold shaping
+  - returns `launch_briefs` derived from cluster outputs
+- Upgraded Optimization Control Center UI:
+  - cluster cards now show overlap risk and confidence context
+  - new “Launch Briefs” section with pilot-ready execution guidance
+  - preserved recommend-only posture (no auto posting/create actions)
+
+### Validation
+- TDD RED→GREEN completed with new failing tests first, then implementation:
+  - `src/lib/optimization/__tests__/control-center.test.ts`
+- Regression test suite passed:
+  - `src/lib/optimization/__tests__/control-center.test.ts`
+  - `src/lib/optimization/decomposition/__tests__/engine.test.ts`
+  - `src/lib/shopping-funnel/__tests__/reviewer-priority.test.ts`
+  - `src/lib/shopping-funnel/__tests__/explainability.test.ts`
+- `npm run lint` passed with existing baseline warnings only.
+- `npm run build` passed (full Next.js production build).
+
+### Main commit status
+- Local Task 6 code is implemented and verified in the branch working tree.
+- Next checkpoint commit will include Task 6 changes + tracker update.
 
 ---
 
@@ -184,13 +219,13 @@ Track progress for the 8-step Google Ads optimization implementation sequence on
 - Backfill `dry_run=true` remains the safe rehearsal mode and writes nothing.
 
 ## Recommended Next Step
-Proceed with **Task 6**:
-- implement opportunity cluster miner v1 and launch-brief generation workflow.
-- keep output recommendation-only (no auto campaign creation/posting yet).
+Proceed with **Task 7**:
+- integrate GA4 + Shopify supplemental value signals into confidence gating.
+- keep Google Ads decisioning primary; supplemental signals should modulate confidence, not replace core routing logic.
 
 ## Session Log (Latest)
-- Implemented and verified Task 5 adaptive tROAS policy enhancements.
+- Implemented and verified Task 6 opportunity miner + launch brief workflow.
 - Validation evidence captured:
-  - build success
+  - targeted and regression test success
   - lint success (warnings only)
-  - targeted control-center test pass.
+  - full production build success.
