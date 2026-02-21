@@ -67,20 +67,21 @@ CANDIDATE_SCHEMA = {
         "self_score": {
             "type": "object",
             "properties": {
-                "specificity": {"type": "integer", "minimum": 0, "maximum": 10},
-                "benefit_coverage": {"type": "integer", "minimum": 0, "maximum": 10},
-                "keyword_inclusion": {"type": "integer", "minimum": 0, "maximum": 10},
-                "format_adherence": {"type": "integer", "minimum": 0, "maximum": 10},
-                "brand_voice": {"type": "integer", "minimum": 0, "maximum": 10},
-                "factual_accuracy": {"type": "integer", "minimum": 0, "maximum": 10},
+                "hook_quality": {"type": "integer", "minimum": 0, "maximum": 10, "description": "First sentence engagement: 0=fragment/dump, 5=generic, 10=specific+engaging"},
+                "product_specificity": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Could ONLY describe this product: 0=any competitor, 5=mentions brand generically, 10=unmistakable"},
+                "competitive_diff": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Why THIS over cheaper alternative: 0=none, 5=generic brass mention, 10=advantage woven naturally"},
+                "keyword_integration": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Keywords natural or stuffed: 0=stuffed/missing, 5=present but awkward, 10=invisible"},
+                "customer_scenario": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Real buying situation: 0=spec dump, 5=generic upgrade, 10=specific resonant scenario"},
+                "emotional_resonance": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Creates desire: 0=database export, 5=pleasant but forgettable, 10=genuine want"},
+                "factual_accuracy": {"type": "integer", "minimum": 0, "maximum": 10, "description": "All claims traceable to evidence: 10=yes, 0=fabricated specs"},
+                "platform_compliance": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Meets platform format/length rules: 10=perfect, 5=minor issues, 0=wrong format"},
+                "finish_integration": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Finish as design choice or afterthought: 0=raw placeholder, 5=generic, 10=woven into narrative"},
+                "variety_score": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Different from catalog peers: 0=identical pattern, 5=same skeleton, 10=unique structure"},
             },
             "required": [
-                "specificity",
-                "benefit_coverage",
-                "keyword_inclusion",
-                "format_adherence",
-                "brand_voice",
-                "factual_accuracy",
+                "hook_quality", "product_specificity", "competitive_diff",
+                "keyword_integration", "customer_scenario", "emotional_resonance",
+                "factual_accuracy", "platform_compliance", "finish_integration", "variety_score",
             ],
         },
     },
@@ -233,7 +234,10 @@ Don't:
 - Output empty bullets.
 
 Scoring intent:
-- self_score should reflect factual specificity, benefit coverage, keyword inclusion quality, format adherence, brand voice fit, and factual accuracy.
+- self_score uses 10 criteria measuring click-worthiness, not just compliance.
+- Criteria and weights: hook_quality (15%), product_specificity (15%), competitive_diff (12%), keyword_integration (10%), customer_scenario (10%), emotional_resonance (10%), factual_accuracy (10%), platform_compliance (8%), finish_integration (5%), variety_score (5%).
+- A description that follows all rules but is generic should score 50-60, not 80+.
+- Score each criterion 0-10 independently. Do NOT inflate to hit a target.
 """
 
 # ---------------------------------------------------------------------------
