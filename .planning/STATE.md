@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 18 of 20 (Diagnosis: Establish Ground Truth)
-Plan: 2 of 3 in current phase
+Plan: 3 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-21 — Phase 18 Plan 01 complete (generation path trace, feature flag audit, Cloud Run runtime state)
+Last activity: 2026-02-21 — Phase 18 Plan 02 complete (SKU coverage funnel API + CoverageFunnel dashboard component, DIAG-01 done)
 
 Progress: [████░░░░░░] ~18% (v1.2 milestone — 4/TBD plans complete)
 
@@ -28,6 +28,7 @@ Progress: [████░░░░░░] ~18% (v1.2 milestone — 4/TBD plans 
 | v1.0 | 4 | 16 |
 | v1.1 | 8 | 24 |
 | v1.2 | 4 | TBD |
+| Phase 18-diagnosis-establish-ground-truth P02 | 4 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -45,6 +46,9 @@ Progress: [████░░░░░░] ~18% (v1.2 milestone — 4/TBD plans 
 - [17-01]: {FINISH_NAME} placeholder found in approved content (SKU 102) — expand-variants.ts substitution bug needs immediate fix
 - [Phase 17-03]: PMax Zombie SKUs (126K impressions, 54.6% IS Lost to Rank) identified as highest-value Phase 20 target — content generation priority 1
 - [Phase 17-03]: Decorative grab bar CTR gap confirmed: 741 impressions at 0% CTR traced to title language mismatch — fix is adding 'Decorative' to Pipeline/Cube Design grab bar titles
+- [Phase 18-02]: Separate /api/funnel/summary endpoint instead of augmenting /api/stats — avoids slowing existing stats load
+- [Phase 18-02]: COUNT DISTINCT via JS Set dedup for funnel queries — Supabase JS client lacks native COUNT DISTINCT
+- [Phase 18-02]: Stage 5 (confirmed_sample) reads static spot-check-results.json — live read-back is DIAG-04's job (Plan 03)
 
 ### Key Context Carried Forward
 
