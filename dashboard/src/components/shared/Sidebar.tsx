@@ -17,6 +17,8 @@ import {
   Funnel,
   Gauge,
   Siren,
+  GitBranch,
+  FlaskConical,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -33,6 +35,9 @@ const navigation = [
   { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
   { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge },
+  { name: 'Intent Control', href: '/intent-control-center', icon: Gauge },
+  { name: 'Search Governance', href: '/search-governance', icon: GitBranch },
+  { name: 'Experiment Lab', href: '/experiment-lab', icon: FlaskConical },
   { name: 'Attribution Forensics', href: '/attribution-forensics', icon: Siren },
   { name: 'Backfill Monitoring', href: '/backfill', icon: Activity },
   { name: 'Settings', href: '/settings', icon: Settings },
