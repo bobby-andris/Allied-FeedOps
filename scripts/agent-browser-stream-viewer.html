@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Browser Stream Viewer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --line: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+    }
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #020617;
+    }
+    .topbar input[type="text"] {
+      width: 240px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+    .topbar button {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .status {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .viewport-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+    }
+    #viewport {
+      display: block;
+      max-width: 96vw;
+      max-height: calc(100vh - 86px);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #000;
+      image-rendering: auto;
+      user-select: none;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 12px 10px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <label for="wsUrl">WS URL</label>
+    <input id="wsUrl" type="text" value="ws://localhost:9223" />
+    <button id="connectBtn">Connect</button>
+    <label>
+      <input id="inputEnabled" type="checkbox" checked />
+      Enable input injection
+    </label>
+    <span class="status warn" id="status">disconnected</span>
+  </div>
+
+  <div class="viewport-wrap">
+    <img id="viewport" alt="Agent browser stream viewport" tabindex="0" />
+  </div>
+  <div class="hint">
+    Click inside viewport to focus keyboard events. Mouse, wheel, and keyboard input are sent over WebSocket when enabled.
+  </div>
+
+  <script>
+    const wsInput = document.getElementById('wsUrl');
+    const connectBtn = document.getElementById('connectBtn');
+    const inputEnabled = document.getElementById('inputEnabled');
+    const statusEl = document.getElementById('status');
+    const viewport = document.getElementById('viewport');
+
+    let ws = null;
+    let latestMeta = {
+      deviceWidth: 1,
+      deviceHeight: 1,
+    };
+
+    function setStatus(text, cls) {
+      statusEl.textContent = text;
+      statusEl.className = `status ${cls}`;
+    }
+
+    function send(payload) {
+      if (!ws || ws.readyState !== WebSocket.OPEN || !inputEnabled.checked) return;
+      ws.send(JSON.stringify(payload));
+    }
+
+    function buttonName(btn) {
+      if (btn === 2) return 'right';
+      if (btn === 1) return 'middle';
+      return 'left';
+    }
+
+    function toViewportCoords(event) {
+      const rect = viewport.getBoundingClientRect();
+      const xNorm = (event.clientX - rect.left) / rect.width;
+      const yNorm = (event.clientY - rect.top) / rect.height;
+      return {
+        x: Math.max(0, Math.min(latestMeta.deviceWidth, Math.round(xNorm * latestMeta.deviceWidth))),
+        y: Math.max(0, Math.min(latestMeta.deviceHeight, Math.round(yNorm * latestMeta.deviceHeight))),
+      };
+    }
+
+    connectBtn.addEventListener('click', () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close();
+        return;
+      }
+      try {
+        ws = new WebSocket(wsInput.value.trim());
+      } catch (err) {
+        setStatus(`invalid url: ${err}`, 'warn');
+        return;
+      }
+
+      setStatus('connecting…', 'warn');
+      ws.onopen = () => setStatus('connected', 'ok');
+      ws.onclose = () => setStatus('disconnected', 'warn');
+      ws.onerror = () => setStatus('ws error', 'warn');
+      ws.onmessage = (event) => {
+        let msg;
+        try {
+          msg = JSON.parse(event.data);
+        } catch {
+          return;
+        }
+        if (msg.type === 'frame') {
+          if (msg.metadata) latestMeta = msg.metadata;
+          viewport.src = `data:image/jpeg;base64,${msg.data}`;
+        } else if (msg.type === 'status') {
+          if (msg.viewportWidth && msg.viewportHeight) {
+            latestMeta.deviceWidth = msg.viewportWidth;
+            latestMeta.deviceHeight = msg.viewportHeight;
+          }
+        }
+      };
+    });
+
+    viewport.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      viewport.focus();
+      const { x, y } = toViewportCoords(event);
+      send({
+        type: 'input_mouse',
+        eventType: 'mousePressed',
+        x,
+        y,
+        button: buttonName(event.button),
+        clickCount: 1,
+      });
+    });
+
+    viewport.addEventListener('mouseup', (event) => {
+      event.preventDefault();
+      const { x, y } = toViewportCoords(event);
+      send({
+        type: 'input_mouse',
+        eventType: 'mouseReleased',
+        x,
+        y,
+        button: buttonName(event.button),
+      });
+    });
+
+    viewport.addEventListener('mousemove', (event) => {
+      const { x, y } = toViewportCoords(event);
+      send({
+        type: 'input_mouse',
+        eventType: 'mouseMoved',
+        x,
+        y,
+      });
+    });
+
+    viewport.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      const { x, y } = toViewportCoords(event);
+      send({
+        type: 'input_mouse',
+        eventType: 'mouseWheel',
+        x,
+        y,
+        deltaX: Math.round(event.deltaX),
+        deltaY: Math.round(event.deltaY),
+      });
+    }, { passive: false });
+
+    viewport.addEventListener('keydown', (event) => {
+      send({
+        type: 'input_keyboard',
+        eventType: 'keyDown',
+        key: event.key,
+        code: event.code,
+        modifiers:
+          (event.altKey ? 1 : 0) |
+          (event.ctrlKey ? 2 : 0) |
+          (event.metaKey ? 4 : 0) |
+          (event.shiftKey ? 8 : 0),
+      });
+      if (event.key.length === 1) {
+        send({
+          type: 'input_keyboard',
+          eventType: 'char',
+          text: event.key,
+        });
+      }
+      event.preventDefault();
+    });
+
+    viewport.addEventListener('keyup', (event) => {
+      send({
+        type: 'input_keyboard',
+        eventType: 'keyUp',
+        key: event.key,
+        code: event.code,
+      });
+      event.preventDefault();
+    });
+  </script>
+</body>
+</html>
