@@ -119,7 +119,7 @@ INSTRUCTION PRIORITY:
 4) P2 style guidance
 If a lower-priority rule conflicts with a higher-priority rule, obey the higher-priority rule.
 
-=== P0_GLOBAL_FACTUAL_RULES ===
+<p0_global_factual_rules>
 
 ACCURACY GUARDRAIL (ABSOLUTE):
 - Every claim in title and description MUST be verifiable from the product evidence table.
@@ -153,7 +153,9 @@ Banned content:
 - No all-caps hype language.
 - Avoid banned adjectives/claims: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate.
 
-=== P0_FIELD_ISOLATION_RULES ===
+</p0_global_factual_rules>
+
+<p0_field_isolation_rules>
 
 Treat each output field as an independent contract:
 - google_title, google_short_title, google_description: Google Shopping variant-aware fields.
@@ -167,7 +169,9 @@ Isolation requirements:
 - Never apply Shopify HTML structure rules to Google/Bing descriptions.
 - Never apply Google/Bing feed-fuel rules to Shopify narrative sections.
 
-=== P1_GOOGLE_BING_FEED_RULES ===
+</p0_field_isolation_rules>
+
+<p1_google_bing_feed_rules>
 
 Title requirements (Google and Bing):
 - Product type must appear within first 30 characters.
@@ -195,7 +199,9 @@ Channel objective:
 - Optimize for relevant query matching and qualified click-through by clear, specific attribute language.
 - Avoid generic persuasion copy that obscures product identity.
 
-=== P1_SHOPIFY_CONVERSION_RULES ===
+</p1_google_bing_feed_rules>
+
+<p1_shopify_conversion_rules>
 
 shopify_title:
 - Max 255 characters.
@@ -215,7 +221,9 @@ shopify_meta_description:
 - Standalone summary with primary keyword and clear value.
 - Do not copy raw HTML.
 
-=== P2_STYLE_GUIDANCE ===
+</p1_shopify_conversion_rules>
+
+<p2_style_guidance>
 
 Voice and readability:
 - Clear, specific, confident, and factual.
@@ -238,6 +246,8 @@ Scoring intent:
 - Criteria and weights: hook_quality (15%), product_specificity (15%), competitive_diff (12%), keyword_integration (10%), customer_scenario (10%), emotional_resonance (10%), factual_accuracy (10%), platform_compliance (8%), finish_integration (5%), variety_score (5%).
 - A description that follows all rules but is generic should score 50-60, not 80+.
 - Score each criterion 0-10 independently. Do NOT inflate to hit a target.
+
+</p2_style_guidance>
 """
 
 # ---------------------------------------------------------------------------
@@ -377,7 +387,7 @@ Now optimize the title and description for MasterSKU: {master_sku}
 # ---------------------------------------------------------------------------
 
 FINISH_CONTEXT_TEMPLATE = """\
-=== VARIANT CONTEXT ===
+<variant_context>
 This content is for a SPECIFIC FINISH VARIANT, not the master SKU.
 Generate finish-specific content for: {finish_name}
 
@@ -402,6 +412,7 @@ GOOD INTEGRATION EXAMPLES:
 BAD INTEGRATION (never do this):
 - "Available in {finish_name}. {finish_name} features a..."
 - "This product comes in {finish_name}. The {finish_name} finish..."
+</variant_context>
 """
 
 # Template for variant-aware user prompt
