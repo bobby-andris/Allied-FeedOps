@@ -242,6 +242,20 @@ class RegenerateRequest(BaseModel):
     finish_code: str | None = Field(
         default=None, description="Specific finish code for variant"
     )
+    # Structured feedback fields (FIX-01: feedback layer)
+    tone_style: Literal["formal", "conversational", "technical", "aspirational"] | None = Field(
+        default=None, description="Desired tone and style for the content"
+    )
+    emphasis: list[Literal["finish", "dimensions", "use_case", "compatibility", "luxury"]] | None = Field(
+        default=None, description="Content aspects to emphasize"
+    )
+    length_preference: Literal["shorter", "standard", "longer"] | None = Field(
+        default=None, description="Desired length relative to current"
+    )
+    save_as_correction: bool = Field(
+        default=False,
+        description="If true, save structured feedback as a persistent correction for this SKU",
+    )
 
 
 class BatchOptimizeRequest(BaseModel):
@@ -961,6 +975,45 @@ async def regenerate_content(request: RegenerateRequest):
 
         prompt_hash = get_system_prompt_hash()
 
+        # Load persistent corrections for this SKU (FIX-01: feedback layer)
+        # Corrections are platform/content_type scoped so "all" platform corrections apply everywhere
+        corrections: list[dict] = []
+        try:
+            corrections_resp = (
+                supabase.table("sku_corrections")
+                .select("*")
+                .eq("master_sku", canonical_master_sku)
+                .in_("platform", [request.platform, "all"])
+                .in_("content_type", [request.content_type, "all"])
+                .eq("is_active", True)
+                .execute()
+            )
+            corrections = corrections_resp.data or []
+            if corrections:
+                logger.info(
+                    "Loaded %s persistent corrections for %s/%s/%s",
+                    len(corrections),
+                    canonical_master_sku,
+                    request.platform,
+                    request.content_type,
+                )
+        except Exception as e:
+            logger.warning(
+                "Failed to load corrections for %s: %s", canonical_master_sku, e
+            )
+
+        # Build session feedback from structured fields (FIX-01)
+        feedback_parts: list[str] = []
+        if request.tone_style:
+            feedback_parts.append(f"Tone/style: {request.tone_style}")
+        if request.emphasis:
+            feedback_parts.append(f"Emphasize: {', '.join(request.emphasis)}")
+        if request.length_preference:
+            feedback_parts.append(f"Length: {request.length_preference}")
+        if request.feedback:
+            feedback_parts.append(request.feedback)
+        session_feedback = "\n".join(feedback_parts) if feedback_parts else None
+
         # Build user prompt via shared prompt_builder (FIX-01: parity with batch path)
         # FIX-02: Shopping intelligence gated by PROMPT_CONTRACT_V2.
         # Toggling flag produces structurally different prompt (with/without Shopping section).
@@ -975,7 +1028,7 @@ async def regenerate_content(request: RegenerateRequest):
             finish_code=request.finish_code,
         )
         user_prompt = apply_feedback_layer(
-            core, corrections=[], session_feedback=request.feedback
+            core, corrections=corrections, session_feedback=session_feedback
         )
         simple_schema = {
             "type": "object",
@@ -1066,6 +1119,42 @@ async def regenerate_content(request: RegenerateRequest):
                     e,
                 )
 
+        # Persist correction if save_as_correction=True and there's session feedback (FIX-01)
+        if request.save_as_correction and session_feedback:
+            try:
+                # Determine correction type from structured fields (priority order)
+                if request.tone_style:
+                    correction_type = "tone"
+                elif request.emphasis:
+                    correction_type = "emphasis"
+                elif request.length_preference:
+                    correction_type = "length"
+                else:
+                    correction_type = "free_text"
+
+                supabase.table("sku_corrections").upsert(
+                    {
+                        "master_sku": canonical_master_sku,
+                        "platform": request.platform,
+                        "content_type": request.content_type,
+                        "correction_text": session_feedback,
+                        "correction_type": correction_type,
+                        "is_active": True,
+                    },
+                    on_conflict="master_sku,platform,content_type,correction_type,correction_text",
+                ).execute()
+                logger.info(
+                    "Saved persistent correction for %s/%s/%s (type=%s)",
+                    canonical_master_sku,
+                    request.platform,
+                    request.content_type,
+                    correction_type,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Failed to save correction for %s: %s", canonical_master_sku, e
+                )
+
         return RegenerateResponse(
             success=True,
             master_sku=canonical_master_sku,
@@ -1073,7 +1162,7 @@ async def regenerate_content(request: RegenerateRequest):
             platform=request.platform,
             content=content,
             finish_sentences=finish_sentences,
-            used_feedback=request.feedback is not None,
+            used_feedback=session_feedback is not None,
             prompt_hash=prompt_hash,
             model=provider.name,
         )
