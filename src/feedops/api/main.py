@@ -53,6 +53,7 @@ from feedops.api.prompt_loader import (
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.models.parent_sku import ParentSKU
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.api.prompt_builder import build_core_prompt, apply_feedback_layer
 from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
@@ -443,66 +444,27 @@ def _build_generation_user_prompt(
     content_type: str,
     feedback: str | None = None,
     finish_code: str | None = None,
+    evidence: list | None = None,
 ) -> str:
-    """Build a unified user prompt for all API generation paths.
+    """DEPRECATED: Use build_core_prompt() from prompt_builder.py instead.
 
-    System prompt remains canonical in Python code. Supabase prompt template
-    data is used only for examples and category guidance.
+    Thin wrapper around build_core_prompt() + apply_feedback_layer() maintained
+    for backward compatibility. New call sites should call build_core_prompt()
+    directly to pass the raw evidence list for keyword placement enrichment.
     """
-    category_guidance = get_category_guidance(parent_sku.category)
-    if not category_guidance:
-        category_guidance = build_category_guidance(parent_sku.category)
-
-    examples = format_gold_standard_examples(
+    # FIX-02: Shopping intelligence gated by PROMPT_CONTRACT_V2.
+    # Toggling flag produces structurally different prompt (with/without Shopping section).
+    # INTENT_CURATOR_V1 effect is in evidence.py (curated vs raw evidence content).
+    # SEGMENT_STRATEGY_V1 gates segment strategy guidance section.
+    core = build_core_prompt(
+        parent_sku=parent_sku,
+        evidence=evidence or [],
+        evidence_markdown=evidence_markdown,
         platform=platform,
         content_type=content_type,
-        max_examples=3,
+        finish_code=finish_code,
     )
-    examples_section = (
-        f"Gold Standard Examples (data-only guidance):\n{examples}\n"
-        if examples
-        else ""
-    )
-
-    context_lines: list[str] = []
-    if platform in {"google", "bing"}:
-        context_lines.append(
-            "Entity context: variant listing copy (finish-aware when variant finish context is available)."
-        )
-        if finish_code:
-            context_lines.append(
-                f"Requested variant finish code: {finish_code}. Integrate this variant context naturally."
-            )
-        context_lines.append(
-            "Use finish names from evidence data only; do not invent unsupported finish language."
-        )
-    else:
-        context_lines.append(
-            "Entity context: master SKU storefront copy (finish-agnostic base copy for Shopify)."
-        )
-
-    finish_list = ", ".join(get_finish_list())
-    context_lines.append(
-        "Canonical finish vocabulary reference (use only when supported by evidence): "
-        f"{finish_list}."
-    )
-    context_section = "\n".join(context_lines)
-
-    category_section = f"Category Guidance:\n{category_guidance}\n" if category_guidance else ""
-    feedback_section = f"Reviewer Feedback:\n{feedback}\n" if feedback else ""
-
-    return f"""\
-Product Evidence Table:
-{evidence_markdown}
-
-Target platform: {platform}
-Content type to generate: {content_type}
-
-{context_section}
-{category_section}
-{examples_section}{feedback_section}Generate only the {content_type} for {platform}.
-Return your response as JSON: {{"content": "your generated {content_type} here"}}
-"""
+    return apply_feedback_layer(core, corrections=[], session_feedback=feedback)
 
 
 def _build_finish_sentences_user_prompt(
@@ -872,8 +834,10 @@ async def optimize_single_sku(request: OptimizeRequest):
         # Generate for each platform and content type
         for platform in platforms:
             for content_type in content_types:
-                user_prompt = _build_generation_user_prompt(
+                # FIX-01: Use shared build_core_prompt() — structurally identical to batch path
+                user_prompt = build_core_prompt(
                     parent_sku=parent_sku,
+                    evidence=evidence,
                     evidence_markdown=evidence_markdown,
                     platform=platform,
                     content_type=content_type,
@@ -997,14 +961,21 @@ async def regenerate_content(request: RegenerateRequest):
 
         prompt_hash = get_system_prompt_hash()
 
-        # Build user prompt
-        user_prompt = _build_generation_user_prompt(
+        # Build user prompt via shared prompt_builder (FIX-01: parity with batch path)
+        # FIX-02: Shopping intelligence gated by PROMPT_CONTRACT_V2.
+        # Toggling flag produces structurally different prompt (with/without Shopping section).
+        # INTENT_CURATOR_V1 effect is in evidence.py (curated vs raw evidence content).
+        # SEGMENT_STRATEGY_V1 gates segment strategy guidance section.
+        core = build_core_prompt(
             parent_sku=parent_sku,
+            evidence=evidence,
             evidence_markdown=evidence_markdown,
             platform=request.platform,
             content_type=request.content_type,
-            feedback=request.feedback,
             finish_code=request.finish_code,
+        )
+        user_prompt = apply_feedback_layer(
+            core, corrections=[], session_feedback=request.feedback
         )
         simple_schema = {
             "type": "object",
@@ -1490,8 +1461,10 @@ async def process_batch_job(
             # Generate for each platform
             for platform in platforms:
                 for content_type in content_types:
-                    user_prompt = _build_generation_user_prompt(
+                    # FIX-01: Use shared build_core_prompt() — structurally identical to single-SKU path
+                    user_prompt = build_core_prompt(
                         parent_sku=parent_sku,
+                        evidence=evidence,
                         evidence_markdown=evidence_markdown,
                         platform=platform,
                         content_type=content_type,
@@ -1722,8 +1695,10 @@ async def process_hybrid_batch_job(
         evidence = build_evidence_table(parent_sku)
         evidence_markdown = format_evidence_markdown(evidence)
 
-        user_prompt = _build_generation_user_prompt(
+        # FIX-01: Use shared build_core_prompt() — structurally identical to single-SKU path
+        user_prompt = build_core_prompt(
             parent_sku=parent_sku,
+            evidence=evidence,
             evidence_markdown=evidence_markdown,
             platform=platform,
             content_type=content_type,
