@@ -412,6 +412,43 @@ def _normalize_generation_options(options: dict | None) -> dict:
     return normalized
 
 
+def _extract_content_from_schema_response(
+    response: dict,
+    platform: str,
+    content_type: str,
+) -> str:
+    """Extract platform+content_type specific content from CANDIDATE_SCHEMA response.
+
+    The OpenAI provider always uses _STRICT_RESPONSE_FORMAT (built from CANDIDATE_SCHEMA)
+    which returns keys like google_title, google_description, bing_title, etc.
+    Per-call prompts ask the model to populate only one field; this function
+    extracts that field by name.
+
+    Args:
+        response: Parsed JSON dict from provider.generate() — CANDIDATE_SCHEMA shape.
+        platform: "google", "bing", or "shopify".
+        content_type: "title" or "description".
+
+    Returns:
+        The content string, stripped. Empty string if the field is absent/empty.
+    """
+    # Map (platform, content_type) → CANDIDATE_SCHEMA key
+    _FIELD_MAP = {
+        ("google", "title"): "google_title",
+        ("google", "description"): "google_description",
+        ("bing", "title"): "bing_title",
+        ("bing", "description"): "bing_description",
+        ("shopify", "title"): "shopify_title",
+        ("shopify", "description"): "shopify_description",
+    }
+    field_key = _FIELD_MAP.get((platform, content_type))
+    if field_key:
+        value = response.get(field_key, "")
+        return (value or "").strip()
+    # Fallback: legacy "content" key (json_object mode)
+    return (response.get("content", "") or "").strip()
+
+
 async def _generate_with_metrics(
     *,
     provider,
@@ -873,7 +910,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                 )
                 _gen_latency_ms = int((time.time() - _gen_start) * 1000)
 
-                content = response.get("content", "").strip()
+                content = _extract_content_from_schema_response(response, platform, content_type)
                 finish_sentences: dict[str, str] | None = None
                 if content_type == "description" and platform in {"google", "bing"}:
                     content, finish_sentences = await _enforce_finish_sentence_parity(
@@ -1047,7 +1084,7 @@ async def regenerate_content(request: RegenerateRequest):
         )
         _regen_latency_ms = int((time.time() - _regen_start) * 1000)
 
-        content = response.get("content", "").strip()
+        content = _extract_content_from_schema_response(response, request.platform, request.content_type)
         finish_sentences: dict[str, str] | None = None
 
         if request.content_type == "description" and request.platform in {"google", "bing"}:
@@ -1575,7 +1612,7 @@ async def process_batch_job(
                     )
                     _batch_gen_latency_ms = int((time.time() - _batch_gen_start) * 1000)
 
-                    content = response.get("content", "").strip()
+                    content = _extract_content_from_schema_response(response, platform, content_type)
                     finish_sentences: dict[str, str] | None = None
                     if content_type == "description" and platform in {"google", "bing"}:
                         content, finish_sentences = await _enforce_finish_sentence_parity(
@@ -1809,7 +1846,7 @@ async def process_hybrid_batch_job(
         )
         _hybrid_gen_latency_ms = int((time.time() - _hybrid_gen_start) * 1000)
 
-        content = response.get("content", "").strip()
+        content = _extract_content_from_schema_response(response, platform, content_type)
         finish_sentences: dict[str, str] | None = None
         if content_type == "description" and platform in {"google", "bing"}:
             content, finish_sentences = await _enforce_finish_sentence_parity(
