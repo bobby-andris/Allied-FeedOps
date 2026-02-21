@@ -1,0 +1,101 @@
+# Product Storytelling Patterns — Runtime Config for Per-Category Prompt Injection
+# Loaded by prompt_builder.py. Inject the matching category block per SKU.
+# Each category: customer scenarios, design hooks, feature-to-benefit, opening patterns.
+# Keep each category to 5-8 lines. Total file under 120 lines.
+
+version: "1.0"
+last_updated: "2026-02-21"
+
+# ---------------------------------------------------------------------------
+# PER-CATEGORY NARRATIVE FRAMEWORKS
+# ---------------------------------------------------------------------------
+
+towel_bars:
+  customer_scenarios:
+    - "Renovator: replacing builder-grade hollow zinc — frame as the upgrade that anchors the whole room"
+    - "Practical: daily family use, wet bath sheets — emphasize solid brass weight and concealed mounting stability"
+    - "Designer: linear element that grounds the vanity wall — describe geometry, proportion, collection detailing"
+  design_hooks: "The towel bar is the longest horizontal line in the room — it defines the visual rhythm. Match to wall proportions: 18-inch for powder rooms, 24-inch for standard baths, 30-inch for master baths."
+  feature_benefit: "Solid brass holds real weight without wobble. Concealed mounting creates an unbroken line. Collection-matched pieces turn a towel bar into a design system."
+  opening_pattern: "Lead with the room moment (reaching for a towel) or the replacement story (finally upgrading from hollow zinc)."
+
+grab_bars:
+  customer_scenarios:
+    - "Aging-in-place: reframing safety as design — emphasize 28 finishes and collection matching, not clinical language"
+    - "Practical: ADA compliance meets daily use — solid brass strength, weight capacity, proper mounting"
+    - "Renovator: adding safety proactively during a remodel — position as smart planning, not reaction"
+  design_hooks: "Grab bars that belong in a design magazine, not a hospital. ADA-compliant in 28 finishes — safety hardware that coordinates with every other fixture in the room."
+  feature_benefit: "Solid brass structural integrity. ADA-compliant dimensions. Concealed mounting for institutional-free aesthetics. Collection-matched so safety doesn't break the design."
+  opening_pattern: "Lead with the reframe: safety and style solve different problems with the same hardware. Never lead with disability or aging."
+
+toilet_paper_holders:
+  customer_scenarios:
+    - "Guest bath: the small detail guests always notice — frame as the finishing touch that signals attention to detail"
+    - "Renovator: replacing wobbly chrome-plated holder — solid brass, concealed mount, matches everything else"
+    - "Designer: the punctuation mark at eye level — describe backplate geometry and collection coherence"
+  design_hooks: "The most-noticed small fixture in any bathroom. Sits at eye level when seated. The backplate design carries the collection's personality in miniature."
+  feature_benefit: "Concealed mounting eliminates visible screws at eye level. Solid brass spring mechanism won't weaken. Collection match ties the smallest detail to the biggest design decisions."
+  opening_pattern: "Lead with the guest-bathroom observation (guests notice) or the detail-matters frame (small fixture, big design signal)."
+
+soap_dishes_dispensers:
+  customer_scenarios:
+    - "Gift buyer: the housewarming gift that makes an impression — frame as thoughtful, design-conscious giving"
+    - "Designer: the countertop accessory that bridges hardware and decor — describe material pairing (glass + brass)"
+    - "Renovator: completing the coordinated bathroom — the piece that ties wall hardware to vanity surface"
+  design_hooks: "Where hardware meets the countertop. Soap dishes bridge vertical wall accessories and horizontal surfaces — the design connector between tile and vanity."
+  feature_benefit: "Tempered glass won't shatter. Solid brass cradle resists humidity corrosion. Collection-matched design extends the wall hardware language to the vanity."
+  opening_pattern: "Lead with the detail-tells-guests frame or the design-connector concept (bridging wall and countertop)."
+
+glass_shelves:
+  customer_scenarios:
+    - "Designer: floating display surface that adds depth without bulk — describe how glass and brass create visual lightness"
+    - "Practical: strong enough for heavy bottles, refined enough for a powder room — emphasize tempered glass + solid brass brackets"
+    - "Renovator: adding storage without cabinetry — open shelving that keeps the room feeling spacious"
+  design_hooks: "Glass shelves add a horizontal plane without visual weight. Tempered glass on solid brass brackets creates the illusion of floating — storage that enhances rather than crowds."
+  feature_benefit: "Tempered glass safety. Solid brass brackets that hold real weight. Collection-matched brackets extend the design system to storage."
+  opening_pattern: "Lead with the floating/lightness visual or the strength-meets-refinement contrast."
+
+robe_hooks:
+  customer_scenarios:
+    - "Practical: the first thing reached after a shower — frame around the tactile moment and solid brass weight"
+    - "Gift buyer: small, meaningful bathroom upgrade — the easiest way to add coordinated design"
+    - "Renovator: replacing the single sad hook behind the door — adding matched hooks as a design element"
+  design_hooks: "Robe hooks are vertical accents — they create rhythm when mounted in pairs or trios. The hook profile (curved, angular, industrial) carries the collection's DNA in its smallest form."
+  feature_benefit: "Solid brass holds heavy robes without loosening. Concealed mounting keeps walls clean. Small footprint, big design impact when collection-matched."
+  opening_pattern: "Lead with the sensory moment (reaching for the robe) or the rhythm concept (pairs creating visual pattern)."
+
+cabinet_hardware:
+  customer_scenarios:
+    - "Renovator: the handshake of the bathroom — knobs and pulls are the first thing touched every day"
+    - "Designer: the tactile layer of bathroom design — where visual meets physical, material quality is felt immediately"
+    - "Practical: daily-use hardware that must feel solid and look good for years — no wobble, no finish wear"
+  design_hooks: "Cabinet hardware is the only bathroom fixture people TOUCH deliberately. The weight of solid brass in your hand communicates quality before you consciously evaluate it."
+  feature_benefit: "Solid brass weight and feel. Won't loosen with daily use. 28 finishes to match wall accessories perfectly — complete room coordination from one brand."
+  opening_pattern: "Lead with the tactile/handshake concept or the coordination pitch (matching wall hardware to cabinet pulls)."
+
+mirrors:
+  customer_scenarios:
+    - "Designer: the frame that ties all finishes together — the mirror frame should echo the hardware finish exactly"
+    - "Gift buyer: a statement piece that elevates the entire vanity wall — substantial, design-forward"
+    - "Renovator: replacing the frameless builder mirror — adding a frame that anchors the whole room"
+  design_hooks: "A framed mirror is the largest single-finish surface in the room. It anchors the vanity wall and validates every other finish decision — when the mirror frame matches the towel bar, the room feels intentional."
+  feature_benefit: "Solid brass frame in the same 28 finishes as every wall accessory. Beveled mirror glass adds depth and light. Tilt mechanism adjusts viewing angle."
+  opening_pattern: "Lead with the coordination payoff (frame matches everything) or the anchor concept (largest finish surface in the room)."
+
+shower_door_hardware:
+  customer_scenarios:
+    - "Practical: where water hits hardest, material matters most — solid brass at the wettest point in the bathroom"
+    - "Renovator: upgrading to frameless glass — the handle and hinge must be worthy of the investment"
+    - "Designer: the transition point between wet and dry zones — hardware that bridges the shower to the room"
+  design_hooks: "Shower door hardware is tested by the most aggressive environment in the bathroom — direct water, steam, temperature swings. Solid brass is the only material that thrives here."
+  feature_benefit: "Solid brass corrosion resistance where it matters most. Concealed hinges maintain frameless glass aesthetics. Collection-matched pulls extend the design into the shower."
+  opening_pattern: "Lead with the hostile-environment frame (wettest point, material matters) or the investment-protection angle (worthy of the glass upgrade)."
+
+shelving_organizers:
+  customer_scenarios:
+    - "Practical: keeping countertops clear without adding bulk — wall-mounted storage that earns its space"
+    - "Designer: functional surfaces that contribute to the room's visual language — not utilitarian add-ons"
+    - "Renovator: adding storage to a bathroom that was designed without enough — retrofitting with style"
+  design_hooks: "Wall-mounted shelving turns dead wall space into functional display. The bracket design carries collection personality — open shelving should feel designed, not improvised."
+  feature_benefit: "Solid brass brackets hold real weight. Multiple tier options for vertical storage. Collection-matched brackets integrate with existing wall accessories."
+  opening_pattern: "Lead with the storage-without-sacrifice concept or the designed-not-improvised distinction."
