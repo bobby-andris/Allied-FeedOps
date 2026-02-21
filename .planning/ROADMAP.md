@@ -92,7 +92,10 @@ Plans:
   2. All 8 YAML configs (brand_voice, quality_rubric, finish_guide, storytelling_patterns, collection_stories, platform_bing, platform_shopify, shopping_intelligence) are loaded by prompt_builder.py and appear in generated prompt logs
   3. A product in any of the top-20 revenue categories receives category-specific guidance in its prompt (not the generic fallback)
   4. The prompt for any SKU includes a customer framing block (who buys this, what problem it solves) and a competitive positioning block
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 24-01-PLAN.md — Rewrite SYSTEM_PROMPT as creative brief, build unified skill loader, wire skills into prompt_builder.py
+- [ ] 24-02-PLAN.md — Expand category guidance to 20+ categories, add customer framing and competitive positioning blocks, remove legacy category guidance
 
 ### Phase 25: Evaluate & Iterate
 **Goal**: The improved pipeline is validated against reality — 10 representative SKUs regenerated with the new prompt architecture, old vs. new descriptions compared side-by-side with human scores, iteration applied where scores fall short, and a test batch published to begin measuring CTR/CVR delta.
