@@ -7,9 +7,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.2 Measurement Infrastructure
-**Current phase:** 21-apply-database-migrations
-**Current plan:** 02 (plan 01 complete)
-**Status:** Ready to plan
+**Current phase:** 22-fix-integration-bugs-doc-gaps
+**Current plan:** 03
+**Status:** In progress
 
 ## Session Log
 
@@ -19,6 +19,7 @@ See: .planning/PROJECT.md
 - 2026-02-21: Plan 20-03 complete — shared prompt_builder.py with build_core_prompt() achieving FIX-01 prompt parity, FIX-02 observable feature flags (PROMPT_CONTRACT_V2 gates Shopping intelligence, SEGMENT_STRATEGY_V1 gates segment guidance), GOOG-04 wired into all generation paths
 - 2026-02-21: Plan 20-04 complete — sku_corrections table (persistent corrections per SKU/platform/content_type), structured feedback UI (tone/emphasis/length controls), save-as-correction checkbox in FeedbackModal. Commits: 2c46e4b1, 963cbafc
 - 2026-02-21: Plan 21-01 complete — Verified migrations 034+035 in live Supabase (all columns/tables/indexes confirmed), renamed deferred migrations (034b_DEFERRED_*, 035b_DEFERRED_*), updated SCHEMA.md publish_events with 5 lineage columns, verified /api/prompt-lineage endpoint. Commits: 89621ecb, 02ce3610
+- 2026-02-21: Plan 22-02 complete — Added requirements-completed frontmatter to 17-02-SUMMARY.md [MODEL-01, MODEL-02] and 19-02/03-SUMMARY.md [MEAS-04], closing v1.2 milestone audit traceability gaps. Commit: 913ec0cb
 
 ## Decisions
 
@@ -39,6 +40,8 @@ See: .planning/PROJECT.md
 - sku_corrections correction lookup filters by platform IN (request.platform, 'all') — 'all' corrections apply to any platform
 - Structured feedback (tone/emphasis/length) merged with free-text into single session_feedback string before apply_feedback_layer()
 - save_as_correction uses upsert with unique index to prevent duplicate correction accumulation
+- MEAS-04 attributed to both 19-02 (API) and 19-03 (dashboard UI) — both plans contributed to requirement completion
+- requirements-completed uses hyphenated key matching established pattern across all SUMMARY files
 
 ## Completed Plans (Phase 20)
 

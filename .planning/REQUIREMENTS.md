@@ -68,8 +68,8 @@
 | GOOG-01 | Phase 17 | Complete |
 | GOOG-02 | Phase 17 | Complete |
 | GOOG-03 | Phase 17 | Complete |
-| MODEL-01 | Phase 17 → Phase 22 | Pending |
-| MODEL-02 | Phase 17 → Phase 22 | Pending |
+| MODEL-01 | Phase 17 → Phase 22 | Complete |
+| MODEL-02 | Phase 17 → Phase 22 | Complete |
 | DIAG-01 | Phase 18 | Complete |
 | DIAG-02 | Phase 18 | Complete |
 | DIAG-03 | Phase 18 | Complete |
