@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 23 of 25 (Foundation — GPT-5.2 bugs + gold standards + rubric)
 **Current plan:** 02 complete — 23-02 gold standards + 10-criterion rubric done
-**Status:** Phase 23 complete — both plans executed, ready for Phase 24
+**Status:** Milestone complete
 **Last activity:** 2026-02-21 — 23-02 executed: 10-criterion rubric, 15 gold standards loaded into feedops_v3
 
 Progress: [████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~10% (v1.3a)
