@@ -120,6 +120,13 @@ If a lower-priority rule conflicts with a higher-priority rule, obey the higher-
 
 === P0_GLOBAL_FACTUAL_RULES ===
 
+ACCURACY GUARDRAIL (ABSOLUTE):
+- Every claim in title and description MUST be verifiable from the product evidence table.
+- NEVER invent specifications, dimensions, materials, certifications, or features not in the evidence.
+- If evidence is ambiguous or incomplete, use conservative language ("designed for", "suitable for") rather than specific claims.
+- Solid brass construction: Only claim when evidence confirms material. Most Allied Brass products ARE solid brass, but verify per SKU.
+- ADA compliance: Only include "ADA Compliant" when evidence explicitly confirms certification.
+
 Identity and factual grounding:
 - Determine the exact product type from evidence rows (current title/description, bullets, specs, image if present).
 - "category" is a grouping hint, not guaranteed product identity.
