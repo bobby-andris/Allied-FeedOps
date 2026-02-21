@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 19 of 20 (Measurement Infrastructure)
-Plan: 2 of 4 in current phase
-Status: In progress — 19-02 complete (bottleneck classifier + prompt lineage API routes)
-Last activity: 2026-02-21 — Phase 19 Plan 02 complete (POST /api/bottleneck/classify, GET /api/bottleneck/status, GET /api/prompt-lineage)
+Plan: 3 of 4 in current phase
+Status: In progress — 19-03 complete (BottleneckBadge + PromptLineagePanel components + /monitoring/bottleneck diagnostic page)
+Last activity: 2026-02-21 — Phase 19 Plan 03 complete (dashboard UI: bottleneck badge, prompt lineage panel, bottleneck diagnostic page)
 
 Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans complete)
 
@@ -31,6 +31,7 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 | Phase 18-diagnosis-establish-ground-truth P02 | 4 | 2 tasks | 4 files |
 | Phase 19-measurement-infrastructure P02 | 4 | 2 tasks | 3 files |
 | Phase 19-measurement-infrastructure P01 | 16 | 2 tasks | 4 files |
+| Phase 19-measurement-infrastructure P03 | 4 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -58,6 +59,9 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 - [Phase 19-02]: maybeSingle() for optional lookups in prompt-lineage to avoid 406 errors on missing rows
 - [Phase 19-01]: capture_flag_snapshot() captures flags at call time (not import time) — avoids warm container stale state in Cloud Run
 - [Phase 19-01]: Migration 035 created but needs manual application via Supabase SQL Editor — dev machine has no direct postgres access
+- [Phase 19-03]: PromptLineagePanel defaults to collapsed state to avoid cluttering SKU review with technical metadata
+- [Phase 19-03]: Compare Versions in PromptLineagePanel is strictly opt-in (button to reveal), not default view
+- [Phase 19-03]: /monitoring/bottleneck is a dedicated route (not third tab) — override form complexity warrants its own page
 
 ### Key Context Carried Forward
 
@@ -96,5 +100,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 19-01-PLAN.md (measurement infrastructure schema migration 035 + Python flag capture)
+Stopped at: Completed 19-03-PLAN.md (dashboard UI: BottleneckBadge, PromptLineagePanel, /monitoring/bottleneck diagnostic page)
 Resume file: None
