@@ -78,7 +78,10 @@
   3. The system prompt and all injected config sections use XML tags, not === headers — visually verifiable in prompt logs
   4. At least 15 gold standard examples exist in the prompt_templates table, covering towel bars, grab bars, shower accessories, mirrors, and at least 3 other categories
   5. Running a quality evaluation on a batch of SKUs returns a score breakdown rewarding differentiation and emotional resonance, not just rule compliance
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Fix all 5 GPT-5.2 integration bugs (temperature/reasoning conflict, default reasoning_effort, json_schema strict mode, cache retention, XML tags)
+- [ ] 23-02-PLAN.md — Load 15 gold standards into DB, replace self_score with 10-criterion rubric, create batch evaluation script
 
 ### Phase 24: Prompt Architecture
 **Goal**: The entire generation prompt is rewritten from a compliance document into a creative brief — SYSTEM_PROMPT rebuilt with XML structure and positive examples, all 8 runtime YAML configs loaded and injected, category guidance expanded to cover the top-20 revenue categories, and customer use case and competitive positioning evidence added to every prompt.
@@ -112,7 +115,7 @@
 | 05-08 | v1.0 | 16/16 | Complete | 2026-02-13 |
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
-| 23. Foundation | v1.3a | 0/TBD | Not started | - |
+| 23. Foundation | v1.3a | 0/2 | Planned | - |
 | 24. Prompt Architecture | v1.3a | 0/TBD | Not started | - |
 | 25. Evaluate & Iterate | v1.3a | 0/TBD | Not started | - |
 
