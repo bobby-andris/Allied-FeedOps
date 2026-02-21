@@ -18,6 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY pyproject.toml .
 
+# Copy Claude Code skills for runtime prompt enrichment
+# skill_loader.py looks for .claude/skills/ relative to /app (Cloud Run path)
+COPY .claude/skills /app/.claude/skills
+
 # Create placeholder README.md for pyproject.toml (actual file excluded by .gcloudignore)
 RUN echo "# FeedOps Pipeline" > README.md
 

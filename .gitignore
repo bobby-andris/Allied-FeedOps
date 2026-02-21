@@ -88,7 +88,7 @@ Library/
 # Agent skills (installed locally, not tracked)
 .agent/skills/
 .agents/skills/
-.claude/skills/
+# .claude/skills/ — tracked in git so Cloud Build can copy to Cloud Run container
 .cursor/skills/
 
 # Claude checkpoints (session-specific, not tracked)

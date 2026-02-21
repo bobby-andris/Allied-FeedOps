@@ -35,6 +35,8 @@ dashboard/
 tests/
 docs/
 *.md
+# Allow skill files — needed for Cloud Run container skill injection
+!.claude/skills/**
 
 # Data files (product data comes from Supabase - THIS IS KEY!)
 data/
