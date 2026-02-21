@@ -129,8 +129,9 @@ Plans:
   2. Migration 035 (measurement tables + columns) applied to live Supabase — `regeneration_history` has `feature_flags_active`/`latency_ms`/`tokens_used`/`cost_usd` columns; `prompt_version_aliases`, `sku_bottleneck_classifications`, `gmc_product_status` tables exist
   3. `/api/prompt-lineage` returns non-empty lineage for published SKUs with prompt hashes
   4. SCHEMA.md updated with all new columns and tables from migrations 034+035
+**Plans**: 1 plan
 Plans:
-- [ ] 21-01-PLAN.md — Apply migrations 034+035 via Supabase SQL Editor + verify
+- [ ] 21-01-PLAN.md — Apply migrations 034+035 via Supabase MCP, verify lineage endpoint, update SCHEMA.md, rename deferred migrations
 
 ### Phase 22: Fix Integration Bugs & Close Documentation Gaps
 **Goal**: Fix integration bugs found during audit and close remaining documentation gaps to bring all requirements to satisfied status
