@@ -1,0 +1,32 @@
+# Quality Scoring Rubric — replaces 6-criterion self_score in CANDIDATE_SCHEMA
+# Injected into LLM prompt for self-scoring. Measures click-worthiness, not compliance.
+# Skill reference: .claude/skills/quality-evaluation/SKILL.md
+
+version: "1.0"
+last_updated: "2026-02-21"
+
+criteria:
+  hook_quality:       { weight: 0.15, desc: "Does the first sentence create curiosity? 0=fragment/keyword dump, 5=correct but generic, 10=specific+engaging opener" }
+  product_specificity: { weight: 0.15, desc: "Could this ONLY describe this exact product? 0=any competitor's product, 5=mentions brand/collection generically, 10=unmistakably this product" }
+  competitive_diff:   { weight: 0.12, desc: "Why THIS over a cheaper alternative? 0=none, 5=mentions solid brass generically, 10=advantage woven naturally into narrative" }
+  keyword_integration: { weight: 0.10, desc: "Are keywords natural or stuffed? 0=stuffed/missing, 5=present but awkward, 10=invisible integration" }
+  customer_scenario:  { weight: 0.10, desc: "Does it connect to a real buying situation? 0=spec dump, 5=generic 'upgrade your bathroom', 10=specific scenario that resonates" }
+  emotional_resonance: { weight: 0.10, desc: "Does it create desire? 0=database export, 5=pleasant but forgettable, 10=genuine want" }
+  factual_accuracy:   { weight: 0.10, desc: "All claims traceable to evidence? 10=yes, 0=fabricated specs" }
+  platform_compliance: { weight: 0.08, desc: "Meets platform format/length rules? 10=perfect, 5=minor issues, 0=wrong format" }
+  finish_integration: { weight: 0.05, desc: "Is finish a design choice or afterthought? 0=raw placeholder, 5=mentioned generically, 10=woven into narrative" }
+  variety_score:      { weight: 0.05, desc: "Different from other catalog descriptions? 0=identical pattern, 5=different words same skeleton, 10=unique structure" }
+
+scoring_rules:
+  - "Score each criterion 0-10 independently. Do NOT inflate to hit a target."
+  - "A description that follows all rules but is generic and forgettable should score 50-60, not 80+."
+  - "Hook quality: read ONLY the first sentence — would a shopper click or scroll past?"
+  - "Specificity test: could a competitor copy-paste this for their product? If yes, score ≤5."
+  - "Keyword test: read aloud — any phrase that sounds inserted for SEO rather than the reader? Deduct."
+
+grade_thresholds:
+  reject: 59       # Block from approval, regenerate
+  needs_work: 74   # Flag for revision
+  acceptable: 84   # OK for low-priority SKUs
+  good: 94         # Approve, near gold-standard
+  excellent: 100   # Flag as gold standard example
