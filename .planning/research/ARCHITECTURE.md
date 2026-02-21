@@ -1,783 +1,505 @@
-# Architecture Research: Google Ads API Backfill Systems
+# Architecture Research
 
-**Domain:** Data backfill and monitoring for Google Ads API
-**Researched:** 2026-02-11
-**Confidence:** HIGH
+**Domain:** Feed optimization diagnostic layer — impact debugging and tracing for existing content generation/publishing pipeline
+**Researched:** 2026-02-20
+**Confidence:** HIGH (based on direct code inspection, not inferred)
+
+---
 
 ## Standard Architecture
 
-### System Overview
+### System Overview (Existing)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Application Layer                         │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
-│  │ Dashboard  │  │  Batch     │  │  Manual    │            │
-│  │  Trigger   │  │ Scheduler  │  │  Scripts   │            │
-│  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘            │
-│        │                │                │                   │
-├────────┴────────────────┴────────────────┴───────────────────┤
-│                    Job Management Layer                      │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │          Job Queue + Status Tracking                  │   │
-│  │  (Database: job_id, status, progress, errors)        │   │
-│  └───────────────────┬──────────────────────────────────┘   │
-│                      │                                       │
-├──────────────────────┴───────────────────────────────────────┤
-│                  Processing Layer                            │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │ Worker 1 │  │ Worker 2 │  │ Worker 3 │  │ Worker N │    │
-│  │ (Thread/ │  │ (Thread/ │  │ (Thread/ │  │ (Thread/ │    │
-│  │  Process)│  │  Process)│  │  Process)│  │  Process)│    │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘    │
-│       │             │             │             │           │
-├───────┴─────────────┴─────────────┴─────────────┴───────────┤
-│                  Google Ads API Layer                        │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  GoogleAdsService.SearchStream + Rate Limiter        │   │
-│  │  - Token Bucket throttling                           │   │
-│  │  - Exponential backoff + jitter                      │   │
-│  │  - Partial failure handling                          │   │
-│  └───────────────────┬──────────────────────────────────┘   │
-│                      │                                       │
-├──────────────────────┴───────────────────────────────────────┤
-│                   Storage Layer                              │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
-│  │  Postgres  │  │   Cache    │  │   Logs     │            │
-│  │ (Supabase) │  │  (Redis)   │  │ (GCP Log)  │            │
-│  └────────────┘  └────────────┘  └────────────┘            │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     Dashboard (Next.js / Vercel)                 │
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │ SKU Review   │  │  Batches     │  │  Monitoring / Perf   │   │
+│  │   Pages      │  │   Pages      │  │      Pages           │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘   │
+│         │                 │                      │               │
+│  ┌──────▼─────────────────▼──────────────────────▼───────────┐  │
+│  │              Next.js API Routes (/api/*)                   │  │
+│  │  /regenerate  /publish/google  /monitoring/performance-    │  │
+│  │  /batches     /publish/bing    delta  /stats  /approvals   │  │
+│  └──────┬─────────────────────────────────────────────────────┘  │
+└─────────┼───────────────────────────────────────────────────────-┘
+          │ HTTP POST (FEEDOPS_PIPELINE_URL)
+          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Python Pipeline (Cloud Run / FastAPI)               │
+│                                                                   │
+│  Endpoints:                                                       │
+│  /regenerate  /optimize-sku  /batch-optimize  /hybrid-generate   │
+│  /performance/*  /search-insights/sync  /backfill/*              │
+│                                                                   │
+│  ┌──────────────┐  ┌────────────────┐  ┌───────────────────┐    │
+│  │  generator   │  │ segment_strat  │  │  observability    │    │
+│  │  evidence    │  │ feature_flags  │  │  metrics_registry │    │
+│  │  prompts     │  │ runtime_ctrl   │  │  log_event()      │    │
+│  └──────────────┘  └────────────────┘  └───────────────────┘    │
+└──────────────────────────────┬──────────────────────────────────-┘
+                               │
+          ┌────────────────────┼────────────────────────┐
+          │                    │                        │
+          ▼                    ▼                        ▼
+┌──────────────┐   ┌─────────────────────┐  ┌──────────────────────┐
+│   Supabase   │   │    Google Sheets     │  │  Google Ads API /    │
+│              │   │ Supplemental Feed    │  │  GMC Merchant API    │
+│  Tables:     │   │                     │  │                      │
+│  generated_  │   │  Rows updated by    │  │  Source of search    │
+│  content     │   │  gmc_offer_id (28   │  │  terms, performance  │
+│  publish_    │   │  variants per SKU)  │  │  baselines,          │
+│  events      │   │                     │  │  snapshots           │
+│  performance_│   └──────────┬──────────┘  └──────────────────────┘
+│  baselines   │              │
+│  perf_       │              ▼
+│  snapshots   │   ┌─────────────────────┐
+│  regen_hist  │   │   Google Merchant   │
+│  ...32 tables│   │      Center (GMC)   │
+└──────────────┘   └─────────────────────┘
 ```
 
-### Component Responsibilities
+---
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| Job Manager | Creates jobs, tracks status, aggregates progress | FastAPI endpoint + Supabase table (`batch_generation_jobs`, `search_query_sync_jobs`) |
-| Worker Pool | Executes API calls, handles retries, stores results | Python threads with dedicated asyncio event loops (`run_async_in_thread()`) |
-| Rate Limiter | Enforces API quotas, prevents throttling | Token bucket algorithm (built into google-ads client) |
-| Result Store | Persists metrics, handles upserts on conflict | Supabase tables with unique constraints |
-| Monitor | Tracks latency, error rates, completion status | Cloud Logging + metrics (percentiles, not just averages) |
+### The Two Generation Paths (Critical Distinction)
 
-## Recommended Project Structure
+There are **two separate code paths** that generate content. This is the primary diagnostic complexity and the most important finding in this research.
 
 ```
-src/
-├── feedops/
-│   ├── api/
-│   │   ├── main.py                      # FastAPI endpoints
-│   │   ├── search_insights.py           # Search term sync router
-│   │   └── performance_baseline.py      # Baseline capture router
-│   ├── integrations/
-│   │   ├── google_ads_search_terms.py   # SearchTermsClient
-│   │   ├── google_ads_performance.py    # Performance fetching
-│   │   └── keyword_planner.py           # KeywordPlannerClient
-│   ├── db/
-│   │   └── supabase_client.py           # Database connection
-│   └── observability/
-│       ├── metrics.py                   # Prometheus-style metrics
-│       └── logging.py                   # Structured logging
-scripts/
-└── backfill-performance-baselines.py    # Standalone backfill script
+Path A: Single-SKU regeneration (ACTIVE — used by SKU review UI)
+──────────────────────────────────────────────────────────────────
+UI click → /api/regenerate (route.ts, thin proxy)
+         → Python Cloud Run /regenerate
+         → _build_generation_user_prompt() in main.py
+           [NOT generator.py — segment_strategy NOT used here]
+         → _enforce_finish_sentence_parity()
+         → Supabase: generated_content upsert + regeneration_history insert
+
+Path B: Batch/optimize generation (used by /batch-optimize, /hybrid-generate)
+──────────────────────────────────────────────────────────────────────────────
+/api/regenerate/batch or /api/sku-selection/generate-hybrid
+         → Python /batch-optimize or /hybrid-generate
+         → generator.py: build_split_prompt()
+           [Includes: segment_strategy, keyword_plan, evidence_table, gold_examples]
+         → generate_candidates() → parse_candidate_response()
+         → Saves Candidate model (multi-field: google_title, bing_title, etc.)
+
+Path C: Legacy TypeScript batch regeneration (NOT for single-SKU)
+──────────────────────────────────────────────────────────────────
+Called ONLY by: /api/regenerate/batch/route.ts
+Calls OpenAI directly, has own evidence builder, own prompt templates
+This path bypasses the Python pipeline entirely
 ```
 
-### Structure Rationale
+**Diagnostic implication:** Feature flags PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, SEGMENT_STRATEGY_V1 are only evaluated in Path B (generator.py). Single-SKU regeneration (Path A, the most-used path) does NOT invoke generator.py at all. It uses `_build_generation_user_prompt()` in main.py which calls neither feature flags nor segment strategy.
 
-- **api/**: HTTP entrypoints with CORS for dashboard calls
-- **integrations/**: Isolated API clients with retry logic and caching
-- **db/**: Single source for connection pooling and transaction management
-- **observability/**: Centralized monitoring to expose latency/error patterns
+---
+
+### Feature Flag Observability Gap (Confirmed by Code Inspection)
+
+```
+Flag                   | Defined In          | Default | Active Call Sites in Live Paths
+-----------------------|---------------------|---------|--------------------------------
+SEGMENT_STRATEGY_V1    | feature_flags.py    | True    | generator.py only (Path B)
+                       |                     |         | NOT in main.py /regenerate (Path A)
+PROMPT_CONTRACT_V2     | feature_flags.py    | True    | NONE FOUND in main.py or generator.py
+                       |                     |         | Flag exists, no active call sites
+INTENT_CURATOR_V1      | feature_flags.py    | True    | NONE FOUND in main.py or generator.py
+                       |                     |         | Flag exists, no active call sites
+FEEDOPS_DISABLE_       | runtime_controls.py | False   | main.py /regenerate (kill switch)
+  GENERATION           |                     |         | Separate from feature_flags.py
+```
+
+**Key finding:** PROMPT_CONTRACT_V2 and INTENT_CURATOR_V1 appear to be defined but never called in any production code path. This needs static verification (grep) before drawing final conclusions.
+
+---
+
+### Content Propagation Chain
+
+```
+1. generation_timestamp set → candidate_content saved to generated_content
+2. User approves → approved_content set (immutable copy in same row)
+3. Batch created → batch_sku_assignments links master_sku to publish_batch
+4. Publish triggered → /api/publish/google reads approved_content
+5. Variant expansion → 28 gmc_offer_ids per master_sku (from variant_index)
+6. Google Sheets update → rows matched by gmc_offer_id
+7. GMC feed sync → Google Sheets → GMC (NOT Shopify auto-sync; manual feed)
+8. Auction signals reflect new content (2-4 week lag in Google Ads performance)
+
+Known breakpoints where content silently stops propagating:
+- Step 2: No approved_content → publish reads nothing
+- Step 5: variant_index gaps → some gmc_offer_ids missing → partial expansion
+- Step 6: Case mismatch (lowercase shopify_us_ vs required uppercase shopify_US_)
+           → rows append as duplicates instead of updating existing rows
+- Step 7: GMC feed sync delay — can be 24-72 hours after Sheets update
+- Step 8: Content relevance signal takes 2-4 weeks to show in auction metrics
+```
+
+---
+
+## Component Responsibilities
+
+| Component | Responsibility | Status |
+|-----------|----------------|--------|
+| `main.py /regenerate` | Single-SKU content generation (Path A) | ACTIVE |
+| `generator.py` | Multi-SKU batch content generation (Path B) | ACTIVE for batch only |
+| `feature_flags.py` | Runtime flag definitions (SEGMENT_STRATEGY, etc.) | Defined; partial wiring |
+| `runtime_controls.py` | Kill switches (FEEDOPS_DISABLE_GENERATION) | ACTIVE |
+| `observability/__init__.py` | Structured log events with request_id | ACTIVE |
+| `observability/metrics.py` | In-memory Prometheus metrics | ACTIVE |
+| `core.ts` | Legacy TypeScript generation (Path C) | ACTIVE for batch regen only |
+| `route.ts /api/regenerate` | Thin proxy to Python pipeline | ACTIVE |
+| `google-sheets.ts` | Publish approved_content to supplemental feed | ACTIVE |
+| `publish_events` table | Audit log with content snapshots | ACTIVE |
+| `performance_impact_scores` table | Diff-in-diff impact calculations | ACTIVE (pipeline fills it) |
+
+---
+
+## Recommended Project Structure (Diagnostic Layer — Additive Only)
+
+The diagnostic layer is additive. No changes to existing generation paths until root cause is confirmed.
+
+```
+src/feedops/
+├── diagnostics/                  # NEW — diagnostic utilities
+│   ├── __init__.py
+│   ├── coverage_queries.py       # NEW — coverage funnel SQL queries (read-only)
+│   └── flag_inspector.py         # NEW — call-site audit + runtime flag state
+│
+├── api/
+│   ├── diagnostics.py            # NEW — /diagnostics/* FastAPI router
+│   └── main.py                   # EXISTING — minor: add generation_path to log_event calls
+│
+└── pipeline/
+    └── feature_flags.py          # EXISTING — no changes in diagnostic phase
+
+dashboard/src/app/api/
+└── diagnostics/
+    ├── coverage/route.ts         # NEW — SKU coverage funnel endpoint
+    └── flag-status/route.ts      # NEW — live feature flag state (calls Cloud Run)
+```
+
+---
 
 ## Architectural Patterns
 
-### Pattern 1: Job-Based Backfill Architecture
+### Pattern 1: Coverage Query (Zero-Risk Diagnostic)
 
-**What:** Async job pattern where API creates job record, returns job_id immediately, then processes in background thread
+**What:** All coverage data already exists in Supabase. Write diagnostic SQL queries joining existing tables to answer "of 2,784 SKUs, how many have content at each funnel stage?" No new data collection.
 
-**When to use:**
-- Backfilling 2,784 SKUs (multi-minute/hour operations)
-- User-facing endpoints that can't block on completion
-- Operations requiring progress tracking
+**When to use:** Phase 1 of diagnostics — before any code changes, answer coverage question.
 
-**Trade-offs:**
-- ✅ Non-blocking: User gets immediate response
-- ✅ Resumable: Job state persisted, can recover from crashes
-- ✅ Observable: Progress updates, error tracking
-- ❌ Complexity: Requires job table, status polling, background worker management
-- ❌ Deployment risk: Workers terminate during Cloud Run container replacement (expected behavior)
+**Trade-offs:** Read-only, zero risk. Immediate answer. No deployment needed.
 
 **Example:**
-```python
-# Job creation endpoint (returns immediately)
-@app.post("/search-insights/sync")
-async def create_sync_job():
-    job_id = str(uuid.uuid4())
-
-    # Store job record
-    supabase.table("search_query_sync_jobs").insert({
-        "job_id": job_id,
-        "status": "running",
-        "total_skus": 2784,
-        "processed_skus": 0
-    }).execute()
-
-    # Start background worker
-    run_async_in_thread(sync_job_worker, job_id=job_id)
-
-    return {"job_id": job_id}
-
-# Background worker (async function in separate thread)
-async def sync_job_worker(job_id: str):
-    for sku in skus:
-        try:
-            data = fetch_search_terms(sku)
-            save_to_db(data)
-            update_progress(job_id, processed_count)
-        except Exception as e:
-            log_error(job_id, sku, e)
-
-    update_status(job_id, "completed")
-```
-
-### Pattern 2: Campaign-Level Query Strategy
-
-**What:** Fetch products by campaign first, then search terms with campaign_id, join via campaign association
-
-**When to use:**
-- Product-level filtering not directly supported in search_term_view
-- Need variant-level granularity (GMC offer IDs)
-- Multi-product campaigns
-
-**Trade-offs:**
-- ✅ Workaround for API limitation (search_term + product_item_id not both supported)
-- ✅ Provides campaign context for debugging
-- ❌ Two-query pattern (shopping_performance_view → search_term_view)
-- ❌ Potential data staleness if campaign products change between queries
-
-**Example:**
-```python
-# Step 1: Get products by campaign
-query1 = """
+```sql
+-- Coverage funnel (all data exists today, no new tables needed)
 SELECT
-    segments.product_item_id,
-    campaign.id,
-    metrics.impressions
-FROM shopping_performance_view
-WHERE segments.date DURING LAST_30_DAYS
-    AND campaign.advertising_channel_type = 'SHOPPING'
-    AND metrics.impressions > 0
-ORDER BY metrics.impressions DESC
-LIMIT 50000
-"""
-
-# Step 2: Get search terms by campaign
-query2 = """
-SELECT
-    search_term_view.search_term,
-    campaign.id,
-    metrics.impressions,
-    metrics.clicks
-FROM search_term_view
-WHERE segments.date DURING LAST_{days}_DAYS
-    AND campaign.advertising_channel_type = 'SHOPPING'
-ORDER BY metrics.impressions DESC
-"""
-
-# Step 3: Join in-memory
-campaign_products = {campaign_id: [offer_ids]}
-for search_term in search_terms:
-    offer_ids = campaign_products.get(search_term.campaign_id, [])
-    # Associate search term with product variants
+  (SELECT COUNT(DISTINCT master_sku) FROM variant_index)
+    AS total_skus,
+  (SELECT COUNT(DISTINCT master_sku) FROM generated_content
+   WHERE candidate_content IS NOT NULL)
+    AS skus_with_generated_content,
+  (SELECT COUNT(DISTINCT master_sku) FROM generated_content
+   WHERE approved_content IS NOT NULL)
+    AS skus_with_approved_content,
+  (SELECT COUNT(DISTINCT master_sku) FROM publish_events
+   WHERE platform = 'google')
+    AS skus_published_to_google,
+  (SELECT COUNT(DISTINCT master_sku) FROM publish_events
+   WHERE platform = 'google'
+     AND published_at > NOW() - INTERVAL '90 days')
+    AS skus_published_google_last_90d;
 ```
 
-### Pattern 3: Exponential Backoff with Jitter
+### Pattern 2: Trace-Passthrough (Non-Breaking Path Tracing)
 
-**What:** Retry transient errors with exponentially increasing delays plus randomization
+**What:** Add a `x-diagnostic-trace: true` request header. When present, generation paths emit extra structured log fields identifying which code path executed, which flags were evaluated, and what evidence was assembled. Generation logic is unchanged.
 
-**When to use:**
-- All Google Ads API calls
-- Errors: `UNAVAILABLE`, `DEADLINE_EXCEEDED`, `INTERNAL`, `TRANSIENT_ERROR`, `RATE_LIMIT_EXCEEDED`
+**When to use:** Phase 3 — confirming which code path executed for a specific SKU request.
 
-**Trade-offs:**
-- ✅ Prevents retry storms (jitter prevents synchronized retries)
-- ✅ Respects API rate limits
-- ✅ Built into google-ads Python client (automatic)
-- ❌ Increases latency for failed requests
-- ❌ Requires max retry limit to prevent infinite loops
+**Trade-offs:** Slight overhead only on traced requests. No persistent storage needed for one-off checks.
 
 **Example:**
 ```python
-import random
-import time
+# In main.py /regenerate endpoint — minimal addition
+trace_enabled = request.headers.get("x-diagnostic-trace") == "true"
 
-def exponential_backoff_with_jitter(
-    func,
-    max_retries=5,
-    base_delay=5.0,
-    max_delay=60.0
-):
-    """Retry function with exponential backoff + jitter."""
-    for attempt in range(max_retries):
-        try:
-            return func()
-        except GoogleAdsException as e:
-            # Only retry transient errors
-            if e.error.code().name not in [
-                'UNAVAILABLE', 'DEADLINE_EXCEEDED', 'INTERNAL'
-            ]:
-                raise
-
-            if attempt == max_retries - 1:
-                raise
-
-            # Calculate delay: base * 2^attempt + jitter
-            delay = min(base_delay * (2 ** attempt), max_delay)
-            jitter = random.uniform(0, delay * 0.1)  # ±10% jitter
-
-            logger.warning(f"Retry {attempt+1}/{max_retries} after {delay+jitter:.2f}s")
-            time.sleep(delay + jitter)
+if trace_enabled:
+    log_event(
+        logger,
+        logging.INFO,
+        "diagnostic.path_entry",
+        endpoint="regenerate",
+        generation_path="main.py/_build_generation_user_prompt",
+        # This is NOT generator.py — segment_strategy is not called here
+        segment_strategy_called=False,
+        feature_flags_evaluated=[],  # Empty — none called in this path
+        evidence_builder="main.py/build_evidence_table",
+    )
 ```
 
-### Pattern 4: Pagination with SearchStream
+### Pattern 3: Static Flag Call-Site Audit
 
-**What:** Use `GoogleAdsService.search_stream()` for large result sets, client library auto-paginates
+**What:** Grep Python source files to find every location where each feature flag function is called. Establish ground truth for which flags affect which generation paths.
 
-**When to use:**
-- Result sets > 10,000 rows
-- Performance queries with 30+ day date ranges
-- Search term queries across many campaigns
+**When to use:** Phase 2 — before changing any code, confirm which flags are actually wired.
 
-**Trade-offs:**
-- ✅ Handles pagination automatically (no manual token management)
-- ✅ Single operation quota cost (regardless of pages)
-- ✅ Server-side caching speeds up subsequent pages
-- ❌ Query must be identical to leverage cache
-- ❌ First page slower than subsequent pages
+**Trade-offs:** Zero risk. 30 minutes. Answers the flag question definitively.
 
 **Example:**
-```python
-from google.ads.googleads.client import GoogleAdsClient
+```bash
+# Audit all flag call sites
+grep -rn \
+  "is_prompt_contract_v2_enabled\|is_intent_curator_v1_enabled\|is_segment_strategy_v1_enabled" \
+  src/feedops/ --include="*.py"
 
-client = GoogleAdsClient.load_from_storage()
-ga_service = client.get_service("GoogleAdsService")
-
-query = """
-SELECT
-    search_term_view.search_term,
-    metrics.impressions
-FROM search_term_view
-WHERE segments.date DURING LAST_30_DAYS
-"""
-
-# SearchStream automatically paginates (10k rows/page)
-stream = ga_service.search_stream(customer_id="1234567890", query=query)
-
-results = []
-for batch in stream:  # Each batch = 1 page
-    for row in batch.results:
-        results.append(row)
-
-# Total: 1 operation quota cost regardless of page count
+# Expected output (based on code inspection):
+# src/feedops/pipeline/generator.py:36: from feedops.pipeline.feature_flags import is_segment_strategy_v1_enabled
+# src/feedops/pipeline/generator.py:101: enabled=is_segment_strategy_v1_enabled()
+# (No results for PROMPT_CONTRACT_V2 or INTENT_CURATOR_V1 in live paths)
 ```
 
-### Pattern 5: Variant-Level Caching
+### Pattern 4: Propagation Diff (DB Content vs Live Sheet)
 
-**What:** Cache variant_index lookups (gmc_offer_id → master_sku/finish) in-memory during batch operations
+**What:** Compare `approved_content` in Supabase against content currently in Google Sheets for a sample of recently published SKUs.
 
-**When to use:**
-- Processing thousands of search terms/performance records
-- Same variants referenced repeatedly
-- Batch jobs with predictable SKU sets
+**When to use:** Phase 4 — after confirming content is approved and published_events exists, verify it actually reached Google Sheets.
 
-**Trade-offs:**
-- ✅ Reduces database queries (2,784 SKUs × N records → 2,784 cache misses max)
-- ✅ Speeds up processing (memory lookup vs network round-trip)
-- ❌ Memory footprint (minimal: ~500KB for 2,784 variants)
-- ❌ Stale data risk if variant_index changes during processing (rare)
+**Trade-offs:** Requires Google Sheets API read (already available). Run as one-off diagnostic, not continuous. 10-20 SKU sample is sufficient.
 
-**Example:**
-```python
-class SearchTermsClient:
-    def __init__(self):
-        self._variant_cache: dict[str, dict] = {}
+**Implementation:** Use existing `buildColumnMap()` + read path from `google-sheets.ts` to fetch rows by gmc_offer_id, compare titles/descriptions vs Supabase `approved_content`.
 
-    def get_variant_info(self, gmc_offer_id: str) -> dict:
-        """Cache variant lookups during batch processing."""
-        if gmc_offer_id in self._variant_cache:
-            return self._variant_cache[gmc_offer_id]
-
-        # Cache miss: query database
-        result = supabase.table("variant_index").select(
-            "master_sku, finish, finish_code"
-        ).eq("gmc_offer_id", gmc_offer_id).limit(1).execute()
-
-        info = result.data[0] if result.data else {}
-        self._variant_cache[gmc_offer_id] = info
-        return info
-```
+---
 
 ## Data Flow
 
-### Backfill Request Flow
+### Request Flow: Single-SKU Regeneration (Path A)
 
 ```
-[User/Scheduler]
-    ↓ POST /search-insights/sync
-[API Endpoint] → Create job record in search_query_sync_jobs
-    ↓ run_async_in_thread()
-[Background Worker]
-    ↓ Query variant_index for SKU list
-    ↓ for each SKU chunk (batch_size=50):
-[Worker] → Fetch products by campaign
-    ↓ GoogleAdsService.search_stream(shopping_performance_view)
-[Worker] → Fetch search terms by campaign
-    ↓ GoogleAdsService.search_stream(search_term_view)
-[Worker] → Join via campaign_id, lookup variant info
-    ↓ Dedupe by (query_text, gmc_offer_id)
-[Worker] → Upsert to search_queries table
-    ↓ Update job progress
-[Worker] → Aggregate by master_sku → search_queries_by_master_sku
-    ↓
-[Job Complete] → Update status to 'completed'
+Dashboard UI (SKU review page)
+    ↓ POST /api/regenerate {master_sku, content_type, platform, mode}
+Next.js route.ts (validates, calls ensureSkuData() non-blocking)
+    ↓ POST {PIPELINE_URL}/regenerate {master_sku, content_type, platform, feedback, finish_code}
+Python main.py /regenerate endpoint
+    ↓ ensure_generation_enabled() [checks FEEDOPS_DISABLE_GENERATION kill switch]
+    ↓ resolve_canonical_master_sku()
+    ↓ load_parent_sku_from_supabase()
+    ↓ build_evidence_table() → format_evidence_markdown()
+    ↓ _build_generation_user_prompt()  [NOT generator.py; segment_strategy NOT called]
+    ↓ get_provider().generate()        [OpenAI via provider abstraction]
+    ↓ _enforce_finish_sentence_parity() [for google/bing descriptions]
+    ↓ supabase.generated_content.upsert()
+    ↓ supabase.regeneration_history.insert()
+    ↓ Returns {content, prompt_hash, model, finish_sentences}
+route.ts saves candidate_content + generation metadata
+    ↓ Returns {success, content, version, pipeline: "python"}
 ```
 
-### Performance Baseline Capture Flow
+### Coverage Funnel (All Data in Supabase Today)
 
 ```
-[User/Scheduler]
-    ↓ POST /performance/capture-baseline?master_sku=920D-6
-[API Endpoint] → Check if baseline exists + age
-    ↓ if missing or stale (>60 days):
-[Baseline Capture] → Get all gmc_offer_ids for master_sku
-    ↓ for each platform (google, bing, shopify):
-[Client] → Query performance metrics
-    ↓ GoogleAdsService.search_stream(shopping_performance_view)
-    ↓ WHERE segments.date BETWEEN start AND end
-    ↓      AND segments.product_item_id = offer_id
-[Client] → Aggregate: impressions, clicks, conversions, cost, ROAS
-    ↓
-[Storage] → Upsert to performance_baselines
-    ↓ on_conflict=(master_sku, platform)
-[Response] ← Return baseline metrics
+variant_index: 2,784 master_skus (total catalog)
+    ↓ (unknown without query)
+generated_content: ? master_skus with candidate_content
+    ↓ (requires user approval action)
+generated_content: ? master_skus with approved_content
+    ↓ (requires batch publish action)
+publish_events: ? master_skus with at least one google publish event
+    ↓ (variant expansion: 28 gmc_offer_ids per master_sku)
+Google Sheets: ? rows with updated content (not tracked in Supabase)
+    ↓ (24-72hr GMC sync lag)
+Google Ads: performance metrics reflect new content (2-4 week signal lag)
 ```
 
-### Key Data Flows
+### Performance Impact Signal Flow
 
-1. **Job Status Updates:** Worker → Supabase → Dashboard polling (every 2-5s)
-2. **Error Logging:** Worker exception → Cloud Logging → Alert policy trigger
-3. **Metric Collection:** All API calls → Token bucket check → Rate limit enforcement
-4. **Cache Warming:** First query → API response → In-memory cache → Subsequent queries
+```
+publish_events.published_at (Supabase)
+    → performance_baselines (30d pre-publish metrics, captured before publish)
+    → performance_snapshots (post-publish tracking, days_since_publish calculated)
+    → performance_impact_scores (diff-in-diff, computed by /performance/compute-impact)
+    → Dashboard /api/monitoring/performance-delta reads scorecards
+    → Labels each publish_event as positive/negative/neutral
+```
+
+---
+
+## Diagnostic Data Availability Assessment
+
+### What Already Exists in Supabase (No New Collection Needed)
+
+| Diagnostic Question | Table / Column | Available |
+|--------------------|----------------|-----------|
+| How many SKUs have generated content? | `generated_content.candidate_content IS NOT NULL` | YES |
+| How many SKUs have approved content? | `generated_content.approved_content IS NOT NULL` | YES |
+| When was content last generated per SKU? | `generated_content.generation_timestamp` | YES |
+| What model generated each piece of content? | `generated_content.generation_model` | YES |
+| What prompt hash was used? | `generated_content.generation_prompt_hash` | YES |
+| How many SKUs have been published to Google? | `publish_events WHERE platform = 'google'` | YES |
+| When was each SKU last published? | `publish_events.published_at` | YES |
+| Performance before publish? | `performance_baselines` | YES |
+| Performance after publish? | `performance_snapshots`, `performance_impact_scores` | YES |
+| Which mode was used per generation? | `regeneration_history.mode` | YES (partial) |
+| What segment strategy was applied? | `regeneration_history` | NO — strategy_id not stored |
+| Which feature flags were active? | Anywhere | NO — not stored |
+| Which generation path (A/B/C) was taken? | Anywhere | NO — not stored |
+| Is content in Google Sheets matching Supabase? | Not in Supabase | NO — requires Sheets API |
+
+### What Needs New Instrumentation (Add Only After Root Cause Confirmed)
+
+| Diagnostic Need | Where to Add | Complexity |
+|----------------|--------------|------------|
+| Flag snapshot per generation | `regeneration_history` — add `flag_snapshot JSONB` column | LOW — 1 migration + ~3 lines per path |
+| Generation path identifier | `regeneration_history` — add `generation_path TEXT` column | LOW — 1 migration + label in each endpoint |
+| Sheets content verification | One-off script using existing `google-sheets.ts` read path | LOW — ~50 lines |
+| Live flag state endpoint | `/diagnostics/flags` Cloud Run route | LOW — reads env vars, returns JSON |
+| Coverage dashboard UI | SQL query exposed via `/api/diagnostics/coverage` route | LOW — ~30 lines TS + SQL |
+
+---
+
+## Build Order for Diagnostics (Diagnose First, Fix Second)
+
+The order prioritizes proving root cause with zero code changes before touching any generation logic.
+
+### Step 1 — Coverage Query (Zero code, 1 hour, immediate answer)
+
+Answer: "How many of 2,784 SKUs have content at each funnel stage?"
+
+- Run SQL directly via `mcp__supabase__execute_sql`
+- Read-only queries against `variant_index`, `generated_content`, `publish_events`
+- **Decision gate:** If <10% of SKUs are published to Google, coverage is the bottleneck — proceed to fix coverage before changing anything else
+
+### Step 2 — Flag Call-Site Audit (Zero code, 30 minutes)
+
+Answer: "Are PROMPT_CONTRACT_V2 and INTENT_CURATOR_V1 called anywhere in live paths?"
+
+- Static grep on `src/feedops/` Python files
+- **Expected finding:** SEGMENT_STRATEGY_V1 called in generator.py only (Path B). PROMPT_CONTRACT_V2 and INTENT_CURATOR_V1 likely have no active call sites.
+- **Decision gate:** Confirms which flags are dead vs active — determines whether flag wiring is a fix candidate
+
+### Step 3 — Path Trace for Single SKU (Minimal code change, 2 hours)
+
+Answer: "When we regenerate SKU X from the UI, which code path executes?"
+
+- Add one `log_event()` call to main.py /regenerate with `generation_path` field
+- Trigger a real regeneration (low-traffic SKU)
+- Read Cloud Run logs filtered by request_id
+- **Expected finding:** Confirms Path A (main.py, not generator.py, no segment strategy)
+- **Decision gate:** Confirms whether wiring segment_strategy into Path A is a meaningful fix candidate
+
+### Step 4 — Propagation Check (Read-only Sheets API call)
+
+Answer: "For SKUs with recent publish_events, does Google Sheets have the updated content?"
+
+- Query `publish_events` for 10 most recent Google publishes
+- Read those gmc_offer_ids from Google Sheets
+- Compare vs `approved_content` in Supabase
+- **Decision gate:** If Sheets content is stale or missing, propagation failure is a root cause
+
+### Step 5 — Apply Minimal Fixes (Only after steps 1-4 complete)
+
+Fixes are selected based on what steps 1-4 reveal:
+
+| Finding | Fix |
+|---------|-----|
+| Coverage <10% published | Run batch generation + approval for top N SKUs by impressions |
+| PROMPT_CONTRACT_V2 has no call sites | Either wire it or remove the dead flag (depends on intent) |
+| Path A missing segment_strategy | Add `_resolve_segment_strategy()` to `_build_generation_user_prompt()` in main.py |
+| Propagation gap (Sheets stale) | Fix case normalization or row-matching in `google-sheets.ts` |
+| Performance data is stale | Run `/api/performance/capture-snapshot` to refresh `performance_impact_scores` |
+
+---
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Fix Before Diagnosing
+
+**What people do:** Assume the flags aren't wired, wire them to the regeneration path, push, and wait to see if metrics improve.
+**Why it's wrong:** You've changed behavior without knowing the root cause. If coverage is the bottleneck, wiring flags adds complexity with no improvement. Any metric change becomes unattributable.
+**Do this instead:** Steps 1-4 first. Fix only what the evidence points to.
+
+### Anti-Pattern 2: Treating core.ts as the Active Single-SKU Path
+
+**What people do:** Find `dashboard/src/lib/regeneration/core.ts` and assume it's the primary generation path.
+**Why it's wrong:** `core.ts` is called only by `/api/regenerate/batch/route.ts`. The primary `/api/regenerate` route (used by the SKU review UI) is a thin proxy to Python Cloud Run. `core.ts` improvements don't affect single-SKU regeneration from the UI.
+**Do this instead:** For single-SKU improvements, modify Python `main.py /regenerate` or `_build_generation_user_prompt()`.
+
+### Anti-Pattern 3: Trusting Performance Dashboard Labels as Root Cause
+
+**What people do:** See "neutral" impact labels on the performance delta page and conclude content isn't working.
+**Why it's wrong:** "Neutral" could mean: (a) content never reached GMC (propagation gap), (b) not enough days post-publish for signal, (c) insufficient impressions for statistical significance, (d) diff-in-diff limitations with sparse data. Performance labels don't tell you why.
+**Do this instead:** Step 1 (coverage) and Step 4 (propagation) establish whether content reached GMC before interpreting impact labels.
+
+### Anti-Pattern 4: Treating feature_flags.py as Evidence Flags Are Active
+
+**What people do:** Read `feature_flags.py`, see `default=True` for all flags, conclude they're all active in production.
+**Why it's wrong:** A flag with `default=True` but no call sites in active code paths has zero effect. The existence of the flag function is not evidence it's invoked.
+**Do this instead:** Static audit (Step 2) to find actual call sites.
+
+### Anti-Pattern 5: Interpreting Metrics_Registry as Real Monitoring
+
+**What people do:** Look at `src/feedops/observability/metrics.py` and assume metrics are persisted for analysis.
+**Why it's wrong:** `MetricsRegistry` is in-memory only. Metrics reset on container restart. It's used for Prometheus `/metrics` endpoint only, not for historical querying. Cloud Run logs are the durable diagnostic source.
+**Do this instead:** For historical diagnostic queries, read Cloud Run logs via GCP Logs Explorer filtered by `jsonPayload.event` and `jsonPayload.request_id`.
+
+---
+
+## Integration Points
+
+### New vs Modified Components
+
+| Component | Type | Action for Diagnostics |
+|-----------|------|------------------------|
+| `src/feedops/api/main.py` | EXISTING | Minor: add `generation_path` field to existing `log_event()` calls (non-breaking) |
+| `src/feedops/pipeline/feature_flags.py` | EXISTING | Read-only audit only; no changes in diagnostic phase |
+| `src/feedops/pipeline/generator.py` | EXISTING | No changes for diagnostics |
+| `dashboard/src/lib/regeneration/core.ts` | EXISTING | No changes (not on primary path) |
+| `dashboard/src/lib/publishing/google-sheets.ts` | EXISTING | Read-only use in Step 4 propagation check |
+| `supabase/migrations/` | EXISTING | New migration for `generation_path` + `flag_snapshot` in `regeneration_history` — ONLY after root cause confirmed |
+| `src/feedops/diagnostics/coverage_queries.py` | NEW | Phase 1 (optional CLI wrapper if preferred over direct SQL) |
+| `dashboard/src/app/api/diagnostics/coverage/route.ts` | NEW | Phase 1 (if dashboard display needed) |
+| `src/feedops/api/diagnostics.py` | NEW | Phase 2+ Cloud Run router for live flag state |
+
+### External Service Integration for Diagnostics
+
+| Service | Diagnostic Use | Already Integrated |
+|---------|----------------|-------------------|
+| Supabase | Coverage queries, regeneration_history reads | YES |
+| Cloud Run logs | Path tracing via structured log fields | YES (read via `gcloud run services logs read`) |
+| Google Sheets API | Propagation verification (Step 4) | YES (via `google-sheets.ts`) |
+| Prometheus `/metrics` | In-process metrics (not for historical analysis) | YES |
+
+---
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 0-500 SKUs (current) | Single worker thread, sequential processing, ~3-5 min backfill |
-| 500-5,000 SKUs | Parallel workers (5-10 threads), batch_size=50-100, ~10-20 min backfill |
-| 5,000-50,000 SKUs | Distributed workers (Cloud Run Jobs, Cloud Tasks), batch_size=100-500, ~1-2 hours |
-| 50,000+ SKUs | Dataflow pipeline, streaming architecture (5-10 min batches), concurrent connections (5-10) |
-
-### Scaling Priorities
-
-1. **First bottleneck:** API rate limits hit (~15k operations/day on Basic Access)
-   - **Fix:** Request Standard Access (higher quota), implement request batching
-
-2. **Second bottleneck:** Database upsert latency with 50k+ rows
-   - **Fix:** Batch upserts (500-1000 rows/transaction), connection pooling, read replicas
-
-3. **Third bottleneck:** Worker thread count limited by container CPU
-   - **Fix:** Horizontal scaling (Cloud Run with `--min-instances=N`), async I/O instead of threads
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Query Product and Search Term Together
-
-**What people do:** Try to SELECT both segments.product_item_id and search_term_view fields in same query
-
-**Why it's wrong:** Google Ads API doesn't support filtering search_term_view by product_item_id simultaneously
-
-**Do this instead:** Two-query pattern (fetch products by campaign → search terms by campaign → join in-memory)
-
-**Evidence:** [Google Ads API groups discussion](https://groups.google.com/g/adwords-api/c/Ll5hhZzCFXY) confirms limitation, existing code in `google_ads_search_terms.py` implements workaround
+| Current diagnostic phase | Direct Supabase queries for coverage are fast (<1s). No caching needed for one-off runs. |
+| Instrumentation additions | Adding `generation_path` + `flag_snapshot` JSON column to `regeneration_history` — minimal write overhead per regeneration. |
+| Propagation checks | 10-50 SKUs via Sheets API. Rate limit: 300 req/min (well within bounds). One-time check. |
+| After coverage fix (1,000+ published SKUs) | `performance_impact_scores` query already handles 10,000+ rows via existing index. No changes needed. |
 
 ---
-
-### Anti-Pattern 2: Polling Job Status Every Second
-
-**What people do:** Dashboard polls job status endpoint every 1 second to show real-time progress
-
-**Why it's wrong:**
-- Wastes API quota (each poll = 1 database query)
-- Increases database load (500 SKUs × 1 poll/sec = 500 queries over 500 seconds)
-- No meaningful progress update sub-second
-
-**Do this instead:** Poll every 3-5 seconds, use exponential backoff for long jobs
-
-**Example:**
-```typescript
-// Bad: 1 second polling
-setInterval(() => fetchJobStatus(jobId), 1000);
-
-// Good: 5 second polling with exponential backoff
-let pollInterval = 5000;
-const maxInterval = 30000;
-
-const poll = async () => {
-    const status = await fetchJobStatus(jobId);
-    if (status === 'running') {
-        pollInterval = Math.min(pollInterval * 1.2, maxInterval);
-        setTimeout(poll, pollInterval);
-    }
-};
-```
-
----
-
-### Anti-Pattern 3: Synchronous Batch Processing
-
-**What people do:** Process all 2,784 SKUs sequentially in HTTP request handler, block until complete
-
-**Why it's wrong:**
-- Times out (Cloud Run 60 min max, Vercel 10 sec/60 sec limits)
-- No progress visibility
-- Wastes connection resources
-- Can't cancel once started
-
-**Do this instead:** Job-based async pattern with background workers
-
----
-
-### Anti-Pattern 4: No Retry on Rate Limit
-
-**What people do:** Catch `RATE_LIMIT_EXCEEDED` error and fail immediately
-
-**Why it's wrong:**
-- Rate limits are temporary (token bucket refills)
-- Wastes already-fetched partial results
-- User has to manually retry entire batch
-
-**Do this instead:** Exponential backoff with jitter (built into google-ads client library)
-
----
-
-### Anti-Pattern 5: Ignoring Partial Failures
-
-**What people do:** Assume batch job operations are all-or-nothing transactions
-
-**Why it's wrong:** Google Ads API batch jobs use partial failure model - successful operations persist even if others fail
-
-**Do this instead:**
-- Check `BatchJobService.ListMutateJobResults` for per-operation status
-- Log failed operations separately
-- Report success/failure counts to user
-
-**Evidence:** [Batch Processing Best Practices](https://developers.google.com/google-ads/api/docs/batch-processing/best-practices) states "if a job is cancelled or individual operations fail, operations that succeeded will not be rolled back"
-
-## Integration Points
-
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Google Ads API | google-ads Python client, SearchStream with retry | Token bucket rate limiting, auto-pagination |
-| Supabase | supabase-py client, upsert on conflict | Connection pooling recommended (pgbouncer) |
-| Cloud Logging | Python logging module → GCP Logging Handler | Structured JSON logs with request_id context |
-| Cloud Run | FastAPI + uvicorn, background threads | Threads survive HTTP response but terminate on deployment |
-| Vercel Dashboard | HTTP polling for job status | CORS enabled for `allied-feed-ops.vercel.app` |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| API ↔ Worker | Function call + database state | run_async_in_thread() with job_id |
-| Worker ↔ Google Ads API | GAQL queries via search_stream | Retry logic in client library |
-| Worker ↔ Database | Supabase upsert (on_conflict) | Handles concurrent writes from multiple workers |
-| Dashboard ↔ API | REST (POST to create job, GET for status) | JWT auth via Supabase auth headers |
-
-## Query Architecture
-
-### GAQL Query Best Practices
-
-**1. Product-Level Filtering:**
-```sql
--- Use shopping_performance_view for product metrics
-SELECT
-    segments.product_item_id,
-    campaign.id,
-    campaign.advertising_channel_type,  -- MUST SELECT when filtering by it
-    metrics.impressions,
-    metrics.clicks
-FROM shopping_performance_view
-WHERE segments.date DURING LAST_30_DAYS
-    AND campaign.advertising_channel_type = 'SHOPPING'
-    AND metrics.impressions > 0
-ORDER BY metrics.impressions DESC
-LIMIT 50000
-```
-
-**2. Search Terms by Campaign:**
-```sql
-SELECT
-    search_term_view.search_term,
-    campaign.id,
-    metrics.impressions,
-    metrics.clicks,
-    metrics.conversions
-FROM search_term_view
-WHERE segments.date DURING LAST_30_DAYS
-    AND campaign.advertising_channel_type = 'SHOPPING'
-ORDER BY metrics.impressions DESC
-LIMIT 1000
-```
-
-**3. Date Range Formats:**
-- Predefined: `segments.date DURING LAST_30_DAYS` (recommended for caching)
-- Custom: `segments.date BETWEEN '2025-01-01' AND '2025-01-31'` (YYYY-MM-DD or YYYYMMDD)
-- Historical limit: 11 years retention (data older than Nov 13, 2013 not accessible as of Nov 2024)
-
-**4. Field Selection:**
-- Only SELECT fields you need (fewer fields = faster queries)
-- Campaign-level queries faster than account-level
-- MUST SELECT any field used in WHERE clause (e.g., `campaign.advertising_channel_type`)
-
-### Query Optimization Rules
-
-1. **Use SearchStream for large result sets** (>10k rows expected)
-2. **Order by meaningful metric** (impressions/clicks) to get top results first
-3. **Limit result size** for exploratory queries (use pagination for full datasets)
-4. **Filter by campaign when possible** (faster than account-level)
-5. **Use predefined date ranges** when applicable (leverages server-side caching)
-
-## Batch Processing Strategy
-
-### Recommended Approach for 2,784 SKUs
-
-**Architecture:** Job-based with sequential processing (current scale doesn't need parallelism)
-
-**Rationale:**
-- API quota: 15k operations/day (Basic Access) means ~15k SKUs/day theoretical max
-- Current need: 2,784 SKUs = ~19% of daily quota
-- Processing time: ~3-5 minutes for search term sync (tested in existing implementation)
-- Complexity trade-off: Sequential easier to debug, sufficient for current scale
-
-**Implementation:**
-```python
-# Single worker, batched API queries
-async def sync_job_worker(job_id: str):
-    skus = fetch_sku_list()  # 2,784 SKUs
-    batch_size = 50  # Process 50 SKUs per API query
-
-    for i in range(0, len(skus), batch_size):
-        batch = skus[i:i+batch_size]
-
-        # Single query fetches data for 50 SKUs
-        campaign_products = fetch_campaign_products(days=30)
-        search_terms = fetch_search_terms(days=30)
-
-        # Join and save
-        for sku in batch:
-            terms = associate_search_terms(sku, campaign_products, search_terms)
-            save_to_db(terms)
-
-        update_progress(job_id, i + len(batch))
-```
-
-### When to Scale to Parallel Workers
-
-**Trigger conditions:**
-- SKU count > 5,000
-- Backfill time > 30 minutes
-- API quota increase to Standard Access (higher limit)
-
-**Parallel architecture:**
-```python
-# Multiple workers, partitioned SKU list
-async def parallel_sync(job_id: str, worker_count: int = 5):
-    skus = fetch_sku_list()
-    partitions = partition_list(skus, worker_count)
-
-    tasks = [
-        sync_worker(job_id, partition, worker_id)
-        for worker_id, partition in enumerate(partitions)
-    ]
-
-    await asyncio.gather(*tasks)
-```
-
-## Monitoring Strategy
-
-### Key Metrics to Track
-
-**Latency (percentiles, not averages):**
-- `google_ads_api_latency_p50`, `p90`, `p99` (ms)
-- `job_completion_time` (seconds)
-- `database_upsert_latency_p90` (ms)
-
-**Throughput:**
-- `skus_processed_per_minute`
-- `api_requests_per_second`
-- `search_terms_saved_per_minute`
-
-**Errors:**
-- `google_ads_api_error_rate` (by error code)
-- `job_failure_rate`
-- `retry_attempts_total`
-
-**Resource Utilization:**
-- `worker_thread_count`
-- `database_connection_pool_usage`
-- `memory_usage_mb`
-
-### Alert Policies
-
-**Critical:**
-- Job failure rate > 10% (alert immediately)
-- API error rate > 5% (alert within 5 minutes)
-- No job completions in 2 hours (stalled workers)
-
-**Warning:**
-- p90 latency > 2x baseline (performance degradation)
-- Retry attempts > 20% of requests (rate limit issues)
-
-### Implementation
-
-```python
-from feedops.observability.metrics import metrics_registry
-
-# In API integration code
-def fetch_search_terms_with_metrics(days: int):
-    started = time.perf_counter()
-
-    try:
-        result = ga_service.search_stream(query=query)
-        metrics_registry.increment("google_ads_api_requests_total", status="success")
-        return result
-    except GoogleAdsException as e:
-        metrics_registry.increment(
-            "google_ads_api_errors_total",
-            error_code=e.error.code().name
-        )
-        raise
-    finally:
-        latency = time.perf_counter() - started
-        metrics_registry.observe("google_ads_api_latency_seconds", latency)
-```
-
-### Dashboard Queries (Cloud Logging)
-
-```sql
--- Error rate over time
-resource.type="cloud_run_revision"
-severity="ERROR"
-jsonPayload.component="google_ads_api"
-| rate 1m
-
--- Slow queries (p99 latency)
-resource.type="cloud_run_revision"
-jsonPayload.google_ads_api_latency_seconds > 5.0
-| percentile 99
-
--- Job completion tracking
-resource.type="cloud_run_revision"
-jsonPayload.event="job_completed"
-| group by jsonPayload.job_id
-```
-
-## Implementation Order for Backfill System
-
-Based on dependency analysis and risk mitigation:
-
-### Phase 1: Validation (Low Risk, Foundation)
-**Goal:** Verify query patterns work with real data
-
-1. Test product-level filtering with `shopping_performance_view`
-2. Test search term fetching by campaign
-3. Verify variant_index join logic
-4. Validate date range queries (30, 60, 90, 180 days)
-
-**Deliverable:** Jupyter notebook or script demonstrating query patterns with sample data
-
-**Risk mitigation:** Catches API limitation issues before building full system
-
----
-
-### Phase 2: Core Backfill (Medium Risk, Critical Path)
-**Goal:** Implement minimal backfill functionality
-
-1. Create `search_query_sync_jobs` table
-2. Implement single-SKU search term fetch function
-3. Add database upsert logic with conflict resolution
-4. Build sequential job processor (no parallelism yet)
-
-**Deliverable:** `/search-insights/sync` endpoint that processes all SKUs sequentially
-
-**Risk mitigation:** Simplest possible architecture, easy to debug
-
----
-
-### Phase 3: Job Management (Low Risk, User Experience)
-**Goal:** Make backfill observable and non-blocking
-
-1. Add job status endpoint (`GET /search-insights/sync/{job_id}`)
-2. Implement progress tracking (processed_skus / total_skus)
-3. Add error logging to job records
-4. Build dashboard polling UI
-
-**Deliverable:** Dashboard shows real-time progress, error counts, completion status
-
-**Risk mitigation:** User visibility into long-running operations
-
----
-
-### Phase 4: Monitoring (Low Risk, Operations)
-**Goal:** Detect failures and performance issues
-
-1. Add structured logging with request_id
-2. Implement metric collection (latency, error rate, throughput)
-3. Create Cloud Logging queries for common issues
-4. Set up alert policies for critical errors
-
-**Deliverable:** GCP dashboard showing API health, job completion rate, error patterns
-
-**Risk mitigation:** Proactive failure detection
-
----
-
-### Phase 5: Optimization (Optional, Scale-Dependent)
-**Goal:** Handle larger SKU counts if needed
-
-1. Add parallel worker support
-2. Implement caching for variant lookups
-3. Tune batch sizes based on measured latency
-4. Add retry budget to prevent infinite retries
-
-**Deliverable:** Sub-5-minute backfill for 5,000+ SKUs
-
-**Risk mitigation:** Only build if scale requires it (current 2,784 SKUs fine with sequential)
 
 ## Sources
 
-### Official Documentation (HIGH Confidence)
-- [Batch Processing Best Practices](https://developers.google.com/google-ads/api/docs/batch-processing/best-practices)
-- [Batch Processing Overview](https://developers.google.com/google-ads/api/docs/batch-processing/overview)
-- [Google Ads API Rate Limits](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
-- [Pagination with Search](https://developers.google.com/google-ads/api/docs/reporting/paging)
-- [Date Ranges in GAQL](https://developers.google.com/google-ads/api/docs/query/date-ranges)
-- [Error Handling Best Practices](https://developers.google.com/google-ads/api/docs/best-practices/error-types)
-- [Monitoring Guidelines](https://developers.google.com/google-ads/api/docs/productionize/monitoring)
-
-### Implementation References (HIGH Confidence)
-- Existing code: `/src/feedops/integrations/google_ads_search_terms.py`
-- Existing code: `/src/feedops/integrations/google_ads_performance.py`
-- Existing code: `/scripts/backfill-performance-baselines.py`
-- Database schema: `/docs/database/SCHEMA.md`
-
-### Community/Blog Sources (MEDIUM Confidence)
-- [Google Ads Data Retention Policy (Nov 2024)](https://support.google.com/google-ads/answer/15188209)
-- [2026 API Changes Discussion](https://almcorp.com/blog/google-ads-api-conversion-data-changes-2026/)
+- Direct code inspection: `src/feedops/api/main.py` (generation paths A and B confirmed, Path A does not invoke generator.py)
+- Direct code inspection: `src/feedops/pipeline/generator.py` (Path B; segment_strategy_v1 called here only)
+- Direct code inspection: `src/feedops/pipeline/feature_flags.py` (flag definitions, defaults all True, call sites not found for PROMPT_CONTRACT_V2/INTENT_CURATOR_V1)
+- Direct code inspection: `src/feedops/api/runtime_controls.py` (kill switches — separate system from feature_flags.py)
+- Direct code inspection: `src/feedops/observability/__init__.py` (structured log format, request_id context via contextvars)
+- Direct code inspection: `src/feedops/observability/metrics.py` (in-memory only, resets on container restart)
+- Direct code inspection: `dashboard/src/app/api/regenerate/route.ts` (thin proxy confirmed; contains validation + DB writes but all generation delegated to Python)
+- Direct code inspection: `dashboard/src/lib/regeneration/core.ts` (legacy path; called only from /api/regenerate/batch, NOT from /api/regenerate)
+- Direct code inspection: `dashboard/src/app/api/monitoring/performance-delta/route.ts` (reads from `performance_impact_scores` table)
+- `.planning/PROJECT.md` (v1.2 milestone goals and current state)
+- `docs/database/SCHEMA.md` (32 tables, column names, constraints)
 
 ---
 
-*Architecture research for: Google Ads API data backfill systems*
-*Researched: 2026-02-11*
-*Next step: Use findings to structure backfill implementation phases in roadmap*
+*Architecture research for: Allied FeedOps v1.2 — diagnostic layer for impact debugging*
+*Researched: 2026-02-20*

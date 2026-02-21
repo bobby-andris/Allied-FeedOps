@@ -1,365 +1,203 @@
-# Feature Research: Data Backfill & Monitoring Systems
+# Feature Research
 
-**Domain:** Batch backfill systems, monitoring pipelines, data validation frameworks
-**Researched:** 2026-02-13
-**Confidence:** HIGH
+**Domain:** Feed optimization diagnostic and measurement system (AI content generation for Google Shopping)
+**Researched:** 2026-02-20
+**Confidence:** HIGH — based on verified codebase review, architecture docs, audit traces, and current-state documentation
 
-## Overview
+---
 
-This research documents the expected feature landscape for adding comprehensive data backfill capabilities to the existing Allied FeedOps platform. Focus areas: job orchestration, progress tracking, error recovery, validation frameworks, monitoring dashboards, and incremental sync strategies.
+## Context: What Already Exists
 
-**Context:** Building on top of existing single-SKU collection (works for 84/2,784 SKUs). New goal: Scale to all 2,784 SKUs with 180-day historical backfill, robust error handling, and ongoing incremental sync.
+This is a subsequent milestone for a running system. The v1.1 system has:
+- AI content generation pipeline (Cloud Run Python) wired end-to-end
+- Dashboard review/approval workflow with per-platform badges
+- Publishing to Google Sheets supplemental feed, Shopify, Bing
+- Performance baselines and snapshots with delta comparison UI
+- Search query insights from Google Ads (10,000+ queries, 824/2,784 SKUs covered)
+- Feature flags: `PROMPT_CONTRACT_V2`, `INTENT_CURATOR_V1`, `SEGMENT_STRATEGY_V1`
+- Monitoring page with CTR/impressions deltas and search query deltas
+- Attribution forensics page for GA4 revenue attribution
+
+**The problem is not missing features — it is missing visibility into whether existing features are working.** The diagnostic gap is: we cannot determine WHY impact is weak without observing what actually runs in production.
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+### Table Stakes (Required to Diagnose Impact)
 
-Features users assume exist. Missing these = product feels incomplete.
+Features that any team would expect in order to answer "why isn't this working?" Missing these makes the impact question unanswerable by inspection alone.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Job Status Tracking** | Users need visibility into long-running operations | LOW | Standard polling pattern — existing `batch_generation_jobs` table provides template. Status enum: pending → executing → [published\|partial\|failed] |
-| **Progress Indicators** | Users expect % complete, ETA for multi-hour jobs | LOW | Simple calculation: `(processed_skus / total_skus) * 100`. Update every N iterations to reduce DB writes |
-| **Error Logging** | Users need to know what failed and why | LOW | Store failed SKUs in JSONB array with error messages. Essential for debugging rate limit vs data quality issues |
-| **Resume/Restart Capability** | Backfill jobs interrupted by deployments must be resumable | MEDIUM | Idempotent upserts with ON CONFLICT. Track last processed SKU. Sequential processing simplifies restart logic |
-| **Rate Limit Handling** | API calls fail gracefully with exponential backoff | MEDIUM | Google Ads SDK handles token bucket automatically. Add exponential backoff: 5s → 10s → 20s for RESOURCE_TEMPORARILY_EXHAUSTED |
-| **Data Freshness Checks** | Users need to know if data is stale/outdated | LOW | TTL-based validation: compare `created_at` to threshold (e.g., 60 days for baselines, 7 days for search terms) |
-| **Completeness Validation** | Users expect to know coverage: "2,500/2,784 SKUs have data" | LOW | Simple COUNT query with NULL checks. Display as "84 missing" with drill-down capability |
-| **Basic Alerting** | Users get notified when jobs fail | MEDIUM | Job status transitions trigger notifications. Email/Slack integration via webhook on status = 'failed' |
+| Runtime path verification — end-to-end trace from UI click to live feed | Cannot trust that generation → approval → publish → Google feed is wired without verifying in production. Supplemental feed update lag can be 24-72h, observed up to 9 days per GMC incident reports. | MEDIUM | Codebase confirms Python is SOT and dashboard is thin proxy. Feed propagation (Google Sheets → GMC → Google Ads indexing) has never been verified with timestamps. |
+| Feature flag active-state confirmation | Three flags exist in env vars but there is no dashboard surface showing which are active in the live Cloud Run instance at any given time | LOW | `PROMPT_CONTRACT_V2`, `INTENT_CURATOR_V1`, `SEGMENT_STRATEGY_V1` exist in `runtime_controls.py` but have no observability. Flag state is invisible at runtime. |
+| SKU coverage funnel — generated vs approved vs published vs in-feed counts | Without this, "we optimized content" is unmeasurable. The bottleneck could be at any of four stages: generation, approval, publish, or GMC indexing | MEDIUM | All four stages have data: `generated_content`, `sku_approvals`, `publish_events`, `batch_sku_assignments`. No single view aggregates these. |
+| Content propagation timestamp chain | Shows how long each SKU takes from approval to live in GMC. Identifies where delays accumulate. | MEDIUM | `publish_events.published_at` exists. GMC indexing timestamp is not tracked. Supplemental feed is Google Sheets — GMC processes on its own schedule. |
+| Feed quality score surface per SKU | Google Shopping rewards completeness. Short or non-compliant titles reduce impression share silently. Users cannot tell whether generated content is high-quality or borderline. | MEDIUM | `quality_score` field exists in `generated_content` but only populated by `/optimize-sku` path. The `/regenerate` path used in the dashboard does NOT produce self-scores. Documented gap in signal audit. |
+| Per-SKU impact attribution — before/after content change impressions and CTR | Without pre/post comparison, cannot confirm content changes moved metrics | MEDIUM | `performance_baselines` and `performance_snapshots` exist. Monitoring page shows deltas. Gap: only 824/2,784 SKUs have search query data, and baseline capture requires published SKUs. |
+| GMC disapproval and warning visibility | Google silently disapproves products for policy violations. Disapproved products show zero impressions regardless of content quality. This is the highest-probability silent impact killer. | HIGH | Not currently tracked. Requires Merchant API `product_view` with `aggregated_reporting_context_status` and `item_issues`. |
 
-**Complexity Notes:**
-- **LOW:** 1-2 days implementation, standard patterns, minimal edge cases
-- **MEDIUM:** 3-5 days implementation, requires testing for error conditions, coordination with existing systems
-- **HIGH:** 1+ week implementation, complex distributed patterns, significant testing required
+### Differentiators (High Diagnostic Value, Not Universally Built)
 
-### Differentiators (Competitive Advantage)
-
-Features that set the product apart. Not required, but valuable.
+Features that go beyond "what broke" to "why it broke" and "how to fix it efficiently." These distinguish a diagnostic system that guides decisions from one that only surfaces raw data.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Automated Data Collection** | System proactively backfills missing data without user intervention | MEDIUM | Existing `ensureSkuData()` pattern: check freshness → auto-trigger if stale. Extends to batch operations |
-| **Incremental Refresh Strategy** | Transition from batch backfill to ongoing sync automatically | MEDIUM | After initial 180-day backfill, switch to daily/weekly incremental queries. Microbatch pattern: 1-day chunks with lookback window |
-| **Data Quality Dashboards** | Real-time coverage metrics, API health, freshness heatmaps | MEDIUM | Visualize: SKU coverage % by platform, API error rates over time, freshness distribution (how many SKUs >30 days old) |
-| **Smart Batching** | Optimize batch sizes dynamically based on API response times | HIGH | Adaptive batch sizing: track p95 latency per query, adjust batch_size (10 → 50 → 100) if latency <1s. Prevents both over-batching and under-utilization |
-| **Historical Trend Analysis** | 180-day backfill enables long-term pattern detection | LOW | Once data exists, standard time-series queries. Differentiator is data depth, not technical complexity |
-| **Dead Letter Queue** | Failed items isolated for retry without blocking full job | MEDIUM | Separate `failed_sku_queue` table. Retry logic with circuit breaker pattern (3 failures → skip permanently, flag for manual review) |
-| **Parallel Window Processing** | Date ranges processed in parallel (30-day chunks) | HIGH | Avoids sequential wait for large backfills. Requires distributed rate limiting, partial failure handling. Premature for 2,784 SKU scale |
-
-**Value Justification:**
-- **Automated Data Collection:** Reduces manual work from daily chore to "set it and forget it"
-- **Incremental Refresh:** 95% cost savings vs full re-backfill (1-day query vs 180-day)
-- **Data Quality Dashboards:** Answers "are we done?" at a glance, no SQL required
-- **Historical Trend Analysis:** Enables seasonal pattern detection, long-term ROI tracking
+| Bottleneck classifier — code-path vs auction vs coverage vs propagation | Pinpoints root cause category without manual investigation. The four failure modes are: (1) content not approved; (2) approved but not published; (3) published but not indexed in GMC; (4) indexed but auction dynamics prevent impressions | MEDIUM | Requires combining: coverage funnel counts + propagation timestamps + GMC status + performance delta. No single system does all four today. |
+| Prompt hash lineage — which prompt version produced which live content | If content quality is the issue, knowing whether current live content was generated with old or new prompt is critical for attribution. The answer to "did we ship the fix?" is currently a manual investigation. | LOW | `generated_content.generation_prompt_hash` exists. `publish_events` stores content snapshots. A join between them shows which prompt version is live for each SKU. Already 90% of the data exists. |
+| Search query coverage health per SKU — count, recency, volume quality | Signal audit confirmed: SKUs without search query data get weaker content. 1,960/2,784 SKUs have no search data today. Shows which SKUs will generate weak content before generation happens. | LOW | `search_query_sync_jobs` tracks recency. `search_queries_by_master_sku` has counts. A simple aggregation query surfaces this. Exists in data; missing from UI. |
+| GMC feed row verification — confirm supplemental feed row matches approved content | The pipeline (generate → approve → publish → Google Sheets row) can silently diverge. Column mapping bugs are a documented historical failure mode (2026-02-06 bug corrupted production data by writing to wrong columns). | MEDIUM | Google Sheets API is already integrated in `google-sheets.ts`. `publish_events` stores `final_payload_snapshot`. A spot-check reads the live sheet and compares to `approved_content` in DB. |
+| Feature flag impact segmentation — delta metrics for flag-on vs flag-off SKUs | The three feature flags have no experiment tracking. Cannot measure whether `INTENT_CURATOR_V1` actually improves CTR without knowing which SKUs had content generated under each flag state. | HIGH | Requires: (a) flag-state logging at generation time — not currently done; (b) performance deltas for those SKUs. Flags are env vars, not tracked per generation run. Unbuildable until logging exists. |
+| Content quality regression detector — compares self-score across prompt versions | Catches prompt changes that degrade quality before they propagate widely | MEDIUM | Self-scores only exist for `/optimize-sku` path (not `/regenerate`). Adding self-score to `/regenerate` response is the prerequisite. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems.
-
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Real-Time Sync** | "Always have latest data" sounds good | Keyword Planner is rate-limited (~10 req/min). Real-time queries would deplete quota instantly. Data updates monthly anyway. | Daily/weekly scheduled sync with 30-day cache TTL. Batch overnight for non-critical data |
-| **Offset-Based Pagination** | Familiar pattern from SQL (OFFSET/LIMIT) | Google Ads API doesn't support offset pagination — only token-based via SearchStream. Implementing client-side pagination defeats built-in streaming. | Use SearchStream's automatic pagination. Store continuation tokens if manual chunking needed |
-| **Parallel Worker Architecture** | Faster is better, right? | At 2,784 SKU scale, sequential completes in ~5-7 minutes. Parallel workers add complexity: distributed rate limiting, worker coordination, partial failures, deadlock risk. 80% effort for 20% time savings. | Sequential processing with 1-2s delays. Sufficient for current scale. Re-evaluate at 5,000+ SKUs |
-| **Granular Job Cancellation** | User wants to stop mid-job | Cloud Run background tasks don't support graceful cancellation (non-daemon threads). Partial data left in inconsistent state. | Mark job as 'cancelled' in DB, let current iteration finish. Idempotent upserts prevent data corruption. Document that jobs complete current batch |
-| **Custom Retry Policies** | "Configure retry attempts, delays, etc." | Google Ads SDK already implements optimal exponential backoff with jitter. Custom policies often make things worse (thundering herd, token bucket depletion). | Trust SDK defaults. Only add application-level retry for transient Supabase errors (connection timeouts) |
-| **Sub-Second Progress Updates** | Real-time progress feels responsive | Updating DB every iteration causes write amplification (2,784 updates for full backfill). Supabase connection pool exhaustion risk. | Batch progress updates: every 10 SKUs or 5 seconds, whichever comes first. Client polls every 3s anyway |
-
-**Warning Signs to Watch For:**
-- User asks for "more granular control" → Usually adds complexity without value
-- "Make it faster" without measuring current performance → Premature optimization
-- "Handle every edge case" → Leads to feature creep, 80/20 rule applies
+| Real-time GMC status polling | "Is my content live?" is the obvious question | GMC API rate limits and supplemental feed processing is batch, not real-time. Polling 2,784 SKUs repeatedly would exhaust quota. Polling does not change when GMC processes the feed — that is external. | Scheduled daily status capture to a `gmc_status` table. Alert when disapproval rate crosses a threshold. |
+| Automatic content re-generation when metrics drop | Seems like a logical feedback loop | CTR can drop for auction reasons (bid changes, competitor entry, seasonality) completely unrelated to content. Auto-regeneration would waste Cloud Run budget and generate noise without confirming content is actually the issue. | Manual trigger with an evidence panel showing WHY a SKU's metrics dropped before regeneration |
+| A/B testing framework at SKU level | Standard CRO instinct | Google Shopping does not support controlled A/B experiments at the SKU level within the same campaign. Controlled tests require separate campaigns with the same products at different bid levels — complex to set up and control for. | Segment-level holdout rollout: optimize one `custom_label_0` category, keep another as control for 2-week windows. Already planned in post-optimization plan. |
+| Full new audit log UI for content changes | Compliance instinct | `regeneration_history` and `publish_events` already store this. Building a new audit log UI before fixing the actual diagnostic gap is scope creep. | Use `publish_events.payload_snapshot` for rollback and `regeneration_history` for history. Surface in existing review UI where needed. |
+| GMC price competitiveness dashboard | Merchant API provides benchmark prices | Price competitiveness is useful for pricing strategy, not content optimization. Titles and descriptions cannot contain price claims. Adding this before content impact is proven is a distraction from diagnosing the current gap. | Defer until content impact is confirmed and the next growth lever needs identification. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Data Completeness Validation
-    └──requires──> Job Status Tracking
-                       └──requires──> Error Logging
+[SKU Coverage Funnel]
+    └──requires──> [generated_content + sku_approvals + publish_events joined]
+                       └──requires──> [consistent publish_event writes for all paths]
 
-Resume/Restart Capability
-    └──requires──> Idempotent Upserts (DB pattern)
-    └──requires──> Progress Tracking
+[Bottleneck Classifier]
+    └──requires──> [SKU Coverage Funnel]
+    └──requires──> [Content Propagation Timestamp Chain]
+    └──requires──> [GMC Disapproval Visibility]
 
-Incremental Refresh Strategy
-    └──requires──> Data Freshness Checks
-                       └──requires──> Completeness Validation
+[Feature Flag Impact Segmentation]
+    └──requires──> [Feature Flag State Logging at Generation Time]
+                       └──blocks──> [any flag experiment measurement until logging exists]
 
-Data Quality Dashboards
-    └──requires──> Completeness Validation
-    └──requires──> Data Freshness Checks
+[Prompt Hash Lineage View]
+    └──enhances──> [Bottleneck Classifier] (identifies content-quality bottleneck vs other bottlenecks)
+    └──requires──> [generation_prompt_hash in publish_events or joinable via generated_content]
 
-Dead Letter Queue
-    └──enhances──> Error Logging
-    └──enhances──> Resume/Restart Capability
+[Content Quality Regression Detector]
+    └──requires──> [self_score added to /regenerate path] (currently missing — only /optimize-sku has it)
 
-Smart Batching ──conflicts──> Parallel Worker Architecture
-    (Both optimize throughput — choose one or sequential)
+[GMC Feed Row Verification]
+    └──requires──> [Google Sheets API read access] (already exists in codebase)
+    └──requires──> [publish_events.final_payload_snapshot] (migration 033 planned)
 
-Automated Data Collection
-    └──requires──> Data Freshness Checks
-    └──requires──> Job Status Tracking
+[Search Query Coverage Health]
+    └──enhances──> [SKU Coverage Funnel] (adds signal-quality dimension to coverage)
+    └──requires──> [search_query_sync_jobs + search_queries_by_master_sku] (already populated)
 ```
 
 ### Dependency Notes
 
-- **Resume/Restart requires Idempotent Upserts:** Without `ON CONFLICT` upsert logic, restarting a job creates duplicate rows or primary key violations. Idempotency is the foundation of resumability.
-- **Incremental Refresh requires Freshness Checks:** Can't transition from batch to incremental without knowing what data is stale. Freshness checks trigger delta queries (new data only).
-- **Data Quality Dashboards require Validation Primitives:** Dashboards visualize underlying metrics. Must build validation checks first (completeness, freshness) before rendering.
-- **Dead Letter Queue enhances Error Logging:** DLQ isolates failures for targeted retry. Pairs with error logging to surface patterns (e.g., "all SKUs with finish_code=NULL fail").
-- **Smart Batching conflicts with Parallel Workers:** Both attempt to optimize throughput. Combining creates race conditions (batch size changes while workers are running). Pick one strategy.
+- **Feature flag impact segmentation is currently unbuildable.** Flags are env vars, not tracked per generation run. The flags have no logging at the `regeneration_history` write step. Building measurement requires adding `feature_flags_active` to `regeneration_history` first.
+- **GMC disapproval visibility is the hardest item and the highest priority unknown.** It requires a new Merchant API integration. This is the most likely silent killer of impressions — disapproved products show zero impressions regardless of content quality.
+- **SKU Coverage Funnel is the prerequisite for everything else.** Once the funnel is visible, all other diagnostics have a baseline to work against. It is also the fastest to build.
+- **Content propagation timestamps** depend on the supplemental feed processing being a Google Sheets fetch-on-schedule process. GMC processes the sheet on its own schedule. The timestamp chain must account for this external latency (24-72h typical, up to 9 days observed).
+- **Prompt hash lineage is 90% built** from existing data. The join is: `publish_events` → `batch_sku_assignments` → `generated_content.generation_prompt_hash`. No new data needed, just a query and a UI surface.
 
 ---
 
-## MVP Definition
+## Prioritized Diagnostic Build List
 
-### Launch With (v1)
+This milestone is primarily about closing visibility gaps, not building new features. The priority ordering answers: "what must we verify first to diagnose weak impact?"
 
-Minimum viable product — what's needed to validate 180-day backfill for 2,784 SKUs.
+### Phase 1: Verify the Path (Answer: Is the system actually working end-to-end?)
 
-- [x] **Job Status Tracking** — Non-blocking operations require user visibility. Users shouldn't wonder if system crashed.
-- [x] **Progress Indicators** — 7-minute backfill needs progress bar. Without it, users assume failure and restart.
-- [x] **Error Logging** — First production run will surface edge cases (invalid offer IDs, missing variants). Need diagnostics.
-- [x] **Rate Limit Handling** — Google Ads API rejects requests during token bucket depletion. Exponential backoff prevents cascading failures.
-- [x] **Resume/Restart Capability** — Cloud Run containers restart during deployments. Jobs must survive interruptions.
-- [x] **Data Freshness Checks** — Users need to know if baseline is from 3 months ago (stale) or last week (valid).
-- [x] **Completeness Validation** — "Are we done?" requires definitive answer: X/2,784 SKUs have data.
+All data exists. These are query + lightweight UI additions, not new infrastructure.
 
-**Justification:** These 7 features form the minimum for production-ready backfill. Missing any one creates user confusion or data integrity risk.
+- [ ] **SKU Coverage Funnel** — query joining `generated_content`, `sku_approvals`, `batch_sku_assignments`, `publish_events` → show counts at each stage. Answers: how many SKUs are actually live with optimized content? Estimated complexity: LOW (single SQL query + summary card on existing dashboard page).
+- [ ] **Feature Flag Active-State API** — add a `/runtime-state` endpoint to `main.py` that returns which feature flags are active in the live Cloud Run instance. Answers: are the flags we think are on actually on? Estimated complexity: LOW (one new endpoint, reads env vars already loaded by `runtime_controls.py`).
+- [ ] **Prompt Hash Lineage** — for published SKUs, show which `generation_prompt_hash` is in the live `publish_events`. Answers: was live content generated with current or old prompt? Estimated complexity: LOW (join query, add column to existing monitoring page).
+- [ ] **Search Query Coverage Health summary** — count SKUs by search data quality tier (0 queries, 1-5 queries, 5+ queries with volume data). Answers: how many SKUs will get weak content because search data is missing? Estimated complexity: LOW (aggregation query, summary card).
 
-### Add After Validation (v1.x)
+### Phase 2: Measure the Bottleneck (Answer: Where exactly is impact blocked?)
 
-Features to add once initial backfill completes successfully.
+Requires Phase 1 data to be meaningful.
 
-- [ ] **Automated Data Collection** — Trigger: Manual re-runs are tedious after 3+ backfills. Add auto-refresh for stale SKUs (60+ days).
-- [ ] **Incremental Refresh Strategy** — Trigger: First 180-day backfill completes. Transition to daily 1-day queries instead of full re-backfill.
-- [ ] **Data Quality Dashboards** — Trigger: Users ask "What's our coverage?" more than twice. Build once, reuse forever.
-- [ ] **Basic Alerting** — Trigger: Job failures discovered hours later via manual checks. Add email notification on failure.
+- [ ] **Content Propagation Timestamp Chain** — for published SKUs, show: `approved_at` → `published_at` → estimated GMC processing window → first performance snapshot date. Answers: how long is the lag between publishing and measuring impact? Estimated complexity: MEDIUM (join across tables + estimated GMC window column).
+- [ ] **Feed Quality Score added to /regenerate path** — add `quality_score` and self-score dimensions to `/regenerate` path response (matches what `/optimize-sku` produces), surface aggregate quality distribution in review UI. Answers: are we generating high-quality content or borderline content? Estimated complexity: MEDIUM (modify Python `/regenerate` to include self-score; the schema and scoring rubric already exist in the codebase for the other path).
+- [ ] **GMC Feed Row Spot Checker** — read N rows from the live Google Sheet and compare `id` + `title` + `description` to `approved_content` in DB. Answers: does the live feed actually contain our optimized content? Estimated complexity: MEDIUM (Google Sheets API read already integrated, add diff logic).
 
-**Trigger-Based Prioritization:** Don't build until pain is felt. Validate that MVP works before adding automation.
+### Phase 3: Attribute Impact (Answer: Did content changes actually move metrics?)
 
-### Future Consideration (v2+)
+Requires Phases 1 and 2 data to contextualize.
 
-Features to defer until product-market fit is established or scale requires.
-
-- [ ] **Smart Batching** — Defer until: API latency variability causes >2x performance differences. Batch size optimization is premature at current scale.
-- [ ] **Dead Letter Queue** — Defer until: Error patterns emerge. Don't build complex retry infrastructure before knowing what actually fails.
-- [ ] **Parallel Window Processing** — Defer until: 5,000+ SKUs or <5 minute time requirement. Sequential is sufficient now.
-- [ ] **Historical Trend Analysis** — Defer until: 180-day backfill data exists. Build analysis on top of complete dataset, not partial.
-
-**Deferral Rationale:** These features optimize for scale/edge cases we don't have yet. Build when data proves necessity.
+- [ ] **GMC Disapproval Visibility** — fetch `product_view` from Merchant API for published SKUs, flag disapproved products and surface `item_issues`. Answers: are products being blocked from serving silently? Estimated complexity: HIGH (new Merchant API integration, schema for status tracking, sync job).
+- [ ] **Bottleneck Classifier summary** — synthesize Phase 1+2 data into a single diagnostic view: for each published SKU, classify the bottleneck as (generation missing | approval missing | publish missing | not in feed | in feed but no data yet | in feed with data and metrics). Estimated complexity: MEDIUM (classification logic over existing data, new view in dashboard).
+- [ ] **Feature Flag State Logging** — add `feature_flags_active` JSON field to `regeneration_history` at write time. Enables future flag-impact segmentation. Estimated complexity: LOW to add logging, HIGH to build experiment analysis (defer analysis to future milestone).
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority | Rationale |
-|---------|------------|---------------------|----------|-----------|
-| Job Status Tracking | HIGH | LOW | **P1** | Table stakes — users expect visibility |
-| Progress Indicators | HIGH | LOW | **P1** | Table stakes — long jobs need progress |
-| Resume/Restart | HIGH | MEDIUM | **P1** | Critical for Cloud Run deployments |
-| Rate Limit Handling | HIGH | MEDIUM | **P1** | Prevents cascading failures at scale |
-| Error Logging | HIGH | LOW | **P1** | Essential for debugging first backfill |
-| Data Freshness Checks | MEDIUM | LOW | **P1** | Prevents using stale baselines |
-| Completeness Validation | MEDIUM | LOW | **P1** | Users need "are we done?" answer |
-| Automated Data Collection | MEDIUM | MEDIUM | **P2** | Reduces manual work, not critical for v1 |
-| Incremental Refresh | MEDIUM | MEDIUM | **P2** | Efficiency gain after initial backfill |
-| Data Quality Dashboards | MEDIUM | MEDIUM | **P2** | Nice to have, manual queries work initially |
-| Basic Alerting | LOW | MEDIUM | **P2** | Helpful but not blocking — polling UI exists |
-| Dead Letter Queue | LOW | MEDIUM | **P3** | Advanced pattern — defer until errors emerge |
-| Smart Batching | LOW | HIGH | **P3** | Optimization for scale we don't have yet |
-| Parallel Workers | LOW | HIGH | **P3** | Premature optimization for 2,784 SKUs |
+| Feature | Diagnostic Value | Implementation Cost | Priority |
+|---------|-----------------|---------------------|----------|
+| SKU Coverage Funnel | HIGH — baseline for all other diagnostics | LOW | P1 |
+| Feature Flag Active-State API | HIGH — confirms flags are actually running | LOW | P1 |
+| Prompt Hash Lineage | HIGH — confirms live content version | LOW | P1 |
+| Search Query Coverage Health | HIGH — explains content quality variance | LOW | P1 |
+| Content Propagation Timestamp Chain | HIGH — reveals attribution lag | MEDIUM | P1 |
+| GMC Feed Row Spot Checker | HIGH — verifies end-to-end wiring | MEDIUM | P2 |
+| Feed Quality Score (add to /regenerate) | MEDIUM — improves signal quality | MEDIUM | P2 |
+| GMC Disapproval Visibility | HIGH — most likely silent impression killer | HIGH | P2 |
+| Bottleneck Classifier | HIGH — synthesizes all diagnostic data | MEDIUM | P2 |
+| Feature Flag State Logging | MEDIUM — enables future experiments | LOW | P2 |
+| Feature Flag Impact Segmentation | HIGH — proves flag value | HIGH | P3 (blocked until flag logging exists) |
+| Content Quality Regression Detector | MEDIUM — prevents regressions | MEDIUM | P3 |
+| Impression Share Gap by Category | LOW — secondary signal | MEDIUM | P3 |
 
 **Priority key:**
-- **P1**: Must have for launch — backfill fails without these
-- **P2**: Should have, add when possible — improves UX/efficiency
-- **P3**: Nice to have, future consideration — optimization or advanced patterns
+- P1: Must have to diagnose current impact gap — answers whether the system is working
+- P2: Should have to confirm fixes are working — answers whether fixes moved metrics
+- P3: Nice to have for ongoing optimization — not needed to diagnose the current gap
 
 ---
 
-## Existing Features (Already Built)
+## What Existing Infrastructure Already Supports (No New Build Needed)
 
-Features from Allied FeedOps that inform this milestone.
+The instinct to "build more features" is often the wrong response when diagnostic gaps can be closed with queries and small additions.
 
-| Existing Feature | Relevance | How to Leverage |
-|------------------|-----------|-----------------|
-| `batch_generation_jobs` table | Job tracking pattern already exists | Copy schema pattern: status, total_skus, processed_skus, errors JSONB |
-| `ensureSkuData()` automated collection | Data freshness checks already implemented | Extend pattern to backfill: check TTL → trigger refresh |
-| `performance_baselines` 60-day staleness | TTL-based validation pattern established | Apply same threshold logic to search_queries table |
-| Cloud Run `run_async_in_thread()` | Non-blocking background task pattern | Use for backfill jobs — survives HTTP response, terminates on deployment |
-| `search_query_sync_jobs` table | Job tracking for search term sync | Already implemented — validates P1 features exist |
-| Idempotent upserts with `ON CONFLICT` | Database pattern for resumability | Already used in `save_search_terms_to_db()` — proven pattern |
-| Sequential processing in `google_ads_search_terms.py` | Single-threaded execution with delays | Existing implementation validates "no parallel workers" decision |
-
-**Key Insight:** 7 out of 7 P1 features already have implementation patterns in the codebase. This milestone is primarily about scaling/generalizing existing patterns, not inventing new ones.
-
----
-
-## Pattern Comparison: Batch Orchestration Approaches
-
-| Pattern | Allied FeedOps Use Case | When to Use | Complexity |
-|---------|-------------------------|-------------|------------|
-| **Job-Based Sequential** | ✅ Current approach for 2,784 SKUs | <5,000 items, acceptable completion time (<10 min), simple retry logic | LOW |
-| **Event-Driven Orchestration** | ❌ Not needed — time-based scheduling sufficient | Real-time triggers, complex DAG dependencies, cross-system coordination | HIGH |
-| **Microbatch (Hourly/Daily Chunks)** | ✅ Future for incremental refresh | Large fact tables, late-arriving data, automatic backfill for missed windows | MEDIUM |
-| **Parallel Worker Pool** | ❌ Premature — sequential completes in 5-7 min | >5,000 items, distributed rate limiting, resource contention requires parallelism | HIGH |
-| **BigQuery Integration** | ❌ Not needed — direct API sufficient | Multi-year backfills (>2 years), petabyte-scale datasets, data lake architecture | HIGH |
-
-**Decision Drivers:**
-- **Scale:** 2,784 SKUs = small batch, sequential is fine
-- **Time Constraint:** 5-7 min is acceptable, no need for parallelism
-- **Failure Handling:** Sequential + idempotent upserts = simple restart logic
-- **Cost:** Direct API queries cost nothing vs BigQuery storage/compute
-
----
-
-## Validation Framework Comparison
-
-| Approach | Allied FeedOps Fit | Implementation |
-|----------|-------------------|----------------|
-| **Great Expectations** | ❌ Overkill for SQL validation | 1500+ LOC framework for "does column exist, is value >0?" — use SQL assertions instead |
-| **dbt Tests** | ❌ No dbt in stack | Would require adding dbt + learning curve. Supabase queries achieve same outcome |
-| **Custom SQL Assertions** | ✅ Lightweight, inline | `SELECT COUNT(*) WHERE column IS NULL` + alerting. Fits Cloud Run + Supabase architecture |
-| **Soda Core (YAML configs)** | 🤷 Possible but not critical | If validation grows to 10+ checks, consider. Start with SQL, migrate if complexity emerges |
-
-**Recommendation:** Start with custom SQL assertions. If validation rules exceed 10-15 checks or become complex (nested conditions, cross-table validation), re-evaluate Soda Core.
-
----
-
-## Monitoring Dashboard Patterns
-
-Based on research and existing Allied FeedOps UI patterns:
-
-### Essential Metrics (P1)
-
-| Metric | Calculation | UI Component | Update Frequency |
-|--------|-------------|--------------|------------------|
-| Job Progress | `(processed_skus / total_skus) * 100` | Progress bar + percentage | Poll every 3s during execution |
-| Error Count | `LENGTH(errors::jsonb)` | Badge with red styling | Poll every 3s |
-| Job Status | Enum: pending, executing, published, failed | Status badge (color-coded) | Poll every 3s |
-| Estimated Time Remaining | `(total_skus - processed_skus) * avg_seconds_per_sku` | "~5 min remaining" text | Calculate client-side |
-
-### Enhanced Metrics (P2)
-
-| Metric | Calculation | UI Component | Update Frequency |
-|--------|-------------|--------------|------------------|
-| Coverage % | `(COUNT(*) WHERE data IS NOT NULL) / 2784 * 100` | Donut chart | Load on page mount |
-| Data Freshness Distribution | `COUNT(*) GROUP BY DATE_TRUNC('week', created_at)` | Histogram | Daily batch query |
-| Platform Comparison | Coverage % by platform (Google, Bing, Shopify) | Grouped bar chart | Load on page mount |
-| API Error Rate | `(error_count / total_requests) * 100` over 24h | Line chart | Hourly aggregation |
-
-### Advanced Metrics (P3)
-
-| Metric | Calculation | UI Component | Trigger |
-|--------|-------------|--------------|---------|
-| Query Performance (p95 latency) | Track API call duration, calculate percentiles | Heatmap by SKU category | Performance issues |
-| Rate Limit Events | Count RESOURCE_TEMPORARILY_EXHAUSTED per hour | Alert timeline | Capacity planning |
-| Backfill vs Incremental Cost | API quota consumed by backfill vs daily refresh | Stacked area chart | Cost optimization |
-
-**UI/UX Notes:**
-- Polling at 3s intervals balances responsiveness vs server load
-- Client-side ETA calculation reduces DB queries
-- Lazy-load advanced metrics (render on tab switch, not page mount)
+| Diagnostic Need | Already Available | Where |
+|----------------|-------------------|-------|
+| How many SKUs generated content | YES | `generated_content` table count |
+| How many SKUs approved | YES | `sku_approvals` with `approval_status` |
+| How many SKUs published | YES | `publish_events` count |
+| What prompt version produced content | YES | `generated_content.generation_prompt_hash` |
+| When was each SKU published | YES | `publish_events.published_at` |
+| Performance delta since publish | YES | Monitoring page already exists with delta view |
+| Search query count per SKU | YES | `search_queries_by_master_sku` |
+| Search query data freshness | YES | `search_query_sync_jobs` |
+| Content quality score (optimize path only) | PARTIAL | `generated_content.quality_score` — null for regenerate path |
+| Live feed content verification | PARTIAL | Google Sheets API integrated for writes; read-path for verification not built |
+| GMC approval status | NO | Requires new Merchant API integration |
+| Feature flag state in Cloud Run | NO | Flags are env vars with no observability surface |
+| Prompt hash in published content | YES (joinable) | `generated_content.generation_prompt_hash` + `publish_events` |
 
 ---
 
 ## Sources
 
-### Primary Sources (Official Documentation)
-
-**Batch Processing & Orchestration:**
-- [AWS Batch Orchestration Workflow](https://aws.amazon.com/blogs/machine-learning/build-a-serverless-amazon-bedrock-batch-job-orchestration-workflow-using-aws-step-functions/) — Event-driven orchestration patterns, job state management
-- [Building Resilient Batch Pipelines (Ariane Horbach, Medium)](https://medium.com/@arianehorbach/building-resilient-batch-pipelines-orchestration-essentials-for-modern-data-platforms-1a4bcebf4c50) — Success-based triggering, automatic restarts, monitoring best practices
-- [Google Ads API: Best Practices and Limitations](https://developers.google.com/google-ads/api/docs/batch-processing/best-practices) — Batch operation ordering, rate limit management, polling patterns
-
-**Retry Logic & Error Handling:**
-- [Error Handling & Retry Logic in Data Engineering (Medium)](https://medium.com/data-engineering-technical-standards-and-best/error-handling-retry-logic-n-data-engineering-5e1922be8b01) — Exponential backoff with jitter, error classification
-- [API Error Handling & Retry Strategies: Python Guide 2026](https://easyparser.com/blog/api-error-handling-retry-strategies-python-guide) — Adaptive retry strategies, system stability patterns
-- [Backfilling Data Pipelines (Medium)](https://medium.com/@andymadson/backfilling-data-pipelines-concepts-examples-and-best-practices-19f7a6b20c82) — Chunk-based processing, idempotent operations, incremental testing
-
-**Data Quality & Validation:**
-- [Data Quality Tools 2026 (OvalEdge)](https://www.ovaledge.com/blog/data-quality-tools/) — Automated validation, monitoring, lineage tracking
-- [Great Expectations Documentation](https://greatexpectations.io/) — Leading validation framework (evaluated as anti-pattern for this use case)
-- [Continuous Validation Framework for Data Pipelines](https://platformengineering.org/blog/the-continuous-validation-framework-for-data-pipelines) — Architectural isolation, configuration-driven quality management
-- [Mastering Data Quality Monitoring (Alation)](https://www.alation.com/blog/mastering-data-quality-monitoring/) — Completeness, freshness, accuracy checks
-
-**Incremental Sync Patterns:**
-- [Incremental Patterns for Near Real-Time Data (dbt)](https://docs.getdbt.com/best-practices/how-we-handle-real-time-data/2-incremental-patterns) — Microbatch approach, lookback parameters, late data handling
-- [dbt Incremental Models (Conduktor)](https://www.conduktor.io/glossary/dbt-incremental-models-efficient-transformations) — Batch-to-streaming transition patterns
-- [Data Synchronization Guide (Striim)](https://www.striim.com/blog/data-synchronization-a-guide-for-ai-ready-enterprises/) — Change Data Capture (CDC), hybrid batch+real-time approaches
-
-**Progress Tracking & Checkpointing:**
-- [Checkpointing Jobs (CHTC)](https://chtc.cs.wisc.edu/uw-research-computing/checkpointing) — Saving process state for restart capability
-- [How to Handle Long-Running Jobs in BullMQ](https://oneuptime.com/blog/post/2026-01-21-bullmq-long-running-jobs/view) — Progress updates, heartbeat patterns, timeout configuration
-- [What Does Checkpointing Mean (Dagster)](https://dagster.io/glossary/checkpointing) — Resumable execution patterns
-
-**Monitoring & Dashboards:**
-- [How to Create Batch Monitoring](https://oneuptime.com/blog/post/2026-01-30-batch-processing-monitoring/view) — Silent failures, SLA breaches, zombie jobs
-- [Monitor Job Resources Using Metrics (Google Cloud)](https://docs.cloud.google.com/batch/docs/monitor-job-resources-using-metrics) — Real-time metrics, custom dashboards
-- [Understanding Data Visualization Dashboards 2026](https://www.fanruan.com/en/blog/data-visualization-dashboard-key-metrics) — Real-time data display, decision-making metrics
-
-**Dead Letter Queue Patterns:**
-- [Dead Letter Queue Patterns (OneUptime)](https://oneuptime.com/blog/post/2026-02-09-dead-letter-queue-patterns/view) — Retry logic, error metadata, automated reprocessing
-- [Kafka Dead Letter Queue Best Practices](https://www.superstream.ai/blog/kafka-dead-letter-queue) — Parking-lot topics, backoff strategies, monitoring
-- [Error Handling via Dead Letter Queue (Kai Waehner)](https://www.kai-waehner.de/blog/2022/05/30/error-handling-via-dead-letter-queue-in-apache-kafka/) — Non-retryable vs transient errors, recovery strategies
-
-### Project-Specific Sources
-
-**Existing Implementation:**
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/scripts/backfill-performance-baselines.py` — Reference implementation for batch backfill pattern
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/integrations/google_ads_performance.py` — Rate limiting, SearchStream pagination
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/database/SCHEMA.md` — Job tracking tables: batch_generation_jobs, search_query_sync_jobs
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/CLAUDE.md` — Cloud Run background task patterns, MCP limitations
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/.planning/research/SUMMARY.md` — Phase 0 findings on API capabilities, rate limits, query patterns
+- Codebase verified (HIGH confidence): `docs/audit/signal-audit-2026-02-11/prompt-wiring-map.md` — prompt traceability confirmed, regenerate vs optimize-sku schema difference confirmed
+- Codebase verified (HIGH confidence): `docs/audit/signal-audit-2026-02-11/external-signals-assessment.md` — keyword planner wiring confirmed, cold-start gap documented
+- Codebase verified (HIGH confidence): `docs/architecture/2026-02-11-content-generation-pipeline-current-state.md` — `/regenerate` path lacks self-score confirmed as known gap
+- Codebase verified (HIGH confidence): `docs/architecture/prompt-contract.md` — prompt hash persistence contract confirmed
+- Codebase verified (HIGH confidence): `docs/plans/2026-02-20-feedops-post-custom-label0-optimization.md` — segment rollout strategy and final-payload observability planned
+- Codebase verified (HIGH confidence): `docs/database/SCHEMA.md` — table structure and column names confirmed
+- Codebase verified (HIGH confidence): `.planning/PROJECT.md` — v1.2 milestone goals, feature flag names, known issues
+- External (MEDIUM confidence): GMC supplemental feed propagation timing — 24-72h typical, up to 9-day delay observed per [ppc.land incident report](https://ppc.land/google-merchant-centers-24-hour-update-promise-fails-by-nine-days/)
+- External (MEDIUM confidence): Feed optimization impact measurement — title optimization highest CTR impact per [Store Growers guide](https://www.storegrowers.com/product-feed-optimization/)
+- External (MEDIUM confidence): GMC product view for disapproval tracking — available via [Merchant API ReportService](https://developers.google.com/shopping-content/reference/rest/v2.1/reports/search)
 
 ---
 
-## Confidence Assessment
-
-| Area | Confidence | Reason |
-|------|------------|--------|
-| Table Stakes Features | **HIGH** | All 8 features have established patterns in industry + existing Allied FeedOps code |
-| Differentiators | **MEDIUM** | Automated collection + incremental refresh are validated patterns, but project-specific tuning needed |
-| Anti-Features | **HIGH** | Real-time sync, parallel workers, custom retry clearly problematic based on API constraints |
-| Feature Dependencies | **HIGH** | Dependencies validated via existing implementation (idempotent upserts require ON CONFLICT) |
-| MVP Definition | **HIGH** | 7 P1 features all have reference implementations in codebase |
-| Monitoring Patterns | **MEDIUM** | Dashboard metrics are standard, but Allied FeedOps-specific data structure needs validation |
-
-**Overall Confidence:** **HIGH**
-
-Research validated via:
-- Official documentation from Google Ads API, AWS Batch, data orchestration vendors
-- Industry best practices from Medium, developer blogs (2025-2026 sources)
-- Existing Allied FeedOps implementation patterns (7/7 P1 features already have templates)
-- No speculative features — all recommendations grounded in proven patterns
-
----
-
-## Next Steps (For Requirements Phase)
-
-### Immediate Use (Phase 1: Requirements)
-
-Use this research to define:
-
-1. **Must-Have Features:** 7 P1 features = non-negotiable for v1 launch
-2. **Nice-to-Have Features:** 4 P2 features = add after validation
-3. **Anti-Patterns to Avoid:** 6 anti-features = document explicitly as "won't build"
-4. **Feature Dependencies:** Use dependency graph to inform phase ordering
-
-### Validation Tasks
-
-Before building, validate assumptions:
-
-1. **Backfill Performance:** Run 10-SKU sample to measure actual completion time (confirm 5-7 min estimate)
-2. **Error Rate:** Monitor first 100 SKUs for error patterns (validates need for DLQ or not)
-3. **Freshness Threshold:** Interview user to confirm 60-day staleness is acceptable (vs 30 or 90 days)
-
----
-
-*Feature research for: Data backfill systems for Google Ads API (Allied FeedOps v1.0)*
-*Researched: 2026-02-13*
-*Confidence: HIGH — All findings validated via official documentation, existing codebase patterns, and established industry practices*
+*Feature research for: Feed optimization diagnostics and impact measurement*
+*Researched: 2026-02-20*
+*Context: v1.2 milestone — diagnose why existing generation and publishing is not producing measurable Google Shopping impact*

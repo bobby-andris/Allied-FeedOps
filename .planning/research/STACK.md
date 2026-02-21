@@ -1,502 +1,323 @@
-# Technology Stack
+# Technology Stack — v1.2 Impact Debug & Diagnostics
 
-**Project:** Allied FeedOps - Large-Scale Batch Orchestration & Monitoring
-**Researched:** 2026-02-13
-**Previous Research:** 2026-02-11 (Google Ads API Integration)
+**Project:** Allied FeedOps — Google Shopping Feed Impact Diagnostics
+**Researched:** 2026-02-20
+**Milestone:** v1.2 (Impact Debug & Fix)
+**Confidence:** MEDIUM-HIGH (core APIs verified via official docs; propagation timing from community sources)
+
+> **Scope note:** This document covers only NET NEW tooling needed for v1.2 diagnosing.
+> Existing stack (google-ads>=28.4.1, gspread>=6.0, supabase>=2.0, FastAPI, Next.js) is already
+> installed. Do not re-install or alter those packages.
+
+---
 
 ## Recommended Stack Additions
 
-### Core Orchestration & Job Management
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| **asyncio** (stdlib) | 3.11+ | Async batch processing, concurrent API calls | Built-in, zero dependencies, TaskGroup in 3.11+ provides structured concurrency for clean error handling |
-| **asyncio.Semaphore** (stdlib) | 3.11+ | Concurrency limiting (10 concurrent SKUs) | Simple, effective rate limiting without external dependencies |
-| **tenacity** | 9.1.4 (latest: 2026-02-07) | Retry logic with exponential backoff | Google Ads API best practice: handles RESOURCE_TEMPORARILY_EXHAUSTED with configurable backoff + jitter |
-| **aiolimiter** | 1.2.1 | Token bucket rate limiting | Precise QPS control for Google Ads API (per-CID and per-developer-token metering) |
-
-**Rationale**: Avoid heavyweight orchestration (Airflow, Prefect, Dagster) which add deployment complexity and don't fit Cloud Run's request-response + background task model. Your existing `run_async_in_thread()` pattern (main.py:149-150) handles background jobs; just need better async primitives for batch control.
-
-**Integration**: Extend existing FastAPI endpoints with async batch controllers:
-```python
-# Existing pattern in main.py
-async def process_batch(batch_id: str, sku_list: list[str]):
-    semaphore = asyncio.Semaphore(10)  # Max 10 concurrent
-    limiter = AsyncLimiter(5, 1)  # 5 req/sec per CID
-
-    async def process_one(sku: str):
-        async with semaphore, limiter:
-            # Existing SKU optimization logic
-            pass
-
-    await asyncio.gather(*[process_one(sku) for sku in sku_list])
-```
-
-### Data Validation & Quality
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| **Pydantic** | 2.0+ (already installed) | Schema validation, type safety | Already in pyproject.toml; v2 is 4-50x faster than v1, perfect for validating 2,784 SKU records |
-| **PostgreSQL check constraints** | Native | Database-level validation | Leverage existing Supabase schema (SCHEMA.md); cheaper than app-layer validation |
-| **Custom validation functions** | Python | Business rule validation (e.g., finish coverage, keyword freshness) | Domain-specific rules don't fit generic frameworks |
-
-**Rationale**: Great Expectations is overkill (designed for data warehouse profiling/reporting). You need lightweight validation for API responses and database writes. Pydantic v2 (already installed) handles schema validation; custom Python for domain logic (e.g., "all 28 finishes have search data").
-
-**Integration**: Create validation models in `src/feedops/validation/`:
-```python
-from pydantic import BaseModel, Field, field_validator
-
-class SearchTermRecord(BaseModel):
-    master_sku: str
-    gmc_offer_id: str
-    query: str
-    impressions: int = Field(ge=0)
-    clicks: int = Field(ge=0)
-
-    @field_validator('master_sku')
-    def validate_sku_format(cls, v):
-        # Existing SKU format logic from sku-utils.ts
-        return v
-
-class BatchValidationResult(BaseModel):
-    total_skus: int
-    valid_skus: int
-    missing_data: list[str]
-    stale_data: list[str]  # > 7 days old
-```
-
-### Error Handling & Retry Logic
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| **tenacity** | 9.1.4 | Declarative retry logic | Industry standard; supports all Google Ads API retry patterns (exponential backoff, jitter, conditional retry) |
-| **Custom error types** | Python | Domain-specific errors | Distinguish retryable (API rate limit) vs non-retryable (missing SKU) errors |
-
-**Rationale**: Tenacity is mature (Apache 2.0), supports async, and handles Google Ads API error codes cleanly. Alternative (retrying) is deprecated.
-
-**Integration**: Wrap Google Ads API calls with retry decorators:
-```python
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_exponential,
-    retry_if_exception_type,
-    before_sleep_log
-)
-
-class RetryableAPIError(Exception):
-    """Rate limits, timeouts, server errors"""
-    pass
-
-@retry(
-    retry=retry_if_exception_type(RetryableAPIError),
-    stop=stop_after_attempt(5),
-    wait=wait_exponential(multiplier=1, min=1, max=60),
-    before_sleep=before_sleep_log(logger, logging.WARNING)
-)
-async def fetch_search_terms(master_sku: str):
-    try:
-        # Existing Google Ads API call
-        pass
-    except Exception as e:
-        if "RESOURCE_TEMPORARILY_EXHAUSTED" in str(e):
-            raise RetryableAPIError(e) from e
-        raise  # Non-retryable
-```
-
-### Monitoring & Observability
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| **structlog** | 24.5.0+ | Structured logging with context propagation | Better than loguru for async: ContextVars support, integrates with Cloud Run structured logging, observable with GCP Logging |
-| **Prometheus client** (python) | 0.21.1 | Custom metrics (batch progress, API latency) | Supabase already exposes Prometheus endpoint; you can push custom metrics to same stack |
-| **Supabase Metrics API** | Native | Database health monitoring | Already available (200+ Postgres metrics); scrape into Grafana or Datadog |
-| **Google Cloud Logging** | Native | Log aggregation, alerting | Cloud Run auto-integration; structlog outputs JSON that GCP parses automatically |
-
-**Rationale**: Structlog is the modern choice for async Python logging in 2026. It has steeper learning curve than loguru but critical advantages: async context propagation (request_id follows across async calls), integration with Cloud Logging structured JSON, and production-grade observability. Your existing `request_context()` middleware (main.py:112-141) already uses contextvars—structlog builds on this pattern.
-
-**Integration**: Replace basic logging with structlog:
-```python
-# In main.py
-import structlog
-
-structlog.configure(
-    processors=[
-        structlog.contextvars.merge_contextvars,
-        structlog.processors.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.JSONRenderer()  # Cloud Run parses this
-    ],
-    wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
-    context_class=dict,
-    logger_factory=structlog.PrintLoggerFactory(),
-)
-
-logger = structlog.get_logger()
-
-# Usage in batch jobs
-logger.info("batch_started", batch_id=batch_id, sku_count=len(skus))
-logger.info("sku_processed", master_sku=sku, duration_ms=elapsed)
-logger.error("sku_failed", master_sku=sku, error=str(e))
-```
-
-**Prometheus Integration**: Add custom metrics for batch progress:
-```python
-from prometheus_client import Counter, Histogram, Gauge
-
-batch_jobs_total = Counter('batch_jobs_total', 'Total batch jobs started')
-batch_skus_processed = Counter('batch_skus_processed', 'SKUs processed', ['status'])
-batch_duration = Histogram('batch_duration_seconds', 'Batch job duration')
-active_batch_jobs = Gauge('active_batch_jobs', 'Currently running batches')
-
-# Expose /metrics endpoint
-from prometheus_client import make_asgi_app
-metrics_app = make_asgi_app()
-app.mount("/metrics", metrics_app)
-```
-
-### Dashboard Visualization
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| **Recharts** | 3.7.0 (already installed) | Base charts (progress bars, line charts) | Already in package.json; mature (9.5M weekly downloads), good for custom charts |
-| **Tremor** | 3.21.0+ | Pre-built dashboard components (KPI cards, tables) | Built on Recharts + Radix; provides 30+ dashboard components with Tailwind integration—eliminates custom component building |
-| **Zustand** | 5.0.11 (already installed) | Client state (real-time batch progress) | Already installed; lightweight, perfect for polling batch status without Redux overhead |
-| **Server-Sent Events (SSE)** | Native | Real-time progress updates | Lightweight alternative to WebSockets; Cloud Run supports long-lived connections |
-
-**Rationale**: Recharts (already installed) handles custom charts. Add Tremor for high-level dashboard components (KPI cards showing "2,105 / 2,784 SKUs processed", progress rings, data tables). Tremor is opinionated but saves weeks of component development. For real-time updates, SSE is simpler than WebSockets and works with Cloud Run's HTTP/2.
-
-**Integration**: Add Tremor to dashboard:
-```bash
-cd dashboard
-npm install @tremor/react
-```
-
-```tsx
-// New dashboard page: /dashboard/src/app/(dashboard)/backfill/page.tsx
-import { Card, ProgressBar, Metric, Text, BarChart } from '@tremor/react';
-
-export default function BackfillDashboard() {
-  const { data: progress } = useQuery({
-    queryKey: ['batch-progress'],
-    queryFn: () => fetch('/api/batch-status/current').then(r => r.json()),
-    refetchInterval: 5000  // Poll every 5s
-  });
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <Card>
-        <Text>SKUs Processed</Text>
-        <Metric>{progress.completed} / {progress.total}</Metric>
-        <ProgressBar value={(progress.completed / progress.total) * 100} />
-      </Card>
-
-      <Card>
-        <Text>API Calls Today</Text>
-        <Metric>{progress.api_calls}</Metric>
-        <Text className="text-sm">Quota: {progress.quota_remaining} remaining</Text>
-      </Card>
-
-      <Card>
-        <Text>Error Rate</Text>
-        <Metric>{progress.error_rate}%</Metric>
-      </Card>
-    </div>
-  );
-}
-```
-
-**SSE for Real-Time Updates** (optional, better than polling):
-```python
-# In main.py
-from fastapi.responses import StreamingResponse
-
-@app.get("/batch-status/{job_id}/stream")
-async def stream_batch_progress(job_id: str):
-    async def event_stream():
-        while True:
-            status = await get_batch_status(job_id)
-            yield f"data: {json.dumps(status)}\n\n"
-            if status['state'] in ['completed', 'failed']:
-                break
-            await asyncio.sleep(2)
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
-```
-
-### Database Connection Pooling
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| **Supabase pooler** | Native | Connection pooling (transaction mode) | Built-in, no code changes; prevents exhausting Postgres connections during 2,784 SKU batch |
-| **asyncpg** (optional) | Latest | Direct async Postgres access | If Supabase client is bottleneck; bypasses REST API for bulk inserts |
-
-**Rationale**: Supabase provides connection pooling out-of-the-box. For 2,784 SKU batch writes, transaction mode pooler handles concurrency. Only add asyncpg if Supabase REST API becomes a bottleneck (unlikely for batch sizes of 10).
-
-**Integration**: Use existing Supabase client with pooled connection string (if needed):
-```python
-# Already in place via SUPABASE_URL
-# If adding asyncpg for bulk operations:
-import asyncpg
-
-async def bulk_insert_search_terms(records: list[dict]):
-    pool = await asyncpg.create_pool(
-        os.getenv('DATABASE_URL'),  # Direct Postgres URL
-        min_size=5,
-        max_size=20
-    )
-    async with pool.acquire() as conn:
-        await conn.executemany(
-            'INSERT INTO search_queries (...) VALUES ($1, $2, ...)',
-            [(r['sku'], r['query'], ...) for r in records]
-        )
-```
-
-## Existing Stack (From 2026-02-11 Research)
-
-### Core Technologies
+### Core Technologies — Feed Quality Diagnostics
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| google-ads | 29.0.0 | Official Google Ads API client library | Google's official Python client with full API coverage, active maintenance, and best-in-class authentication handling. Supports GAQL queries, streaming for large datasets, and all Google Ads API v18+ features. |
-| Python | >=3.11 | Runtime environment | Project already on 3.11+. Library requires >=3.9 but 3.11+ provides better performance and type hints. Cloud Run supports 3.11+ natively. |
-| GAQL | v18+ | Google Ads Query Language | Standard query language for Google Ads API. SQL-like syntax optimized for advertising data. Required for search_stream and search operations. |
-| google-auth | >=2.48.0 | Authentication | Official OAuth2/service account library. Already in project dependencies. Handles refresh tokens and credential lifecycle. |
+| **google-shopping-merchant-products** | Latest (PyPI) | Per-product GMC status + issue audit via Merchant API v1 | Only official Python SDK for the new Merchant API (replaces Content API). Provides `productStatus.itemLevelIssues[]` with `severity`, `code`, `attribute`, `documentation` per product. Content API shuts down August 2026. |
+| **google-shopping-merchant-reports** | Latest (PyPI) | Merchant-side impression data, `product_view` queries | `reports.search` with `ProductView` table returns `aggregated_reporting_context_status` — the fastest way to find "NOT_ELIGIBLE_OR_DISAPPROVED" products at scale without paginating every product status. |
+| **google-shopping-merchant-issueresolution** | Latest (PyPI) | Programmatic access to GMC diagnostics UI actions | Provides `renderproductissue` with human-readable descriptions; useful for surfacing actionable messages in the Allied Brass dashboard. |
 
-### Supporting Libraries
+**Why Merchant API not Content API:** Content API v2.1 `productstatuses.list` still works but is deprecated. The new Merchant API packages are the supported path forward. Both use the same OAuth credentials already in GCP secrets.
+
+**Integration point:** Add to `pyproject.toml` dependencies. Auth reuses existing `google-auth>=2.48.0` service account credentials.
+
+```toml
+# Add to pyproject.toml [project.dependencies]
+"google-shopping-merchant-products>=0.1.0",
+"google-shopping-merchant-reports>=0.1.0",
+"google-shopping-merchant-issueresolution>=0.1.0",
+```
+
+---
+
+### Supporting Libraries — Diagnostics-Specific
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| pandas | >=2.0 | Data processing for large result sets | Processing 50K+ row query results before Supabase insert. Already in project. Essential for batch operations and data transformation. |
-| supabase | >=2.0 | Data storage | Storing search terms, performance data, keyword metrics. Already integrated with project. |
-| google-api-python-client | >=2.0 | Merchant API integration | Required for custom_label_0 sync via Merchant API. Already in project for GMC integration. |
-| httpx | >=0.25 | HTTP client for API calls | Async-capable client for concurrent API operations. Already in project dependencies. |
+| **google-ads** (existing) | >=28.4.1 | `shopping_product` resource for per-product eligibility status linked to Google Ads campaigns | Use GAQL `SELECT shopping_product.status, shopping_product.issues FROM shopping_product WHERE shopping_product.status != 'ELIGIBLE'` — returns products that are IN a shopping campaign but disapproved/limited. Complements GMC-side audit. |
+| **pandas** (existing) | >=2.0 | Join GMC issue data with Supabase `variant_index` and `generated_content` tables | Already installed. Use for pivot tables: issue_code → SKU count, severity heatmaps, coverage gap analysis. |
+| **rich** (existing) | >=13.0 | CLI diagnostic report rendering | Already installed. Use `rich.table.Table` and `rich.progress` for script output. No new dependency. |
+| **httpx** (existing) | >=0.25 | Direct Google Sheets API verification calls | Already installed. Use to fetch and parse live sheet rows to verify content actually made it to the supplemental feed. |
 
-## Alternatives Considered
+---
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Orchestration | asyncio + Semaphore | Airflow / Prefect / Dagster | Too heavyweight for Cloud Run; designed for scheduled DAGs, not API-triggered batches; adds deployment complexity (need separate Airflow server) |
-| Orchestration | asyncio + Semaphore | Cloud Tasks | Good option but adds GCP service dependency; asyncio is simpler for tightly coupled batch work; consider if jobs need to survive deployments (current limitation of Cloud Run background tasks) |
-| Rate Limiting | aiolimiter | Token bucket from scratch | Don't reinvent; aiolimiter is battle-tested, async-native |
-| Retry Logic | tenacity | retrying library | retrying is deprecated, not maintained since 2016 |
-| Validation | Pydantic v2 | Great Expectations | GE is for data warehouse profiling/reporting; overkill for API validation |
-| Validation | Pydantic v2 | Pandera | Designed for DataFrame validation; you're working with dict/JSON from APIs |
-| Logging | structlog | loguru | Loguru is simpler but lacks async context propagation (ContextVars); structlog integrates better with Cloud Run structured logging |
-| Logging | structlog | python-json-logger | Minimal features; structlog provides richer processor pipeline |
-| Dashboards | Recharts + Tremor | Chart.js | Chart.js is imperative (not React-friendly); Recharts is declarative |
-| Dashboards | Recharts + Tremor | D3.js | Too low-level; D3 requires custom SVG manipulation; Recharts/Tremor are higher-level |
-| Dashboards | Recharts + Tremor | Plotly | Heavy library (larger bundle); Recharts is lighter, faster |
-| Real-time | SSE | WebSockets (Socket.IO) | SSE is simpler for one-way updates (server → client); WebSockets are overkill for batch progress |
-| Queue | asyncio tasks | RQ / Celery / Dramatiq | Require Redis/RabbitMQ; added infrastructure; Cloud Run background tasks are sufficient for 6-minute jobs |
+### Development Tools — Diagnostic Validation
+
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| **Google Ads Query Builder** (web) | Construct and validate GAQL queries before coding | https://developers.google.com/google-ads/api/docs/developer-toolkit/gaa-query-builder — free, no install. Use to prototype `shopping_product` and `shopping_performance_view` queries. |
+| **Google Ads Query Validator** (web) | Validate GAQL syntax against API schema | https://developers.google.com/google-ads/api/docs/developer-toolkit/gaa-query-validator — validates field selectability before writing Python. |
+| **Rich Results Test** (web) | Validate product JSON-LD structured data on Shopify storefront | https://search.google.com/test/rich-results — checks schema.org Product markup for name, image, offers, price. Run against `alliedbrass.com/products/[slug]` to verify Shopify structured data is valid. |
+| **GMC Diagnostics UI** (web) | Source of truth for account-level issues before scripting | Check Merchant Center > Products > Diagnostics before building scripts. Confirm issue categories exist. The API mirrors this data. |
+
+---
+
+## GAQL Queries for Impact Diagnostics
+
+These are the specific GAQL patterns to implement in the Python pipeline. All use the existing `google-ads` client.
+
+### 1. Product Eligibility Status Audit
+
+Finds products IN campaigns that are not serving ads. The most direct "why isn't this showing up?" diagnostic.
+
+```sql
+SELECT
+  shopping_product.resource_name,
+  shopping_product.merchant_center_id,
+  shopping_product.feed_label,
+  shopping_product.item_id,
+  shopping_product.status,
+  shopping_product.issues
+FROM shopping_product
+WHERE shopping_product.status != 'ELIGIBLE'
+```
+
+**Integration point:** New file `src/feedops/integrations/gmc_product_audit.py`. Call from a new
+Cloud Run endpoint `GET /diagnostics/feed-audit` or as a standalone script.
+
+### 2. Impression Share — Where Traffic Is Lost
+
+Answers "are we losing impressions to budget or to rank?" at campaign level.
+
+```sql
+SELECT
+  campaign.name,
+  campaign.id,
+  metrics.search_impression_share,
+  metrics.search_budget_lost_impression_share,
+  metrics.search_rank_lost_impression_share,
+  segments.date
+FROM campaign
+WHERE campaign.advertising_channel_type = 'SHOPPING'
+  AND segments.date DURING LAST_30_DAYS
+```
+
+**Note:** Impression share is only available at campaign and ad group level (HIGH confidence — confirmed in Google Ads API docs). Not available at product-item level. Join with `shopping_performance_view` by campaign to identify which products are in budget-constrained vs. rank-constrained campaigns.
+
+### 3. Product-Level Performance — Which SKUs Are Actually Serving
+
+```sql
+SELECT
+  segments.product_item_id,
+  segments.product_title,
+  segments.product_feed_label,
+  metrics.impressions,
+  metrics.clicks,
+  metrics.cost_micros,
+  metrics.conversions,
+  metrics.conversions_value
+FROM shopping_performance_view
+WHERE segments.date DURING LAST_30_DAYS
+  AND metrics.impressions > 0
+ORDER BY metrics.impressions DESC
+LIMIT 500
+```
+
+**Integration point:** Compare this list against `generated_content` in Supabase to find the "published but not serving" gap. Join on `segments.product_item_id` = lowercase GMC offer ID.
+
+### 4. Zero-Impression Published SKUs (the core impact gap diagnostic)
+
+No direct GAQL for this — it requires a JOIN at the Python layer:
+
+```python
+# Pseudo-code for the diagnostic join
+published_skus = supabase.query("SELECT gmc_offer_id FROM batch_sku_assignments WHERE status = 'published'")
+serving_skus = google_ads.query(shopping_performance_view_query)  # impressions > 0
+zero_impression_published = published_skus - serving_skus
+# These are SKUs where content was published but Google isn't showing them
+```
+
+---
+
+## GMC Product Status Audit — Merchant API Pattern
+
+Uses `google-shopping-merchant-products` and `google-shopping-merchant-reports`.
+
+### Fast Path: Filter Disapproved via Reports API
+
+Faster than paginating all product statuses. Returns only problem products.
+
+```python
+from google.shopping.merchant_reports_v1beta import ReportServiceClient
+from google.shopping.merchant_reports_v1beta.types import SearchRequest
+
+client = ReportServiceClient(credentials=credentials)
+request = SearchRequest(
+    parent=f"accounts/{merchant_id}",
+    query="""
+        SELECT offer_id, id, title, item_issues
+        FROM product_view
+        WHERE aggregated_reporting_context_status = 'NOT_ELIGIBLE_OR_DISAPPROVED'
+    """,
+    page_size=1000,
+)
+for row in client.search(request=request):
+    # row.product_view.offer_id, row.product_view.item_issues
+```
+
+### Per-Product Issue Detail (after fast path identifies problem SKUs)
+
+```python
+from google.shopping.merchant_products_v1beta import ProductsServiceClient
+
+products_client = ProductsServiceClient(credentials=credentials)
+# product_name format: "accounts/{merchant_id}/products/{product_id}"
+product = products_client.get_product(name=product_name)
+for issue in product.product_status.item_level_issues:
+    print(issue.code, issue.severity, issue.attribute, issue.documentation)
+```
+
+**Severity values:** `critical` (account suspension risk), `error` (warning, may cause disapproval),
+`suggestion` (optimization opportunity). Focus v1.2 fixes on `critical` and `error` first.
+
+---
+
+## Feed Content A/B Testing Approach
+
+**Recommendation:** Manual cohort split using custom labels, not a third-party tool. Reason: Allied Brass has 2,784 SKUs — enough statistical power — and the existing supplemental feed infrastructure supports this without new tooling.
+
+**Pattern (verified by Feedonomics, DataFeedWatch, industry sources):**
+
+1. Split SKUs into two cohorts by modulo of product_id: even = control, odd = test
+2. Write different content variants to `custom_label_3` (currently unused) to track cohort
+3. Publish test cohort with new content; keep control cohort on old content
+4. After 30 days, compare `shopping_performance_view` impressions/CTR/CVR between cohorts
+5. Statistical significance: minimum 100 clicks per cohort before drawing conclusions
+
+**No new tool needed.** Implement as a filter in the existing batch publishing flow: `batch_sku_assignments.cohort = 'control' | 'test'`. Add `cohort` column to `batch_sku_assignments` or use `custom_label_3` in the supplemental feed.
+
+**Why not Google's native A/B experiment tool:** Google Ads launched Shopping experiment support (confirmed, searchengineland.com 2024) but it requires Performance Max or Smart Shopping campaigns, not standard Shopping. Allied Brass likely uses standard Shopping — verify before investing in this path.
+
+---
+
+## Content Propagation Verification Stack
+
+**Problem:** After publishing to Google Sheets supplemental feed, how do we know Google ingested it?
+
+### Verification Layers (in order of reliability)
+
+| Layer | Tool | How to Check | Latency |
+|-------|------|-------------|---------|
+| 1. Google Sheets write confirmation | `gspread` (existing) | Verify row exists with correct content in sheet | Immediate |
+| 2. GMC feed fetch status | Merchant API `datasources.list` | Check `lastFetchTime` and `fetchSchedule` on data source | ~1-24 hours |
+| 3. GMC product status update | `productstatuses.get` | `googleExpirationDate` advances, `destinationStatuses` changes | 1-3 days |
+| 4. Google Ads serving confirmation | `shopping_performance_view` | Impressions appear for product_item_id | 3-7 days |
+
+**Implementation:** Add a `propagation_check` field to `publish_events` table tracking which verification layer has been confirmed. Run as a Cloud Scheduler daily job calling the existing `/api/performance/capture-snapshot` endpoint, extended with GMC status polling.
+
+### Concrete Verification Script Pattern
+
+```python
+# src/feedops/integrations/propagation_verifier.py
+async def verify_propagation(gmc_offer_ids: list[str]) -> dict:
+    """
+    Check propagation status for a batch of published SKUs.
+    Returns dict of offer_id -> PropagationStatus.
+    """
+    # Layer 1: sheets check (fast, use existing gspread client)
+    sheet_confirmed = await check_google_sheets(gmc_offer_ids)
+
+    # Layer 2: GMC status (use Merchant API products client)
+    gmc_confirmed = await check_merchant_center_status(gmc_offer_ids)
+
+    # Layer 3: Ads serving (use existing GAQL shopping_performance_view)
+    ads_serving = await check_ads_serving(gmc_offer_ids)
+
+    return {id: PropagationStatus(sheet=s, gmc=g, ads=a)
+            for id, s, g, a in zip(gmc_offer_ids, sheet_confirmed, gmc_confirmed, ads_serving)}
+```
+
+---
+
+## Structured Data Validation
+
+**For Shopify storefront** (alliedbrass.com): Product schema.org markup affects organic search rich results, not Shopping ads directly. Low priority for impact debugging unless organic traffic is a goal.
+
+**For GMC feed fields:** The relevant "structured" validation is already in the supplemental feed:
+- `structured_title` (column M in Google Sheets)
+- `structured_description` (column N)
+
+Validate these fields by checking they're non-empty after publish via the existing sheet-read pattern in `google-sheets.ts`.
+
+**If Shopify structured data validation is needed:**
+- Tool: Google Rich Results Test (https://search.google.com/test/rich-results) — free, no install
+- Check `Product` type, verify `offers.price`, `offers.availability`, `image`, `name` fields
+- Run against 5-10 sample product URLs to spot systematic gaps
+
+---
+
+## What NOT to Use
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| **Content API for Shopping v2.1 `productstatuses`** | Deprecated, August 2026 shutdown; same auth overhead as Merchant API | `google-shopping-merchant-products` (Merchant API v1) |
+| **Third-party feed auditing SaaS** (DataFeedWatch, Feedonomics, Channable) | Expensive, external, can't join against Supabase data, no programmatic output | Build thin audit script using Merchant API + existing GAQL |
+| **Google Optimize / Optimize 360** | Discontinued September 2023 | Custom cohort split via `custom_label_3` in supplemental feed |
+| **schema.org validators for impact debugging** | JSON-LD validates HTML page structure; Shopping ads use feed data, not page schema | GMC `productstatuses` API for feed-level validation |
+| **BigQuery / Looker Studio** | Overkill for 2,784 SKU dataset; adds infrastructure to maintain | pandas + existing Supabase tables for diagnostic joins |
+| **Separate A/B testing infrastructure** | Unnecessary complexity for feed testing | Custom label cohort split in existing supplemental feed |
+
+---
 
 ## Installation
 
-### Python Pipeline
+Only three new Python packages need to be added for the full diagnostic capability:
 
 ```bash
-cd /Users/bobby/Documents/GitHub/Allied-FeedOps
+# Add to pyproject.toml then run:
+uv pip install google-shopping-merchant-products google-shopping-merchant-reports google-shopping-merchant-issueresolution
 
-# New dependencies for v1.0 (add to pyproject.toml)
-uv pip install tenacity==9.1.4
-uv pip install aiolimiter==1.2.1
-uv pip install structlog>=24.5.0
-uv pip install prometheus-client==0.21.1
-
-# Update pyproject.toml
-# [project]
-# dependencies = [
-#   ...existing...
-#   "tenacity>=9.1.4",
-#   "aiolimiter>=1.2.1",
-#   "structlog>=24.5.0",
-#   "prometheus-client>=0.21.1",
-# ]
+# Verify existing packages cover remaining needs:
+uv pip show google-ads        # should show >=28.4.1
+uv pip show google-api-python-client  # covers Sheets verification
+uv pip show supabase          # covers DB joins
 ```
 
-### Dashboard
+**No dashboard changes needed** for diagnostic scripts — run as standalone Python scripts in
+`src/feedops/scripts/` or as new Cloud Run endpoints.
 
-```bash
-cd dashboard
+---
 
-# Dashboard visualization (new for v1.0)
-npm install @tremor/react@latest
+## Alternatives Considered
 
-# Already installed (no action needed):
-# - recharts@3.7.0
-# - zustand@5.0.11
-# - @tanstack/react-query@5.90.20
-```
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Merchant API `product_view` query (fast path) | Paginate all `productstatuses.list` | When you need complete issue detail for every SKU, not just disapproved ones |
+| Custom cohort split via `custom_label_3` | Google Ads Shopping experiments | If Allied Brass migrates to Performance Max campaigns — native experiments work there |
+| GAQL `shopping_product` for eligibility | GMC UI manual review | Only for spot-checking 1-2 SKUs; doesn't scale to 2,784 |
+| Python scripts in `src/feedops/scripts/` | New Cloud Run endpoints | When diagnostics need to be triggered from the dashboard UI or on a schedule |
 
-## Integration Points with Existing Stack
+---
 
-### 1. FastAPI Endpoints (main.py)
-- **Current**: Single SKU optimization, basic batch creation
-- **Add**: Batch orchestration with asyncio.gather, progress tracking, SSE streaming
-- **Compatibility**: Extends existing `run_async_in_thread()` pattern; no breaking changes
+## Version Compatibility
 
-### 2. Google Ads API Integration
-- **Current**: Basic API calls in `src/feedops/integrations/google_ads_*.py`
-- **Add**: Tenacity retry decorators, aiolimiter rate limiting
-- **Compatibility**: Wrap existing functions; backward compatible
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| `google-shopping-merchant-products` | `google-auth>=2.48.0` | Uses same OAuth2 credentials as existing Google Ads client |
+| `google-shopping-merchant-reports` | `google-auth>=2.48.0` | Same credential chain |
+| `google-ads>=28.4.1` (existing) | API v19-v22 | `shopping_product` resource available since v18; use latest API version |
+| Merchant API client libraries | Python 3.11+ (project requirement) | Min supported is Python 3.8; project uses 3.11, no conflict |
 
-### 3. Database (Supabase)
-- **Current**: Supabase client via REST API
-- **Add**: Pydantic validation models for batch writes, optional asyncpg for bulk inserts
-- **Compatibility**: Supabase pooler handles connection limits; no schema changes
-
-### 4. Logging (main.py:76-80)
-- **Current**: Basic logging with stdlib logging
-- **Migration**: Replace with structlog; keeps same log levels
-- **Breaking**: Log format changes from text to JSON (better for Cloud Logging)
-
-### 5. Dashboard (Next.js)
-- **Current**: Recharts for charts, custom components
-- **Add**: Tremor for pre-built dashboard components, SSE for real-time updates
-- **Compatibility**: Tremor builds on Recharts; coexist peacefully
-
-### 6. Observability (main.py:112-141)
-- **Current**: Request ID middleware, basic metrics
-- **Extend**: Prometheus metrics, structlog context propagation
-- **Compatibility**: Enhances existing middleware; no conflicts
-
-## Anti-Patterns to Avoid
-
-### 1. Don't Add a Full Orchestration Framework
-**Anti-Pattern**: Install Airflow/Prefect for batch jobs
-**Why Bad**: Requires separate deployment, DAG-centric design doesn't fit API-triggered batches, overkill for 2,784 SKUs
-**Instead**: Use asyncio.gather with Semaphore for concurrency control
-
-### 2. Don't Use Synchronous Batch Processing
-**Anti-Pattern**: Process 2,784 SKUs sequentially in a loop
-**Why Bad**: 2,784 SKUs × 6 min/SKU = 278 hours (11+ days)
-**Instead**: Async batch processing with 10 concurrent SKUs = 28 hours (achievable)
-
-### 3. Don't Ignore Rate Limits Until They Hit
-**Anti-Pattern**: Blast Google Ads API, catch RESOURCE_TEMPORARILY_EXHAUSTED, sleep 60s
-**Why Bad**: Wastes quota, unpredictable latency, triggers account review
-**Instead**: Proactive rate limiting with aiolimiter (5 req/sec per CID)
-
-### 4. Don't Validate Everything in the Database
-**Anti-Pattern**: Add 50+ check constraints for complex business rules
-**Why Bad**: Poor error messages, hard to debug, coupling logic to schema
-**Instead**: Database for simple constraints (NOT NULL, CHECK > 0), Pydantic for complex validation
-
-### 5. Don't Build Custom Dashboard Components
-**Anti-Pattern**: Hand-code KPI cards, progress bars, data tables from scratch
-**Why Bad**: Weeks of dev time, inconsistent styling, maintenance burden
-**Instead**: Use Tremor's pre-built components (30+ components, Tailwind-integrated)
-
-### 6. Don't Poll Every Second for Progress
-**Anti-Pattern**: `setInterval(() => fetch('/batch-status'), 1000)`
-**Why Bad**: Hammers API, wastes Cloud Run CPU, delays scale-to-zero
-**Instead**: Use SSE for server-push updates or poll every 5-10 seconds
-
-### 7. Don't Mix Pydantic v1 and v2
-**Anti-Pattern**: Keep some models on v1 (`from pydantic.v1 import BaseModel`)
-**Why Bad**: Confusing, dual validation logic, performance penalty
-**Instead**: Migrate fully to v2 (already in pyproject.toml; ensure all code uses v2)
-
-### 8. Don't Use WebSockets for One-Way Data
-**Anti-Pattern**: Implement Socket.IO for batch progress updates
-**Why Bad**: Overkill for server→client streaming, harder to debug, needs connection management
-**Instead**: Use SSE (simpler, built-in browser support, auto-reconnect)
-
-### 9. Don't Store Logs in Database
-**Anti-Pattern**: `INSERT INTO batch_logs (level, message, timestamp) VALUES (...)`
-**Why Bad**: Database bloat, slow queries, hard to search/aggregate
-**Instead**: Use Cloud Logging (auto-ingestion from Cloud Run), query with Log Explorer
-
-### 10. Don't Retry Non-Retryable Errors
-**Anti-Pattern**: Retry all exceptions 5 times
-**Why Bad**: Wastes time on permanent failures (missing SKU, auth errors)
-**Instead**: Classify errors (retryable vs permanent), use `retry_if_exception_type(RetryableAPIError)`
-
-## Configuration Example
-
-### Environment Variables (.env.vercel)
-```bash
-# Existing variables (no changes)
-SUPABASE_URL=...
-SUPABASE_SERVICE_ROLE_KEY=...
-GOOGLE_ADS_DEVELOPER_TOKEN=...
-
-# New: Rate limiting config
-GOOGLE_ADS_QPS_LIMIT=5  # Queries per second per CID
-BATCH_CONCURRENCY=10     # Max concurrent SKUs
-
-# New: Batch job config
-BATCH_SIZE=10            # SKUs per batch
-BACKFILL_DAYS=180        # Historical data window
-```
-
-### Feature Flags (optional)
-```python
-# In runtime_controls.py (already exists)
-ENABLE_BATCH_BACKFILL = os.getenv('ENABLE_BATCH_BACKFILL', 'true').lower() == 'true'
-ENABLE_PROMETHEUS_METRICS = os.getenv('ENABLE_PROMETHEUS_METRICS', 'true').lower() == 'true'
-```
-
-## Migration Path
-
-### Phase 1: Validation & Error Handling (Week 1)
-1. Add tenacity, aiolimiter to pyproject.toml
-2. Create Pydantic validation models in `src/feedops/validation/`
-3. Wrap Google Ads API calls with retry decorators
-4. Test with single SKU
-
-### Phase 2: Async Batch Processing (Week 2)
-1. Refactor batch job to use asyncio.gather + Semaphore
-2. Add rate limiting with aiolimiter
-3. Test with 50 SKU batch
-
-### Phase 3: Observability (Week 2)
-1. Replace logging with structlog
-2. Add Prometheus metrics endpoint
-3. Set up GCP Logging alerts for errors
-
-### Phase 4: Dashboard (Week 3)
-1. Install Tremor
-2. Build backfill dashboard page with progress KPIs
-3. Add SSE for real-time updates (optional)
-
-### Phase 5: Full Backfill (Week 4)
-1. Run 180-day backfill for 2,784 SKUs
-2. Monitor metrics, adjust concurrency/rate limits
-3. Validate data completeness
+---
 
 ## Sources
 
-**Batch Orchestration**:
-- [Top 17 Data Orchestration Tools for 2026](https://lakefs.io/blog/data-orchestration-tools/)
-- [Python Workflow Framework: 4 Orchestration Tools to Know](https://www.advsyscon.com/blog/workload-orchestration-tools-python/)
-- [Cloud Run Jobs & Scheduler](https://medium.com/@markwkiehl/google-cloud-run-jobs-scheduler-22a4e9252cf0)
-- [Cloud Tasks Python App Engine: Queues Routing 2026](https://johal.in/cloud-tasks-python-app-engine-queues-routing-2026/)
+- [Google Merchant API — List products data and product issues](https://developers.google.com/merchant/api/guides/products/list-products-data-issues) — MEDIUM confidence (official docs, verified Feb 2026)
+- [Issue severity and Merchant Center Diagnostics](https://developers.google.com/shopping-content/guides/how-tos/severity-mapping) — HIGH confidence (official)
+- [Google Ads API — Shopping Ads Reporting](https://developers.google.com/google-ads/api/docs/shopping-ads/reporting) — HIGH confidence (official)
+- [shopping_product resource fields (v19)](https://developers.google.com/google-ads/api/fields/v19/shopping_product) — HIGH confidence (official)
+- [Merchant API Python client libraries](https://developers.google.com/merchant/api/client-libraries/python) — HIGH confidence (official)
+- [A/B Testing Product Titles for Google Shopping — Feedonomics](https://feedonomics.com/blog/how-to-ab-test-different-titles-for-google-shopping/) — MEDIUM confidence (verified industry source)
+- [Google Ads tests A/B experiments for Shopping product data — Search Engine Land](https://searchengineland.com/google-ads-tests-a-b-experiments-for-shopping-ad-product-data-467644) — MEDIUM confidence (industry news, verify campaign type requirement)
+- [PyPI — google-shopping-merchant-products](https://pypi.org/project/google-shopping-merchant-accounts/) — HIGH confidence (official package registry)
+- [productstatuses.list — Content API for Shopping](https://developers.google.com/shopping-content/reference/rest/v2.1/productstatuses/list) — HIGH confidence (official, deprecated path for reference)
 
-**Error Handling & Retry**:
-- [Retry Failed Python Requests in 2026](https://decodo.com/blog/python-requests-retry)
-- [Tenacity Documentation](https://tenacity.readthedocs.io/)
-- [API Error Handling & Retry Strategies: Python Guide 2026](https://easyparser.com/blog/api-error-handling-retry-strategies-python-guide)
-- [Google Ads API Rate Limits Best Practices](https://developers.google.com/google-ads/api/docs/productionize/rate-limits)
+---
 
-**Data Validation**:
-- [The data validation landscape in 2025](https://aeturrell.com/blog/posts/the-data-validation-landscape-in-2025/)
-- [Exploring Data Quality Frameworks](https://www.perarduaconsulting.com/post/exploring-data-quality-frameworks-great-expectations-pandas-profiling-and-pydantic-in-python)
-- [Pydantic v2 Migration Guide](https://docs.pydantic.dev/latest/migration/)
-
-**Async & Rate Limiting**:
-- [AsyncIO Rate Limiter Documentation](https://asynciolimiter.readthedocs.io/)
-- [Limiting concurrency in Python asyncio](https://death.andgravity.com/limit-concurrency)
-- [Python asyncio: Complete Guide 2026](https://devtoolbox.dedyn.io/blog/python-asyncio-complete-guide)
-
-**Observability**:
-- [Structured Logging in Python using Loguru](https://www.soumendrak.com/series/practical-observability-with-python/structured-logging/)
-- [Structlog ContextVars: Python Async Logging 2026](https://johal.in/structlog-contextvars-python-async-logging-2026/)
-- [From Chaos to Clarity: Structured Logging on GCP](https://www.waltlabs.io/blog/structured-logging-in-python-on-gcp)
-- [Supabase Metrics API](https://supabase.com/docs/guides/telemetry/metrics)
-
-**Dashboard Visualization**:
-- [Using Next.js and Tremor for charts](https://www.erichowey.dev/writing/using-nextjs-tremor-for-charts-graphs-data-visualization/)
-- [Tremor React UI Components](https://www.tremor.so/)
-- [Building a Real-Time Dashboard with Next.js and Chart.js](https://cloudactivelabs.com/en/blog/building-a-real-time-dashboard-with-nextjs-and-chartjs)
-- [React Chart Libraries Comparison](https://www.kylegill.com/essays/react-chart-libraries)
+*Stack research for: Google Shopping feed impact diagnostics*
+*Researched: 2026-02-20*
+*Milestone: v1.2 Impact Debug & Fix*

@@ -1,408 +1,347 @@
 # Pitfalls Research
 
-**Domain:** Large-scale batch data collection and monitoring for Google Ads feed optimization
-**Researched:** 2026-02-13 (Updated from 2026-02-11)
-**Confidence:** HIGH
+**Domain:** Diagnosing and fixing Google Shopping feed impact issues in existing systems (Allied FeedOps v1.2)
+**Researched:** 2026-02-20
+**Confidence:** HIGH — grounded in verified codebase evidence, documented investigation history, and confirmed external patterns
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Silent Completion with Incomplete Data
+### Pitfall 1: Blaming Content Quality When the Real Bottleneck is Coverage
 
 **What goes wrong:**
-Batch job completes successfully (status = 'completed'), but only collected data for 30% of SKUs. Dashboard shows "success" but data is incomplete. Users don't discover missing data until they try to use it weeks later.
+Team spends weeks tuning prompts, improving gold standard examples, and raising average quality scores from 75 to 82/100 — but Shopping impressions barely move. The optimization improved content that was never being surfaced in the first place. The real problem was that only ~200 of 2,784 SKUs had published content in GMC, so the higher-quality content affected a negligible fraction of catalog exposure.
 
 **Why it happens:**
-- API errors (rate limits, timeouts) are caught and logged but don't fail the entire batch
-- Progress counters increment even when individual operations fail
-- Status updates check "processed count == total count" not "success count == total count"
-- No post-completion validation of data coverage
+Coverage is invisible in the metrics dashboards most teams watch. Google Ads shows campaign-level impressions. If 2,500 SKUs still have original unoptimized titles, a 7-point quality improvement on 200 SKUs moves total catalog CTR by fractions of a percent. Teams optimize the wrong layer because quality is legible and measurable while coverage requires explicit counting.
 
 **How to avoid:**
-1. Track three separate counters: `total_skus`, `success_count`, `failure_count`
-2. Final status logic: `status = 'partial' if failure_count > 0 else 'completed'`
-3. Add post-job validation: Query collected data count, compare to expected count
-4. Set `error_message` even when status is 'completed' if any SKUs failed
-5. Dashboard alerts: Warn user if `success_count < total_skus * 0.95` (95% threshold)
+Before touching prompt quality or generation logic, establish a coverage baseline:
+1. Count SKUs with `approved_content` in `generated_content` table
+2. Count SKUs with at least one `publish_events` row (actually pushed to Google Sheets)
+3. Verify Google Sheets row count matches expected published SKU × variant count
+4. Check that GMC supplemental feed is actually fetching the updated sheet
+5. If published SKU count < 10% of catalog, fix coverage before fixing quality
 
 **Warning signs:**
-- Job shows "completed" but logs contain rate limit errors
-- Database row count doesn't match `total_skus` count
-- Timestamps show batch finished too quickly (4 minutes for 2,784 SKUs = impossible)
-- Success rate dropped from historical 98% to 60% but status still "completed"
+- Generate and approve content but impressions don't move
+- Quality scores go up but campaign CTR stays flat
+- Less than 500 SKUs have `publish_events` entries despite months of operation
 
 **Phase to address:**
-Phase 1 (Foundation) - Validation framework must be in place before first batch runs
+Phase 1 (Diagnosis) — Measure coverage first, before any fix is applied
 
-**Confidence:** HIGH — Learned from documented baseline capture issues and [batch processing metrics best practices](https://oneuptime.com/blog/post/2026-01-30-batch-processing-metrics/view).
+**Confidence:** HIGH — Verified via `generated_content`, `publish_events`, and `variant_index` table structure
 
 ---
 
-### Pitfall 2: Database Connection Exhaustion from Concurrent Batch Jobs
+### Pitfall 2: Assuming Feature Flags Are Active When They Default to True
 
 **What goes wrong:**
-Start 5 batch jobs simultaneously (different date ranges). First job succeeds, others fail with "connection pool exhausted" errors. Supabase shows 100/100 connections used, jobs hang waiting for connections that never free up.
+`PROMPT_CONTRACT_V2`, `INTENT_CURATOR_V1`, and `SEGMENT_STRATEGY_V1` all default to `True` if the environment variable is absent (see `feature_flags.py` lines 16-24). A developer sees these defined as feature flags and assumes they need to be explicitly enabled in production. They check Cloud Run environment variables, find no `PROMPT_CONTRACT_V2=1` entry, and conclude the feature is off — and waste time trying to "activate" something that was already running.
 
 **Why it happens:**
-- Each background thread opens its own Supabase client connection
-- Connection pooling doesn't work across threads in Python
-- Supabase free tier: max 50 direct connections, pro tier: max 200
-- Batch jobs hold connections for entire duration (30+ minutes)
-- No connection cleanup on job failure or timeout
-- Each API call within batch opens new connection instead of reusing
+Feature flags that default to `True` are unusual. The common pattern is opt-in (default `False`). When a developer sees a flag with no env var set, they assume it's disabled. This codebase inverts the convention: absence of the variable means enabled.
 
 **How to avoid:**
-1. Implement global connection pool with max size = Supabase tier limit - 20 (buffer for dashboard)
-2. Use connection context managers that guarantee cleanup: `with get_pooled_connection() as conn:`
-3. Limit concurrent batch jobs: Database flag `SELECT count(*) FROM batch_jobs WHERE status IN ('processing', 'queued')` < 3
-4. Fail-fast: Return 429 "Too many concurrent jobs" instead of queueing indefinitely
-5. Monitor `pg_stat_activity` in health checks, kill idle connections > 5 minutes old
-6. Use Supabase connection pooling mode ('transaction' for batch jobs, not 'session')
+Read `feature_flags.py` before assuming any flag is inactive:
+```python
+def _is_enabled(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default  # <-- returns True when env var is absent
+```
+To verify actual flag state in production, add a `/config/flags` health endpoint that logs active flag states on startup, or check Cloud Run logs for `"PROMPT_CONTRACT_V2 disabled"` — the absence of this log line means it IS enabled and using canonical Python prompts.
 
 **Warning signs:**
-- Cloud Run logs show "connection timeout" after 2-3 concurrent batches start
-- Supabase dashboard shows connections spike to limit and stay there
-- Jobs stuck in "processing" status with no progress for > 10 minutes
-- Error rate increases when multiple users trigger batch operations
+- Searching Cloud Run env vars for the flag name and finding nothing, then concluding it's off
+- Attempting to set `PROMPT_CONTRACT_V2=1` in Cloud Run thinking this enables it
+- Treating the absence of an env var as proof the feature is not running
 
 **Phase to address:**
-Phase 1 (Foundation) - Connection management is architectural, can't retrofit later
+Phase 1 (Diagnosis) — Verify flag states before diagnosing generation quality
 
-**Confidence:** HIGH — Confirmed in [Supabase connection management docs](https://supabase.com/docs/guides/database/connection-management) and [serverless database connection challenges](https://vercel.com/blog/the-real-serverless-compute-to-database-connection-problem-solved).
+**Confidence:** HIGH — Verified directly in `/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/pipeline/feature_flags.py`
 
 ---
 
-### Pitfall 3: Google Ads API Rate Limits with No Backoff
+### Pitfall 3: Treating Dead Code as the Active Execution Path
 
 **What goes wrong:**
-Batch processes 500 SKUs successfully, hits rate limit, then fails the remaining 2,284 SKUs. All 2,284 fail with RESOURCE_TEMPORARILY_EXHAUSTED. No retry logic, entire batch marked failed, data for first 500 SKUs is lost because transaction rolled back.
+`dashboard/src/lib/regeneration/core.ts` contains a complete alternative content generation pipeline — its own OpenAI calls, prompt construction, and `regenerateContent()` function. It looks wired. It has substantial code. A developer investigating why content seems "off" reads this file and concludes this is the runtime path. They spend hours diagnosing prompt issues in TypeScript that are never executed. Meanwhile the actual runtime path is the Python Cloud Run pipeline.
 
 **Why it happens:**
-- Google Ads API rate limits are not documented precisely - varies with server load
-- Token bucket algorithm means hitting one limit puts you in "cool down" for unknown duration
-- No exponential backoff implemented - code retries immediately and exhausts retry budget
-- Batch size (10 SKUs) optimal for latency, but creates 278 API calls (2,784 / 10)
-- Campaign-join pattern = 2 API calls per SKU = 556 total calls
-- Keyword Planner = additional API call per unique keyword (100s of calls)
-- Rate limit applies per developer token + customer ID, not per job
+Dead code that isn't marked as deprecated looks exactly like live code. Signal audit confirmed `core.ts:regenerateContent()` has zero imports in the entire codebase. But without that knowledge, it's indistinguishable from an active path. The same pattern applies to `dashboard/src/lib/regeneration/prompts.ts` — `SYSTEM_PROMPT` and `PLATFORM_CONTEXT` are defined there but never used at runtime; only `validateGeneratedContent()` is called.
 
 **How to avoid:**
-1. Implement exponential backoff: 5s, 15s, 45s, 2min, 5min delays
-2. Global rate limiter: Track API call timestamps, enforce max 10 QPS across all jobs
-3. Break batch into smaller chunks with sleep between: Process 100 SKUs, sleep 30s, repeat
-4. Persist progress after each chunk: Don't wait until end to commit data
-5. Implement jitter in retry delays: `random.uniform(base_delay * 0.8, base_delay * 1.2)`
-6. Monitor for rate limit pattern: If 3 consecutive chunks fail, pause job for 10 minutes
-7. Use BatchJobService for Google Ads mutations (auto-retries), not for reporting queries
+Before diagnosing any quality issue, verify the actual execution path by tracing calls from the UI entry point forward:
+1. `RegenerateButton.tsx` → `POST /api/regenerate` (dashboard route)
+2. `route.ts` → `POST {PIPELINE_URL}/regenerate` (Python Cloud Run)
+3. Python handles all generation; TypeScript is only a proxy
+Run `grep -r "from '@/lib/regeneration/core'" dashboard/src` — it returns nothing. That's proof core.ts is dead.
 
 **Warning signs:**
-- Multiple RESOURCE_TEMPORARILY_EXHAUSTED errors in logs clustered within seconds
-- API call timestamps show 50 calls in 3 seconds (way above 10 QPS)
-- Job fails at same point every time (500 SKUs = hit limit consistently)
-- Different jobs running concurrently both fail at ~250 SKUs each (shared rate limit)
+- Reading TypeScript prompt files to understand content generation behavior
+- Diagnosing prompt quality by looking at `dashboard/src/lib/regeneration/prompts.ts`
+- Spending time on `SYSTEM_PROMPT` in TypeScript when Python's `prompts.py` is canonical
 
 **Phase to address:**
-Phase 1 (Foundation) - Rate limiting must be implemented before scaling up
+Phase 1 (Diagnosis) — Trace runtime path before reading any source file
 
-**Confidence:** HIGH — Documented in [Google Ads API rate limits](https://developers.google.com/google-ads/api/docs/productionize/rate-limits) and [batch processing best practices](https://developers.google.com/google-ads/api/docs/batch-processing/best-practices).
+**Confidence:** HIGH — Confirmed via signal audit at `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/audit/signal-audit-2026-02-11/prompt-wiring-map.md`
 
 ---
 
-### Pitfall 4: Stale Data Causing Incorrect Historical Baselines
+### Pitfall 4: Misattributing Low Impact to Auction Dynamics Before Verifying Feed Propagation
 
 **What goes wrong:**
-Collect 180-day baseline for SKU that was just optimized. Baseline includes 179 days of old content performance + 1 day of new content. Post-optimization comparison shows "no improvement" because baseline is contaminated. Can't prove optimization worked.
+Team publishes content to Google Sheets, waits a week, sees no impression uplift, and concludes "Google's auction doesn't reward our optimized titles" or "this category is too competitive." In reality, the supplemental feed never refreshed GMC because the scheduled fetch was misconfigured, pointing to the wrong URL, or the sheet ID changed after a rename. The content change never reached Google's index.
 
 **Why it happens:**
-- No validation that SKU is in "pre-optimization" state before capturing baseline
-- `publish_events` table has publish dates, but baseline capture doesn't check them
-- 180-day window crosses multiple content iterations for frequently updated SKUs
-- Baseline capture runs on schedule without context of recent changes
-- No "time since last publish" filter in query logic
+The propagation chain has four independently-failable steps: (1) Google Sheets write succeeds, (2) GMC scheduled fetch picks up the sheet, (3) GMC processes and approves the product, (4) Google Ads picks up the refreshed product data. Each step is asynchronous. Teams check step 1 (Google Sheets updated) and assume steps 2-4 followed. GMC's supplemental feed fetch is not real-time — it runs on a schedule, typically daily, and failures are silent unless you check GMC's feed diagnostics.
 
 **How to avoid:**
-1. Check `publish_events` before baseline capture: `SELECT MAX(published_at) FROM publish_events WHERE master_sku = ? AND platform = ?`
-2. If published within last 30 days: Skip baseline or shorten window to pre-publish period only
-3. Add `content_version` to baselines table: Link to specific content iteration
-4. Validation rule: Baseline date range must not overlap with any publish date ± 7 days
-5. Dashboard flag: Show "baseline may be contaminated" warning if published during baseline period
-6. Alternative: Capture baseline at time of approval, before publish (proactive not reactive)
+Before concluding no impact, verify propagation at each layer:
+1. Check Google Sheets row contains the new title for the target offer ID
+2. In GMC > Products > Your products, search for the offer ID and check the title shown in GMC
+3. Compare GMC product title to what's in Google Sheets — if they differ, feed hasn't propagated
+4. Check GMC > Feeds > Supplemental feed > Fetch history for error status and last-success timestamp
+5. Only after confirming GMC shows the new content, wait 48-72 hours before measuring impact
 
 **Warning signs:**
-- Baseline shows steady performance but publish_events shows 3 updates in that period
-- Post-publish delta analysis shows identical CTR despite content changes
-- Baseline capture timestamp is AFTER publish timestamp (reversed causality)
-- Historical trend chart shows spike in metrics mid-baseline period
+- Google Sheets shows new title, Google Ads shows old title in product details
+- GMC feed fetch history shows errors or "last fetched: 8 days ago"
+- Impression data shows no change immediately after content update (should see change within ~72 hours once propagated)
 
 **Phase to address:**
-Phase 2 (Validation Layer) - Temporal validation requires understanding of data lifecycle
+Phase 1 (Diagnosis) — Verify propagation chain before measuring impact
 
-**Confidence:** HIGH — Based on existing baseline capture troubleshooting guide and project-specific patterns.
+**Confidence:** HIGH — Documented in `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/architecture/data-pipeline.md` and `/docs/audit/gmc-feed-investigation-2026-02-08.md`
 
 ---
 
-### Pitfall 5: Multi-SKU Family Data Aggregation Errors
+### Pitfall 5: Measuring Impact Too Early
 
 **What goes wrong:**
-Query Google Ads for DMF-2/2X performance data. Get back aggregated data for DMF-2/2X, DMF-2/3X, DMF-2/4X, DMF-2/5X (all share product_id). Attribute all impressions/clicks to DMF-2/2X only. Other SKUs show zero data. Total metrics correct, distribution completely wrong.
+Publish optimized titles for 50 SKUs. Check Google Ads performance data 2 days later. See no statistical improvement. Conclude the optimization didn't work. In reality, Google needs time to: re-crawl/re-index the updated feed, re-evaluate product relevance scores, re-enter auctions with updated signals, and accumulate enough impression/click data for statistical significance. Two days is nearly always insufficient.
 
 **Why it happens:**
-- Google Ads aggregates at product_id level for Shopping campaigns
-- Returns data with product_item_id of whichever variant had most impressions
-- variant_index maps offer_id → master_sku, but offer_id returned doesn't match expected
-- Code assumes 1:1 mapping product_item_id → master_sku (FALSE for multi-SKU families)
-- No detection of multi-SKU families before data collection
-- No proportional allocation of aggregated metrics across family members
+Developers used to A/B testing on websites expect near-real-time feedback. Google Shopping works differently — the feed is batch-processed, relevance signals update on Google's schedule (not yours), and Shopping performance data in Google Ads has a built-in ~2-3 day reporting delay.
 
 **How to avoid:**
-1. Pre-flight check: Query variant_index to detect multi-SKU families
-   ```sql
-   SELECT product_id, COUNT(DISTINCT master_sku) as sku_count
-   FROM variant_index
-   GROUP BY product_id
-   HAVING COUNT(DISTINCT master_sku) > 1
-   ```
-2. For multi-SKU families: Collect data once, allocate proportionally based on variant count
-3. Flag multi-SKU data in database: `is_aggregated = true`, `family_members = ['DMF-2/2X', 'DMF-2/3X']`
-4. Dashboard display: Show "aggregated family data" badge, list all members
-5. Alternative: Use variant-level tracking via custom labels (custom_label_4 = master_sku)
+- Minimum measurement window: 14 days post-propagation-confirmation (not post-publish)
+- Preferred window: 28 days for statistical significance at typical Allied Brass impression volumes
+- Do not look at absolute day-over-day changes — compare 14-day periods before vs. after
+- Use `performance_baselines` and `performance_snapshots` tables to capture pre/post windows correctly
+- Filter for `days_since_publish >= 7` before including any snapshot data in impact analysis
 
 **Warning signs:**
-- One SKU in family has 10k impressions, others have 0 (sum is wrong)
-- product_item_id in API response doesn't match any gmc_offer_id in variant_index
-- Baseline data shows 100% of traffic to one variant, impossible product mix
-- Investigation shows all family members use same product_id (SUBSTRING(gmc_offer_id FROM 'shopify_us_(\d+)_'))
+- Measuring within 48 hours of publishing
+- Comparing single-day before vs. single-day after
+- Not accounting for day-of-week seasonality in small windows
+- Comparing against baseline period that includes last week (too recent to be pre-optimization)
 
 **Phase to address:**
-Phase 0 (Current) - Multi-SKU pattern already documented, must extend to batch collection
+Phase 2 (Measurement) — Build measurement protocol into fix rollout plan before fixing anything
 
-**Confidence:** HIGH — Documented in `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/architecture/multi-sku-pattern.md` and baseline capture troubleshooting.
+**Confidence:** HIGH — Corroborated by industry evidence (2-4 week impact window for title changes) and `performance_snapshots` schema design
 
 ---
 
-### Pitfall 6: Cloud Run Container Restart Mid-Batch
+### Pitfall 6: Confusing Query Logic Failures with Data Pipeline Failures
 
 **What goes wrong:**
-Batch job processing 1,400 of 2,784 SKUs. Cloud Run scales down to zero during traffic lull, container terminates, background thread killed. Job record stuck in "processing" status forever. 1,400 SKUs of data collected but not committed. Restart from scratch loses all progress.
+Investigate why a SKU has no performance data. Assume it's a data sync issue — conclude Shopify/GMC/Google Ads pipeline is broken. Spend days auditing the pipeline, finding nothing wrong. The real issue: the query uses `master_sku`-level offer ID matching, but Google Ads returns data attributed to a different master_sku in the same product family (multi-SKU products share a `product_id`).
 
 **Why it happens:**
-- Cloud Run scales to zero after 15 minutes of no HTTP requests
-- Background threads are NOT preserved during scale-down (despite using non-daemon threads)
-- FastAPI BackgroundTasks killed when container terminates
-- No checkpoint/resume mechanism - batch is all-or-nothing
-- Job status never updated to "failed" because no exception thrown (just killed)
-- Deployment during batch processing also kills in-flight jobs
+This exact failure mode occurred in this codebase (documented in `docs/audit/SUMMARY-2026-02-08.md`): query match rate was 0.3% not because data was missing but because the query was too narrow. The investigator's instinct was to check data freshness and sync status — all healthy — rather than the query logic itself. "Data not found" looks identical to "data not queried correctly."
 
 **How to avoid:**
-1. Implement checkpoint system: Commit progress every 100 SKUs, update job status
-2. Job recovery: On restart, check for jobs stuck in "processing" > 1 hour, mark as "failed_recoverable"
-3. Resume logic: Load last checkpoint, continue from `completed_skus` count
-4. Health ping: Background thread pokes HTTP endpoint every 5 minutes to prevent scale-down
-5. Alternative: Use Cloud Run Jobs (not Cloud Run services) for batch operations
-6. Set min-instances=1 for batch processing service (costs ~$10/month, guarantees availability)
-7. Add timeout: If job exceeds expected duration (2,784 SKUs * 5s/SKU = 4 hours), auto-fail
+Before concluding a data pipeline is broken:
+1. Verify the data exists at all: check raw Acatalog.csv directly for the variant ID
+2. Check if the product is multi-SKU: query variant_index for `product_id` matches across multiple `master_sku` values
+3. Try a broader query: use `LIKE 'shopify_us_{product_id}_%'` instead of specific offer IDs
+4. If the broader query returns data, the issue is query logic, not pipeline health
+5. Only after confirming data truly doesn't exist at the source, investigate pipeline health
 
 **Warning signs:**
-- Jobs stuck in "processing" for days with no log activity
-- `completed_at` is NULL but `started_at` is 2 days ago
-- Cloud Run logs show container termination during batch run
-- Deployment logs timestamp matches "stuck job" started_at timestamp
+- All pipeline components (GMC, Sheets, variant_index) show healthy status but performance data is empty
+- Zero performance data for an SKU that has been live in Google Ads for months
+- The problem occurs specifically for SKUs that share a product_id with other master SKUs
 
 **Phase to address:**
-Phase 1 (Foundation) - Checkpoint system must exist before running long batches
+Phase 1 (Diagnosis) — Apply multi-SKU product_id matching check before any pipeline audit
 
-**Confidence:** HIGH — Confirmed in [Cloud Run always-on CPU allocation](https://cloud.google.com/blog/topics/developers-practitioners/use-cloud-run-always-cpu-allocation-background-work) and [background job limitations](https://www.grouparoo.com/blog/google-cloud-run-no-background-job).
+**Confidence:** HIGH — Root cause documented in `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/audit/SUMMARY-2026-02-08.md`
 
 ---
 
-### Pitfall 7: Keyword Planner Cache Stampede
+### Pitfall 7: Breaking Existing Working Workflows When Applying Fixes
 
 **What goes wrong:**
-1000 SKUs all need search volume data for "brass towel bar". Cache is empty. Trigger 1000 concurrent Keyword Planner API calls for same keyword. Hit rate limit, 990 fail. Retry logic triggers 990 more calls. Rate limit again. Exponential growth in failed calls.
+Fix the keyword injection path to use more search query data. The prompt assembly changes make generated content longer. The finish sentence validation (`normalize_and_validate_finish_sentences`) starts rejecting sentences that exceed the validation length threshold. Finish sentence generation starts failing silently. Google/Bing description publishing now omits finish-specific copy. The fix improved headline content quality while breaking a different content layer.
 
 **Why it happens:**
-- No locking mechanism when cache miss detected
-- Multiple threads/jobs check cache simultaneously, all see "not found"
-- Each thread independently calls Keyword Planner API for same keyword
-- 30-day TTL means cache expires all at once for keywords collected in same batch
-- Retry logic doesn't check if another thread already fetched the data
-- No deduplication of keyword requests within a batch
+The content generation pipeline has interdependent validation layers. A change to prompt content changes LLM output structure, which can break downstream validators that expect specific formats, lengths, or patterns. The system has at least three distinct validation gates (`normalize_and_validate_finish_sentences`, `validate_candidate_content` in hybrid path, `validateGeneratedContent` in route.ts), each with its own thresholds. Changes that bypass one gate often hit another unexpectedly.
 
 **How to avoid:**
-1. Implement distributed lock: `SELECT pg_try_advisory_lock(hashtext('keyword'))` before API call
-2. After lock acquired, recheck cache - another thread may have populated it
-3. Batch keyword enrichment: Deduplicate keywords across all SKUs before API calls
-4. Keyword Planner supports bulk requests (up to 1000 keywords) - use it
-5. Cache warming: Pre-fetch top 1000 keywords before batch starts
-6. Stagger TTL: Add random 1-7 days to 30-day TTL so expirations spread out
-7. Rate limit per keyword: Max 1 request per keyword per 10 seconds globally
+Before applying any fix to generation logic:
+1. Run existing test suite: `PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v`
+2. Generate test content for 3-5 SKUs and trace through all validation layers manually
+3. Check finish sentence output specifically — it's the most likely to break silently
+4. For each planned code change, grep for all callers and validators that depend on the changed component
+5. After any fix: verify publish → Google Sheets → GMC propagation still works end-to-end for at least one SKU
 
 **Warning signs:**
-- Keyword Planner logs show 100 calls for "brass towel bar" within 1 second
-- Cache hit rate < 20% despite 30-day TTL (should be 80%+)
-- Rate limit errors only for Keyword Planner, not for other APIs
-- Database shows 1000 rows inserted for same keyword with identical timestamps
+- Fix passes unit tests but finish sentences are empty in generated content
+- `normalize_and_validate_finish_sentences` log shows increased rejections after a change
+- Content quality improves for main title/description but variant descriptions regress
+- Hybrid path validation starts throwing errors that didn't exist before
 
 **Phase to address:**
-Phase 2 (Optimization) - Cache strategy can be improved after foundation works
+Phase 3 (Fix Application) — Run regression checklist before every fix deployment
 
-**Confidence:** MEDIUM — Based on common caching patterns and Keyword Planner API documentation.
+**Confidence:** HIGH — Validated via `docs/architecture/2026-02-11-content-generation-pipeline-current-state.md` which documents path-specific validation asymmetry
 
 ---
 
-### Pitfall 8: Monitoring Blind Spots (Jobs Degrade, Nobody Notices)
+### Pitfall 8: Inferring Runtime Prompt Behavior from Code Without Checking the Actual Prompt Hash
 
 **What goes wrong:**
-Batch jobs run nightly for 3 weeks. Success rate gradually drops from 98% to 65%. Nobody notices. On week 4, user complains "dashboard shows stale data". Investigation reveals 900 SKUs haven't updated in 2 weeks. No alerts fired. No monitoring in place.
+Developer reads `src/feedops/pipeline/prompts.py` and assumes the content they see is what the LLM receives. But prompts.py is a static file. The actual runtime prompt may differ if: (a) PROMPT_CONTRACT_V2 is somehow disabled and Supabase fallback is used, (b) gold standard examples are populated in Supabase and get injected, (c) category guidance from Supabase adds additional context, or (d) the code has been changed but Cloud Run hasn't been redeployed yet (stale container).
 
 **Why it happens:**
-- Job status is binary (success/failed), doesn't capture degradation
-- No metrics tracking: success rate, average duration, data coverage
-- Logs exist but nobody reads them unless users complain
-- No automated anomaly detection (success rate drops 20% = should alert)
-- Dashboard shows last successful update timestamp, not data freshness for ALL SKUs
-- Stakeholders don't know what "normal" looks like (no baseline metrics)
+Prompt assembly is multi-layered: canonical system prompt from Python code + Supabase data (gold examples, category guidance) + runtime evidence table. Reading any single layer gives an incomplete picture. Most debugging starts from the code layer and never checks what actually ran.
 
 **How to avoid:**
-1. Track metrics over time: `batch_job_metrics` table (timestamp, success_rate, avg_duration, failure_reasons)
-2. Anomaly detection: Alert if success_rate < 7-day average - 15%
-3. Data freshness SLA: Every SKU should have data < 48 hours old, alert if > 100 SKUs stale
-4. Dashboard health widget: "2,650/2,784 SKUs current (95%), 134 stale"
-5. Weekly report: Email summary of batch job health to stakeholders
-6. Failure reason tracking: Group errors by type, alert if new error type appears
-7. Performance regression detection: Alert if p95 duration increases > 50%
+To see what actually executed for a specific generation run:
+1. Query `regeneration_history.system_prompt` — this is the truncated prompt that was actually sent
+2. Query `regeneration_history.prompt_hash` — compare against `get_system_prompt_hash()` output to confirm canonical prompt was used
+3. Query `regeneration_history.user_prompt` — see actual evidence table that was assembled
+4. If diagnosing a specific generation, always start with database records, not source code
+5. To verify current Cloud Run is running latest code: `gcloud builds list --project=bobbys-project-346400 --limit=3`
 
 **Warning signs:**
-- User reports stale data before you discover it (monitoring failed its job)
-- Logs show gradual increase in timeout errors over 2 weeks
-- Success rate chart shows downward trend but no alerts
-- No metrics dashboard exists (can't answer "is this normal?")
+- Prompts.py code was updated but Cloud Run still serving old content (check build status)
+- Prompt hash in `generated_content.generation_prompt_hash` doesn't match expected hash from local code
+- Category guidance in Supabase `prompt_templates` table is outdated and injecting stale context
 
 **Phase to address:**
-Phase 3 (Monitoring) - Purpose-built for monitoring, but basic metrics needed in Phase 1
+Phase 1 (Diagnosis) — Query actual execution records before reading source code
 
-**Confidence:** HIGH — Based on [data reliability best practices](https://www.siffletdata.com/blog/data-reliability) and [self-healing data pipelines](https://analyticsweek.com/self-healing-data-pipelines-2026/).
+**Confidence:** HIGH — `regeneration_history` schema documented in codebase; prompt hash contract verified in `prompt_loader.py`
 
 ---
 
-### Pitfall 9: Validation Happens Too Late (Garbage In, Dashboard Out)
+### Pitfall 9: Over-Engineering Diagnostics Instead of Checking Basics First
 
 **What goes wrong:**
-Batch collects 180 days of data for 2,784 SKUs. Takes 6 hours. Writes to database. Dashboard loads it. Users see negative CTR (-0.05%), clicks > impressions, conversion_value = $999,999,999. Data is corrupted but validation happens at display time, not collection time. Can't fix without re-running 6-hour batch.
+Team builds a multi-agent diagnostic pipeline, queries Google Ads API across all campaigns, generates a comprehensive coverage report, and runs correlation analysis between content scores and impression deltas — before checking whether the Google Sheets supplemental feed has a valid scheduled fetch configured in GMC. The answer was "fetch was set to monthly, not daily." Two hours of instrumentation, one lookup in GMC settings.
 
 **Why it happens:**
-- Validation logic in dashboard frontend (TypeScript), not in data collection (Python)
-- "Fail fast" principle not applied - wait until all data collected to validate
-- API responses trusted blindly - assume Google Ads returns valid data
-- No schema validation on database writes - accepts any numeric value
-- Batch commits all data at end, not incrementally - can't rollback individual errors
-- No data quality checks: range validation, referential integrity, statistical sanity
+Engineers gravitate toward tools they know. Building diagnostic infrastructure feels productive. The simple operational checks (feed schedule, approval status in GMC, sheet fetch history) require going into third-party UIs that engineers rarely visit, so they skip them and build instead.
 
 **How to avoid:**
-1. Validate at collection time: Check CTR = clicks/impressions ± 0.1% before writing
-2. Range validation: impressions >= 0, CTR between 0 and 1, cost_micros >= 0
-3. Statistical outliers: Flag if metric > 3 standard deviations from SKU's historical average
-4. Reject invalid rows: Don't write to database, log validation failure, increment error count
-5. Incremental commits: Validate + commit every 100 SKUs, rollback only failed chunk
-6. Database constraints: CHECK (ctr >= 0 AND ctr <= 1), CHECK (clicks <= impressions)
-7. Pre-flight validation: Check 10 SKUs first, if >50% fail validation, abort entire batch
+Apply a strict "basics first" checklist before any engineering work:
+1. Is the supplemental feed fetch configured and succeeding? (GMC UI)
+2. Does GMC show the new title for a specific offer ID you published? (GMC product search)
+3. Is the product approved for Shopping ads? (check `destinationStatuses` in GMC)
+4. Is the Google Sheet accessible with the correct column mapping? (spot-check 2 rows)
+5. Does the Google Ads campaign serving these products still have budget and positive bids?
+
+Only after these five checks pass should diagnostic tooling be built.
 
 **Warning signs:**
-- Dashboard shows impossible metrics (negative rates, values > 100%)
-- Data warehouse team reports "data quality issues from FeedOps table"
-- Users screenshot bugs instead of trusting the data
-- Validation logic duplicated in 3 places (API, database, dashboard)
+- No one has looked at GMC UI in the past 2 weeks
+- The feed configuration has never been verified after initial setup
+- Diagnostics are built before root cause is even hypothesized
 
 **Phase to address:**
-Phase 1 (Foundation) - Validation is foundational, can't bolt on later
+Phase 1 (Diagnosis) — Enforce operational basics checklist as first step
 
-**Confidence:** HIGH — Based on [data quality in batch pipelines](https://community.databricks.com/t5/data-engineering/best-practices-for-ensuring-data-quality-in-batch-pipelines/td-p/105876) and project-specific patterns.
+**Confidence:** HIGH — Validated by the documented investigation pattern in this codebase where data pipeline appeared broken but was actually a query logic issue
 
 ---
 
-### Pitfall 10: Date Range Boundary Errors (Off-by-One at Scale)
+### Pitfall 10: Applying Multiple Fixes Simultaneously, Making Root Cause Unattributable
 
 **What goes wrong:**
-Request 180-day baseline. Query uses `>= start_date AND <= end_date`. Gets 181 days. Request 30-day post-publish snapshot, gets 29 days (< instead of <=). Delta comparison uses different denominators. Results show "10% improvement" that's actually 0% (just different sample sizes).
+Deploy four changes at once: fix offer ID case transformation, improve prompt keyword injection, add search query data to cold-start SKUs, and update the supplemental feed fetch schedule from weekly to daily. Performance improves. Team cannot determine which change drove the improvement, cannot attribute value to each fix, and cannot safely revert a specific change if a regression appears.
 
 **Why it happens:**
-- Timezone mismatches: Google Ads uses account timezone, code uses UTC
-- Inclusive vs exclusive bounds: `BETWEEN` is inclusive on both ends (181 days)
-- Leap year edge case: "Last 180 days" in leap year vs non-leap year
-- DST transitions: "Last 24 hours" = 23 or 25 hours depending on DST
-- Python datetime vs SQL date types: datetime includes time, date is midnight only
-- Different date math in different parts of codebase (timedelta vs dateutil)
+Fixing multiple things at once feels efficient. Teams accumulate a list of suspected issues and batch them into a single deployment. The cost — loss of causal attribution — is invisible until you need to isolate a problem.
 
 **How to avoid:**
-1. Standardize date logic: Always use account timezone, convert at API boundary
-2. Use explicit date ranges: `>= start_date AND < end_date` (exclusive upper bound)
-3. Document expected behavior: "Last N days" = N full days, not including today
-4. Validation: Assert `date_range.days == expected_days` before querying
-5. Test edge cases: DST transition dates, leap day, month boundaries, year boundaries
-6. Store timezone with timestamps: `timestamp with time zone` in Postgres
-7. Helper function: `get_date_range(days=180, end_date=None)` with clear semantics
+Apply fixes in staged, independently measurable deployments:
+1. Fix one variable at a time with at least 72 hours of measurement between changes
+2. Document pre-fix baseline metrics before each deployment (not just the first one)
+3. Use the existing `performance_snapshots` infrastructure to capture state at each fix boundary
+4. If multiple fixes must ship together (e.g., offer ID case + sheet update), group only changes that affect the same layer
 
 **Warning signs:**
-- Baseline shows 181 rows when query was for 180 days
-- Metrics differ slightly when re-running same query (timezone drift)
-- Data for "today" sometimes included, sometimes not (midnight boundary issue)
-- Delta comparison uses different row counts for before/after periods
+- "We shipped 4 fixes this week" in a context where impact measurement is the goal
+- No pre-fix snapshot was taken before applying fixes
+- Cannot answer "which fix caused the improvement?"
 
 **Phase to address:**
-Phase 1 (Foundation) - Date handling bugs compound over time, fix early
+Phase 3 (Fix Application) — Enforce one fix per measurement window
 
-**Confidence:** HIGH — Common date handling pitfall, validated in existing codebase patterns.
+**Confidence:** HIGH — Industry best practice; corroborated by Google's own guidance on avoiding simultaneous feed changes
 
 ---
 
-### Pitfall 11: search_term_view Cannot Filter by product_item_id
+### Pitfall 11: Keyword Planning Data Not Reaching Generation for Low-Volume SKUs
 
 **What goes wrong:**
-Developers assume they can query `search_term_view` with `WHERE segments.product_item_id = 'shopify_US_...'` to get product-specific search terms. This query returns zero rows for Shopping campaigns because Google intentionally removed this capability.
+For SKUs with fewer than 10 impressions in Google Ads, `search_queries_by_master_sku` returns empty (the view filters for `total_impressions >= 10`). The evidence table builds without any `search_queries_top`, `search_query_themes`, or `keyword_gaps_current_title` rows. Generation proceeds on product catalog data alone. The generated title for a low-impression SKU misses the high-volume search terms customers actually use for that category. The fix — improving prompt quality — doesn't help because the evidence is incomplete.
 
 **Why it happens:**
-The legacy AdWords API supported product partition data in search query reports, leading developers to expect similar functionality in the Google Ads API. The newer API intentionally decouples search terms from products to avoid misleading results.
+The evidence assembly code silently continues when search data is absent. There's no warning, no fallback activation log, and no indication in the generated content that it was built without search signal data. The problem is invisible to anyone reviewing the output.
 
 **How to avoid:**
-Use the campaign-join pattern already implemented in the codebase:
-1. Query `shopping_performance_view` to get products by campaign
-2. Query `search_term_view` to get search terms by campaign
-3. Join via campaign_id to associate (approximate association, not exact)
-
-Do NOT attempt to add `segments.product_item_id` as a WHERE filter or SELECT field in `search_term_view` queries.
+For impact debugging, always check evidence completeness before evaluating content quality:
+1. Query `search_queries_by_master_sku` for the target SKU — if empty, content was generated without search signals
+2. Check search terms coverage: `SELECT COUNT(DISTINCT master_sku) FROM search_queries` (824/2784 as of v1.2 start)
+3. For SKUs with no search data, `keyword_bank.json` provides category-level fallback — verify this file exists in Cloud Run deployment (it may be gitignored and absent)
+4. Distinguish between "bad content" (prompt/model quality issue) and "thin evidence" (data coverage issue) before choosing a fix
 
 **Warning signs:**
-- GAQL query returns zero rows for Shopping campaigns despite active traffic
-- Error message mentioning field compatibility issues
-- Queries work for Search campaigns but not Shopping campaigns
+- Generated titles miss obvious category keywords despite good prompt quality
+- Evidence table in `regeneration_history.user_prompt` lacks `search_queries_top` rows
+- SKU has low impressions and was generated early in the backfill before search data was collected
+- `data/keyword-bank.json` is gitignored and not deployed to Cloud Run
 
 **Phase to address:**
-Phase 0 (Discovery) — Validate this limitation before planning detailed backfill
+Phase 1 (Diagnosis) — Check evidence completeness per SKU before quality evaluation
 
-**Confidence:** HIGH — Confirmed in [Google Groups discussion](https://groups.google.com/g/adwords-api/c/SxEmuVTfBoQ) and project codebase.
+**Confidence:** HIGH — Documented in `/docs/audit/signal-audit-2026-02-11/external-signals-assessment.md` and evidence.py code review
 
 ---
 
-### Pitfall 12: GMC Offer ID Case Sensitivity
+### Pitfall 12: Performance Baselines Contaminated by Pre-Optimization Content
 
 **What goes wrong:**
-Database stores offer IDs as lowercase `shopify_us_{product_id}_{variant_id}`, but GMC requires uppercase `shopify_US_{product_id}_{variant_id}`. Query logic using lowercase IDs fails to match uppercase IDs returned from Google Ads API.
+A SKU was published with optimized content in November. Performance baselines were captured in January (using the 30-day pre-publish window). The baseline capture query uses `published_at` from `publish_events` to define the pre-period — but if a SKU was published multiple times (e.g., regenerated and re-published), the baseline may use the most recent publish date rather than the first one, comparing against a post-optimization baseline. The "improvement" calculation shows neutral because both baseline and snapshot reflect optimized content.
 
 **Why it happens:**
-Historical data has mixed case from various sources. Google technically treats IDs as case-sensitive, but Shopify's auto-sync creates uppercase format. Database normalization chose lowercase, creating a mismatch.
+`performance_baselines` captures a 30-day pre-period anchored to `published_at`. If a SKU was published, then regenerated and re-published, the baseline anchor shifts to the re-publish date. The 30-day pre-period now falls inside the original optimization period. This makes before/after comparison meaningless.
 
 **How to avoid:**
-1. Normalize API responses: Convert to uppercase before storing
-2. Database joins: Use `LOWER()` on both sides or case-insensitive regex
-3. Already implemented pattern: `re.sub(r'^shopify_us_', 'shopify_US_', gmc_offer_id, flags=re.IGNORECASE)`
+1. Check `publish_events` count for each SKU being measured — if > 1, the baseline may be anchored to a re-publish
+2. For multi-publish SKUs, use the earliest `published_at` date as baseline anchor, not the latest
+3. Visually validate baseline CTR against Google Ads historical data in the UI for a few SKUs before trusting any aggregate impact numbers
+4. The `performance_snapshots` table captures `days_since_publish` — ensure this is calculated from the *first* publish, not the most recent
 
 **Warning signs:**
-- variant_index lookups return NULL despite offer ID existing
-- Performance queries return zero rows despite Google Ads showing data
+- Baseline and snapshot CTR are nearly identical despite a content change
+- `publish_events` shows 2+ entries for the same SKU within 90 days
+- Baseline period's CTR looks "too high" for unoptimized content (because it was already optimized)
 
 **Phase to address:**
-Phase 0 (Discovery) + Phase 1 (Validation) — Audit all query patterns before backfill
+Phase 2 (Measurement) — Audit baseline integrity before computing impact scores
 
-**Confidence:** HIGH — Documented in CLAUDE.md and [GMC documentation](https://support.google.com/merchants/answer/6324405?hl=en).
+**Confidence:** HIGH — Grounded in `performance_baselines` and `publish_events` schema understanding
 
 ---
 
@@ -410,160 +349,109 @@ Phase 0 (Discovery) + Phase 1 (Validation) — Audit all query patterns before b
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Skip connection pooling | Simpler code | Connection exhaustion at scale | Never (for batch jobs) |
-| Commit all data at end | Atomic semantics | Lost work on failure | MVP only, fix in Phase 1 |
-| No checkpointing | Faster implementation | Can't recover from failures | Only if batch < 15 minutes |
-| Trust API data without validation | Shorter code | Corrupted data in production | Never (data quality critical) |
-| Binary success/failed status | Simpler state machine | Silent degradation | MVP only, add in Phase 1 |
-| Log errors without alerting | Quick to implement | Problems discovered too late | Never (monitoring essential) |
-| Hard-coded retry delays | Predictable behavior | Rate limit exhaustion | Only if no rate limits |
-| Cache without TTL | Infinite cache hits | Stale data forever | Never (data changes frequently) |
-| Using LIMIT 1000 instead of 50K | Faster queries | Misses long-tail data | Testing only |
-| Campaign-level search association | Works around API limit | Imprecise mapping | Acceptable (API limitation) |
+| Measure impact before verifying propagation | Faster feedback loop | False negatives — conclude fix didn't work when feed hasn't propagated | Never |
+| Apply multiple fixes at once | Faster shipping | Cannot attribute improvement or isolate regression | Only if fixes are in completely independent layers |
+| Skip evidence completeness check | Simpler debugging | Optimize content built on thin data | Only if catalog-wide search data is confirmed populated |
+| Read source code to understand runtime behavior | Faster than querying DB | May read dead code or stale code | Only after confirming the code path is live |
+| Trust batch job "success" without checking row counts | Less monitoring overhead | Silent coverage gaps | Never — always validate with coverage counts |
+| Infer GMC sync status from Sheets update timestamp | Avoids GMC UI login | Feed may not have been fetched | Never for impact diagnosis |
+
+---
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Google Ads API | Assume fixed rate limits | Implement adaptive backoff, limits vary with load |
-| Google Ads API | Query without campaign.advertising_channel_type | Always include in SELECT for Performance Max data |
-| Google Ads API | Assume 1:1 product_item_id → master_sku | Check for multi-SKU families, allocate metrics |
-| Google Ads API | Use LAST_N_DAYS for historical | Use explicit BETWEEN dates |
-| Keyword Planner | Call API per keyword | Batch up to 1000 keywords per request |
-| Supabase | Open new connection per operation | Use connection pool with max limit |
-| Supabase | Assume connection closed on error | Use context managers or try/finally |
-| Cloud Run | Use BackgroundTasks for long jobs | Use non-daemon threads with event loops |
-| Cloud Run | Assume container stays running | Implement checkpoints, containers restart |
-| search_term_view | Filter by product_item_id | Use campaign-join pattern |
+| GMC Supplemental Feed | Assume Sheets update = GMC update | Verify in GMC UI that title matches Sheets value for a specific offer ID |
+| GMC Supplemental Feed | Assume daily refresh by default | Check fetch schedule in GMC — may be weekly or monthly |
+| Google Ads reporting | Measure impact immediately after publish | Wait 14-28 days post-propagation-confirmation; ads reporting has 2-3 day delay |
+| Google Ads + multi-SKU | Match performance data by master_sku offer IDs | Match by `product_id` extracted from offer ID to capture all family variants |
+| Cloud Run feature flags | Absent env var = flag disabled | For this codebase, absent env var uses the `default` parameter (often `True`) |
+| Python Cloud Run | Read TypeScript files to understand generation | Python `prompts.py` and `main.py` are canonical; TypeScript `core.ts` is dead code |
+| `regeneration_history` | Read source code for prompt content | Query `regeneration_history.user_prompt` to see what actually ran |
+| Offer ID case | Store/query with lowercase | GMC requires uppercase `shopify_US_`; Sheets write must transform |
+| `search_queries_by_master_sku` | Assume all SKUs have search data | 824/2784 SKUs covered as of v1.2; check per-SKU before evaluating content quality |
+
+---
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| N+1 queries | 4 hours for 2,784 SKUs | Batch queries: 100 SKUs per API call | > 100 SKUs |
-| Synchronous API calls | Linear scaling | Use asyncio, concurrent processing | Any batch job |
-| No connection pooling | New connection overhead | Use pool, reuse connections | > 10 requests/min |
-| Commit every row | Database overwhelmed | Batch commits every 100 rows | > 1000 rows |
-| No pagination | OOM error | Stream results, process chunks | > 10k results |
-| Cache stampede | 1000 threads fetch same data | Distributed locking | High concurrency |
-| Polling every second | Database CPU at 100% | Exponential poll backoff | Multiple jobs polling |
-| Full table scan | Query takes 10 seconds | Index on (status, created_at) | > 10k job records |
-| N+1 variant lookups | Thousands of DB queries | Cache variant_index results | > 1000 search terms |
-| Large upsert batches | Timeout errors | Batch to 500 rows max | > 5000 rows |
+| Measuring on too-small a window | Single-day CTR variance swamps signal | Minimum 14-day window, prefer 28 days | < 14 days always |
+| Measuring without seasonality control | Week-over-week swings look like optimization impact | Compare same weekdays; compare 4-week vs 4-week periods | Any holiday/seasonal product category |
+| Including unpropagated SKUs in impact measurement | Dilutes true signal — half your "optimized" SKUs still show old content | Filter `days_since_publish >= 7` before including snapshot data | Immediately |
+| Using campaign-level metrics to measure SKU-level impact | Campaign metric movement may be driven by unrelated SKUs | Measure at SKU level using `shopping_performance_view` with product filter | Any analysis |
 
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Log API responses with PII | GDPR violation | Sanitize logs, never log full product data |
-| Store customer ID in code | Multi-tenant data leakage | Parameterize, validate from environment |
-| No auth on batch endpoints | Anyone triggers expensive ops | Require service account token |
-| Database credentials in logs | Credential leakage | Use Secret Manager, never log connection strings |
-| No validation on SKU input | SQL injection | Parameterized queries, validate format |
-| Logging offer IDs plaintext | Exposes catalog structure | Hash or truncate in logs |
-| API keys in database | DB breach = API access | Environment variables or secret manager |
-
-## UX Pitfalls
-
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| "Success" when 40% failed | Trust incomplete data | Show "partial: 1670/2784 SKUs" with details |
-| No progress indicator | Thinks it's hung, cancels | Show "1234/2784 (44%), ~2h remaining" |
-| No error message | Can't fix issue | Show "Failed: Rate limit. Retry in 30min" |
-| Data freshness not visible | Doesn't know if stale | Show "Last updated: 2 hours ago" |
-| No cancel button | Stuck waiting 4 hours | Add "Cancel batch", graceful shutdown |
-| No filtering | Can't find specific SKU | Search box, filters by category/tier |
-| No last-batch indicator | Doesn't know if job ran | Show "Last: 2026-02-13 02:15 AM (2,650)" |
-| No backfill progress | Unknown if running/stuck | Update with progress percentage |
-| Fail silently on partial | Sees 3% coverage | Show "Backfill: 84/2,784 SKUs" |
-| Not explaining 180-day limit | Requests impossible data | Display "Last 6 months available" |
+---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Batch job success:** Often missing validation that all SKUs succeeded — verify success_count + failure_count == total_count
-- [ ] **Data validation:** Often missing sanity checks — verify ranges, no nulls, CTR math correct
-- [ ] **Connection cleanup:** Often missing in error paths — verify context managers or try/finally
-- [ ] **Rate limit handling:** Often missing exponential backoff — verify delays increase (5s, 15s, 45s)
-- [ ] **Progress persistence:** Often missing checkpoints — verify can resume from arbitrary point
-- [ ] **Multi-SKU handling:** Often missing aggregation — verify family members all get data
-- [ ] **Date range logic:** Often missing timezone — verify account timezone used
-- [ ] **Monitoring:** Often missing alerting — verify automated alerts fire on degradation
-- [ ] **Validation timing:** Often at display not collection — verify bad data rejected at API
-- [ ] **Cache TTL:** Often missing or infinite — verify stale data expires
-- [ ] **Search term sync:** Often missing variant_index — verify master_sku populated >90%
-- [ ] **Performance backfill:** Often missing campaign filter — verify Shopping campaigns only
-- [ ] **Keyword enrichment:** Often missing cache check — verify not re-fetching recent
-- [ ] **Offer ID normalization:** Often missing case conversion — verify uppercase in sheets
-- [ ] **Resumability:** Often missing offset tracking — verify can resume mid-batch
+- [ ] **Content published to Sheets:** Often this is where verification stops — also verify GMC shows new title for a specific offer ID
+- [ ] **Feature flags "on":** Often inferred from flag name presence — verify by checking default behavior and absence of "disabled" log line
+- [ ] **Generation pipeline wired:** TypeScript `core.ts` looks live — verify by tracing from UI entry point through actual HTTP calls
+- [ ] **Impact measured:** Publishing happened — verify propagation chain (Sheets → GMC fetch → GMC approval → Ads serving) before measuring
+- [ ] **Search data wired into generation:** Evidence table is assembled — verify search rows are actually present in `regeneration_history.user_prompt` for target SKUs
+- [ ] **Baseline captures pre-optimization period:** Baseline exists — verify baseline `created_at` is before `publish_events.published_at` and no re-publish has shifted the anchor
+- [ ] **Fix isolated:** Improvement observed — verify only one variable changed per measurement window
+
+---
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Silent incomplete data | MEDIUM | Query gaps → re-run failed SKUs → update status → add validation |
-| Connection exhaustion | LOW | Kill idle connections → restart jobs → add pool → limit concurrent |
-| Rate limit exceeded | LOW | Wait 30 min → re-run with backoff → reduce batch size |
-| Stale baseline | HIGH | Drop contaminated → check publish_events → re-capture pre-publish |
-| Multi-SKU aggregation | HIGH | Identify families → allocate proportionally → re-run with detection |
-| Container restart | MEDIUM | Mark stuck as failed_recoverable → resume from checkpoint |
-| Cache stampede | MEDIUM | Clear duplicates → add locking → pre-warm → use bulk API |
-| Monitoring blind spots | HIGH | Audit 30-day logs → identify timeline → backfill → add metrics |
-| Late validation | HIGH | Identify corrupt data → delete invalid → re-run with validation |
-| Date boundary errors | MEDIUM | Audit date queries → standardize timezone → fix bounds → re-capture |
-| Hit rate limits | LOW | Resume from checkpoint, increase delays |
-| Wrong case IDs | MEDIUM | Run migration: UPDATE to uppercase format |
-| Incomplete variant_index | MEDIUM | Re-sync catalog, re-run backfill |
-| search_term query fails | HIGH | Redesign with campaign-join pattern |
+| Wrong layer optimized (quality vs coverage) | MEDIUM | Count actual published SKUs; pivot work to increase publishing coverage |
+| Feature flag assumed off when default-on | LOW | Re-read feature_flags.py; confirm flag state from Cloud Run logs |
+| Time lost on dead code | LOW | Grep for `core.ts` imports to confirm dead; pivot to Python source |
+| Feed never propagated to GMC | LOW | Check GMC supplemental feed fetch history; manually trigger fetch; verify title in GMC |
+| Measured too early | MEDIUM | Discard early measurement; re-baseline; wait full 14-28 day window |
+| Multi-SKU query logic failure | MEDIUM | Switch to product_id-based matching; re-run data collection |
+| Regression from simultaneous fixes | HIGH | Revert all changes; re-apply one at a time with measurement windows |
+| Evidence thin for low-volume SKUs | MEDIUM | Run search term backfill first; confirm keyword bank present in Cloud Run; re-generate after data populated |
+| Contaminated baselines | MEDIUM | Identify re-published SKUs; use earliest publish date for anchor; re-compute impact scores |
+
+---
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Silent incomplete data | Phase 1: Foundation | success_count logic, status updated correctly |
-| Connection exhaustion | Phase 1: Foundation | Pool exists, concurrent limit enforced, no timeouts |
-| Rate limit exceeded | Phase 1: Foundation | Exponential backoff, global rate limiter tracking |
-| Stale baseline | Phase 2: Validation | Checks publish_events, skips if recent |
-| Multi-SKU aggregation | Phase 0: Research | Family detection runs, metrics allocated |
-| Container restart | Phase 1: Foundation | Checkpoints exist, jobs can resume |
-| Cache stampede | Phase 2: Optimization | Locks before writes, bulk API calls |
-| Monitoring blind spots | Phase 3: Monitoring | Dashboard exists, alerts fire (tested) |
-| Late validation | Phase 1: Foundation | Validation at collection, DB constraints |
-| Date boundary errors | Phase 1: Foundation | Helper functions, timezone standardized |
-| search_term filtering | Phase 0: Discovery | Test with product_item_id, confirm zero rows |
-| Offer ID case | Phase 1: Validation | Audit case handling, test conversion |
+| Coverage vs quality confusion | Phase 1: Diagnosis | Published SKU count > 10% of catalog before quality work begins |
+| Feature flag observability | Phase 1: Diagnosis | Log active flag state on startup; document default behavior |
+| Dead code path confusion | Phase 1: Diagnosis | Execution path traced from UI through HTTP to Python before any source reading |
+| Feed propagation not verified | Phase 1: Diagnosis | GMC product search confirms new title before measurement window opens |
+| Measuring too early | Phase 2: Measurement | Measurement protocol enforces 14-day minimum window |
+| Query logic vs pipeline failure | Phase 1: Diagnosis | Multi-SKU product_id matching check before any pipeline audit |
+| Regression from fix | Phase 3: Fix Application | Regression checklist run before each deployment; tests pass |
+| Runtime prompt vs source code | Phase 1: Diagnosis | `regeneration_history` queried before source code examined |
+| Over-engineered diagnostics | Phase 1: Diagnosis | Operational basics checklist completed before any tooling built |
+| Multi-fix attribution loss | Phase 3: Fix Application | One fix per measurement window enforced |
+| Thin evidence for cold-start SKUs | Phase 1: Diagnosis | Evidence completeness check per SKU before content quality evaluation |
+| Contaminated baselines | Phase 2: Measurement | Baseline integrity audit for re-published SKUs |
+
+---
 
 ## Sources
 
-**Google Ads API:**
-- [API Limits and Quotas](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
-- [Rate limits](https://developers.google.com/google-ads/api/docs/productionize/rate-limits)
-- [Batch Processing Overview](https://developers.google.com/google-ads/api/docs/batch-processing/overview)
-- [Best Practices and Limitations](https://developers.google.com/google-ads/api/docs/batch-processing/best-practices)
-- [search_term_view Reference](https://developers.google.com/google-ads/api/fields/v22/search_term_view)
-- [Field Compatibility](https://developers.google.com/google-ads/api/docs/concepts/field-service)
+**Project investigation history:**
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/audit/SUMMARY-2026-02-08.md` — Documented query logic vs pipeline failure example
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/audit/gmc-feed-investigation-2026-02-08.md` — GMC feed propagation verification pattern
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/audit/signal-audit-2026-02-11/prompt-wiring-map.md` — Dead code identification (core.ts), runtime path verification
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/audit/signal-audit-2026-02-11/external-signals-assessment.md` — Evidence completeness for low-volume SKUs, search data coverage gaps
 
-**Cloud Run:**
-- [Always-on CPU allocation for background work](https://cloud.google.com/blog/topics/developers-practitioners/use-cloud-run-always-cpu-allocation-background-work)
-- [Don't Do Background Jobs on Google Cloud Run](https://www.grouparoo.com/blog/google-cloud-run-no-background-job)
-- [Cloud Run Jobs for background tasks](https://medium.com/@shubhangi.thakur4532/google-cloud-run-jobs-for-background-tasks-1413ed41e433)
+**Codebase verification:**
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/pipeline/feature_flags.py` — Default-True flag pattern
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/api/prompt_loader.py` — Multi-layer prompt assembly
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/api/runtime_controls.py` — Kill switches
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/architecture/2026-02-11-content-generation-pipeline-current-state.md` — Validation layer asymmetry
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/architecture/data-pipeline.md` — Propagation chain documentation
 
-**Database:**
-- [Connect to your database | Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres)
-- [Connection management | Supabase](https://supabase.com/docs/guides/database/connection-management)
-- [Supavisor connection pooler](https://supabase.com/blog/supavisor-postgres-connection-pooler)
-- [Serverless database connection problem solved](https://vercel.com/blog/the-real-serverless-compute-to-database-connection-problem-solved)
-
-**Data Quality:**
-- [How to Implement Batch Metrics](https://oneuptime.com/blog/post/2026-01-30-batch-processing-metrics/view)
-- [Data Reliability Guide](https://www.siffletdata.com/blog/data-reliability)
-- [Self-Healing Data Pipelines](https://analyticsweek.com/self-healing-data-pipelines-2026/)
-- [Best practices for data quality in batch pipelines](https://community.databricks.com/t5/data-engineering/best-practices-for-ensuring-data-quality-in-batch-pipelines/td-p/105876)
-
-**Project-Specific:**
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/troubleshooting/baseline-capture.md`
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/architecture/multi-sku-pattern.md`
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/api/main.py`
+**External references:**
+- [Google Shopping feed optimization impact timelines](https://www.storegrowers.com/product-title-optimization/) — 2-4 week measurement window
+- [GMC supplemental feed sync behavior](https://www.jumpfly.com/blog/setting-up-supplemental-feeds-in-google-merchant-center-next-part-2-of-3/) — Daily fetch schedule, manual trigger
+- [Avoiding simultaneous changes in feed testing](https://blog.adnabu.com/google-shopping-feed/google-shopping-feed-optimization/) — One variable at a time principle
 
 ---
-*Pitfalls research for: Allied FeedOps - Large-scale batch data collection and monitoring*
-*Researched: 2026-02-13 (Updated from 2026-02-11)*
+*Pitfalls research for: Allied FeedOps v1.2 — Impact Debug & Fix milestone*
+*Researched: 2026-02-20*
