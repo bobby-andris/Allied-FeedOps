@@ -36,7 +36,7 @@
 - [x] **GOOG-02**: Competitive analysis methodology — understand why competitors show 5x for search terms where Allied Brass products are better suited (analyze: auction dynamics, impression share, product data gaps, category targeting, bid strategies)
 - [x] **GOOG-03**: Generate actionable checklist of Google Shopping optimization factors with priority ranking — which factors are within feed control vs require account-level changes
 - [ ] **GOOG-04**: Update content generation prompts to incorporate Google Shopping ranking intelligence — titles, descriptions, and structured data should reflect what Google's algorithm actually rewards
-- [ ] **GOOG-05**: Image generation guidance updated to reflect Google Shopping visual ranking factors (product clarity, lifestyle context, image quality signals that affect CTR and Quality Score)
+- [x] **GOOG-05**: Image generation guidance updated to reflect Google Shopping visual ranking factors (product clarity, lifestyle context, image quality signals that affect CTR and Quality Score)
 
 ## Future Requirements (v1.3+)
 
@@ -81,7 +81,7 @@
 | FIX-01 | Phase 20 | Pending |
 | FIX-02 | Phase 20 | Pending |
 | GOOG-04 | Phase 20 | Pending |
-| GOOG-05 | Phase 20 | Pending |
+| GOOG-05 | Phase 20 | Complete |
 | MODEL-03 | Phase 20 | Pending |
 
 **Coverage:**
