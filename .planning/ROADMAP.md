@@ -78,7 +78,11 @@ Plans:
   2. The single-SKU UI regeneration path is documented end-to-end, naming which Python functions execute (and which are bypassed) when a user clicks Regenerate in the dashboard
   3. Feature flag audit confirms with grep evidence whether PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, and SEGMENT_STRATEGY_V1 have active call sites in the production code path — or are dead flags
   4. Propagation spot-check for 10-20 recently-published SKUs confirms whether Google Sheets rows contain the approved content from Supabase, with discrepancies documented
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 18-01-PLAN.md — Code path tracing (Path A vs Path B) + feature flag audit with grep evidence
+- [ ] 18-02-PLAN.md — SKU coverage funnel API + dashboard component on overview page
+- [ ] 18-03-PLAN.md — Propagation spot-check (Supabase vs Google Sheets) + {FINISH_NAME} bug scope
 
 ### Phase 19: Measurement Infrastructure
 **Goal**: Make impact measurable by adding the minimum instrumentation needed to know when fixes are working — feature flag state at generation time, GMC disapproval visibility, prompt version lineage, and a bottleneck classifier
@@ -111,7 +115,7 @@ Plans:
 | 05-08 | v1.0 | 16/16 | Complete | 2026-02-13 |
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17. Google Shopping Intelligence & Model Research | 3/3 | Complete    | 2026-02-21 | - |
-| 18. Diagnosis — Establish Ground Truth | v1.2 | 0/TBD | Not started | - |
+| 18. Diagnosis — Establish Ground Truth | v1.2 | 0/3 | Planned | - |
 | 19. Measurement Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 20. Targeted Fixes & Intelligence Application | v1.2 | 0/TBD | Not started | - |
 
