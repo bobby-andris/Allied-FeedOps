@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation at scale
-**Current focus:** Phase 18 — Diagnosis: Establish Ground Truth
+**Current focus:** Phase 19 — Measurement Infrastructure
 
 ## Current Position
 
-Phase: 18 of 20 (Diagnosis: Establish Ground Truth)
-Plan: 3 of 3 in current phase
-Status: Phase complete — ready for Phase 19
-Last activity: 2026-02-21 — Phase 18 Plan 03 complete (propagation spot-check: 10/10 published SKUs matched, DIAG-04 done)
+Phase: 19 of 20 (Measurement Infrastructure)
+Plan: 2 of 4 in current phase
+Status: In progress — 19-02 complete (bottleneck classifier + prompt lineage API routes)
+Last activity: 2026-02-21 — Phase 19 Plan 02 complete (POST /api/bottleneck/classify, GET /api/bottleneck/status, GET /api/prompt-lineage)
 
 Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans complete)
 
@@ -29,6 +29,7 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 | v1.1 | 8 | 24 |
 | v1.2 | 4 | TBD |
 | Phase 18-diagnosis-establish-ground-truth P02 | 4 | 2 tasks | 4 files |
+| Phase 19-measurement-infrastructure P02 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -52,6 +53,8 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 - [Phase 18-03]: DIAG-04 CONFIRMED — Propagation pipeline is working correctly; 10/10 published SKUs have structurally matching content in Google Sheets; 0 discrepancies
 - [Phase 18-03]: {FINISH_NAME} in Supabase approved_content is intentional template (28 rows, 28 SKUs); expand-variants.ts correctly substitutes at publish time; not a bug requiring an immediate fix
 - [Phase 18-03]: Node.js helper needed for Python Sheets access — GOOGLE_SERVICE_ACCOUNT_KEY has non-standard 2056-bit RSA modulus rejected by Python cryptography but accepted by Node.js; use fetch_sheets_data.js pattern for future Python scripts needing Sheets access
+- [Phase 19-02]: Delete-then-insert for auto-classifications: Supabase JS cannot target partial unique indexes directly
+- [Phase 19-02]: maybeSingle() for optional lookups in prompt-lineage to avoid 406 errors on missing rows
 
 ### Key Context Carried Forward
 
