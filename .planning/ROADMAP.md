@@ -108,7 +108,11 @@ Plans:
   4. At least 8 of the 10 new descriptions pass the differentiation test: a reader can identify them as Allied Brass, not a generic hardware store
   5. Average quality score across the 10 test SKUs on the new rubric is at or above 85%
   6. The test batch is published to Google Sheets supplemental feed so CTR/CVR delta measurement can begin
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 25-01-PLAN.md — Deploy skill-enriched prompts to Cloud Run, select 10 representative SKUs, regenerate, build blind A/B comparison document
+- [ ] 25-02-PLAN.md — Human blind evaluation, quality scoring, iterate on prompt issues if needed
+- [ ] 25-03-PLAN.md — Approve and publish highest-scoring SKU to Google Sheets supplemental feed
 
 ## Progress
 
@@ -120,7 +124,7 @@ Plans:
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23 | v1.3a | 2/2 | Complete | 2026-02-21 |
 | 24 | 2/2 | Complete    | 2026-02-21 | - |
-| 25 | v1.3a | 0/TBD | Not started | - |
+| 25 | v1.3a | 0/3 | Not started | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
