@@ -17,24 +17,32 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
+  ChevronRight,
 } from 'lucide-react'
 import Link from 'next/link'
+import { BottleneckBadge } from '@/components/bottleneck/BottleneckBadge'
 
 interface PerformanceDelta {
   master_sku: string
   platform: string
-  days_since_publish: number
-  trend: 'improving' | 'declining' | 'stable'
-  significance: 'high' | 'medium' | 'low' | 'insufficient_data'
-  ctr_delta: number
-  cvr_delta: number
-  roas_delta: number
-  impressions_delta: number
-  clicks_delta: number
-  baseline_ctr: number
-  current_ctr: number
-  baseline_conversions: number
-  current_conversions: number
+  environment: string
+  publish_event_id: number
+  label: 'positive' | 'negative' | 'neutral'
+  confidence: number
+  sample_size_treated: number
+  sample_size_control: number
+  days_since_publish: number | null
+  primary_roas_did_lift_pct: number | null
+  guardrails: {
+    impressions: number | null
+    conversions: number | null
+    ctr: number | null
+    cvr: number | null
+    clicks: number | null
+    cost: number | null
+    conversion_value: number | null
+  }
+  metrics: Record<string, { did_lift_pct: number | null }>
 }
 
 interface SearchQueryDelta {
@@ -58,6 +66,25 @@ interface SnapshotResult {
   error?: string
 }
 
+interface PerformanceSummary {
+  total: number
+  positive: number
+  negative: number
+  neutral: number
+  avg_roas_did_lift_pct: number
+}
+
+interface SnapshotStaleness {
+  latest_snapshot_date: string | null
+  days_stale: number | null
+  is_stale: boolean
+}
+
+interface BottleneckSummary {
+  by_category: Record<string, number>
+  total_count: number
+}
+
 export default function MonitoringPage() {
   const [performanceDeltas, setPerformanceDeltas] = useState<PerformanceDelta[]>([])
   const [searchDeltas, setSearchDeltas] = useState<SearchQueryDelta[]>([])
@@ -66,6 +93,9 @@ export default function MonitoringPage() {
   const [skuFilter, setSkuFilter] = useState('')
   const [activeTab, setActiveTab] = useState('performance')
   const [snapshotResult, setSnapshotResult] = useState<SnapshotResult | null>(null)
+  const [performanceSummary, setPerformanceSummary] = useState<PerformanceSummary | null>(null)
+  const [snapshotStaleness, setSnapshotStaleness] = useState<SnapshotStaleness | null>(null)
+  const [bottleneckSummary, setBottleneckSummary] = useState<BottleneckSummary | null>(null)
 
   const fetchPerformanceDeltas = async () => {
     setLoadingPerformance(true)
@@ -78,6 +108,8 @@ export default function MonitoringPage() {
 
       const data = await res.json()
       setPerformanceDeltas(data.deltas || [])
+      setPerformanceSummary(data.summary || null)
+      setSnapshotStaleness(data.staleness || null)
     } catch (err) {
       console.error('Failed to fetch performance deltas:', err)
     } finally {
@@ -140,7 +172,10 @@ export default function MonitoringPage() {
       if (!res.ok) throw new Error('Failed to capture performance snapshots')
 
       const data = await res.json()
-      setSnapshotResult({ created: data.snapshots_created ?? data.captured ?? 0, type: 'performance' })
+      setSnapshotResult({
+        created: data.snapshots_created ?? data.captured ?? 0,
+        type: 'performance',
+      })
 
       // Refresh data
       fetchPerformanceDeltas()
@@ -152,32 +187,39 @@ export default function MonitoringPage() {
   }
 
   useEffect(() => {
+    // Fetch bottleneck summary once on mount (no SKU filter — always full picture)
+    fetch('/api/bottleneck/status?limit=1')
+      .then((r) => r.json())
+      .then((json) => setBottleneckSummary({ by_category: json.by_category ?? {}, total_count: json.total_count ?? 0 }))
+      .catch(() => {/* non-critical */ })
+  }, [])
+
+  useEffect(() => {
     fetchPerformanceDeltas()
     fetchSearchDeltas()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [skuFilter])
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'improving':
+  const getLabelIcon = (label: string) => {
+    switch (label) {
+      case 'positive':
         return <TrendingUp className="h-4 w-4 text-green-500" />
-      case 'declining':
+      case 'negative':
         return <TrendingDown className="h-4 w-4 text-red-500" />
       default:
         return <Minus className="h-4 w-4 text-gray-500" />
     }
   }
 
-  const getSignificanceBadge = (significance: string) => {
+  const getLabelBadge = (label: string) => {
     const colors = {
-      high: 'bg-red-100 text-red-800',
-      medium: 'bg-yellow-100 text-yellow-800',
-      low: 'bg-blue-100 text-blue-800',
-      insufficient_data: 'bg-gray-100 text-gray-800',
+      positive: 'bg-green-100 text-green-800',
+      negative: 'bg-red-100 text-red-800',
+      neutral: 'bg-gray-100 text-gray-800',
     }
     return (
-      <Badge className={colors[significance as keyof typeof colors] || ''}>
-        {significance.replace('_', ' ')}
+      <Badge className={colors[label as keyof typeof colors] || ''}>
+        {label}
       </Badge>
     )
   }
@@ -197,7 +239,8 @@ export default function MonitoringPage() {
     )
   }
 
-  const formatPercent = (value: number) => {
+  const formatPercent = (value: number | null) => {
+    if (value === null || Number.isNaN(value)) return 'n/a'
     const sign = value >= 0 ? '+' : ''
     return `${sign}${value.toFixed(1)}%`
   }
@@ -210,6 +253,53 @@ export default function MonitoringPage() {
           Track performance changes and search query shifts after content optimization
         </p>
       </div>
+
+      {/* Bottleneck Diagnostics Link */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Bottleneck Diagnostics</CardTitle>
+              <CardDescription>Root cause classification for underperforming SKUs</CardDescription>
+            </div>
+            <Link href="/monitoring/bottleneck">
+              <Button variant="outline" size="sm">
+                View Diagnostic View
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        {bottleneckSummary && bottleneckSummary.total_count > 0 && (
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-3">
+              {Object.entries(bottleneckSummary.by_category)
+                .filter(([, count]) => count > 0)
+                .sort(([, a], [, b]) => b - a)
+                .map(([category, count]) => (
+                  <div key={category} className="flex items-center gap-2">
+                    <BottleneckBadge classification={category} />
+                    <span className="text-sm text-muted-foreground">{count}</span>
+                  </div>
+                ))}
+              <span className="text-sm text-muted-foreground self-center">
+                ({bottleneckSummary.total_count} total)
+              </span>
+            </div>
+          </CardContent>
+        )}
+        {bottleneckSummary && bottleneckSummary.total_count === 0 && (
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              No classifications yet.{' '}
+              <Link href="/monitoring/bottleneck" className="text-primary underline underline-offset-2">
+                Run classifier
+              </Link>
+              {' '}to diagnose underperforming SKUs.
+            </p>
+          </CardContent>
+        )}
+      </Card>
 
       {/* Controls */}
       <Card>
@@ -270,10 +360,51 @@ export default function MonitoringPage() {
             <CardHeader>
               <CardTitle>Performance Changes</CardTitle>
               <CardDescription>
-                Compare baseline metrics to post-publish performance
+                Difference-in-differences impact by publish event
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {snapshotStaleness && (
+                <Alert className="mb-4">
+                  <AlertDescription>
+                    Snapshot freshness:
+                    {' '}
+                    {snapshotStaleness.latest_snapshot_date || 'unknown'}
+                    {' '}
+                    (
+                    {snapshotStaleness.days_stale ?? 'n/a'}
+                    {' '}
+                    days stale)
+                    {snapshotStaleness.is_stale && (
+                      <span className="text-red-600 ml-2">Data may be stale</span>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {performanceSummary && performanceSummary.total > 0 && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                  <div className="border rounded p-3">
+                    <div className="text-xs text-muted-foreground">Positive</div>
+                    <div className="text-xl font-semibold">{performanceSummary.positive}</div>
+                  </div>
+                  <div className="border rounded p-3">
+                    <div className="text-xs text-muted-foreground">Neutral</div>
+                    <div className="text-xl font-semibold">{performanceSummary.neutral}</div>
+                  </div>
+                  <div className="border rounded p-3">
+                    <div className="text-xs text-muted-foreground">Negative</div>
+                    <div className="text-xl font-semibold">{performanceSummary.negative}</div>
+                  </div>
+                  <div className="border rounded p-3">
+                    <div className="text-xs text-muted-foreground">Avg ROAS DID</div>
+                    <div className="text-xl font-semibold">
+                      {formatPercent(performanceSummary.avg_roas_did_lift_pct)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {loadingPerformance ? (
                 <div className="space-y-2">
                   {[1, 2, 3].map((i) => (
@@ -300,58 +431,68 @@ export default function MonitoringPage() {
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          {getTrendIcon(delta.trend)}
+                          {getLabelIcon(delta.label)}
                           <div>
                             <div className="font-semibold">{delta.master_sku}</div>
                             <div className="text-sm text-muted-foreground">
-                              {delta.platform} • {delta.days_since_publish} days since publish
+                              {delta.platform}
+                              {' • '}
+                              {delta.environment}
+                              {' • '}
+                              {delta.days_since_publish ?? 'n/a'}
+                              {' '}
+                              days since publish
                             </div>
                           </div>
                         </div>
-                        {getSignificanceBadge(delta.significance)}
+                        {getLabelBadge(delta.label)}
                       </div>
 
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div>
-                          <div className="text-sm text-muted-foreground">CTR</div>
+                          <div className="text-sm text-muted-foreground">ROAS DID (Primary)</div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-bold">
-                              {(delta.current_ctr * 100).toFixed(2)}%
-                            </span>
-                            <span
-                              className={
-                                delta.ctr_delta > 0 ? 'text-green-600' : 'text-red-600'
-                              }
-                            >
-                              {formatPercent(delta.ctr_delta)}
+                              {formatPercent(delta.primary_roas_did_lift_pct)}
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            Baseline: {(delta.baseline_ctr * 100).toFixed(2)}%
+                            Confidence: {(delta.confidence * 100).toFixed(0)}%
                           </div>
                         </div>
 
                         <div>
-                          <div className="text-sm text-muted-foreground">CVR</div>
+                          <div className="text-sm text-muted-foreground">Guardrails</div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold">
-                              {formatPercent(delta.cvr_delta)}
+                            <span className="text-sm">
+                              Imp:
+                              {' '}
+                              {formatPercent(delta.guardrails.impressions)}
+                            </span>
+                            <span className="text-sm">
+                              Conv:
+                              {' '}
+                              {formatPercent(delta.guardrails.conversions)}
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            Conversions: {delta.current_conversions} (baseline: {delta.baseline_conversions})
+                            CTR:
+                            {' '}
+                            {formatPercent(delta.guardrails.ctr)}
+                            {' • '}
+                            CVR:
+                            {' '}
+                            {formatPercent(delta.guardrails.cvr)}
                           </div>
                         </div>
 
                         <div>
-                          <div className="text-sm text-muted-foreground">ROAS</div>
+                          <div className="text-sm text-muted-foreground">Sample Size</div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold">
-                              {formatPercent(delta.roas_delta)}
-                            </span>
+                            <span className="text-2xl font-bold">{delta.sample_size_treated}</span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            Clicks: {formatPercent(delta.clicks_delta)}
+                            Control: {delta.sample_size_control} • Event #{delta.publish_event_id}
                           </div>
                         </div>
                       </div>
