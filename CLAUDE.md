@@ -134,7 +134,7 @@ Core workflow:
 See full research: `docs/research/gpt52-best-practices.md`
 
 1. **BUG**: `temperature=0.7` always passed alongside `reasoning_effort` — mutually exclusive on GPT-5.2 (`openai_provider.py:168-185`)
-2. **BUG**: `reasoning_effort` defaults to `none` (zero reasoning) — must set to `medium` for quality (`optimize.py:148`)
+2. **BUG**: `reasoning_effort` from env var `FEEDOPS_REASONING_EFFORT` — if unset, no reasoning sent (GPT-5.2 defaults to zero reasoning)
 3. Using legacy `json_object` instead of `json_schema` strict mode — wastes tokens on retry loops
 4. No `prompt_cache_retention: "24h"` — cache expires in 5-10 min during batch runs
 5. Gold standard examples in user prompt break cacheable prefix
@@ -151,28 +151,20 @@ See full research: `docs/research/gpt52-best-practices.md`
 - **v1.3c**: Actionable Shopping Intelligence — distribution-based scoring, revenue leakage
 - **v1.4**: Closed-Loop Optimization — performance-informed regeneration
 
-## What's Implemented
+## What's Implemented (v1.2 Complete)
 
-Prompts `01`-`09`, `14`, `19`-`24`:
-- 01-06: Performance, batches, publishing, variant review, settings, regeneration
-- 07: Dashboard overview with charts
-- 08: SKU selection & generation (tier-based scoring)
-- 09: Competitor intelligence (SERP analysis, Apify scraping)
-- 14: Search query insights (Google Ads search terms + Keyword Planner)
-- 19: Evidence table (product_catalog with vision support)
-- 20: SKU review enhancements (hero images, lifestyle approval)
-- 21: Variant content review (accordion UI, bulk actions)
-- 22: Performance data lifecycle (baseline + snapshots)
-- 23: Publishing enhancements (structured fields, Shopify CDN)
-- 24: Post-publish monitoring (performance/search delta tracking)
+**Dashboard pages**: Overview, SKU review (3 variants), variant review, performance baselines/snapshots, batches/publishing, competitor intelligence, search insights, evidence table, settings, regeneration, SKU selection, post-publish monitoring
+**Pipeline**: Single-SKU generation, batch generation, hybrid multi-SKU generation, lifestyle image generation, search term sync, performance capture
+**Publishing**: Google Sheets (structured fields), Shopify (product-level + CDN lifecycle), variant expansion (28 finishes)
+**Data collection**: Auto-triggered baselines, search terms, keyword planner (via `ensure-data.ts`)
 
 ## Content Generation
 
 **Default: Cloud Run Pipeline (GPT-5.2)**
 - Location: `src/feedops/api/main.py` (FastAPI)
-- **Model**: GPT-5.2 (`gpt-5.2` in `openai_provider.py`) — default reasoning_effort is `none`
+- **Model**: GPT-5.2 (`gpt-5.2` in `openai_provider.py`) — reasoning_effort from env `FEEDOPS_REASONING_EFFORT` (unset = no reasoning)
 - **Dashboard regeneration proxies to this pipeline** — `route.ts` is a thin proxy, NOT a separate codepath
-- **Prompt authority chain**: `prompt_builder.py` (orchestrator) → `prompts.py` (SYSTEM_PROMPT) + `prompt_loader.py` (DB data) + `config/*.yaml` (runtime configs)
+- **Prompt authority chain**: `src/feedops/api/prompt_builder.py` (orchestrator) → `prompts.py` (SYSTEM_PROMPT) + `prompt_loader.py` (DB data) + `shopping_intelligence.py` (loads `config/shopping_intelligence.yaml`)
 - TypeScript prompt logic is legacy/reference during migration and must not be treated as runtime source-of-truth
 - Finish sentence generation is being consolidated into Python; avoid adding new TS-side prompt behavior
 - Quality: ~75-80/100 (pre-v1.3a; target 85-92 after skill wiring)
@@ -195,18 +187,18 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 
 Skills serve two layers — Claude Code guidance AND GPT-5.2 runtime injection:
 
-| Skill | Claude Code Skill | Runtime Config | Wired into prompt_builder.py |
+| Skill | Claude Code Skill | Runtime Config | Wired into pipeline |
 |-------|:-:|:-:|:-:|
-| Brand Voice | `.claude/skills/allied-brass-brand-expert` | `config/brand_voice.yaml` | Yes |
-| Quality Rubric | `.claude/skills/quality-evaluation` | `config/quality_rubric.yaml` | Yes |
-| Finish Expertise | `.claude/skills/finish-expertise` | `config/finish_guide.yaml` | Yes |
-| Shopping Intelligence | `.claude/skills/google-shopping-content` | `config/shopping_intelligence.yaml` | Yes |
+| Shopping Intelligence | `.claude/skills/google-shopping-content` | `config/shopping_intelligence.yaml` | Yes (via `shopping_intelligence.py`) |
+| Brand Voice | `.claude/skills/allied-brass-brand-expert` | `config/brand_voice.yaml` | Pending (v1.3a) |
+| Quality Rubric | `.claude/skills/quality-evaluation` | `config/quality_rubric.yaml` | Pending (v1.3a) |
+| Finish Expertise | `.claude/skills/finish-expertise` | `config/finish_guide.yaml` | Pending (v1.3a) |
 | Product Storytelling | `.claude/skills/product-storytelling` | `config/storytelling_patterns.yaml` | Pending (v1.3a) |
 | Collection Stories | `.claude/skills/collection-storytelling` | `config/collection_stories.yaml` | Pending (v1.3a) |
 | Platform: Bing | `.claude/skills/bing-shopping-content` | `config/platform_bing.yaml` | Pending (v1.3a) |
-| Platform: Shopify | Pending | `config/platform_shopify.yaml` | Pending (v1.3a) |
+| Platform: Shopify | `.claude/skills/shopify-conversion-content` | `config/platform_shopify.yaml` | Pending (v1.3a) |
 
-**Key files**: `src/feedops/pipeline/prompt_builder.py` (loads configs), `src/feedops/config/` (YAML configs)
+**Key files**: `src/feedops/api/prompt_builder.py` (orchestrator), `src/feedops/pipeline/shopping_intelligence.py` (loads YAML), `src/feedops/config/` (YAML configs)
 
 ## Key Database Tables
 
@@ -328,7 +320,7 @@ Two migration files exist but are NOT applied to production Supabase:
 
 **Python Pipeline**:
 - Cloud Run API: `src/feedops/api/main.py`
-- Prompt builder (orchestrator): `src/feedops/pipeline/prompt_builder.py`
+- Prompt builder (orchestrator): `src/feedops/api/prompt_builder.py`
 - System prompt: `src/feedops/pipeline/prompts.py`
 - DB data loader: `src/feedops/api/prompt_loader.py`
 - OpenAI provider: `src/feedops/providers/openai_provider.py`
@@ -596,27 +588,8 @@ git push origin master
 
 ## Documentation
 
-**Strategic Planning**:
-- `docs/plans/2026-02-21-strategic-milestone-assessment.md` - Master v1.3 implementation guide (10 parts)
+**Key docs** (use Glob for others in `docs/`):
+- `docs/plans/2026-02-21-strategic-milestone-assessment.md` - Master v1.3 plan (10 parts)
 - `.planning/PROJECT.md` - GSD context (read by all GSD agents)
-
-**Architecture** (how systems work):
-- `docs/architecture/multi-sku-pattern.md` - Product families, query logic
-- `docs/architecture/data-pipeline.md` - Complete pipeline flow
-- `docs/architecture/content-generation-hybrid.md` - Multi-SKU generation
-
-**Research**:
-- `docs/research/gpt52-best-practices.md` - GPT-5.2 optimization findings (8 issues)
-- `docs/brand/` - Allied Brass brand identity documents
-
-**Troubleshooting** (when things break):
-- `docs/troubleshooting/baseline-capture.md` - Performance capture debugging
-
-**Investigation History** (root cause analyses):
-- `docs/audit/SUMMARY-2026-02-08.md` - Baseline capture investigation
-- `docs/audit/variant-id-mismatch-root-cause-2026-02-08.md` - Multi-SKU discovery
-- `docs/audit/hybrid-generation-implementation-2026-02-08.md` - Hybrid generation
-
-**Prompts** (implementation specs):
-- `docs/prompts/01-09.md` - Implemented features
-- `docs/prompts/FUTURE-IDEAS.md` - Backlog
+- `docs/database/SCHEMA.md` - Complete DB schema reference
+- `docs/research/gpt52-best-practices.md` - GPT-5.2 optimization findings
