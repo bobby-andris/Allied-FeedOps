@@ -1,0 +1,32 @@
+# Allied Brass Brand Voice — Runtime Config for LLM Prompt Injection
+# Keep under 40 lines. Loaded by prompt_builder.py.
+
+brand_truths:
+  - "Solid brass construction — corrosion-resistant alloy used in marine hardware. Most mid-market competitors use zinc alloy (zamak) that cracks and corrodes in bathroom humidity."
+  - "28+ designer finishes across every product in every collection. Competitors offer 4-12 finishes, often inconsistently across their lines."
+  - "41+ coordinated designer collections — each a complete design system, not just a product grouping. Beaded, geometric, industrial, coastal, traditional — every aesthetic covered."
+  - "Limited Lifetime Warranty on every product. The manufacturer expects it to outlast the renovation."
+  - "Plated and assembled in Louisa, Virginia since 1965 — over 55 years of American manufacturing heritage."
+  - "Concealed mounting hardware across most product lines — no visible screws interrupting the finish."
+  - "2,892 master SKUs across 32 categories — a complete bathroom hardware ecosystem from one brand, one finish, one design language."
+
+voice_rules:
+  - rule: "Prove, don't claim"
+    good: "Solid brass core with concealed mounting"
+    bad: "Premium quality construction"
+  - rule: "Open with feeling or scenario, follow with proof"
+    good: "The small touch that tells guests you care about every detail. Solid brass, 28 finishes."
+    bad: "This high-quality soap dish features premium materials."
+  - rule: "Be specific — name the collection, the finish count, the material"
+    good: "Dottingham collection — delicate beaded backplates in 28 finishes"
+    bad: "Beautiful design available in many finishes"
+  - rule: "Never use banned adjectives as standalone qualifiers"
+    banned: "premium, luxurious, finest, exceptional, unparalleled, superior, exquisite, ultimate, exclusive"
+
+one_two_punch: "Allied Brass wraps everyday functionality in intentional design — then lets you choose from 28 finishes so every piece in the room speaks the same language. No other brand at this price tier offers this depth of customization."
+
+competitor_contrasts:
+  - "Most bathroom hardware at this price uses die-cast zinc with decorative plating — it looks identical on day one, but corrodes in humid bathrooms by year three."
+  - "Competitors offer 4-12 finishes and rarely match them consistently across product lines — forcing homeowners to compromise or mix brands."
+  - "Mass-market accessories hide generic construction behind vague 'quality' claims. Solid brass and concealed mounting are specific, verifiable design choices."
+  - "A 1-5 year warranty says the manufacturer expects you to replace it. A lifetime warranty says they don't."
