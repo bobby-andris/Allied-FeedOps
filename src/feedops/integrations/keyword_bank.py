@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_KEYWORD_BANK_PATH = Path("data/keyword-bank.json")
+DEFAULT_KEYWORD_BANK_PATH = Path(__file__).parent / "data" / "keyword-bank.json"
 
 
 def _keyword_bank_path() -> Path:

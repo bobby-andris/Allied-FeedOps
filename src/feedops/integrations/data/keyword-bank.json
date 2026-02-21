@@ -1,0 +1,528 @@
+{
+  "Towel Bars": {
+    "primary_keywords": [
+      "towel bar",
+      "wall mount towel bar",
+      "wall mounted towel bar"
+    ],
+    "size_keywords": [
+      "18-inch towel bar",
+      "24-inch towel bar",
+      "30-inch towel bar",
+      "36-inch towel bar"
+    ],
+    "material_keywords": [
+      "solid brass towel bar",
+      "brass towel bar"
+    ],
+    "feature_keywords": [
+      "concealed mount",
+      "hidden screws",
+      "double towel bar",
+      "train rack towel bar"
+    ],
+    "design_keywords": [
+      "designer towel bar",
+      "modern towel bar",
+      "traditional towel bar",
+      "transitional towel bar",
+      "geometric towel bar",
+      "minimalist towel bar"
+    ],
+    "collection_keywords": [
+      "waverly place towel bar",
+      "dottingham towel bar",
+      "pipeline towel bar",
+      "montero towel bar"
+    ],
+    "synonyms_for_description": [
+      "towel rack",
+      "towel rail",
+      "towel holder",
+      "bath towel bar",
+      "bathroom towel rack"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "budget",
+      "plastic"
+    ]
+  },
+  "Grab Bars": {
+    "primary_keywords": [
+      "grab bar",
+      "ADA grab bar",
+      "ADA compliant grab bar",
+      "bathroom grab bar"
+    ],
+    "size_keywords": [
+      "16-inch grab bar",
+      "18-inch grab bar",
+      "24-inch grab bar",
+      "36-inch grab bar",
+      "42-inch grab bar"
+    ],
+    "material_keywords": [
+      "solid brass grab bar",
+      "brass grab bar"
+    ],
+    "feature_keywords": [
+      "500lb capacity",
+      "concealed screws",
+      "knurled grip",
+      "decorative grab bar",
+      "designer grab bar",
+      "reeded grab bar",
+      "textured grip grab bar",
+      "smooth grab bar",
+      "L-shaped grab bar",
+      "corner grab bar",
+      "3-post grab bar"
+    ],
+    "design_keywords": [
+      "designer ADA grab bar",
+      "decorative safety bar",
+      "stylish grab bar",
+      "modern grab bar",
+      "traditional grab bar",
+      "luxury grab bar"
+    ],
+    "collection_keywords": [
+      "dottingham grab bar",
+      "waverly place grab bar",
+      "pipeline grab bar",
+      "montero grab bar"
+    ],
+    "safety_keywords": [
+      "bathroom safety",
+      "ADA compliant",
+      "safety rail",
+      "support bar",
+      "assist bar"
+    ],
+    "synonyms_for_description": [
+      "safety bar",
+      "support bar",
+      "assist bar",
+      "bathroom safety rail"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "institutional",
+      "hospital"
+    ]
+  },
+  "Wall Mirrors": {
+    "primary_keywords": [
+      "wall mirror",
+      "vanity mirror",
+      "bathroom mirror"
+    ],
+    "shape_keywords": [
+      "oval mirror",
+      "round mirror",
+      "rectangular mirror"
+    ],
+    "feature_keywords": [
+      "tilt mirror",
+      "pivot mirror",
+      "tilting mirror",
+      "pivoting mirror",
+      "swivel mirror",
+      "adjustable mirror"
+    ],
+    "frame_keywords": [
+      "solid brass frame",
+      "brass frame mirror",
+      "frameless mirror"
+    ],
+    "design_keywords": [
+      "designer bathroom mirror",
+      "decorative wall mirror",
+      "modern vanity mirror",
+      "traditional bathroom mirror",
+      "transitional mirror"
+    ],
+    "collection_keywords": [
+      "waverly place mirror",
+      "dottingham mirror",
+      "que new mirror"
+    ],
+    "synonyms_for_description": [
+      "bathroom wall mirror",
+      "decorative mirror",
+      "adjustable mirror"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "plastic frame"
+    ]
+  },
+  "Glass Shelves": {
+    "primary_keywords": [
+      "glass shelf",
+      "bathroom glass shelf",
+      "tempered glass shelf"
+    ],
+    "size_keywords": [
+      "16-inch glass shelf",
+      "18-inch glass shelf",
+      "22-inch glass shelf",
+      "24-inch glass shelf"
+    ],
+    "feature_keywords": [
+      "gallery rail",
+      "corner shelf",
+      "wall mounted shelf",
+      "tempered glass",
+      "beveled glass shelf"
+    ],
+    "design_keywords": [
+      "designer glass shelf",
+      "modern glass shelf",
+      "traditional glass shelf",
+      "transitional glass shelf"
+    ],
+    "collection_keywords": [
+      "waverly place glass shelf",
+      "dottingham glass shelf",
+      "montero glass shelf"
+    ],
+    "synonyms_for_description": [
+      "bathroom shelf",
+      "vanity shelf",
+      "bath shelf"
+    ],
+    "avoid_keywords": [
+      "plastic",
+      "cheap"
+    ]
+  },
+  "Toilet Paper Holders": {
+    "primary_keywords": [
+      "toilet paper holder",
+      "tissue holder",
+      "toilet tissue holder"
+    ],
+    "mount_keywords": [
+      "recessed toilet paper holder",
+      "wall mount toilet paper holder",
+      "freestanding toilet paper holder"
+    ],
+    "feature_keywords": [
+      "spring loaded",
+      "concealed mount",
+      "covered toilet paper holder",
+      "euro style",
+      "european toilet paper holder"
+    ],
+    "design_keywords": [
+      "designer toilet paper holder",
+      "modern toilet paper holder",
+      "traditional toilet paper holder",
+      "transitional tissue holder",
+      "decorative toilet paper holder"
+    ],
+    "collection_keywords": [
+      "waverly place toilet paper holder",
+      "dottingham toilet paper holder",
+      "pipeline toilet paper holder",
+      "montero toilet paper holder"
+    ],
+    "synonyms_for_description": [
+      "TP holder",
+      "paper holder",
+      "tissue holder",
+      "toilet roll holder"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "plastic"
+    ]
+  },
+  "Cabinet Hardware": {
+    "primary_keywords": [
+      "cabinet knob",
+      "cabinet pull",
+      "drawer knob",
+      "drawer pull"
+    ],
+    "size_keywords": [
+      "1-inch cabinet knob",
+      "1-1/4 inch cabinet knob",
+      "1-1/2 inch cabinet knob"
+    ],
+    "material_keywords": [
+      "solid brass cabinet knob",
+      "brass cabinet hardware"
+    ],
+    "style_keywords": [
+      "traditional cabinet knob",
+      "classic cabinet knob",
+      "round cabinet knob",
+      "modern cabinet knob"
+    ],
+    "design_keywords": [
+      "designer cabinet knob",
+      "decorative cabinet hardware",
+      "luxury cabinet knob"
+    ],
+    "collection_keywords": [
+      "waverly place cabinet knob",
+      "dottingham cabinet knob"
+    ],
+    "location_keywords": [
+      "kitchen cabinet knob",
+      "bathroom vanity knob"
+    ],
+    "synonyms_for_description": [
+      "furniture knob",
+      "cabinet hardware",
+      "drawer hardware"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "plastic",
+      "hollow"
+    ]
+  },
+  "Guest Towel Holders": {
+    "primary_keywords": [
+      "guest towel holder",
+      "hand towel holder",
+      "fingertip towel holder"
+    ],
+    "feature_keywords": [
+      "wall mount",
+      "countertop",
+      "vanity towel holder"
+    ],
+    "design_keywords": [
+      "designer guest towel holder",
+      "modern hand towel holder",
+      "traditional guest towel holder"
+    ],
+    "collection_keywords": [
+      "waverly place guest towel holder",
+      "dottingham guest towel holder"
+    ],
+    "synonyms_for_description": [
+      "guest towel stand",
+      "hand towel rack",
+      "fingertip towel rack"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "plastic"
+    ]
+  },
+  "Make-Up Mirrors": {
+    "primary_keywords": [
+      "makeup mirror",
+      "make-up mirror",
+      "vanity mirror",
+      "cosmetic mirror"
+    ],
+    "feature_keywords": [
+      "magnifying mirror",
+      "2X magnification",
+      "3X magnification",
+      "4X magnification",
+      "5X magnification",
+      "8X magnification",
+      "swivel mirror",
+      "extendable mirror",
+      "wall mount makeup mirror",
+      "swing arm mirror"
+    ],
+    "design_keywords": [
+      "designer makeup mirror",
+      "modern vanity mirror",
+      "traditional makeup mirror",
+      "luxury cosmetic mirror"
+    ],
+    "collection_keywords": [
+      "waverly place makeup mirror",
+      "dottingham makeup mirror",
+      "soho makeup mirror"
+    ],
+    "synonyms_for_description": [
+      "cosmetic mirror",
+      "shaving mirror",
+      "magnifying vanity mirror",
+      "beauty mirror"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "plastic"
+    ]
+  },
+  "Wood Shelves": {
+    "primary_keywords": [
+      "wood shelf",
+      "wooden bathroom shelf",
+      "wood gallery shelf"
+    ],
+    "material_keywords": [
+      "solid wood shelf",
+      "IPE ironwood shelf",
+      "teak shelf"
+    ],
+    "feature_keywords": [
+      "gallery rail",
+      "solid brass brackets",
+      "wall mounted"
+    ],
+    "design_keywords": [
+      "designer wood shelf",
+      "modern wood shelf",
+      "transitional wood shelf",
+      "spa-style wood shelf"
+    ],
+    "collection_keywords": [
+      "waverly place wood shelf",
+      "dottingham wood shelf"
+    ],
+    "synonyms_for_description": [
+      "bathroom wood shelf",
+      "wooden vanity shelf"
+    ],
+    "avoid_keywords": [
+      "particle board",
+      "cheap",
+      "laminate"
+    ]
+  },
+  "Shower Door Hardware": {
+    "primary_keywords": [
+      "shower door handle",
+      "shower door pull",
+      "shower door hardware"
+    ],
+    "feature_keywords": [
+      "back-to-back",
+      "single sided",
+      "solid brass shower handle"
+    ],
+    "size_keywords": [
+      "18-inch shower door pull",
+      "24-inch shower door pull"
+    ],
+    "design_keywords": [
+      "designer shower door handle",
+      "modern shower hardware",
+      "frameless shower handle"
+    ],
+    "collection_keywords": [
+      "contemporary shower door pull"
+    ],
+    "synonyms_for_description": [
+      "shower door grab bar",
+      "frameless shower handle",
+      "glass door handle"
+    ],
+    "avoid_keywords": [
+      "cheap",
+      "plastic"
+    ]
+  },
+  "_design_intent": {
+    "description": "Design-driven keywords based on Allied Brass's 41 collections",
+    "style_groups": {
+      "contemporary_modern": [
+        "modern bathroom hardware",
+        "contemporary bath accessories",
+        "minimalist bathroom fixtures",
+        "geometric bathroom hardware",
+        "sleek bathroom accessories"
+      ],
+      "traditional_classic": [
+        "traditional bathroom hardware",
+        "classic bath accessories",
+        "heritage bathroom fixtures",
+        "elegant bathroom hardware",
+        "timeless bathroom accessories"
+      ],
+      "transitional": [
+        "transitional bathroom hardware",
+        "versatile bath accessories",
+        "modern-traditional bathroom fixtures",
+        "balanced bathroom design"
+      ],
+      "designer_statement": [
+        "designer bathroom hardware",
+        "statement bath accessories",
+        "sculptural bathroom fixtures",
+        "gallery-worthy bathroom hardware",
+        "unique bathroom accessories"
+      ],
+      "coastal_modern": [
+        "coastal bathroom hardware",
+        "beach house accessories",
+        "maritime bath fixtures",
+        "light and airy bathroom hardware"
+      ],
+      "industrial_modern": [
+        "industrial bathroom hardware",
+        "pipe-style bath accessories",
+        "loft bathroom fixtures",
+        "urban bathroom hardware"
+      ]
+    },
+    "functional_differentiators": {
+      "grab_bars": [
+        "reeded grab bar",
+        "textured grip safety bar",
+        "smooth grab bar",
+        "L-shaped grab bar",
+        "corner grab bar",
+        "3-post grab bar",
+        "designer ADA grab bar"
+      ],
+      "towel_bars": [
+        "double towel bar",
+        "train rack towel bar",
+        "towel bar with shelf"
+      ],
+      "mirrors": [
+        "tilting mirror",
+        "pivot mirror",
+        "magnifying mirror",
+        "extendable makeup mirror",
+        "swing arm mirror"
+      ],
+      "toilet_paper_holders": [
+        "recessed toilet paper holder",
+        "spring loaded toilet paper holder",
+        "covered toilet paper holder",
+        "european style tissue holder"
+      ]
+    },
+    "finish_variety": {
+      "statement_finishes": [
+        "fire engine red bathroom hardware",
+        "mediterranean blue bath accessories",
+        "matte black bathroom fixtures",
+        "unlacquered brass bathroom hardware",
+        "antique pewter bath accessories",
+        "venetian bronze bathroom fixtures"
+      ],
+      "finish_variety_messaging": [
+        "available in 28 finishes",
+        "designer finish options",
+        "coordinate with any decor"
+      ]
+    },
+    "collection_coordination": [
+      "matching collection",
+      "coordinated bathroom hardware",
+      "complete bathroom set",
+      "matching bath accessories"
+    ]
+  },
+  "_metadata": {
+    "last_updated": "2026-01-24",
+    "source": "Competitive intelligence + keyword research synthesis + 41 collection descriptions",
+    "notes": "Keywords organized by intent tier. Primary keywords go in titles, synonyms in descriptions only. Design keywords from collection metadata enable on-the-fly enrichment."
+  }
+}
