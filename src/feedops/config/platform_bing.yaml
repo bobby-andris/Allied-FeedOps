@@ -1,0 +1,45 @@
+# Bing Shopping Platform Config — Runtime rules for GPT-5.2 prompt injection
+# Keep under 50 lines. Loaded by prompt_builder.py for Bing content generation.
+
+platform: bing
+title_limit: 150
+description_limit: 10000
+description_target: "700-900 characters. Same sweet spot as Google. Do NOT pad to use the 10K limit."
+
+title_rules:
+  - "Product type in first 30 chars, primary dimension before char 70, Allied Brass last."
+  - "Include one synonym variant not in the Google title (e.g., towel rack alongside towel bar)."
+  - "Style descriptors (Decorative, Modern, Farmhouse) earn their place — Bing users search with style terms."
+  - "No promotional text, no ALL CAPS except ADA. Title Case only."
+
+description_rules:
+  - "Front-load key specs in first 200 chars — Bing shows slightly more preview than Google."
+  - "Plain text only. No HTML, no $ symbols, no quotation marks for emphasis, no ALL CAPS promotional text."
+  - "Include 3-4 natural synonym variations, each in a genuinely different sentence context."
+  - "Include at least one buyer scenario (renovation, gift, aging-in-place, design coordination)."
+  - "Mention Limited Lifetime Warranty — Bing audience responds to quality assurance."
+  - "Never open with a spec fragment. Open with a benefit or scenario in a complete sentence."
+
+synonym_coverage:
+  towel_bar: [towel rack, towel holder, towel rail, bath towel bar]
+  toilet_paper_holder: [tissue holder, TP holder, toilet roll holder]
+  grab_bar: [safety bar, ADA grab bar, support bar, shower grab bar]
+  robe_hook: [towel hook, bathroom hook, wall hook, coat hook]
+  shower_basket: [shower caddy, shower organizer, bath caddy]
+  soap_dispenser: [lotion dispenser, soap pump, liquid soap dispenser]
+  glass_shelf: [bathroom glass shelf, floating glass shelf, wall shelf]
+  makeup_mirror: [vanity mirror, magnifying mirror, cosmetic mirror]
+  cabinet_knob: [drawer knob, cupboard knob, furniture knob]
+  cabinet_pull: [drawer pull, cabinet handle, furniture pull]
+  valet_rod: [closet valet rod, garment rod, pull-out closet rod]
+
+audience_signals:
+  - "Higher household income (75K+), less price-sensitive, more quality-responsive."
+  - "Slightly older (35-65), values installation confidence and brand heritage."
+  - "Responds to gift framing, design coordination, and American manufacturing."
+
+prohibited:
+  - "No promotional language: SALE, Best, Free Shipping, Limited Time, #1."
+  - "No symbols: $, quotation marks for emphasis."
+  - "No competitor brand names."
+  - "No banned adjectives: finest, luxurious, premium, exclusive, exceptional, superior."

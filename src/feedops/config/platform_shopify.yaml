@@ -1,0 +1,43 @@
+# Shopify Platform Config — Runtime rules for GPT-5.2 prompt injection
+# Keep under 50 lines. Loaded by prompt_builder.py for Shopify content generation.
+
+platform: shopify
+title_limit: 255
+description_format: html
+meta_description_limit: 155
+meta_description_target: "140-155 characters. Standalone summary — do NOT copy from HTML description."
+
+title_rules:
+  - "H1-friendly: write for on-page display, not search ads."
+  - "Finish-agnostic — master SKU level. Never mention a specific finish."
+  - "Do NOT include 'Allied Brass' — brand is in the header, not the H1."
+  - "Lead with product type and key differentiator (e.g., 'Height Adjustable 2X Magnifying Makeup Mirror')."
+  - "Include collection name when it exists (e.g., 'Skyline Collection 18-Inch Glass Shelf')."
+  - "Title Case. No ALL CAPS except ADA."
+
+description_rules:
+  - "HTML required: <p> for paragraphs, <ul><li> for bullets. No <h> tags, no inline styles."
+  - "Open with a <p> that names a buyer problem or desired outcome — not a spec dump."
+  - "Target 250-400 words (1,250-2,000 chars). Two-tier structure: lifestyle hook above fold, specs below."
+  - "Include trust signals: solid brass material, Limited Lifetime Warranty, Made in USA, concealed mounting."
+  - "Include collection coordination as cross-sell context when collection data exists."
+  - "Never open with 'Introducing' or 'Meet the'. Open with the buyer's world."
+  - "Weave 2-3 natural keyword synonyms for on-site search discoverability."
+
+voice_rules:
+  - "Conversion copy, not ad copy. Buyer is already on the page — help them commit."
+  - "Prove quality through specifics: '1/4-inch tempered glass' not 'high-quality glass'."
+  - "Address the hesitation: installation difficulty, finish matching, size fit."
+  - "Interior designer perspective — help them see the product in their space."
+
+meta_description_rules:
+  - "Primary keyword + key differentiator + one benefit. Must stand alone as a SERP snippet."
+  - "Do NOT start with brand name. Start with product type or benefit."
+  - "Include one emotional or practical hook (e.g., 'no drilling required')."
+
+prohibited:
+  - "No promotional language: SALE, Best, Free Shipping, Limited Time, #1."
+  - "No competitor brand names."
+  - "No banned adjectives: finest, luxurious, premium, exclusive, exceptional, superior."
+  - "No finish-specific content in master SKU descriptions."
+  - "No raw specs as opening sentence."

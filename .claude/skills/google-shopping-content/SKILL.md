@@ -296,18 +296,18 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 
 ---
 
-### 3. Decorative Grab Bar — Camo Collection 16-Inch (SKU: CM-P-700-16-GB) — Score: 92/100
+### 3. Decorative Reeded Grab Bar — Cube Design 18-Inch (SKU: CU-GRR-18) — Score: 92/100
 
 **Google Title:**
-> Decorative 16-Inch Solid Brass Grab Bar - ADA Compliant 250 lb Capacity - Camo Farmhouse Style - Allied Brass
+> Decorative 18-Inch Reeded Solid Brass Grab Bar - ADA Compliant 250 lb Capacity - Cube Design Contemporary - Allied Brass
 
 **Google Short Title:**
-> Decorative 16-Inch Solid Brass Grab Bar, ADA Compliant
+> Decorative 18-Inch Reeded Solid Brass Grab Bar, ADA Compliant
 
-**Google Description (856 chars):**
-> A grab bar that looks like it belongs in a farmhouse renovation, not a hospital hallway — the Camo Collection's decorative design brings ADA-compliant safety to bathrooms without the institutional aesthetic that makes most grab bars an eyesore. Solid brass construction supports 250 lb and resists the corrosion that destroys chrome-plated steel bars in wet shower environments. {FINISH_SENTENCE} The 16-inch length fits beside a shower entry, along a tub wall, or next to a toilet — mounting vertically, horizontally, or diagonally depending on where you need the grip most. Corrosion-free solid brass means this bar performs in the exact humid conditions that cause cheaper metals to pit and weaken. Whether you are outfitting an aging parent's bathroom or adding safety to your own shower, the Camo Collection proves that ADA compliance and farmhouse charm belong in the same sentence. Coordinates with Camo Collection accessories in 28 finishes.
+**Google Description (861 chars):**
+> A grab bar that looks like it belongs in a contemporary renovation, not a hospital hallway — the Cube Design Reeded Grab Bar brings ADA-compliant safety to bathrooms without the institutional aesthetic that makes most grab bars an eyesore. The reeded texture provides secure grip even with wet or soapy hands, while solid brass construction supports 250 lb and resists the corrosion that destroys chrome-plated steel bars in wet shower environments. {FINISH_SENTENCE} The 18-inch length fits beside a shower entry, along a tub wall, or next to a toilet — mounting vertically, horizontally, or diagonally depending on where you need the grip most. Corrosion-free solid brass means this bar performs in the exact humid conditions that cause cheaper metals to pit and weaken. Whether you are outfitting an aging parent's bathroom or adding safety to your own shower, the Cube Design proves that ADA compliance and contemporary style belong in the same sentence. Coordinates with Cube Design accessories in 28 finishes.
 
-**Why it's excellent:** Opens by naming the core objection ("hospital hallway") and resolving it with farmhouse aesthetic. "Decorative" in both title and description captures search terms current listings miss (741 impressions at 0% CTR). Two buyer personas (aging parent, own shower). Highest-scoring example at 92/100.
+**Why it's excellent:** Opens by naming the core objection ("hospital hallway") and resolving it with contemporary aesthetic. "Decorative" in both title and description captures search terms current listings miss (741 impressions at 0% CTR). Reeded texture as both design and function. Two buyer personas (aging parent, own shower). Highest-scoring example at 92/100.
 
 ---
 
@@ -454,7 +454,7 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 
 **Keyword synonyms:** grab bar, safety bar, decorative grab bar, designer grab bar, ADA grab bar, shower grab bar, bathtub grab bar
 
-**CRITICAL:** For decorative/designer collections (Pipeline, Cube Design, Monte Carlo, Camo), ALWAYS include "Decorative" in the title. This single word converts 741 currently-zero-click impressions.
+**CRITICAL:** For decorative/designer collections (Pipeline, Cube Design, Monte Carlo), ALWAYS include "Decorative" in the title. This single word converts 741 currently-zero-click impressions.
 
 ---
 

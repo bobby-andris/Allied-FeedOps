@@ -112,7 +112,7 @@ These rules prevent disapprovals and “AI text” compliance issues. If any rul
 For Google/Bing variant content:
 - **Base content** is finish-agnostic (no specific finish mentioned)
 - **Finish sentences** describe the relationship between THIS product and each finish
-- **28 finishes** for content generation (excludes Military Camo and Red White and Blue)
+- **28 finishes** for content generation (excludes discontinued finishes: Military Camo, Red White and Blue)
 - Good: "The warm, aged patina of Antique Brass complements this traditional Carolina design"
 - Bad: "Antique Brass makes a bold statement" (generic, could apply to any product)
 

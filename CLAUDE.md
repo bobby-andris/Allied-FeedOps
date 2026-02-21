@@ -203,7 +203,7 @@ Skills serve two layers — Claude Code guidance AND GPT-5.2 runtime injection:
 | Shopping Intelligence | `.claude/skills/google-shopping-content` | `config/shopping_intelligence.yaml` | Yes |
 | Product Storytelling | `.claude/skills/product-storytelling` | `config/storytelling_patterns.yaml` | Pending (v1.3a) |
 | Collection Stories | `.claude/skills/collection-storytelling` | `config/collection_stories.yaml` | Pending (v1.3a) |
-| Platform: Bing | Pending | `config/platform_bing.yaml` | Pending (v1.3a) |
+| Platform: Bing | `.claude/skills/bing-shopping-content` | `config/platform_bing.yaml` | Pending (v1.3a) |
 | Platform: Shopify | Pending | `config/platform_shopify.yaml` | Pending (v1.3a) |
 
 **Key files**: `src/feedops/pipeline/prompt_builder.py` (loads configs), `src/feedops/config/` (YAML configs)

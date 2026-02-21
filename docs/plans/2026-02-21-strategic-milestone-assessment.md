@@ -1062,11 +1062,18 @@ Create the skill with these sections:
 - Should create curiosity or urgency without hype
 
 ### Gold Standard Examples
-- 8 examples showing the full Shopify output: title, description HTML, meta description
+- 10 examples showing the full Shopify output: title, description HTML, meta description
+- Use the SAME 10 product SKUs as Google and Bing gold standards (1025U, CC-29, CU-GRR-18,
+  101, CH-90, DM-1/2X, 1033/18, 1020-2, 953, BSK-10ST) for cross-platform comparison
+- REWRITE these from scratch for Shopify — do NOT copy Google/Bing descriptions and add HTML tags.
+  Shopify content serves a fundamentally different purpose (on-site conversion vs ad click-through).
+  The opening hook, structure, length, and buyer psychology are all different.
 - Each gold standard must score 85+ on the quality-evaluation rubric
 - For each, annotate WHY each section works for conversion
 - Show the "buyer objection → answer" mapping in each example
 - Descriptions must demonstrate full recommended length, not short fragments
+- Include side-by-side comparison for 2-3 examples: Google desc vs Bing desc vs Shopify desc
+  to clearly show how the SAME product requires different content per platform
 
 ### Collection Coordination
 - When collection data exists, how to use it as a design-story hook

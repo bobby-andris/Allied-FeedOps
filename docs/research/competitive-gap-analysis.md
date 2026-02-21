@@ -347,7 +347,7 @@ The user identified this as Allied Brass's highest product-market-fit category w
 
 **Allied Brass grab bar portfolio:**
 - 40+ unique master SKUs in "Grab Bars" category
-- Collections: Pipeline (industrial decorative), Cube Design (contemporary), Camo (farmhouse), Monte Carlo (traditional)
+- Collections: Pipeline (industrial decorative), Cube Design (contemporary), Monte Carlo (traditional)
 - Material: Solid brass and iron pipe construction — genuine quality materials
 - Weight capacity: 250 lbs across the line — ADA-compliant strength
 - Sizes: 16", 18", 24", 30", 32", 36", 42", 48", 60" — comprehensive size range
@@ -407,7 +407,7 @@ Building on the 9 changes documented in `docs/research/google-shopping-ranking-f
 
 **Recommendation:**
 ```
-For grab bars in decorative/designer collections (Pipeline, Cube Design, Monte Carlo, Camo):
+For grab bars in decorative/designer collections (Pipeline, Cube Design, Monte Carlo):
 Add "Decorative" before "Grab Bar" in the title.
 Example: "Oil Rubbed Bronze 16-Inch Decorative Grab Bar - Pipeline - Allied Brass"
 NOT: "Pipeline Collection 16 Inch Grab Bar"
