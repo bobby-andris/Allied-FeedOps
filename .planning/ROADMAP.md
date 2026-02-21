@@ -93,7 +93,12 @@ Plans:
   2. The system can query GMC via Merchant API and surface disapproved or not-serving products with item-level issue detail — the silent impression killer is no longer invisible
   3. For any published SKU, the system can show which prompt version (hash) produced the live content — connecting performance outcomes to the exact generation input
   4. Each SKU with published content receives a bottleneck classification label (code-path gap, auction/bid, query relevance, coverage gap, or propagation failure) with evidence for the classification
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 19-01-PLAN.md — Schema migrations + Python flag/cost capture (MEAS-01, MEAS-03)
+- [ ] 19-02-PLAN.md — Bottleneck classifier + prompt lineage API routes (MEAS-03, MEAS-04)
+- [ ] 19-03-PLAN.md — Dashboard UI: lineage panel, bottleneck badges, diagnostic page (MEAS-01, MEAS-03, MEAS-04)
+- [ ] 19-04-PLAN.md — GMC disapproval sync + monitoring tab + badges (MEAS-02)
 
 ### Phase 20: Targeted Fixes & Intelligence Application
 **Goal**: Apply one fix at a time based on Phase 18-19 evidence — wire generation paths correctly, activate feature flags, update prompts with Google Shopping intelligence, and implement model upgrade if benchmarks justify it
@@ -116,7 +121,7 @@ Plans:
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17. Google Shopping Intelligence & Model Research | 3/3 | Complete    | 2026-02-21 | - |
 | 18. Diagnosis — Establish Ground Truth | 3/3 | Complete    | 2026-02-21 | - |
-| 19. Measurement Infrastructure | v1.2 | 0/TBD | Not started | - |
+| 19. Measurement Infrastructure | v1.2 | 0/4 | Planned | - |
 | 20. Targeted Fixes & Intelligence Application | v1.2 | 0/TBD | Not started | - |
 
 ---
