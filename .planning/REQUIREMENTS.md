@@ -28,14 +28,14 @@
 
 - [x] **MODEL-01**: Research GPT-5.2 capabilities, pricing, and best practices for product content generation — compare against current model (GPT-4o or equivalent) on quality, speed, and cost per SKU
 - [x] **MODEL-02**: Evaluate alternative models (Claude, Gemini, open-source) for cost-effective feed content generation with quality benchmarks
-- [ ] **MODEL-03**: If a superior model is identified, implement model switch in Python pipeline with A/B quality comparison on sample SKUs
+- [x] **MODEL-03**: If a superior model is identified, implement model switch in Python pipeline with A/B quality comparison on sample SKUs
 
 ### Google Shopping Intelligence
 
 - [x] **GOOG-01**: Deep research into Google Shopping ranking factors — what signals drive product surfacing in Shopping results (feed quality, bid strategy, seller ratings, product data completeness, structured data, historical performance, landing page quality)
 - [x] **GOOG-02**: Competitive analysis methodology — understand why competitors show 5x for search terms where Allied Brass products are better suited (analyze: auction dynamics, impression share, product data gaps, category targeting, bid strategies)
 - [x] **GOOG-03**: Generate actionable checklist of Google Shopping optimization factors with priority ranking — which factors are within feed control vs require account-level changes
-- [ ] **GOOG-04**: Update content generation prompts to incorporate Google Shopping ranking intelligence — titles, descriptions, and structured data should reflect what Google's algorithm actually rewards
+- [x] **GOOG-04**: Update content generation prompts to incorporate Google Shopping ranking intelligence — titles, descriptions, and structured data should reflect what Google's algorithm actually rewards
 - [x] **GOOG-05**: Image generation guidance updated to reflect Google Shopping visual ranking factors (product clarity, lifestyle context, image quality signals that affect CTR and Quality Score)
 
 ## Future Requirements (v1.3+)
@@ -80,9 +80,9 @@
 | MEAS-04 | Phase 19 | Complete |
 | FIX-01 | Phase 20 | Pending |
 | FIX-02 | Phase 20 | Pending |
-| GOOG-04 | Phase 20 | Pending |
+| GOOG-04 | Phase 20 | Complete |
 | GOOG-05 | Phase 20 | Complete |
-| MODEL-03 | Phase 20 | Pending |
+| MODEL-03 | Phase 20 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 18 total
