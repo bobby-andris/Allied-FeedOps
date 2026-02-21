@@ -13,6 +13,10 @@ Endpoints:
 - POST /hybrid-generate - Hybrid multi-SKU batch generation
 - POST /performance/capture-baseline - Capture performance baselines for SKUs
 - GET /performance/baseline/{master_sku} - Get baseline status for SKU
+- POST /performance/collect-daily - Collect durable daily performance snapshots
+- POST /performance/compute-impact - Compute persisted diff-in-diff impact scores
+- GET /performance/impact-scores - Read persisted impact scorecards
+- POST /performance/capture-snapshot - Backward-compatible collector alias
 - POST /search-insights/sync - Sync search terms from Google Ads
 - GET /search-insights/sync/{job_id} - Get search term sync status
 - POST /backfill/start - Create and start a backfill job
@@ -73,6 +77,7 @@ from feedops.api.runtime_controls import (
     ensure_generation_enabled,
     finish_sentence_regeneration_enabled,
 )
+from feedops.pipeline.feature_flags import capture_flag_snapshot
 from feedops.observability import get_request_id, log_event, request_context
 from feedops.observability.metrics import metrics_registry
 
@@ -583,6 +588,8 @@ def _persist_generated_content_and_history(
     system_prompt: str,
     user_prompt: str,
     mode: str,
+    tokens_used: int | None = None,
+    latency_ms: int | None = None,
 ):
     """Persist generated content and linked history in one canonical path."""
     supabase.table("generated_content").upsert(
@@ -615,6 +622,9 @@ def _persist_generated_content_and_history(
         "user_prompt": user_prompt[:5000],
         "prompt_hash": prompt_hash,
         "generated_content_id": generated_content_id,
+        "feature_flags_active": capture_flag_snapshot(),
+        "tokens_used": tokens_used,
+        "latency_ms": latency_ms,
     }
     supabase.table("regeneration_history").insert(history_payload).execute()
 
@@ -870,6 +880,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                     "required": ["content"],
                 }
 
+                _gen_start = time.time()
                 response = await _generate_with_metrics(
                     endpoint="optimize_single_sku",
                     provider=provider,
@@ -879,6 +890,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                     platform=platform,
                     content_type=content_type,
                 )
+                _gen_latency_ms = int((time.time() - _gen_start) * 1000)
 
                 content = response.get("content", "").strip()
                 finish_sentences: dict[str, str] | None = None
@@ -904,6 +916,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                         system_prompt=system_prompt,
                         user_prompt=user_prompt,
                         mode="full_generation",
+                        latency_ms=_gen_latency_ms,
                     )
                     if finish_sentences:
                         supabase.table("variant_finish_sentences").upsert(
@@ -995,6 +1008,7 @@ async def regenerate_content(request: RegenerateRequest):
             "required": ["content"],
         }
 
+        _regen_start = time.time()
         response = await _generate_with_metrics(
             endpoint="regenerate",
             provider=provider,
@@ -1004,6 +1018,7 @@ async def regenerate_content(request: RegenerateRequest):
             platform=request.platform,
             content_type=request.content_type,
         )
+        _regen_latency_ms = int((time.time() - _regen_start) * 1000)
 
         content = response.get("content", "").strip()
         finish_sentences: dict[str, str] | None = None
@@ -1051,6 +1066,8 @@ async def regenerate_content(request: RegenerateRequest):
                     "user_prompt": user_prompt[:5000],
                     "prompt_hash": prompt_hash,
                     "generated_content_id": generated_content_id,
+                    "feature_flags_active": capture_flag_snapshot(),
+                    "latency_ms": _regen_latency_ms,
                 }
             ).execute()
         except Exception as e:
@@ -1481,6 +1498,7 @@ async def process_batch_job(
                         "required": ["content"],
                     }
 
+                    _batch_gen_start = time.time()
                     response = await _generate_with_metrics(
                         endpoint="process_batch_job",
                         provider=provider,
@@ -1490,6 +1508,7 @@ async def process_batch_job(
                         platform=platform,
                         content_type=content_type,
                     )
+                    _batch_gen_latency_ms = int((time.time() - _batch_gen_start) * 1000)
 
                     content = response.get("content", "").strip()
                     finish_sentences: dict[str, str] | None = None
@@ -1514,6 +1533,7 @@ async def process_batch_job(
                             system_prompt=system_prompt,
                             user_prompt=user_prompt,
                             mode="full_generation",
+                            latency_ms=_batch_gen_latency_ms,
                         )
                         if finish_sentences:
                             supabase.table("variant_finish_sentences").upsert(
@@ -1710,6 +1730,7 @@ async def process_hybrid_batch_job(
             "required": ["content"],
         }
 
+        _hybrid_gen_start = time.time()
         response = await _generate_with_metrics(
             endpoint="process_hybrid_batch_job",
             provider=provider,
@@ -1719,6 +1740,7 @@ async def process_hybrid_batch_job(
             platform=platform,
             content_type=content_type,
         )
+        _hybrid_gen_latency_ms = int((time.time() - _hybrid_gen_start) * 1000)
 
         content = response.get("content", "").strip()
         finish_sentences: dict[str, str] | None = None
@@ -1742,6 +1764,7 @@ async def process_hybrid_batch_job(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             mode="full_generation",
+            latency_ms=_hybrid_gen_latency_ms,
         )
         if finish_sentences:
             supabase.table("variant_finish_sentences").upsert(
