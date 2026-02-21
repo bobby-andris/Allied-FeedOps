@@ -65,30 +65,30 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIAG-01 | — | Pending |
-| DIAG-02 | — | Pending |
-| DIAG-03 | — | Pending |
-| DIAG-04 | — | Pending |
-| MEAS-01 | — | Pending |
-| MEAS-02 | — | Pending |
-| MEAS-03 | — | Pending |
-| MEAS-04 | — | Pending |
-| FIX-01 | — | Pending |
-| FIX-02 | — | Pending |
-| MODEL-01 | — | Pending |
-| MODEL-02 | — | Pending |
-| MODEL-03 | — | Pending |
-| GOOG-01 | — | Pending |
-| GOOG-02 | — | Pending |
-| GOOG-03 | — | Pending |
-| GOOG-04 | — | Pending |
-| GOOG-05 | — | Pending |
+| GOOG-01 | Phase 17 | Pending |
+| GOOG-02 | Phase 17 | Pending |
+| GOOG-03 | Phase 17 | Pending |
+| MODEL-01 | Phase 17 | Pending |
+| MODEL-02 | Phase 17 | Pending |
+| DIAG-01 | Phase 18 | Pending |
+| DIAG-02 | Phase 18 | Pending |
+| DIAG-03 | Phase 18 | Pending |
+| DIAG-04 | Phase 18 | Pending |
+| MEAS-01 | Phase 19 | Pending |
+| MEAS-02 | Phase 19 | Pending |
+| MEAS-03 | Phase 19 | Pending |
+| MEAS-04 | Phase 19 | Pending |
+| FIX-01 | Phase 20 | Pending |
+| FIX-02 | Phase 20 | Pending |
+| GOOG-04 | Phase 20 | Pending |
+| GOOG-05 | Phase 20 | Pending |
+| MODEL-03 | Phase 20 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 (pending roadmap creation)
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after initial definition*
+*Last updated: 2026-02-20 — traceability complete, phases 17-20 assigned*
