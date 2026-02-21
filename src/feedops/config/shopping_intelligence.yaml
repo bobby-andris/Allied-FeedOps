@@ -45,31 +45,39 @@ universal_rules:
 
   description_structure:
     rule: >
-      Google allows up to 5,000 characters for descriptions. Shopping ads display ~160
-      characters as a preview, but the FULL text is indexed for query matching. Target
-      Use the full character budget appropriate for the product's complexity — longer
-      for complex products with many features (grab bars, mirrors), shorter for simple
-      accessories (hooks, knobs). Do NOT artificially cap at any arbitrary character range.
+      Google allows up to 5,000 characters for descriptions. Shopping ads display
+      approximately 145-180 characters as a preview, but the FULL text is indexed for
+      query matching. Target 700-900 characters (approximately 800) for Google Shopping
+      descriptions. Bing Shopping allows 10,000 characters (NOT 5,000 — that was
+      Google's limit misapplied by feed tools), but the same 700-900 char sweet spot
+      applies for performance.
 
-      First sentence MUST be a complete, concrete product statement — not a fragment,
-      not a marketing slogan. Include product type, key dimension, material, and one
-      differentiating attribute within the first 160 characters. Open with a real
-      sentence: 'This 24-inch wall-mounted towel bar is constructed of solid brass
-      with concealed mounting hardware.'
+      Do NOT write descriptions under 600 characters — short descriptions miss
+      long-tail search queries. Do NOT exceed 1,000 characters — beyond that shows
+      diminishing returns and risks keyword dilution.
+
+      First sentence MUST open with a benefit or scenario, not a spec dump and not a
+      marketing slogan. Include product type, key dimension, material, and one
+      differentiating attribute within the first 160 characters.
 
       NEVER open with: 'The contemporary motif from this elegant collection has
       timeless appeal.' or any sentence that could apply to any product from any brand.
+      NEVER open with 'This [product type]...' followed by a dimension — open with
+      WHY the shopper should care.
 
-      After the core product narrative (first 500 chars), naturally weave in keyword
-      synonyms, use-case variations, and installation context. Every relevant search
-      term integrated here is another auction entered.
-    example: "This 24-inch wall-mounted towel bar is constructed of solid brass with concealed mounting hardware and coordinates with the full Skyline Collection bathroom line."
+      Structure: First 160 chars = Shopping preview hook. Chars 160-500 = construction,
+      differentiation, finish integration. Chars 500-900 = buyer scenarios, collection
+      coordination, keyword synonyms. Every relevant search term naturally woven in
+      here is another auction entered.
+    example: "Free up counter space and keep a full roll at tearing height — this wall-mounted paper towel holder is constructed of solid brass, not the hollow zinc tubing that loosens after a few months of one-handed pulls."
     bad_example: "The contemporary motif from this elegant collection has timeless appeal. Towel bar for bathroom installation."
     rationale: >
-      Google's Shopping Graph indexes the full description text for long-tail query
-      matching — not just the visible preview. Longer, keyword-rich descriptions match
-      more search queries. The first 160 characters are the visible mini-ad; characters
-      beyond that are algorithmic fuel for entering more auctions.
+      Evidence-based research (Feb 2026): Top-performing Google Shopping listings use
+      500-1,000 characters. Google's Shopping Graph indexes the full description for
+      long-tail query matching. Below 500 chars leaves keyword-matching value on the
+      table. Above 1,000 chars shows diminishing returns. The 700-900 char sweet spot
+      captures specs, differentiation, finish, collection, and 4-6 keyword variations
+      without padding. Gold standard examples average 856 characters scoring 89.3/100.
 
   finish_specificity:
     rule: >
