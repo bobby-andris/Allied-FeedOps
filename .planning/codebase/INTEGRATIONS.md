@@ -1,251 +1,239 @@
 # External Integrations
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-20
 
 ## APIs & External Services
 
-**Content Generation (LLM Providers):**
-- OpenAI GPT-5.2 - Primary content generation model
-  - SDK/Client: `openai` 4.77.0 (TypeScript in dashboard, Python via providers)
-  - Auth: `OPENAI_API_KEY` (GCP Secret Manager)
-  - Usage: `src/feedops/providers/openai_provider.py`
-  - Features: JSON mode, structured output, token logging
+**E-Commerce & Product Data:**
+- Google Merchant Center - Product feed sync, structured data validation
+  - SDK: `googleapis` (TypeScript), `google-api-python-client` (Python)
+  - Auth: Service account credentials (base64-encoded JSON in `GOOGLE_SERVICE_ACCOUNT_KEY`)
+  - Integration: `dashboard/src/lib/publishing/google-sheets.ts`, `src/feedops/integrations/merchant_center.py`
+  - Feed Type: Supplemental feed via Google Sheets (custom columns: title, description, lifestyle_image_link, structured_title, structured_description)
 
-- Google Gemini 3 Flash Preview - Fallback LLM provider
-  - SDK/Client: `google-genai` 1.0+ (Python)
-  - Auth: `GEMINI_API_KEY` (GCP Secret Manager)
-  - Usage: `src/feedops/providers/gemini_provider.py`
-  - Implementation: Async via `client.aio`
+- Shopify Storefront & Admin - Product content, media management, order tracking
+  - SDK: Direct GraphQL Admin API calls (v2026-01)
+  - Auth: `SHOPIFY_ACCESS_TOKEN`, `SHOPIFY_STORE_URL` environment variables
+  - Integration: `dashboard/src/lib/publishing/shopify.ts`, `dashboard/src/lib/publishing/shopify-images.ts`, `src/feedops/integrations/shopify_catalog.py`
+  - Endpoints: Product mutations, media append (variant-level), storefront analytics (GraphQL)
+  - Media: Product-level only (no variant-specific titles/descriptions); lifecycle: Supabase Storage → Shopify CDN → Google Sheets
 
-**Search & Advertising:**
-- Google Ads API - Performance metrics, search terms, keyword research
-  - SDK/Client: `google-ads-api` 23.0.0 (TypeScript) and `google-ads` 28.4.1+ (Python)
-  - Auth: OAuth 2.0 + Developer Token (4 GCP Secrets):
-    - `GOOGLE_ADS_CLIENT_ID`
-    - `GOOGLE_ADS_CLIENT_SECRET`
-    - `GOOGLE_ADS_REFRESH_TOKEN`
-    - `GOOGLE_ADS_DEVELOPER_TOKEN`
-  - Login Customer ID: `GOOGLE_ADS_LOGIN_CUSTOMER_ID` (Account-level access)
-  - Usage: `src/feedops/integrations/google_ads.py`, `src/feedops/integrations/google_ads_performance.py`, `src/feedops/integrations/google_ads_search_terms.py`, `dashboard/src/lib/google-ads.ts`
-  - Features: Product performance, search terms sync, Keyword Planner (rate-limited), keyword historical metrics
-  - Default Customer ID: `6253381786` (Allied Brass account)
-  - Execution modes: API mode (preferred) or MCP mode (Cursor-only, disabled in repo)
+**Advertising Platforms:**
+- Google Ads API - Shopping performance, campaign data, search terms
+  - SDK: `google-ads-api` (NPM v23.0.0), `google-ads` (Python v28.4.1+)
+  - Auth: OAuth2 (developer token, client ID/secret, refresh token, login customer ID)
+  - Integration: `dashboard/src/lib/google-ads.ts`, `src/feedops/integrations/google_ads.py`, `src/feedops/integrations/google_ads_performance.py`, `src/feedops/integrations/google_ads_search_terms.py`
+  - Customer ID: `6253381786` (default)
+  - Metrics: Impressions, clicks, conversions, CTR, ROAS, search terms
+  - Query Language: GAQL (Google Ads Query Language)
+  - Rate limiting: Max 25 offer IDs per GAQL IN() clause to prevent API hangs
 
-**Content Publishing:**
-- Google Sheets API - GMC supplemental feed updates
-  - SDK/Client: `googleapis` 171.2.0 (TypeScript) and `gspread` 6.0+ (Python)
-  - Auth: Service account (base64-encoded JSON in environment)
-    - Env var: `GOOGLE_SERVICE_ACCOUNT_KEY` (base64-encoded JSON)
-    - Scope: Spreadsheets + Drive API
-  - Usage: `dashboard/src/lib/publishing/google-sheets.ts`, `src/feedops/integrations/google_sheets.py`
-  - Sheet ID: `GOOGLE_SHEETS_SPREADSHEET_ID`
-  - Sheet name: `SupplementalFeedData` (default, configurable via `GOOGLE_SHEETS_SHEET_NAME_STAGING`)
-  - Features: Dynamic column header mapping, grid expansion, row updates by offer ID (uppercase `shopify_US_` format), lifecycle image CDN links
-  - Critical: Column mapping built from actual sheet headers (no hardcoded defaults)
+- Google Ads Keyword Planner - Search volume, competition, bid data
+  - SDK: `google-ads` Python client (GenerateKeywordHistoricalMetrics, GenerateKeywordIdeas)
+  - Auth: Same OAuth2 as Google Ads API
+  - Metrics: avg_monthly_searches, competition (LOW/MEDIUM/HIGH), competition_index (0-100), CPC bids
+  - Caching: Historical metrics cached (30-day TTL); monthly updates
+  - Seeds: Domain-based ideas up to 250,000 keywords
 
-**Product Catalog & Storefront:**
-- Shopify Admin API - Product title/description updates, media uploads
-  - SDK/Client: Native GraphQL queries via HTTP (no SDK in dependencies)
-  - Auth: `SHOPIFY_ACCESS_TOKEN` (environment variable)
-  - Store URL: `SHOPIFY_STORE_URL`
-  - API Version: `2026-01`
-  - Usage: `dashboard/src/lib/publishing/shopify.ts`, `dashboard/src/lib/storage/upload-lifestyle-image.ts`
-  - Features:
-    - Product update mutations (title, description)
-    - Product media management (variant-level lifestyle images)
-    - Tag addition for environment tracking
-  - Critical pattern: Use `uploadProductImage()` (not `uploadVariantImage()`) for lifestyle images
-  - CDN integration: Supabase Storage → Shopify media → Google Sheets feed
+- Microsoft (Bing) Ads - Shopping performance, competitor data
+  - SDK: `bingads` (v13.0.x Python SDK)
+  - Auth: OAuth2 credentials (customer ID, account ID)
+  - Integration: `src/feedops/integrations/bing_ads_performance.py`, `src/feedops/integrations/bing_catalog.py`
+  - Metrics: ProductDimensionPerformanceReport (impressions, clicks, conversions, ROAS)
+  - Status: Optional (BING_ADS_API_ENABLED env var controls activation)
 
-**Competitor Intelligence:**
-- Apify Web Scraping Platform - SERP analysis, competitor data
-  - SDK/Client: `apify-client` 2.22.0 (TypeScript in dashboard)
-  - Auth: `APIFY_TOKEN` (optional, for API mode)
-  - Usage: `src/feedops/integrations/apify.py` (stub implementation), `src/feedops/pipeline/competitor_evidence.py`
-  - Status: Optional integration (can be enabled via `APIFY_MCP_ENABLED` env var)
-  - Features: Competitor title scraping, SERP features, organic search data collection
-  - Implementation: MCP-compatible but currently stubbed unless wired at runtime
+**Content Generation (LLMs):**
+- OpenAI GPT API - Primary content generation
+  - SDK: `openai` (v4.77.0 NPM, v1.0+ Python)
+  - Auth: `OPENAI_API_KEY`
+  - Models: gpt-5.2 (current default)
+  - Features: JSON mode for structured output, prompt caching (50% token cost reduction)
+  - Integration: `src/feedops/providers/openai_provider.py` (Python), `dashboard/src/app/api/regenerate/route.ts` proxies to Cloud Run
+  - Token Usage: Logged for monitoring (no secrets exposed)
+
+- Google Gemini API - Fallback LLM provider
+  - SDK: `google-genai` (v1.0+, new SDK replacing deprecated google.generativeai)
+  - Auth: `GEMINI_API_KEY`
+  - Models: gemini-3-flash-preview (default)
+  - Integration: `src/feedops/providers/gemini_provider.py`
+  - Features: JSON output parsing with cleanup, async support via client.aio
+  - Usage: Fallback when OpenAI unavailable; can be forced via provider factory
+
+- Gemini Vision API - Lifestyle image generation
+  - SDK: `google-genai` (v1.0+)
+  - Auth: `GEMINI_API_KEY`
+  - Integration: `src/feedops/pipeline/lifestyle_images.py`
+  - Quality: ~75-80/100 average, process time ~3 minutes per SKU
+  - Features: Smart finish selection based on product metadata
 
 ## Data Storage
 
 **Databases:**
-- Supabase (PostgreSQL) - Primary database
-  - Connection: `SUPABASE_URL` (project URL), `SUPABASE_KEY` (anon key for client, service role for admin)
-  - Client (TypeScript): `@supabase/supabase-js` 2.94.0 with `@supabase/ssr` 0.8.0
-  - Client (Python): `supabase` 2.0+
-  - Usage:
-    - Dashboard: `dashboard/src/lib/supabase/*` (client queries, RLS-protected)
-    - Pipeline: `src/feedops/db/supabase_client.py` (service role, admin operations)
-  - Key Tables:
-    - `generated_content` - Baseline, candidate, approved product content
-    - `sku_approvals` / `variant_approvals` - Content approval workflow
-    - `performance_baselines` - Pre-optimization 30-day metrics
-    - `performance_snapshots` - Post-publish tracking with delta calculations
-    - `product_catalog` - All variants with full product data
-    - `variant_index` - Master SKU ↔ GMC offer ID mapping (source of truth)
-    - `publish_batches` / `batch_sku_assignments` - Publishing workflow
-    - `publish_events` - Audit log with content snapshots for rollback
-    - `search_queries` - Google Ads variant-level search terms
-    - `keyword_metrics` - Keyword Planner cached data
-    - `product_lifestyle_images` - Product-level lifestyle images
-    - `variant_lifestyle_images` - Variant-level lifestyle images with finish mapping
-    - `prompt_templates` - Gold standard examples, category guidance, platform rules
-  - Retry logic: Built-in with 3 retries, 0.5s delay for transient errors
-  - Health check: `src/feedops/db/supabase_client.py` provides `is_supabase_available()`
+- Supabase (PostgreSQL 15+)
+  - Project ID: `qezuszwufortkiutlhym`
+  - Connection: Environment variables `NEXT_PUBLIC_SUPABASE_URL` (public), `SUPABASE_SERVICE_ROLE_KEY` (elevated)
+  - Client: `@supabase/supabase-js` (TypeScript), `supabase` (Python v2.0+)
+  - Auth: Supabase built-in JWT + Row-Level Security (RLS) policies
+  - Use: All state (content, approvals, publishing, performance baselines, search terms, backfill jobs)
+  - Migrations: SQL files in `supabase/migrations/`
+  - Real-time: Subscriptions supported for live updates
 
 **File Storage:**
-- Supabase Storage - Lifestyle image temporary staging
-  - Bucket: Lifestyle images before CDN migration to Shopify
-  - Integration: `dashboard/src/lib/storage/upload-lifestyle-image.ts`
-  - Lifecycle: Storage → Shopify CDN → Google Sheets feed reference
+- Supabase Storage - Lifestyle images before CDN publication
+  - Lifecycle: Generated → Stored in Supabase → Migrated to Shopify CDN → Published to Google Sheets
+  - Bucket: `product_images` (inferred from publish flow)
+  - Integration: `src/feedops/pipeline/lifestyle_images.py` (generation), `dashboard/src/lib/publishing/shopify-images.ts` (upload)
+
+- Google Drive - Supplemental feed spreadsheet (persistent, collaborative editing)
+  - File: Supplemental feed sheet (production ID: `1qMjCn1ZPlDd0R3TkTI0kDnX6tnApIHrnfAOWfJj_QEg`)
+  - Columns: id, mpn, product_type, pattern, custom_label_0-2, title, google_product_category, description, custom_label_4, lifestyle_image_link, structured_title, structured_description
+  - Auth: Service account with Sheets & Drive scopes
+  - Integration: `dashboard/src/lib/publishing/google-sheets.ts`, `src/feedops/integrations/google_sheets.py`
 
 **Caching:**
-- React Query (TanStack) - In-memory client-side data caching
-  - Config: Default 5-minute stale time, no background refetching
-  - Usage: Dashboard API routes and data fetching components
-
-- Supabase Realtime (optional) - Not currently integrated, available for live updates
+- None detected - Query results cached in-memory during request lifetime only
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Custom OAuth via Supabase Auth (optional, user authentication)
-- Service-to-service: GCP service account authentication
-  - Build time: `profit-pilot-build` service account
-  - Runtime: `profit-pilot-runtime` service account with secrets bound
-  - Scopes: Sheets, Drive, Cloud Run management
+- Supabase Auth (built-in)
+  - Implementation: Session management via cookies + JWT tokens
+  - Dashboard integration: `dashboard/src/lib/supabase/server.ts` (server-side), `dashboard/src/lib/supabase/client.ts` (client-side)
+  - Middleware: `@supabase/ssr` for server-side session refresh
+  - RLS: Row-level security policies on all tables (enforced at database level)
 
-**Authorization:**
-- Supabase RLS (Row-Level Security) - Dashboard API protection
-  - Policy: User ID-based filtering on sensitive tables
-- Cloud Run: Allow unauthenticated access (public endpoints, no user auth required)
+**Service Accounts:**
+- GCP Service Account (GCS, Sheets, Drive)
+  - Email: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
+  - Format: Base64-encoded JSON in `GOOGLE_SERVICE_ACCOUNT_KEY`
+  - Scopes: Sheets, Drive, Cloud Run (runtime permissions)
+
+- Google Ads OAuth2
+  - Flow: Refresh token-based (not browser redirect flow)
+  - Credentials: Developer token, client ID/secret, refresh token, login customer ID
+  - Storage: GCP Secrets Manager (Cloud Run), environment variables (local dev)
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- Custom logging (no Sentry/Rollbar integration)
-  - Python: `logging` module with structured format
-  - TypeScript: `console.error()` for client-side, NextResponse for error handling
-  - File: `src/feedops/observability/` (log_event, metrics_registry)
+- Slack Webhook - Job lifecycle alerts
+  - Endpoint: `SLACK_WEBHOOK_URL`
+  - Integration: `src/feedops/observability/alerts.py` (send_slack_notification, notify_job_event)
+  - Usage: Backfill job status, pipeline failures (fire-and-forget)
 
 **Logs:**
-- Python: Structured logs to stdout (picked up by Cloud Run logs)
-  - Command: `gcloud run services logs read feedops-pipeline --limit=50`
-- Dashboard: Vercel function logs (accessible via Vercel dashboard or MCP)
-- Metrics: Basic prometheus-compatible metrics via `metrics_registry` in observability module
+- Cloud Run logs - Python pipeline execution
+  - Aggregator: GCP Cloud Logging
+  - Access: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400`
+  - Format: JSON structured logs (FastAPI/Uvicorn)
 
-**Request Tracing:**
-- Correlation ID: `get_request_id()` in observability module
-- Context: `request_context` for tracking across async operations
+- Vercel logs - Dashboard (Next.js) execution
+  - Aggregator: Vercel dashboard
+  - Browser console: Client-side errors and warnings
+
+- Application logging: `logging` module (Python), `console` (JavaScript)
+  - Level: INFO (production), configurable per module
+
+**Metrics:**
+- Prometheus client - Python pipeline metrics
+  - Integration: `src/feedops/observability/metrics.py`
+  - Registry: `prometheus-client` 0.20+
+  - Exposed on: `/metrics` endpoint (Cloud Run)
+  - Metrics: Token usage (cached vs. uncached), generation latency, error rates
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Dashboard: Vercel (Next.js managed hosting)
-- Pipeline: Google Cloud Run (containerized Python service)
+- Cloud Run (Python pipeline)
+  - Region: us-east1
+  - Memory: 2 GB
+  - CPU: 2
+  - Timeout: 900 seconds
+  - Max instances: 10
+  - Auto-scaling: Managed by Cloud Run
+  - Service account: `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
+  - Health check: `GET /health` with Supabase status
+
+- Vercel (Next.js dashboard)
+  - Auto-deploy on push to master branch
+  - Project ID: `prj_00zlLdZVgbP8XjDWIEXSRdFyqDqA`
+  - Team ID: `team_KsEZDE8Pw0bKQDGlieBVBQVs`
+  - Custom domain: `allied-feed-ops.vercel.app`
 
 **CI Pipeline:**
-- GitHub Actions (optional, supplementary to Vercel/Cloud Build)
-  - Directory: `.github/workflows/` (minimal, auto-deploy is primary)
+- GCP Cloud Build
+  - Trigger: `feedops-pipeline-deploy` (push to master on GitHub)
+  - Build config: `cloudbuild.yaml`
+  - Steps:
+    1. Docker build (Python 3.11-slim)
+    2. Push to Artifact Registry (`us-east1-docker.pkg.dev`)
+    3. Deploy to Cloud Run with secrets injection
+  - Build SA: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
+  - Secrets injected at deploy time (9 total secrets)
+  - Logs: GCP Cloud Build console
 
-- Vercel auto-deploy: Push to master → Automatic deployment
-  - No manual approval required
-  - Config: Managed via Vercel project settings
-
-- Google Cloud Build: Push to master → Automated build and deploy
-  - Trigger: `feedops-pipeline-deploy` (cloud-native build)
-  - Config: `cloudbuild.yaml` (Docker build → Artifact Registry → Cloud Run)
-
-**Pre-Deployment Checks:**
-Required before push (enforced via local development workflow):
-1. `cd dashboard && npm run build` - TypeScript compilation + Next.js build
-2. `npx tsc --noEmit` - Strict type checking
-3. `npm run lint` - ESLint validation
-4. Python: `pytest tests/ -v` - Unit test execution
+**Docker Registry:**
+- GCP Artifact Registry (`us-east1-docker.pkg.dev`)
+  - Images: `feedops-pipeline:$COMMIT_SHA`, `feedops-pipeline:latest`
+  - Build Backend: hatchling (Python)
 
 ## Environment Configuration
 
-**Dashboard Environment Variables** (`.env.local` for development, Vercel project for production):
+**Required env vars (Production - GCP Secrets):**
+- `OPENAI_API_KEY` - OpenAI API key
+- `GEMINI_API_KEY` - Google Gemini API key
+- `SUPABASE_URL` - Supabase project URL (can use NEXT_PUBLIC variant)
+- `SUPABASE_KEY` - Supabase service role key (can use SUPABASE_SERVICE_ROLE_KEY)
+- `GOOGLE_ADS_DEVELOPER_TOKEN` - Google Ads API developer token
+- `GOOGLE_ADS_CLIENT_ID` - Google Ads OAuth2 client ID
+- `GOOGLE_ADS_CLIENT_SECRET` - Google Ads OAuth2 client secret
+- `GOOGLE_ADS_REFRESH_TOKEN` - Google Ads OAuth2 refresh token
+- `GOOGLE_ADS_LOGIN_CUSTOMER_ID` - Google Ads manager account ID (optional, for multi-account)
+- `SLACK_WEBHOOK_URL` - Slack incoming webhook for alerts
+
+**Required env vars (Dashboard - .env.local):**
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL (public)
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key (public, client-side)
-- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (private, server-side only)
-- `SHOPIFY_STORE_URL` - Shopify storefront URL
-- `SHOPIFY_ACCESS_TOKEN` - Shopify API access token
-- `FEEDOPS_PIPELINE_URL` - Cloud Run pipeline endpoint (default: https://feedops-pipeline-623866089882.us-east1.run.app)
-- `GOOGLE_SERVICE_ACCOUNT_KEY` - Base64-encoded Google service account JSON
-- `GOOGLE_SHEETS_SPREADSHEET_ID` - Production sheet ID
-- `GOOGLE_ADS_CUSTOMER_ID` - Google Ads account ID
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key (public)
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (server-only)
+- `GOOGLE_SERVICE_ACCOUNT_KEY` - Base64-encoded GCP service account JSON (server-only)
+- `SHOPIFY_STORE_URL` - Shopify store domain
+- `SHOPIFY_ACCESS_TOKEN` - Shopify Admin API access token
+- `GOOGLE_ADS_*` - Google Ads credentials (same as Cloud Run)
 
-**Pipeline Environment Variables** (Cloud Run secrets + env vars):
-All 9 secrets injected via `--set-secrets` in Cloud Build:
-1. `OPENAI_API_KEY` → feedops-openai-api-key
-2. `SUPABASE_URL` → feedops-supabase-url
-3. `SUPABASE_KEY` → feedops-supabase-key (service role)
-4. `GOOGLE_ADS_DEVELOPER_TOKEN` → feedops-google-ads-developer-token
-5. `GOOGLE_ADS_CLIENT_ID` → feedops-google-ads-client-id
-6. `GOOGLE_ADS_CLIENT_SECRET` → feedops-google-ads-client-secret
-7. `GOOGLE_ADS_REFRESH_TOKEN` → feedops-google-ads-refresh-token
-8. `GOOGLE_ADS_LOGIN_CUSTOMER_ID` → feedops-google-ads-login-customer-id
-9. `GEMINI_API_KEY` → feedops-gemini-api-key
+**Optional env vars:**
+- `FEEDOPS_OPENAI_MODEL` - OpenAI model override (default: gpt-5.2)
+- `FEEDOPS_GMC_STRUCTURED_ONLY=1` - Omit standard title/description, use structured fields only
+- `BING_ADS_API_ENABLED=1` - Enable Bing Ads integration (default: disabled)
+- `GOOGLE_ADS_API_ENABLED=1` - Enable Google Ads API (default: enabled on Cloud Run)
+- `GOOGLE_ADS_MCP_ENABLED=1` - Use MCP server instead of native SDK (Cursor-only, experimental)
 
-Set via `--set-env-vars` in Cloud Build:
-- `GOOGLE_ADS_CUSTOMER_ID=6253381786`
-- `GOOGLE_ADS_API_ENABLED=1`
-
-**Optional Toggles** (runtime feature flags):
-- `FEEDOPS_GMC_STRUCTURED_ONLY=1` - Use structured title/description only (omit standard fields)
-- `GOOGLE_ADS_MCP_ENABLED=1` - Enable Apify/Google Ads MCP mode (not recommended for production)
-- `APIFY_MCP_ENABLED=1` - Enable Apify MCP integration (optional)
-
-**Secrets Location:**
-- Production: GCP Secret Manager (bound to Cloud Run service account)
-- Development: `.env` file (local, not committed) or `.env.vercel` file (team-shared, also not committed)
+**Secrets location:**
+- Development: `.env.local` (dashboard), `.env` (Python local)
+- Production: GCP Secret Manager (Cloud Run), Vercel Secrets (dashboard)
+- Never committed to git (`.env` in `.gitignore`)
 
 ## Webhooks & Callbacks
 
-**Incoming Webhooks:**
-- Google Sheets → No incoming webhooks (pull model via Sheets API)
-- Shopify → No incoming webhooks currently (pull model)
-- Google Ads → No incoming webhooks (API polling for metrics)
+**Incoming:**
+- `POST /api/regenerate` - Content regeneration endpoint (dashboard proxies to Cloud Run `/regenerate`)
+- `POST /api/publish/batch` - Batch publishing trigger
+- `POST /api/performance/capture-snapshot` - Performance metrics collection
+- `POST /api/search-insights/sync` - Google Ads search term sync job start
+- `POST /backfill/start` - Backfill job creation
+- Health checks: `GET /health` on both dashboard and Cloud Run
 
-**Outgoing Webhooks:**
-- Dashboard → Cloud Run Pipeline: `POST /regenerate`, `POST /optimize-sku`, `POST /batch-optimize`, `POST /hybrid-generate`, `POST /generate-images`
-- Dashboard → Cloud Run Pipeline: `POST /performance/capture-baseline`, `POST /search-insights/sync`
-- Cloud Run Pipeline → Supabase: Direct database updates (no webhook format)
-- Cloud Run Pipeline → Google Sheets: Direct API updates (no webhook format)
+**Outgoing:**
+- Slack webhooks - Job completion notifications (Cloud Run → Slack)
+- Google Sheets API - Feed updates written to supplemental sheet
+- Shopify GraphQL mutations - Product updates (title, description, media, tags)
+- Google Ads uploads - Not webhooks; sheet-based feed sync (GMC pulls from sheet)
 
-**Callback Patterns:**
-- Polling via job IDs: `/batch-status/{job_id}`, `/search-insights/sync/{job_id}`
-- Background tasks: Non-daemon async threads survive HTTP response, managed by `run_async_in_thread()` helper
-- CORS: Cloud Run allows requests from `https://allied-feed-ops.vercel.app` and `http://localhost:3000`
-
-## Data Integration Flow
-
-**Content Generation Pipeline:**
-1. Dashboard (`/api/regenerate` route) → Cloud Run `/regenerate` endpoint
-2. Cloud Run executes Python pipeline (OpenAI/Gemini LLM)
-3. Results written to Supabase `generated_content` table
-4. Dashboard polls for updates via React Query
-
-**Publishing Workflow:**
-1. User approves content in dashboard
-2. Batch creation triggers publish sequence
-3. Desktop → Google Sheets (Google Sheets API) — updates supplemental feed
-4. Dashboard → Shopify (GraphQL mutations) — product title/description, media uploads
-5. Audit trail written to `publish_events` table
-
-**Performance Tracking:**
-1. Auto-capture baselines before optimization (30-day pre-publish data)
-2. Capture snapshots post-publish (daily/weekly via Cloud Scheduler or manual trigger)
-3. Analytics dashboards consume `performance_baselines` and `performance_snapshots`
-
-**Search Insights:**
-1. Scheduled sync: `/search-insights/sync` endpoint triggers background task
-2. Queries Google Ads Search Terms report
-3. Runs Keyword Planner for keyword volume/competition data
-4. Results cached in `search_queries` and `keyword_metrics` tables
-5. Evidence table auto-populated for content generation
+**Job Completion:**
+- Synchronous: Endpoint waits for response (batch operations timeout at 900s on Cloud Run)
+- Asynchronous: Background task pattern using `run_async_in_thread()` in Python for long-running operations (image generation, backfill)
+  - Pattern: Non-daemon threads with dedicated asyncio event loops survive HTTP response and container scaling-to-zero
+  - Limitation: Jobs terminate during Cloud Run deployments (expected behavior, can be resumed)
 
 ---
 
-*Integration audit: 2026-02-11*
+*Integration audit: 2026-02-20*

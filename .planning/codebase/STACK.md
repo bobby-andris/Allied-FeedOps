@@ -1,192 +1,145 @@
 # Technology Stack
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-20
 
 ## Languages
 
 **Primary:**
-- TypeScript 5 - Next.js dashboard, API routes, client components
-- Python 3.11 - Cloud Run pipeline, integrations, data processing
-- JavaScript - NPM dependency resolution, tooling
+- TypeScript 5 - Next.js dashboard (`dashboard/src/**/*.ts`, `dashboard/src/**/*.tsx`)
+- Python 3.11 - Cloud Run pipeline (`src/feedops/**/*.py`)
+
+**Secondary:**
+- JavaScript (Node.js) - Build tooling, scripts
+- SQL - Supabase queries and migrations
 
 ## Runtime
 
 **Environment:**
-- Node.js (via Next.js 16.1.6) - Dashboard and API routes
-- Python 3.11 (via Docker container) - Cloud Run pipeline
-- Uvicorn 0.25+ (async Python server) - FastAPI runtime
+- Node.js (LTS) - Dashboard dev server and build
+- Python 3.11 - Content generation pipeline
+- Cloud Run (containerized Python FastAPI) - Production pipeline
 
-**Package Managers:**
-- npm/Node.js - Dashboard dependencies
-- uv (Python) - Python dependency management
-  - Lockfile: `uv.lock` (present, committed)
+**Package Manager:**
+- npm (Node.js) - Dashboard dependencies
+- uv/pip (Python) - Python dependencies
+- Lockfiles: `package-lock.json` (npm), `pyproject.toml` (Python hatch)
 
 ## Frameworks
 
 **Core:**
-- Next.js 16.1.6 - React meta-framework, API routes, SSR/SSG
-- FastAPI - Python async web framework for Cloud Run pipeline
-- React 19.2.3 - UI component library
-- React DOM 19.2.3 - React rendering
+- Next.js 16.1.6 - Full-stack React framework for dashboard (`dashboard/src/app/**`)
+  - App Router (file-based routing)
+  - Server Components and API Routes
+- FastAPI 0.109.0+ - API framework for Cloud Run pipeline (`src/feedops/api/main.py`)
+- React 19.2.3 - UI framework (dashboard)
 
-**UI & Styling:**
-- TailwindCSS 4 - Utility-first CSS framework
+**UI/Styling:**
+- Tailwind CSS 4 - Utility-first CSS framework
 - Radix UI 1.4.3 - Headless component library
-- Lucide React 0.563.0 - SVG icon library
-- class-variance-authority 0.7.1 - Component variant management
-- clsx 2.1.1 - Class name utility
-- tailwind-merge 3.4.0 - Tailwind class merging
-
-**Charting & Visualization:**
-- Recharts 3.7.0 - React charting library
-- Victory (via node_modules) - Alternative charting via Recharts dependencies
-
-**Data & State:**
-- TanStack React Query 5.90.20 - Server state management, API caching
-- Zustand 5.0.11 - Client state management
-- Pydantic 2.0+ - Python data validation and settings
-- Pandas 2.0+ - Python data manipulation
+- Tremor 3.18.7 - Analytics dashboard components
+- Recharts 3.7.0 - Chart library for performance dashboards
+- Lucide React 0.563.0 - Icon library
+- Sonner 2.0.7 - Toast notifications
+- Zustand 5.0.11 - Client-side state management
 
 **Testing:**
-- pytest 7.0+ - Python test runner
-- pytest-asyncio 0.21+ - Async test support for pytest
-- Playwright/Playwright Test - Browser automation (in `.playwright-mcp` for agent access)
+- Vitest 3.2.4 - Unit/integration test runner (`dashboard/vitest.config.ts`)
+- Playwright 1.58.2 - E2E testing framework
+- Testing Library (React) 16.3.0 - Component testing utilities
 
-**Build & Dev:**
-- Turbopack - Next.js bundler (monorepo root stability)
-- Tailwind CSS PostCSS 4 - CSS preprocessing
-- ESLint 9 - TypeScript/JavaScript linting
-  - Config: `eslint-config-next` (Next.js defaults + web vitals + TypeScript)
-  - File: `dashboard/eslint.config.mjs` (flat config format)
-- TypeScript 5 - Type checking (`npx tsc --noEmit`)
-- Ruff 0.1+ - Python linting and formatting
-- mypy 1.0+ - Python type checking
-- Rich 13.0+ - Python terminal formatting
+**Build/Dev:**
+- TypeScript 5 - Type checking
+- ESLint 9 - Code linting (flat config)
+- Tailwind CSS PostCSS 4 - CSS processing
+- Vite/esbuild - Bundling (via Next.js)
 
 ## Key Dependencies
 
-**Critical (Content Generation):**
-- openai 4.77.0 - OpenAI API client (GPT-5.2 via gpt-5.2 model)
+**Critical:**
+- @supabase/supabase-js 2.94.0 - Database client (`dashboard/src/lib/supabase/**`)
+- @supabase/ssr 0.8.0 - Server-side session management (Next.js)
+- openai 4.77.0 (dashboard), 1.0+ (Python) - LLM client for content generation
 - google-genai 1.0+ - Google Gemini API client (fallback LLM provider)
+- google-ads-api 23.0.0 - Google Ads API wrapper for shopping performance
+- google-api-python-client 2.0+ - Google APIs (Sheets, Drive, etc.)
+- googleapis 171.2.0 (TypeScript) - Google API client for Sheets integration
+- gspread 6.0+ - Google Sheets Python client
 
-**Google Integrations:**
-- googleapis 171.2.0 - Google APIs (Sheets v4, Drive)
-- google-ads-api 23.0.0 - Google Ads API client (JavaScript)
-- google-ads 28.4.1+ - Google Ads API client (Python)
-- google-auth 2.48.0+ - Google OAuth authentication
-- gspread 6.0+ - Google Sheets Python client (alternative to googleapis)
-- google-api-python-client 2.0+ - Google APIs Python client
+**Data Handling:**
+- pandas 2.0+ - Data manipulation and analysis (Python)
+- pydantic 2.0+, pydantic-settings 2.0+ - Data validation (Python)
+- csv-parse 5.6.0 - CSV parsing (dashboard)
+- date-fns 4.1.0 - Date manipulation (dashboard)
 
-**Database & Storage:**
-- @supabase/supabase-js 2.94.0 - Supabase client (TypeScript)
-- @supabase/ssr 0.8.0 - Supabase SSR utilities for Next.js
-- supabase 2.0+ - Supabase client (Python)
+**Infrastructure:**
+- uvicorn[standard] 0.27.0+ - ASGI server for Cloud Run
+- httpx 0.25+ - Async HTTP client (Python)
+- supabase 2.0+ - Python Supabase client
+- bingads 13.0.x - Bing Ads SDK for performance metrics
 
-**Shopify:**
-- No dedicated SDK in dependencies; uses GraphQL queries via HTTP
-
-**Data Scraping & Competitor Analysis:**
-- apify-client 2.22.0 - Apify web scraping platform client (optional integration)
+**Async/HTTP:**
+- @tanstack/react-query 5.90.20 - Server state management (dashboard)
+- python-multipart 0.0.6+ - Multipart form parsing (FastAPI)
 
 **Utilities:**
-- date-fns 4.1.0 - Date manipulation
-- csv-parse 5.6.0 - CSV parsing
+- python-dotenv 1.0+ - Environment variable loading (Python)
 - typer 0.9+ - CLI framework (Python)
-- streamlit 1.30+ - Python data app framework (alternative UI, not production)
-- python-dotenv 1.0+ - Environment variable loading
-- httpx 0.25+ - Async HTTP client (Python)
+- rich 13.0+ - Terminal output formatting (Python)
+- prometheus-client 0.20+ - Metrics collection (Python pipeline)
+- streamlit 1.30+ - Analytics UI (optional, legacy)
 
-**API & Web:**
-- next-themes 0.4.6 - Next.js dark mode support
-- sonner 2.0.7 - Toast notifications
+## Configuration
 
-## Configuration Files
+**Environment:**
+- `.env.local` (dashboard) - Next.js dev server configuration
+- `.env` files - Environment variable management (local development only)
+- GCP Secrets Manager - Cloud Run runtime secrets (production)
+  - `feedops-openai-api-key`
+  - `feedops-supabase-url`, `feedops-supabase-key`
+  - `feedops-google-ads-*` (developer-token, client-id, client-secret, refresh-token, login-customer-id)
+  - `feedops-gemini-api-key`
+  - `feedops-slack-webhook-url`
 
-**TypeScript/JavaScript:**
-- `dashboard/tsconfig.json` - Strict mode, ES2017 target, path alias `@/*`
-- `dashboard/next.config.ts` - Turbopack monorepo root stabilization
-- `dashboard/eslint.config.mjs` - Flat format, Next.js web vitals + TypeScript rules
+**Build:**
+- `dashboard/tsconfig.json` - TypeScript configuration with path aliases (`@/*`)
+- `dashboard/eslint.config.mjs` - ESLint flat config (Next.js core-web-vitals + TypeScript)
+- `dashboard/vitest.config.ts` - Vitest configuration for unit testing
+- `.python-version` - Python 3.11 version specification
+- `pyproject.toml` - Python project metadata and dependencies (hatchling build backend)
+- `Dockerfile` - Cloud Run container definition (Python 3.11-slim base)
+- `cloudbuild.yaml` - GCP Cloud Build pipeline configuration
 
-**Python:**
-- `pyproject.toml` - Project metadata, dependencies (hatchling build), pytest/ruff/mypy config
-- `.python-version` - Python 3.11
-- `setup.cfg` or inline tools.* - Ruff/mypy configuration in pyproject.toml
-
-**Docker:**
-- `Dockerfile` - Multi-stage Python 3.11 build for Cloud Run
-  - Base: `python:3.11-slim`
-  - CMD: `uvicorn feedops.api.main:app --host 0.0.0.0 --port 8080`
-  - Health check: HTTP GET to `/health` endpoint
-
-**Cloud Build & Deployment:**
-- `cloudbuild.yaml` - GCP Cloud Build trigger (push to master)
-  - Docker build → Artifact Registry → Cloud Run deploy
-  - Memory: 2Gi, CPU: 2, Timeout: 900s, Max instances: 10
-  - Secrets: 9 GCP Secret Manager bindings (all env vars)
-
-**Ignore/Exclude:**
-- `.gitignore` - Standard Node/Python ignores
-- `.gcloudignore` - Excludes large files from Cloud Build (e.g., node_modules, .venv)
-
-## Platform & Deployment
-
-**Development:**
-- Local: Node.js (npm), Python 3.11 (uv), Docker (optional)
-- Dashboard: `npm run dev` (Next.js dev server on http://localhost:3000)
-- Pipeline: `python -m feedops.api.main` or Docker container
-
-**Production - Dashboard:**
-- Vercel (Next.js hosting)
-- Deployment: Auto-deploy on push to master via Vercel GitHub integration
-- Project ID: `prj_00zlLdZVgbP8XjDWIEXSRdFyqDqA`
-- Team ID: `team_KsEZDE8Pw0bKQDGlieBVBQVs`
-- URL: https://allied-feed-ops.vercel.app
-
-**Production - Pipeline:**
-- Google Cloud Run (us-east1)
-- Service: `feedops-pipeline`
-- Trigger: Cloud Build on push to master
-- Artifact Registry: `us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy`
-- URL: https://feedops-pipeline-623866089882.us-east1.run.app
-- Service Account (runtime): `profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com`
-
-**Build Infrastructure:**
-- GCP Project: `bobbys-project-346400`
-- Cloud Build trigger: `feedops-pipeline-deploy`
-- Build Service Account: `profit-pilot-build@bobbys-project-346400.iam.gserviceaccount.com`
-- Artifact Registry location: `us-east1` region
+**Runtime Secrets:**
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL (public)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key (public, safe for browser)
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role (server-only, elevated permissions)
+- `GOOGLE_SERVICE_ACCOUNT_KEY` - Base64-encoded GCP service account JSON (Google Sheets integration)
+- `OPENAI_API_KEY` - OpenAI API key
+- `GEMINI_API_KEY` - Google Gemini API key
+- `GOOGLE_ADS_*` - Google Ads OAuth2 credentials (developer token, client ID/secret, refresh token, login customer ID)
 
 ## Platform Requirements
 
 **Development:**
-- Node.js 18+ with npm or equivalent
+- Node.js LTS (tested with current LTS)
 - Python 3.11+
-- Docker (optional, for Cloud Run local testing)
+- npm or yarn
+- uv or pip for Python
 - Git
 
-**Production Dashboard:**
-- Node.js runtime (managed by Vercel)
-- Environment variables: Supabase URL/key, Shopify credentials, Google/OpenAI API keys
+**Production (Cloud Run):**
+- Python 3.11-slim container
+- 2 GB memory allocation
+- 2 CPU allocation
+- 900 second timeout
+- Max 10 concurrent instances
+- Region: us-east1
 
-**Production Pipeline:**
-- Cloud Run runtime (managed by GCP)
-- Docker container registry (GCP Artifact Registry)
-- 9 GCP Secrets (see INTEGRATIONS.md)
-
-## Build Verification
-
-**Before deployment:**
-```bash
-# TypeScript check
-cd dashboard && npx tsc --noEmit
-
-# Linting
-npm run lint  # Runs ESLint
-
-# Build
-npm run build  # Next.js production build
-```
+**Dashboard Deployment:**
+- Vercel (automatic deployment on push to master)
+- Next.js 16.1.6 compatible
+- Server Components and API Routes supported
 
 ---
 
-*Stack analysis: 2026-02-11*
+*Stack analysis: 2026-02-20*

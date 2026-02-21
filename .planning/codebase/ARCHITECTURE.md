@@ -1,281 +1,268 @@
 # Architecture
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-20
 
 ## Pattern Overview
 
-**Overall:** Microservice + Monorepo hybrid with decoupled frontend/backend
+**Overall:** Distributed pipeline with clear separation between dashboard (Next.js frontend/API routes) and Python-based content generation engine (Cloud Run backend).
 
 **Key Characteristics:**
-- Next.js dashboard (TypeScript) as frontend API gateway
-- Python Cloud Run FastAPI as content generation engine (source of truth)
-- Supabase PostgreSQL as persistent data layer
-- Multi-platform integration (Google Ads, Merchant Center, Shopify, Google Sheets)
-- Event-driven data collection and publication workflows
+- **Dual-stack architecture**: TypeScript/Next.js for UI/orchestration, Python for content generation
+- **Thin proxy pattern**: Dashboard API routes act as lightweight proxies to Cloud Run
+- **Modular pipeline**: Content generation broken into reusable pipeline stages (evidence, enrichment, generation, validation)
+- **Event-driven**: Approval workflows, publishing, and performance tracking use Supabase as message hub
+- **Data-first flow**: Evidence tables built from product catalog → fed into LLM generation → approved → published
 
 ## Layers
 
-**Presentation (Frontend):**
-- Purpose: Next.js app serving dashboard UI, API routes as proxies/controllers
-- Location: `dashboard/src/app/(dashboard)/` and `dashboard/src/app/api/`
-- Contains: Page components, API route handlers, form management, UI state
-- Depends on: Supabase (direct reads), Python Cloud Run (proxies), Google APIs
-- Used by: Browser clients via HTTPS
+**Presentation Layer:**
+- Purpose: Interactive UI for content review, approvals, batching, monitoring
+- Location: `dashboard/src/app/(dashboard)/**` (Next.js page routes)
+- Contains: React components, client-side state management, dashboard views
+- Depends on: API Routes layer, Supabase client libraries
+- Used by: End users (product managers, content reviewers)
 
-**API Gateway (Next.js Routes):**
-- Purpose: Thin proxy to Cloud Run, Supabase mutation handler, health checks
-- Location: `dashboard/src/app/api/**/*.ts`
-- Contains: Request validation, error handling, data transformation between layers
-- Depends on: Python Cloud Run (`POST /regenerate`, `/hybrid-generate`), Supabase admin client
-- Used by: Dashboard components, external integrations (webhooks)
-- Examples:
-  - `dashboard/src/app/api/regenerate/route.ts` - Proxies to Cloud Run
-  - `dashboard/src/app/api/health/route.ts` - Multi-service health checks
-  - `dashboard/src/app/api/publish/batch/route.ts` - Batch publication controller
+**API Routes Layer (Dashboard):**
+- Purpose: Orchestrate workflows, validate requests, proxy to Cloud Run backend
+- Location: `dashboard/src/app/api/**` (Next.js API routes)
+- Contains: HTTP endpoints for regeneration, publishing, batch jobs, image uploads, approvals
+- Depends on: Supabase clients (admin + RLS), Cloud Run pipeline, Shopify/Google APIs
+- Used by: Dashboard UI, external systems calling webhook endpoints
+- Pattern: Routes validate input → ensure data → call Cloud Run → persist results to Supabase
 
-**Library/Utilities (TypeScript):**
-- Purpose: Shared business logic, data fetching, type definitions
-- Location: `dashboard/src/lib/`
-- Contains: Supabase queries, publishing orchestration, evidence building, SKU selection scoring
-- Depends on: Supabase, Google APIs (sheets, ads, analytics), Shopify GraphQL
-- Used by: API routes, React components
+**Utility/Lib Layer (Dashboard):**
+- Purpose: Reusable business logic, SDK wrappers, data collection, evidence building
+- Location: `dashboard/src/lib/**` (TypeScript utilities and modules)
+- Contains: Publishing helpers, Supabase types, evidence builders, regeneration prompts (legacy reference), Google Sheets/Shopify SDK, multi-SKU detection
+- Depends on: Supabase clients, external SDKs
+- Used by: API routes, components, other utilities
 - Key modules:
-  - `dashboard/src/lib/evidence/` - Evidence table building for LLM prompts
-  - `dashboard/src/lib/publishing/` - Google Sheets + Shopify publication logic
-  - `dashboard/src/lib/supabase/` - Database client factories and queries
-  - `dashboard/src/lib/data-collection/` - Auto-collection of performance/search data
+  - `lib/publishing/**` - Google Sheets and Shopify publishing flows
+  - `lib/evidence/**` - Evidence table construction for LLM
+  - `lib/regeneration/**` - Legacy TypeScript prompts (reference only, not runtime)
+  - `lib/supabase/**` - Database client setup and type definitions
+  - `lib/data-collection/**` - Automatic performance/search data triggers
 
-**Content Generation Pipeline (Python):**
-- Purpose: LLM-driven content generation, SKU optimization, multi-SKU variant handling
-- Location: `src/feedops/api/main.py` (FastAPI app entry), `src/feedops/pipeline/`
-- Contains: Prompt building, LLM provider abstraction, evidence processing, finish sentence handling
-- Depends on: OpenAI/Gemini APIs, Supabase, Google Ads API, Merchant Center API
-- Used by: Dashboard `/api/regenerate`, `/api/sku-selection/generate-hybrid`
-- Key modules:
-  - `src/feedops/pipeline/optimize.py` - Main optimization orchestrator
-  - `src/feedops/pipeline/prompts.py` - Prompt template and guidance builder
-  - `src/feedops/pipeline/evidence.py` - Product evidence extraction
-  - `src/feedops/pipeline/generator.py` - LLM call + response parsing
-  - `src/feedops/api/multi_sku_detection.py` - Product family grouping
+**Backend API Layer (Cloud Run):**
+- Purpose: Run expensive content generation, processing jobs asynchronously
+- Location: `src/feedops/api/main.py` (FastAPI entry point) + modular routers
+- Contains: HTTP endpoints for optimization, batch jobs, performance capture, search sync, backfill
+- Depends on: LLM providers (OpenAI), external APIs (Google Ads, Merchant Center, Shopify), Supabase, GCP services
+- Used by: Dashboard API routes (via HTTP), background job schedulers
 
-**Data Loaders (Python):**
-- Purpose: Product data aggregation from multiple sources
-- Location: `src/feedops/loaders/`
-- Contains: Supabase catalog loading, variant index resolution, status enrichment
-- Depends on: Supabase, Shopify API (optional), Merchant Center snapshots
-- Used by: Pipeline, batch selection
-- Examples: `src/feedops/loaders/unified_loader.py` - Master loader combining catalog + status
+**Pipeline Engine (Python):**
+- Purpose: Multi-stage content generation with quality validation
+- Location: `src/feedops/pipeline/**` (pipeline modules)
+- Contains:
+  - Evidence building: `evidence.py` - assembles product specs, keywords, search terms, competitor data
+  - Enrichment: `enrichment.py` - adds competitive context, keyword gaps, segment strategy
+  - Generation: `generator.py` - LLM-based candidate creation with structured output
+  - Post-generation: Finish sentence injection, keyword placement validation, title normalization, quality scoring
+  - Validation: Claims extraction, fact checking against evidence
+- Depends on: Models, providers, integrations, database client
+- Used by: API endpoints for single-SKU and batch optimization
 
-**Integrations (Python):**
-- Purpose: External API clients for data fetching and publishing
-- Location: `src/feedops/integrations/`
-- Contains: Google Ads performance, search terms, Merchant Center data, Shopify catalog, publishing
-- Depends on: External APIs (Google Ads, Shopify, Google Sheets)
-- Used by: Data collection workflows, publishing, evidence building
+**Integration Layer (Python):**
+- Purpose: Fetch data from external systems, push updates back
+- Location: `src/feedops/integrations/**` (integration modules)
+- Contains:
+  - Google: Google Ads (performance, search terms, Keyword Planner), Google Sheets, Google Feed Upload
+  - Merchant Center: Product data, performance metrics, publishing
+  - Shopify: Catalog data, analytics, media uploads
+  - Bing: Ads performance, catalog management
+  - Analytics: GA4, Apify competitor scraping
+- Depends on: External SDK clients, Supabase
+- Used by: Pipeline stages (evidence building, enrichment), API endpoints for direct API calls
 
-**UI Components (React):**
-- Purpose: Reusable React components for dashboard pages
-- Location: `dashboard/src/components/`
-- Contains: Feature-specific components (review, batches, performance, search-insights)
-- Depends on: Supabase queries, TanStack Query for async state, Zustand for client state
-- Used by: Pages in `dashboard/src/app/(dashboard)/`
+**Database Layer (Python):**
+- Purpose: Query and write Supabase tables
+- Location: `src/feedops/db/**` (database clients and schema)
+- Contains:
+  - `supabase_client.py` - Connection management, query helpers
+  - `schema.py` - Pydantic models for all Supabase tables (source-of-truth schema definitions)
+  - `variant_index.py` - Master SKU ↔ GMC offer ID mapping utilities
+- Depends on: supabase-py client library
+- Used by: All Python modules that read/write database
 
-**Database (Supabase PostgreSQL):**
-- Purpose: Single source of truth for content, approvals, performance, publishing
-- Location: Schema defined in `supabase/migrations/`
-- Contains: 32 tables covering SKUs, approvals, content variants, batches, performance snapshots
-- Key tables:
-  - `product_catalog` - Master product data with variant details
-  - `generated_content` - Candidate/approved content (baseline, candidate, approved_content JSONB)
-  - `sku_approvals`, `variant_approvals` - Approval workflow state
-  - `publish_batches`, `batch_sku_assignments` - Batch publishing coordination
-  - `performance_baselines`, `performance_snapshots` - Performance tracking pre/post-publish
-  - `variant_index` - SKU ↔ GMC offer ID mapping (source of truth)
+**Data Models (Python):**
+- Purpose: Type-safe product and content representations
+- Location: `src/feedops/models/**` (Pydantic models)
+- Contains:
+  - `parent_sku.py` - ParentSKU with variants, merchant center items, enrichment metadata
+  - `candidate.py` - Generated content (titles, descriptions, claims, self-scores)
+  - `variant.py` - Variant-specific product data (master_sku, finish, gmc_offer_id)
+  - `claim.py`, `score.py` - Component models for validation scoring
+- Depends on: pydantic
+- Used by: Pipeline stages, API endpoints, database layer
+
+**Providers (Python):**
+- Purpose: Abstract LLM/AI vendor APIs
+- Location: `src/feedops/providers/**` (provider implementations)
+- Contains: OpenAI (GPT generation), Gemini (image generation), and interface for extensibility
+- Depends on: External API SDKs
+- Used by: Pipeline generator, image generation endpoint
 
 ## Data Flow
 
-**Content Generation Flow:**
+**Single SKU Content Generation (Regeneration):**
 
-1. User selects SKU(s) from dashboard → `POST /api/sku-selection/generate`
-2. Dashboard API loads product data via `ensureSkuData()` (auto-collects performance/search)
-3. Dashboard API calls Cloud Run `POST /regenerate` with master_sku + feedback
-4. Python pipeline:
-   - Loads ParentSKU + variants from Supabase via `load_parent_sku_unified_with_status()`
-   - Detects multi-SKU families via `detect_multi_sku_families()` (e.g., DMF-2/2X, 2/3X...)
-   - Builds evidence table from product_catalog + search terms
-   - Constructs prompt using `build_category_guidance()` + gold standard examples
-   - Calls OpenAI/Gemini with evidence + prompt
-   - Validates claims via `verify_claims()`, normalizes finish sentences
-   - Returns optimized candidate content
-5. Dashboard stores in `generated_content.candidate_content` (JSONB)
-6. User reviews and approves → `PUT sku_approvals.approval_status = 'approved'`
-7. Approved content moves to `generated_content.approved_content` (immutable)
+1. User submits regeneration request via dashboard → `/api/regenerate`
+2. Dashboard route validates SKU, ensures performance/search data exists, calls Cloud Run `/regenerate`
+3. Cloud Run endpoint:
+   - Loads ParentSKU from Supabase with variants and merchant catalog data
+   - Builds evidence table: specs + search terms + competitor context + keyword gaps
+   - Calls generator with LLM → receives candidate titles/descriptions + finish sentences
+   - Validates claims against evidence, scores quality (specificity, keyword inclusion, etc.)
+   - Returns candidates + scores to dashboard
+4. Dashboard stores candidates in `generated_content.candidate_content` (JSONB array)
+5. User reviews → approves a candidate → stored in `generated_content.approved_content`
 
-**Publication Flow:**
+**Batch Content Generation:**
 
-1. User creates batch → `POST /api/publish/batch`
-2. Batch status: `draft` → `pending`
-3. Batch execution:
-   - Reads `approved_content` for each SKU
-   - Expands variants (e.g., {FINISH_NAME} → ABR, BRG, ...)
-   - Publishes to Google Sheets (GMC supplemental feed) - transforms offer IDs to uppercase
-   - (Optional) Publishes lifestyle images to Shopify CDN
-   - Updates Shopify product descriptions if applicable
-4. Batch status: `pending` → `executing` → `published`
-5. Audit trail: `publish_events` stores content snapshots for rollback
+1. User selects SKUs, options (platforms, content types) → dashboard `/api/sku-selection/generate`
+2. Dashboard triggers data collection (non-blocking): ensures baselines + search terms exist
+3. Dashboard calls Cloud Run `/batch-optimize`:
+   - Creates batch job record with job_id
+   - For each SKU: execute full generation pipeline in background thread
+   - Multi-SKU families detected: base SKU generated fully, variants adapted (cost savings)
+   - Results stored in `generated_content` with version tracking
+   - Job status updated via database polls from dashboard
+4. Dashboard UI polls `/api/sku-selection/jobs/{jobId}` to track progress
+5. Results appear in `/review` page for approval
 
-**Performance Data Collection:**
+**Publishing Workflow:**
 
-1. Dashboard auto-triggers on generation start: `ensureSkuData()` → `POST /api/performance/capture-baseline`
-2. Cloud Run queries Google Ads for 30-day pre-publish metrics (impressions, clicks, CTR, CVR)
-3. Stores in `performance_baselines`
-4. Post-publish, Cloud Scheduler or manual trigger: `POST /api/performance/capture-snapshot`
-5. Calculates `days_since_publish` from `publish_events.published_at`
-6. Stores in `performance_snapshots` (keyed by `master_sku`, `platform`, `days_since_publish`)
+1. User selects approved SKUs → creates publish batch via `/api/publish/batch`
+2. Batch status: `draft` → `pending` → `executing` → `published`
+3. During execute:
+   - Expand variants: base SKU → 28 variants (one per finish permutation)
+   - Update Google Sheets: rows identified by GMC offer ID, content columns updated
+   - Publish to Shopify: product-level titles/descriptions + variant-level lifecycle images
+   - Audit: `publish_events` stores snapshot (immutable for rollback)
+4. Post-publish monitoring:
+   - Performance snapshots captured daily via `/api/performance/capture-snapshot`
+   - Performance baselines (pre-publish 30-day metrics) compared against post-publish
 
-**Search Query Sync Flow:**
+**Search Insights Sync:**
 
-1. Dashboard auto-triggers: `POST /search-insights/sync`
-2. Cloud Run queries Google Ads search terms for variants
-3. Stores in `search_queries` (variant-level, GMC offer ID)
-4. Also triggers Keyword Planner for related keywords
-5. Caches in `keyword_metrics` (30-day TTL)
+1. Background job or manual trigger: `/performance/collect-daily` (Cloud Run)
+2. Fetches Google Ads search terms for master SKUs
+3. Stores in `search_queries` table with variant-level data
+4. Evidence builder picks up via `fetch_search_queries_for_master_sku()`
 
 **State Management:**
 
-- **Database state:** Authoritative (Supabase)
-- **Client state:** Transient UI state (Zustand stores in `dashboard/src/lib/*/store.ts`)
-- **Content versions:** Immutable chain: `baseline_content` → `candidate_content` → `approved_content`
-- **Approval workflow:** Single source: `sku_approvals.approval_status` enum (`pending`, `approved`, `rejected`, `draft`)
+- **Approval state**: Stored in `sku_approvals`, `variant_approvals` (enum: pending, approved, rejected)
+- **Content state**: `generated_content` stores baseline, candidate (versioned array), approved (immutable)
+- **Publish state**: `publish_batches` tracks batch status, `publish_events` stores snapshots for audit
+- **Performance state**: `performance_baselines` (pre-publish aggregate), `performance_snapshots` (daily post-publish)
+- **Inventory state**: `variant_index` (canonical master_sku ↔ gmc_offer_id), `product_catalog` (all variants with specs)
 
 ## Key Abstractions
 
-**ParentSKU Model:**
-- Purpose: Represents product with finish-specific variants
-- Examples: `src/feedops/models/parent_sku.py`, dashboard type in API responses
-- Pattern: Aggregates variant data (finish codes, titles, descriptions) + parent-level specs (material, shape, dimensions)
-- Used by: Pipeline for content generation, dashboard for variant expansion
+**ParentSKU (Content Generation Context):**
+- Purpose: Encapsulates everything about a product needed for generation
+- Examples: `src/feedops/models/parent_sku.py`
+- Pattern: Loaded from Supabase `product_catalog` + enriched with search data + keyword gaps + competitor data
+- Used by: Generator, evidence builder, keyword placement validator
 
-**Candidate Selection:**
-- Purpose: Multi-candidate generation and scoring to select best variant
-- Examples: `src/feedops/pipeline/selection.py`, dashboard reviewer UI
-- Pattern: LLM generates N candidates, human scores + LLM heuristic selection combine
-- Used by: `/optimize-sku` endpoint, batch regeneration
+**Evidence Table (LLM Input):**
+- Purpose: Structured markdown representation of product specs → fed to LLM as user message
+- Examples: `src/feedops/pipeline/evidence.py`, `build_evidence_table()`
+- Pattern: Sections for specs, keywords, search terms, finish context, competitor insights, claims bank
+- Used by: Generator prompt construction, validation scorers
 
-**Evidence Table:**
-- Purpose: Structured data extracted from product_catalog for LLM prompt context
-- Examples: `src/feedops/pipeline/evidence.py` (Python), `dashboard/src/lib/evidence/builder.ts` (TS)
-- Pattern: Builds field-value pairs with source metadata (catalog, shopify, google_ads, etc.)
-- Used by: LLM prompt construction, audit/traceability
+**Pipeline Routers (Modular Processing):**
+- Purpose: Break generation into pluggable stages
+- Examples: `src/feedops/api/main.py` includes routers from `search_insights.py`, `performance_baseline.py`, `monitoring.py`
+- Pattern: Each router handles one domain (search, performance, monitoring)
+- Used by: Cloud Run app mounting
 
-**Multi-SKU Detection:**
-- Purpose: Group related SKUs (product families) for batch processing
-- Examples: `src/feedops/api/multi_sku_detection.py`
-- Pattern: Identifies shared `product_id` across multiple `master_sku` entries (e.g., DMF-2/2X, DMF-2/3X)
-- Used by: Hybrid generation (base SKU full generation, variants adapted via `adapt_variant_content()`)
-
-**Finish Sentence Handling:**
-- Purpose: Dynamic finish-specific descriptions (e.g., "Antique Brass", "Brushed Nickel")
-- Examples: `src/feedops/pipeline/finish_sentence_placeholder.py`, `src/feedops/pipeline/finish_sentence_validation.py`
-- Pattern: Base description has `{FINISH_NAME}` placeholder; normalized and validated per-variant
-- Used by: Google/Bing variant expansion, publication
-
-**Provider Abstraction:**
-- Purpose: Unified LLM interface (OpenAI, Gemini)
-- Examples: `src/feedops/providers/` directory
-- Pattern: `get_provider()` factory selects based on `FEEDOPS_LLM_PROVIDER` env var
-- Used by: All generation pipelines
+**Candidate with Score (Output Format):**
+- Purpose: Generated content + validation scores for human review
+- Examples: `src/feedops/models/candidate.py`
+- Pattern: Stores title, description, claims with sources, self-scores across 6 dimensions
+- Used by: Dashboard review page, approval workflow
 
 ## Entry Points
 
-**Dashboard Web App:**
-- Location: `dashboard/src/app/(dashboard)/page.tsx`
-- Triggers: User navigates to `/` after login
-- Responsibilities: Main dashboard overview with stats, approval queue, performance charts
+**Dashboard Page Routes:**
+- Location: `dashboard/src/app/(dashboard)/[feature]/page.tsx`
+- Triggers: User navigation
+- Responsibilities: Render UI, fetch data, dispatch actions (approve, publish, regenerate)
+- Examples:
+  - `page.tsx` - Overview dashboard with stats and charts
+  - `review/[sku]/page.tsx` - Content review and approval for single SKU
+  - `batches/page.tsx` - Batch creation and monitoring
+  - `monitoring/page.tsx` - Performance tracking and insights
 
-**SKU Selection/Generation:**
-- Location: `dashboard/src/app/(dashboard)/generate/page.tsx`
-- Triggers: User clicks "Generate Content"
-- Responsibilities: SKU selection UI, batch job creation, progress tracking
+**Dashboard API Routes:**
+- Location: `dashboard/src/app/api/[domain]/route.ts`
+- Triggers: HTTP requests from frontend, external webhooks
+- Responsibilities: Validate input, call Cloud Run, manage Supabase state
+- Examples:
+  - `GET /api/health` - System status check
+  - `POST /api/regenerate` - Single SKU content generation (thin proxy)
+  - `POST /api/publish/batch` - Batch publish execution
+  - `POST /api/performance/capture-snapshot` - Snapshot data collection
 
-**Content Review:**
-- Location: `dashboard/src/app/(dashboard)/review/[sku]/page.tsx`
-- Triggers: User clicks SKU to review generated content
-- Responsibilities: Side-by-side comparison, platform-specific approval, variant review
-
-**Batch Publishing:**
-- Location: `dashboard/src/app/(dashboard)/batches/page.tsx`
-- Triggers: User selects approved content for batch publish
-- Responsibilities: Batch creation, execution status, publish preview
-
-**API Health Check:**
-- Location: `dashboard/src/app/api/health/route.ts`
-- Triggers: External monitoring, dashboard startup
-- Responsibilities: Check all dependent services (Supabase, Google Ads, Shopify, Google Sheets)
-
-**Cloud Run Content Generation:**
-- Location: `src/feedops/api/main.py` FastAPI app
-- Triggers: Dashboard calls `POST /regenerate`, `/hybrid-generate`, `/batch-optimize`
-- Responsibilities: Orchestrate LLM generation, store results to Supabase, return optimized content
-
-**Cloud Run Performance Capture:**
-- Location: `src/feedops/api/main.py` endpoint `POST /performance/capture-baseline`
-- Triggers: Dashboard auto-triggers during SKU selection, manual via API
-- Responsibilities: Query Google Ads, store baseline metrics, cache results
+**Cloud Run API Endpoints:**
+- Location: `src/feedops/api/main.py` (FastAPI app)
+- Triggers: HTTP requests from dashboard routes, scheduled jobs
+- Responsibilities: Heavy lifting (LLM generation, batch processing, data collection)
+- Examples:
+  - `POST /optimize-sku` - Single SKU full pipeline
+  - `POST /batch-optimize` - Multi-SKU background job
+  - `POST /regenerate` - Content regeneration with feedback
+  - `POST /performance/capture-baseline` - Baseline data collection
+  - `POST /search-insights/sync` - Search term sync job
 
 ## Error Handling
 
-**Strategy:** Layered error handling with graceful degradation
+**Strategy:** Fail fast on validation, graceful degradation on external API failures
 
 **Patterns:**
 
-- **TypeScript API routes:** Return `NextResponse.json({ error: string, code?: string, details?: string }, { status: number })`
-- **Python endpoints:** Return JSON with `error` key, HTTP status codes (400 bad request, 500 server error)
-- **Database queries:** Explicit error checking; Supabase errors include `code`, `message`, `details`, `hint`
-- **LLM calls:** Retry logic for transient failures, fallback to previous approved content
-- **Validation:** Input validation at route handler level; Pydantic for Python request bodies
-- **Timeout handling:** Concurrent operations wrapped with `withTimeout()` in health checks, non-blocking background tasks with `run_async_in_thread()`
+- **Validation errors**: Return 400 with clear field/reason (dashboard shows error message)
+  - Example: SKU not found, invalid platform, missing required field
+  - Location: Route validation logic before Cloud Run call
 
-**Common Patterns:**
+- **External API failures**: Log warning, continue (non-blocking)
+  - Example: Search term fetch fails → generation still completes with baseline evidence
+  - Location: Pipeline stages wrap integrations in try-catch
 
-```typescript
-// TypeScript: Structured error response
-if (!supabase) {
-  return NextResponse.json(
-    { error: 'Database unavailable' },
-    { status: 503 }
-  )
-}
+- **LLM generation failures**: Return structured error with retry guidance
+  - Example: Token limit exceeded, malformed response, safety filter triggered
+  - Location: Generator returns `{ success: false, error: "...", retry_after: 60 }`
 
-// TypeScript: Error context in logs
-logSupabaseError('query_context', error)
+- **Database write failures**: Explicit transaction rollback, return error
+  - Example: Approval write fails on stale approval_status → user sees "Status changed, refresh and try again"
+  - Location: Route endpoint performs transaction validation
 
-// Python: Pydantic validation errors caught by FastAPI
-class RegenerateRequest(BaseModel):
-  master_sku: str
-  content_type: Literal['title', 'description']
-```
+- **Long-running jobs**: Timeout, resume capability
+  - Example: Batch job takes >25 min, Cloud Run returns job_id for polling
+  - Location: Batch job runs in background thread, stores state in database
 
 ## Cross-Cutting Concerns
 
 **Logging:**
-- Python: `logging` module with structured context via `request_context` (request ID, user)
-- TypeScript: `console.log`/`error` (Vercel captures to logs)
-- Observability: GCP Cloud Logging aggregates both Cloud Run and Cloud Function logs
+- Dashboard: Built-in Node.js console (captured by Vercel)
+- Python: Python logging module with structured JSON format
+- Location: `src/feedops/observability/` for centralized config
+- Pattern: Request ID propagation for tracing across systems
 
 **Validation:**
-- Input: Pydantic (Python), Next.js request handlers (TypeScript)
-- Content: Claim verification via `verify_claims()` in Python pipeline
-- Data: Schema constraints in Supabase (enums for status fields, NOT NULL constraints)
+- Content validation: Pydantic models in Python (database layer)
+- Business rule validation: Route-level checks (e.g., SKU exists, user has access)
+- LLM output validation: `src/feedops/pipeline/validators.py` checks claims, keyword placement, format adherence
+- Location: Pipeline stages validate before writing to database
 
 **Authentication:**
-- Dashboard: Supabase Auth (JWT tokens via `@supabase/ssr`)
-- Cloud Run: Unauthenticated (protected by default credentials via Cloud IAM; CORS allows only `allied-feed-ops.vercel.app`, `localhost:3000`)
-- Google APIs: Service accounts (base64-encoded JSON in env vars)
-- Shopify: Access token in env var
-
-**Rate Limiting:** Not explicitly implemented; relies on upstream API rate limits (Google Ads, OpenAI)
+- Dashboard: Supabase RLS + API key headers for server routes
+- Cloud Run: Service account identity via GCP (no explicit token passing)
+- External APIs: Credentials from GCP Secrets Manager injected at runtime
+- Location: Middleware in `src/feedops/api/main.py` for request validation
 
 ---
 
-*Architecture analysis: 2026-02-11*
+*Architecture analysis: 2026-02-20*

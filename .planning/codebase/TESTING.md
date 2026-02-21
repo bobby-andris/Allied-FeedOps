@@ -1,399 +1,476 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-20
 
 ## Test Framework
 
-**TypeScript/JavaScript:**
-- **Runner:** Vitest (installed but not in dashboard `package.json` scripts yet)
-- **Test Library:** `@testing-library/react` for component testing, `@testing-library/user-event` for user interactions
-- **Assertion:** Vitest's `expect()` (matching Jest syntax)
-- **Mocking:** Vitest `vi` module with `vi.mock()` and `vi.fn()`
+**Runner:**
+- Vitest 3.2.4 (configured in `dashboard/vitest.config.ts`)
+- Primary test framework for TypeScript/JavaScript
+- Python: pytest 7.0+ (configured in `pyproject.toml`)
 
-**Python:**
-- **Runner:** pytest (configured in `pyproject.toml`)
-- **Config:** `pytest.ini_options` in `pyproject.toml`:
-  ```toml
-  [tool.pytest.ini_options]
-  testpaths = ["tests"]
-  asyncio_mode = "auto"
-  ```
-- **Async:** `pytest-asyncio` for async test support
-- **Mocking:** `unittest.mock` (standard library) via `monkeypatch` fixture
+**Assertion Library:**
+- Vitest built-in `expect()` API (compatible with Jest)
+- Python: pytest `assert` statements
 
 **Run Commands:**
 ```bash
-# TypeScript (currently no test script in dashboard/package.json)
-# To add: "test": "vitest" in package.json
+# TypeScript/JavaScript (from dashboard/ directory)
+npm run test              # Run all tests once
+npm run test:watch       # Watch mode
 
-# Python
-pytest tests/ -v                  # Run all tests verbose
-pytest tests/test_name.py -v     # Run specific test file
-pytest tests/ --asyncio-mode=auto  # Async tests
-PYTHONPATH=./src pytest tests/    # Run with Python path set
+# Python (from project root)
+pytest tests/ -v         # Run all tests with verbose output
+pytest tests/test_performance_impact.py -v  # Run specific file
+pytest -k "test_name" -v # Run tests matching pattern
 ```
 
 ## Test File Organization
 
-**TypeScript:**
-- **Location:** Co-located in `__tests__` directories alongside source files
-  - Example: `dashboard/src/components/review/__tests__/PerformanceCard.test.tsx`
-  - Example: `dashboard/src/lib/__tests__/baseline-capture.test.ts`
-- **Naming:** `[ComponentName].test.tsx` or `[module].test.ts`
-- **Structure:** One test file per module/component
+**Location:**
+- TypeScript: Co-located with source in `__tests__/` subdirectory
+  - Relative path: `src/components/review/__tests__/PublishButton.test.tsx`
+  - Source path: `src/components/review/PublishButton.tsx`
+- Python: Separate `tests/` directory at project root
+  - Test file: `tests/test_performance_impact.py`
+  - Source module: `src/feedops/monitoring/performance_impact.py`
 
-**Python:**
-- **Location:** Separate `tests/` directory at project root
-  - `tests/test_openai_provider_max_tokens.py`
-  - `tests/test_evidence_multisize.py`
-  - `tests/conftest.py` for shared fixtures
-- **Naming:** `test_[feature].py` (pytest convention)
+**Naming:**
+- TypeScript: `{ComponentName}.test.tsx` or `{module}.test.ts`
+- Python: `test_{module}.py` (prefix, not suffix)
+
+**File Count:**
+- 28 TypeScript test files as of 2026-02-20
+- Coverage: Components, API routes, utilities, business logic
+- Selective: Not every file has tests; focus on critical paths and complex logic
 
 ## Test Structure
 
-**TypeScript with Vitest:**
-
+**TypeScript Suite Organization:**
 ```typescript
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ComponentUnderTest } from '../Component'
-
-// Mock external dependencies
-vi.mock('@/hooks/useCustomHook', () => ({
-  useCustomHook: vi.fn(),
-}))
+import { ComponentName } from '../ComponentName'
 
 describe('ComponentName', () => {
   beforeEach(() => {
+    // Setup before each test
     vi.clearAllMocks()
   })
 
-  describe('Feature Group', () => {
-    it('should handle specific behavior', () => {
-      // Arrange
-      const mockData = { /* ... */ }
+  afterEach(() => {
+    // Cleanup after each test
+    vi.restoreAllMocks()
+  })
 
-      // Act
-      const result = someFunction(mockData)
+  it('should render with expected props', () => {
+    render(<ComponentName prop="value" />)
+    expect(screen.getByText('Expected text')).toBeInTheDocument()
+  })
 
-      // Assert
-      expect(result).toEqual(expectedValue)
-    })
+  it('should handle user interaction', async () => {
+    const user = userEvent.setup()
+    render(<ComponentName />)
+    await user.click(screen.getByRole('button'))
+    expect(screen.getByText('Result')).toBeInTheDocument()
   })
 })
 ```
 
-**Key patterns from `PerformanceCard.test.tsx`:**
-- Nested `describe()` blocks for feature grouping
-  - Example: `describe('Loading State')`, `describe('Expanded State')`
-- Mock hooks before import: `vi.mock('@/hooks/usePerformanceData')`
-- Type cast mocks: `const mockUsePerformanceData = usePerformanceData as ReturnType<typeof vi.fn>`
-- Clear mocks in `beforeEach()` for test isolation
-- User interactions with `userEvent.setup()` and async patterns
-- `waitFor()` for async state updates in React
-
-**Python with Pytest:**
-
+**Python Test Organization:**
 ```python
+from __future__ import annotations
+from datetime import date
 import pytest
-from unittest.mock import patch, MagicMock
 
-@pytest.mark.asyncio
-async def test_async_function():
+def test_function_does_something() -> None:
+    """Docstring describing test intent."""
     # Arrange
-    mock_data = {...}
+    input_data = date(2026, 2, 20)
 
     # Act
-    result = await function_under_test(mock_data)
+    result = function_under_test(input_data)
 
     # Assert
     assert result == expected_value
 
-def test_with_fixture(sample_catalog_path):
-    # Use fixture
-    assert sample_catalog_path.exists()
+
+class TestGroupName:
+    """Group related tests in a class."""
+
+    @pytest.fixture
+    def fixture_name(self):
+        """Provide test data."""
+        return sample_data
+
+    def test_case_one(self, fixture_name):
+        assert fixture_name is not None
 ```
 
-**Key patterns from Python tests:**
-- `@pytest.mark.asyncio` decorator for async tests
-- `monkeypatch` fixture for mocking
-  - Example: `monkeypatch.setattr(provider.client.chat.completions, "create", _fake_create)`
-- Simple function mocking with types.SimpleNamespace for mock responses
-- Fixtures defined in `conftest.py` for reusable test data
+**Patterns:**
+- `describe()` blocks group related tests by component/function
+- Test names start with `it('should...')` describing behavior
+- Tests are isolated: no shared state between tests
+- Use `beforeEach()` for setup, `afterEach()` for cleanup
+- Python: `def test_*() -> None:` signature for type clarity
 
 ## Mocking
 
-**TypeScript Mocking (Vitest):**
+**Framework:** Vitest `vi` module (Jest-compatible)
 
+**Patterns:**
+
+**1. Module Mocking (Hoisting Pattern):**
 ```typescript
-// Before imports:
-vi.mock('@/hooks/usePerformanceData', () => ({
-  usePerformanceData: vi.fn(),
+const mocks = vi.hoisted(() => ({
+  createAdminClient: vi.fn(),
+  resolveCanonicalMasterSku: vi.fn(),
 }))
 
-// After imports:
-import { usePerformanceData } from '@/hooks/usePerformanceData'
-const mockUsePerformanceData = usePerformanceData as ReturnType<typeof vi.fn>
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: mocks.createAdminClient,
+}))
 
-// Setup in test:
-mockUsePerformanceData.mockReturnValue({
-  current: { impressions: 45200, clicks: 1446 },
-  baseline: null,
-  status: 'warning',
-  loading: false,
-  error: null,
+vi.mock('@/lib/master-sku', () => ({
+  resolveCanonicalMasterSku: mocks.resolveCanonicalMasterSku,
+}))
+
+import { POST } from '@/app/api/regenerate/batch/route'
+```
+- Hoisting: Define `vi.hoisted()` at top before imports
+- Allows importing and mocking the same module consistently
+- Used in `src/app/api/regenerate/batch/__tests__/route.test.ts`
+
+**2. Mock Implementation:**
+```typescript
+vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(performanceMap)
+vi.mocked(googleAds.getDateRange).mockReturnValue({
+  startDate: '2026-01-08',
+  endDate: '2026-02-07',
 })
-
-// Assertions:
-expect(mockUsePerformanceData).toHaveBeenCalledWith('920D-6', 'google')
-vi.clearAllMocks()  // In beforeEach()
 ```
+- `mockResolvedValue()` for async functions
+- `mockReturnValue()` for sync functions
+- `mockImplementation()` for custom behavior (e.g., tracking in-flight count)
 
-**Python Mocking (monkeypatch):**
-
-```python
-def test_function(monkeypatch):
-    # Mock module function
-    monkeypatch.setattr(googleAds, 'getDateRange', lambda: {
-        'startDate': '2026-01-08',
-        'endDate': '2026-02-07'
-    })
-
-    # Mock provider method
-    async def _fake_create(**kwargs):
-        return types.SimpleNamespace(
-            choices=[types.SimpleNamespace(message=types.SimpleNamespace(content="{}"))],
-            usage={"prompt_tokens": 1, "completion_tokens": 1}
-        )
-    monkeypatch.setattr(provider.client.chat.completions, "create", _fake_create)
+**3. Global Stubs:**
+```typescript
+const fetchMock = vi.fn().mockResolvedValue(
+  new Response(JSON.stringify({ success: true }), { status: 200 })
+)
+vi.stubGlobal('fetch', fetchMock)
 ```
+- Replace global functions like `fetch`
+- Cleanup with `vi.unstubAllGlobals()` in `afterEach()`
+
+**4. DOM/Library Mocks:**
+```typescript
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+    warning: vi.fn(),
+  },
+}))
+```
+- Mock third-party libraries (sonner toast notifications)
+- Return minimal interface matching usage
+
+**5. Supabase Client Mocks:**
+```typescript
+function createSupabaseMock() {
+  const single = vi.fn().mockResolvedValue({ data: {...}, error: null })
+  const limit = vi.fn(() => ({ single }))
+  const eq = vi.fn(() => ({ limit }))
+  const select = vi.fn(() => ({ eq }))
+  const from = vi.fn((table: string) => {
+    if (table === 'variant_index') return { select }
+    if (table === 'performance_baselines') return { upsert }
+    return {}
+  })
+
+  return { from } as unknown as SupabaseClient
+}
+```
+- Chain builder pattern matching Supabase API
+- Supports `.from(table).select(...).eq(...).limit(...).single()`
+- Type cast to `SupabaseClient` at end
 
 **What to Mock:**
-- External API calls (OpenAI, Google Ads, Supabase)
-- Browser APIs (localStorage, window, fetch)
-- Hooks and context providers
-- System functions (dates, random values)
-- Database queries
+- External API calls (Google Ads, Supabase, Shopify)
+- Third-party libraries (toast, external services)
+- `fetch()` for HTTP mocking
+- Current date/time (via mocking utilities)
 
 **What NOT to Mock:**
-- Utility functions from the same module (test the real implementation)
-- React components rendering helpers
-- Standard library functions (Math, Array methods, etc.)
-- Custom validators unless they have side effects
+- Built-in functions (Math, String, Array methods)
+- Internal utility functions (use real implementations)
+- Database schema/queries (mock the client, not the queries)
+- Component children (render real components)
 
 ## Fixtures and Factories
 
-**TypeScript:**
-- Create mock data objects inline in tests
-- Example from `PerformanceCard.test.tsx`:
-  ```typescript
-  mockUsePerformanceData.mockReturnValue({
-    current: {
-      impressions: 45200,
-      clicks: 1446,
-      ctr: 0.032,
-      conversions: 89,
-      conversion_value: 2847,
-    },
-    baseline: {
-      avg_impressions: 42100,
-      avg_clicks: 1263,
-      avg_ctr: 0.030,
-      avg_conversions: 71,
-      avg_conversion_value: 2201,
-    },
-    status: 'warning',
-    loading: false,
+**Test Data:**
+
+**TypeScript Factory Pattern:**
+```typescript
+function createSupabaseMock(shopifyProductId: string | null = '1234567890'): MockContext {
+  const single = vi.fn().mockResolvedValue({
+    data: shopifyProductId ? { shopify_product_id: shopifyProductId } : null,
     error: null,
   })
-  ```
+  // ... build chain
+  return { supabase, upsert }
+}
 
-**Python:**
-- **Location:** `tests/conftest.py` for shared fixtures
-  - Example:
-    ```python
-    @pytest.fixture
-    def sample_catalog_path() -> Path:
-        """Path to sample catalog CSV for testing."""
-        return Path("samples/sample-catalog.csv")
+// Usage
+const { supabase, upsert } = createSupabaseMock('1234567890')
+```
 
-    @pytest.fixture
-    def temp_db_path(tmp_path: Path) -> Path:
-        """Temporary database path for testing."""
-        return tmp_path / "test_feedops.db"
-    ```
-- **Usage in tests:** Fixtures injected as parameters
-  ```python
-  def test_load_catalog(sample_catalog_path):
-      assert sample_catalog_path.exists()
-  ```
-- **Pytest built-ins:** `tmp_path`, `monkeypatch`, `capsys` available without definition
+**TypeScript Test Data Objects:**
+```typescript
+const mockPerformanceData = {
+  master_sku: '920D-6',
+  platform: 'google',
+  avg_impressions: 42100,
+  avg_clicks: 1263,
+  avg_ctr: 0.03,
+}
+
+render(<PerformanceCard baselines={[mockPerformanceData]} snapshots={[]} />)
+```
+
+**Python Fixtures (conftest.py):**
+```python
+@pytest.fixture
+def sample_catalog_path() -> Path:
+    """Path to sample catalog CSV for testing."""
+    return Path("samples/sample-catalog.csv")
+
+# Usage in test
+def test_loads_catalog(sample_catalog_path):
+    assert sample_catalog_path.exists()
+```
+
+**Location:**
+- TypeScript: Inline factory functions in test file (near top)
+- Python: Fixtures in `tests/conftest.py` for reuse across tests
+- Inline data: Use for single-test scenarios, factories for complex multi-test setups
 
 ## Coverage
 
 **Requirements:** Not enforced (no coverage thresholds in config)
 
-**Current state:**
-- Limited test suite: 2 TypeScript test files, multiple Python test files
-- Dashboard tests: UI component testing (PerformanceCard), utility testing (baseline-capture)
-- Python tests: Provider integration, data loading, title normalization
-
 **View Coverage:**
 ```bash
-# Python (if coverage plugin installed)
-pytest tests/ --cov=src/feedops --cov-report=html
-# Then open htmlcov/index.html
-
-# TypeScript (if coverage support added to vitest config)
-vitest --coverage
+npm run test -- --coverage  # Would need coverage plugin configured
 ```
 
-## Test Types
+**Current State:**
+- No coverage configuration in `vitest.config.ts`
+- Testing is selective, focusing on:
+  - Complex business logic (baseline capture, performance calculations)
+  - API routes with multiple branches
+  - Component interactions and state
+  - Edge cases (null data, errors, concurrency)
+
+**Test Types:**
 
 **Unit Tests:**
-- **Scope:** Single function or component
-- **Approach:** Mock external dependencies, test logic in isolation
-- **Examples:**
-  - `test_baseline-capture.test.ts`: Tests `captureBaseline()` function with mocked Supabase and Google Ads
-  - Python provider tests: Test OpenAI API call parameters without hitting real API
+- Scope: Single function or small module
+- Approach: Pure function testing, isolated from dependencies
+- Example: `test_compute_diff_in_diff_lift_pct_uses_relative_changes()` in `test_performance_impact.py`
+- Focus: Logic correctness, edge cases (zero denominators, null values)
+- Files: `src/lib/__tests__/`, `src/components/review/__tests__/`
 
 **Integration Tests:**
-- **Scope:** Multiple modules working together
-- **Approach:** Use real services (Supabase test DB) or realistic mocks
-- **Examples:**
-  - `test_review_dashboard.py`: Tests data loading and transformation
-  - `test_evidence_multisize.py`: Tests evidence table building with real product data
-
-**E2E Tests:**
-- **Framework:** Not implemented (no Cypress, Playwright, or similar)
-- **Note:** Dashboard has no end-to-end test automation; manual testing via browser
+- Scope: Multiple modules working together (typically with mock external services)
+- Approach: Mock external APIs but test internal integration
+- Example: `captureBaseline` test mocking Google Ads but testing Supabase flow
+- Focus: Data transformations, end-to-end flow verification
+- Files: API route tests in `src/app/api/**/__tests__/`
 
 **Component Tests:**
-- **Scope:** React components with user interactions
-- **Approach:** Render component, mock hooks, simulate user actions
-- **Key libraries:** `@testing-library/react`, `@testing-library/user-event`
-- **Example from `PerformanceCard.test.tsx`:**
-  ```typescript
-  it('toggles between collapsed and expanded on click', async () => {
-    const user = userEvent.setup()
-    render(<PerformanceCard sku="920D-6" />)
-    const trigger = screen.getByRole('button', { name: /performance/i })
+- Scope: React components with user interactions
+- Approach: Render component, simulate user events, verify DOM changes
+- Example: `PublishButton.test.tsx` rendering button, clicking, verifying results
+- Tools: `@testing-library/react`, `@testing-library/user-event`
+- Pattern: `render()` → user interaction → assertion on DOM
 
-    // Initially collapsed
-    expect(screen.queryByText(/CURRENT/i)).not.toBeInTheDocument()
-
-    // Click to expand
-    await user.click(trigger)
-    await waitFor(() => {
-      expect(screen.getByText(/CURRENT/i)).toBeInTheDocument()
-    })
-  })
-  ```
+**E2E Tests:**
+- Framework: Not used (would be Playwright or Cypress)
+- Status: Functional testing done manually or via staging deployment
 
 ## Common Patterns
 
-**Async Testing:**
-
-TypeScript:
+**Async Testing (React):**
 ```typescript
-it('should handle async operations', async () => {
+it('waits for async operations to complete', async () => {
   const user = userEvent.setup()
-  render(<Component />)
-  await user.click(button)
+  render(<ComponentWithAsyncLoad />)
+
+  // Wait for promise to resolve
   await waitFor(() => {
-    expect(screen.getByText('Expected')).toBeInTheDocument()
+    expect(screen.getByText('Loaded')).toBeInTheDocument()
   })
 })
-```
 
-Python:
-```python
-@pytest.mark.asyncio
-async def test_async_function():
-    result = await some_async_function()
-    assert result == expected
+// Alternative: vi.waitFor() for non-DOM async operations
+await vi.waitFor(() => {
+  expect(mocks.apiCall).toHaveBeenCalledTimes(1)
+})
 ```
 
 **Error Testing:**
-
-TypeScript:
 ```typescript
-it('handles fetch errors gracefully', () => {
-  mockUsePerformanceData.mockReturnValue({
-    current: null,
-    baseline: null,
-    status: 'no-data',
-    loading: false,
-    error: 'Failed to fetch performance data',
-  })
-  render(<PerformanceCard sku="920D-6" />)
-  expect(screen.getByText(/failed to load performance/i)).toBeInTheDocument()
+it('handles API errors gracefully', async () => {
+  vi.mocked(fetchFunction).mockRejectedValue(new Error('Network error'))
+
+  const result = await functionUnderTest()
+
+  expect(result).toBeNull()  // Or check error state
 })
+
+// Spy on console.error to verify error is logged
+const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+// ... run code that errors
+expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Failed'))
 ```
 
-Python:
-```python
-def test_validation_error(monkeypatch):
-    monkeypatch.setattr(provider, 'validate', lambda x: None)
-    with pytest.raises(ValueError, match="Invalid input"):
-        provider.generate(invalid_data)
-```
-
-**Accessibility Testing:**
-
+**Mock State Verification:**
 ```typescript
-it('supports keyboard navigation', async () => {
-  const user = userEvent.setup()
-  render(<PerformanceCard sku="920D-6" />)
-  const trigger = screen.getByRole('button', { name: /performance/i })
+it('calls API with correct parameters', async () => {
+  const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+  vi.stubGlobal('fetch', fetchMock)
 
-  // Tab to focus
-  await user.tab()
-  expect(trigger).toHaveFocus()
+  await functionThatFetches()
 
-  // Enter to activate
-  await user.keyboard('{Enter}')
-  await waitFor(() => {
-    expect(screen.getByText(/baseline/i)).toBeInTheDocument()
-  })
-})
-
-it('announces state to screen readers', () => {
-  render(<PerformanceCard sku="920D-6" />)
-  const trigger = screen.getByRole('button', { name: /performance/i })
-  expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  expect(fetchMock).toHaveBeenCalledWith(
+    expect.stringContaining('/api/endpoint'),
+    expect.objectContaining({
+      method: 'POST',
+      headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+    })
+  )
 })
 ```
 
-**State Assertion Patterns:**
+**Concurrent Operations Testing:**
+```typescript
+it('processes batch operations concurrently', async () => {
+  let inFlight = 0
+  let maxInFlight = 0
 
-TypeScript:
-- Use `screen.getByText()` / `screen.queryByText()` for DOM assertions
-- Use `queryByText()` (returns null if not found) vs `getByText()` (throws if not found)
-- Chain assertions: `expect(element).toHaveClass('bg-green-500')`
-- Test IDs: `screen.getByTestId('status-indicator')`
+  const fetchMock = vi.fn().mockImplementation(async () => {
+    inFlight += 1
+    maxInFlight = Math.max(maxInFlight, inFlight)
+    await new Promise(resolve => setTimeout(resolve, 30))
+    inFlight -= 1
+    return new Response(JSON.stringify({ success: true }), { status: 200 })
+  })
+  vi.stubGlobal('fetch', fetchMock)
 
-Python:
-- Simple equality: `assert result == expected_value`
-- Decimal precision: `assert result?.avg_cvr == 0.05`
-- Null checks: `assert result is None`
-- Collection checks: `assert len(result) > 0`
+  await batchFunction()
 
-## Test Data Characteristics
+  expect(maxInFlight).toBeGreaterThanOrEqual(2)  // Verify concurrency
+})
+```
 
-**TypeScript:**
-- Real data from production (SKU IDs, timestamps)
-  - Example: `sku="920D-6"`, `impressions: 45200`, `ctr: 0.032`
-- Performance metrics use realistic ranges
-- Mock hook return shapes exactly match real hook signatures
+## Setup and Configuration
 
-**Python:**
-- Use factory patterns for generating test models
-- Create realistic Pydantic models with all required fields
-- Use actual product family structures (DMF-2/2X, DMF-2/3X, etc.)
-- Test with sample CSV files (e.g., `samples/sample-catalog.csv`)
+**TypeScript Configuration (`dashboard/vitest.config.ts`):**
+```typescript
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',           // Browser environment for DOM tests
+    globals: true,                  // Global test functions (describe, it, expect)
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    exclude: ['node_modules', '.next'],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})
+```
+
+**Setup File (`dashboard/src/test/setup.ts`):**
+```typescript
+import '@testing-library/jest-dom/vitest'
+```
+- Adds matchers like `.toBeInTheDocument()`, `.toHaveClass()`, etc.
+
+**Python Configuration (`pyproject.toml`):**
+```ini
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+```
+- `testpaths`: Where to find tests
+- `asyncio_mode`: Auto-detect async tests
+
+## Test Quality Patterns
+
+**Descriptive Test Names:**
+```typescript
+// Good: Behavior-focused
+it('marks funnel decisions incomplete until all custom_label_0 assignments are set')
+it('renders readiness errors without duplicate React keys when multiple blockers exist for one platform')
+
+// Avoid: Implementation-focused
+it('checks status')
+it('validates input')
+```
+
+**Arrange-Act-Assert:**
+```typescript
+it('does something', () => {
+  // Arrange: Set up test data and mocks
+  const mockData = { id: '1', name: 'Test' }
+  const { supabase, upsert } = createSupabaseMock()
+
+  // Act: Call function under test
+  const result = await captureBaseline(supabase, 'SKU-1', 'google')
+
+  // Assert: Verify expectations
+  expect(result).toEqual(expectedValue)
+  expect(upsert).toHaveBeenCalledTimes(1)
+})
+```
+
+**Test Isolation:**
+```typescript
+afterEach(() => {
+  vi.clearAllMocks()      // Clear mock call history
+  vi.restoreAllMocks()    // Restore mocked implementations
+  vi.unstubAllGlobals()   // Remove global stubs (fetch, etc.)
+})
+```
+
+**Boundary/Edge Cases:**
+```typescript
+it('returns null when no performance data is available', async () => {
+  vi.mocked(googleAds.fetchShoppingPerformance).mockResolvedValue(new Map())
+  const result = await captureBaseline(supabase, '920D-6', 'google')
+  expect(result).toBeNull()
+  expect(upsert).not.toHaveBeenCalled()  // Side effect not triggered
+})
+
+it('returns None when a pre-period denominator is zero', () => {
+  result = compute_diff_in_diff_lift_pct(
+    treated_pre=0,
+    treated_post=10,
+    control_pre=8,
+    control_post=9,
+  )
+  assert result is None
+})
+```
 
 ---
 
-*Testing analysis: 2026-02-11*
+*Testing analysis: 2026-02-20*

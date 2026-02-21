@@ -1,346 +1,388 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-20
 
 ## Directory Layout
 
 ```
 Allied-FeedOps/
-├── dashboard/                  # Next.js web app (TypeScript/React)
+├── dashboard/                          # Next.js dashboard (Vercel deployment)
 │   ├── src/
-│   │   ├── app/               # Next.js App Router (pages + API routes)
-│   │   ├── components/        # React components by feature
-│   │   ├── lib/               # Shared utilities, business logic, types
-│   │   └── hooks/             # Custom React hooks
-│   ├── public/                # Static assets
-│   ├── supabase/              # Database migrations
-│   └── package.json           # Dependencies (Next.js, React, Supabase, etc.)
+│   │   ├── app/                       # App Router directory structure
+│   │   │   ├── (dashboard)/           # Protected dashboard routes
+│   │   │   │   ├── page.tsx           # Overview dashboard
+│   │   │   │   ├── review/            # Content review workflows
+│   │   │   │   ├── batches/           # Batch management (creation, publishing)
+│   │   │   │   ├── performance/       # Performance metrics & snapshots
+│   │   │   │   ├── monitoring/        # Real-time monitoring & alerts
+│   │   │   │   ├── generate/          # SKU selection & generation UI
+│   │   │   │   ├── search-insights/   # Google Ads search term analysis
+│   │   │   │   └── [other routes]/    # Settings, competitors, attribution, etc.
+│   │   │   ├── api/                   # API routes (Next.js serverless)
+│   │   │   │   ├── regenerate/        # Content generation proxy to Cloud Run
+│   │   │   │   ├── publish/           # Publishing orchestration (Google Sheets, Shopify)
+│   │   │   │   ├── sku-selection/     # Batch generation & job tracking
+│   │   │   │   ├── performance/       # Performance capture & analysis
+│   │   │   │   ├── review/            # Content approvals & image selection
+│   │   │   │   ├── ga4/               # GA4 data fetching & attribution
+│   │   │   │   └── [other endpoints]/ # Health, variants, images, etc.
+│   │   │   └── login/                 # Authentication page
+│   │   ├── lib/                       # Shared utilities & business logic
+│   │   │   ├── api/                   # API client helpers
+│   │   │   ├── auth/                  # Authentication utilities
+│   │   │   ├── batches/               # Batch state management
+│   │   │   ├── data-collection/       # Auto-trigger data fetches (performance, search)
+│   │   │   ├── evidence/              # Evidence table building for LLM
+│   │   │   ├── ga4/                   # GA4 API integration
+│   │   │   ├── multi-sku-detection.ts # Product family detection
+│   │   │   ├── optimization/          # Quality scoring & ranking logic
+│   │   │   ├── publishing/            # Google Sheets & Shopify SDK wrappers
+│   │   │   ├── regeneration/          # Legacy TypeScript prompts (reference only)
+│   │   │   ├── review/                # Image/variant review state
+│   │   │   ├── supabase/              # Database client setup & types
+│   │   │   ├── google-ads.ts          # Google Ads API helpers
+│   │   │   ├── shopify/               # Shopify GraphQL helpers
+│   │   │   └── [utilities]/           # master-sku.ts, sku-utils.ts, etc.
+│   │   ├── components/                # Reusable React components
+│   │   │   ├── ui/                    # shadcn/ui components (Card, Button, etc.)
+│   │   │   ├── dashboard/             # Overview charts & stats components
+│   │   │   ├── review/                # SKU review, image approval, variant browser
+│   │   │   ├── batches/               # Batch creation & management UI
+│   │   │   ├── attribution/           # Attribution forensics, GA4 charts
+│   │   │   ├── search-insights/       # Search query tables, performance
+│   │   │   └── [feature]/             # Other feature-specific components
+│   │   └── styles/                    # Global CSS & Tailwind config
+│   ├── next.config.js                 # Next.js build config
+│   ├── tsconfig.json                  # TypeScript config
+│   └── package.json                   # Dependencies: next, react, supabase, etc.
 │
-├── src/feedops/               # Python content generation pipeline
-│   ├── api/                   # FastAPI app + route handlers (Cloud Run)
-│   ├── pipeline/              # Content generation orchestration
-│   ├── loaders/               # Data loading from Supabase, Shopify, CSV
-│   ├── integrations/          # External API clients (Google, Shopify, etc.)
-│   ├── models/                # Pydantic data models
-│   ├── db/                    # Database clients and schema
-│   ├── providers/             # LLM provider abstraction (OpenAI, Gemini)
-│   ├── quality/               # Quality scoring and gates
-│   ├── observability/         # Logging and metrics
-│   ├── config/                # Configuration management
-│   └── cli/                   # Command-line tools
+├── src/feedops/                       # Python pipeline (Cloud Run deployment)
+│   ├── api/                           # FastAPI entry point & routers
+│   │   ├── main.py                    # FastAPI app, CORS, mount routers
+│   │   ├── regenerate/                # Single SKU regeneration endpoint
+│   │   ├── search_insights/           # Search term sync router
+│   │   ├── performance_baseline/      # Baseline capture router
+│   │   ├── monitoring/                # Performance monitoring & impact scoring
+│   │   ├── backfill/                  # Data backfill & validation jobs
+│   │   ├── hybrid_generation/         # Multi-SKU variant adaptation
+│   │   ├── sku_alias/                 # SKU resolution & canonicalization
+│   │   ├── runtime_controls/          # Feature flags & generation guards
+│   │   └── [routers]/                 # Other domain-specific endpoints
+│   │
+│   ├── pipeline/                      # Content generation stages
+│   │   ├── evidence.py                # Evidence table assembly
+│   │   ├── enrichment.py              # Enrichment (keywords, competitors, segments)
+│   │   ├── generator.py               # LLM-based candidate generation
+│   │   ├── prompts.py                 # Prompt templates & JSON schemas
+│   │   ├── keyword_placement.py       # Keyword validation & placement scoring
+│   │   ├── finish_injection.py        # Finish-specific sentence injection
+│   │   ├── claim_extraction.py        # Claims bank building from evidence
+│   │   ├── validators.py              # Post-generation validation (format, claims)
+│   │   ├── quality_scoring.py         # Quality dimension scoring
+│   │   ├── lifestyle_images.py        # Lifestyle image generation & management
+│   │   └── [stages]/                  # Segment strategy, title normalization, etc.
+│   │
+│   ├── integrations/                  # External API clients
+│   │   ├── google_ads.py              # Google Ads API (campaigns, account structure)
+│   │   ├── google_ads_search_terms.py # Search term reporting
+│   │   ├── google_ads_performance.py  # Performance & conversion data
+│   │   ├── google_sheets.py           # Google Sheets API (supplemental feed)
+│   │   ├── google_supplemental.py     # Supplemental feed schema mapping
+│   │   ├── merchant_center.py         # Google Merchant Center API
+│   │   ├── search_query_insights.py   # Search query aggregation & relevance
+│   │   ├── shopify_catalog.py         # Shopify GraphQL (products, variants, media)
+│   │   ├── shopify_analytics.py       # Shopify Analytics API
+│   │   ├── bing_catalog.py            # Bing Catalog API
+│   │   ├── bing_ads_performance.py    # Bing Ads performance
+│   │   └── [integrations]/            # Apify, analytics, etc.
+│   │
+│   ├── db/                            # Database layer
+│   │   ├── supabase_client.py         # Supabase connection & query helpers
+│   │   ├── schema.py                  # Pydantic models for ALL tables
+│   │   └── variant_index.py           # Master SKU ↔ offer ID mapping
+│   │
+│   ├── models/                        # Data models (Pydantic)
+│   │   ├── parent_sku.py              # ParentSKU (product with variants)
+│   │   ├── candidate.py               # Generated content + scores
+│   │   ├── variant.py                 # Variant product data
+│   │   ├── claim.py                   # Claim assertion
+│   │   └── score.py                   # Quality score object
+│   │
+│   ├── providers/                     # LLM & AI vendor abstractions
+│   │   ├── openai_provider.py         # OpenAI (GPT) implementation
+│   │   ├── gemini_provider.py         # Google Gemini (images)
+│   │   └── base.py                    # Provider interface
+│   │
+│   ├── jobs/                          # Background job implementations
+│   │   ├── batch_optimizer.py         # Batch job executor
+│   │   ├── backfill.py                # Data backfill orchestration
+│   │   └── [job types]/               # Job implementations
+│   │
+│   ├── monitoring/                    # Performance impact tracking
+│   │   ├── impact_scorer.py           # Diff-in-diff impact calculation
+│   │   ├── snapshot_collector.py      # Daily snapshot capture
+│   │   └── performance_tracker.py     # Performance trend analysis
+│   │
+│   ├── quality/                       # Quality assurance modules
+│   │   ├── claim_verifier.py          # Fact-check claims against specs
+│   │   └── [quality checks]/          # Format, keyword, specificity checks
+│   │
+│   ├── config/                        # Configuration & environment
+│   │   ├── settings.py                # Settings model from env vars
+│   │   └── logging.py                 # Logging setup
+│   │
+│   ├── observability/                 # Logging, tracing, metrics
+│   │   ├── logging.py                 # Structured logging config
+│   │   ├── metrics.py                 # Prometheus metrics registry
+│   │   └── context.py                 # Request context & ID propagation
+│   │
+│   └── [other modules]/               # CLI, loaders, scripts
 │
-├── tests/                     # Python pytest tests
-│   ├── test_*.py              # Individual test files (co-located by feature)
-│   └── api/                   # API-specific tests
+├── tests/                             # Test suites
+│   ├── test_*.py                      # Test files for Python modules
+│   ├── api/                           # API route tests
+│   └── [test packages]/               # Grouped tests by feature
 │
-├── supabase/                  # Supabase infrastructure
-│   └── migrations/            # Database migration SQL files (numbered)
+├── supabase/                          # Database migrations
+│   ├── migrations/                    # SQL migration files
+│   └── schema.yml                     # Schema documentation (auto-generated)
 │
-├── docs/                      # Documentation
-│   ├── architecture/          # System design docs
-│   ├── database/              # Database schema reference
-│   ├── prompts/               # Implementation specs for features
-│   ├── troubleshooting/       # Debugging guides
-│   ├── audit/                 # Root cause analyses
-│   └── plans/                 # Project plans and handoffs
+├── docs/                              # Documentation
+│   ├── architecture/                  # System design docs
+│   ├── database/                      # Database schema reference (SCHEMA.md)
+│   ├── troubleshooting/               # Debugging guides
+│   ├── audit/                         # Investigation reports
+│   └── plans/                         # Phase planning & runbooks
 │
-├── scripts/                   # Utility scripts (Python, bash)
-├── data/                      # Local test data and exports
-├── exports/                   # Generated report exports
-├── logs/                      # Application logs
-├── samples/                   # Sample data files
+├── .planning/                         # GSD project management
+│   ├── phases/                        # Phase planning documents
+│   ├── codebase/                      # Codebase analysis (this file's home)
+│   └── config.json                    # GSD configuration
 │
-├── pyproject.toml             # Python project config (dependencies, build)
-├── CLAUDE.md                  # Project instructions for AI agents
-└── .github/workflows/         # CI/CD pipeline definitions
+└── [config files]/                    # pyproject.toml, .env.vercel, Dockerfile, etc.
 ```
 
 ## Directory Purposes
 
-**`dashboard/src/app/`:**
-- Purpose: Next.js App Router — pages and API routes
-- Contains: Page components (`page.tsx`), route handlers (`route.ts`), layouts
-- Structure:
-  - `(dashboard)/` - Protected pages (wrapped in layout with auth)
-  - `api/` - HTTP endpoints (regenerate, publish, health, etc.)
+**dashboard/src/app/(dashboard)/**
+- Purpose: User-facing pages for content management workflows
+- Contains: Page components, server/client components for features
 - Key files:
-  - `(dashboard)/page.tsx` - Main dashboard overview
-  - `(dashboard)/review/[sku]/page.tsx` - Content review UI
-  - `(dashboard)/generate/page.tsx` - SKU selection and batch generation
-  - `(dashboard)/batches/page.tsx` - Batch management
-  - `api/health/route.ts` - Multi-service health checks
-  - `api/regenerate/route.ts` - Proxy to Cloud Run pipeline
+  - `page.tsx` - Dashboard overview with stats
+  - `review/[sku]/page.tsx` - Single SKU review & approval
+  - `batches/page.tsx` - Batch management UI
+  - `performance/page.tsx` - Performance analytics & snapshots
 
-**`dashboard/src/components/`:**
-- Purpose: Reusable React components organized by feature area
-- Contains: UI components, form controls, feature-specific logic components
-- Structure by feature:
-  - `ui/` - Base shadcn components (Button, Card, Dialog, etc.)
-  - `dashboard/` - Overview dashboard components (charts, stats)
-  - `review/` - Content review UI (PlatformContent, ImageGallery, etc.)
-  - `generate/` - SKU selection and generation components
-  - `batches/` - Batch management UI
-  - `performance/` - Performance data visualization
-  - `search-insights/` - Search query analysis components
-  - `competitors/` - Competitor intelligence components
-  - `shared/` - Navigation, layout wrappers, generic utilities
+**dashboard/src/app/api/**
+- Purpose: HTTP endpoints that orchestrate workflows
+- Contains: Next.js API route handlers
+- Pattern: Validate input → ensure prerequisites → call Cloud Run or Supabase → return response
+- Key subdirectories:
+  - `regenerate/` - Content generation proxy
+  - `publish/` - Publishing orchestration
+  - `sku-selection/` - Batch generation jobs
+  - `performance/` - Performance data capture
 
-**`dashboard/src/lib/`:**
-- Purpose: Business logic, data fetching, utilities shared across app
-- Structure:
-  - `supabase/` - Database client factories (`admin.ts`, `client.ts`, `server.ts`), queries
-  - `publishing/` - Google Sheets, Shopify publication logic
-  - `evidence/` - Evidence table building for LLM prompts
-  - `data-collection/` - Auto-collection of performance/search data
-  - `regeneration/` - Legacy regeneration helpers (most logic moved to Python)
-  - `batches/` - Batch operation utilities
-  - `competitors/` - Competitor data fetching
-  - `prompts/` - Prompt-related utilities (legacy, moved to Python)
-  - `storage/` - File upload helpers (Supabase Storage)
-  - Types: `sku-utils.ts`, `google-ads.ts`, `variant-content.ts`
+**dashboard/src/lib/**
+- Purpose: Shared business logic, SDK wrappers, utilities
+- Contains: Reusable functions, client setup, type definitions
+- Key subdirectories:
+  - `publishing/` - Google Sheets & Shopify publishing flows
+  - `supabase/` - Database client & types
+  - `evidence/` - Evidence table building
+  - `data-collection/` - Auto-trigger data fetches
 
-**`src/feedops/api/`:**
-- Purpose: FastAPI HTTP layer for Cloud Run deployment
-- Contains: Route handlers, request/response models, main app setup
+**dashboard/src/components/**
+- Purpose: Reusable React components for UI
+- Contains: Presentational and container components
+- Pattern: Components in feature directories (review/, batches/, etc.) wrap shadcn/ui base components
+- Key subdirectories:
+  - `ui/` - Base shadcn/ui components (Card, Button, Dialog, etc.)
+  - `review/` - SKU review, image approval components
+  - `dashboard/` - Overview charts and stat cards
+
+**src/feedops/api/**
+- Purpose: Cloud Run HTTP endpoints
+- Contains: FastAPI router definitions
+- Pattern: Each endpoint performs one workflow (optimize, batch, publish, monitor)
+- Entry point: `main.py` - FastAPI app with CORS, routers, metrics endpoint
+
+**src/feedops/pipeline/**
+- Purpose: Modular content generation stages
+- Contains: Functions that process product data through generation stages
+- Pattern: Each module exports functions called in sequence by generator/optimizer
+- Key modules:
+  - `evidence.py` - Assembles product context for LLM
+  - `enrichment.py` - Adds competitive & keyword insights
+  - `generator.py` - LLM-based candidate creation
+  - `validators.py` - Post-generation quality checks
+
+**src/feedops/integrations/**
+- Purpose: External API clients and data fetching
+- Contains: Wrapper functions around external SDKs
+- Pattern: Each module handles one system (Google Ads, Shopify, etc.)
+- Key modules:
+  - `google_ads*.py` - Google Ads API (performance, search terms)
+  - `shopify_catalog.py` - Shopify product & media data
+  - `merchant_center.py` - Google Merchant Center API
+  - `search_query_insights.py` - Search term aggregation & scoring
+
+**src/feedops/db/**
+- Purpose: Database access layer
+- Contains: Supabase client setup, schema models, query helpers
 - Key files:
-  - `main.py` - FastAPI app initialization, endpoint definitions, CORS setup
-  - `prompt_loader.py` - Load system prompts from Supabase (runtime authority)
-  - `supabase_loader.py` - Load product data from Supabase
-  - `multi_sku_detection.py` - Detect product families and group variants
-  - `hybrid_generation.py` - Variant content adaptation (base SKU → variants)
-  - `runtime_controls.py` - Feature flags (generation enabled, finish sentence mode)
+  - `supabase_client.py` - Connection & query helpers
+  - `schema.py` - Pydantic models for all Supabase tables (source-of-truth)
 
-**`src/feedops/pipeline/`:**
-- Purpose: Content generation orchestration and processing
-- Contains: Optimization logic, evidence building, LLM prompt construction
-- Key files:
-  - `optimize.py` - Main orchestrator (loads data, builds evidence, calls LLM, validates)
-  - `prompts.py` - Prompt template building, guidance data assembly
-  - `evidence.py` - Extract structured data from product catalog
-  - `generator.py` - LLM call + JSON parsing
-  - `selection.py` - Multi-candidate evaluation and best-pick selection
-  - `verifier.py` - Claim validation against specifications
-  - `finish_sentence_*.py` - Finish-specific content handling
-  - `reporter.py` - Generate HTML reports and patch previews
+**src/feedops/models/**
+- Purpose: Data type definitions
+- Contains: Pydantic models for products, candidates, scores
+- Pattern: Used by database layer, pipeline, API endpoints
 
-**`src/feedops/loaders/`:**
-- Purpose: Product data aggregation from multiple sources
-- Contains: Supabase queries, data enrichment, status resolution
-- Key files:
-  - `unified_loader.py` - Master loader combining catalog + approval status
-  - `catalog.py` - Supabase product_catalog queries
-  - `catalog_resolver.py` - Resolve variant details (descriptions, specs)
+**tests/**
+- Purpose: Test coverage for Python modules
+- Contains: pytest test files
+- Pattern: Mirrors src/ structure (test_integrations/, test_pipeline/, etc.)
 
-**`src/feedops/integrations/`:**
-- Purpose: External API clients
-- Contains: Google Ads, Merchant Center, Shopify, Google Sheets, Apify integrations
-- Key files:
-  - `google_ads_performance.py` - Query Google Ads for impressions/clicks/CTR/CVR
-  - `google_ads_search_terms.py` - Query Google Ads search terms (variant-level)
-  - `google_sheets.py` - Update supplemental feed (product data, images)
-  - `shopify_catalog.py` - Fetch Shopify product/variant details
-  - `merchant_center.py` - Load GMC snapshot for competitor analysis
-  - `apify.py` - Web scraping for competitor content
-
-**`src/feedops/models/`:**
-- Purpose: Pydantic data models for type safety and validation
-- Key files:
-  - `parent_sku.py` - ParentSKU (product + variants) model
-  - `variant.py` - Variant details (finish, title, description, specs)
-  - `candidate.py` - Generated content candidate
-  - `score.py` - Quality/heuristic scores
-  - `claim.py` - Extracted product claims
-
-**`src/feedops/db/`:**
-- Purpose: Database client and schema management
-- Key files:
-  - `supabase_client.py` - Supabase client factory, connection pooling
-  - `schema.py` - Schema type hints and utilities
-  - `variant_index.py` - SKU ↔ GMC offer ID mapping queries
-
-**`src/feedops/providers/`:**
-- Purpose: LLM provider abstraction
-- Key files:
-  - Factory: `__init__.py` exports `get_provider()` function
-  - Implementations: `openai_provider.py`, `gemini_provider.py`
-
-**`tests/`:**
-- Purpose: Python test suite
-- Naming: `test_*.py` (pytest convention)
-- Location: Can be at root (`tests/`) or co-located with source
-- Key patterns:
-  - `conftest.py` - Shared fixtures
-  - `test_*.py` - Individual test modules by feature
-  - `api/` - API endpoint tests
-- Examples:
-  - `test_openai_provider_max_tokens.py` - LLM provider tests
-  - `test_evidence_multisize.py` - Evidence table generation
-  - `test_images.py` - Lifestyle image handling
-
-**`supabase/migrations/`:**
-- Purpose: Database schema versioning
-- Naming: `001_initial_schema.sql`, `002_add_approvals.sql`, etc. (numbered, sequential)
-- Contains: CREATE TABLE, ALTER TABLE, index creation, constraint definitions
-- Key: Each migration is run once in order; immutable
-
-**`docs/`:**
-- Purpose: Documentation and knowledge base
-- Structure:
-  - `database/SCHEMA.md` - Complete schema reference (tables, columns, types, examples)
-  - `architecture/` - System design and decision documents
-  - `prompts/` - Feature specification documents (01-09.md, FUTURE-IDEAS.md)
-  - `troubleshooting/` - Debugging guides and common issues
-  - `audit/` - Root cause analyses and investigation results
+**supabase/migrations/**
+- Purpose: Database schema changes
+- Contains: SQL migration files (numbered sequentially)
+- Pattern: Each migration is atomic, applies a single schema change
 
 ## Key File Locations
 
 **Entry Points:**
 
-- `dashboard/src/app/(dashboard)/page.tsx` - Web app dashboard
-- `dashboard/src/app/api/health/route.ts` - Service health checks
-- `src/feedops/api/main.py` - Cloud Run API server
+- `dashboard/src/app/(dashboard)/page.tsx` - Dashboard overview (accessed after login)
+- `dashboard/src/app/login/page.tsx` - Authentication entry point
+- `src/feedops/api/main.py` - Python pipeline FastAPI app entry point
 
 **Configuration:**
 
-- `dashboard/.env.local` - Local dashboard config (development)
-- `dashboard/.env.vercel` - Vercel environment variables (auto-loaded)
-- `pyproject.toml` - Python dependencies and package config
-- `dashboard/tsconfig.json` - TypeScript compiler options
-- `dashboard/package.json` - Node.js dependencies and scripts
+- `dashboard/.env.local` - Dashboard environment variables (local dev)
+- `dashboard/next.config.js` - Next.js build configuration
+- `src/feedops/config/settings.py` - Python settings from env vars
+- `pyproject.toml` - Python package definition & dependencies
+- `supabase/migrations/` - Database schema version history
 
 **Core Logic:**
 
-- `src/feedops/pipeline/optimize.py` - Main content generation orchestrator
-- `dashboard/src/app/api/regenerate/route.ts` - Dashboard proxy to Cloud Run
-- `dashboard/src/lib/evidence/builder.ts` - Evidence table construction (TS port)
-- `dashboard/src/lib/publishing/google-sheets.ts` - Publication to GMC feed
-- `src/feedops/loaders/unified_loader.py` - Master product data loader
+- `src/feedops/pipeline/generator.py` - LLM-based content generation core
+- `src/feedops/integrations/google_ads_search_terms.py` - Search term aggregation
+- `dashboard/src/lib/publishing/google-sheets.ts` - Google Sheets publishing logic
+- `dashboard/src/lib/regeneration/core.ts` - Legacy TypeScript regeneration (reference only)
 
 **Testing:**
 
-- `tests/conftest.py` - Pytest configuration and shared fixtures
-- `tests/test_*.py` - Python unit/integration tests
-- `dashboard/src/components/review/__tests__/PerformanceCard.test.tsx` - React component test
-
-**Database:**
-
-- `supabase/migrations/` - Schema migration SQL (numbered sequentially)
-- `docs/database/SCHEMA.md` - Complete schema reference with examples
+- `tests/` - Test files (mirrors src/ structure)
+- `tests/test_pipeline/` - Pipeline unit tests
+- `tests/api/` - API integration tests
+- `dashboard/src/app/api/regenerate/batch/__tests__/` - Dashboard route tests
 
 ## Naming Conventions
 
 **Files:**
 
-- **TypeScript components:** `CamelCase.tsx` (e.g., `SkuReviewClient.tsx`, `ApprovalChart.tsx`)
-- **TypeScript utilities:** `kebab-case.ts` (e.g., `sku-utils.ts`, `evidence-builder.ts`)
-- **Python modules:** `snake_case.py` (e.g., `optimize.py`, `supabase_client.py`)
-- **API routes:** Match HTTP pattern in path (e.g., `/api/regenerate/route.ts` = POST /regenerate)
-- **Migrations:** `001_description.sql`, `002_description.sql` (zero-padded numbers)
-- **Tests:** `test_feature_name.py` (pytest convention)
+- TypeScript: `camelCase.ts` (e.g., `google-sheets.ts`, `evidence-builder.ts`)
+- Python: `snake_case.py` (e.g., `generator.py`, `google_ads.py`)
+- React components: `PascalCase.tsx` (e.g., `SkuReviewClient.tsx`, `ReviewCard.tsx`)
+- Migrations: `NNN_description.sql` (e.g., `001_initial_schema.sql`, `025_fix_publish_batches_status_enum.sql`)
 
 **Directories:**
 
-- **Feature areas:** `kebab-case` in both TS and Python (e.g., `search-insights/`, `evidence/`)
-- **API route groups:** Reflect REST paths (e.g., `api/publish/batch/`, `api/regenerate/`)
+- Feature domains: `lowercase` (e.g., `publishing/`, `evidence/`, `integrations/`)
+- Utility collections: `lowercase` (e.g., `lib/`, `utils/`, `helpers/`)
+- UI components: `lowercase` (e.g., `ui/`, `components/`)
+
+**Functions & Variables:**
+
+- TypeScript: `camelCase` (e.g., `getSkuData()`, `publishBatch()`)
+- Python: `snake_case` (e.g., `build_evidence_table()`, `fetch_parent_sku()`)
+- Constants: `UPPER_SNAKE_CASE` (e.g., `CANDIDATE_SCHEMA`, `PLATFORM_CONTEXT`)
+- React components: `PascalCase` (e.g., `SkuReview`, `ReviewCard`)
+- Database models: `PascalCase` (e.g., `ParentSKU`, `GeneratedContent`)
 
 ## Where to Add New Code
 
-**New Feature (e.g., New Dashboard Page):**
+**New Feature (API endpoint + UI):**
 
-1. **Page component:** `dashboard/src/app/(dashboard)/feature-name/page.tsx`
-2. **Feature components:** `dashboard/src/components/feature-name/*.tsx`
-3. **API routes:** `dashboard/src/app/api/feature-name/route.ts` (if needed)
-4. **Utilities:** `dashboard/src/lib/feature-name/*.ts`
-5. **Tests:** `dashboard/src/components/feature-name/__tests__/*.test.tsx` (optional)
+1. API endpoint:
+   - Location: `dashboard/src/app/api/[domain]/[feature]/route.ts` (if dashboard orchestration needed)
+   - Or: `src/feedops/api/[router_name].py` (if backend processing needed)
+   - Tests: `tests/api/test_[feature].py` (Python) or `dashboard/src/app/api/[domain]/[feature]/__tests__/route.test.ts` (TypeScript)
 
-**New Generation Step (e.g., New Validation):**
+2. UI page:
+   - Location: `dashboard/src/app/(dashboard)/[feature]/page.tsx`
+   - Components: `dashboard/src/components/[feature]/` subdirectory
 
-1. **Pipeline module:** `src/feedops/pipeline/new_step.py`
-2. **Integration into `optimize.py`:** Add step to orchestration
-3. **Tests:** `tests/test_new_step.py`
+3. Utilities:
+   - Location: `dashboard/src/lib/[domain]/` (if feature-specific) or `dashboard/src/lib/[utility].ts` (if shared)
 
-**New API Integration (e.g., New Ads Platform):**
+**New Pipeline Stage (Python):**
 
-1. **Integration module:** `src/feedops/integrations/new_platform.py`
-2. **Query module:** Export functions for data fetching
-3. **Model types:** Add Pydantic models in `src/feedops/models/` if new structures
-4. **Pipeline integration:** Call from appropriate orchestrator
-5. **Tests:** `tests/test_new_platform.py`
+- Implementation: `src/feedops/pipeline/[stage_name].py`
+- Export function: Should be importable by `generator.py` or relevant orchestrator
+- Tests: `tests/test_pipeline/test_[stage_name].py`
+- Pattern: Function takes `ParentSKU` or `Evidence` as input, returns enriched version
 
-**New Database Table:**
+**New Integration (External API):**
 
-1. **Migration file:** `supabase/migrations/NNN_description.sql`
-2. **Python model:** Add corresponding Pydantic model in `src/feedops/models/`
-3. **Query helpers:** `src/feedops/db/table_name.py` (if complex queries)
-4. **Documentation:** Update `docs/database/SCHEMA.md`
+- Implementation: `src/feedops/integrations/[system_name].py`
+- Pattern: Wrap external SDK, return typed results
+- Tests: `tests/test_integrations/test_[system_name].py`
+- Register: Import in pipeline modules that need the data
 
-**Shared Utility (e.g., New Formatter):**
+**Database Schema Change:**
 
-- **Python:** `src/feedops/pipeline/utility_name.py` or `src/feedops/lib/utility_name.py`
-- **TypeScript:** `dashboard/src/lib/utility-name.ts` (co-located with usage or `dashboard/src/lib/shared/`)
+- Migration: `supabase/migrations/NNN_description.sql` (number sequentially)
+- Pattern: Single responsibility (add table, add column, create index)
+- Update schema docs: `docs/database/SCHEMA.md`
+
+**New Component (React):**
+
+- Location: `dashboard/src/components/[feature]/[ComponentName].tsx`
+- Pattern: Use shadcn/ui base components, follow existing patterns in directory
+- Props: Interface defining props with clear types
+- Example: `dashboard/src/components/review/SkuReviewClient.tsx`
 
 ## Special Directories
 
-**`.planning/codebase/`:**
-- Purpose: Generated by `/gsd:map-codebase` — architecture and quality analysis
-- Generated: Yes (by agent)
-- Committed: Yes (part of codebase analysis)
-- Contains: `ARCHITECTURE.md`, `STRUCTURE.md`, `CONVENTIONS.md`, `TESTING.md`, `STACK.md`, `INTEGRATIONS.md`, `CONCERNS.md`
+**dashboard/.next/**
+- Purpose: Build output from Next.js compilation
+- Generated: Yes
+- Committed: No (in .gitignore)
+- Action: Ignore, regenerate on build
 
-**`dashboard/.next/`:**
-- Purpose: Next.js build cache and compiled code
-- Generated: Yes (by `npm run build`)
-- Committed: No (in `.gitignore`)
+**src/feedops/__pycache__/**
+- Purpose: Python bytecode cache
+- Generated: Yes
+- Committed: No (in .gitignore)
+- Action: Ignore, regenerate on import
 
-**`supabase/.temp/`:**
-- Purpose: Temporary Supabase CLI files
-- Generated: Yes (by Supabase CLI)
-- Committed: No
+**.env files (.env.vercel, .env.local)**
+- Purpose: Environment configuration & secrets
+- Generated: No
+- Committed: No (in .gitignore)
+- Action: Never commit; manage via GCP Secrets Manager or Vercel Secrets UI
 
-**`exports/` and `data/`:**
-- Purpose: Local test data and report exports
-- Generated: Yes (by scripts and pipeline)
-- Committed: No (but directories exist for development)
+**exports/, dashboard_data/, data/**
+- Purpose: Generated data exports, CSVs, temporary files
+- Generated: Yes
+- Committed: No (in .gitignore)
+- Action: Can be cleaned safely; regenerate as needed
 
-**`docs/screenshots/`:**
-- Purpose: UI screenshots and diagrams for documentation
-- Generated: No (manually created)
+**.planning/**
+- Purpose: GSD phase management & codebase analysis
+- Generated: Partially (user-created phases, auto-created codebase docs)
+- Committed: Yes (but not secrets)
+- Action: Track phase progress, codebase mapping documents
+
+**docs/architecture/, docs/audit/**
+- Purpose: System design docs, investigation reports
+- Generated: No (manually written)
 - Committed: Yes
-
-## Path Aliases
-
-**TypeScript (`dashboard/tsconfig.json`):**
-
-```json
-"paths": {
-  "@/*": ["./src/*"]
-}
-```
-
-Usage:
-- Import from `src/lib/supabase/client.ts` as `import { ... } from '@/lib/supabase/client'`
-- Simplifies paths and allows easy refactoring
-
-**Python:**
-- No aliases; import from root package: `from feedops.pipeline.optimize import ...`
-- Install package in editable mode: `pip install -e .` or `uv pip install -e .`
-
-## Database Schema
-
-**Authoritative Reference:** `docs/database/SCHEMA.md`
-
-**Key Tables:**
-
-- `product_catalog` - Master product + variant data (shopify_product_id, variant_id, master_sku, finish_code, title, description, specs)
-- `sku_approvals`, `variant_approvals` - Approval workflow (master_sku/variant_id, approval_status enum, approved_by, approved_at, notes)
-- `generated_content` - Content versions (master_sku, platform, baseline_content JSONB, candidate_content JSONB, approved_content JSONB)
-- `variant_index` - SKU mapping (master_sku, gmc_offer_id, shopify_product_id, variant_id)
-- `publish_batches`, `batch_sku_assignments` - Batch coordination (batch_id, status enum, sku assignments)
-- `performance_baselines` - Pre-publish metrics (master_sku, platform, avg_impressions, avg_clicks, avg_ctr, avg_cvr)
-- `performance_snapshots` - Post-publish tracking (master_sku, platform, days_since_publish, impressions, clicks, ctr, cvr)
-- `search_queries` - Google Ads search terms (variant_id, gmc_offer_id, query, clicks, impressions)
-- `keyword_metrics` - Keyword Planner cache (keyword, search_volume, competition, bid_range)
+- Action: Update when architecture changes or major bugs are discovered
 
 ---
 
-*Structure analysis: 2026-02-11*
+*Structure analysis: 2026-02-20*

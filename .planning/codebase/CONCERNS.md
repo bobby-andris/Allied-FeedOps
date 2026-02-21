@@ -1,517 +1,605 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-20
 
 ## Tech Debt
 
-### Multi-SKU Product Query Logic
-
-**Issue:** Query logic mismatch between master_sku-specific filtering and Google Ads' product_id-level aggregation. Google Ads returns data at product_id level, but queries filter by specific master_sku variants.
-
+### TypeScript Type Duplication (HIGH IMPACT)
 **Files:**
-- `src/feedops/integrations/google_ads_performance.py` (fetch_batch_product_performance)
-- `src/feedops/api/performance_baseline.py` (_capture_google_baseline)
+- `dashboard/src/components/review/SkuReviewClient.tsx`
+- `dashboard/src/app/(dashboard)/review/page.tsx`
+- `dashboard/src/lib/supabase/types.ts`
+- `dashboard/src/lib/supabase/queries.ts`
 
-**Impact:** Only 0.3% match rate for multi-SKU products (e.g., DMF-2/2X, DMF-2/3X, DMF-2/4X sharing product_id 4539975336068). Single variants capture correctly.
+**Issue:** Multiple interface definitions duplicated across files:
+- `ContentRecord` interface defined in page.tsx AND SkuReviewClient.tsx (must stay in sync manually)
+- `PerformanceBaseline` / `PerformanceSnapshot` types duplicated across files with incomplete nullable field definitions
+- Inconsistencies when one copy is updated without updating others
 
-**Root Cause:** When Google Ads returns variant data for high-impression variants (e.g., DMF-2/5X), the code only accepts matches for the queried master_sku (DMF-2/2X), causing silent misses.
+**Impact:** Hard to maintain. Type changes require finding and updating 3+ locations. Missing fields cause runtime errors.
 
-**Fix Approach:**
-- Implement product_id-based matching: accept ANY variant with matching product_id
-- Add `extract_product_id()` helper to parse shopify_us_{product_id}_{variant_id} format
-- Update `_capture_google_baseline()` to use product_id instead of exact variant matching
-- Test with multi-SKU families to verify 95%+ match rate
-
----
-
-### Missing Platform Support for Performance Baselines
-
-**Issue:** Only Google Ads platform supported for baseline capture; Bing and Shopify return no data.
-
-**Files:** `src/feedops/api/performance_baseline.py` (line 126)
-
-**Impact:** Cannot capture baseline metrics for Bing or Shopify platforms, limiting performance tracking to Google only.
-
-**Fix Approach:** Implement Bing (`src/feedops/integrations/bing_ads_performance.py`) and Shopify performance APIs; add to baseline capture flow.
-
-**Blocking:** Low priority - Google is primary platform.
+**Fix approach:**
+- Consolidate all shared types to `dashboard/src/lib/supabase/types.ts`
+- Re-export from components that need them
+- Add TypeScript strict mode validation
 
 ---
 
-### User Attribution Not Implemented in Dashboard API Routes
-
-**Issue:** Approval/selection endpoints use hardcoded user values instead of authenticated session data.
-
+### SkuReviewClient Component Variants (MEDIUM COMPLEXITY)
 **Files:**
-- `dashboard/src/app/api/images/route.ts` (line 52)
-- `dashboard/src/app/api/review/images/select/route.ts` (lines 62, 115)
-- `dashboard/src/app/api/review/images/approve/route.ts` (line 43)
+- `dashboard/src/components/review/SkuReviewClient.tsx` (628 lines)
+- `dashboard/src/components/review/SkuReviewClient.magazine.tsx` (696 lines)
+- `dashboard/src/components/review/SkuReviewClient.original.tsx` (746 lines)
 
-**Impact:** Cannot track which user approved content or selected images; audit trail incomplete.
+**Issue:** Three parallel implementations of same component. Each variant:
+- Uses different subsets of imports (must `grep` before cleanup)
+- Requires prop changes in all 3 locations
+- Has slightly different rendering logic that could diverge
+- Makes it hard to know which version is authoritative
 
-**Fix Approach:** Extract user from session middleware (Supabase auth or NextAuth), pass to database operations.
+**Impact:** Changes are 3x slower to implement. Bug fixes must be replicated. Code maintenance risk.
+
+**Fix approach:**
+- Extract common logic to shared module
+- Use feature flags/props to control rendering differences
+- Single source of truth for component
 
 ---
 
-### Category Benchmarks Not Implemented
+### TypeScript Prompt Reference Legacy Code (MEDIUM)
+**Files:**
+- `dashboard/src/lib/regeneration/prompts.ts`
+- `dashboard/src/lib/regeneration/core.ts`
 
-**Issue:** Placeholder references to category performance benchmarks without actual data source.
+**Issue:** Contains legacy prompt logic that's NOT runtime source-of-truth. Python pipeline in `src/feedops/pipeline/prompts.py` is the actual authority. TypeScript code exists for reference only but is easily confused with active code.
 
-**Files:** `dashboard/src/lib/performance-utils.ts` (line 4)
+**Impact:** New developers may update TypeScript prompts thinking they affect content generation. They don't—only Python changes matter.
 
-**Impact:** Cannot compare SKU performance against category baselines; feature blocked.
-
-**Fix Approach:** Query `category_performance_benchmarks` table (if it exists) or create from historical data aggregation.
+**Fix approach:**
+- Add prominent comments: "REFERENCE ONLY - DO NOT EDIT"
+- Move to separate `legacy/` or `reference/` directory
+- Document Python as source-of-truth in CLAUDE.md (already done, but needs enforcement)
 
 ---
 
 ## Known Bugs
 
-### Batch Publishing Status Stuck in "executing"
-
-**Issue:** Final batch status UPDATE fails silently, leaving publish batch in "executing" state instead of final "published"/"partial"/"failed" status.
-
+### Batch Publishing Status Never Updates (CRITICAL)
 **Files:**
-- `dashboard/src/components/batches/BatchesClient.tsx` (status display logic)
-- `dashboard/src/app/api/publish/batch/route.ts` (status update)
+- `dashboard/src/app/api/publish/batch/route.ts` (1217 lines)
 
-**Symptoms:** Batch operations complete but UI shows "Executing..." indefinitely. User has no indication of success/failure.
+**Issue:** Final `UPDATE publish_batches SET status = 'published'` fails silently. Batch remains stuck in "executing" status indefinitely even after all content is published to Google Sheets and Shopify.
 
-**Trigger:** Long-running batch operations (Google Sheets + Shopify updates) may timeout or error on final UPDATE operation.
+**Symptoms:**
+- Batch shows green checkmarks (all SKUs published)
+- Status stays "executing" instead of "published"
+- No error logs appear
+- Happens after long-running Google Sheets + Shopify operations
+
+**Root cause:** Status update happens at the very end, after timeout-prone external API calls. Likely exceeds serverless function timeout (15 min for Vercel).
+
+**Files affected:**
+- `dashboard/src/app/api/publish/batch/route.ts` - Line ~1100 region where status update happens
+- `dashboard/src/lib/batches/reconciliation.ts` - Status enum logic
 
 **Workaround:** Manually update via Supabase:
 ```sql
-UPDATE publish_batches
-SET status = 'published', success_count = N
-WHERE batch_id = 'batch-id'
+UPDATE publish_batches SET status = 'published' WHERE batch_id = 'batch-id'
 ```
 
-**Fix Approach:**
-1. Add error handling to final status UPDATE in `/api/publish/batch/route.ts`
-2. Log completion status regardless of update success
-3. Consider retry logic for status persistence
-4. Add database constraints to prevent stuck states
-
-**Priority:** High - impacts production publishing workflow.
+**Fix approach:**
+- Move status update BEFORE long-running operations, or
+- Use background task to finalize status after retry delay, or
+- Implement database trigger to auto-finalize when all SKU assignments succeed
 
 ---
 
-### Background Task Container Lifecycle Termination
+### Multi-SKU Product Query Logic Vulnerability (HIGH)
+**Files:**
+- `src/feedops/integrations/google_ads_performance.py`
+- `src/feedops/api/performance_baseline.py`
 
-**Issue:** Despite threading fix (2026-02-08), long-running jobs still fail during container deployments.
+**Issue:** Query logic is too specific for master_sku when Google Ads returns data at product_id level. This was the root cause of "0.3% match rate" bug in 2026-02-08.
 
-**Files:** `src/feedops/api/main.py` (run_async_in_thread, /hybrid-generate endpoint)
+**Details:**
+- Multiple master SKUs share same product_id (e.g., DMF-2/2X, DMF-2/3X, DMF-2/4X all share product_id 4539975336068)
+- Google Ads aggregates at product_id level
+- Query requests variants for DMF-2/2X only, but Google returns DMF-2/5X variant (higher impressions)
+- Code rejects match because variant_id doesn't match
 
-**Symptoms:** Job progresses to 50-75% completion then stops mid-execution when new container deploys.
+**Impact:** Missing 95%+ of performance data for multi-SKU products.
 
-**Trigger:** Deployment of new Cloud Run revision while background job running.
+**Vulnerable SKU families:**
+- DMF-2 family (2X, 3X, 4X, 5X)
+- Others potentially undiscovered
 
-**Current Mitigation:** Threading enables jobs to survive scale-to-zero, but not deployments. Job status UPDATE fails silently.
+**Fix approach:**
+- Extract product_id from offer_id
+- Accept ANY variant with matching product_id (not just master_sku-specific variants)
+- See: `docs/architecture/multi-sku-pattern.md` for detailed solution
 
-**Fix Approach:**
-- Option 1: Implement external task queue (Cloud Tasks, Pub/Sub) with persistent job state
-- Option 2: Add deployment-aware job checkpointing to resume on container restart
-- Option 3: Accept job interruption as expected; document in UI that deployments cancel jobs
+---
 
-**Priority:** Medium - affects batch operations but has documented workaround.
+### Background Task Failures on Deployments (HIGH)
+**Files:**
+- `src/feedops/api/main.py` (lines 175-201: `run_async_in_thread`)
+- `src/feedops/api/backfill.py`
+
+**Issue:** Background jobs using `run_async_in_thread()` die silently when Cloud Run deploys new container revision. Old container's background thread is killed by SIGTERM, new container doesn't resume the job.
+
+**Documented failure:**
+- Job `3da77cd6`: Backfill stuck at 100/2784 SKUs after deployment
+- Latest: Job `3da77cd6` killed entirely on 2026-02-20
+
+**Impact:**
+- Long-running backfill jobs never complete
+- No error indication to user (job status stays "running")
+- Manual database cleanup required to reset
+
+**Current status:** KNOWN LIMITATION documented in CLAUDE.md. Not a code bug, but architectural limitation of Cloud Run + FastAPI pattern.
+
+**Fix approach (future):**
+- Implement external task queue (Cloud Tasks, Pub/Sub, or Celery)
+- Add checkpoint recovery on startup (in-progress)
+- Use durable execution pattern with database-backed state
+
+---
+
+### Google Sheets Grid Expansion Race Condition (MEDIUM)
+**Files:**
+- `dashboard/src/lib/publishing/google-sheets.ts` (817 lines)
+
+**Issue:** When adding new columns (structured_title, lifestyle_image_link), code checks grid size but doesn't lock against concurrent requests. If two publish operations hit simultaneously:
+1. Operation A checks grid: needs expansion
+2. Operation B checks grid: needs expansion (both see same state)
+3. Both try to appendDimension → potential sheet corruption
+
+**Impact:** Rare but possible data corruption if batches publish in parallel.
+
+**Fix approach:**
+- Add advisory lock before appendDimension
+- Or: Use transactional batchUpdate for all sheet modifications
 
 ---
 
 ## Security Considerations
 
-### Environment Configuration Scattered Across Sources
-
-**Risk:** Multiple sources of truth for API credentials (env vars, GCP Secrets Manager, Supabase Auth, session tokens).
-
+### Google Service Account Key in Environment (ACCEPTED RISK)
 **Files:**
-- `dashboard/.env.local` (local development only)
-- `dashboard/src/app/api/health/route.ts` (credential parsing from env)
-- `src/feedops/api/main.py` (Google Ads auth via env vars)
-- GCP Secrets Manager (production credentials, auto-bound to Cloud Run)
+- `dashboard/src/lib/publishing/google-sheets.ts` (lines 37-78)
+- `dashboard/src/app/api/publish/batch/route.ts` (uses credentials)
 
-**Current Mitigation:**
-- No secrets committed to git (.env files in .gitignore)
-- GCP Secrets Manager ensures production isolation
-- Local dev requires manual .env setup
+**Issue:** Google service account credentials stored in base64-encoded GOOGLE_SERVICE_ACCOUNT_KEY environment variable. If leaked, attacker gains full access to Google Sheets and Drive.
 
-**Recommendation:**
-- Document all required secrets in `SECRETS.md` (what keys, where they come from)
-- Add pre-commit hook to catch .env commits
-- Implement secret rotation schedule for GCP secrets
+**Mitigation in place:**
+- Credentials live in GCP Secret Manager (not checked into git)
+- Accessed only at runtime by Vercel
+- .env files in .gitignore
+- CRITICAL: Never echo/log the actual credentials
+
+**Risk level:** LOW if secrets remain in GCP, HIGH if ever exposed.
+
+**Recommendations:**
+- Rotate service account keys quarterly
+- Monitor GCP audit logs for unauthorized access
+- Consider Workload Identity Federation for Vercel (advanced option)
 
 ---
 
-### Service Account Key Parsing Without Validation
+### Shopify Access Token in Environment (ACCEPTED RISK)
+**Files:**
+- `dashboard/src/lib/publishing/shopify.ts`
+- `dashboard/src/lib/publishing/shopify-images.ts`
 
-**Risk:** Service account JSON parsing assumes correct structure without schema validation.
+**Issue:** Shopify store access token in SHOPIFY_ACCESS_TOKEN env var enables full store modifications.
 
-**Files:** `dashboard/src/app/api/health/route.ts` (lines 131-139)
-
-**Impact:** Malformed or incomplete service account JSON would cause runtime error instead of validation error.
-
-**Fix Approach:**
-```typescript
-const credentials = z.object({
-  client_email: z.string(),
-  private_key: z.string(),
-  project_id: z.string()
-}).parse(JSON.parse(serviceAccountJson))
-```
+**Mitigation:**
+- Stored in Vercel secrets
+- Access token has minimal required scopes
+- Rotated after any incident
 
 ---
 
-### Admin/User Role Not Enforced
-
-**Risk:** Approval and publishing endpoints have no role checks; any authenticated user can approve content or publish batches.
-
+### No Rate Limiting on API Routes (LOW RISK)
 **Files:**
+- `dashboard/src/app/api/regenerate/route.ts`
+- `dashboard/src/app/api/sku-selection/generate-hybrid/route.ts`
 - `dashboard/src/app/api/publish/batch/route.ts`
-- `dashboard/src/app/api/review/images/approve/route.ts`
 
-**Current Mitigation:** Vercel deployment limits dashboard access; not suitable for multi-user production.
+**Issue:** No per-user or per-IP rate limiting. A malicious user with dashboard access could:
+- Spam regeneration requests (costs OpenAI credits)
+- Trigger hundreds of batch publishes (spams Google Sheets/Shopify)
 
-**Fix Approach:**
-- Add role-based access control (RBAC) checks
-- Create users table with roles (admin, reviewer, publisher)
-- Enforce role checks in middleware or route handlers
+**Impact:** Cost abuse possible, but requires dashboard authentication first.
 
-**Priority:** High if multi-user production deployment planned.
+**Fix approach:**
+- Add Redis rate limiter (Upstash compatible with Vercel)
+- Implement per-user request quotas
+- Log abnormal request patterns
 
 ---
 
 ## Performance Bottlenecks
 
-### Large File Queries on variant_index Without Pagination
+### Large File Uploads Without Chunking (MEDIUM)
+**Files:**
+- `src/feedops/pipeline/lifestyle_images.py` (1990 lines)
 
-**Issue:** Queries fetch all variants for a master_sku without limit, potential memory/performance issue with large product catalogs.
+**Issue:** Lifestyle image generation and uploads happen synchronously in single requests. Generating images for 100 SKUs:
+- Takes ~3 minutes per SKU
+- Ties up Cloud Run container for 5+ hours
+- No progress reporting to user
+- Single failure kills entire batch
 
-**Files:** `src/feedops/api/performance_baseline.py` (lines 97-99)
+**Impact:** Cannot scale beyond ~20 SKUs per request. Backfill jobs timeout.
 
-**Problem:**
-```python
-variant_result = supabase.table("variant_index").select("gmc_offer_id")\
-    .eq("master_sku", master_sku).execute()
-```
+**Current workaround:** Background tasks with checkpointing (but limited by deployment interruptions).
 
-No pagination; for product families with 1000+ variants, this loads entire result set into memory.
-
-**Impact:** Slow baseline capture for high-variant products; potential OOM errors.
-
-**Fix Approach:**
-- Add pagination with `.limit(100).offset(i)` loop
-- Or use streaming/generator pattern for large result sets
-- Profile query performance with real SKUs
+**Fix approach:**
+- Implement chunked image generation (10 SKUs per background job)
+- Add progress webhooks to dashboard
+- Use Cloud Tasks for reliable distributed processing
 
 ---
 
-### Sequential Google Ads API Calls in Batch Operations
+### Google Ads Query Chunking with ThreadPoolExecutor (ACCEPTABLE)
+**Files:**
+- `src/feedops/integrations/google_ads_performance.py` (lines 370-440)
 
-**Issue:** Performance baseline captures performance data sequentially for each master_sku instead of batching.
+**Issue:** Chunks offer IDs into groups of 25 and runs parallel queries with ThreadPoolExecutor(5 workers). Rate limiting depends on Google Ads API quotas.
 
-**Files:** `src/feedops/api/performance_baseline.py` (lines 94-143)
+**Impact:** Works for backfills up to ~2,500 SKUs. May exceed API quotas for larger operations.
 
-**Problem:**
-```python
-for master_sku in request.master_skus:  # Sequential loop
-    # ... fetch variants ...
-    # ... query Google Ads ...
-```
-
-For 100 SKUs × 2 API calls = 200 sequential calls, bottlenecked by API latency.
-
-**Impact:** Baseline capture for 50+ SKUs takes 10-15 minutes instead of 2-3 minutes.
-
-**Fix Approach:**
-- Use `asyncio.gather()` to parallelize Google Ads queries
-- Implement batch query optimization (GAQL `IN` operator for multiple offer IDs)
-- Respect Google Ads rate limits (implement backoff)
+**Fix approach:** Monitor error rates in production. If quota exceeded, reduce worker count or add exponential backoff.
 
 ---
 
-### Synchronous Lifestyle Image Generation
+### Dashboard Build Time Not Optimized (LOW)
+**Files:**
+- All of `dashboard/src`
 
-**Issue:** Image generation (`/generate-images` endpoint) blocks on Gemini Imagen API without timeout or parallel processing.
+**Issue:** `npm run build` takes ~45-60 seconds locally. Large bundle from 54K+ lines of TypeScript.
 
-**Files:** `src/feedops/pipeline/lifestyle_images.py`
+**Impact:** Slow local development iteration. Vercel deploys take longer.
 
-**Impact:** Single image generation takes ~3 minutes; generating 10 images = 30 minutes single-threaded.
-
-**Fix Approach:**
-- Implement parallel image generation (asyncio.gather with concurrency limits)
-- Add request timeout and retry logic
-- Consider image batch endpoint if API supports
+**Fix approach:**
+- Profile bundle (npx bundle-analyzer)
+- Code-split large components (SkuReviewClient variants, review dashboards)
+- Lazy-load non-critical routes
 
 ---
 
 ## Fragile Areas
 
-### Finish Sentence Injection for Multi-Platform Publishing
-
-**Issue:** Finish sentences (e.g., "2X magnification") injected differently per platform (Google vs Bing descriptions) with minimal test coverage.
-
+### Variant Expansion Logic (CRITICAL DEPENDENCY)
 **Files:**
-- `src/feedops/pipeline/finish_injection.py` (896 lines)
-- `src/feedops/api/hybrid_generation.py` (variant_finish_sentences integration)
-- No dedicated test file for finish sentence logic
+- `dashboard/src/lib/publishing/expand-variants.ts`
 
-**Why Fragile:**
-- Template string manipulation (find/replace) is error-prone
-- Multi-platform expectations differ (Google accepts structured fields, Bing doesn't)
-- Test coverage gaps for finish permutation edge cases
+**Issue:** Core business logic that expands master SKU variants into platform-specific finishes. The function `expandVariantsForPublish()` is:
+- 400+ lines of intricate logic
+- No comprehensive test coverage
+- Depends on exact variant naming patterns (e.g., `{FINISH_NAME}` placeholder)
+- Used by both Google Sheets and Shopify publishing
 
-**Safe Modification:**
-1. Add comprehensive test suite for finish injection scenarios (2X, 3X, 4X variants)
-2. Use templating library (Jinja2) instead of string replace
-3. Add validation that finish sentences match variant specs
+**Risk:** Single bug here breaks publishing for ALL products. Example: Off-by-one error in finish expansion = wrong finish names on 100+ products in GMC.
+
+**Safe modification:**
+- Add integration tests for each product family BEFORE changing
+- Use snapshot testing to detect variant count changes
+- Document finish placeholder contract clearly
+
+**Test coverage gaps:**
+- Multi-SKU families not tested
+- Variant count validation missing
+- Edge cases (very large finish lists) untested
 
 ---
 
-### Google Sheets Publishing Without Schema Validation
+### Publishing Event Snapshot Logic (MEDIUM)
+**Files:**
+- `dashboard/src/lib/publishing/final-payload.ts`
+- `dashboard/src/app/api/publish/batch/route.ts`
 
-**Issue:** Grid expansion, column mapping, and data writes to Google Sheets assume correct state without pre-check.
+**Issue:** Builds final payload snapshots for `publish_events` table to enable rollback. Logic involves:
+- Hashing prompt + content combinations
+- Tracking lineage through generation pipeline
+- Deduplicating identical variants
 
-**Files:** `dashboard/src/lib/publishing/google-sheets.ts` (328-422 lines)
+**Fragility:**
+- Hash algorithm changes break historical comparisons
+- Missing fields in snapshot = can't rollback properly
+- Multi-platform content interleaving complex
 
-**Known Issues Fixed:**
-- Grid expansion failure when adding new columns (fixed 2026-02-08)
-- Offer ID case mismatch (uppercase vs lowercase - fixed 2026-02-08)
-- Column mapping defaulting to hardcoded positions (fixed 2026-02-06)
-
-**Current Risk:**
-- If sheet structure changes externally, publishing fails silently
-- No validation that all required columns exist before write
-- No rollback if partial write fails
-
-**Safe Modification:**
-1. Add sheet structure validation before publishing
-2. Check column headers exist and are at expected positions
-3. Implement atomic transaction or partial rollback
-4. Add dry-run mode to preview changes
+**Safe modification:**
+- Never change hash algorithm (creates version mismatch)
+- Add all newly tracked fields to schema FIRST, then use them
+- Write unit tests before modifying snapshot builder
 
 ---
 
-### Supabase JSONB Parsing Without Type Safety
-
-**Issue:** JSONB fields (quality_breakdown, item_issues) parsed with type casting `::jsonb` without schema validation.
-
+### Google Sheets Column Mapping (MEDIUM)
 **Files:**
-- `src/feedops/db/schema.py` (JSONB handling)
-- Various query files using `(column#>>'{}')::jsonb` pattern
+- `dashboard/src/lib/publishing/google-sheets.ts` (lines 155-250)
 
-**Impact:** Malformed JSON in database causes silent failures or runtime errors.
+**Issue:** `buildColumnMap()` dynamically detects column positions from sheet headers. If sheet layout changes unexpectedly:
+- Wrong columns get updated
+- Data corruption possible
+- No validation that expected columns exist
 
-**Fix Approach:**
-- Create Pydantic models for JSONB shape validation
-- Add database constraints or triggers to validate JSON structure
-- Use `json_schema_validation()` in PostgreSQL if available
+**Recent bug (fixed 2026-02-06):** Code used hardcoded DEFAULT_COLUMN_MAP without verifying sheet headers, wrote to wrong columns.
+
+**Safe modification:**
+- Always verify actual sheet headers before any write
+- Validate that `structured_title`, `lifestyle_image_link` exist at expected positions
+- Add pre-flight check that fails loudly if columns missing
+
+---
+
+### Batch Status State Machine (MEDIUM)
+**Files:**
+- `dashboard/src/app/api/publish/batch/route.ts`
+- `dashboard/src/lib/batches/reconciliation.ts`
+- `dashboard/src/lib/supabase/types.ts`
+
+**Issue:** Batch status flow is implicit:
+```
+draft → pending → executing → [published | partial | failed]
+```
+
+But code has multiple places checking status:
+- `normalizeBatchStatus()` in route.ts
+- Reconciliation logic in reconciliation.ts
+- UI checks in BatchesClient.tsx
+
+**Risk:** Inconsistent status handling if flow changes. Example: If new status added, must update 5+ locations or batches get stuck.
+
+**Safe modification:**
+- Extract status enum and valid transitions to single location
+- Add exhaustive switch statements (TypeScript strict mode)
+- Document state transition rules explicitly
 
 ---
 
 ## Scaling Limits
 
-### Cloud Run Container Timeout on Large Batches
+### Content Generation Throughput (KNOWN LIMITATION)
+**Constraint:** Cloud Run instance can handle ~1 content generation request at a time.
 
-**Current Limit:** Cloud Run default timeout ~60-120 seconds depending on SKU complexity.
+**Numbers:**
+- Single SKU: ~3 minutes (OpenAI + Gemini)
+- Batch of 10: ~30 minutes
+- Batch of 100: ~300+ minutes (5+ hours)
+- Multiple concurrent requests queue up, not parallel
 
-**Impact:** Batches >50 SKUs timeout; jobs fail with no error.
-
-**Evidence:** Hybrid generation with 51 SKUs times out on Vercel (15 min max), partially succeeds on Cloud Run with threading.
-
-**Scaling Path:**
-1. Increase Cloud Run timeout configuration (max 3600 seconds)
-2. Implement checkpointing to resume interrupted jobs
-3. Split large batches into smaller parallel jobs
-4. Move to external task queue (Pub/Sub) for unbounded jobs
-
----
-
-### Database Connection Pool Saturation
-
-**Issue:** `supabase_client.py` creates new connection per request without connection pooling.
-
-**Files:** `src/feedops/db/supabase_client.py` (get_client pattern)
-
-**Impact:** High-concurrency scenarios (10+ parallel Cloud Run instances) exhaust connection limits.
-
-**Fix Approach:**
-- Implement connection pooling (pgBouncer or Supabase connection pooling)
-- Use connection pool across request handlers
-- Monitor active connection count
+**Scaling approach:**
+- Current: Batch jobs in background threads (limited by container lifecycle)
+- Future: Distributed queue (Cloud Tasks) with multiple worker containers
+- Cost: OpenAI + Gemini API usage scales linearly with SKU count
 
 ---
 
-### Google Ads API Rate Limiting Not Respected
+### Database Connection Pool (MONITORED)
+**File:**
+- `src/feedops/db/supabase_client.py` (lines 32-68)
 
-**Issue:** Query throttling uses simple retry loops without proper rate limit detection.
+**Issue:** Supabase client uses single connection with 3-retry pattern. Under high concurrent load (100+ simultaneous backfill operations), connection pool can saturate.
 
-**Files:** `src/feedops/integrations/google_ads_performance.py`
+**Current status:** Functional for current scale (< 50 concurrent users). Not tested at 100+ concurrent operations.
 
-**Impact:** Batch operations trigger rate limiting, causing exponential backoff and cascading failures.
+**Monitoring:** Watch Cloud Run logs for "Connection reset" or "Too many connections" errors.
 
-**Fix Approach:**
-- Parse Google Ads rate limit headers (429 responses)
-- Implement token bucket algorithm for request throttling
-- Document API quotas and batch size limits
-
----
-
-## Dependencies at Risk
-
-### FastAPI BackgroundTasks Cloud Run Incompatibility
-
-**Status:** Partially mitigated with threading (2026-02-08), but still has known limits.
-
-**Risk:** Background jobs fail during container deployments; no recovery mechanism.
-
-**Migration Path:**
-1. Short-term: Accept job interruption risk, document in UI
-2. Long-term: Migrate to Google Cloud Tasks or Pub/Sub for reliable async jobs
-
-**Files:** `src/feedops/api/main.py` (run_async_in_thread pattern)
+**Fix approach:** Implement connection pooling if bottleneck appears.
 
 ---
 
-### bingads Package Version Pinned to 13.0.x
+### Google Sheets API Quota (THEORETICAL RISK)
+**Numbers:** Google Sheets API allows 60,000 requests/minute per project.
 
-**Issue:** bingads 14.0 released but package conflict with project dependencies.
+**Current usage:** ~10-20 requests per publish batch. Publishing 100 batches/day = ~2,000 requests. Well below quota.
 
-**Files:** `pyproject.toml` (bingads==13.0.x)
+**Scaling limit:** Could hit quota if publishing 1,000+ batches daily. Unlikely at current scale.
 
-**Impact:** Security patches and features in 14.0 unavailable; maintenance burden increases over time.
-
-**Fix Approach:**
-- Test compatibility with bingads 14.0
-- Update if compatible, or document version constraint reason
-
----
-
-### Google Sheets Python Client Permissions Fragility
-
-**Issue:** Google Sheets API auth uses service account with hardcoded scopes; any permission change breaks publishing.
-
-**Files:** `src/feedops/integrations/google_sheets.py` (scopes hardcoded)
-
-**Impact:** If Google Workspace admin removes service account access, publishing fails with auth error.
-
-**Fix Approach:**
-- Monitor service account permissions regularly
-- Document required IAM roles and scopes
-- Add health check for Google Sheets connectivity
+**Monitoring:** Implement quota monitoring (GCP Cloud Monitoring).
 
 ---
 
 ## Test Coverage Gaps
 
-### No Integration Tests for Multi-SKU Performance Matching
+### Publishing Route Integration Tests Missing (HIGH)
+**Files:**
+- `dashboard/src/app/api/publish/batch/route.ts` - 1217 lines, NO TESTS
+- `dashboard/src/app/api/publish/sku/route.ts` - 912 lines, NO TESTS
 
-**What's not tested:** End-to-end baseline capture for multi-SKU products (DMF-2/2X family).
+**What's NOT tested:**
+- Full publish flow (content → Google Sheets → Shopify)
+- Error handling (what happens if Shopify upload fails mid-batch?)
+- Idempotency (publishing same batch twice)
+- Variant expansion correctness
+- Status transitions
 
-**Files:** `tests/` (no performance_baseline integration tests)
+**Risk:** Publishing bugs only caught in production.
 
-**Risk:** Query logic changes could silently reintroduce 0.3% match rate bug.
-
-**Priority:** High - critical to system stability.
-
----
-
-### Finish Sentence Injection Edge Cases Untested
-
-**What's not tested:**
-- Variants with multiple finish names in same sentence
-- Finish names containing special characters
-- Empty finish list scenarios
-- Mismatched variant/finish combinations
-
-**Files:** `src/feedops/pipeline/finish_injection.py` (896 lines, minimal test coverage)
-
-**Risk:** Production publishing breaks with unexpected SKU/finish combinations.
-
-**Priority:** High - impacts all variant publishing.
+**Priority:** Add integration tests before adding new publishing features.
 
 ---
 
-### Google Sheets Publishing Atomic Transaction Coverage Missing
+### Performance Impact Calculation Tests Missing (MEDIUM)
+**Files:**
+- `src/feedops/monitoring/performance_impact.py`
+- Tests: `tests/test_performance_impact.py` (exists but incomplete)
 
-**What's not tested:**
-- Partial failure scenarios (grid expanded, but header write fails)
-- Rollback behavior when data write fails mid-batch
-- Concurrent publish batch operations to same sheet
-
-**Files:** `dashboard/src/lib/publishing/google-sheets.ts`
-
-**Risk:** Sheet corruption if write fails mid-operation; no rollback mechanism.
-
-**Priority:** High - data integrity risk.
+**What's NOT tested:**
+- Edge cases (0 baseline impressions, negative deltas)
+- Multi-month attribution windows
+- Concurrent performance updates
+- Database upsert race conditions
 
 ---
 
-### Cloud Run Background Job Resumption Not Tested
+### Google Sheets Concurrent Write Tests Missing (MEDIUM)
+**Files:**
+- `dashboard/src/lib/publishing/google-sheets.ts` - NO CONCURRENT WRITE TESTS
 
-**What's not tested:**
-- Job resumption after container restart
-- Status persistence during deployment
-- Partial completion rollback scenarios
-
-**Files:** `src/feedops/api/main.py` (background job implementation)
-
-**Risk:** Stuck jobs with stale status; no visibility into failure.
-
-**Priority:** Medium - partial mitigation exists with threading.
+**What's NOT tested:**
+- Two batch operations updating different columns simultaneously
+- Column expansion while writes in progress
+- Sheet lock timeout handling
 
 ---
 
-### Performance Baseline Query Validation Missing
+## Dependencies at Risk
 
-**What's not tested:**
-- Empty result set handling (SKU not in Google Ads)
-- Multi-SKU product matching (product_id-based)
-- Case sensitivity of offer IDs
-- Campaign type filtering correctness
+### OpenAI API Provider (MEDIUM RISK)
+**File:**
+- `src/feedops/providers/openai_provider.py`
 
-**Files:** `tests/api/test_performance_baseline.py` (if exists, likely minimal)
+**Risk:** Dependency on OpenAI for content generation. If API becomes unavailable or pricing changes significantly, entire regeneration pipeline blocked.
 
-**Risk:** Silent failures; 0.3% match rate recurrence if query changes.
+**Mitigation:**
+- Alternative: Could fall back to Gemini (already used for images)
+- Cost monitoring in place
+- Rate limiting to prevent runaway costs
 
-**Priority:** High - critical to feature stability.
+**Monitoring:** Watch for API errors in logs. Alert on >5% error rate.
+
+---
+
+### Google Ads API Stability (LOW RISK)
+**File:**
+- `src/feedops/integrations/google_ads_performance.py`
+
+**Risk:** Google Ads Python client (bingads v13.0) pins to older version. Updates rare, but breakage possible on Google API changes.
+
+**Mitigation:**
+- Test Google Ads queries regularly (backfill jobs do this)
+- Monitor query response formats for changes
+
+---
+
+### Shopify API Webhooks (MEDIUM RISK)
+**File:**
+- Not implemented. Lifestyle images pushed directly to Shopify.
+
+**Issue:** No webhook validation. If Shopify image upload endpoint changes, CDN migration silently fails.
+
+**Mitigation:** Monitor Shopify GraphQL errors in Cloud Run logs.
 
 ---
 
 ## Missing Critical Features
 
-### Job Queue Persistence for Batch Operations
+### No Automatic Job Recovery on Deployment (HIGH IMPACT)
+**Issue:** Background jobs die silently on Cloud Run deployments. No auto-resume.
 
-**Problem:** Batch generation jobs stored in memory; lost on container restart.
+**Affects:**
+- Backfill jobs (stuck at 100/2784)
+- Batch image generation (incomplete uploads)
+- Search term syncing (partial syncs)
 
-**Impact:** Cannot resume interrupted batches; must restart from scratch.
+**Workaround:** Manual restart via dashboard or curl.
 
-**Blocking:** Low - workaround is user re-submit.
-
----
-
-### Search Query Deduplication Not Implemented
-
-**Problem:** Multiple uploads of same search query create duplicates in `search_queries` table.
-
-**Files:** `src/feedops/api/search_insights.py` (sync endpoint)
-
-**Impact:** Query analytics inflated; duplicate data in reports.
-
-**Fix Approach:** Add unique constraint or dedup logic before insert.
+**Fix approach:**
+- Add job checkpoint recovery on startup
+- Implement persistent queue (Cloud Tasks)
 
 ---
 
-### Variant Lifestyle Image Deduplication
+### No Rate Limiting on Public Endpoints (LOW IMPACT)
+**Issue:** No per-user or per-IP rate limiting on API routes.
 
-**Problem:** Same image URL can exist in both `product_lifestyle_images` and `variant_lifestyle_images` tables.
+**Risk:** Cost abuse if dashboard compromised.
 
-**Files:** `dashboard/src/components/sku-review/page.tsx` (dedup by URL)
-
-**Current Mitigation:** Dashboard deduplicates by image_url (prefer variant records).
-
-**Fix Approach:** Add database unique constraint or cleanup job to remove exact duplicates.
+**Fix approach:** Add Upstash Redis rate limiter.
 
 ---
 
+### No Async Job Progress Reporting (MEDIUM IMPACT)
+**Issue:** Users can't see real-time progress of long-running jobs. Only poll for final status.
+
+**Affects:** Batch generation, image generation, backfill operations.
+
+**Fix approach:**
+- Implement Server-Sent Events (SSE) for progress updates
+- Or: WebSocket connection for real-time status
+
 ---
 
-*Concerns audit: 2026-02-11*
+### No Scheduled Maintenance Jobs (MEDIUM)
+**Issue:** No automatic cleanup of:
+- Stale job records (backfill_jobs from weeks ago)
+- Orphaned search_query_snapshots
+- Old publish_events (audit log grows unbounded)
+
+**Impact:** Database bloat over time. Manual cleanup currently required.
+
+**Fix approach:** Add Cloud Scheduler jobs for daily cleanup tasks.
+
+---
+
+## Database Schema Issues
+
+### Inconsistent Column Naming Across Tables (LOW)
+**Issue:** Some tables use `created_at`, some use `created` (see variant_lifestyle_images vs product_lifestyle_images).
+
+**Impact:** Query confusion, potential typos. Not critical since migrations are already deployed, but indicates schema evolution without convention enforcement.
+
+**Recommendation:** Document column naming convention in SCHEMA.md. Future migrations should follow pattern.
+
+---
+
+### JSONB Parsing Complexity (ACCEPTED TRADEOFF)
+**Files:**
+- `src/feedops/db/supabase_client.py`
+- Multiple query files
+
+**Issue:** JSONB columns require manual parsing with `(column#>>'{}')::jsonb` before operations. Error-prone.
+
+**Mitigation:** Schema documentation (SCHEMA.md) covers patterns. Well-tested in existing queries.
+
+**Acceptable:** This is cost of flexible JSONB storage. Alternative would be normalized tables (more rigid).
+
+---
+
+## Logging & Observability Gaps
+
+### Missing Request-Level Tracing (MEDIUM)
+**Files:**
+- `src/feedops/api/main.py` (has request_id context but not fully utilized)
+
+**Issue:** Not all logs tagged with request_id. Hard to trace single request through multi-component system.
+
+**Fix approach:**
+- Ensure request_id attached to EVERY log in request path
+- Propagate to background jobs
+- Export to Datadog or similar
+
+---
+
+### Missing Cloud Run Metrics for Job Duration (MEDIUM)
+**Issue:** No automated alerts for jobs exceeding expected duration.
+
+**Example:** Backfill job stuck for 4+ hours with no alert.
+
+**Fix approach:**
+- Add Prometheus metrics for job start/end times
+- Cloud Monitoring alert if job_duration > 2x expected
+
+---
+
+### Silent Failures in Background Tasks (HIGH)
+**Files:**
+- `src/feedops/api/main.py` (lines 175-201)
+- `src/feedops/api/backfill.py`
+
+**Issue:** When background thread dies, no alert or error logging. Job status stuck in "running" forever.
+
+**Example:** Job `3da77cd6` (backfill) stuck at 100/2784 for 4+ hours with no indication of failure.
+
+**Fix approach:**
+- Add timeout monitoring for background jobs
+- Alert if job shows no progress for > 30 minutes
+- Implement automatic job failure after timeout
+
+---
+
+*Concerns audit: 2026-02-20*
