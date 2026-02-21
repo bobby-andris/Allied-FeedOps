@@ -98,7 +98,7 @@ export async function GET() {
         confirmedSample = {
           checked: parsed.summary?.total_checked ?? 0,
           matched: parsed.summary?.total_matched ?? 0,
-          last_run: parsed.run_at ?? null,
+          last_run: parsed.run_timestamp ?? null,
         }
       }
     } catch {

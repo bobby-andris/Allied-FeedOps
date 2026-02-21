@@ -293,8 +293,8 @@ def apply_feedback_layer(
     Args:
         core_prompt: The base prompt from build_core_prompt().
         corrections: List of persistent correction dicts from sku_corrections table
-                     (to be populated by Plan 04). Each dict should have a 'text' key.
-                     Pass [] for now until Plan 04 wires the DB lookup.
+                     (from sku_corrections table). Each dict should have a 'correction_text' key
+                     (from sku_corrections table).
         session_feedback: Single-session feedback text from the request body.
 
     Returns:
@@ -306,7 +306,7 @@ def apply_feedback_layer(
     if corrections:
         correction_lines = []
         for correction in corrections:
-            text = correction.get("text") or correction.get("correction") or str(correction)
+            text = correction.get("correction_text") or correction.get("text") or correction.get("correction") or str(correction)
             if text:
                 correction_lines.append(f"- {text}")
         if correction_lines:
