@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation at scale
-**Current focus:** Phase 17 — Google Shopping Intelligence & Model Research
+**Current focus:** Phase 18 — Diagnosis: Establish Ground Truth
 
 ## Current Position
 
-Phase: 17 of 20 (Google Shopping Intelligence & Model Research)
-Plan: 3 of 3 in current phase
+Phase: 18 of 20 (Diagnosis: Establish Ground Truth)
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-21 — Phase 17 Plan 03 complete (competitive gap analysis, PMax Zombie SKUs discovery, optimization checklist)
+Last activity: 2026-02-21 — Phase 18 Plan 01 complete (generation path trace, feature flag audit, Cloud Run runtime state)
 
-Progress: [███░░░░░░░] ~15% (v1.2 milestone — 3/TBD plans complete)
+Progress: [████░░░░░░] ~18% (v1.2 milestone — 4/TBD plans complete)
 
 ## Performance Metrics
 
@@ -36,6 +36,9 @@ Progress: [███░░░░░░░] ~15% (v1.2 milestone — 3/TBD plans 
 - [v1.2 roadmap]: Google Shopping Intelligence research (Phase 17) runs BEFORE diagnosis — ranking knowledge informs what to look for in code review
 - [v1.2 roadmap]: Model research grouped with Google Shopping research in Phase 17 — both are pure research with no code dependencies
 - [v1.2 roadmap]: Fixes (Phase 20) are conditional on Phase 18-19 findings — apply only fixes matched to confirmed evidence
+- [18-01]: DIAG-02 CONFIRMED — Path A (UI regen) calls main.py::regenerate_content() via HTTP POST; generator.py::build_prompt() is bypassed (legacy 6-agent pipeline only)
+- [18-01]: DIAG-03 CONFIRMED — All 3 feature flags wired to production paths, all default True (enabled), no Cloud Run overrides needed
+- [18-01]: keyword_bank.json absent from Cloud Run — data/ excluded from Docker build context; external keywords always [] in production
 - [17-01]: auction_insight_view not in Google Ads API v16 — use manual UI export or upgrade to v18 for competitor domain data
 - [17-01]: Merchant Center account ID ≠ Google Ads customer ID — user must provide MC ID for disapproval diagnostic
 - [17-01]: Feed content coverage (79/2,784 SKUs = 2.8%) is primary scale bottleneck; content quality (89.4/100 avg) is already production-ready
@@ -46,7 +49,7 @@ Progress: [███░░░░░░░] ~15% (v1.2 milestone — 3/TBD plans 
 ### Key Context Carried Forward
 
 - v1.1 completed: 8 phases, 24 plans, 16/16 requirements — phases archived to .planning/milestones/v1.1-phases/
-- Feature flags exist (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, SEGMENT_STRATEGY_V1) but activation status unknown — Phase 18 audit will confirm
+- Feature flags (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, SEGMENT_STRATEGY_V1): all confirmed wired to production paths in evidence.py and prompt_loader.py — all default to True (enabled), no Cloud Run env vars override
 - Dashboard regeneration is thin proxy to Cloud Run Python pipeline — core.ts is dead code
 - 824/2,784 SKUs have search term coverage; performance backfill in progress (job 3da77cd6)
 - [17-01] Allied Brass campaign baseline: 179 Shopping campaigns, all Standard Shopping (not PMax), all Target ROAS, avg IS 69.7%, IS lost to rank 20.2%, budget IS loss ~0%
@@ -67,7 +70,7 @@ Progress: [███░░░░░░░] ~15% (v1.2 milestone — 3/TBD plans 
 ### Blockers/Concerns
 
 - GMC merchant account ID needed for Phase 19 Merchant API integration (not same as Google Ads ID 6253381786) — confirmed in 17-01
-- Keyword bank (data/keyword-bank.json) may be gitignored — verify in Cloud Run container during Phase 18
+- keyword_bank.json CONFIRMED absent from Cloud Run container — data/ excluded by .gcloudignore, external keywords always return [] in production (Phase 20 action item)
 - Campaign type: CONFIRMED Standard Shopping (not Performance Max) — all campaigns use Standard Shopping + Target ROAS
 - {FINISH_NAME} placeholder bug in expand-variants.ts — needs fix before next publish run
 - Google Ads API v16 does not support auction_insight_view — need v18 upgrade or manual UI export for competitor domain data
@@ -79,5 +82,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 17-03-PLAN.md (competitive gap analysis — PMax Zombie SKUs + decorative grab bar fix confirmed)
+Stopped at: Completed 18-01-PLAN.md (generation path trace, feature flag audit, Cloud Run runtime state)
 Resume file: None

@@ -8,8 +8,8 @@
 ### Diagnosis
 
 - [ ] **DIAG-01**: System can report SKU coverage funnel (total catalog → generated → approved → published → confirmed in GMC) via SQL queries against existing Supabase data
-- [ ] **DIAG-02**: Execution path for single-SKU UI regeneration is traced and documented, confirming which Python functions are invoked and which are bypassed (Path A vs Path B)
-- [ ] **DIAG-03**: Feature flag call-site audit confirms which flags (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, SEGMENT_STRATEGY_V1) have active call sites in production code paths
+- [x] **DIAG-02**: Execution path for single-SKU UI regeneration is traced and documented, confirming which Python functions are invoked and which are bypassed (Path A vs Path B)
+- [x] **DIAG-03**: Feature flag call-site audit confirms which flags (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, SEGMENT_STRATEGY_V1) have active call sites in production code paths
 - [ ] **DIAG-04**: Propagation spot-check verifies whether published content actually reached Google Sheets rows and GMC feed (read-back verification)
 
 ### Measurement
@@ -71,8 +71,8 @@
 | MODEL-01 | Phase 17 | Complete |
 | MODEL-02 | Phase 17 | Complete |
 | DIAG-01 | Phase 18 | Pending |
-| DIAG-02 | Phase 18 | Pending |
-| DIAG-03 | Phase 18 | Pending |
+| DIAG-02 | Phase 18 | Complete |
+| DIAG-03 | Phase 18 | Complete |
 | DIAG-04 | Phase 18 | Pending |
 | MEAS-01 | Phase 19 | Pending |
 | MEAS-02 | Phase 19 | Pending |
