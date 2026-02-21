@@ -353,6 +353,11 @@ Audit log for all publishing operations. Stores content snapshots for rollback c
 | rollback_id | bigint | YES | - | ID of event being rolled back |
 | error_message | text | YES | - | Error details if failed |
 | published_at | timestamp with time zone | NO | now() | Publish timestamp |
+| final_payload_snapshot | jsonb | YES | - | Post-expansion channel-ready payload snapshot for audit/debug (migration 033) |
+| final_payload_hash | text | YES | - | SHA-256 of canonicalized final_payload_snapshot JSON (migration 034) |
+| prompt_hash | text | YES | - | Prompt identity hash for generation lineage tracking (migration 034) |
+| evidence_hash | text | YES | - | SHA-256 of canonicalized evidence input at publish time (migration 034) |
+| segment_key | text | YES | - | Normalized custom_label_0 segment key, lowercased with collapsed whitespace (migration 034) |
 
 **Primary Key**: `id`
 
@@ -360,6 +365,9 @@ Audit log for all publishing operations. Stores content snapshots for rollback c
 - `idx_publish_events_sku` on `master_sku`
 - `idx_publish_events_published_at` on `published_at DESC`
 - `idx_publish_events_platform_env` on `(platform, environment)`
+- `idx_publish_events_final_payload_hash` on `final_payload_hash` (migration 034)
+- `idx_publish_events_prompt_hash` on `prompt_hash` (migration 034)
+- `idx_publish_events_segment_key` on `segment_key` (migration 034)
 
 **Check Constraints**:
 - `environment IN ('staging', 'production')`
@@ -377,6 +385,14 @@ ORDER BY published_at DESC;
 SELECT published_title, published_description, content_version
 FROM publish_events
 WHERE id = 12345;
+
+-- Get prompt lineage for published SKU (migration 034)
+SELECT id, published_at, prompt_hash, evidence_hash, segment_key
+FROM publish_events
+WHERE master_sku = 'WP-2/16-GAL'
+  AND platform = 'google'
+  AND prompt_hash IS NOT NULL
+ORDER BY published_at DESC LIMIT 5;
 ```
 
 ---
