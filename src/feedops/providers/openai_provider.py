@@ -11,6 +11,7 @@ from openai import AsyncOpenAI
 
 from feedops.observability import log_event
 from feedops.observability.metrics import metrics_registry
+from feedops.pipeline.prompts import CANDIDATE_SCHEMA
 from feedops.providers.base import ImageInput, LLMError, LLMProvider
 from feedops.providers.reliability import (
     circuit_breakers,
@@ -19,6 +20,60 @@ from feedops.providers.reliability import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _build_strict_schema() -> dict[str, Any]:
+    """Convert CANDIDATE_SCHEMA to OpenAI strict json_schema format.
+
+    Strict mode requires:
+    - "additionalProperties": false on every object type
+    - All properties listed in "required" arrays
+
+    Returns:
+        OpenAI response_format dict with type "json_schema".
+    """
+
+    def _make_strict(schema: dict[str, Any]) -> dict[str, Any]:
+        """Recursively add additionalProperties: false to all object schemas."""
+        result = dict(schema)
+        if result.get("type") == "object":
+            result["additionalProperties"] = False
+            # Ensure all properties are required
+            if "properties" in result:
+                props = result["properties"]
+                existing_required = set(result.get("required", []))
+                all_props = set(props.keys())
+                result["required"] = sorted(all_props | existing_required)
+                # Recurse into nested properties
+                result["properties"] = {
+                    k: _make_strict(v) for k, v in props.items()
+                }
+        elif result.get("type") == "array" and "items" in result:
+            result["items"] = _make_strict(result["items"])
+        return result
+
+    strict_schema = _make_strict(CANDIDATE_SCHEMA)
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "candidate_content",
+            "strict": True,
+            "schema": strict_schema,
+        },
+    }
+
+
+def _build_response_format() -> dict[str, Any]:
+    """Return the preferred response_format for structured output.
+
+    Primary: json_schema strict mode (GPT-5.2 native structured output).
+    Fallback: json_object (legacy mode, included as docstring reference only).
+    """
+    return _build_strict_schema()
+
+
+# Compute once at import time to avoid rebuilding per-request.
+_STRICT_RESPONSE_FORMAT = _build_strict_schema()
 
 
 class OpenAIProvider(LLMProvider):
@@ -132,6 +187,12 @@ class OpenAIProvider(LLMProvider):
         if reasoning_effort and self._supports_reasoning_effort():
             reasoning_params["reasoning_effort"] = reasoning_effort
 
+        # Temperature and reasoning_effort are mutually exclusive on GPT-5.2.
+        # Only pass temperature when reasoning_effort is NOT set.
+        sampling_params: dict[str, float] = {}
+        if not reasoning_params:
+            sampling_params["temperature"] = 0.7
+
         current_prompt = prompt
         last_error = None
         content = ""
@@ -168,9 +229,10 @@ class OpenAIProvider(LLMProvider):
                     response = await self.client.chat.completions.create(
                         model=self.model,
                         messages=image_messages,
-                        response_format={"type": "json_object"},
-                        temperature=0.7,
+                        response_format=_STRICT_RESPONSE_FORMAT,
+                        extra_body={"prompt_cache_retention": "24h"},
                         **token_params,
+                        **sampling_params,
                         **reasoning_params,
                     )
                     self._last_usage = _extract_usage(response)
@@ -179,9 +241,10 @@ class OpenAIProvider(LLMProvider):
                     response = await self.client.chat.completions.create(
                         model=self.model,
                         messages=messages,
-                        response_format={"type": "json_object"},
-                        temperature=0.7,
+                        response_format=_STRICT_RESPONSE_FORMAT,
+                        extra_body={"prompt_cache_retention": "24h"},
                         **token_params,
+                        **sampling_params,
                         **reasoning_params,
                     )
                     self._last_usage = _extract_usage(response)
