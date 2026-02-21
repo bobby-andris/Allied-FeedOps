@@ -1,3 +1,29 @@
+-- ============================================================
+-- DEFERRED MIGRATION — 034b_DEFERRED_ga4_attribution_forensics.sql
+-- ============================================================
+-- WHY DEFERRED: Not in v1.2 milestone scope (phases 17-22).
+--   The v1.2 milestone focuses on measurement infrastructure,
+--   content quality, and publishing reliability. GA4 attribution
+--   forensics requires a separate data pipeline that is not
+--   prioritized in this milestone.
+--
+-- CODEBASE STATUS: No API routes currently reference these tables.
+--   The tables were defined for a future GA4 attribution debugging
+--   feature. Tables that DO exist (ga4_source_medium_daily,
+--   ga4_landing_page_quality_daily, ga4_attribution_root_cause_daily,
+--   ga4_shopify_reconciliation_daily) were applied out-of-band
+--   in a previous session.
+--
+-- WHEN TO APPLY: When GA4 attribution forensics features are
+--   prioritized in a future milestone (e.g., v2.0 Analytics).
+--
+-- NOTE: File renamed from 034_ga4_attribution_forensics.sql to
+--   034b_DEFERRED_ga4_attribution_forensics.sql to avoid conflict
+--   with 034_add_publish_lineage_hashes.sql (which is applied).
+--
+-- STATUS: Tables created out-of-band; this file is reference only.
+-- ============================================================
+
 -- GA4 attribution forensics diagnostics tables
 -- Read-only telemetry snapshots for root-cause analysis and reconciliation.
 

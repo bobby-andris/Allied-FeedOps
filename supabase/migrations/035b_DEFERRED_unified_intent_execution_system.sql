@@ -1,3 +1,31 @@
+-- ============================================================
+-- DEFERRED MIGRATION — 035b_DEFERRED_unified_intent_execution_system.sql
+-- ============================================================
+-- WHY DEFERRED: Not in v1.2 milestone scope (phases 17-22).
+--   The Unified Intent Execution System (bidding policy, search
+--   governance, experiment tracking) is a major feature set
+--   requiring dedicated implementation work beyond measurement
+--   infrastructure.
+--
+-- CODEBASE STATUS: 10+ API routes reference these tables (estimates
+--   based on research phase 21-RESEARCH.md):
+--   - intent_taxonomy_versions: referenced by intent classification APIs
+--   - term_intent_state: referenced by search query routing
+--   - experiment_registry: referenced by A/B testing framework
+--   - policy_decision_log: referenced by policy audit endpoints
+--   Tables were applied out-of-band in a previous session.
+--
+-- WHEN TO APPLY: When the intent classification, search governance,
+--   or experiment tracking features are prioritized in a future
+--   milestone (e.g., v2.0 Intent Intelligence).
+--
+-- NOTE: File renamed from 035_unified_intent_execution_system.sql to
+--   035b_DEFERRED_unified_intent_execution_system.sql to avoid conflict
+--   with 035_measurement_infrastructure_schema.sql (which is applied).
+--
+-- STATUS: Tables created out-of-band; this file is reference only.
+-- ============================================================
+
 -- Unified Intent Intelligence & Execution System
 -- Adds policy/versioning, search governance, experiment tracking, and value-confidence support tables.
 
