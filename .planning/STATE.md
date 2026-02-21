@@ -30,6 +30,7 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 | v1.2 | 4 | TBD |
 | Phase 18-diagnosis-establish-ground-truth P02 | 4 | 2 tasks | 4 files |
 | Phase 19-measurement-infrastructure P02 | 4 | 2 tasks | 3 files |
+| Phase 19-measurement-infrastructure P01 | 16 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -55,6 +56,8 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 - [Phase 18-03]: Node.js helper needed for Python Sheets access — GOOGLE_SERVICE_ACCOUNT_KEY has non-standard 2056-bit RSA modulus rejected by Python cryptography but accepted by Node.js; use fetch_sheets_data.js pattern for future Python scripts needing Sheets access
 - [Phase 19-02]: Delete-then-insert for auto-classifications: Supabase JS cannot target partial unique indexes directly
 - [Phase 19-02]: maybeSingle() for optional lookups in prompt-lineage to avoid 406 errors on missing rows
+- [Phase 19-01]: capture_flag_snapshot() captures flags at call time (not import time) — avoids warm container stale state in Cloud Run
+- [Phase 19-01]: Migration 035 created but needs manual application via Supabase SQL Editor — dev machine has no direct postgres access
 
 ### Key Context Carried Forward
 
@@ -84,6 +87,7 @@ Progress: [█████░░░░░] ~22% (v1.2 milestone — 5/TBD plans 
 - Campaign type: CONFIRMED Standard Shopping (not Performance Max) — all campaigns use Standard Shopping + Target ROAS
 - {FINISH_NAME} placeholder bug in expand-variants.ts — needs fix before next publish run
 - Google Ads API v16 does not support auction_insight_view — need v18 upgrade or manual UI export for competitor domain data
+- Migration 035 needs manual application via Supabase SQL Editor — apply supabase/migrations/035_measurement_infrastructure_schema.sql before Phase 19 measurement data will be captured
 
 ### Pending Todos
 
@@ -92,5 +96,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 18-03-PLAN.md (propagation spot-check, DIAG-04 confirmed, Phase 18 complete)
+Stopped at: Completed 19-01-PLAN.md (measurement infrastructure schema migration 035 + Python flag capture)
 Resume file: None

@@ -14,10 +14,10 @@
 
 ### Measurement
 
-- [ ] **MEAS-01**: Each content generation records which feature flags were active at generation time (feature_flags_active field in regeneration_history)
+- [x] **MEAS-01**: Each content generation records which feature flags were active at generation time (feature_flags_active field in regeneration_history)
 - [ ] **MEAS-02**: GMC disapproval visibility — system can query Merchant API to identify disapproved/not-serving products and surface issues (the one silent impact killer)
-- [ ] **MEAS-03**: Prompt hash lineage tracking connects generated content to the exact prompt version that produced it
-- [ ] **MEAS-04**: Bottleneck classifier categorizes impact issues as code-path, auction/bid, query relevance, coverage gap, or propagation failure — with evidence for each classification
+- [x] **MEAS-03**: Prompt hash lineage tracking connects generated content to the exact prompt version that produced it
+- [x] **MEAS-04**: Bottleneck classifier categorizes impact issues as code-path, auction/bid, query relevance, coverage gap, or propagation failure — with evidence for each classification
 
 ### Fixes
 
@@ -74,10 +74,10 @@
 | DIAG-02 | Phase 18 | Complete |
 | DIAG-03 | Phase 18 | Complete |
 | DIAG-04 | Phase 18 | Complete |
-| MEAS-01 | Phase 19 | Pending |
+| MEAS-01 | Phase 19 | Complete |
 | MEAS-02 | Phase 19 | Pending |
-| MEAS-03 | Phase 19 | Pending |
-| MEAS-04 | Phase 19 | Pending |
+| MEAS-03 | Phase 19 | Complete |
+| MEAS-04 | Phase 19 | Complete |
 | FIX-01 | Phase 20 | Pending |
 | FIX-02 | Phase 20 | Pending |
 | GOOG-04 | Phase 20 | Pending |

@@ -121,7 +121,7 @@ Plans:
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17. Google Shopping Intelligence & Model Research | 3/3 | Complete    | 2026-02-21 | - |
 | 18. Diagnosis — Establish Ground Truth | 3/3 | Complete    | 2026-02-21 | - |
-| 19. Measurement Infrastructure | 1/4 | In Progress|  | - |
+| 19. Measurement Infrastructure | 2/4 | In Progress|  | - |
 | 20. Targeted Fixes & Intelligence Application | v1.2 | 0/TBD | Not started | - |
 
 ---
