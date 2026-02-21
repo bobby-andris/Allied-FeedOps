@@ -1,8 +1,9 @@
 'use client'
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, useTransition, lazy, Suspense } from 'react'
 import {
   AlertCircle,
+  ArrowUpDown,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -42,6 +43,8 @@ import {
   EXISTING_FUNNEL_UI_LIMIT,
   NEEDS_DECISION_UI_LIMIT,
 } from '@/lib/shopping-funnel/ui-performance'
+
+const TierMovementsPanel = lazy(() => import('./TierMovementsPanel'))
 
 type DateRangePreset = '7d' | '30d' | '60d' | '90d'
 
@@ -238,7 +241,7 @@ function applyStagedDecisionToState(
 
 export default function ShoppingFunnelPage() {
   const [isTransitionPending, startTransition] = useTransition()
-  const [activeTab, setActiveTab] = useState<'needs-decision' | 'existing-funnel'>('needs-decision')
+  const [activeTab, setActiveTab] = useState<'needs-decision' | 'existing-funnel' | 'tier-movements'>('needs-decision')
   const [range, setRange] = useState<DateRangePreset>('30d')
   const [customLabelFilter, setCustomLabelFilter] = useState<string>('all')
   const [minImpressions, setMinImpressions] = useState<string>('0')
@@ -507,9 +510,10 @@ export default function ShoppingFunnelPage() {
   useEffect(() => {
     if (activeTab === 'needs-decision') {
       fetchNeedsDecision()
-    } else {
+    } else if (activeTab === 'existing-funnel') {
       fetchExisting()
     }
+    // tier-movements tab manages its own data fetching
   }, [activeTab, fetchExisting, fetchNeedsDecision])
 
   useEffect(() => {
@@ -1334,6 +1338,10 @@ export default function ShoppingFunnelPage() {
         <TabsList>
           <TabsTrigger value="needs-decision">Needs Decision</TabsTrigger>
           <TabsTrigger value="existing-funnel">Existing Funnel</TabsTrigger>
+          <TabsTrigger value="tier-movements">
+            <ArrowUpDown className="mr-2 h-4 w-4" />
+            Tier Movements
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="needs-decision" className="space-y-4">
@@ -1986,6 +1994,22 @@ export default function ShoppingFunnelPage() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="tier-movements" className="space-y-4">
+          <Suspense
+            fallback={
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                </CardContent>
+              </Card>
+            }
+          >
+            <TierMovementsPanel />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

@@ -51,6 +51,21 @@ This document provides a comprehensive reference for all database tables, column
 10. [Backfill Infrastructure Tables](#backfill-infrastructure-tables)
    - [backfill_jobs](#backfill_jobs)
    - [backfill_job_errors](#backfill_job_errors)
+11. [Optimization & Intent Control Tables](#optimization--intent-control-tables)
+   - [intent_taxonomy_versions](#intent_taxonomy_versions)
+   - [term_intent_state](#term_intent_state)
+   - [policy_decision_log](#policy_decision_log)
+   - [policy_action_execution_log](#policy_action_execution_log)
+   - [policy_snapshots](#policy_snapshots)
+   - [sku_margin_daily](#sku_margin_daily)
+   - [order_line_returns_daily](#order_line_returns_daily)
+   - [attribution_confidence_daily](#attribution_confidence_daily)
+   - [experiment_registry](#experiment_registry)
+   - [experiment_assignments](#experiment_assignments)
+   - [experiment_outcomes](#experiment_outcomes)
+   - [negative_registry](#negative_registry)
+   - [search_buildout_recommendations](#search_buildout_recommendations)
+   - [operator_review_audit](#operator_review_audit)
 
 ---
 
@@ -1686,6 +1701,188 @@ ORDER BY error_count DESC;
 
 ---
 
+## Optimization & Intent Control Tables
+
+These tables were introduced by migration `035_unified_intent_execution_system.sql` and support unified Shopping/Search intent routing, policy decisioning, guardrails, search governance, and experimentation.
+
+### intent_taxonomy_versions
+
+Versioned taxonomy registry used by routing and governance policies.
+
+**Key columns**:
+- `version_key` (unique): policy/taxonomy identifier
+- `class_definitions` / `mapping_rules` (jsonb): canonical intent mappings
+- `is_active`, `activated_at`, `activated_by`: active version controls
+
+---
+
+### term_intent_state
+
+Current resolved intent state per normalized query and label scope.
+
+**Key columns**:
+- `search_term`, `normalized_search_term`, `custom_label_0`
+- `intent_class`, `intent_subclasses`, `route_action`
+- `shopping_tier`, `search_tier`, `confidence`, `requires_review`
+- `policy_version`, `source_window_start`, `source_window_end`, `metadata`
+
+**Unique index**:
+- `(normalized_search_term, coalesce(custom_label_0, '__all__'))`
+
+---
+
+### policy_decision_log
+
+Immutable ledger of policy decisions (routing, promotion/demotion, bid policy, etc.).
+
+**Key columns**:
+- `decision_type`, `channel`, `policy_version`
+- `decision_payload` (jsonb), `confidence`, `requires_review`
+- `search_term`, `custom_label_0`, `created_by`, `created_at`
+
+---
+
+### policy_action_execution_log
+
+Execution-status log for planned/applied/rolled-back actions.
+
+**Key columns**:
+- `action_type`, `status`, `policy_version`
+- `action_payload` (jsonb), `reason_codes`
+- `search_term`, `custom_label_0`, `created_by`, `updated_at`
+
+**Status check values**:
+- `planned`, `applied`, `rolled_back`, `failed`, `cancelled`
+
+---
+
+### policy_snapshots
+
+Snapshot/restore state for safe rollback workflows.
+
+**Key columns**:
+- `snapshot_key` (unique), `policy_version`
+- `payload` (jsonb)
+- `created_by`, `restored_by`, `restored_at`
+
+---
+
+### sku_margin_daily
+
+Daily SKU-level margin enrichment for profit-weighted optimization.
+
+**Key columns**:
+- `snapshot_date`, `sku` (unique pair)
+- `unit_cogs`, `gross_margin_rate`, `currency_code`
+- `source_payload` (jsonb)
+
+---
+
+### order_line_returns_daily
+
+Daily return/refund enrichment to support contribution-margin quality signals.
+
+**Key columns**:
+- `snapshot_date`, `shopify_order_gid`, `sku`
+- `returned_quantity`, `return_amount`, `restock_fee`
+- `source_payload` (jsonb)
+
+---
+
+### attribution_confidence_daily
+
+Daily confidence scoring for attribution quality by channel/campaign scope.
+
+**Key columns**:
+- `snapshot_date`, `channel`, `campaign_key`
+- `confidence_score`, `quality_bucket`, `signals` (jsonb)
+
+**Quality bucket check values**:
+- `high`, `medium`, `low`, `unknown`
+
+---
+
+### experiment_registry
+
+Top-level experiment definitions with thresholds and decision rules.
+
+**Key columns**:
+- `experiment_key` (unique), `name`, `initiative`, `hypothesis`
+- `decision_rule`, `success_threshold`, `failure_threshold`
+- `status`, `start_date`, `end_date`, `metadata`
+
+**Status check values**:
+- `draft`, `active`, `paused`, `completed`, `cancelled`
+
+---
+
+### experiment_assignments
+
+Entity-level cohort assignments for controlled experiments.
+
+**Key columns**:
+- `experiment_key`, `entity_key`, `cohort`
+- `assigned_at`, `metadata`
+
+**Foreign key**:
+- `experiment_key` references `experiment_registry(experiment_key)` ON DELETE CASCADE
+
+---
+
+### experiment_outcomes
+
+Observed outcomes/lift measurements by experiment and metric.
+
+**Key columns**:
+- `experiment_key`, `metric_name`
+- `observed_lift`, `sample_size`, `status`, `measured_at`
+- `metadata`
+
+**Status check values**:
+- `observing`, `success`, `failure`, `inconclusive`
+
+**Foreign key**:
+- `experiment_key` references `experiment_registry(experiment_key)` ON DELETE CASCADE
+
+---
+
+### negative_registry
+
+Centralized cross-channel negative governance with rollback tokens.
+
+**Key columns**:
+- `term`, `scope`, `source_policy`
+- `confidence`, `reason_codes`, `rollback_token`
+- `active`, `metadata`, `deactivated_at`, `deactivated_by`
+
+---
+
+### search_buildout_recommendations
+
+Search governance output queue for candidate/approved/applied buildout terms.
+
+**Key columns**:
+- `search_term`, `custom_label_0`
+- `recommended_search_tier`, `status`, `confidence`
+- `metadata`, `approved_by`, `approved_at`
+
+**Check values**:
+- Tiers: `broad`, `phrase`, `exact`
+- Status: `candidate`, `approved`, `applied`, `rejected`, `paused`
+
+---
+
+### operator_review_audit
+
+Audit trail for human review actions (queue decisions and before/after state).
+
+**Key columns**:
+- `queue_name`, `entity_key`, `action`
+- `before_state` / `after_state` (jsonb)
+- `actor`, `created_at`
+
+---
+
 ## Key Relationships
 
 ### Foreign Key Relationships
@@ -1716,6 +1913,12 @@ ORDER BY error_count DESC;
 
 9. **backfill_job_errors** → **backfill_jobs**
    - `job_id` references `backfill_jobs(id)` ON DELETE CASCADE
+
+10. **experiment_assignments** → **experiment_registry**
+   - `experiment_key` references `experiment_registry(experiment_key)` ON DELETE CASCADE
+
+11. **experiment_outcomes** → **experiment_registry**
+   - `experiment_key` references `experiment_registry(experiment_key)` ON DELETE CASCADE
 
 ---
 
@@ -1871,8 +2074,8 @@ WHERE gc.master_sku = 'WP-2/16-GAL'
 
 ## Notes
 
-- **Version**: Schema documented 2026-02-13 (updated with backfill infrastructure)
-- **Total Tables**: 34
+- **Version**: Schema documented 2026-02-20 (updated with unified intent execution control-plane tables)
+- **Total Tables**: 48
 - **Backup Table**: `generated_images_backup_20260208` (historical data)
 - **Data Collection**: Automated via `ensureSkuData()` and `ensureAllData()` in dashboard
 - **Auto-Deploy**: Push to master triggers Cloud Run (Python) and Vercel (Dashboard) deploys
