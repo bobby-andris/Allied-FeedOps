@@ -131,7 +131,7 @@ from a cost to an investment.
 ### 5. American Manufacturing Heritage
 
 **Fact**: Founded in 1965. Products plated and assembled in Louisa, Virginia — Shenandoah Valley.
-Over 55 years of continuous operation. Not a brand name slapped on imports — a real manufacturing
+Over 60 years of continuous operation. Not a brand name slapped on imports — a real manufacturing
 facility with real craftspeople.
 
 **Why it matters**: "Made in USA" isn't just patriotism — it's accountability. A Virginia factory
@@ -139,7 +139,7 @@ means quality control at the source, responsive customer service, and a company 
 name on every piece that ships.
 
 **How to express it**:
-- YES: "Plated and assembled in Louisa, Virginia since 1965 — over half a century of American
+- YES: "Plated and assembled in Louisa, Virginia since 1965 — over six decades of American
   craftsmanship in every piece."
 - NO: "Proudly American-made" (too generic, sounds like a bumper sticker)
 

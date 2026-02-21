@@ -187,8 +187,8 @@ sentences, common mistakes), use the `finish-expertise` skill. This section cove
 ### Warm Metals (Polished Brass, Satin Brass, Spanish Gold, Unlacquered Brass, Golden Yellow)
 **Room mood**: Inviting, layered, collected. Warm metals make bathrooms feel lived-in and
 intentional rather than clinical. They pull a room toward warmth the way candlelight does.
-**Design context**: "Warm metals are having a major moment — Satin Brass is the finish
-interior designers are specifying most in 2026. It coordinates with mixed metals and bridges
+**Design context**: "Warm metals are having a major moment — Satin Brass is among the
+fastest-growing finishes in bathroom hardware. It coordinates with mixed metals and bridges
 traditional and contemporary."
 
 ### Cool Metals (Polished Chrome, Satin Chrome, Polished Nickel, Satin Nickel)
@@ -258,7 +258,7 @@ See `references/opening-sentences.md` for 20 annotated examples organized by app
 - Rotate approaches across products — never use the same opening style twice in a row
 - The opening sentence should work WITHOUT the product name — if it could describe anything,
   it's too generic
-- Max 25 words for the opening sentence — punchy, not sprawling
+- Keep opening sentences concise and punchy — don't sprawl into run-on sentences
 
 ---
 

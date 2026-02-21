@@ -48,10 +48,10 @@ The 28 standard finishes span the full catalog:
 - **Visual**: Brushed golden surface with a soft, muted luster. Warmer than gold, less reflective than polished brass. Subtle directional brushing visible up close.
 - **Design style**: Transitional, modern farmhouse, contemporary warm. The "it" finish in current design.
 - **Pairs with**: Brushed gold faucets, warm LED lighting, white oak vanities, quartz countertops, mixed metals.
-- **Popular with**: Current renovators following design trends, younger homeowners, Instagram-influenced buyers. Highest growth finish in bathroom hardware.
+- **Popular with**: Current renovators following design trends, younger homeowners, Instagram-influenced buyers. One of the highest-growth finishes in bathroom hardware.
 - **Search behavior**: "satin brass bathroom hardware", "brushed brass towel bar", "brushed gold bathroom accessories", "champagne gold hardware", "warm gold bath accessories".
 - **Compelling sentences**:
-  - "Satin Brass softens the golden tone with a brushed texture that hides fingerprints and water spots — the finish designers are specifying most in 2026."
+  - "Satin Brass softens the golden tone with a brushed texture that hides fingerprints and water spots — one of the most-specified finishes in current bathroom design."
   - "The Satin Brass finish gives this piece a warm, modern glow without the high-maintenance shine of polished brass — brushed texture meets golden warmth."
   - "In Satin Brass, this accessory brings the warm metallic trend to your bathroom with a brushed golden surface that pairs with both modern and transitional faucets."
 - **Avoid**: Don't confuse with polished brass. Don't call it "dull" — it's intentionally muted. Don't say "gold-plated."
@@ -214,7 +214,7 @@ The 28 standard finishes span the full catalog:
 - **Visual**: Deep, uniform black with zero reflections. Smooth, non-glossy surface. High visual contrast against light walls and tile. Bold and architectural.
 - **Design style**: Modern, industrial, contemporary, minimalist, farmhouse modern. The fastest-growing finish in hardware.
 - **Pairs with**: Matte black faucets, white tile, concrete, natural wood, mixed metals (especially with brass/gold accents).
-- **Popular with**: Trend-aware renovators, younger homeowners, modern farmhouse, industrial loft style. Growth audience.
+- **Popular with**: Trend-aware renovators, younger homeowners, modern farmhouse, industrial loft style. High-growth audience.
 - **Search behavior**: "matte black towel bar", "black bathroom hardware", "matte black bath accessories", "black towel bar", "modern black bathroom hardware".
 - **Compelling sentences**:
   - "Matte Black makes this piece a bold architectural element — the zero-reflection surface creates clean contrast against light tile and modern bathroom palettes."

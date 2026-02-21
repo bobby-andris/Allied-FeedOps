@@ -150,8 +150,8 @@ Does it meet platform-specific requirements? This is the baseline — necessary 
 
 | Platform | Requirements |
 |---|---|
-| **Google Shopping** | Plain text only. Title 60-150 chars, product type in first 30 chars, brand as final segment. Description 600-800 chars target. No HTML. |
-| **Bing Shopping** | Plain text only. Similar to Google but 700-1000 chars target. Synonym coverage. |
+| **Google Shopping** | Plain text only. Title 60-150 chars, product type in first 30 chars, brand as final segment. Description up to 5,000 chars max; full text indexed for query matching — use the character budget appropriate for product complexity. No HTML. |
+| **Bing Shopping** | Plain text only. Similar to Google but verify platform-specific limits. Synonym coverage. |
 | **Shopify** | HTML allowed. Starts with `<p>`, uses `<ul><li>` for benefits. Meta description 140-155 chars. No brand in title. |
 
 | Score | Anchor |

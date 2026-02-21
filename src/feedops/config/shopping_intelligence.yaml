@@ -1,5 +1,5 @@
 # Google Shopping Intelligence Configuration
-# Three-tier structure: universal_rules → category_rules → allied_brass_usp
+# Three-tier structure: universal_rules -> category_rules -> allied_brass_usp
 # Loaded once at container startup via lru_cache; injected into the user prompt
 # (NOT the system prompt) to preserve OpenAI prompt caching.
 #
@@ -7,7 +7,7 @@
 # Cloud Run container by the Dockerfile. Any path outside src/ will cause a
 # runtime FileNotFoundError in production.
 
-version: "1.0"
+version: "2.0"
 last_updated: "2026-02-21"
 
 # ---------------------------------------------------------------------------
@@ -15,27 +15,93 @@ last_updated: "2026-02-21"
 # ---------------------------------------------------------------------------
 universal_rules:
   title_structure:
-    description: "Lead with finish + product type in first 70 characters"
-    rule: "Title MUST open with [Finish Name] [Size] [Product Type] in first 70 characters. Never lead with collection name or brand."
-    example: "Polished Nickel 24-Inch Solid Brass Towel Bar - Waverly Place - Allied Brass"
-    rationale: "Google Shopping matches product titles to query intent. Finish + size + product type are the primary search signals."
+    description: "Lead with finish + key attribute + product type in first 70 characters"
+    rule: >
+      Title MUST place the product type within the first 30 characters and the primary
+      dimension before character 70. Finish name goes in the first 25 characters for
+      variant-specific content. End with 'Allied Brass' as the final segment.
+      Use hyphens or commas as separators — never pipes.
+      Target 60-150 characters total.
+    example: "Polished Nickel 24-Inch Solid Brass Towel Bar - Wall Mount - Skyline Collection - Allied Brass"
+    bad_example: "Skyline Collection Towel Bar"
+    rationale: >
+      Google Shopping matches titles to search intent. Shoppers scan the first 70
+      visible characters in 1-2 seconds. Finish-specific titles earn 2-3x higher
+      CTR than generic titles (2.56% vs 0.79% in Allied Brass data). Product type
+      in first 30 chars ensures category match. Brand at end is a trust signal,
+      not a search signal.
 
   material_differentiator:
-    rule: "Include 'Solid Brass' in every title. Differentiates from zinc alloy and chrome-plated steel competitors."
-    rationale: "Solid brass is the primary material differentiator vs Kingston Brass zinc alloy, Moen chrome-plated steel, and Delta plastic cores."
+    rule: >
+      Include 'Solid Brass' in every title when evidence confirms brass material.
+      This is Allied Brass's primary competitive advantage — Kingston Brass uses
+      zinc alloy for many products, Moen uses chrome-plated steel, Delta uses
+      plastic cores. 'Solid brass' is factual and differentiating. It matches
+      material-specific searches that achieve 4.0% CTR (vs 1.0% average).
+    rationale: >
+      'solid brass grab bars' achieves 4.0% CTR — the highest material-specific
+      CTR in the grab bar category. Material is a quality signal that justifies
+      Allied Brass's premium pricing.
 
   description_structure:
-    rule: "First sentence of description: '[Finish] [Product Type] for bathroom installation. [Material]. [Key dimension]. [Key functional claim].'"
-    example: "This Polished Nickel 24-Inch towel bar for bathroom installation is constructed of solid brass with concealed mounting hardware."
-    rationale: "First 160 characters of description are visible in Shopping preview. Front-load specs."
+    rule: >
+      Google allows up to 5,000 characters for descriptions. Shopping ads display ~160
+      characters as a preview, but the FULL text is indexed for query matching. Target
+      Use the full character budget appropriate for the product's complexity — longer
+      for complex products with many features (grab bars, mirrors), shorter for simple
+      accessories (hooks, knobs). Do NOT artificially cap at any arbitrary character range.
+
+      First sentence MUST be a complete, concrete product statement — not a fragment,
+      not a marketing slogan. Include product type, key dimension, material, and one
+      differentiating attribute within the first 160 characters. Open with a real
+      sentence: 'This 24-inch wall-mounted towel bar is constructed of solid brass
+      with concealed mounting hardware.'
+
+      NEVER open with: 'The contemporary motif from this elegant collection has
+      timeless appeal.' or any sentence that could apply to any product from any brand.
+
+      After the core product narrative (first 500 chars), naturally weave in keyword
+      synonyms, use-case variations, and installation context. Every relevant search
+      term integrated here is another auction entered.
+    example: "This 24-inch wall-mounted towel bar is constructed of solid brass with concealed mounting hardware and coordinates with the full Skyline Collection bathroom line."
+    bad_example: "The contemporary motif from this elegant collection has timeless appeal. Towel bar for bathroom installation."
+    rationale: >
+      Google's Shopping Graph indexes the full description text for long-tail query
+      matching — not just the visible preview. Longer, keyword-rich descriptions match
+      more search queries. The first 160 characters are the visible mini-ad; characters
+      beyond that are algorithmic fuel for entering more auctions.
 
   finish_specificity:
-    rule: "Integrate finish name naturally in first sentence. Never use 'Available in [Finish].' pattern."
+    rule: >
+      Weave the finish name naturally into the first sentence of variant descriptions.
+      The finish should feel like a selling point, not an awkward addition.
+      NEVER use the pattern: 'Available in [Finish]. [Finish] features a...'
+      GOOD: 'This 18-inch towel bar in Polished Nickel coordinates with modern bathroom fixtures.'
+      BAD: 'Available in Polished Nickel. Polished Nickel features a bright mirror-like surface.'
     bad_example: "Available in Polished Nickel. Polished Nickel features a bright mirror-like surface."
-    good_example: "This 18-inch towel bar in Polished Nickel coordinates with modern bathroom fixtures."
+    good_example: "This 18-inch towel bar in Polished Nickel coordinates with modern bathroom fixtures while the solid brass core provides lasting durability."
 
   front_load_specs:
-    rule: "Key specs (dimensions, material, mounting type) must appear in first 160 characters of description — visible in Shopping preview."
+    rule: >
+      Key specs (dimensions, material, mounting type) must appear in the first 160
+      characters of the description. This is the visible preview in Shopping results.
+      Do not waste these characters on collection narrative or brand positioning.
+
+  keyword_integration:
+    rule: >
+      Integrate search query synonyms naturally throughout the description — use each
+      synonym once in a natural sentence, distributed across the copy. NEVER stuff
+      keywords: 'towel rack towel bar towel holder bathroom towel' is penalized by
+      Google and looks terrible to shoppers. Use the synonym list from category_rules
+      as a reference, not a checklist to cram into one paragraph.
+
+  accuracy_guardrail:
+    rule: >
+      NEVER claim 'mounting hardware included' unless evidence explicitly confirms it.
+      NEVER state specific warranty durations unless evidence states them.
+      NEVER use: finest, luxurious, premium, exclusive, exceptional, unparalleled,
+      superior, exquisite, ultimate. These are empty hype words that violate Google
+      Merchant Center content policies and erode shopper trust.
 
 # ---------------------------------------------------------------------------
 # CATEGORY RULES — keyed by lowercase category / custom_label_0 value
@@ -51,19 +117,35 @@ category_rules:
       - "designer grab bar"
       - "ADA compliant grab bar"
       - "brass grab bar"
-      - "polished nickel grab bar"
+      - "shower grab bar"
+      - "bathtub grab bar"
     title_instruction: >
-      Include 'Decorative' or 'Designer' for decorative/styled grab bars.
-      Include 'ADA Compliant' only when evidence explicitly confirms ADA certification.
-      Lead with size at position 2-3: '[Finish] [XX-Inch] [Decorative] Grab Bar'.
+      For decorative/designer collections (Pipeline, Cube Design, Monte Carlo, Camo),
+      ALWAYS include 'Decorative' before 'Grab Bar' in the title. This single word
+      converts 741 currently-zero-click impressions on decorative-intent search terms.
+      Include 'ADA Compliant' when evidence confirms compliance (250 lb weight capacity
+      + 3-post design). Lead with size at position 2-3 in title:
+      '[Finish] [XX-Inch] Decorative Grab Bar - ADA Compliant Solid Brass [Style] -
+      [Collection] - Allied Brass'.
     size_instruction: >
-      Size-specific searches (e.g., '60 grab bar') have 4.12% CTR — highest in the dataset.
-      Always include exact inch measurement early in title.
+      Size-specific searches (e.g., '60 grab bar') achieve 4.12% CTR — the highest
+      in the entire dataset. Always include exact inch measurement early in title.
+      Shoppers who include a size have measured their space and are ready to buy.
+    description_instruction: >
+      Two distinct buyer personas shop for grab bars: (1) safety-focused caregivers
+      who need ADA compliance, and (2) design-conscious homeowners who want safety
+      without the institutional look. For decorative collections, lead with aesthetics:
+      'Decorative solid brass grab bar that provides bathroom safety without compromising
+      style.' Address the emotional concern — nobody wants their bathroom to look like
+      a hospital. For explicitly safety-focused products, lead with compliance:
+      'ADA compliant solid brass grab bar with 250 lb weight capacity.' Include
+      installation flexibility: 'Installs vertically, horizontally, or diagonally.'
     evidence: >
-      741 impressions for 'decorative grab bars' and 'decorative grab bars for bathroom' at 0% CTR.
-      Root cause: Allied Brass enters the auction but loses clicks due to title language mismatch.
-      Fix: Add 'Decorative' / 'Designer' language to grab bar titles.
-    note: "Safety-critical product. Lead with functional assurance before aesthetics."
+      741 impressions for decorative grab bar terms at 0% CTR. Allied Brass enters
+      auctions but loses every click. Title language mismatch: 'Pipeline Collection
+      16 Inch Grab Bar' vs competitor 'Decorative Brass Grab Bar - ADA Compliant'.
+      The product is right — the listing doesn't communicate it.
+    note: "Competitor Barclay Products wins 'decorative grab bar' terms with LOWER domain authority — proof that title relevance beats platform authority."
     is_lost_to_rank_pct: 32.7
     monthly_impressions: 25086
 
@@ -74,40 +156,72 @@ category_rules:
       - "towel holder"
       - "solid brass towel bar"
       - "bathroom towel bar"
+      - "24 inch towel bar"
     title_instruction: >
-      Lead with finish + size + 'Solid Brass Towel Bar'.
-      Include towel bar/rack/holder synonyms in description for long-tail coverage.
+      Lead with finish + size + 'Solid Brass Towel Bar'. This is the highest-volume
+      category (70,866 impressions/month). Differentiation must happen in the title
+      because competition is fierce. Include 'Wall Mount' when applicable — it matches
+      a common search modifier.
+    description_instruction: >
+      Address the towel bar shopper's real concern: 'Will this hold up?' Solid brass
+      doesn't flex under heavy bath towels — say it. Mention concealed mounting hardware
+      for clean wall appearance. Include synonym coverage in description: use 'towel bar'
+      in title, 'towel rack' in description, 'towel holder' in collection coordination.
+      Example: 'Coordinates with Skyline Collection towel rack accessories including
+      robe hooks, towel rings, and a matching towel holder set.'
     differentiation: >
-      Lead with construction quality — solid brass vs zinc alloy.
-      Competitors (Kingston Brass, Delta) use zinc alloy or chrome-plated steel.
-    note: "Highest-volume category (70,866 impressions/month). Differentiate on solid brass construction."
+      Lead with construction quality — solid brass vs die-cast zinc. Kingston Brass
+      uses zinc alloy for many towel bars; the solid brass core in Allied Brass bars
+      means they won't flex or bend. This is the price justification for a shopper
+      comparing a $45 Kingston Brass bar to a $90 Allied Brass bar.
+    note: "Highest-volume category. Finish-specific towel bar searches ('unlacquered brass towel bar' — 43,109 impressions, 1.30% CTR) dramatically outperform generic ('towel bar')."
     is_lost_to_rank_pct: 32.2
     monthly_impressions: 70866
 
   "toilet paper holders":
     intent_keywords:
       - "toilet paper holder"
+      - "recessed toilet paper holder"
       - "toilet paper holder wall mount"
       - "tissue holder"
-      - "tp holder brass"
+      - "free standing toilet paper holder"
+      - "toilet paper holder with shelf"
+      - "polished brass toilet paper holder"
     title_instruction: >
-      Lead with finish + size + 'Toilet Paper Holder'.
-      Include 'wall mount' / 'wall-mounted' — primary use-case modifier.
-    note: "54,761 impressions/month; 36.7% IS lost to rank — high improvement priority."
+      Lead with finish + type descriptor + 'Toilet Paper Holder'. Always specify the
+      style type (Two-Post, Recessed, Freestanding, With Shelf) — these are the primary
+      search modifiers shoppers use. Include 'wall mount' or 'freestanding' explicitly.
+      Example: 'Polished Brass Two-Post Toilet Paper Holder - Euro Style Solid Brass
+      Wall Mount - Skyline - Allied Brass'.
+    description_instruction: >
+      Mention the roll-change mechanism (Euro-style hook, spring-loaded, etc.) — this
+      is a practical differentiator shoppers care about. Address material quality:
+      'solid brass construction outlasts chrome-plated plastic holders.' Include
+      collection coordination for upsell potential.
+    note: "54,761 impressions/month. 'recessed toilet paper holder' alone has 222,551 impressions — the #1 search term in the entire Allied Brass dataset."
     is_lost_to_rank_pct: 36.7
     monthly_impressions: 54761
 
   "garment rods":
     intent_keywords:
+      - "valet rod"
+      - "closet valet rod"
+      - "retractable valet rod"
+      - "pull out closet rod"
       - "garment rod"
       - "wardrobe rod"
-      - "closet rod"
-      - "brass garment rod"
-      - "hotel style garment rod"
     title_instruction: >
-      Include 'Garment Rod' as primary noun. Size is critical signal for this category.
-      'Wardrobe rod' and 'closet rod' are strong synonyms for description coverage.
-    note: "54.9% IS lost to rank — highest priority for content improvement. 45,548 impressions/month."
+      CRITICAL: Use 'Valet Rod' as the primary product type noun — NOT 'Garment Rod'.
+      Shoppers search 'valet rod' (163,083 impressions) at 50x the rate of 'garment rod'.
+      Include 'Retractable' when the rod extends and retracts. Include length prominently.
+      Example: 'Polished Chrome 12-Inch Retractable Valet Rod - Solid Brass Pull-Out
+      Closet Rod - Allied Brass'.
+    description_instruction: >
+      Address the durability concern: 'solid brass construction won't sag under garment
+      weight.' Describe the mechanism: 'extends when needed, tucks away flush with the
+      wall when not in use.' Include 'closet' context — shoppers are installing these
+      in closets, not bathrooms.
+    note: "54.9% IS lost to rank — second highest. 'valet rod' is the correct search vocabulary, not 'garment rod'. Use 'closet rod' and 'pull-out rod' as synonyms in description."
     is_lost_to_rank_pct: 54.9
     monthly_impressions: 45548
 
@@ -118,9 +232,14 @@ category_rules:
       - "swing arm hook"
       - "wall mounted retractable hook"
     title_instruction: >
-      Lead with 'Retractable Hook' or 'Swing Arm Hook'. Include 'wall mounted' as modifier.
-      Emphasize fold-flat functionality in description — key differentiator.
-    note: "57.4% IS lost to rank — highest IS loss percentage in portfolio. 24,503 impressions/month."
+      Lead with finish + 'Retractable Hook' or 'Swing Arm Hook'. Include 'wall mounted'
+      as modifier. Emphasize the fold-flat functionality — this is the key differentiator
+      that separates retractable hooks from standard hooks.
+    description_instruction: >
+      Describe the mechanism clearly: 'swing arm folds flat against the wall when not in
+      use, extends to hold robes, towels, and garments when needed.' Solid brass construction
+      means the swing arm maintains tension over years of use — unlike plastic alternatives.
+    note: "57.4% IS lost to rank — highest IS loss in the entire portfolio. 24,503 impressions/month. Content optimization here has the highest marginal return."
     is_lost_to_rank_pct: 57.4
     monthly_impressions: 24503
 
@@ -131,9 +250,15 @@ category_rules:
       - "bathroom hook"
       - "solid brass robe hook"
       - "coat hook bathroom"
+      - "wall hook"
     title_instruction: >
-      Lead with finish + 'Robe Hook'. Include 'wall mounted' as modifier.
-      'Towel hook' is a common synonym — include in description.
+      Lead with finish + 'Solid Brass Robe Hook'. Include 'wall mounted' as modifier.
+      'Towel hook' is the most common synonym — include in description.
+    description_instruction: >
+      Mention projection depth — shoppers need to know their robe will stay on the hook.
+      'The X-inch projection provides enough depth for heavy robes and bath towels without
+      protruding excessively from the wall.' Emphasize collection coordination — robe hooks
+      are frequently purchased as part of a bathroom hardware set.
 
   "soap dispensers":
     intent_keywords:
@@ -141,9 +266,17 @@ category_rules:
       - "lotion dispenser"
       - "bathroom soap dispenser"
       - "countertop soap dispenser"
+      - "wall mounted soap dispenser"
     title_instruction: >
-      Lead with finish + 'Soap Dispenser'. Specify countertop vs wall mount in title.
-      Include refillable/pump type in description — key buyer decision factor.
+      Lead with finish + 'Soap Dispenser'. Specify countertop vs wall mount in the title —
+      this is the primary purchase decision factor. Include refillable/pump type in
+      description. If the dispenser has crystal accents or other design elements, include
+      them after the core product type.
+    description_instruction: >
+      Address practical concerns: 'Refillable design lets you use your preferred soap.'
+      For wall-mounted: 'Eliminates countertop clutter.' Mention the pump mechanism
+      material: 'solid brass pump for long-lasting operation.' Kitchen applicability
+      expands search matching — mention if the product works in both bathroom and kitchen.
 
   "towel rings":
     intent_keywords:
@@ -151,9 +284,17 @@ category_rules:
       - "hand towel ring"
       - "guest towel ring"
       - "bathroom towel ring"
+      - "unlacquered brass towel ring"
     title_instruction: >
-      Lead with finish + size + 'Towel Ring'.
-      'Hand towel ring' and 'guest towel ring' are high-intent synonyms.
+      Lead with finish + diameter + 'Towel Ring'. Diameter is the primary dimension
+      for towel rings — shoppers need to confirm the ring is the right size for their
+      hand towels. 'Hand towel ring' and 'guest towel ring' are high-intent synonyms
+      — use in description.
+    description_instruction: >
+      State the diameter prominently. Address the quality concern: 'Solid brass
+      construction maintains its shape and weight — no hollow zinc that feels flimsy.'
+      Include collection coordination for the full-set upsell.
+    note: "'unlacquered brass towel ring' has 35,337 impressions at 1.30% CTR — finish-specific terms perform well in this category."
 
   "towel shelves":
     intent_keywords:
@@ -161,9 +302,16 @@ category_rules:
       - "bathroom shelf"
       - "wall shelf with towel bar"
       - "bathroom wall shelf"
+      - "bathroom shelf with towel bar"
     title_instruction: >
-      Lead with finish + size + 'Towel Shelf'. If shelf has towel bar, include 'with Towel Bar'.
-      Dimensions (width + depth) are primary purchase decision factors.
+      Lead with finish + size + 'Towel Shelf'. If the shelf has an integrated towel bar,
+      include 'with Towel Bar' — this matches 'bathroom shelf with towel bar' (38,660
+      impressions). Dimensions (width + depth) are the primary purchase decision factors.
+    description_instruction: >
+      State both width and depth dimensions. If the shelf has a gallery rail, mention it
+      for the security benefit. For combination shelf+bar products, describe the dual
+      functionality: 'Upper shelf for toiletries with lower towel bar for hand towels.'
+    note: "'bathroom shelf with towel bar' has 38,660 impressions and 1.11% CTR — the combination product term is a strong search signal."
 
   "glass shelves":
     intent_keywords:
@@ -171,9 +319,17 @@ category_rules:
       - "bathroom glass shelf"
       - "floating glass shelf"
       - "tempered glass shelf"
+      - "glass shelf with towel bar"
     title_instruction: >
-      Lead with finish + size + 'Glass Shelf'. Include 'tempered' if evidence confirms.
-      Glass thickness and weight capacity are key trust signals.
+      Lead with finish + size + 'Glass Shelf'. Include 'tempered' when evidence confirms
+      — it's a safety and quality signal. If double-tier, state it. If gallery rail
+      present, include it.
+    description_instruction: >
+      Glass thickness and weight capacity are the primary trust signals. State both:
+      '3/8-inch tempered glass provides strength for bathroom essentials.' The gallery
+      rail addresses the 'will my stuff fall off?' concern. Mention solid brass brackets
+      as the mounting hardware quality signal.
+    note: "'glass shelf with towel bar' has 35,265 impressions and 1.27% CTR. Combination products are strong search performers."
     is_lost_to_rank_pct: 30.6
     monthly_impressions: 40081
 
@@ -184,8 +340,13 @@ category_rules:
       - "frameless shower door hardware"
       - "shower door knob"
     title_instruction: >
-      Specify hardware type (handle, pull, knob) immediately after finish.
+      Specify the hardware type (handle, pull, knob) immediately after finish.
       'Frameless' is a high-intent modifier — include when evidence supports it.
+      Include the glass thickness compatibility range if available.
+    description_instruction: >
+      Address the wet-environment durability concern: 'Solid brass construction resists
+      corrosion in shower environments.' Mention glass thickness compatibility for
+      frameless installations. Include the mounting pattern for shoppers doing replacement.
 
   "make-up mirrors":
     intent_keywords:
@@ -193,9 +354,19 @@ category_rules:
       - "vanity mirror"
       - "magnifying mirror"
       - "bathroom mirror with magnification"
+      - "countertop makeup mirror"
     title_instruction: >
-      Include magnification level (e.g., '5X Magnification') in title — primary search signal.
-      Lead with finish + magnification + 'Makeup Mirror'.
+      Include magnification level (e.g., '2X Magnification' or '5X Magnification') in
+      the title — this is the #1 search signal for mirrors. Lead with finish +
+      magnification + size + 'Makeup Mirror'.
+      Example: 'Satin Chrome 8-Inch 2X Magnifying Makeup Mirror - Height Adjustable
+      Countertop - Solid Brass - Allied Brass'.
+    description_instruction: >
+      Magnification level, mirror diameter, and mounting type are the three purchase
+      decision factors. State all three in the first sentence. For height-adjustable
+      models, mention that it accommodates 'seated or standing use' and 'different
+      counter heights.' Address the durability concern: 'solid brass arm won't droop
+      over time' — a common complaint with cheaper mirrors.
 
   "wall mirrors":
     intent_keywords:
@@ -203,9 +374,15 @@ category_rules:
       - "bathroom wall mirror"
       - "vanity mirror"
       - "framed wall mirror"
+      - "oval wall mirror"
     title_instruction: >
-      Lead with finish + dimensions (W x H) + 'Wall Mirror'.
-      Dimensions (width x height) are primary filter criteria for mirrors.
+      Lead with finish + dimensions (W x H) + 'Wall Mirror'. Dimensions are the primary
+      filter criteria — shoppers need to confirm the mirror fits their vanity area.
+      Include shape (oval, rectangular) when it's a differentiator.
+    description_instruction: >
+      State exact dimensions prominently. Mention frame material (solid brass frame) and
+      any design features (beveled edge, tilting mechanism). Include style context for
+      the bathroom aesthetic.
 
   "cabinet hardware":
     intent_keywords:
@@ -213,9 +390,19 @@ category_rules:
       - "cabinet knob"
       - "drawer pull"
       - "drawer knob"
+      - "brass cabinet knob"
+      - "kitchen cabinet hardware"
     title_instruction: >
-      Specify hardware type (pull vs knob) after finish. Include center-to-center measurement
-      for pulls — critical buyer spec. 'Drawer pull' and 'cabinet pull' are interchangeable synonyms.
+      Specify hardware type (pull vs knob) after finish. For pulls, include
+      center-to-center measurement — this is the critical spec buyers use to match
+      existing hardware holes. For knobs, include diameter.
+      Example: 'Oil Rubbed Bronze 1-1/2 Inch Solid Brass Cabinet Knob - Round Modern
+      Style - Allied Brass'.
+    description_instruction: >
+      For knobs: 'Solid brass core provides weight and substance that signals quality
+      with every use.' Mention 28 finishes for coordination with existing kitchen or
+      bathroom hardware. State that standard mounting pattern fits most cabinets.
+      For pulls: center-to-center measurement is the make-or-break spec.
 
   "appliance and door pulls":
     intent_keywords:
@@ -224,16 +411,27 @@ category_rules:
       - "refrigerator pull"
       - "cabinet door pull"
     title_instruction: >
-      Lead with finish + length + 'Appliance Pull' or 'Door Pull'.
-      Length is the primary purchase decision factor — buyers match to existing hardware dimensions.
+      Lead with finish + length + 'Appliance Pull' or 'Door Pull'. Length is the
+      primary purchase decision factor — buyers match to existing hardware dimensions
+      or appliance requirements.
+    description_instruction: >
+      State the total length and projection prominently. For appliance pulls, mention
+      compatibility with standard appliance mounting patterns. Solid brass weight and
+      feel is a differentiator — lighter aluminum pulls feel cheap on heavy appliance doors.
 
   "candle holders":
     intent_keywords:
       - "candle holder"
       - "taper candle holder"
       - "brass candle holder"
+      - "decorative candle holder"
     title_instruction: >
-      Lead with finish + 'Candle Holder'. Specify candle type (taper, pillar, votive) when known.
+      Lead with finish + 'Candle Holder'. Specify candle type (taper, pillar, votive)
+      when known from evidence. 'Brass candle holder' is a strong search term.
+    description_instruction: >
+      Mention the base weight/stability. State candle cup dimensions if available.
+      Position as both functional and decorative — 'solid brass construction with
+      weighted base for stability.'
 
   "squeegee":
     intent_keywords:
@@ -241,9 +439,16 @@ category_rules:
       - "bathroom squeegee"
       - "glass squeegee"
       - "brass squeegee"
+      - "squeegee for shower"
     title_instruction: >
-      Lead with finish + 'Shower Squeegee'. Include blade width in title.
-      'Glass squeegee' and 'bathroom squeegee' are common search synonyms.
+      Lead with finish + 'Shower Squeegee'. Include blade width if available.
+      'Glass squeegee' and 'bathroom squeegee' are common search synonyms — use in
+      description.
+    description_instruction: >
+      This is a functional product — shoppers care about blade quality, handle
+      comfort, and durability. 'Solid brass handle outlasts plastic squeegees that
+      crack in shower humidity.' Mention blade width and whether it's replaceable.
+    note: "'shower squeegee' has 164,415 impressions — second highest search term in entire dataset. 'squeegee for shower' adds another 36,521."
 
 # ---------------------------------------------------------------------------
 # ALLIED BRASS USP — brand differentiators injected into all generations
@@ -251,14 +456,41 @@ category_rules:
 allied_brass_usp:
   dual_positioning: >
     Allied Brass products are both beautifully designed AND highly functional.
-    Reflect both dimensions in every content piece — do not trade aesthetics for utility or vice versa.
+    Reflect both dimensions — the decorative grab bar buyer wants safety that
+    looks intentional. The towel bar buyer wants durability that looks elegant.
+    Never trade aesthetics for utility or vice versa. The price premium is
+    justified by getting BOTH.
   solid_brass_quality: >
-    Solid brass construction is the primary material differentiator vs zinc alloy competitors
-    (Kingston Brass) and chrome-plated steel (Moen, Delta). Always include when evidence confirms.
+    Solid brass construction is the primary material differentiator. In concrete
+    terms: Kingston Brass uses zinc alloy (heavier, brittle, corrodes faster),
+    Moen uses chrome-plated steel (rusts under plating), Delta uses plastic cores
+    (lightweight, feels cheap). Allied Brass solid brass is corrosion-resistant,
+    maintains finish integrity, and has a substantial feel that signals quality.
+    State this as a factual comparison, not as hype.
   finish_variety: >
-    28 finishes available including specialty options: Unlacquered Brass, Venetian Bronze,
-    and other finishes not offered by mass-market competitors. Finish variety is a genuine
-    differentiator — mention when relevant to the specific product/finish context.
+    28 finishes available — more than any competitor in the decorative bathroom
+    hardware category. Specialty finishes that competitors do not offer:
+    Unlacquered Brass (develops natural patina over time), Venetian Bronze,
+    Antique Copper, Satin Chrome. Finish variety is a genuine differentiator
+    for design-conscious buyers who need to match existing fixtures. Include
+    the specific finish count (28) when relevant — it's a concrete fact, not
+    marketing language.
+  collection_coordination: >
+    41 named collections spanning all bathroom accessory categories. A shopper
+    can match their towel bar, robe hook, soap dish, toilet paper holder, glass
+    shelf, and towel ring in the same finish and design language. This is a
+    unique advantage — most competitors offer individual products, not coordinated
+    collections. Use collection coordination as a cross-sell signal in descriptions:
+    'Coordinates with [Collection] towel bars, robe hooks, and soap dishes.'
   brand_positioning: >
-    Allied Brass is a direct-to-consumer brand sold on Shopify and through Google Shopping.
-    Content should convey craftsmanship and design quality without luxury hype language.
+    Allied Brass is a direct-to-consumer brand sold on Shopify and through
+    Google Shopping. Content should convey craftsmanship and design quality
+    through specific, verifiable claims — not through adjective inflation.
+    'Solid brass construction with concealed mounting hardware' is more
+    persuasive than 'premium quality exceptional craftsmanship.' Show, don't tell.
+  lifestyle_advantage: >
+    Allied Brass has lifestyle images in the Google Shopping feed — most competitors
+    (including Kingston Brass via Home Depot) only have white-background product shots.
+    Lifestyle images improve CTR by 15-25% in home decor Shopping categories.
+    When a lifestyle image is present, the description can reference it:
+    'Shown styled in a modern bathroom setting.' This reinforces the visual advantage.
