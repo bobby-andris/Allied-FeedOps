@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Transform low-performing product feeds into high-converting assets with AI content generation informed by Google Shopping ranking intelligence
-**Current focus:** v1.3a Content Generation Excellence — Phase 24: Prompt Architecture
+**Current focus:** v1.3a Content Generation Excellence — Phase 25: Evaluate & Iterate
 
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 24 of 25 (Prompt Architecture — rewrite prompts, wire configs, expand guidance)
-**Current plan:** 24-02 complete, Phase 24 complete
-**Status:** Milestone complete
-**Last activity:** 2026-02-21 — 24-02: shopping_intelligence.yaml expanded to 24 categories, customer_framing and competitive_positioning blocks added to every prompt, legacy build_category_guidance() removed
+**Current phase:** 25 of 25 (Evaluate & Iterate — deploy, regenerate test SKUs, blind evaluation, publish)
+**Current plan:** 25-01 complete, starting 25-02
+**Status:** In progress — 10 SKUs regenerated with skill-enriched prompts, blind A/B comparison ready for human evaluation
+**Last activity:** 2026-02-21 — 25-01: Deployed skills to Cloud Run, fixed CANDIDATE_SCHEMA extraction bug, regenerated 10 SKUs across 10 categories, built blind A/B comparison document
 
 Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~20% (v1.3a)
 
@@ -23,7 +23,7 @@ Progress: [████████░░░░░░░░░░░░░░░
 - Total plans completed: 68
 - Milestones shipped: 4 (Phase 0, v1.0, v1.1, v1.2)
 
-**v1.3a plans:** 4 completed (TBD total)
+**v1.3a plans:** 5 completed (7 total)
 
 | Plan | Duration | Tasks | Files | Date |
 |------|----------|-------|-------|------|
@@ -31,6 +31,7 @@ Progress: [████████░░░░░░░░░░░░░░░
 | 23-02 Gold standards + 10-criterion rubric | 276s | 2 | 2 | 2026-02-21 |
 | 24-01 Creative brief + skill loader | 3 min | 2 | 4 | 2026-02-21 |
 | 24-02 Category expansion + customer/competitive blocks | 316s | 2 | 5 | 2026-02-21 |
+| 25-01 Deploy & regenerate 10 test SKUs | ~10 min | 2 | 5 | 2026-02-21 |
 
 ## Accumulated Context
 
@@ -46,7 +47,8 @@ Progress: [████████░░░░░░░░░░░░░░░
 - [Phase 23-foundation]: 15 gold standard examples loaded into feedops_v3 template: 10 from google-shopping-content skill, 5 improved from quality-evaluation skill, covering 15 product categories
 - [24-01]: SYSTEM_PROMPT opens with creative_direction — good/bad examples, one-two punch framing, before any rules. Accuracy guardrail moved lower.
 - [24-01]: skill_loader.py uses lru_cache pattern from shopping_intelligence.py; batch mode loads all 8 skills (254K), single mode loads core + platform-relevant (172K)
-- [24-01]: Cloud Run Dockerfile needs COPY .claude/skills /app/.claude/skills before skills-enabled production deployment
+- [24-01]: Cloud Run Dockerfile needs COPY .claude/skills /app/.claude/skills before skills-enabled production deployment — DONE in 25-01
+- [25-01]: CANDIDATE_SCHEMA extraction bug: Phase 23 strict mode changed keys from 'content' to 'google_title'/'google_description' etc. Fixed with _extract_content_from_schema_response() helper across all 4 endpoints
 - [Phase 24-02]: Customer framing as reasoning prompt (not fill-in): guides GPT-5.2 to reason concrete buyer scenarios rather than fill template slots
 - [Phase 24-02]: DB-query-driven YAML expansion: queried product_catalog by variant count to identify 7 missing high-revenue categories
 - [Phase 24-02]: Competitive positioning: contrast material/approach not companies — 'solid brass vs die-cast zinc' keeps brand voice without naming competitors
@@ -72,5 +74,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed .planning/phases/24-prompt-architecture/24-02-PLAN.md
-Resume file: .planning/phases/24-prompt-architecture/24-02-SUMMARY.md
+Stopped at: Completed Plan 25-01 (deploy + regeneration). Plan 25-02 next (human blind evaluation).
+Resume file: .planning/phases/25-evaluate-iterate/25-01-SUMMARY.md
+Next action: Human evaluates .planning/phases/25-evaluate-iterate/25-01-evaluation-comparisons.md
