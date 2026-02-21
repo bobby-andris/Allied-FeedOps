@@ -115,9 +115,9 @@ Plans:
 | 05-08 | v1.0 | 16/16 | Complete | 2026-02-13 |
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
-| 23. Foundation | 2/2 | Complete    | 2026-02-21 | - |
-| 24. Prompt Architecture | v1.3a | 0/TBD | Not started | - |
-| 25. Evaluate & Iterate | v1.3a | 0/TBD | Not started | - |
+| 23 | v1.3a | 2/2 | Complete | 2026-02-21 |
+| 24 | v1.3a | 0/TBD | Not started | - |
+| 25 | v1.3a | 0/TBD | Not started | - |
 
 ---
 *Phase 0 completed: 2026-02-13*

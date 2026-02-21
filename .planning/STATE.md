@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Transform low-performing product feeds into high-converting assets with AI content generation informed by Google Shopping ranking intelligence
-**Current focus:** v1.3a Content Generation Excellence — Phase 23: Foundation
+**Current focus:** v1.3a Content Generation Excellence — Phase 24: Prompt Architecture
 
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 23 of 25 (Foundation — GPT-5.2 bugs + gold standards + rubric)
-**Current plan:** 02 complete — 23-02 gold standards + 10-criterion rubric done
-**Status:** Milestone complete
-**Last activity:** 2026-02-21 — 23-02 executed: 10-criterion rubric, 15 gold standards loaded into feedops_v3
+**Current phase:** 24 of 25 (Prompt Architecture — rewrite prompts, wire configs, expand guidance)
+**Current plan:** Not yet planned
+**Status:** Phase 23 complete, phase 24 not started
+**Last activity:** 2026-02-21 — Phase 23 complete: GPT-5.2 bugs fixed, gold standards loaded, 10-criterion rubric live
 
 Progress: [████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~10% (v1.3a)
 
