@@ -8,6 +8,17 @@ A Google Ads feed optimization platform that automatically collects search perfo
 
 Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation, enabling data-driven optimization at scale for the entire catalog.
 
+## Current Milestone: v1.2 Impact Debug & Fix
+
+**Goal:** Diagnose why existing content generation and publishing isn't producing measurable Google Shopping impact, and apply minimal evidence-backed fixes.
+
+**Target outcomes:**
+- Clear evidence-backed explanation of why impact has been weak
+- Verified runtime path from generation through publishing to live feed
+- Feature flag activation confirmed or fixed
+- Minimal fixes with staged rollout path
+- No dashboard regressions
+
 ## Current State (after v1.1)
 
 **What's shipped:**
@@ -49,9 +60,14 @@ Transform low-performing product feeds into high-converting assets by combining 
 - ✓ DASH-01 through DASH-03: Dashboard audit (no dead ends, stale data fixed, unused pages simplified)
 - ✓ VER-01: Visual verification via agent-browser for all UI changes
 
-### Active
+### Active (v1.2)
 
-(No active milestone — define with `/gsd:new-milestone`)
+- [ ] Diagnose end-to-end runtime path wiring (UI → API → pipeline → DB → publish → Google feed)
+- [ ] Verify feature flag behavior (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1, SEGMENT_STRATEGY_V1) in live runtime
+- [ ] Impact bottleneck analysis: code-path vs auction/relevance vs coverage vs propagation
+- [ ] Quantify SKU coverage: generated content vs published vs total catalog
+- [ ] Apply minimal, reversible, high-impact fixes based on root cause evidence
+- [ ] Validate fixes via tests + agent-browser headless verification
 
 ### Out of Scope
 
@@ -98,4 +114,4 @@ Transform low-performing product feeds into high-converting assets by combining 
 - **Competitive Metrics:** Only 33% coverage for impression/click share
 
 ---
-*Last updated: 2026-02-21 after v1.1 milestone*
+*Last updated: 2026-02-20 after v1.2 milestone start*
