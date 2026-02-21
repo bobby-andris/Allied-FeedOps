@@ -52,7 +52,7 @@
 - [x] **Phase 19: Measurement Infrastructure** - Add feature flag logging, GMC disapproval visibility, prompt hash lineage, and bottleneck classification to make impact measurable (completed 2026-02-21)
 - [x] **Phase 20: Targeted Fixes & Intelligence Application** - Apply evidence-backed fixes to generation path, feature flag wiring, prompts, and image guidance — one fix at a time (completed 2026-02-21)
 - [x] **Phase 21: Apply Database Migrations & Update Schema Docs** - Apply migrations 034+035 to live Supabase to unblock measurement infrastructure; update SCHEMA.md (gap closure) (completed 2026-02-21)
-- [ ] **Phase 22: Fix Integration Bugs & Close Documentation Gaps** - Fix feedback layer field mismatch, set GMC env var, fix tech debt items, close SUMMARY frontmatter gaps (gap closure)
+- [x] **Phase 22: Fix Integration Bugs & Close Documentation Gaps** - Fix feedback layer field mismatch, set GMC env var, fix tech debt items, close SUMMARY frontmatter gaps (gap closure) (completed 2026-02-21)
 
 ## Phase Details
 
@@ -161,7 +161,7 @@ Plans:
 | 19. Measurement Infrastructure | 4/4 | Complete   | 2026-02-21 | - |
 | 20. Targeted Fixes & Intelligence Application | 4/4 | Complete    | 2026-02-21 | - |
 | 21. Apply Database Migrations & Update Schema Docs | 1/1 | Complete    | 2026-02-21 | - |
-| 22. Fix Integration Bugs & Close Documentation Gaps | 1/2 | In Progress|  | - |
+| 22. Fix Integration Bugs & Close Documentation Gaps | 2/2 | Complete   | 2026-02-21 | - |
 
 ---
 *Phase 0 completed: 2026-02-13*

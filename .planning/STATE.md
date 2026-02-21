@@ -20,6 +20,7 @@ See: .planning/PROJECT.md
 - 2026-02-21: Plan 20-04 complete — sku_corrections table (persistent corrections per SKU/platform/content_type), structured feedback UI (tone/emphasis/length controls), save-as-correction checkbox in FeedbackModal. Commits: 2c46e4b1, 963cbafc
 - 2026-02-21: Plan 21-01 complete — Verified migrations 034+035 in live Supabase (all columns/tables/indexes confirmed), renamed deferred migrations (034b_DEFERRED_*, 035b_DEFERRED_*), updated SCHEMA.md publish_events with 5 lineage columns, verified /api/prompt-lineage endpoint. Commits: 89621ecb, 02ce3610
 - 2026-02-21: Plan 22-02 complete — Added requirements-completed frontmatter to 17-02-SUMMARY.md [MODEL-01, MODEL-02] and 19-02/03-SUMMARY.md [MEAS-04], closing v1.2 milestone audit traceability gaps. Commit: 913ec0cb
+- 2026-02-21: Plan 22-01 complete — Fixed correction_text key priority in apply_feedback_layer(), fixed funnel last_run field mapping to run_timestamp, moved keyword_bank.json into Docker-included src/ tree, set GMC_MERCHANT_ID=136699027 on Cloud Run. Commits: 37602b98, 06a0d351
 
 ## Decisions
 
@@ -42,6 +43,9 @@ See: .planning/PROJECT.md
 - save_as_correction uses upsert with unique index to prevent duplicate correction accumulation
 - MEAS-04 attributed to both 19-02 (API) and 19-03 (dashboard UI) — both plans contributed to requirement completion
 - requirements-completed uses hyphenated key matching established pattern across all SUMMARY files
+- GMC_MERCHANT_ID=136699027 sourced from .env.vercel; set directly on Cloud Run feedops-pipeline via gcloud — no user input required
+- keyword_bank.json relocated from gitignored data/ to tracked src/feedops/integrations/data/ for Docker build inclusion
+- correction_text priority ordering in apply_feedback_layer() preserves backward compat: falls through to text, correction, str(correction)
 
 ## Completed Plans (Phase 20)
 

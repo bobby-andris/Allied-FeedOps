@@ -75,10 +75,10 @@
 | DIAG-03 | Phase 18 | Complete |
 | DIAG-04 | Phase 18 | Complete |
 | MEAS-01 | Phase 19 → Phase 21 | Complete |
-| MEAS-02 | Phase 19 → Phase 22 | Pending |
+| MEAS-02 | Phase 19 → Phase 22 | Complete |
 | MEAS-03 | Phase 19 → Phase 21 | Complete |
 | MEAS-04 | Phase 19 → Phase 21 | Complete |
-| FIX-01 | Phase 20 → Phase 22 | Pending |
+| FIX-01 | Phase 20 → Phase 22 | Complete |
 | FIX-02 | Phase 20 | Complete |
 | GOOG-04 | Phase 20 | Complete |
 | GOOG-05 | Phase 20 | Complete |
