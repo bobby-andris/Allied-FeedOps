@@ -12,15 +12,27 @@ import {
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Sparkles, Loader2 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Sparkles, Loader2, ChevronDown, ChevronRight } from 'lucide-react'
 import { FeedbackPreset } from '@/lib/supabase/types'
+
+type ToneStyle = 'formal' | 'conversational' | 'technical' | 'aspirational'
+type EmphasisOption = 'finish' | 'dimensions' | 'use_case' | 'compatibility' | 'luxury'
+type LengthPreference = 'shorter' | 'standard' | 'longer'
+
+export interface StructuredFeedback {
+  tone_style?: ToneStyle
+  emphasis?: EmphasisOption[]
+  length_preference?: LengthPreference
+  save_as_correction?: boolean
+}
 
 interface FeedbackModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   contentType: 'title' | 'description'
   currentContent: string
-  onSubmit: (feedback: string, feedbackType?: FeedbackPreset) => void
+  onSubmit: (feedback: string, feedbackType?: FeedbackPreset, structured?: StructuredFeedback) => void
   isLoading?: boolean
 }
 
@@ -34,6 +46,27 @@ const FEEDBACK_PRESETS: { id: FeedbackPreset; label: string }[] = [
   { id: 'less_promotional', label: 'Less Promotional' },
 ]
 
+const TONE_OPTIONS: { id: ToneStyle; label: string; description: string }[] = [
+  { id: 'formal', label: 'Formal', description: 'Professional, authoritative tone' },
+  { id: 'conversational', label: 'Conversational', description: 'Friendly, approachable tone' },
+  { id: 'technical', label: 'Technical', description: 'Precise, specification-focused' },
+  { id: 'aspirational', label: 'Aspirational', description: 'Luxury, lifestyle-oriented' },
+]
+
+const EMPHASIS_OPTIONS: { id: EmphasisOption; label: string }[] = [
+  { id: 'finish', label: 'Finish Details' },
+  { id: 'dimensions', label: 'Dimensions / Size' },
+  { id: 'use_case', label: 'Use Case' },
+  { id: 'compatibility', label: 'Compatibility' },
+  { id: 'luxury', label: 'Luxury Positioning' },
+]
+
+const LENGTH_OPTIONS: { id: LengthPreference; label: string }[] = [
+  { id: 'shorter', label: 'Shorter' },
+  { id: 'standard', label: 'Standard' },
+  { id: 'longer', label: 'Longer' },
+]
+
 export function FeedbackModal({
   open,
   onOpenChange,
@@ -44,10 +77,17 @@ export function FeedbackModal({
 }: FeedbackModalProps) {
   const [feedback, setFeedback] = useState('')
   const [selectedPreset, setSelectedPreset] = useState<FeedbackPreset | undefined>()
+  // Structured feedback state
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [toneStyle, setToneStyle] = useState<ToneStyle | undefined>()
+  const [emphasis, setEmphasis] = useState<EmphasisOption[]>([])
+  const [lengthPreference, setLengthPreference] = useState<LengthPreference | undefined>()
+  const [saveAsCorrection, setSaveAsCorrection] = useState(false)
+
+  const hasAnyInput = feedback.trim() || toneStyle || emphasis.length > 0 || lengthPreference
 
   const handlePresetClick = (preset: FeedbackPreset) => {
     setSelectedPreset(preset)
-    // Optionally prepopulate textarea with preset description
     const presetDescriptions: Record<FeedbackPreset, string> = {
       shorter: 'Make this shorter and more concise while keeping key information.',
       longer: 'Expand this with more detail and product benefits.',
@@ -62,26 +102,45 @@ export function FeedbackModal({
     }
   }
 
+  const handleEmphasisToggle = (option: EmphasisOption) => {
+    setEmphasis(prev =>
+      prev.includes(option)
+        ? prev.filter(e => e !== option)
+        : [...prev, option]
+    )
+  }
+
   const handleSubmit = () => {
-    if (!feedback.trim()) return
-    onSubmit(feedback, selectedPreset)
+    if (!hasAnyInput) return
+    const structured: StructuredFeedback = {
+      ...(toneStyle ? { tone_style: toneStyle } : {}),
+      ...(emphasis.length > 0 ? { emphasis } : {}),
+      ...(lengthPreference ? { length_preference: lengthPreference } : {}),
+      ...(saveAsCorrection ? { save_as_correction: true } : {}),
+    }
+    onSubmit(feedback, selectedPreset, Object.keys(structured).length > 0 ? structured : undefined)
   }
 
   const handleClose = () => {
     if (!isLoading) {
       setFeedback('')
       setSelectedPreset(undefined)
+      setToneStyle(undefined)
+      setEmphasis([])
+      setLengthPreference(undefined)
+      setSaveAsCorrection(false)
+      setShowAdvanced(false)
       onOpenChange(false)
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Improve {contentType === 'title' ? 'Title' : 'Description'}</DialogTitle>
           <DialogDescription>
-            Provide feedback on what to change. The AI will use your feedback to generate improved content.
+            Provide feedback on what to change. Use quick options, structured controls, or free-text.
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +150,7 @@ export function FeedbackModal({
             <Label className="text-sm text-muted-foreground">
               Current {contentType}:
             </Label>
-            <p className="mt-2 text-sm whitespace-pre-wrap max-h-[150px] overflow-y-auto">
+            <p className="mt-2 text-sm whitespace-pre-wrap max-h-[120px] overflow-y-auto">
               {currentContent || 'No content'}
             </p>
           </div>
@@ -124,13 +183,132 @@ export function FeedbackModal({
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder={`E.g., "Emphasize the solid brass construction more" or "Make the opening more compelling for homeowners"`}
-              rows={4}
+              rows={3}
               className="mt-2"
               disabled={isLoading}
             />
             <p className="text-xs text-muted-foreground mt-1">
               Be specific about what you want changed
             </p>
+          </div>
+
+          {/* Advanced Feedback — collapsible */}
+          <div className="border rounded-lg">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full flex items-center justify-between p-3 text-sm font-medium hover:bg-muted/50 rounded-lg transition-colors"
+              disabled={isLoading}
+            >
+              <span className="flex items-center gap-2">
+                {showAdvanced ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                Advanced Feedback Controls
+              </span>
+              <span className="text-xs text-muted-foreground font-normal">
+                {[toneStyle, emphasis.length > 0 && `${emphasis.length} emphasis`, lengthPreference]
+                  .filter(Boolean)
+                  .join(' · ') || 'Optional'}
+              </span>
+            </button>
+
+            {showAdvanced && (
+              <div className="px-4 pb-4 space-y-4 border-t pt-4">
+                {/* Tone / Style */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Tone / Style</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {TONE_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setToneStyle(toneStyle === option.id ? undefined : option.id)}
+                        disabled={isLoading}
+                        className={`text-left px-3 py-2 rounded-md border text-sm transition-colors ${
+                          toneStyle === option.id
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="font-medium">{option.label}</div>
+                        <div className={`text-xs mt-0.5 ${toneStyle === option.id ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                          {option.description}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Content Emphasis */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Content Emphasis</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {EMPHASIS_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => handleEmphasisToggle(option.id)}
+                        disabled={isLoading}
+                        className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
+                          emphasis.includes(option.id)
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border hover:bg-muted/50'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Length */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Length</Label>
+                  <div className="flex gap-2">
+                    {LENGTH_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setLengthPreference(lengthPreference === option.id ? undefined : option.id)}
+                        disabled={isLoading}
+                        className={`flex-1 px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
+                          lengthPreference === option.id
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border hover:bg-muted/50'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Save as persistent correction */}
+                <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <Checkbox
+                    id="save-as-correction"
+                    checked={saveAsCorrection}
+                    onCheckedChange={(checked) => setSaveAsCorrection(Boolean(checked))}
+                    disabled={isLoading || !hasAnyInput}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <label
+                      htmlFor="save-as-correction"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Remember this correction for future regenerations
+                    </label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Saves this feedback as a persistent correction. All future regenerations for this SKU will automatically include it.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -140,7 +318,7 @@ export function FeedbackModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!feedback.trim() || isLoading}
+            disabled={!hasAnyInput || isLoading}
           >
             {isLoading ? (
               <>

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { RefreshCw, MessageSquare, ChevronDown, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { FeedbackModal } from './FeedbackModal'
+import { FeedbackModal, StructuredFeedback } from './FeedbackModal'
 
 interface RegenerateButtonProps {
   sku: string
@@ -113,7 +113,7 @@ export function RegenerateButton({
     }
   }
 
-  const handleFeedbackRegenerate = async (feedback: string, feedbackType?: string) => {
+  const handleFeedbackRegenerate = async (feedback: string, feedbackType?: string, structured?: StructuredFeedback) => {
     setIsRegenerating(true)
     toast.info('Regenerating with feedback...')
 
@@ -125,12 +125,17 @@ export function RegenerateButton({
           master_sku: sku,
           content_type: contentType,
           platform,
-          mode: 'with_feedback',
-          feedback: {
+          mode: feedback ? 'with_feedback' : 'simple',
+          feedback: feedback ? {
             current_content: currentContent,
             user_feedback: feedback,
             feedback_type: feedbackType,
-          },
+          } : undefined,
+          // Structured feedback fields (FIX-01) — forwarded to Python pipeline
+          ...(structured?.tone_style ? { tone_style: structured.tone_style } : {}),
+          ...(structured?.emphasis && structured.emphasis.length > 0 ? { emphasis: structured.emphasis } : {}),
+          ...(structured?.length_preference ? { length_preference: structured.length_preference } : {}),
+          ...(structured?.save_as_correction ? { save_as_correction: true } : {}),
         }),
       })
 

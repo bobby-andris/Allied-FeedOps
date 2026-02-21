@@ -19,6 +19,10 @@ const FEEDBACK_PRESETS: Record<FeedbackPreset, string> = {
   better_hook: 'Improve the opening to be more compelling',
 }
 
+type ToneStyle = 'formal' | 'conversational' | 'technical' | 'aspirational'
+type EmphasisOption = 'finish' | 'dimensions' | 'use_case' | 'compatibility' | 'luxury'
+type LengthPreference = 'shorter' | 'standard' | 'longer'
+
 interface RegenerateRequest {
   master_sku: string
   content_type: 'title' | 'description'
@@ -33,6 +37,11 @@ interface RegenerateRequest {
   options?: {
     num_candidates?: number
   }
+  // Structured feedback fields (FIX-01: persistent corrections)
+  tone_style?: ToneStyle
+  emphasis?: EmphasisOption[]
+  length_preference?: LengthPreference
+  save_as_correction?: boolean
 }
 
 type SupabaseErrLike = {
@@ -208,16 +217,29 @@ export async function POST(request: NextRequest) {
 
     console.log(`Calling Python pipeline for ${canonicalMasterSku} (${platform}/${content_type}, mode=${mode})`)
 
+    // Extract structured feedback fields forwarded from client (FIX-01)
+    const toneStyle = body.tone_style
+    const emphasis = body.emphasis
+    const lengthPreference = body.length_preference
+    const saveAsCorrection = Boolean(body.save_as_correction)
+
+    const pipelinePayload: Record<string, unknown> = {
+      master_sku: canonicalMasterSku,
+      content_type,
+      platform,
+      feedback: feedbackText,
+      finish_code: finishCode,
+      // Structured feedback (FIX-01): only include fields that are set
+      ...(toneStyle ? { tone_style: toneStyle } : {}),
+      ...(emphasis && emphasis.length > 0 ? { emphasis } : {}),
+      ...(lengthPreference ? { length_preference: lengthPreference } : {}),
+      ...(saveAsCorrection ? { save_as_correction: true } : {}),
+    }
+
     const pipelineResponse = await fetch(`${PIPELINE_URL}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        master_sku: canonicalMasterSku,
-        content_type,
-        platform,
-        feedback: feedbackText,
-        finish_code: finishCode,
-      }),
+      body: JSON.stringify(pipelinePayload),
     })
 
     if (!pipelineResponse.ok) {
