@@ -110,7 +110,12 @@ Plans:
   3. Content generation prompts reflect Google Shopping ranking intelligence from Phase 17 — titles and descriptions address the ranking factors identified as feed-controllable
   4. Image generation guidance incorporates Google Shopping visual ranking factors from Phase 17 — clarity, lifestyle context, and quality signals are explicit in the generation instructions
   5. If a superior model was identified in Phase 17, a model switch is implemented in the Python pipeline with A/B quality comparison on sample SKUs before full rollout
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 20-01-PLAN.md — Shopping intelligence YAML + loader + GPT-5.2 accuracy guardrail (MODEL-03, GOOG-04 foundation)
+- [ ] 20-02-PLAN.md — Image generation guidance with collection/finish/category intelligence (GOOG-05)
+- [ ] 20-03-PLAN.md — Shared prompt builder + prompt parity + feature flag observable activation (FIX-01, FIX-02, GOOG-04)
+- [ ] 20-04-PLAN.md — Persistent corrections table + structured feedback UI (FIX-01 feedback)
 
 ## Progress
 
@@ -122,7 +127,7 @@ Plans:
 | 17. Google Shopping Intelligence & Model Research | 3/3 | Complete    | 2026-02-21 | - |
 | 18. Diagnosis — Establish Ground Truth | 3/3 | Complete    | 2026-02-21 | - |
 | 19. Measurement Infrastructure | 4/4 | Complete   | 2026-02-21 | - |
-| 20. Targeted Fixes & Intelligence Application | v1.2 | 0/TBD | Not started | - |
+| 20. Targeted Fixes & Intelligence Application | v1.2 | 0/4 | Planned | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
