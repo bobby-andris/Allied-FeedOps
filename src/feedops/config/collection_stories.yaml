@@ -1,0 +1,484 @@
+# Collection Storytelling — Runtime Config for Per-Collection Prompt Injection
+# Loaded by prompt_builder.py. Inject the matching collection block per SKU.
+# Supplements collection_descriptions.py CSV with storytelling guidance.
+# Each collection: design_aesthetic, style_category, target_buyer, content_examples.
+
+version: "1.0"
+last_updated: "2026-02-21"
+
+# ---------------------------------------------------------------------------
+# WHY COLLECTIONS MATTER (injected once as preamble when collection data exists)
+# ---------------------------------------------------------------------------
+
+collection_preamble: >
+  Allied Brass offers 41 coordinated designer collections — each a complete
+  design system of matching accessories in 28 finishes. No competitor at this
+  price tier offers coordinated collections. Use the collection identity to
+  differentiate this product, suggest coordination with other pieces, and
+  address the "will this match?" anxiety that kills conversions.
+
+# ---------------------------------------------------------------------------
+# PER-COLLECTION STORYTELLING PROFILES
+# ---------------------------------------------------------------------------
+
+collections:
+
+  Argo:
+    design_aesthetic: >
+      Bold architectural geometry with perfectly square backplates and sharply defined
+      cubic end pieces. Uncompromising 90-degree angles and precise proportions create
+      the crisp minimalist presence that contemporary design demands.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Modern minimalists, urban loft dwellers, architects specifying clean-line hardware for contemporary new builds."
+    content_examples:
+      - "Part of the Argo Collection, this towel bar makes a bold architectural statement with perfectly square geometry and crisp 90-degree angles that anchor any contemporary bathroom."
+      - "Coordinates with other Argo Collection pieces for an uncompromising minimalist aesthetic throughout the room."
+
+  Astor Place:
+    design_aesthetic: >
+      Smooth cylindrical posts topped with distinctive curved hooks create a refined
+      silhouette that bridges traditional and contemporary styles. Gently tapered forms
+      and balanced proportions work equally well in modern lofts or classic brownstones.
+    style_category: "Transitional"
+    target_buyer: "Homeowners blending styles, renovators updating traditional spaces without going fully modern, brownstone and townhouse owners."
+    content_examples:
+      - "The Astor Place Collection bridges traditional warmth and contemporary clean lines — this towel bar's smooth cylindrical posts and curved hooks feel at home in any style bathroom."
+      - "Designed to coordinate with matching Astor Place accessories, from robe hooks to toilet paper holders, in your choice of 28 finishes."
+
+  Bolero:
+    design_aesthetic: >
+      Dramatically oversized spherical finials transform ordinary bathroom hardware into
+      sculptural focal points. These substantial ball-shaped end pieces are larger and
+      bolder than traditional round accents, bringing gallery-worthy presence to any room.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Design-forward homeowners, interior designers seeking statement hardware, anyone who wants bathroom accessories to be conversation pieces."
+    content_examples:
+      - "From the Bolero Collection — where oversized spherical finials turn this towel bar into a sculptural focal point, not just a place to hang towels."
+      - "The Bolero Collection's bold ball-shaped accents make bathroom hardware a design statement. Pair with matching hooks and shelves for gallery-worthy coordination."
+
+  Carolina:
+    design_aesthetic: >
+      Classical architecture translated into bathroom hardware through meticulously turned
+      posts and precisely grooved backplates. Balanced proportions and refined detailing
+      honor period design without feeling dated — timeless sophistication that bridges
+      heritage and modern living.
+    style_category: "Traditional/Classic"
+    target_buyer: "Traditional home renovators, historical property owners, anyone creating a timeless bathroom that will never feel dated."
+    content_examples:
+      - "Part of the Carolina Collection — Allied Brass's most extensive traditional design family — this piece brings classical elegance through meticulously turned posts and grooved backplates."
+      - "The Carolina Collection spans over 170 accessories, from towel bars to cabinet hardware, all sharing the same heritage-inspired detailing in 28 coordinated finishes."
+
+  Carolina Crystal:
+    design_aesthetic: >
+      Faceted crystal finials that catch and reflect light like fine jewelry, paired with
+      the same grooved metal backplates as the Carolina Collection. A sophisticated fusion
+      of sparkling crystal accents and traditional craftsmanship that creates luxury-level
+      elegance.
+    style_category: "Traditional/Classic"
+    target_buyer: "Luxury primary bathroom renovators, estate homeowners, anyone who wants crystal-accented hardware that elevates traditional design to opulent."
+    content_examples:
+      - "The Carolina Crystal Collection elevates traditional hardware with faceted crystal finials that catch bathroom light like fine jewelry — paired with meticulously grooved brass backplates."
+      - "Coordinates with the full Carolina Crystal line for a luxury-level bathroom where every accessory sparkles with the same crystal-and-brass refinement."
+
+  Clearview:
+    design_aesthetic: >
+      Crystal-clear acrylic posts that seemingly float against walls, creating openness
+      and light that traditional all-metal accessories cannot match. Minimalist metal
+      mounting brackets disappear visually while transparent cylindrical forms add
+      subtle architectural interest.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Contemporary bathroom designers, anyone seeking visual lightness, shower-door-heavy bathrooms where transparency extends the glass aesthetic."
+    content_examples:
+      - "The Clearview Collection's crystal-clear acrylic posts create the illusion of floating hardware — functional accessories that don't interrupt clean bathroom sightlines."
+      - "Part of Allied Brass's largest collection, Clearview offers over 60 coordinated pieces in four accent styles (Smooth, Dotted, Grooved, Twisted) across 28 finishes."
+
+  Continental:
+    design_aesthetic: >
+      Perfectly round backplates and gently curved hooks create a refined, unfussy
+      aesthetic. Balanced circular proportions and smooth surfaces deliver timeless
+      simplicity that won't compete with other design elements in the room.
+    style_category: "Transitional"
+    target_buyer: "Homeowners who want understated elegance, rental property upgrades, guest bathrooms where hardware should complement without dominating."
+    content_examples:
+      - "The Continental Collection's perfectly round backplates and gentle curves bring quiet elegance to this piece — refined enough for a formal powder room, simple enough for everyday family use."
+      - "Pair with other Continental Collection accessories for a coordinated bathroom that feels intentional without being fussy."
+
+  Dayton:
+    design_aesthetic: >
+      Uncompromising modern geometry with bold rectangular backplates and sharply defined
+      edges that cast dramatic shadows. Strong angular forms and flat planar surfaces
+      create crisp minimalist presence for spaces where clean lines are non-negotiable.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Ultra-modern bathroom designers, commercial/hospitality projects, homeowners who want the sharpest possible geometric hardware."
+    content_examples:
+      - "From the Dayton Collection — bold rectangular backplates and razor-sharp edges that cast dramatic shadows across contemporary bathroom walls."
+      - "The Dayton Collection's uncompromising geometry coordinates towel bars, hooks, and holders into a cohesive architectural statement."
+
+  Dottingham:
+    design_aesthetic: >
+      Delicate beaded detailing encircles each backplate, adding refined texture without
+      overwhelming visual impact. A careful balance of decoration and restraint that
+      bridges traditional and contemporary — hardware with character that doesn't
+      demand attention.
+    style_category: "Transitional"
+    target_buyer: "Transitional bathroom renovators, homeowners bridging design eras, anyone who wants subtle texture without committing to fully traditional or modern."
+    content_examples:
+      - "The Dottingham Collection's signature beaded backplates add just enough refined texture to distinguish this piece from plain hardware — subtle sophistication that bridges any design style."
+      - "One of Allied Brass's most popular collections with over 130 coordinated pieces, Dottingham brings consistent beaded detailing from towel bars to glass shelves."
+
+  Essex:
+    design_aesthetic: >
+      Smooth cylindrical posts and gracefully curved hooks honor traditional design
+      without feeling stuffy or dated. Refined proportions and gentle curves create
+      timeless sophistication for period homes and heritage-inspired renovations.
+    style_category: "Traditional/Classic"
+    target_buyer: "Period home renovators, traditional style enthusiasts, homeowners restoring historical properties who need hardware that respects the era."
+    content_examples:
+      - "The Essex Collection brings classic elegance through smooth cylindrical posts and gracefully curved hooks — traditional hardware that never feels dated."
+      - "Coordinate with matching Essex towel rings, soap dishes, and robe hooks for a cohesive heritage bathroom."
+
+  Foxtrot:
+    design_aesthetic: >
+      Precisely machined concentric grooves wrap around circular backplates and
+      cylindrical posts, creating mesmerizing patterns of light and shadow. Precision-cut
+      circular ridges add sophisticated texture while maintaining contemporary clean lines.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Design-conscious homeowners who want hardware with personality that doesn't abandon minimalist principles, modern bathroom renovators seeking tactile interest."
+    content_examples:
+      - "The Foxtrot Collection's precision-machined concentric grooves turn this piece into tactile art — mesmerizing patterns of light and shadow that elevate simple bathroom hardware."
+      - "Pair with matching Foxtrot accessories to carry the same rhythmic groove pattern throughout your bathroom."
+
+  Fresno:
+    design_aesthetic: >
+      Pure cylindrical geometry — smooth, unadorned posts and simple round backplates
+      without grooves or ornamentation. Disciplined minimalism where visual clarity
+      is paramount, with only essential forms: perfect circles and cylinders.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Minimalists, contemporary new-build specifiers, homeowners who want hardware that enhances clean lines rather than competing with them."
+    content_examples:
+      - "The Fresno Collection commits to pure cylindrical geometry — no grooves, no ornamentation, just the disciplined minimalism that contemporary bathrooms demand."
+      - "Every Fresno piece shares the same unadorned cylindrical forms, creating a quietly powerful modern statement when coordinated throughout the room."
+
+  Malibu:
+    design_aesthetic: >
+      Substantial circular backplates and large spherical end pieces with subtle beveled
+      edges that catch light beautifully. Generous proportions and refined geometric
+      details create a relaxed yet polished California-cool sophistication.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Coastal-contemporary homeowners, California-style renovators, anyone who wants modern hardware that feels sophisticated but never stuffy."
+    content_examples:
+      - "The Malibu Collection's generous proportions and subtly beveled spherical accents bring California-cool sophistication to this piece — relaxed polish for contemporary bathrooms."
+      - "Coordinate with other Malibu pieces for a bathroom that feels effortlessly designed, from towel bars to robe hooks."
+
+  Mambo:
+    design_aesthetic: >
+      Dramatic beaded grooves wrap around posts and backplates, creating rhythmic
+      patterns of texture and shadow. Bold horizontal ridges and confident proportions
+      bring dynamic personality while maintaining enough refinement to bridge into
+      transitional spaces.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Personality-driven designers, homeowners who want bathroom hardware with unmistakable character, eclectic and maximalist bathroom renovators."
+    content_examples:
+      - "The Mambo Collection energizes this piece with dramatic beaded grooves that create rhythmic patterns of texture and shadow — bathroom hardware with unmistakable character."
+      - "Carry the Mambo Collection's bold groove pattern from towel bars to shelves for a bathroom that pulses with dynamic, coordinated personality."
+
+  Mercury:
+    design_aesthetic: >
+      Distinctive grooved rings wrap around cylindrical posts, adding refined texture
+      without overwhelming visual impact. Balanced proportions and subtle detailing
+      work equally well updating a traditional bathroom or adding warmth to modern spaces.
+    style_category: "Transitional"
+    target_buyer: "Versatile renovators, homeowners transitioning between design eras, anyone who wants textured hardware that adapts to evolving style."
+    content_examples:
+      - "The Mercury Collection's distinctive grooved rings add refined texture to cylindrical posts — the kind of subtle detailing that makes this piece feel considered, not generic."
+      - "With over 60 coordinated pieces, the Mercury Collection lets you carry the same grooved-ring detail from towel bars to toilet paper holders."
+
+  Monte Carlo:
+    design_aesthetic: >
+      Masterfully engraved floral patterns on decorative backplates bring the artistry
+      of classical ornamentation to bathroom hardware. Intricate botanical details
+      executed with jewelry-grade precision create timeless luxury for traditional spaces.
+    style_category: "Traditional/Classic"
+    target_buyer: "Traditional luxury homeowners, estate bathroom renovators, anyone who wants hardware with the artistry of classical ornamentation."
+    content_examples:
+      - "The Monte Carlo Collection showcases masterfully engraved floral patterns on every backplate — the kind of botanical artistry typically reserved for fine jewelry, now gracing your bathroom hardware."
+      - "Coordinate Monte Carlo towel bars, hooks, and mirrors for a bathroom where every piece carries the same intricate floral craftsmanship."
+
+  Montero:
+    design_aesthetic: >
+      Bold square backplates with rectangular posts and cubic end pieces create striking
+      geometric hardware. Unwavering commitment to perpendicular angles and flat planar
+      surfaces delivers precise, uncompromising modernism for sophisticated spaces.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Urban loft owners, modern primary bathroom renovators, architects specifying geometric hardware with strong architectural presence."
+    content_examples:
+      - "The Montero Collection draws from mid-century modern geometry — bold square backplates and rectangular posts that make a confident architectural statement in this piece."
+      - "Every Montero piece shares the same perpendicular precision, creating a cohesive geometric language when coordinated throughout the bathroom."
+
+  Pacific Beach:
+    design_aesthetic: >
+      Crystal-clear acrylic accents paired with precisely grooved metal backplates
+      create hardware that feels light, fresh, and unexpectedly modern. Transparent
+      elements add visual airiness while circular groove patterns provide subtle
+      sophistication — coastal-inspired openness for any bathroom.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Coastal homeowners, beach house renovators, anyone seeking a lighter aesthetic than traditional all-metal hardware."
+    content_examples:
+      - "The Pacific Beach Collection pairs crystal-clear acrylic with grooved metal backplates — bringing coastal-inspired lightness to this piece, whether you're beachside or landlocked."
+      - "Coordinate Pacific Beach towel bars, shelves, and hooks for a bathroom that feels airy and fresh, with the same acrylic-and-metal pairing throughout."
+
+  Pacific Grove:
+    design_aesthetic: >
+      Precision-grooved circular backplates with crystal-clear acrylic accents create
+      hardware that feels both sophisticated and refreshingly light. Concentric ring
+      patterns add tactile depth while transparent elements bring visual airiness —
+      refined detailing meets coastal openness.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Design-conscious coastal homeowners, contemporary bathroom renovators who want texture and lightness together."
+    content_examples:
+      - "The Pacific Grove Collection combines precision-grooved metal with crystal-clear acrylic — this piece feels both sophisticated and refreshingly light, with concentric ring patterns that add depth without weight."
+      - "One of Allied Brass's most extensive collections with nearly 180 pieces, Pacific Grove coordinates grooved-and-acrylic detailing from towel bars to glass shelves."
+
+  Pipeline:
+    design_aesthetic: >
+      Authentic industrial design with exposed pipe flanges and visible mounting hardware
+      that celebrates the mechanics of bathroom accessories. Utilitarian plumbing elements
+      refined into architectural features — loft-style edge meeting sophisticated restraint.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Industrial-chic enthusiasts, loft and warehouse conversion owners, urban renovators who want raw mechanical character with refined execution."
+    content_examples:
+      - "The Pipeline Collection celebrates the honest mechanics of plumbing — exposed flanges and visible hardware that transform this piece from bathroom accessory into architectural statement."
+      - "Carry the Pipeline Collection's industrial-modern edge throughout your bathroom with coordinated towel bars, mug holders, and grab bars that share the same raw-meets-refined character."
+
+  Prestige Monte Carlo:
+    design_aesthetic: >
+      Intricate floral engravings and ornate detailing elevate bathroom hardware to fine
+      jewelry for your walls. Masterfully executed traditional patterns with luxury-fixture
+      precision create an unmistakable sense of opulence in premium spaces.
+    style_category: "Traditional/Classic"
+    target_buyer: "Estate homeowners, luxury primary bathroom renovators, collectors of fine traditional hardware who want the most ornate option available."
+    content_examples:
+      - "The Prestige Monte Carlo Collection elevates this piece to fine jewelry for your walls — intricate floral engravings and ornate detailing executed with luxury-fixture precision."
+      - "Every Prestige Monte Carlo accessory carries the same masterful engraving, creating opulent coordination from towel bars to mirrors."
+
+  Prestige Que New:
+    design_aesthetic: >
+      Dramatically deep concentric grooves wrap around square backplates, creating
+      mesmerizing circular patterns that add luxury-level detailing. Precision-machined
+      rings create compelling depth and shadow play while maintaining sophisticated restraint.
+    style_category: "Transitional"
+    target_buyer: "Upscale transitional renovators, powder room designers, homeowners who want premium textured hardware that makes a refined statement."
+    content_examples:
+      - "The Prestige Que New Collection's dramatically deep concentric grooves create mesmerizing circular patterns on square backplates — luxury-level detailing for this piece."
+      - "Coordinate Prestige Que New accessories throughout your bathroom for consistent depth and shadow play that signals refined taste."
+
+  Prestige Regal:
+    design_aesthetic: >
+      Ornately detailed backplates with classical floral engravings and precisely turned
+      posts bring museum-quality craftsmanship to bathroom hardware. Refined decorative
+      elements and meticulous execution typically found in high-end estate homes.
+    style_category: "Traditional/Classic"
+    target_buyer: "Estate and luxury homeowners, historical renovation specialists, buyers who value museum-quality decorative craftsmanship."
+    content_examples:
+      - "The Prestige Regal Collection brings museum-quality craftsmanship to this piece — ornately detailed backplates with classical floral engravings and precisely turned posts."
+      - "One of Allied Brass's most extensive traditional collections with over 120 pieces, Prestige Regal coordinates heritage-level detailing throughout the bathroom."
+
+  Prestige Skyline:
+    design_aesthetic: >
+      Oversized circular backplates with precision-grooved concentric rings create bold,
+      sculptural presence. Substantial scale and meticulous circular detailing transform
+      accessories into architectural focal points for luxury contemporary spaces.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Luxury urban bathroom designers, contemporary statement-seekers, homeowners who want premium hardware that commands attention with restraint."
+    content_examples:
+      - "The Prestige Skyline Collection's oversized grooved backplates transform this piece into an architectural focal point — bold scale with meticulous circular precision."
+      - "Coordinate Prestige Skyline pieces for a luxury contemporary bathroom where every accessory commands attention through the same substantial, sculptural presence."
+
+  Que New:
+    design_aesthetic: >
+      Striking concentric groove patterns on square backplates add dramatic circular
+      detailing without sacrificing clean modern lines. Precision-cut rings create
+      compelling depth and shadow play for hardware that contributes to the architectural
+      conversation with sophisticated restraint.
+    style_category: "Transitional"
+    target_buyer: "Transitional bathroom renovators, homeowners who want geometric interest with restraint, designers bridging modern and traditional."
+    content_examples:
+      - "The Que New Collection adds dramatic circular groove patterns to square backplates — this piece contributes to the architectural conversation without sacrificing clean modern lines."
+      - "With over 75 coordinated pieces, the Que New Collection lets you carry the same concentric-groove language from towel bars to glass shelves."
+
+  Regal:
+    design_aesthetic: >
+      Ornately detailed backplates with classical patterns and refined decorative elements
+      honor heritage design without feeling dated. Balanced proportions and thoughtful
+      ornamentation create timeless sophistication in traditional and transitional spaces.
+    style_category: "Traditional/Classic"
+    target_buyer: "Traditional home owners, historical renovation projects, transitional spaces that need hardware with character and polish."
+    content_examples:
+      - "The Regal Collection honors heritage design with ornately detailed backplates and refined decorative elements — timeless sophistication that never feels dated."
+      - "Pair Regal towel bars, hooks, and accessories for a coordinated traditional bathroom with consistent decorative craftsmanship in every piece."
+
+  Remi:
+    design_aesthetic: >
+      Dramatically curved posts that sweep in bold arcs, transforming ordinary accessories
+      into kinetic architectural elements. Substantial scale and dynamic curved geometry
+      bring gallery-worthy presence to contemporary spaces.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Art-minded homeowners, contemporary design enthusiasts, anyone who wants bathroom hardware that doubles as sculptural art."
+    content_examples:
+      - "The Remi Collection's dramatically curved posts sweep in bold arcs, transforming this piece from a functional accessory into a kinetic architectural element."
+      - "Coordinate Remi pieces throughout the bathroom for gallery-worthy curved geometry that turns hardware into a curated art installation."
+
+  Retro Dot:
+    design_aesthetic: >
+      Precisely arranged circular dots pattern each backplate, creating playful mid-century
+      charm with vintage sophistication. Geometric dot arrangements and balanced traditional
+      proportions offer nostalgic appeal with distinctive personality.
+    style_category: "Traditional/Classic"
+    target_buyer: "Mid-century design enthusiasts, retro-inspired renovators, homeowners who want heritage style with personality and playfulness."
+    content_examples:
+      - "The Retro Dot Collection's precisely arranged circular dot pattern brings playful mid-century charm to this piece — vintage sophistication with a distinctive personality."
+      - "Carry the Retro Dot Collection's nostalgic dot motif from towel bars to toilet paper holders for a coordinated retro-inspired bathroom."
+
+  Retro Wave:
+    design_aesthetic: >
+      Artfully arranged concentric circular rings on each backplate create rhythmic
+      wave-like patterns that bring mid-century sophistication. Vintage-inspired detailing
+      and balanced proportions honor period design while maintaining contemporary polish.
+    style_category: "Traditional/Classic"
+    target_buyer: "Period design enthusiasts, homeowners creating retro-inspired bathrooms, renovators who want heritage hardware that bridges past and present."
+    content_examples:
+      - "The Retro Wave Collection's concentric ring patterns create rhythmic wave-like detailing on this piece — mid-century sophistication that bridges past and present."
+      - "Coordinate Retro Wave accessories for a bathroom where every piece carries the same vintage-inspired ring patterns with contemporary polish."
+
+  Sag Harbor:
+    design_aesthetic: >
+      Substantial round backplates and gently curved hooks bring refined coastal elegance
+      without resorting to literal nautical themes. Generous circular proportions and
+      clean lines echo maritime sophistication with enough restraint to work anywhere.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Coastal homeowners, Hamptons-style renovators, anyone wanting maritime-inspired elegance that works whether oceanside or landlocked."
+    content_examples:
+      - "The Sag Harbor Collection brings refined coastal elegance to this piece — substantial round backplates and gentle curves that echo maritime sophistication without a single anchor motif."
+      - "Coordinate Sag Harbor accessories for a bathroom with consistent coastal character that feels relaxed and elegant, not themed."
+
+  Satellite Orbit One:
+    design_aesthetic: >
+      Dramatically oversized spherical end pieces orbit around sleek cylindrical posts,
+      creating space-age sculptural presence. Bold circular geometry and substantial
+      scale transform bathroom hardware into conversation-worthy focal points.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Design-forward homeowners, statement-piece seekers, anyone who wants bathroom hardware that sparks conversation and makes an unforgettable impression."
+    content_examples:
+      - "The Satellite Orbit One Collection's oversized spherical end pieces create space-age sculptural presence — this piece is designed to start conversations, not just hold towels."
+      - "Pair Satellite Orbit One accessories for a design-forward bathroom where bold orbital geometry creates an unforgettable coordinated statement."
+
+  Satellite Orbit Two:
+    design_aesthetic: >
+      Refined minimalism with sleek cylindrical posts and subtle circular accents that
+      create quiet sophistication. Streamlined forms and precise proportions offer
+      understated architectural presence without unnecessary ornamentation.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Minimalist homeowners, urban apartment dwellers, designers who want sophisticated hardware that enhances clean lines without competing."
+    content_examples:
+      - "The Satellite Orbit Two Collection delivers refined minimalism — sleek cylindrical posts and subtle circular accents give this piece quiet sophistication without unnecessary ornamentation."
+      - "Coordinate Satellite Orbit Two accessories for a minimalist bathroom where every piece shares the same streamlined precision."
+
+  Shadwell:
+    design_aesthetic: >
+      Distinctive J-shaped hooks and curved posts create sculptural, almost mechanical
+      presence. Architectural forms and bold curves bring loft-style sophistication with
+      artistic character and authentic industrial edge.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Urban loft dwellers, industrial-chic designers, anyone who wants bathroom hardware with sculptural artistic character and authentic edge."
+    content_examples:
+      - "The Shadwell Collection's distinctive J-shaped hooks and sculptural curves bring loft-style sophistication to this piece — industrial-modern hardware with artistic character."
+      - "Carry Shadwell's bold sculptural forms throughout the bathroom for coordinated industrial-chic hardware that feels like an art installation."
+
+  Skyline:
+    design_aesthetic: >
+      Distinctively petite spherical end pieces paired with smooth circular backplates
+      create refined, almost jewelry-like presence. Smaller scale and balanced proportions
+      bring metropolitan sophistication without visual heaviness.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Powder room designers, guest bathroom renovators, anyone who wants polished, elegant hardware that doesn't overwhelm smaller spaces."
+    content_examples:
+      - "The Skyline Collection's petite spherical accents create jewelry-like presence on your bathroom walls — refined metropolitan sophistication without visual heaviness."
+      - "Coordinate Skyline pieces in a powder room or guest bath for elegant hardware that feels delicate and intentional."
+
+  Soho:
+    design_aesthetic: >
+      Distinctive round ball-caps atop sleek cylindrical posts create a refined aesthetic
+      equally at home in modern lofts or transitional brownstones. Clean-lined versatility
+      makes it the safe choice that won't feel dated in five years.
+    style_category: "Transitional"
+    target_buyer: "Style-conscious homeowners who hate committing to one aesthetic, renovators who may change their minds, rental upgrades that need broad appeal."
+    content_examples:
+      - "The Soho Collection's clean-lined versatility makes this piece feel at home in a modern loft or a classic brownstone — the bathroom hardware you won't regret in five years."
+      - "Coordinate Soho accessories throughout your bathroom for a refined look that adapts as your style evolves."
+
+  Southbeach:
+    design_aesthetic: >
+      Distinctive pyramid-shaped end caps atop cylindrical posts create striking angular
+      forms that cast dramatic shadows. Sharp pyramidal geometry and confident proportions
+      bring bold, energetic presence to contemporary spaces.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Bold contemporary designers, Miami-modern enthusiasts, homeowners who want geometric hardware with unmistakable personality and architectural impact."
+    content_examples:
+      - "The Southbeach Collection's signature pyramid-shaped end caps create striking angular forms that cast dramatic shadows — Miami-modern energy for this piece."
+      - "Pair Southbeach towel bars, hooks, and holders for a bold geometric bathroom where every piece shares the same confident pyramidal personality."
+
+  Tango:
+    design_aesthetic: >
+      Distinctive elongated half-sphere details create dynamic, almost kinetic presence.
+      Unique asymmetric forms add warmth and personality — artistic, unexpected hardware
+      that brings movement and energy to contemporary spaces.
+    style_category: "Contemporary Specialty"
+    target_buyer: "Art-forward homeowners, eclectic designers, anyone who wants bathroom hardware that feels artistic and unexpected rather than conventional."
+    content_examples:
+      - "The Tango Collection's elongated half-sphere details bring dynamic, almost kinetic energy to this piece — artistic bathroom hardware that defies convention."
+      - "Coordinate Tango accessories for a bathroom that pulses with the same asymmetric, art-forward personality in every piece."
+
+  Tribecca:
+    design_aesthetic: >
+      Distinctively angled backplates and geometric forms create bold shadows and striking
+      visual interest. Precise angular geometry and substantial presence transform
+      accessories into urban-chic focal points.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Urban dwellers, modern loft owners, metropolitan bathroom renovators who want hardware with strong angular architectural character."
+    content_examples:
+      - "The Tribecca Collection's angled backplates create bold shadows and striking geometry — this piece transforms from bathroom accessory into an urban-chic focal point."
+      - "Carry Tribecca's precise angular geometry from towel bars to hooks for a metropolitan bathroom with consistent architectural edge."
+
+  Venus:
+    design_aesthetic: >
+      Pure circular geometry — perfectly round backplates and smooth cylindrical posts
+      without ornamentation. Intentional simplicity that creates serene minimalist
+      presence, where flawless circles and cylinders enhance visual calm.
+    style_category: "Contemporary/Modern"
+    target_buyer: "Zen-inspired designers, spa-style bathroom renovators, minimalists who want hardware that enhances visual calm rather than adding complexity."
+    content_examples:
+      - "The Venus Collection celebrates pure circular geometry — this piece's perfectly round forms create serene minimalist presence, enhancing visual calm rather than competing with it."
+      - "Coordinate Venus accessories for a bathroom where every piece shares the same intentional simplicity — flawless circles that create a spa-like sense of order."
+
+  Washington Square:
+    design_aesthetic: >
+      Substantial round backplates with cylindrical posts and spherical details bring
+      urban sophistication to transitional and contemporary bathrooms. Balanced circular
+      proportions offer metropolitan polish that bridges modern and traditional sensibilities.
+    style_category: "Transitional"
+    target_buyer: "Urban homeowners, transitional bathroom renovators, anyone wanting metropolitan polish that works in both modern and traditional settings."
+    content_examples:
+      - "The Washington Square Collection brings metropolitan sophistication to this piece — substantial round backplates and spherical accents that feel equally at home in a Manhattan loft or suburban primary bath."
+      - "Pair Washington Square accessories for a bathroom with consistent urban polish that bridges modern and traditional design."
+
+  Waverly Place:
+    design_aesthetic: >
+      Cylindrical posts wrapped with precisely machined concentric grooves create
+      sophisticated textural interest without overwhelming clean contemporary lines.
+      Rhythmic circular patterns add refined depth — the bridge between traditional
+      texture and modern restraint.
+    style_category: "Transitional"
+    target_buyer: "Transitional bathroom renovators, homeowners who want subtle architectural detailing, anyone bridging traditional texture with modern restraint."
+    content_examples:
+      - "The Waverly Place Collection wraps this piece in precisely machined concentric grooves — sophisticated textural interest that bridges traditional warmth and contemporary restraint."
+      - "With over 130 coordinated pieces, the Waverly Place Collection lets you carry the same grooved refinement from towel bars to candle holders, mirrors to glass shelves."
