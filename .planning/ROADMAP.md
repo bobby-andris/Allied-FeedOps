@@ -63,7 +63,11 @@
   2. The competitive gap analysis explains why competitors appear 5x more often for relevant search terms, with specific hypotheses tied to auction dynamics, product data gaps, or bid strategy
   3. Model comparison document exists with quality benchmarks, cost per SKU, and speed metrics for GPT-5.2 (or current frontier), Claude, Gemini, and the current model — with a clear recommendation
   4. The research output is specific enough to inform what generation prompts should say differently in Phase 20
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 17-01-PLAN.md — Google Shopping ranking factor research + Allied Brass competitive baseline data
+- [ ] 17-02-PLAN.md — Model benchmarking (GPT-4o vs GPT-5.2 vs Claude vs Gemini) on real SKUs
+- [ ] 17-03-PLAN.md — SERP scraping competitive gap analysis + optimization checklist
 
 ### Phase 18: Diagnosis — Establish Ground Truth
 **Goal**: Answer four sequential questions with evidence: Is content reaching GMC? Which code path runs in production? Are feature flags wired to the active path? Is the SKU coverage funnel wide enough to move metrics?
@@ -106,7 +110,7 @@
 | 01-04 | Phase 0 | 11/11 | Complete | 2026-02-13 |
 | 05-08 | v1.0 | 16/16 | Complete | 2026-02-13 |
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
-| 17. Google Shopping Intelligence & Model Research | v1.2 | 0/TBD | Not started | - |
+| 17. Google Shopping Intelligence & Model Research | v1.2 | 0/3 | Not started | - |
 | 18. Diagnosis — Establish Ground Truth | v1.2 | 0/TBD | Not started | - |
 | 19. Measurement Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 20. Targeted Fixes & Intelligence Application | v1.2 | 0/TBD | Not started | - |
