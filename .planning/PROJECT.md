@@ -8,82 +8,58 @@ A Google Ads feed optimization platform that automatically collects search perfo
 
 Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation, enabling data-driven optimization at scale for the entire catalog.
 
-## Current Milestone: v1.1 Dashboard UX & Quality
+## Current State (after v1.1)
 
-**Goal:** Revamp the dashboard to make the core review, image, and performance workflows fast, clear, and actually useful — with a full audit pass to fix broken pages and eliminate dead-end experiences.
+**What's shipped:**
+- Full Google Ads data pipeline: search terms, performance metrics, Keyword Planner for all 2,784 SKUs
+- Daily automated refresh via Cloud Scheduler
+- Dashboard with compact SKU review, per-platform approval badges, inline detail expansion
+- User-controlled variant selection for lifestyle image generation with impression-based auto-fallback
+- Performance page with baseline vs. snapshot delta comparison and trend indicators
+- Dashboard audit complete — no dead-end states, all pages functional
+- Google Ads backfill pipeline with parallelized GAQL chunking (3.4x speedup)
+- Content generation via Cloud Run Python pipeline (single SKU, batch, and hybrid multi-SKU)
+- Publishing to Google Sheets supplemental feed, Shopify, and Bing
 
-**Target features:**
-- SKU review page revamp: stats bar + compact list with per-platform status badges, dramatically less scrolling
-- Image workflow: user-controlled variant selection for lifestyle image generation; Google variant coverage view; auto-select by impressions only as fallback
-- Performance page: better before/after visualization using real snapshot data (44 snapshots, 36 SKUs)
-- Dashboard audit: fix pages with stale/broken data, rethink pages that don't serve current workflow
-
-**Success criteria:**
-1. Can review and approve 10 SKUs in under 5 minutes
-2. Catalog health visible at a glance from any page
-3. Every page shows useful data or has a clear next action — no dead ends
+**Active background jobs:**
+- Performance metrics backfill running (~2,784 SKUs, job 3da77cd6)
+- Search terms: 824/2,784 SKUs covered, 10,000+ queries collected
 
 ## Requirements
 
-### Validated (Phase 0 - Complete)
+### Validated (Phase 0)
 
-Phase 0 validated Google Ads API capabilities with GO recommendation (4.65/5 confidence):
+- ✓ API-01 through API-05: Google Ads API capabilities validated (campaign-join pattern, query limits, data retention)
+- ✓ DISC-01 through DISC-12: 23 API views, 36+ metrics cataloged
+- ✓ SAMP-01 through SAMP-06: Sample testing across 6 SKUs
+- ✓ DOC-01 through DOC-06: Comprehensive API reference, GO decision (4.65/5)
 
-- ✓ **API-01**: search_term_view product filtering limitation documented (campaign-join workaround validated)
-- ✓ **API-02**: shopping_performance_view supports product-level queries
-- ✓ **API-03**: Query LIMIT values up to 100K tested (50K recommended)
-- ✓ **API-04**: Data retention from 2020-01-01 confirmed (~6 years available)
-- ✓ **API-05**: custom_attribute0-4 fields accessible (note: no underscore before number)
-- ✓ **DISC-01 through DISC-12**: 23 API views enumerated, 36+ metrics cataloged
-- ✓ **SAMP-01 through SAMP-06**: 6 sample SKUs tested, 60K+ search terms validated
-- ✓ **DOC-01 through DOC-06**: Comprehensive API reference created with Go/No-Go decision
+### Validated (v1.0)
 
-### Validated (v1.0 - Complete)
+- ✓ JOB-01 through JOB-10: Job infrastructure with rate limiting, checkpointing, resumability
+- ✓ DATA-01 through DATA-10: Data collection pipeline (search terms, performance, Keyword Planner)
+- ✓ VALID-01 through VALID-10: Data quality validation, freshness checks, multi-SKU family detection
+- ✓ MON-01 through MON-10: Monitoring dashboard, alerting, automated refresh
 
-- ✓ **v1.0**: Full Google Ads data pipeline operational — search terms, performance metrics, Keyword Planner for all 2,784 SKUs with monitoring, validation, and daily automated refresh
+### Validated (v1.1)
 
-### Active (v1.1 - In Progress)
+- ✓ SKUR-01 through SKUR-05: SKU review revamp (compact list, per-platform badges, filtering, inline expand)
+- ✓ IMG-01 through IMG-04: Image workflow (variant selection, impression-based auto-select, coverage view)
+- ✓ PERF-01 through PERF-03: Performance page (baseline vs. snapshot deltas, days-since-publish, trend indicators)
+- ✓ DASH-01 through DASH-03: Dashboard audit (no dead ends, stale data fixed, unused pages simplified)
+- ✓ VER-01: Visual verification via agent-browser for all UI changes
+
+### Active
+
+(No active milestone — define with `/gsd:new-milestone`)
 
 ### Out of Scope
 
-**For v1.0:**
-- Real-time data streaming (batch collection sufficient for v1)
-- Advanced ML models for content optimization (manual prompts first)
+- Real-time data streaming (batch collection sufficient)
 - Multi-account Google Ads management (single account: 6253381786)
-- Competitive intelligence beyond own metrics (auction insights API unavailable)
 - Mobile app or native integrations (web dashboard sufficient)
 
 ## Context
-
-### Phase 0 Discovery (Complete - 2026-02-13)
-
-Phase 0 validated API feasibility through 4 phases:
-1. **API Capability Validation** - Core query patterns and constraints identified
-2. **Comprehensive Data Discovery** - 23 views, 36+ metrics cataloged
-3. **Sample Testing & Analysis** - 6 SKUs tested, query performance benchmarked
-4. **Documentation & Decision** - 60KB API reference created, GO recommendation issued
-
-**Key findings:**
-- Product-level search term queries require 2-step campaign-join pattern
-- Optimal batch size is 10 SKUs (127ms p95 performance, 7.1 min for full catalog)
-- Keyword Planner reveals 43% coverage gap (168K monthly searches)
-- Custom labels available via custom_attribute0-4 fields
-- Data retention: 2020-01-01 to present
-
-**6 Critical modifications identified:**
-1. Use batch size 10 (not 50K LIMIT per query)
-2. Campaign-join pattern for search terms (2-step query)
-3. Skip auction insights API (use own impression/click share)
-4. Plan for 33% competitive metric coverage (sufficient for high-value SKUs)
-5. Use explicit date ranges (LAST_N_DAYS syntax rejected by API)
-6. Include Keyword Planner for ALL SKUs (not just cold-start)
-
-### Current Data State
-
-- **Total SKUs:** 2,784
-- **SKUs with search data:** 84 (3%)
-- **Coverage gap:** 97% of catalog lacks historical search intelligence
-- **Backfill window:** 180 days (2025-08-16 to 2026-02-13)
 
 ### Technical Environment
 
@@ -91,25 +67,35 @@ Phase 0 validated API feasibility through 4 phases:
 - **Google Ads Customer ID:** 6253381786
 - **Python Pipeline:** Cloud Run (auto-deploys on push to master)
 - **Dashboard:** Vercel (allied-feed-ops.vercel.app)
-- **Developer Token:** Highest level with standard access (no read limits)
+- **Developer Token:** Highest level with standard access
 
-## Constraints
+### Known Issues / Tech Debt
 
-- **API Rate Limits:** Google Ads API has undocumented rate limits - batch size 10 provides safety margin
-- **Timeline:** 2-3 weeks for comprehensive v1.0 (fast execution would sacrifice monitoring/validation)
-- **Data Retention:** 180 days for search terms, ~6 years for performance (account-dependent, not API limit)
-- **Competitive Metrics:** Only 33% coverage for impression/click share (sufficient volume required)
-- **Tech Stack:** Python for pipelines (Cloud Run), TypeScript for dashboard (Next.js/Vercel)
+- Performance metrics backfill still running (may need monitoring)
+- Search terms coverage at 824/2,784 SKUs — full 180-day backfill in progress
+- Phase 15 partially complete (bugs were found, fixed in Phase 16)
+- Monitoring freshness endpoint slow (~51s) — has 10s timeout workaround
+- Some phase summaries missing (14-02 rolled into 15, 15-03 skipped)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Phase 0 discovery before execution | Validate API assumptions before detailed planning (5 core questions) | ✓ Good - Found 6 critical modifications, avoided failed assumptions |
-| GO decision (4.65/5 confidence) | All core capabilities validated, performance acceptable, high-value data accessible | — Pending (v1.0 execution will validate) |
-| Keyword Planner for ALL SKUs | 43% coverage gap identified (168K monthly searches) | — Pending (v1.0 will measure impact) |
-| Campaign-join pattern for search terms | API rejects direct product filtering in search_term_view | ✓ Good - Workaround validated in Phase 3 testing |
-| Batch size 10 (not 50K LIMIT) | Optimal throughput (127ms/SKU p95) vs retry granularity | — Pending (v1.0 will validate at scale) |
+| Phase 0 discovery before execution | Validate API assumptions before planning | ✓ Good — found 6 critical modifications |
+| Campaign-join pattern for search terms | API rejects direct product filtering | ✓ Good — validated at scale |
+| Batch size 10 for Google Ads API | Optimal throughput vs retry granularity | ✓ Good — stable at 2,784 SKUs |
+| GAQL chunk size 25 for IN() clauses | Conservative safe value for performance queries | ✓ Good — 250 IDs in 13.2s |
+| ThreadPoolExecutor(5) for parallel chunks | Balance throughput vs API rate limits | ✓ Good — 3.4x speedup |
+| Bulk variant cache preload | Eliminates N+1 queries for 72K+ rows | ✓ Good — 7.7s one-time load |
+| Dashboard compact list over magazine layout | Users need to scan 100+ SKUs quickly | ✓ Good — eliminated per-SKU scrolling |
+| Impression-based variant auto-select | Data-driven vs hardcoded heuristic | ✓ Good — uses real Google Ads data |
+
+## Constraints
+
+- **API Rate Limits:** Google Ads API — batch size 10, chunk size 25 for safety
+- **Data Retention:** 180 days search terms, ~6 years performance
+- **Tech Stack:** Python for pipelines (Cloud Run), TypeScript for dashboard (Next.js/Vercel)
+- **Competitive Metrics:** Only 33% coverage for impression/click share
 
 ---
-*Last updated: 2026-02-18 after v1.0 completion and v1.1 milestone initialization*
+*Last updated: 2026-02-21 after v1.1 milestone*
