@@ -111,6 +111,9 @@ Core workflow:
 - `mcp__vercel__*` - Deployment logs, management
 - `mcp__gcloud__*` / `mcp__cloud-run__*` - GCP operations
 
+**MCP Servers (cont.)**:
+- `mcp__openaiDeveloperDocs__*` - OpenAI API docs, GPT-5.2 best practices, structured outputs, prompt caching
+
 **Agents** (via Task tool):
 - `merchant-integrator` - Merchant API migrations and integrations
 
@@ -119,6 +122,34 @@ Core workflow:
 - `superpowers:systematic-debugging` - When encountering bugs
 - `superpowers:test-driven-development` - Before implementation
 - `marketing-skills:*` - Copy, SEO, marketing content
+- `allied-brass-brand-expert` - Brand voice guidance for content generation
+- `quality-evaluation` - Content quality rubric evaluation
+- `finish-expertise` - Finish-specific content guidance (28 finishes)
+- `product-storytelling` - Interior-design-grade product descriptions
+- `collection-storytelling` - Collection DNA for 41 named collections
+- `google-shopping-content` - Google Shopping title/description optimization
+
+### GPT-5.2 Known Issues (to fix in v1.3a)
+
+See full research: `docs/research/gpt52-best-practices.md`
+
+1. **BUG**: `temperature=0.7` always passed alongside `reasoning_effort` — mutually exclusive on GPT-5.2 (`openai_provider.py:168-185`)
+2. **BUG**: `reasoning_effort` defaults to `none` (zero reasoning) — must set to `medium` for quality (`optimize.py:148`)
+3. Using legacy `json_object` instead of `json_schema` strict mode — wastes tokens on retry loops
+4. No `prompt_cache_retention: "24h"` — cache expires in 5-10 min during batch runs
+5. Gold standard examples in user prompt break cacheable prefix
+6. System prompt uses `=== ===` headers instead of XML tags (GPT-5.2 parses XML better)
+7. Vague length targets ("target 600-800") instead of hard constraints
+
+## Current Roadmap (v1.3)
+
+**Master plan**: `docs/plans/2026-02-21-strategic-milestone-assessment.md` (10-part document)
+**GSD context**: `.planning/PROJECT.md`
+
+- **v1.3a**: Content Generation Excellence — fix prompts, wire skills, fix GPT-5.2 bugs
+- **v1.3b**: Architecture Validation & Data Persistence — deferred migrations, feedback tables
+- **v1.3c**: Actionable Shopping Intelligence — distribution-based scoring, revenue leakage
+- **v1.4**: Closed-Loop Optimization — performance-informed regeneration
 
 ## What's Implemented
 
@@ -137,13 +168,14 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 
 ## Content Generation
 
-**Default: Cloud Run Pipeline**
+**Default: Cloud Run Pipeline (GPT-5.2)**
 - Location: `src/feedops/api/main.py` (FastAPI)
+- **Model**: GPT-5.2 (`gpt-5.2` in `openai_provider.py`) — default reasoning_effort is `none`
 - **Dashboard regeneration proxies to this pipeline** — `route.ts` is a thin proxy, NOT a separate codepath
-- Runtime prompt authority is Python (`src/feedops/pipeline/prompts.py` + `src/feedops/api/prompt_loader.py`)
+- **Prompt authority chain**: `prompt_builder.py` (orchestrator) → `prompts.py` (SYSTEM_PROMPT) + `prompt_loader.py` (DB data) + `config/*.yaml` (runtime configs)
 - TypeScript prompt logic is legacy/reference during migration and must not be treated as runtime source-of-truth
 - Finish sentence generation is being consolidated into Python; avoid adding new TS-side prompt behavior
-- Quality: ~75-80/100
+- Quality: ~75-80/100 (pre-v1.3a; target 85-92 after skill wiring)
 - Speed: ~3 minutes per SKU
 - Use for: Bulk generation (50+ SKUs)
 
@@ -158,6 +190,23 @@ Prompts `01`-`09`, `14`, `19`-`24`:
 - Base SKU: Full generation
 - Variants: Adaptation (60% cost savings)
 - See: `docs/architecture/content-generation-hybrid.md`
+
+## Dual-Use Skill Architecture
+
+Skills serve two layers — Claude Code guidance AND GPT-5.2 runtime injection:
+
+| Skill | Claude Code Skill | Runtime Config | Wired into prompt_builder.py |
+|-------|:-:|:-:|:-:|
+| Brand Voice | `.claude/skills/allied-brass-brand-expert` | `config/brand_voice.yaml` | Yes |
+| Quality Rubric | `.claude/skills/quality-evaluation` | `config/quality_rubric.yaml` | Yes |
+| Finish Expertise | `.claude/skills/finish-expertise` | `config/finish_guide.yaml` | Yes |
+| Shopping Intelligence | `.claude/skills/google-shopping-content` | `config/shopping_intelligence.yaml` | Yes |
+| Product Storytelling | `.claude/skills/product-storytelling` | `config/storytelling_patterns.yaml` | Pending (v1.3a) |
+| Collection Stories | `.claude/skills/collection-storytelling` | `config/collection_stories.yaml` | Pending (v1.3a) |
+| Platform: Bing | Pending | `config/platform_bing.yaml` | Pending (v1.3a) |
+| Platform: Shopify | Pending | `config/platform_shopify.yaml` | Pending (v1.3a) |
+
+**Key files**: `src/feedops/pipeline/prompt_builder.py` (loads configs), `src/feedops/config/` (YAML configs)
 
 ## Key Database Tables
 
@@ -242,6 +291,15 @@ See: `docs/architecture/multi-sku-pattern.md`
 **AI content**: Use `structured_title`/`structured_description` with `digital_source_type=trained_algorithmic_media`
 **Structured-only mode**: When `FEEDOPS_GMC_STRUCTURED_ONLY=1`, omit standard title/description
 
+### Deferred Migrations (DO NOT APPLY)
+
+Two migration files exist but are NOT applied to production Supabase:
+- `034b` — GA4 attribution (4 tables)
+- `035b` — Intent execution (14 tables)
+
+**32 TypeScript files** reference 035b tables that don't exist. These pages show zero results (not bugs — tables don't exist).
+**DO NOT** apply these migrations without explicit user approval. They will be evaluated in v1.3b.
+
 ### Component Patterns (Dashboard)
 
 **ESLint**: Underscore prefix (`_unused`) does NOT suppress `no-unused-vars` — use `// eslint-disable-next-line` or remove the variable
@@ -270,6 +328,12 @@ See: `docs/architecture/multi-sku-pattern.md`
 
 **Python Pipeline**:
 - Cloud Run API: `src/feedops/api/main.py`
+- Prompt builder (orchestrator): `src/feedops/pipeline/prompt_builder.py`
+- System prompt: `src/feedops/pipeline/prompts.py`
+- DB data loader: `src/feedops/api/prompt_loader.py`
+- OpenAI provider: `src/feedops/providers/openai_provider.py`
+- Optimization pipeline: `src/feedops/pipeline/optimize.py`
+- Runtime configs: `src/feedops/config/*.yaml`
 - Google Ads: `src/feedops/integrations/google_ads_performance.py`
 - Search terms: `src/feedops/integrations/google_ads_search_terms.py`
 
@@ -497,7 +561,7 @@ Functions: `ensureSkuData()`, `ensureAllData()` in `dashboard/src/lib/data-colle
 # Format: type: description
 git commit -m "fix: resolve baseline capture query logic
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 # Push triggers auto-deploy
 git push origin master
@@ -532,10 +596,18 @@ git push origin master
 
 ## Documentation
 
+**Strategic Planning**:
+- `docs/plans/2026-02-21-strategic-milestone-assessment.md` - Master v1.3 implementation guide (10 parts)
+- `.planning/PROJECT.md` - GSD context (read by all GSD agents)
+
 **Architecture** (how systems work):
 - `docs/architecture/multi-sku-pattern.md` - Product families, query logic
 - `docs/architecture/data-pipeline.md` - Complete pipeline flow
 - `docs/architecture/content-generation-hybrid.md` - Multi-SKU generation
+
+**Research**:
+- `docs/research/gpt52-best-practices.md` - GPT-5.2 optimization findings (8 issues)
+- `docs/brand/` - Allied Brass brand identity documents
 
 **Troubleshooting** (when things break):
 - `docs/troubleshooting/baseline-capture.md` - Performance capture debugging

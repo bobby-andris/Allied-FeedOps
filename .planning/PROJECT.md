@@ -58,9 +58,45 @@ Transform low-performing product feeds into high-converting assets by combining 
 - ✓ MEAS-01 through MEAS-04: Measurement — feature flag capture, GMC disapproval sync, prompt lineage, bottleneck classifier
 - ✓ FIX-01, FIX-02: Fixes — prompt parity (unified builder), feature flag observable activation
 
+### Planned (v1.3 Roadmap)
+
+The v1.3 series addresses the **content quality crisis** identified in the strategic assessment
+(`docs/plans/2026-02-21-strategic-milestone-assessment.md`). Despite v1.2's infrastructure
+improvements, generated content remains generic and monotonous — keyword-stuffed fragments
+that fail to differentiate Allied Brass from mass-market competitors.
+
+**Milestone order (each builds on the previous):**
+
+**v1.3a: Content Generation Excellence** (3 phases)
+- Fix the content quality problem at its source: prompts, creative direction, and scoring
+- 8 runtime config files already created (`src/feedops/config/`) — need to be wired into `prompt_builder.py`
+- 8 Claude Code skills created (`.claude/skills/`) for development guidance
+- Rewrite SYSTEM_PROMPT from compliance document → creative brief
+- Create gold standard examples, expand category guidance, fix quality rubric
+- Success: human-rated "significantly better" for 8/10 test SKUs
+
+**v1.3b: Architecture Validation & Data Persistence** (2-3 phases)
+- Evaluate and selectively apply deferred migrations (035b: 14 intent execution tables)
+- Create content↔performance feedback table (links generated content to CTR/CVR outcomes)
+- Add persistence for ephemeral service.ts Google Ads queries (currently 2-min cache, no history)
+- Validate end-to-end data flow with no dead ends
+
+**v1.3c: Actionable Shopping Intelligence** (4 phases)
+- Existing spec: `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md`
+- Replace hardcoded thresholds with distribution-based scoring
+- Surface revenue leakage with dollar estimates
+- Enable tier movements and market intelligence
+- Requires 1.3a (good content) and 1.3b (validated architecture) as prerequisites
+
+**v1.4: Closed-Loop Optimization** (2-3 phases)
+- Build the feedback loop: capture → monitor → analyze → learn → optimize → repeat
+- Performance-informed content regeneration
+- Cross-system learning (what prompt changes drove CTR improvement?)
+- Automated optimization cycles (daily/weekly/monthly)
+
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to start next)
+(No active milestone — run `/gsd:new-milestone` to start v1.3a)
 
 ### Out of Scope
 
@@ -83,10 +119,25 @@ Transform low-performing product feeds into high-converting assets by combining 
 
 ### Known Issues / Tech Debt
 
+- **Content quality crisis** — generated descriptions are generic keyword dumps (see strategic assessment Part 2). Root cause: system prompt is 237 lines of compliance rules with no creative direction; shopping_intelligence.yaml provides templates not guidance; self-scoring rewards compliance not quality
+- **Deferred migrations** — 034b (GA4 attribution, 4 tables) and 035b (intent execution, 14 tables) exist as files but NOT applied to live Supabase. TypeScript intent code (32 files) references 035b tables that don't exist in production
+- **Ephemeral Google Ads data** — service.ts queries 6 GAQL queries with 2-minute cache, no historical persistence
+- **Empty dashboard pages** — Shopping Funnel recommendations, Optimization Control, Intent Control, Search Governance, Experiment Lab all show zero results (hardcoded thresholds produce no matches)
 - 2 orphaned dashboard components (GmcDisapprovalBadge, PromptLineagePanel) — built but not yet surfaced in UI pages
-- Phase 20 SUMMARY frontmatter uses underscore key convention in 20-01, 20-03, 20-04
 - Pre-existing duplicate migration file numbers (026, 032, 033)
 - Monitoring freshness endpoint slow (~51s) — has 10s timeout workaround
+
+### Dual-Use Skill Architecture
+
+Skills serve two layers:
+1. **Claude Code skills** (`.claude/skills/`) — full research-backed guidance for Claude when coding
+2. **Runtime configs** (`src/feedops/config/`) — distilled rules injected into GPT-5.2 prompts during generation
+
+Existing runtime configs: `shopping_intelligence.yaml`, `brand_voice.yaml`, `quality_rubric.yaml`, `finish_guide.yaml` + existing Python modules (`segment_strategy.py`, `collection_descriptions.py`, `keyword_bank.py`)
+
+Planned configs (to be created during remaining skill sessions): `storytelling_patterns.yaml`, `collection_stories.yaml`, `platform_bing.yaml`, `platform_shopify.yaml`
+
+All configs are loaded by `prompt_builder.py` and injected into GPT-5.2's prompt at generation time.
 
 ## Key Decisions
 
@@ -106,6 +157,9 @@ Transform low-performing product feeds into high-converting assets by combining 
 | Accuracy guardrail in SYSTEM_PROMPT P0 | GPT-5.2 can over-embellish; guardrail prevents spec fabrication | ✓ Good — immutable safety |
 | Research-first before code changes | v1.2 started with 3 research phases before touching code | ✓ Good — evidence-backed fixes |
 | Persistent corrections via sku_corrections table | Per-SKU feedback accumulates, not lost between sessions | ✓ Good — corrections survive regeneration |
+| Content quality before optimization intelligence | Fix input data before optimizing what we do with it (garbage in, garbage out) | Pending — strategic assessment recommends 1.3a before 1.3c |
+| Dual-use skills (Claude Code + runtime configs) | Skills guide Claude when coding AND inject into GPT-5.2 prompts at runtime | Pending — 4/8 runtime configs created, wiring into prompt_builder.py is v1.3a Phase 2 |
+| Skills before agents for content quality | Better instructions to one model (skills) give better ROI than multiple agents arguing | Pending — skills-enhanced est. 85-92/100 vs current 75-81/100 at ~1.5x cost vs 3x for agents |
 
 ## Constraints
 
@@ -116,4 +170,4 @@ Transform low-performing product feeds into high-converting assets by combining 
 - **Content API:** Works until Aug 2026 — Merchant API used only for diagnostic queries
 
 ---
-*Last updated: 2026-02-21 after v1.2 milestone*
+*Last updated: 2026-02-21 — added v1.3 roadmap, dual-use skill architecture, content quality crisis context*

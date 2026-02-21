@@ -4,6 +4,17 @@
 
 You are working on Allied-FeedOps, a Google Ads optimization dashboard for alliedbrass.com (luxury bathroom accessories — towel bars, soap dispensers, robe hooks, etc. in 28+ finishes). The site sells through a 3-tier Shopping campaign funnel managed via Google Sheets supplemental feed `custom_label_0` labels.
 
+### Prerequisites
+
+> **This milestone assumes two prior milestones have been completed:**
+>
+> 1. **v1.3a (Content Generation Excellence)** — Content quality must be addressed first. Optimizing tier placements for products with generic, keyword-stuffed descriptions yields limited returns. Better descriptions → higher CTR → more data → more meaningful optimization signals. See `docs/plans/2026-02-21-strategic-milestone-assessment.md` Part 3 for the full argument.
+>
+> 2. **v1.3b (Architecture Validation & Data Persistence)** — Data persistence gaps must be resolved before building intelligence on top. Specifically:
+>    - `service.ts` funnel data is ephemeral (2-minute cache, no historical persistence) — trend analysis and before/after measurement require persisted snapshots
+>    - Deferred migrations 034b/035b must be evaluated and resolved (apply, prune, or remove) — see "Deferred Migration Status" section below
+>    - Content↔performance feedback linkage must be established
+
 ### Campaign Architecture
 
 - **177 Shopping campaigns** across **59 product groups** (custom_label_0 values like "Towel Bars", "Soap Dispensers")
@@ -16,7 +27,7 @@ You are working on Allied-FeedOps, a Google Ads optimization dashboard for allie
 
 ### What Exists Today (the Problem)
 
-Milestone v1.2 built substantial **infrastructure** — a working Shopping Funnel management system, optimization libraries, GA4 attribution layer, intent policy engine, and 30+ database tables. However, the **user-facing pages** built on this infrastructure are skeleton shells that render empty tables and zero-value cards because they don't actually compute insights from the available data:
+Milestone v1.2 built substantial **infrastructure** — a working Shopping Funnel management system, optimization libraries, GA4 attribution layer, intent policy engine, and 30+ database tables. Phase 22 (Fix Integration Bugs) resolved several integration issues: `prompt_builder.py` correction_text key fix, `GMC_MERCHANT_ID` environment variable set, `keyword_bank.json` included in Docker context, and documentation gaps closed. However, the **user-facing pages** built on this infrastructure are skeleton shells that render empty tables and zero-value cards because they don't actually compute insights from the available data:
 
 1. **Tier Movements Panel** — shows "0 recommendations" because `query-intelligence.ts` uses hardcoded ROAS/CVR thresholds instead of computing from actual tier performance distributions
 2. **Intent Control Center** — shows "0 terms evaluated" because no pipeline connects the NLP decomposition in `query-intelligence.ts` to the existing funnel terms fetched by `service.ts`
@@ -43,6 +54,8 @@ Key exports to USE:
 - `getShoppingFunnelDataLineage()` → Returns metadata about data freshness and query counts
 
 Important: All service.ts functions use a **2-minute cache** (`CACHE_TTL_MS = 120000`). Data is live from Google Ads API on first call, then cached. Each call runs **6 parallel GAQL queries** to build the full funnel state.
+
+> **⚠️ Data Persistence Gap (v1.3b prerequisite)**: All service.ts data is ephemeral — no historical funnel term data is persisted to the database. This means trend analysis (Phase 1 "compare last 7d vs previous 7d"), before/after impact measurement (Phase 4), and any time-series computation require daily snapshot persistence to be implemented in v1.3b first. Without it, this milestone's trend and impact features have no historical data to compute from.
 
 ### Query Intelligence Library (`query-intelligence.ts`)
 **File**: `dashboard/src/lib/optimization/query-intelligence.ts` (~265 lines)
@@ -74,7 +87,7 @@ Existing exports to build on:
 ### Intent Policy Engine
 **File**: `dashboard/src/lib/intent/policy.ts`
 **File**: `dashboard/src/lib/intent/tier-movement.ts`
-**These already work.** The tier movement pipeline can execute movements, log to `policy_action_execution_log`, update `term_intent_state`, write to `negative_registry`, and update Google Sheets.
+**Code exists but backing tables may be deferred.** The TypeScript code is written and tested, but several tables it references (`term_intent_state`, `policy_action_execution_log`, `negative_registry`, etc.) are part of migration 035b which was DEFERRED during v1.2. These tables may have been applied out-of-band — **verify in v1.3b before relying on them.** If applied, the tier movement pipeline can execute movements, log to `policy_action_execution_log`, update `term_intent_state`, write to `negative_registry`, and update Google Sheets.
 
 Key functions already built:
 - `evaluatePromotionDemotion(input)` → Policy decision with confidence and reason codes
@@ -143,7 +156,10 @@ Key functions already built:
 - `ga4_attribution_root_cause_daily` — Root cause aggregation
 - `ga4_shopify_reconciliation_daily` — Cross-platform reconciliation
 
-**Intent Execution System** (migration 035):
+**Intent Execution System** (migration 035 — applied; **035b — DEFERRED**):
+
+> **⚠️ Deferred Migration Status**: Migration 035 (measurement infrastructure) IS applied to live Supabase. Migration 035b (unified intent execution system — 14 tables below) is DEFERRED. The 035b migration note states tables "were applied out-of-band in a previous session" but this must be verified during v1.3b. 8 of 14 tables are prerequisites for this milestone's Phases 1-4. Migration 034b (GA4 attribution forensics — 4 tables) is also deferred and lower priority. **Resolution of 034b/035b status is a v1.3b deliverable that must complete before this milestone begins.**
+
 - `intent_taxonomy_versions` — Policy version management
 - `term_intent_state` — Current intent classification per term
 - `policy_decision_log` — Every policy evaluation logged
@@ -513,6 +529,20 @@ Execution (existing tier-movement pipeline → Google Ads negatives + Google She
 - All existing API routes under `/api/search-terms/` — these power the working Shopping Funnel management system.
 - All existing API routes under `/api/ga4/` — these power the attribution quality monitoring.
 - `dashboard/src/lib/intent/policy.ts` and `tier-movement.ts` — the execution pipeline. Use as-is.
+
+### Skills Catalog Cross-Reference
+
+The following skills from the strategic assessment (Part 8) are prerequisites or enablers for specific phases:
+
+| Skill | Prerequisite For | Notes |
+|-------|-----------------|-------|
+| `google-shopping-content` | v1.3a (before this milestone) | Content quality directly affects CTR/CVR signals this milestone optimizes |
+| `bing-shopping-content` | v1.3a (before this milestone) | Same — platform-specific content quality |
+| `product-storytelling` | v1.3a (before this milestone) | Differentiation and emotional resonance improve the signals we measure |
+| `competitor-research` | Phase 2 (Competitive Intel) | Competitor research skill enriches the competitive intelligence analysis |
+| `feed-optimization` | Phase 1-2 (Tier Optimization) | Feed optimization best practices inform tier scoring and demand gap analysis |
+
+**Key dependency**: The content generation skills (`google-shopping-content`, `bing-shopping-content`, `product-storytelling`) must be created and applied during v1.3a. Without improved content, the optimization signals this milestone computes will reflect description quality as much as placement quality — making recommendations noisy and less actionable.
 
 ### Performance Considerations
 - Google Ads API has rate limits. The 2-minute cache in service.ts handles interactive use. For batch scoring computations, run server-side in API routes using a single call to `getExistingFunnelTerms()` (which caches the 6-query result).
