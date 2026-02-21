@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 24 of 25 (Prompt Architecture — rewrite prompts, wire configs, expand guidance)
-**Current plan:** 24-01 complete, 24-02 next
-**Status:** Phase 24 in progress — plan 01 complete
-**Last activity:** 2026-02-21 — 24-01: SYSTEM_PROMPT rewritten as creative brief, skill_loader.py built, 8 skills injected into generation prompts (254K chars batch mode)
+**Current plan:** 24-02 complete, Phase 24 complete
+**Status:** Phase 24 complete — both plans done
+**Last activity:** 2026-02-21 — 24-02: shopping_intelligence.yaml expanded to 24 categories, customer_framing and competitive_positioning blocks added to every prompt, legacy build_category_guidance() removed
 
 Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~20% (v1.3a)
 
@@ -23,13 +23,14 @@ Progress: [████████░░░░░░░░░░░░░░░
 - Total plans completed: 68
 - Milestones shipped: 4 (Phase 0, v1.0, v1.1, v1.2)
 
-**v1.3a plans:** 3 completed (TBD total)
+**v1.3a plans:** 4 completed (TBD total)
 
 | Plan | Duration | Tasks | Files | Date |
 |------|----------|-------|-------|------|
 | 23-01 GPT-5.2 bug fixes | 4 min | 2 | 3 | 2026-02-21 |
 | 23-02 Gold standards + 10-criterion rubric | 276s | 2 | 2 | 2026-02-21 |
 | 24-01 Creative brief + skill loader | 3 min | 2 | 4 | 2026-02-21 |
+| 24-02 Category expansion + customer/competitive blocks | 316s | 2 | 5 | 2026-02-21 |
 
 ## Accumulated Context
 
@@ -46,6 +47,9 @@ Progress: [████████░░░░░░░░░░░░░░░
 - [24-01]: SYSTEM_PROMPT opens with creative_direction — good/bad examples, one-two punch framing, before any rules. Accuracy guardrail moved lower.
 - [24-01]: skill_loader.py uses lru_cache pattern from shopping_intelligence.py; batch mode loads all 8 skills (254K), single mode loads core + platform-relevant (172K)
 - [24-01]: Cloud Run Dockerfile needs COPY .claude/skills /app/.claude/skills before skills-enabled production deployment
+- [Phase 24-02]: Customer framing as reasoning prompt (not fill-in): guides GPT-5.2 to reason concrete buyer scenarios rather than fill template slots
+- [Phase 24-02]: DB-query-driven YAML expansion: queried product_catalog by variant count to identify 7 missing high-revenue categories
+- [Phase 24-02]: Competitive positioning: contrast material/approach not companies — 'solid brass vs die-cast zinc' keeps brand voice without naming competitors
 
 ### Open Blockers
 
@@ -68,5 +72,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed .planning/phases/24-prompt-architecture/24-01-PLAN.md
-Resume file: .planning/phases/24-prompt-architecture/24-01-SUMMARY.md
+Stopped at: Completed .planning/phases/24-prompt-architecture/24-02-PLAN.md
+Resume file: .planning/phases/24-prompt-architecture/24-02-SUMMARY.md

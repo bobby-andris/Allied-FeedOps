@@ -17,11 +17,11 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 
 ### Prompt Architecture
 
-- [ ] **PRMT-01**: SYSTEM_PROMPT rewritten from compliance document to creative brief with positive examples of excellent content
-- [ ] **PRMT-02**: All 8 runtime YAML configs loaded and injected into generation prompts by prompt_builder.py
-- [ ] **PRMT-03**: Category guidance expanded from 3 groups to cover at minimum the top-20 revenue product categories
-- [ ] **PRMT-04**: Prompts include customer use case framing (who buys this, why, what problem it solves)
-- [ ] **PRMT-05**: Prompts include competitive positioning evidence (how this product compares to alternatives)
+- [x] **PRMT-01**: SYSTEM_PROMPT rewritten from compliance document to creative brief with positive examples of excellent content
+- [x] **PRMT-02**: All 8 runtime YAML configs loaded and injected into generation prompts by prompt_builder.py
+- [x] **PRMT-03**: Category guidance expanded from 3 groups to cover at minimum the top-20 revenue product categories
+- [x] **PRMT-04**: Prompts include customer use case framing (who buys this, why, what problem it solves)
+- [x] **PRMT-05**: Prompts include competitive positioning evidence (how this product compares to alternatives)
 
 ### Gold Standards & Quality
 
@@ -75,11 +75,11 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | GPT52-03 | Phase 23 | Complete |
 | GPT52-04 | Phase 23 | Complete |
 | GPT52-05 | Phase 23 | Complete |
-| PRMT-01 | Phase 24 | Pending |
-| PRMT-02 | Phase 24 | Pending |
-| PRMT-03 | Phase 24 | Pending |
-| PRMT-04 | Phase 24 | Pending |
-| PRMT-05 | Phase 24 | Pending |
+| PRMT-01 | Phase 24 | Complete |
+| PRMT-02 | Phase 24 | Complete |
+| PRMT-03 | Phase 24 | Complete |
+| PRMT-04 | Phase 24 | Complete |
+| PRMT-05 | Phase 24 | Complete |
 | GOLD-01 | Phase 23 | Complete |
 | GOLD-02 | Phase 23 | Complete |
 | GOLD-03 | Phase 23 | Complete |

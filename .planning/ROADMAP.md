@@ -63,7 +63,7 @@
 **Dependency chain:** GPT-5.2 bugs fixed first (can't evaluate quality with broken model config) → creative direction locked (gold standards + rubric) → prompt architecture rewritten → evaluate and ship.
 
 - [x] **Phase 23: Foundation** — Fix GPT-5.2 bugs, create gold standards, rewrite quality rubric (completed 2026-02-21)
-- [ ] **Phase 24: Prompt Architecture** — Rewrite SYSTEM_PROMPT as creative brief, wire all 8 runtime configs, expand category guidance
+- [x] **Phase 24: Prompt Architecture** — Rewrite SYSTEM_PROMPT as creative brief, wire all 8 runtime configs, expand category guidance (completed 2026-02-21)
 - [ ] **Phase 25: Evaluate & Iterate** — Generate 10 test SKUs, human eval, iterate, publish test batch
 
 ## Phase Details
@@ -119,7 +119,7 @@ Plans:
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23 | v1.3a | 2/2 | Complete | 2026-02-21 |
-| 24 | 1/2 | In Progress|  | - |
+| 24 | 2/2 | Complete   | 2026-02-21 | - |
 | 25 | v1.3a | 0/TBD | Not started | - |
 
 ---
