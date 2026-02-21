@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 24 of 25 (Prompt Architecture — rewrite prompts, wire configs, expand guidance)
 **Current plan:** 24-02 complete, Phase 24 complete
-**Status:** Phase 24 complete — both plans done
+**Status:** Milestone complete
 **Last activity:** 2026-02-21 — 24-02: shopping_intelligence.yaml expanded to 24 categories, customer_framing and competitive_positioning blocks added to every prompt, legacy build_category_guidance() removed
 
 Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~20% (v1.3a)
