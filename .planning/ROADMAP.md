@@ -138,6 +138,7 @@ Plans:
 **Depends on**: Phase 21
 **Requirements**: FIX-01, MEAS-02, MODEL-01, MODEL-02, MEAS-04
 **Gap Closure**: Closes gaps from v1.2 audit — 1 integration bug, 1 env var, 3 documentation gaps, 2 tech debt items
+**Plans**: 2 plans
 **Success Criteria** (what must be TRUE):
   1. `apply_feedback_layer()` in `prompt_builder.py` correctly extracts `correction_text` from sku_corrections rows — persistent corrections produce correct prompt text
   2. `GMC_MERCHANT_ID` env var set in Cloud Run service — `/gmc/sync` endpoint no longer raises ValueError
