@@ -50,7 +50,7 @@
 - [x] **Phase 17: Google Shopping Intelligence & Model Research** - Deep research into Google Shopping ranking factors and model alternatives before touching any code (completed 2026-02-21)
 - [x] **Phase 18: Diagnosis — Establish Ground Truth** - Trace the end-to-end runtime path, audit feature flag wiring, and quantify SKU coverage funnel with zero or minimal code changes (completed 2026-02-21)
 - [x] **Phase 19: Measurement Infrastructure** - Add feature flag logging, GMC disapproval visibility, prompt hash lineage, and bottleneck classification to make impact measurable (completed 2026-02-21)
-- [ ] **Phase 20: Targeted Fixes & Intelligence Application** - Apply evidence-backed fixes to generation path, feature flag wiring, prompts, and image guidance — one fix at a time
+- [x] **Phase 20: Targeted Fixes & Intelligence Application** - Apply evidence-backed fixes to generation path, feature flag wiring, prompts, and image guidance — one fix at a time (completed 2026-02-21)
 
 ## Phase Details
 
@@ -127,7 +127,7 @@ Plans:
 | 17. Google Shopping Intelligence & Model Research | 3/3 | Complete    | 2026-02-21 | - |
 | 18. Diagnosis — Establish Ground Truth | 3/3 | Complete    | 2026-02-21 | - |
 | 19. Measurement Infrastructure | 4/4 | Complete   | 2026-02-21 | - |
-| 20. Targeted Fixes & Intelligence Application | 3/4 | In Progress|  | - |
+| 20. Targeted Fixes & Intelligence Application | 4/4 | Complete   | 2026-02-21 | - |
 
 ---
 *Phase 0 completed: 2026-02-13*

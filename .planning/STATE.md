@@ -8,7 +8,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 Impact Debug & Fix
 **Current phase:** 20-targeted-fixes-intelligence-application
-**Current plan:** 04 (plans 01, 02, and 03 complete)
+**Current plan:** 05 (plans 01, 02, 03, and 04 complete)
 **Status:** In Progress
 
 ## Session Log
@@ -17,6 +17,7 @@ See: .planning/PROJECT.md
 - 2026-02-21: Plan 20-01 complete — Shopping intelligence YAML config (15 DB categories) + Python loader + GPT-5.2 accuracy guardrail (MODEL-03, GOOG-04 foundation)
 - 2026-02-21: Plan 20-02 complete — three-dimensional image intelligence wired into lifestyle_images.py (GOOG-05)
 - 2026-02-21: Plan 20-03 complete — shared prompt_builder.py with build_core_prompt() achieving FIX-01 prompt parity, FIX-02 observable feature flags (PROMPT_CONTRACT_V2 gates Shopping intelligence, SEGMENT_STRATEGY_V1 gates segment guidance), GOOG-04 wired into all generation paths
+- 2026-02-21: Plan 20-04 complete — sku_corrections table (persistent corrections per SKU/platform/content_type), structured feedback UI (tone/emphasis/length controls), save-as-correction checkbox in FeedbackModal. Commits: 2c46e4b1, 963cbafc
 
 ## Decisions
 
@@ -30,9 +31,13 @@ See: .planning/PROJECT.md
 - PROMPT_CONTRACT_V2 gates Shopping intelligence section (structurally observable on/off toggle)
 - SEGMENT_STRATEGY_V1 gates segment strategy guidance section (structurally observable on/off toggle)
 - apply_feedback_layer() uses additive pattern — appends to core, never forks it
+- sku_corrections correction lookup filters by platform IN (request.platform, 'all') — 'all' corrections apply to any platform
+- Structured feedback (tone/emphasis/length) merged with free-text into single session_feedback string before apply_feedback_layer()
+- save_as_correction uses upsert with unique index to prevent duplicate correction accumulation
 
 ## Completed Plans (Phase 20)
 
 - 20-01: Shopping intelligence foundation — shopping_intelligence.yaml (15 categories), shopping_intelligence.py loader (lru_cache), SYSTEM_PROMPT accuracy guardrail. Commits: ce6afcab, 1416c263
 - 20-02: Lifestyle image prompt intelligence — FINISH_LIGHTING (28 finishes), CATEGORY_SCENE (30 categories), _build_enhanced_image_prompt(), collection DNA wiring. Commit: c590bcf9
 - 20-03: Shared prompt builder — prompt_builder.py with build_core_prompt() (keyword placement, segment strategy, Shopping intelligence, gold examples), apply_feedback_layer(), all generation paths wired, deprecated wrapper for backward compat. Commits: 57369167, 14050d14
+- 20-04: Feedback layer — sku_corrections Supabase table (migration 036), structured feedback fields (tone_style/emphasis/length_preference/save_as_correction) in Python /regenerate + TypeScript proxy + FeedbackModal UI with collapsible Advanced Feedback Controls. Commits: 2c46e4b1, 963cbafc
