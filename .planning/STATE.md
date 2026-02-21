@@ -6,10 +6,10 @@ See: .planning/PROJECT.md
 
 ## Position
 
-**Milestone:** v1.0 Impact Debug & Fix
-**Current phase:** 20-targeted-fixes-intelligence-application
-**Current plan:** 05 (plans 01, 02, 03, and 04 complete)
-**Status:** Milestone complete
+**Milestone:** v1.2 Measurement Infrastructure
+**Current phase:** 21-apply-database-migrations
+**Current plan:** 02 (plan 01 complete)
+**Status:** In progress
 
 ## Session Log
 
@@ -18,9 +18,14 @@ See: .planning/PROJECT.md
 - 2026-02-21: Plan 20-02 complete — three-dimensional image intelligence wired into lifestyle_images.py (GOOG-05)
 - 2026-02-21: Plan 20-03 complete — shared prompt_builder.py with build_core_prompt() achieving FIX-01 prompt parity, FIX-02 observable feature flags (PROMPT_CONTRACT_V2 gates Shopping intelligence, SEGMENT_STRATEGY_V1 gates segment guidance), GOOG-04 wired into all generation paths
 - 2026-02-21: Plan 20-04 complete — sku_corrections table (persistent corrections per SKU/platform/content_type), structured feedback UI (tone/emphasis/length controls), save-as-correction checkbox in FeedbackModal. Commits: 2c46e4b1, 963cbafc
+- 2026-02-21: Plan 21-01 complete — Verified migrations 034+035 in live Supabase (all columns/tables/indexes confirmed), renamed deferred migrations (034b_DEFERRED_*, 035b_DEFERRED_*), updated SCHEMA.md publish_events with 5 lineage columns, verified /api/prompt-lineage endpoint. Commits: 89621ecb, 02ce3610
 
 ## Decisions
 
+- Migrations 034+035 were already applied in live Supabase — pre-checks confirmed exact schema match, no re-execution needed
+- Deferred migration files renamed with 034b_DEFERRED_ / 035b_DEFERRED_ prefix to eliminate number conflicts
+- /api/prompt-lineage returns lineage: null gracefully when no prompt_hash data exists — acceptable behavior per plan
+- Deferred tables (ga4_source_medium_daily, intent_taxonomy_versions, etc.) exist in live DB from out-of-band application
 - Shopping intelligence YAML keyed by lowercase product_catalog.category values (15 categories from DB query, not assumed values)
 - Shopping intelligence section injected in user prompt (NOT system prompt) to preserve OpenAI prompt caching
 - Accuracy guardrail in SYSTEM_PROMPT P0_GLOBAL_FACTUAL_RULES — universal, byte-for-byte static, caching-safe
