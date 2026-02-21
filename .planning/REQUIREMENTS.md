@@ -25,10 +25,10 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 
 ### Gold Standards & Quality
 
-- [ ] **GOLD-01**: At least 15 gold standard description examples stored in prompt_templates table
-- [ ] **GOLD-02**: Gold standards cover major product categories (towel bars, grab bars, shower accessories, mirrors, etc.)
-- [ ] **GOLD-03**: Quality scoring rubric rewritten to reward differentiation and emotional resonance over rule compliance
-- [ ] **GOLD-04**: Quality evaluation can be run at scale across multiple SKUs (not just manual one-by-one)
+- [x] **GOLD-01**: At least 15 gold standard description examples stored in prompt_templates table
+- [x] **GOLD-02**: Gold standards cover major product categories (towel bars, grab bars, shower accessories, mirrors, etc.)
+- [x] **GOLD-03**: Quality scoring rubric rewritten to reward differentiation and emotional resonance over rule compliance
+- [x] **GOLD-04**: Quality evaluation can be run at scale across multiple SKUs (not just manual one-by-one)
 
 ### Evaluation & Iteration
 
@@ -80,10 +80,10 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | PRMT-03 | Phase 24 | Pending |
 | PRMT-04 | Phase 24 | Pending |
 | PRMT-05 | Phase 24 | Pending |
-| GOLD-01 | Phase 23 | Pending |
-| GOLD-02 | Phase 23 | Pending |
-| GOLD-03 | Phase 23 | Pending |
-| GOLD-04 | Phase 23 | Pending |
+| GOLD-01 | Phase 23 | Complete |
+| GOLD-02 | Phase 23 | Complete |
+| GOLD-03 | Phase 23 | Complete |
+| GOLD-04 | Phase 23 | Complete |
 | EVAL-01 | Phase 25 | Pending |
 | EVAL-02 | Phase 25 | Pending |
 | EVAL-03 | Phase 25 | Pending |
