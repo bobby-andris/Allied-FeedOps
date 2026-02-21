@@ -5,38 +5,55 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Transform low-performing product feeds into high-converting assets with AI content generation informed by Google Shopping ranking intelligence
-**Current focus:** v1.3a Content Generation Excellence
+**Current focus:** v1.3a Content Generation Excellence — Phase 23: Foundation
 
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** Not started (defining requirements)
-**Current plan:** —
-**Status:** Defining requirements
-**Last activity:** 2026-02-21 — Milestone v1.3a started
+**Current phase:** 23 of 25 (Foundation — GPT-5.2 bugs + gold standards + rubric)
+**Current plan:** Not started (roadmap just created)
+**Status:** Ready to plan
+**Last activity:** 2026-02-21 — v1.3a roadmap created (3 phases: 23-25)
 
-## Session Log
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (v1.3a)
 
-- 2026-02-21: v1.3a milestone started — Content Generation Excellence
+## Performance Metrics
 
-## Decisions
+**Velocity (all milestones):**
+- Total plans completed: 68
+- Milestones shipped: 4 (Phase 0, v1.0, v1.1, v1.2)
 
-(None yet for v1.3a)
+**v1.3a plans:** 0 completed (TBD total)
 
 ## Accumulated Context
 
+### Decisions
+
+- [v1.3a]: Phase 23 combines GPT-5.2 bug fixes WITH gold standards and quality rubric — bugs must be fixed before prompt work begins, and creative direction must be established before prompt rewrite
+- [v1.3a]: Phase structure: 23 (Foundation) → 24 (Prompt Architecture) → 25 (Evaluate & Iterate)
+- [v1.2]: Skills-enhanced single model (est. 85-92/100) preferred over 6-agent pipeline (87.2/100 at 3x cost)
+- [v1.2]: Unified build_core_prompt() — single code path for all 4 generation paths
+
 ### Open Blockers
-(none)
 
-### Tech Debt (from v1.2)
+None.
+
+### Tech Debt Carried from v1.2
+
 - 2 orphaned components: GmcDisapprovalBadge, PromptLineagePanel (built but not surfaced in UI)
-- Phase 20 SUMMARY frontmatter key convention (underscore vs hyphen)
-- Pre-existing duplicate migration file numbers (026, 032, 033)
+- Pre-existing duplicate migration file numbers (026, 032, 033) — non-blocking
+- 5 known GPT-5.2 bugs to fix in Phase 23 (see REQUIREMENTS.md GPT52-01 through GPT52-05)
 
-### GPT-5.2 Known Bugs (to fix in v1.3a)
-- temperature=0.7 passed alongside reasoning_effort — mutually exclusive on GPT-5.2
-- reasoning_effort defaults to none if env var unset — model runs with zero reasoning
-- Uses legacy json_object instead of json_schema strict mode
-- No prompt_cache_retention="24h" — cache expires in 5-10 min during batch runs
-- System prompt uses === headers instead of XML tags (GPT-5.2 parses XML better)
-- Full analysis: docs/research/gpt52-best-practices.md
+### Key Files for v1.3a
+
+- Prompt authority: `src/feedops/api/prompt_builder.py`
+- System prompt: `src/feedops/pipeline/prompts.py`
+- OpenAI provider (bugs here): `src/feedops/providers/openai_provider.py`
+- Runtime configs: `src/feedops/config/*.yaml` (8 files)
+- Gold standards target table: `prompt_templates` (columns: gold_standard_examples, category_guidance)
+
+## Session Continuity
+
+Last session: 2026-02-21
+Stopped at: v1.3a roadmap created — ready to run /gsd:plan-phase 23
+Resume file: None

@@ -70,32 +70,32 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GPT52-01 | — | Pending |
-| GPT52-02 | — | Pending |
-| GPT52-03 | — | Pending |
-| GPT52-04 | — | Pending |
-| GPT52-05 | — | Pending |
-| PRMT-01 | — | Pending |
-| PRMT-02 | — | Pending |
-| PRMT-03 | — | Pending |
-| PRMT-04 | — | Pending |
-| PRMT-05 | — | Pending |
-| GOLD-01 | — | Pending |
-| GOLD-02 | — | Pending |
-| GOLD-03 | — | Pending |
-| GOLD-04 | — | Pending |
-| EVAL-01 | — | Pending |
-| EVAL-02 | — | Pending |
-| EVAL-03 | — | Pending |
-| EVAL-04 | — | Pending |
-| EVAL-05 | — | Pending |
-| EVAL-06 | — | Pending |
+| GPT52-01 | Phase 23 | Pending |
+| GPT52-02 | Phase 23 | Pending |
+| GPT52-03 | Phase 23 | Pending |
+| GPT52-04 | Phase 23 | Pending |
+| GPT52-05 | Phase 23 | Pending |
+| PRMT-01 | Phase 24 | Pending |
+| PRMT-02 | Phase 24 | Pending |
+| PRMT-03 | Phase 24 | Pending |
+| PRMT-04 | Phase 24 | Pending |
+| PRMT-05 | Phase 24 | Pending |
+| GOLD-01 | Phase 23 | Pending |
+| GOLD-02 | Phase 23 | Pending |
+| GOLD-03 | Phase 23 | Pending |
+| GOLD-04 | Phase 23 | Pending |
+| EVAL-01 | Phase 25 | Pending |
+| EVAL-02 | Phase 25 | Pending |
+| EVAL-03 | Phase 25 | Pending |
+| EVAL-04 | Phase 25 | Pending |
+| EVAL-05 | Phase 25 | Pending |
+| EVAL-06 | Phase 25 | Pending |
 
 **Coverage:**
 - v1.3a requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20 (pending roadmap creation)
+- Mapped to phases: 20
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 — traceability complete after roadmap creation*
