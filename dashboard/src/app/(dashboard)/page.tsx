@@ -9,6 +9,7 @@ import { ApprovalChart } from '@/components/dashboard/ApprovalChart'
 import { PlatformBreakdown } from '@/components/dashboard/PlatformBreakdown'
 import { QualityDistribution } from '@/components/dashboard/QualityDistribution'
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
+import { CoverageFunnel } from '@/components/dashboard/CoverageFunnel'
 import {
   ArrowRight,
   Package,
@@ -117,6 +118,9 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* SKU Coverage Funnel — pipeline health at a glance */}
+      <CoverageFunnel />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
