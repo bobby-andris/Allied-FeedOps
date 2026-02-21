@@ -14,10 +14,10 @@
 
 ### Measurement
 
-- [x] **MEAS-01**: Each content generation records which feature flags were active at generation time (feature_flags_active field in regeneration_history)
+- [ ] **MEAS-01**: Each content generation records which feature flags were active at generation time (feature_flags_active field in regeneration_history)
 - [x] **MEAS-02**: GMC disapproval visibility — system can query Merchant API to identify disapproved/not-serving products and surface issues (the one silent impact killer)
-- [x] **MEAS-03**: Prompt hash lineage tracking connects generated content to the exact prompt version that produced it
-- [x] **MEAS-04**: Bottleneck classifier categorizes impact issues as code-path, auction/bid, query relevance, coverage gap, or propagation failure — with evidence for each classification
+- [ ] **MEAS-03**: Prompt hash lineage tracking connects generated content to the exact prompt version that produced it
+- [ ] **MEAS-04**: Bottleneck classifier categorizes impact issues as code-path, auction/bid, query relevance, coverage gap, or propagation failure — with evidence for each classification
 
 ### Fixes
 
@@ -68,17 +68,17 @@
 | GOOG-01 | Phase 17 | Complete |
 | GOOG-02 | Phase 17 | Complete |
 | GOOG-03 | Phase 17 | Complete |
-| MODEL-01 | Phase 17 | Complete |
-| MODEL-02 | Phase 17 | Complete |
+| MODEL-01 | Phase 17 → Phase 22 | Pending |
+| MODEL-02 | Phase 17 → Phase 22 | Pending |
 | DIAG-01 | Phase 18 | Complete |
 | DIAG-02 | Phase 18 | Complete |
 | DIAG-03 | Phase 18 | Complete |
 | DIAG-04 | Phase 18 | Complete |
-| MEAS-01 | Phase 19 | Complete |
-| MEAS-02 | Phase 19 | Complete |
-| MEAS-03 | Phase 19 | Complete |
-| MEAS-04 | Phase 19 | Complete |
-| FIX-01 | Phase 20 | Complete |
+| MEAS-01 | Phase 19 → Phase 21 | Pending |
+| MEAS-02 | Phase 19 → Phase 22 | Pending |
+| MEAS-03 | Phase 19 → Phase 21 | Pending |
+| MEAS-04 | Phase 19 → Phase 21 | Pending |
+| FIX-01 | Phase 20 → Phase 22 | Pending |
 | FIX-02 | Phase 20 | Complete |
 | GOOG-04 | Phase 20 | Complete |
 | GOOG-05 | Phase 20 | Complete |
@@ -86,9 +86,11 @@
 
 **Coverage:**
 - v1.2 requirements: 18 total
+- Satisfied: 11
+- Pending (gap closure): 7 (MEAS-01, MEAS-02, MEAS-03, MEAS-04, FIX-01, MODEL-01, MODEL-02)
 - Mapped to phases: 18
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 — traceability complete, phases 17-20 assigned*
+*Last updated: 2026-02-21 — gap closure phases 21-22 added, 7 requirements reset to Pending*

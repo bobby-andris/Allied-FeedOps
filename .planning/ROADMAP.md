@@ -51,6 +51,8 @@
 - [x] **Phase 18: Diagnosis — Establish Ground Truth** - Trace the end-to-end runtime path, audit feature flag wiring, and quantify SKU coverage funnel with zero or minimal code changes (completed 2026-02-21)
 - [x] **Phase 19: Measurement Infrastructure** - Add feature flag logging, GMC disapproval visibility, prompt hash lineage, and bottleneck classification to make impact measurable (completed 2026-02-21)
 - [x] **Phase 20: Targeted Fixes & Intelligence Application** - Apply evidence-backed fixes to generation path, feature flag wiring, prompts, and image guidance — one fix at a time (completed 2026-02-21)
+- [ ] **Phase 21: Apply Database Migrations & Update Schema Docs** - Apply migrations 034+035 to live Supabase to unblock measurement infrastructure; update SCHEMA.md (gap closure)
+- [ ] **Phase 22: Fix Integration Bugs & Close Documentation Gaps** - Fix feedback layer field mismatch, set GMC env var, fix tech debt items, close SUMMARY frontmatter gaps (gap closure)
 
 ## Phase Details
 
@@ -117,6 +119,34 @@ Plans:
 - [ ] 20-03-PLAN.md — Shared prompt builder + prompt parity + feature flag observable activation (FIX-01, FIX-02, GOOG-04)
 - [ ] 20-04-PLAN.md — Persistent corrections table + structured feedback UI (FIX-01 feedback)
 
+### Phase 21: Apply Database Migrations & Update Schema Docs
+**Goal**: Unblock all measurement infrastructure by applying pending database migrations to live Supabase and updating schema documentation
+**Depends on**: Phase 20
+**Requirements**: MEAS-01, MEAS-03, MEAS-04
+**Gap Closure**: Closes gaps from v1.2 audit — 2 unsatisfied requirements, 1 partial requirement, 2 broken flows
+**Success Criteria** (what must be TRUE):
+  1. Migration 034 (publish_events lineage columns) applied to live Supabase — `prompt_hash` column exists on `publish_events`
+  2. Migration 035 (measurement tables + columns) applied to live Supabase — `regeneration_history` has `feature_flags_active`/`latency_ms`/`tokens_used`/`cost_usd` columns; `prompt_version_aliases`, `sku_bottleneck_classifications`, `gmc_product_status` tables exist
+  3. `/api/prompt-lineage` returns non-empty lineage for published SKUs with prompt hashes
+  4. SCHEMA.md updated with all new columns and tables from migrations 034+035
+Plans:
+- [ ] 21-01-PLAN.md — Apply migrations 034+035 via Supabase SQL Editor + verify
+
+### Phase 22: Fix Integration Bugs & Close Documentation Gaps
+**Goal**: Fix integration bugs found during audit and close remaining documentation gaps to bring all requirements to satisfied status
+**Depends on**: Phase 21
+**Requirements**: FIX-01, MEAS-02, MODEL-01, MODEL-02, MEAS-04
+**Gap Closure**: Closes gaps from v1.2 audit — 1 integration bug, 1 env var, 3 documentation gaps, 2 tech debt items
+**Success Criteria** (what must be TRUE):
+  1. `apply_feedback_layer()` in `prompt_builder.py` correctly extracts `correction_text` from sku_corrections rows — persistent corrections produce correct prompt text
+  2. `GMC_MERCHANT_ID` env var set in Cloud Run service — `/gmc/sync` endpoint no longer raises ValueError
+  3. `confirmed_sample.last_run` populates correctly (route.ts `run_at` → `run_timestamp` fix)
+  4. `keyword_bank.json` included in Cloud Run container (`.gcloudignore` updated)
+  5. Phase 17-02 and 19-02/19-03 SUMMARY frontmatter updated with correct requirements-completed fields
+Plans:
+- [ ] 22-01-PLAN.md — Fix apply_feedback_layer() field name mismatch + GMC env var + tech debt fixes
+- [ ] 22-02-PLAN.md — Close SUMMARY frontmatter documentation gaps (MODEL-01, MODEL-02, MEAS-04)
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -128,6 +158,8 @@ Plans:
 | 18. Diagnosis — Establish Ground Truth | 3/3 | Complete    | 2026-02-21 | - |
 | 19. Measurement Infrastructure | 4/4 | Complete   | 2026-02-21 | - |
 | 20. Targeted Fixes & Intelligence Application | 4/4 | Complete    | 2026-02-21 | - |
+| 21. Apply Database Migrations & Update Schema Docs | 0/1 | Pending | - | - |
+| 22. Fix Integration Bugs & Close Documentation Gaps | 0/2 | Pending | - | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
