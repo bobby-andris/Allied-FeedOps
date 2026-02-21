@@ -23,6 +23,7 @@ This document provides a comprehensive reference for all database tables, column
 4. [Performance Tracking Tables](#performance-tracking-tables)
    - [performance_baselines](#performance_baselines)
    - [performance_snapshots](#performance_snapshots)
+   - [performance_impact_scores](#performance_impact_scores)
 5. [Search & Keyword Tables](#search--keyword-tables)
    - [search_queries](#search_queries)
    - [search_queries_by_master_sku](#search_queries_by_master_sku)
@@ -38,17 +39,21 @@ This document provides a comprehensive reference for all database tables, column
    - [lifestyle_image_selections](#lifestyle_image_selections)
 7. [Content Generation Tables](#content-generation-tables)
    - [regeneration_history](#regeneration_history)
+   - [prompt_version_aliases](#prompt_version_aliases)
    - [prompt_templates](#prompt_templates)
    - [batch_generation_jobs](#batch_generation_jobs)
    - [batch_generation_job_skus](#batch_generation_job_skus)
    - [generation_jobs](#generation_jobs)
-8. [Competitor Intelligence Tables](#competitor-intelligence-tables)
+8. [Measurement & Classification Tables](#measurement--classification-tables)
+   - [sku_bottleneck_classifications](#sku_bottleneck_classifications)
+   - [gmc_product_status](#gmc_product_status)
+9. [Competitor Intelligence Tables](#competitor-intelligence-tables)
    - [competitor_listings](#competitor_listings)
    - [competitor_patterns](#competitor_patterns)
    - [competitor_scrape_jobs](#competitor_scrape_jobs)
-9. [Support Tables](#support-tables)
+10. [Support Tables](#support-tables)
    - [shopify_products](#shopify_products)
-10. [Backfill Infrastructure Tables](#backfill-infrastructure-tables)
+11. [Backfill Infrastructure Tables](#backfill-infrastructure-tables)
    - [backfill_jobs](#backfill_jobs)
    - [backfill_job_errors](#backfill_job_errors)
 11. [Optimization & Intent Control Tables](#optimization--intent-control-tables)
@@ -552,16 +557,17 @@ Stores 30-day pre-optimization performance metrics. Used to measure improvement.
 |--------|------|----------|---------|-------------|
 | master_sku | text | NO | - | Master SKU identifier |
 | platform | text | NO | - | Platform ("google", "bing") |
-| baseline_start_date | text | NO | - | Start date (YYYY-MM-DD) |
-| baseline_end_date | text | NO | - | End date (YYYY-MM-DD) |
+| baseline_start_date | date | NO | - | Start date |
+| baseline_end_date | date | NO | - | End date |
 | avg_impressions | real | YES | - | Average daily impressions |
 | avg_clicks | real | YES | - | Average daily clicks |
 | avg_ctr | real | YES | - | Average CTR (0-1) |
 | avg_conversions | real | YES | - | Average daily conversions |
-| avg_conversion_value | real | YES | - | Average daily conversion value |
+| avg_conversion_value | numeric(18,6) | YES | - | Average daily conversion value |
 | avg_cvr | real | YES | - | Average CVR (0-1) |
-| avg_cost | real | YES | - | Average daily cost |
+| avg_cost | numeric(18,6) | YES | - | Average daily cost |
 | avg_roas | real | YES | - | Average ROAS |
+| metadata | jsonb | YES | '{}'::jsonb | Baseline metadata flags (multi-SKU family, etc.) |
 | created_at | timestamp with time zone | NO | now() | Baseline capture time |
 
 **Primary Key**: `(master_sku, platform)`
@@ -596,7 +602,8 @@ WHERE master_sku = 'WP-2/16-GAL'
 
 ### performance_snapshots
 
-Post-publish performance tracking. Enables delta analysis over time.
+Daily fact table for post-publish shopping performance. This is the source of truth
+for impact analysis and powers difference-in-differences scorecards.
 
 **Columns**:
 | Column | Type | Nullable | Default | Description |
@@ -605,29 +612,41 @@ Post-publish performance tracking. Enables delta analysis over time.
 | master_sku | text | NO | - | Master SKU identifier |
 | platform | text | NO | - | Platform ("google", "bing") |
 | environment | text | NO | - | Environment ("staging", "production") |
-| snapshot_date | text | NO | - | Date of snapshot (YYYY-MM-DD) |
+| snapshot_date | date | NO | - | Daily snapshot date |
 | impressions | integer | YES | 0 | Total impressions |
 | clicks | integer | YES | 0 | Total clicks |
 | ctr | real | YES | 0.0 | Click-through rate |
 | conversions | integer | YES | 0 | Total conversions |
-| conversion_value | real | YES | 0.0 | Total conversion value |
+| conversion_value | numeric(18,6) | YES | 0.0 | Total conversion value |
 | cvr | real | YES | 0.0 | Conversion rate |
-| cost | real | YES | 0.0 | Total cost |
-| cpc | real | YES | 0.0 | Cost per click |
+| cost | numeric(18,6) | YES | 0.0 | Total cost |
+| cpc | numeric(18,6) | YES | 0.0 | Cost per click |
 | roas | real | YES | 0.0 | Return on ad spend |
 | publish_event_id | bigint | YES | - | Foreign key to publish_events |
 | content_version | text | YES | - | Content version at snapshot |
 | days_since_publish | integer | YES | - | Days elapsed since publish |
+| cohort_type | text | YES | - | Treated/control cohort label |
+| product_category | text | YES | - | Category used for control matching |
 | fetched_at | timestamp with time zone | NO | now() | Data fetch timestamp |
 
 **Primary Key**: `id`
 
+**Unique Constraint**:
+- `uq_performance_snapshots_daily` on `(master_sku, platform, environment, snapshot_date)`
+
 **Indexes**:
 - `idx_snapshots_sku_platform_date` on `(master_sku, platform, snapshot_date DESC)`
+- `idx_performance_snapshots_snapshot_date` on `snapshot_date DESC`
+- `idx_performance_snapshots_platform_snapshot_date` on `(platform, snapshot_date DESC)`
+- `idx_performance_snapshots_publish_event` on `publish_event_id`
+- `idx_performance_snapshots_cohort_date` on `(cohort_type, snapshot_date DESC)`
+
+**Check Constraints**:
+- `chk_performance_snapshots_cohort_type` ensures `cohort_type IN ('treated', 'control')`
 
 **Common Queries**:
 ```sql
--- Get post-publish trend
+-- Get daily trend for one SKU
 SELECT
     snapshot_date,
     days_since_publish,
@@ -640,23 +659,75 @@ WHERE master_sku = 'WP-2/16-GAL'
 ORDER BY snapshot_date DESC
 LIMIT 30;
 
--- Compare to baseline
-WITH baseline AS (
-    SELECT avg_impressions, avg_ctr
-    FROM performance_baselines
-    WHERE master_sku = 'WP-2/16-GAL' AND platform = 'google'
-),
-snapshot AS (
-    SELECT impressions, ctr
-    FROM performance_snapshots
-    WHERE master_sku = 'WP-2/16-GAL'
-      AND platform = 'google'
-      AND snapshot_date = CURRENT_DATE
-)
-SELECT
-    s.impressions - b.avg_impressions AS impression_delta,
-    s.ctr - b.avg_ctr AS ctr_delta
-FROM baseline b, snapshot s;
+-- Latest available snapshot date (staleness indicator)
+SELECT snapshot_date
+FROM performance_snapshots
+WHERE platform = 'google' AND environment = 'production'
+ORDER BY snapshot_date DESC
+LIMIT 1;
+```
+
+---
+
+### performance_impact_scores
+
+Persisted difference-in-differences scorecards by publish event and metric.
+This table is populated by the impact computation job and read directly by dashboard APIs.
+
+**Columns**:
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | nextval() | Primary key |
+| publish_event_id | bigint | NO | - | Foreign key to publish_events |
+| master_sku | text | NO | - | Master SKU identifier |
+| platform | text | NO | - | Platform ("google") |
+| environment | text | NO | - | Environment ("production"/"staging") |
+| metric_name | text | NO | - | Metric key (`roas`, `cvr`, `ctr`, `clicks`, `conversions`, `cost`, `conversion_value`, `impressions`) |
+| pre_value | numeric(18,8) | YES | - | Treated pre-window mean |
+| post_value | numeric(18,8) | YES | - | Treated post-window mean |
+| control_pre | numeric(18,8) | YES | - | Control pre-window mean |
+| control_post | numeric(18,8) | YES | - | Control post-window mean |
+| did_lift_pct | numeric(18,8) | YES | - | Diff-in-diff lift percentage |
+| label | text | NO | - | Overall classification (`positive`, `negative`, `neutral`) |
+| confidence | numeric(6,4) | NO | 0 | Confidence score (0-1) |
+| sample_size_treated | integer | NO | 0 | Treated sample size |
+| sample_size_control | integer | NO | 0 | Control sample size |
+| window_pre_days | integer | NO | 30 | Pre window length |
+| window_post_days | integer | NO | 30 | Post window length |
+| run_date | date | NO | - | Job run date |
+| computed_at | timestamp with time zone | NO | now() | Computation timestamp |
+
+**Primary Key**: `id`
+
+**Unique Constraint**:
+- `(publish_event_id, metric_name, platform, environment)`
+
+**Indexes**:
+- `idx_performance_impact_scores_publish_event` on `publish_event_id`
+- `idx_performance_impact_scores_master_sku` on `master_sku`
+- `idx_performance_impact_scores_run_date` on `run_date DESC`
+- `idx_performance_impact_scores_metric` on `metric_name`
+- `idx_performance_impact_scores_label` on `label`
+
+**Check Constraints**:
+- `chk_performance_impact_scores_label` ensures `label IN ('positive', 'negative', 'neutral')`
+
+**Common Queries**:
+```sql
+-- Scorecard metrics for a publish event
+SELECT metric_name, did_lift_pct, label, confidence
+FROM performance_impact_scores
+WHERE publish_event_id = 12345
+ORDER BY metric_name;
+
+-- Latest ROAS impact by SKU
+SELECT master_sku, publish_event_id, did_lift_pct, label, confidence, computed_at
+FROM performance_impact_scores
+WHERE metric_name = 'roas'
+  AND platform = 'google'
+  AND environment = 'production'
+ORDER BY computed_at DESC
+LIMIT 100;
 ```
 
 ---
@@ -1196,7 +1267,7 @@ WHERE master_sku = 'WP-2/16-GAL' AND finish IS NULL;
 
 ### regeneration_history
 
-Audit log for all content regeneration operations. Tracks prompts, feedback, and quality deltas.
+Audit log for all content regeneration operations. Tracks prompts, feedback, quality deltas, feature flags, and generation cost.
 
 **Columns**:
 | Column | Type | Nullable | Default | Description |
@@ -1219,6 +1290,10 @@ Audit log for all content regeneration operations. Tracks prompts, feedback, and
 | generated_content_id | uuid | YES | - | Foreign key to generated_content |
 | created_at | timestamp with time zone | NO | now() | Regeneration timestamp |
 | created_by | text | YES | - | User who triggered |
+| feature_flags_active | jsonb | YES | - | Feature flag state snapshot at generation time (MEAS-01) |
+| tokens_used | integer | YES | - | Token count from LLM provider response |
+| latency_ms | integer | YES | - | Generation wall-clock latency in milliseconds |
+| cost_usd | numeric(10,6) | YES | - | Estimated generation cost in USD |
 
 **Primary Key**: `id`
 
@@ -1227,6 +1302,7 @@ Audit log for all content regeneration operations. Tracks prompts, feedback, and
 - `idx_regen_history_sku_type` on `(master_sku, content_type, platform)`
 - `idx_regen_history_created` on `created_at DESC`
 - `idx_regen_history_prompt_hash` on `prompt_hash`
+- `idx_regen_history_flags` on `feature_flags_active` (GIN)
 
 **Common Queries**:
 ```sql
@@ -1236,7 +1312,9 @@ SELECT
     content_type,
     feedback_text,
     quality_score_before,
-    quality_score_after
+    quality_score_after,
+    feature_flags_active,
+    latency_ms
 FROM regeneration_history
 WHERE master_sku = 'WP-2/16-GAL'
 ORDER BY created_at DESC;
@@ -1246,6 +1324,129 @@ SELECT master_sku, created_at, quality_score_after
 FROM regeneration_history
 WHERE prompt_hash = 'abc123'
 ORDER BY created_at DESC;
+
+-- Analyze generations by flag state (MEAS-01)
+SELECT
+    (feature_flags_active->>'PROMPT_CONTRACT_V2')::boolean AS contract_v2,
+    COUNT(*) AS generation_count,
+    AVG(latency_ms) AS avg_latency_ms
+FROM regeneration_history
+WHERE feature_flags_active IS NOT NULL
+GROUP BY 1;
+```
+
+---
+
+### prompt_version_aliases
+
+Maps prompt hashes to human-readable version names for MEAS-03 tracking. Applied in migration 035.
+
+**Columns**:
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | nextval() | Primary key |
+| prompt_hash | text | NO | - | Unique hash of prompt content |
+| alias | text | YES | - | Human-readable version name (e.g., "v2.1-grab-bar-fix") |
+| notes | text | YES | - | Notes about what changed in this version |
+| created_at | timestamptz | NO | now() | When alias was created |
+| created_by | text | YES | - | User who created the alias |
+
+**Primary Key**: `id`
+
+**Unique Constraint**: `prompt_hash`
+
+**Indexes**:
+- `idx_prompt_version_aliases_hash` on `prompt_hash`
+
+**Common Queries**:
+```sql
+-- Lookup alias for a prompt hash
+SELECT alias, notes
+FROM prompt_version_aliases
+WHERE prompt_hash = 'abc123';
+
+-- Join with regeneration history to see version usage
+SELECT
+    pva.alias,
+    COUNT(*) AS usage_count,
+    MIN(rh.created_at) AS first_used,
+    MAX(rh.created_at) AS last_used
+FROM regeneration_history rh
+LEFT JOIN prompt_version_aliases pva ON rh.prompt_hash = pva.prompt_hash
+GROUP BY pva.alias
+ORDER BY usage_count DESC;
+```
+
+---
+
+### sku_bottleneck_classifications
+
+Stores per-SKU bottleneck classification results for MEAS-04. Applied in migration 035.
+
+**Columns**:
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | nextval() | Primary key |
+| master_sku | text | NO | - | Master SKU identifier |
+| classification | text | NO | - | Bottleneck type (e.g., "content_quality", "coverage_gap") |
+| confidence | numeric(4,2) | YES | - | Confidence score 0-1 |
+| evidence | jsonb | YES | - | Evidence supporting the classification |
+| override_by | text | YES | - | User who created manual override |
+| override_note | text | YES | - | Explanation for override |
+| is_override | boolean | YES | false | True if this is a manual override record |
+| classified_at | timestamptz | NO | now() | When classification was made |
+| publish_event_id | bigint | YES | - | Associated publish event (if applicable) |
+
+**Primary Key**: `id`
+
+**Indexes**:
+- `idx_sku_bottleneck_master_sku` (UNIQUE PARTIAL) on `master_sku WHERE is_override = false`
+- `idx_sku_bottleneck_classification` on `classification`
+- `idx_sku_bottleneck_classified_at` on `classified_at DESC`
+
+**Note**: The partial unique index ensures only one non-override classification exists per SKU. Manual overrides are allowed to coexist.
+
+---
+
+### gmc_product_status
+
+Stores Google Merchant Center product approval status and item issues for MEAS-02. Applied in migration 035.
+
+**Columns**:
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | nextval() | Primary key |
+| gmc_offer_id | text | NO | - | GMC offer ID (format: shopify_us_...) |
+| master_sku | text | YES | - | Master SKU (if resolved) |
+| offer_title | text | YES | - | Product title from GMC |
+| status | text | NO | - | GMC status: "approved", "disapproved", "pending" |
+| item_issues | jsonb | YES | - | Array of GMC item issues |
+| issue_count | integer | YES | 0 | Total number of issues |
+| disapproval_count | integer | YES | 0 | Number of disapprovals |
+| synced_at | timestamptz | NO | now() | Last sync timestamp |
+| sync_job_id | uuid | YES | - | Source sync job ID |
+
+**Primary Key**: `id`
+
+**Unique Constraint**: `gmc_offer_id` (via index)
+
+**Indexes**:
+- `idx_gmc_product_status_offer_id` (UNIQUE) on `gmc_offer_id`
+- `idx_gmc_product_status_master_sku` on `master_sku`
+- `idx_gmc_product_status_status` on `status`
+- `idx_gmc_product_status_synced_at` on `synced_at DESC`
+
+**Common Queries**:
+```sql
+-- Get disapproved products
+SELECT master_sku, offer_title, issue_count, disapproval_count, item_issues
+FROM gmc_product_status
+WHERE status = 'disapproved'
+ORDER BY disapproval_count DESC;
+
+-- Check sync freshness
+SELECT MAX(synced_at) AS last_sync, COUNT(*) AS total_products
+FROM gmc_product_status;
 ```
 
 ---
@@ -2074,11 +2275,12 @@ WHERE gc.master_sku = 'WP-2/16-GAL'
 
 ## Notes
 
-- **Version**: Schema documented 2026-02-20 (updated with unified intent execution control-plane tables)
-- **Total Tables**: 48
+- **Version**: Schema documented 2026-02-21 (updated with unified intent execution + measurement infrastructure)
+- **Total Tables**: 51 (includes unified intent execution tables + prompt_version_aliases, sku_bottleneck_classifications, gmc_product_status)
 - **Backup Table**: `generated_images_backup_20260208` (historical data)
 - **Data Collection**: Automated via `ensureSkuData()` and `ensureAllData()` in dashboard
 - **Auto-Deploy**: Push to master triggers Cloud Run (Python) and Vercel (Dashboard) deploys
+- **Pending Migration**: `supabase/migrations/035_measurement_infrastructure_schema.sql` — apply via Supabase SQL Editor or `supabase db push` with personal access token
 
 For architecture details, see:
 - `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/architecture/`
