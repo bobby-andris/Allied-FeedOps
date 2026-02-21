@@ -104,11 +104,18 @@ that fail to differentiate Allied Brass from mass-market competitors.
 - Fix critical GPT-5.2 bugs (temperature/reasoning conflict, missing cache retention, legacy JSON mode)
 - Wire all 8 runtime YAML configs into prompt_builder.py
 - Rewrite SYSTEM_PROMPT from compliance document → creative brief with XML tags
-- Create 10-15 gold standard examples across major product categories
+- ~~Create 10-15 gold standard examples across major product categories~~ **DONE** — 30 examples across 3 platforms (10 Google, 10 Bing, 10 Shopify), 10 product categories, avg 88.6/100
 - Expand category guidance beyond current 3 groups
-- Rewrite quality rubric to reward differentiation and emotional resonance over compliance
+- ~~Rewrite quality rubric to reward differentiation and emotional resonance over compliance~~ **DONE** — 10-criterion weighted rubric in `quality-evaluation` skill + `quality_rubric.yaml`
 - Generate, evaluate, and iterate on 10 representative test SKUs
 - Success: human-rated "significantly better" for 8/10 test SKUs
+
+**Pre-work complete (skills & configs):**
+- 8/8 Claude Code skills created with comprehensive guidance
+- 8/8 runtime YAML configs created and ready for pipeline wiring
+- 30 gold standard examples written and scored
+- Quality rubric fully redesigned (10 criteria vs old 6)
+- Remaining: GPT-5.2 bug fixes, pipeline wiring, DB loading, prompt rewrite, evaluation
 
 ### Out of Scope
 
@@ -145,11 +152,13 @@ Skills serve two layers:
 1. **Claude Code skills** (`.claude/skills/`) — full research-backed guidance for Claude when coding
 2. **Runtime configs** (`src/feedops/config/`) — distilled rules injected into GPT-5.2 prompts during generation
 
-Existing runtime configs: `shopping_intelligence.yaml`, `brand_voice.yaml`, `quality_rubric.yaml`, `finish_guide.yaml` + existing Python modules (`segment_strategy.py`, `collection_descriptions.py`, `keyword_bank.py`)
+All 8 runtime configs created: `shopping_intelligence.yaml`, `brand_voice.yaml`, `quality_rubric.yaml`, `finish_guide.yaml`, `storytelling_patterns.yaml`, `collection_stories.yaml`, `platform_bing.yaml`, `platform_shopify.yaml` + existing Python modules (`segment_strategy.py`, `collection_descriptions.py`, `keyword_bank.py`)
 
-Planned configs (to be created during remaining skill sessions): `storytelling_patterns.yaml`, `collection_stories.yaml`, `platform_bing.yaml`, `platform_shopify.yaml`
+All 8 Claude Code skills created: `allied-brass-brand-expert`, `quality-evaluation`, `finish-expertise`, `product-storytelling`, `collection-storytelling`, `google-shopping-content`, `bing-shopping-content`, `shopify-conversion-content`
 
-All configs are loaded by `prompt_builder.py` and injected into GPT-5.2's prompt at generation time.
+Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 10 Shopify avg 88.7/100) covering 10 product categories
+
+**Status:** Skills and configs complete. Pending: wire configs into `prompt_builder.py`, load gold standards into `prompt_templates` DB table, fix GPT-5.2 bugs.
 
 ## Key Decisions
 
@@ -170,8 +179,8 @@ All configs are loaded by `prompt_builder.py` and injected into GPT-5.2's prompt
 | Research-first before code changes | v1.2 started with 3 research phases before touching code | ✓ Good — evidence-backed fixes |
 | Persistent corrections via sku_corrections table | Per-SKU feedback accumulates, not lost between sessions | ✓ Good — corrections survive regeneration |
 | Content quality before optimization intelligence | Fix input data before optimizing what we do with it (garbage in, garbage out) | Pending — strategic assessment recommends 1.3a before 1.3c |
-| Dual-use skills (Claude Code + runtime configs) | Skills guide Claude when coding AND inject into GPT-5.2 prompts at runtime | Pending — 4/8 runtime configs created, wiring into prompt_builder.py is v1.3a Phase 2 |
-| Skills before agents for content quality | Better instructions to one model (skills) give better ROI than multiple agents arguing | Pending — skills-enhanced est. 85-92/100 vs current 75-81/100 at ~1.5x cost vs 3x for agents |
+| Dual-use skills (Claude Code + runtime configs) | Skills guide Claude when coding AND inject into GPT-5.2 prompts at runtime | ✓ Complete — 8/8 skills + 8/8 runtime configs created, wiring into prompt_builder.py is v1.3a Phase 24 |
+| Skills before agents for content quality | Better instructions to one model (skills) give better ROI than multiple agents arguing | In progress — 30 gold standards written (avg 88.6/100), pipeline wiring in Phase 23-24 |
 
 ## Constraints
 

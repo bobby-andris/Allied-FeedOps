@@ -190,13 +190,13 @@ Skills serve two layers — Claude Code guidance AND GPT-5.2 runtime injection:
 | Skill | Claude Code Skill | Runtime Config | Wired into pipeline |
 |-------|:-:|:-:|:-:|
 | Shopping Intelligence | `.claude/skills/google-shopping-content` | `config/shopping_intelligence.yaml` | Yes (via `shopping_intelligence.py`) |
-| Brand Voice | `.claude/skills/allied-brass-brand-expert` | `config/brand_voice.yaml` | Pending (v1.3a) |
-| Quality Rubric | `.claude/skills/quality-evaluation` | `config/quality_rubric.yaml` | Pending (v1.3a) |
-| Finish Expertise | `.claude/skills/finish-expertise` | `config/finish_guide.yaml` | Pending (v1.3a) |
-| Product Storytelling | `.claude/skills/product-storytelling` | `config/storytelling_patterns.yaml` | Pending (v1.3a) |
-| Collection Stories | `.claude/skills/collection-storytelling` | `config/collection_stories.yaml` | Pending (v1.3a) |
-| Platform: Bing | `.claude/skills/bing-shopping-content` | `config/platform_bing.yaml` | Pending (v1.3a) |
-| Platform: Shopify | `.claude/skills/shopify-conversion-content` | `config/platform_shopify.yaml` | Pending (v1.3a) |
+| Brand Voice | `.claude/skills/allied-brass-brand-expert` | `config/brand_voice.yaml` | Skill + config ready, wiring pending (v1.3a Phase 24) |
+| Quality Rubric | `.claude/skills/quality-evaluation` | `config/quality_rubric.yaml` | Skill + config ready, wiring pending (v1.3a Phase 23) |
+| Finish Expertise | `.claude/skills/finish-expertise` | `config/finish_guide.yaml` | Skill + config ready, wiring pending (v1.3a Phase 24) |
+| Product Storytelling | `.claude/skills/product-storytelling` | `config/storytelling_patterns.yaml` | Skill + config ready, wiring pending (v1.3a Phase 24) |
+| Collection Stories | `.claude/skills/collection-storytelling` | `config/collection_stories.yaml` | Skill + config ready, wiring pending (v1.3a Phase 24) |
+| Platform: Bing | `.claude/skills/bing-shopping-content` | `config/platform_bing.yaml` | Skill + config ready, wiring pending (v1.3a Phase 24) |
+| Platform: Shopify | `.claude/skills/shopify-conversion-content` | `config/platform_shopify.yaml` | Skill + config ready, wiring pending (v1.3a Phase 24) |
 
 **Key files**: `src/feedops/api/prompt_builder.py` (orchestrator), `src/feedops/pipeline/shopping_intelligence.py` (loads YAML), `src/feedops/config/` (YAML configs)
 
