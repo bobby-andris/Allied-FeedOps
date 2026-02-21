@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.2 Measurement Infrastructure
 **Current phase:** 22-fix-integration-bugs-doc-gaps
 **Current plan:** 03
-**Status:** In progress
+**Status:** Milestone complete
 
 ## Session Log
 
