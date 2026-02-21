@@ -9,11 +9,11 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 
 ### GPT-5.2 Integration
 
-- [ ] **GPT52-01**: Pipeline does not pass temperature alongside reasoning_effort params (mutually exclusive on GPT-5.2)
-- [ ] **GPT52-02**: Pipeline uses a sensible reasoning_effort default (not zero) when env var is unset
-- [ ] **GPT52-03**: Pipeline uses json_schema strict mode instead of legacy json_object response format
-- [ ] **GPT52-04**: Pipeline sets prompt_cache_retention for batch runs to avoid cache expiration between SKUs
-- [ ] **GPT52-05**: System prompt uses XML tags instead of === headers for GPT-5.2 parsing reliability
+- [x] **GPT52-01**: Pipeline does not pass temperature alongside reasoning_effort params (mutually exclusive on GPT-5.2)
+- [x] **GPT52-02**: Pipeline uses a sensible reasoning_effort default (not zero) when env var is unset
+- [x] **GPT52-03**: Pipeline uses json_schema strict mode instead of legacy json_object response format
+- [x] **GPT52-04**: Pipeline sets prompt_cache_retention for batch runs to avoid cache expiration between SKUs
+- [x] **GPT52-05**: System prompt uses XML tags instead of === headers for GPT-5.2 parsing reliability
 
 ### Prompt Architecture
 
@@ -70,11 +70,11 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GPT52-01 | Phase 23 | Pending |
-| GPT52-02 | Phase 23 | Pending |
-| GPT52-03 | Phase 23 | Pending |
-| GPT52-04 | Phase 23 | Pending |
-| GPT52-05 | Phase 23 | Pending |
+| GPT52-01 | Phase 23 | Complete |
+| GPT52-02 | Phase 23 | Complete |
+| GPT52-03 | Phase 23 | Complete |
+| GPT52-04 | Phase 23 | Complete |
+| GPT52-05 | Phase 23 | Complete |
 | PRMT-01 | Phase 24 | Pending |
 | PRMT-02 | Phase 24 | Pending |
 | PRMT-03 | Phase 24 | Pending |
