@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.2 Measurement Infrastructure
 **Current phase:** 21-apply-database-migrations
 **Current plan:** 02 (plan 01 complete)
-**Status:** In progress
+**Status:** Ready to plan
 
 ## Session Log
 

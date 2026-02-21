@@ -159,7 +159,7 @@ Plans:
 | 18. Diagnosis — Establish Ground Truth | 3/3 | Complete    | 2026-02-21 | - |
 | 19. Measurement Infrastructure | 4/4 | Complete   | 2026-02-21 | - |
 | 20. Targeted Fixes & Intelligence Application | 4/4 | Complete    | 2026-02-21 | - |
-| 21. Apply Database Migrations & Update Schema Docs | 1/1 | Complete   | 2026-02-21 | - |
+| 21. Apply Database Migrations & Update Schema Docs | 1/1 | Complete    | 2026-02-21 | - |
 | 22. Fix Integration Bugs & Close Documentation Gaps | 0/2 | Pending | - | - |
 
 ---
