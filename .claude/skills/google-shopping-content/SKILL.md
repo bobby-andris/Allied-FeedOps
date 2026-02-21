@@ -219,10 +219,9 @@ The finish sentence should flow as part of the product narrative, not interrupt 
 
 Google Merchant Center allows up to **5,000 characters** for descriptions. Google Shopping ads display approximately **145-180 characters** as a preview. But here's what matters: **Google's Shopping Graph indexes the FULL description text for query matching** — keywords throughout the description contribute to discoverability even if truncated in SERP.
 
-**Platform limits (verified Feb 2026):**
-- **Google Shopping:** 5,000 chars max. Sweet spot: **700-900 characters** (target 800).
-- **Bing Shopping:** 10,000 chars max (NOT 5,000 — that was Google's limit misapplied by feed tools). Same 700-900 char sweet spot applies.
-- **Shopify DTC:** No hard limit. 250-400 words (1,250-2,000 chars) with two-tier above/below fold format.
+**Google Shopping limits (verified Feb 2026):**
+- **Title:** 150 chars max. ~70 chars visible on most devices.
+- **Description:** 5,000 chars max. Sweet spot: **700-900 characters** (target 800).
 
 **Description length strategy (700-900 chars for Google/Bing):**
 - **First 160 characters:** Your mini-ad. This is the Shopping preview — product type, key spec, one differentiator. Make it a complete, benefit-focused sentence.
@@ -697,9 +696,7 @@ One natural sentence that integrates the finish as a product attribute.
 - The structured fields should contain the same optimized content — not a dumbed-down version
 
 ### Scope: Google Shopping Only
-This skill covers Google Shopping (Google Merchant Center) content exclusively. For other platforms:
-- **Bing Shopping:** Use the Bing content generation skill
-- **Shopify storefront:** Use the Shopify content generation skill
+This skill covers Google Shopping (Google Merchant Center) content exclusively. For other platforms, use the dedicated platform skills (`bing-shopping-content`, `shopify-conversion-content`).
 
 ---
 

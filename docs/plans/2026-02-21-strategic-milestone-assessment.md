@@ -885,10 +885,17 @@ Before writing anything:
 
 2. Read `src/feedops/pipeline/prompts.py` — understand the current Bing-specific rules.
 
-3. **RESEARCH ACTUAL BING LIMITS**: Web search for "Bing Merchant Center product feed
-   specifications 2026", "Microsoft Shopping description character limits", and "Microsoft
-   Advertising Shopping campaign best practices". Do NOT assume character limits match Google's.
-   Do NOT assume 700-1000 chars is correct — verify from official Microsoft documentation.
+3. **BING LIMITS (pre-researched Feb 2026 from official Microsoft API docs)**:
+   - Title: 150 chars max (same as Google). Sweet spot: 50-80 chars.
+   - Description: **10,000 chars max** (NOT 5,000 — that was Google's limit misapplied by feed tools).
+     Source: https://learn.microsoft.com/en-us/advertising/shopping-content/products-resource
+   - Same 700-900 char sweet spot as Google applies (diminishing returns beyond 1,000).
+   - Front-load key details in first 150-200 chars (similar preview truncation as Google).
+   - Microsoft states descriptions "should not contain HTML, symbols such as $ or quotation marks,
+     capital letters, or any promotional text."
+   - Bing rewards synonym coverage more than Google — use the extra budget for natural synonym
+     integration (towel bar/towel rack/towel holder/towel rail in one description).
+   Use these findings directly — do NOT re-research limits unless you find contradicting info.
 
 4. Read `src/feedops/pipeline/segment_strategy.py` — understand the synonym_priority system
    that's already built for Bing's longer description format.
@@ -986,12 +993,20 @@ Before writing anything:
    (towel bar, grab bar, soap dispenser, glass shelf). Note the current page layout, what
    content appears where, and how the description is displayed.
 
-4. **RESEARCH ACTUAL SHOPIFY BEST PRACTICES**: Web search for "Shopify product description
-   conversion optimization 2026", "e-commerce product page copywriting best practices",
-   "Shopify SEO product description length 2026", and "luxury home goods product page examples".
-   Research actual optimal description lengths for Shopify product pages — do NOT assume any
-   character limits from Google or Bing apply. Shopify has no hard character limit for
-   descriptions but there are evidence-based sweet spots for conversion and SEO.
+4. **SHOPIFY LENGTH BEST PRACTICES (pre-researched Feb 2026)**:
+   - No hard character limit for product descriptions.
+   - Meta title: 60-70 chars (Google SERP display limit). Meta description: 155-160 chars.
+   - Description sweet spot: **250-400 words (1,250-2,000 chars)** with a two-tier structure:
+     * Above the fold: 2-3 sentences, lifestyle-focused, benefit-driven hook
+     * Below the fold: Specs (bullet points), finish details, dimensions, mounting, collection story
+   - Luxury/home goods specifically: "You might need longer copy for certain luxury items, because
+     you may be making a case for lifestyle benefits." (Source: Stellar Content)
+   - Minimum for SEO benefit: 200-300 words (confirmed by multiple sources).
+   - Conversion lift from well-structured descriptions: **10-30%** (published A/B test data).
+   - Readability and scannability matter MORE than word count — use headers and bullets.
+   - "Cutting text length by 54% not only made readers able to find and remember information more
+     easily, but also scored it as more complete than the longer version." (Source: AirOps)
+   Use these findings directly — do NOT re-research lengths unless you find contradicting info.
 
 5. Query the `product_catalog` table to understand what product data is available (title,
    description, category, collection, dimensions, specs).
