@@ -458,6 +458,156 @@ category_rules:
       crack in shower humidity.' Mention blade width and whether it's replaceable.
     note: "'shower squeegee' has 164,415 impressions — second highest search term in entire dataset. 'squeegee for shower' adds another 36,521."
 
+  "guest towel holders":
+    intent_keywords:
+      - "guest towel holder"
+      - "hand towel holder"
+      - "bathroom towel holder"
+      - "wall towel holder"
+      - "guest bath towel bar"
+      - "guest towel ring"
+    title_instruction: >
+      Lead with finish + 'Guest Towel Holder' or 'Hand Towel Holder'. Specify
+      mounting style (wall mount, freestanding, over-door) after product type.
+      'Hand towel holder' and 'guest towel holder' are equivalent search terms —
+      use the more specific one based on evidence.
+    description_instruction: >
+      Guest towel holders are often the most-touched hardware in the guest bath —
+      lead with how this product elevates the experience for visitors. Address
+      dimensions (towel clearance, projection) as the practical purchase factor.
+      Mention collection coordination: 'Pairs with matching robe hooks, towel rings,
+      and soap dishes in the [Collection] collection.' Solid brass weight and
+      finish durability contrast with hollow chrome alternatives.
+    note: "2,800 variants — high-volume category with overlap between 'guest towel holder' and 'hand towel holder' search vocabulary."
+
+  "wood shelves":
+    intent_keywords:
+      - "wood shelf bathroom"
+      - "wood bathroom shelf"
+      - "teak bathroom shelf"
+      - "wood wall shelf"
+      - "decorative wood shelf"
+      - "brass and wood shelf"
+    title_instruction: >
+      Lead with finish + wood type (if known) + 'Wood Shelf'. 'Brass and wood shelf'
+      targets design-conscious shoppers blending metal and natural materials.
+      Include dimensions (W x D) as the primary purchase decision factor.
+    description_instruction: >
+      Buyers of wood shelves with brass hardware are design-conscious — they are
+      curating a specific aesthetic, not just adding storage. Lead with the design
+      intention: the warmth of natural wood contrasted with the solidity of the
+      brass hardware. State shelf dimensions (width and depth) and weight capacity.
+      Mention the brass hardware finish and how it ties to other collection pieces.
+    note: "2,786 variants. Buyers want both material warmth and structural quality — address both the aesthetic and the functional concern."
+
+  "tumbler toothbrush holders":
+    intent_keywords:
+      - "tumbler holder"
+      - "toothbrush holder"
+      - "bathroom tumbler"
+      - "countertop toothbrush holder"
+      - "wall mounted toothbrush holder"
+      - "bathroom cup holder"
+      - "tumbler toothbrush cup"
+    title_instruction: >
+      Lead with finish + 'Tumbler/Toothbrush Holder' or 'Bathroom Tumbler'. Specify
+      countertop vs wall-mount in the title — these are different purchase intents.
+      Include 'wall mount' for wall-mounted versions. For combination units with
+      both tumbler and toothbrush holders, note 'Dual' or 'Combo' in the title.
+    description_instruction: >
+      This is the daily-use organizer for bathroom countertops. Shoppers care about
+      capacity (how many toothbrushes fit), stability (does it tip?), and ease of
+      cleaning. 'Solid brass base with substantial weight — stays put when you grab
+      your toothbrush one-handed.' For wall-mount versions: 'Clears counter clutter.'
+      Address finish durability in a moisture-rich bathroom environment.
+    note: "1,860 variants. 'toothbrush holder' is the primary search term; 'tumbler' may confuse general shoppers — use both."
+
+  "soap dishes":
+    intent_keywords:
+      - "soap dish"
+      - "bathroom soap dish"
+      - "soap holder"
+      - "wall mounted soap dish"
+      - "solid brass soap dish"
+      - "countertop soap dish"
+    title_instruction: >
+      Lead with finish + 'Soap Dish'. Specify mounting (wall mount, countertop,
+      shower) in the title — mounting type is the primary differentiator. For
+      wire/grid designs, include 'Open Grid' or 'Wire' to set drainage expectations.
+    description_instruction: >
+      Soap dish shoppers have a specific use-case: they want drainage so the soap
+      doesn't sit in water. Lead with this: 'Open-grid solid brass base lets water
+      drain freely, keeping soap dry between uses.' Contrast with solid-bottom plastic
+      dishes that pool water. For wall-mount versions, mention the drilling-free
+      installation if applicable. Include collection coordination for upsell.
+    note: "1,804 variants. Drainage is the #1 practical concern. Solid brass doesn't rust like chrome-plated steel soap dishes."
+
+  "multi hooks":
+    intent_keywords:
+      - "multi hook"
+      - "coat hook"
+      - "hat and coat hook"
+      - "bathroom hook rack"
+      - "wall hook strip"
+      - "triple hook"
+      - "double hook"
+    title_instruction: >
+      Lead with finish + number of hooks + 'Hook' (e.g., 'Triple Hook', 'Double
+      Hook', 'Multi Hook'). Include 'wall mount' as a modifier. Specify the hook
+      count prominently — 'triple' vs 'double' is the primary purchase differentiator.
+    description_instruction: >
+      Multi hooks solve the overcrowding problem: one hook per robe, plus a hook
+      for a wet towel and a hand towel. Lead with the use scenario. State the
+      projection depth (critical for hanging robes without wall dragging) and
+      the spacing between hooks. Solid brass arms maintain their projection over
+      years of daily use — plastic and zinc hooks sag. Include collection coordination.
+    note: "1,236 variants. The number of hooks and projection depth are the two decisive purchase specs."
+
+  "paper towel holders":
+    intent_keywords:
+      - "paper towel holder"
+      - "wall mounted paper towel holder"
+      - "under cabinet paper towel holder"
+      - "paper towel dispenser"
+      - "countertop paper towel holder"
+      - "brass paper towel holder"
+      - "kitchen paper towel holder"
+    title_instruction: >
+      Lead with finish + mounting style + 'Paper Towel Holder'. Mounting style
+      (wall mount, under-cabinet, countertop, freestanding) is the primary decision
+      factor. Include 'standard roll' or 'jumbo roll' if evidence confirms size
+      compatibility. Kitchen applicability matters — mention 'kitchen' in description.
+    description_instruction: >
+      The paper towel holder buyer has a specific location in mind (under cabinet,
+      beside the sink, on the counter). Lead with the mounting context and how it
+      solves the 'reach for a paper towel one-handed' scenario. 'Solid brass arm
+      holds tension through thousands of one-handed tears — the hollow zinc holders
+      loosen and spin freely.' Mention finish durability in kitchen humidity. Include
+      roll-loading mechanism if available.
+    note: "1,154 variants. Kitchen is the primary use case, bathroom secondary. 'Under cabinet paper towel holder' is a dominant search term."
+
+  "freestanding toilet tissue stands":
+    intent_keywords:
+      - "freestanding toilet paper holder"
+      - "floor standing toilet paper holder"
+      - "toilet paper stand"
+      - "toilet tissue stand"
+      - "standing toilet paper holder"
+      - "toilet roll stand"
+    title_instruction: >
+      CRITICAL: Use 'Freestanding Toilet Paper Holder' as the primary product type —
+      this is the dominant search vocabulary. 'Floor Standing' and 'Standing' are
+      valid synonyms. Include finish and material. Include roll capacity (single roll
+      vs multi-roll) when available.
+    description_instruction: >
+      Freestanding buyers are specifically avoiding wall drilling. Lead with this:
+      'No drilling required — weighted solid brass base provides stability without
+      anchoring to the wall.' Address the stability concern directly — a freestanding
+      holder that tips when pulling paper is the #1 negative review complaint.
+      'Weighted base stays in place through one-handed paper pull.' Include height
+      for reach consideration. Contrast with flimsy chrome stands.
+    note: "908 variants. No-drill installation is the primary buyer motivation. Stability is the #1 trust concern."
+
 # ---------------------------------------------------------------------------
 # ALLIED BRASS USP — brand differentiators injected into all generations
 # ---------------------------------------------------------------------------

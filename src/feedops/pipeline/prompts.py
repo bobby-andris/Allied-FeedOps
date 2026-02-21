@@ -178,73 +178,7 @@ Return ONE valid JSON object with all required fields. Google/Bing fields are va
 </output_contract>
 """
 
-# ---------------------------------------------------------------------------
-# CATEGORY GUIDANCE (injected into dynamic user prompt per-SKU)
-# ---------------------------------------------------------------------------
-# Category-specific writing hints that help the LLM tailor content structure
-# to product types with different buyer intent patterns. These go in the
-# dynamic user prompt (not system prompt) to preserve prompt caching.
-# ---------------------------------------------------------------------------
-
-_CATEGORY_GUIDANCE = {
-    "niche_functional": {
-        "categories": [
-            "retractable",
-            "garment rod",
-            "cabinet pull",
-            "cabinet knob",
-            "squeegee",
-            "door pull",
-            "shower door",
-        ],
-        "guidance": """CATEGORY NOTE: This is a niche/functional product. Shoppers searching
-for this product type already know what they want — focus on the concrete fit for this use case
-(material quality, dimensions, mounting system) rather than generic bathroom upgrade hooks.
-For Google/Bing: lead with exact product type and differentiating specs.
-For Shopify: open with the specific problem this product solves, not a generic bathroom hook.""",
-    },
-    "towel_storage": {
-        "categories": [
-            "towel bar",
-            "towel ring",
-            "towel holder",
-            "towel stand",
-            "towel valet",
-            "towel shelf",
-            "guest towel",
-        ],
-        "guidance": """CATEGORY NOTE: High-competition category. Differentiate on construction
-(solid brass vs die-cast zinc), finish variety, and collection coordination.
-For Google/Bing: include towel bar/rack/holder synonyms and exact dimensions early.
-For Shopify: address the common frustration (flimsy bars, mismatched finishes) in opening.""",
-    },
-    "safety_ada": {
-        "categories": ["grab bar", "ada"],
-        "guidance": """CATEGORY NOTE: Safety-critical product. Lead with functional assurance
-(weight capacity, ADA compliance, mounting security). Trust signals matter more than aesthetics.
-For Google/Bing: include "ADA compliant", weight capacity, mounting type as primary attributes.
-For Shopify: open with safety/accessibility benefit, then mention that it doesn't sacrifice style.""",
-    },
-}
-
-
-def build_category_guidance(category: str | None) -> str:
-    """Return category-specific writing guidance for the user prompt.
-
-    Args:
-        category: The product category (e.g., "Towel Bars", "Grab Bars")
-
-    Returns:
-        Category guidance string or empty string if no match.
-    """
-    if not category:
-        return ""
-    cat_lower = category.lower()
-    for group in _CATEGORY_GUIDANCE.values():
-        if any(kw in cat_lower for kw in group["categories"]):
-            return f"\n{group['guidance']}\n"
-    return ""
-
+# Category guidance now served exclusively by shopping_intelligence.yaml (see shopping_intelligence.py)
 
 # ---------------------------------------------------------------------------
 # DYNAMIC USER PROMPT (per-SKU, assembled at runtime)
@@ -275,6 +209,33 @@ Use only information in the inputs below.
 <segment_strategy_guidance>
 {segment_strategy_guidance}
 </segment_strategy_guidance>
+
+<customer_framing>
+Think about who buys this specific product and why. Consider:
+- What specific problem does this product solve in the buyer's home?
+- What scenario leads someone to search for this exact product type and size?
+- Is the buyer renovating, replacing a broken item, or adding a missing piece?
+- What room context matters (guest bath, master bath, kitchen, closet)?
+
+Use the product evidence, category context, and brand storytelling skills to reason out
+a specific, concrete customer scenario. Do NOT use generic "upgrade your bathroom" framing.
+The customer scenario should be woven naturally into the description, not stated as a separate block.
+{customer_context}
+</customer_framing>
+
+<competitive_positioning>
+Think about why a shopper should choose THIS product over alternatives. Consider:
+- Solid brass vs die-cast zinc (the core material advantage — most competitors at this price use zinc)
+- 28 finishes vs competitors' 4-12 finish options
+- Collection coordination (41 collections — competitors sell individual pieces, not design systems)
+- Concealed mounting hardware (design-forward detail most competitors skip)
+- Lifetime warranty vs competitors' 1-5 year warranties
+
+Weave competitive advantages naturally into the description. Never name competitor brands.
+Contrast the MATERIAL or the APPROACH, not the company. The differentiation should feel like
+a natural selling point, not a comparison chart.
+{competitive_context}
+</competitive_positioning>
 
 <gold_examples>
 {gold_examples}
@@ -366,6 +327,33 @@ Use only information in the inputs below.
 <segment_strategy_guidance>
 {segment_strategy_guidance}
 </segment_strategy_guidance>
+
+<customer_framing>
+Think about who buys this specific product and why. Consider:
+- What specific problem does this product solve in the buyer's home?
+- What scenario leads someone to search for this exact product type and size?
+- Is the buyer renovating, replacing a broken item, or adding a missing piece?
+- What room context matters (guest bath, master bath, kitchen, closet)?
+
+Use the product evidence, category context, and brand storytelling skills to reason out
+a specific, concrete customer scenario. Do NOT use generic "upgrade your bathroom" framing.
+The customer scenario should be woven naturally into the description, not stated as a separate block.
+{customer_context}
+</customer_framing>
+
+<competitive_positioning>
+Think about why a shopper should choose THIS product over alternatives. Consider:
+- Solid brass vs die-cast zinc (the core material advantage — most competitors at this price use zinc)
+- 28 finishes vs competitors' 4-12 finish options
+- Collection coordination (41 collections — competitors sell individual pieces, not design systems)
+- Concealed mounting hardware (design-forward detail most competitors skip)
+- Lifetime warranty vs competitors' 1-5 year warranties
+
+Weave competitive advantages naturally into the description. Never name competitor brands.
+Contrast the MATERIAL or the APPROACH, not the company. The differentiation should feel like
+a natural selling point, not a comparison chart.
+{competitive_context}
+</competitive_positioning>
 
 <variant_context>
 {finish_context}
