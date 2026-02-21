@@ -19,11 +19,14 @@ from typing import Any, TypedDict
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.pipeline.feature_flags import is_prompt_contract_v2_enabled
 from feedops.pipeline.prompts import SYSTEM_PROMPT as CANONICAL_SYSTEM_PROMPT
+from feedops.pipeline.skill_loader import load_skills_for_prompt
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT_WARN_THRESHOLD_CHARS = 20_000
-SYSTEM_PROMPT_CI_MAX_CHARS = 24_000
+# Thresholds updated to accommodate skill-enriched prompts.
+# With all 8 skills loaded (~254K chars), total prompt can reach 260K+.
+SYSTEM_PROMPT_WARN_THRESHOLD_CHARS = 280_000
+SYSTEM_PROMPT_CI_MAX_CHARS = 300_000
 _prompt_size_warning_emitted = False
 
 
@@ -137,11 +140,27 @@ def load_active_prompt_template() -> PromptTemplate | None:
         return None
 
 
-def get_system_prompt() -> str:
-    """Get the canonical system prompt from Python code.
+def get_system_prompt(
+    mode: str = "batch",
+    platform: str | None = None,
+) -> str:
+    """Get the canonical system prompt enriched with skill content.
+
+    Assembles the system prompt by starting with the canonical SYSTEM_PROMPT
+    from code (or Supabase fallback when PROMPT_CONTRACT_V2 disabled), then
+    appending all relevant Claude Code skill SKILL.md files.
+
+    Args:
+        mode: "batch" loads all skills (system prompt cached across all SKUs
+              in a batch run — cost amortized). "single" loads core +
+              platform-relevant skills only (lower token cost for single-SKU
+              regeneration).
+        platform: Target platform for single mode ("google", "bing", "shopify").
+                  Ignored in batch mode.
 
     Returns:
-        System prompt string.
+        System prompt string with skill sections appended. Skills are 5-10x
+        richer than YAML config distillations and improve first-pass quality.
     """
     global _prompt_size_warning_emitted
 
@@ -154,6 +173,20 @@ def get_system_prompt() -> str:
             logger.warning(
                 "PROMPT_CONTRACT_V2 disabled: using Supabase system_prompt fallback for rollback."
             )
+
+    # Append skill content for enriched prompts.
+    # Skills are loaded from .claude/skills/{name}/SKILL.md with lru_cache.
+    # Falls back to empty string gracefully if skills directory unavailable
+    # (YAML configs in prompt_builder.py remain as the backup injection path).
+    skill_content = load_skills_for_prompt(mode=mode, platform=platform)
+    if skill_content:
+        prompt = prompt + "\n\n" + skill_content
+        logger.info(
+            "Skills injected into system prompt: total %d chars (mode=%s, platform=%s)",
+            len(prompt),
+            mode,
+            platform,
+        )
 
     prompt_len = len(prompt)
     if (
@@ -170,13 +203,25 @@ def get_system_prompt() -> str:
     return prompt
 
 
-def get_system_prompt_hash() -> str:
+def get_system_prompt_hash(
+    mode: str = "batch",
+    platform: str | None = None,
+) -> str:
     """Get stable short hash for canonical prompt versioning.
 
+    Hash reflects the full enriched prompt (base + skills) so that different
+    mode/platform combinations produce different hashes.
+
+    Args:
+        mode: "batch" or "single" — same as get_system_prompt().
+        platform: Target platform for single mode.
+
     Returns:
-        First 16 chars of SHA256 hash of canonical system prompt.
+        First 16 chars of SHA256 hash of the enriched system prompt.
     """
-    return hashlib.sha256(get_system_prompt().encode()).hexdigest()[:16]
+    return hashlib.sha256(
+        get_system_prompt(mode=mode, platform=platform).encode()
+    ).hexdigest()[:16]
 
 
 def get_category_guidance(category: str | None) -> str | None:

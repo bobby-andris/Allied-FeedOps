@@ -87,6 +87,7 @@ def build_core_prompt(
     platform: str,
     content_type: str,
     finish_code: str | None = None,
+    mode: str = "batch",
 ) -> str:
     """Build rich prompt — identical for batch and single-SKU paths.
 
@@ -108,6 +109,15 @@ def build_core_prompt(
         platform: Target platform ('google', 'bing', 'shopify').
         content_type: Content type to generate ('title', 'description').
         finish_code: Optional finish code for variant-specific context.
+        mode: "batch" or "single" — controls skill loading in the system prompt.
+              This parameter does NOT change the user prompt built here.
+              Callers should pass mode to get_system_prompt(mode=mode,
+              platform=platform) when constructing LLM messages:
+                - mode="batch": system prompt includes all 8 skills (cached
+                  across SKUs in batch runs, higher quality, amortized cost)
+                - mode="single": system prompt includes core + platform-relevant
+                  skills only (lower token cost for single-SKU regeneration)
+              Defaults to "batch" so existing callers work unchanged.
 
     Returns:
         Assembled user prompt string ready for LLM injection.
