@@ -8,6 +8,7 @@ import re
 
 from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
+    get_category_guidance,
     get_system_prompt,
 )
 from feedops.models import Candidate, Claim, ParentSKU, Score
@@ -26,7 +27,6 @@ from feedops.pipeline.prompts import (
     OPTIMIZATION_TEMPLATE,
     USER_PROMPT_TEMPLATE,
     VARIANT_USER_PROMPT_TEMPLATE,
-    build_category_guidance,
 )
 from feedops.pipeline.segment_strategy import (
     SegmentStrategy,
@@ -128,7 +128,7 @@ def build_prompt(parent_sku: ParentSKU) -> str:
         system_prompt=get_system_prompt(),
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
-        category_guidance=build_category_guidance(parent_sku.category),
+        category_guidance=get_category_guidance(parent_sku.category),
         segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
         gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
@@ -163,8 +163,10 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
     user_prompt = USER_PROMPT_TEMPLATE.format(
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
-        category_guidance=build_category_guidance(parent_sku.category),
+        category_guidance=get_category_guidance(parent_sku.category),
         segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
+        customer_context=parent_sku.category or "",
+        competitive_context="",
         gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
         master_sku=parent_sku.master_sku,
@@ -497,8 +499,10 @@ def build_variant_prompt(
     user_prompt = VARIANT_USER_PROMPT_TEMPLATE.format(
         evidence_table=evidence_markdown,
         keyword_placement=keyword_placement,
-        category_guidance=build_category_guidance(parent_sku.category),
+        category_guidance=get_category_guidance(parent_sku.category),
         segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
+        customer_context=parent_sku.category or "",
+        competitive_context="",
         finish_context=finish_context,
         gold_examples=gold_examples_section,
         schema=json.dumps(CANDIDATE_SCHEMA, indent=2),

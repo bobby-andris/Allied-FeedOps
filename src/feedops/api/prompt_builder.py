@@ -42,7 +42,6 @@ from feedops.pipeline.keyword_placement import (
     build_keyword_placement_plan,
     format_keyword_placement_section,
 )
-from feedops.pipeline.prompts import build_category_guidance
 from feedops.pipeline.segment_strategy import (
     format_segment_strategy_guidance,
     resolve_segment_strategy,
@@ -217,9 +216,8 @@ def build_core_prompt(
         )
 
     # --- 6. Category guidance ---
+    # shopping_intelligence.yaml is the canonical source (PRMT-03)
     category_guidance = get_category_guidance(parent_sku.category)
-    if not category_guidance:
-        category_guidance = build_category_guidance(parent_sku.category)
     if category_guidance:
         sections.append(f"Category Guidance:\n{category_guidance}")
 
@@ -254,7 +252,62 @@ def build_core_prompt(
     if examples:
         sections.append(f"Gold Standard Examples (data-only guidance):\n{examples}")
 
-    # --- 8. Finish context ---
+    # --- 8. Customer framing context (PRMT-04) ---
+    # GPT-5.2 reasons out the customer scenario from evidence + skills.
+    # We provide any available category-level hints from the evidence.
+    customer_context_parts: list[str] = []
+    if parent_sku.category:
+        customer_context_parts.append(f"Product category: {parent_sku.category}")
+    # Extract any collection info for scenario context
+    for item in parent_sku.merchant_center_items or []:
+        collection = item.get("collection") or ""
+        if collection:
+            customer_context_parts.append(f"Collection: {collection}")
+            break
+    customer_context = "\n".join(customer_context_parts) if customer_context_parts else ""
+
+    customer_block = (
+        "Customer Framing:\n"
+        "Think about who buys this specific product and why. Consider:\n"
+        "- What specific problem does this product solve in the buyer's home?\n"
+        "- What scenario leads someone to search for this exact product type and size?\n"
+        "- Is the buyer renovating, replacing a broken item, or adding a missing piece?\n"
+        "- What room context matters (guest bath, master bath, kitchen, closet)?\n"
+        "Use the product evidence and category context to reason out a specific, concrete "
+        "customer scenario. Do NOT use generic 'upgrade your bathroom' framing.\n"
+        "The customer scenario should be woven naturally into the description."
+    )
+    if customer_context:
+        customer_block += f"\n{customer_context}"
+    sections.append(customer_block)
+
+    # --- 9. Competitive positioning context (PRMT-05) ---
+    # GPT-5.2 reasons from skills + evidence. We provide material info if available.
+    competitive_context_parts: list[str] = []
+    # Material confirmation from evidence
+    for ev in evidence:
+        if isinstance(ev, dict):
+            material = ev.get("material") or ev.get("Material") or ""
+            if "brass" in str(material).lower():
+                competitive_context_parts.append("Evidence confirms: solid brass construction")
+                break
+    competitive_context = "\n".join(competitive_context_parts) if competitive_context_parts else ""
+
+    competitive_block = (
+        "Competitive Positioning:\n"
+        "Think about why a shopper should choose THIS product over alternatives. Consider:\n"
+        "- Solid brass vs die-cast zinc (most competitors at this price use zinc)\n"
+        "- 28 finishes vs competitors' 4-12 finish options\n"
+        "- Collection coordination (41 collections — competitors sell individual pieces)\n"
+        "- Concealed mounting hardware (design-forward detail most competitors skip)\n"
+        "- Lifetime warranty vs competitors' 1-5 year warranties\n"
+        "Weave competitive advantages naturally into the description. Never name competitor brands."
+    )
+    if competitive_context:
+        competitive_block += f"\n{competitive_context}"
+    sections.append(competitive_block)
+
+    # --- 10. Finish context ---
     # Platform-specific finish handling (mirrors _build_generation_user_prompt logic).
     context_lines: list[str] = []
     if platform in {"google", "bing"}:
@@ -281,7 +334,7 @@ def build_core_prompt(
     if context_lines:
         sections.append("\n".join(context_lines))
 
-    # --- 9. JSON output instruction ---
+    # --- 11. JSON output instruction ---
     sections.append(
         f"Generate only the {content_type} for {platform}.\n"
         f'Return your response as JSON: {{"content": "your generated {content_type} here"}}'

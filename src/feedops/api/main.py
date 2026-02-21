@@ -63,7 +63,6 @@ from feedops.pipeline.finish_sentence_placeholder import (
     strip_hardcoded_finish_names,
     strip_generic_finish_count_claims,
 )
-from feedops.pipeline.prompts import build_category_guidance
 from feedops.providers import get_provider
 from feedops.api.multi_sku_detection import (
     detect_multi_sku_families,
