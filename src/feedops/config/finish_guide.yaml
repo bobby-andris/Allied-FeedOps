@@ -1,0 +1,383 @@
+# Finish Guide — Runtime Config for Per-Finish Sentence Generation
+# Loaded by prompt_builder.py and injected per-finish during variant expansion.
+# Each entry gives GPT context to write unique, compelling finish sentences
+# instead of generic "{FINISH_SENTENCE}" placeholders.
+#
+# Fields per finish:
+#   code: Finish code used in variant_index
+#   visual: What the finish actually looks like (color, sheen, texture)
+#   design_style: Which bathroom styles it complements
+#   search_keywords: How shoppers search for this finish
+#   sentences: 3-4 varied example sentences (product-type agnostic, use {product} placeholder)
+#   avoid: Common mistakes when describing this finish
+
+# === BRASS FAMILY ===
+
+Polished Brass:
+  code: PB
+  visual: "Mirror-like golden surface with rich, warm reflections. Deep honey-gold color with high-gloss shine."
+  design_style: "Traditional, classic, colonial, Hollywood Regency, new-traditional revival"
+  search_keywords: "polished brass, brass, gold finish, golden hardware"
+  sentences:
+    - "The Polished Brass finish catches light with a warm golden glow that makes this {product} feel like a design statement, not just hardware."
+    - "Polished Brass brings old-world warmth to this {product} — a rich, mirror-like gold that coordinates with brass faucets and traditional fixtures."
+    - "In Polished Brass, this {product} bridges classic and contemporary with the same warm gold tones designers are specifying in brass revival projects."
+    - "This {product} in Polished Brass delivers the rich golden sheen that anchors traditional bathrooms and creates warmth in transitional spaces."
+  avoid: "Don't call it yellow or shiny gold. Don't confuse with satin brass. Never say dated."
+
+Satin Brass:
+  code: SBR
+  visual: "Brushed golden surface with soft, muted luster. Warmer than gold, less reflective than polished brass. Subtle directional brushing."
+  design_style: "Transitional, modern farmhouse, contemporary warm. Highest growth finish in bathroom hardware."
+  search_keywords: "satin brass, brushed brass, brushed gold, champagne gold, warm gold"
+  sentences:
+    - "Satin Brass softens the golden tone on this {product} with a brushed texture that hides fingerprints and water spots."
+    - "The Satin Brass finish gives this {product} warm, modern glow without the high-maintenance shine of polished brass."
+    - "In Satin Brass, this {product} brings the warm metallic trend to your bathroom with a brushed golden surface that pairs with modern and transitional faucets."
+    - "This {product} in Satin Brass combines warm golden tones with a practical brushed surface that looks beautiful without constant upkeep."
+  avoid: "Don't confuse with polished brass. Don't call it dull. Don't say gold-plated."
+
+Unlacquered Brass:
+  code: UNL
+  visual: "Raw brass without protective coating. Starts bright golden, develops natural patina over time. A living finish that evolves — each piece becomes one-of-a-kind."
+  design_style: "Artisan, vintage restoration, European traditional, design-forward contemporary"
+  search_keywords: "unlacquered brass, living finish, raw brass, patina brass, aging brass"
+  sentences:
+    - "Unlacquered Brass is a living finish — this {product} arrives in bright gold and develops its own unique patina over time."
+    - "The Unlacquered Brass finish on this {product} means it will age naturally, darkening in high-touch areas to create authentic character."
+    - "In Unlacquered Brass, this {product} tells a story — the raw brass surface evolves with use, developing genuine patina that can't be manufactured."
+    - "This {product} in Unlacquered Brass develops a one-of-a-kind character over time as the uncoated brass responds naturally to its environment."
+  avoid: "Never say tarnished. Don't promise specific patina timeline. Don't suggest it's low-maintenance."
+
+Antique Brass:
+  code: ABR
+  visual: "Darkened golden-brown with softened, aged patina. Warm but subdued — the look of brass that's been in a home for generations."
+  design_style: "Traditional, vintage, colonial, English country"
+  search_keywords: "antique brass, aged brass, vintage brass, dark brass"
+  sentences:
+    - "The Antique Brass finish gives this {product} the warmth of hardware that's been in the family for generations — a softened golden patina that feels collected."
+    - "Antique Brass adds vintage character to this {product} with warm, darkened golden tones that complement traditional bathrooms."
+    - "In Antique Brass, this {product} carries quiet warmth — a patina that suggests history and pairs naturally with traditional fixtures."
+    - "This {product} in Antique Brass brings heritage warmth with aged golden-brown tones that ground traditional and vintage bathroom designs."
+  avoid: "Don't say old-looking. Don't confuse with unlacquered brass — antique brass is a fixed applied finish."
+
+# === CHROME FAMILY ===
+
+Polished Chrome:
+  code: PC
+  visual: "Bright, mirror-like silver with crisp reflections. Cool-toned, high-contrast. The most reflective of all finishes."
+  design_style: "Modern, contemporary, minimalist, traditional — the universal finish"
+  search_keywords: "chrome, polished chrome, silver, chrome bathroom"
+  sentences:
+    - "The Polished Chrome finish gives this {product} a bright, mirror-like surface that matches the chrome faucets found in most bathrooms."
+    - "Polished Chrome delivers cool, reflective clarity on this {product} — the finish that coordinates with more existing fixtures than any other."
+    - "In Polished Chrome, this {product} reflects light with crisp silver tones that keep the bathroom feeling bright, clean, and modern."
+    - "This {product} in Polished Chrome brings the cool, mirror-like sheen that pairs effortlessly with chrome faucets and contemporary fixtures."
+  avoid: "Don't make it sound boring. Don't confuse with satin chrome or polished nickel."
+
+Satin Chrome:
+  code: SCH
+  visual: "Brushed silver surface with soft, diffused reflections. Less reflective than polished chrome but still cool-toned. Subtle directional texture."
+  design_style: "Contemporary, transitional, Scandinavian, modern minimalist"
+  search_keywords: "satin chrome, brushed chrome, matte chrome, brushed silver"
+  sentences:
+    - "Satin Chrome finishes this {product} with a soft, brushed silver surface that resists fingerprints while maintaining chrome's cool, modern tone."
+    - "The Satin Chrome finish gives this {product} chrome's coordination benefits with a brushed texture that hides everyday use."
+    - "In Satin Chrome, this {product} brings understated modern polish — chrome's versatility with a softer, more forgiving surface."
+    - "This {product} in Satin Chrome offers the clean silver tone of chrome with a practical brushed texture for busy bathroom spaces."
+  avoid: "Don't call it dull chrome. Don't confuse with satin nickel — chrome is cooler."
+
+# === NICKEL FAMILY ===
+
+Polished Nickel:
+  code: PNI
+  visual: "Warm silver with subtle golden undertones. Mirror-like but warmer than chrome. Rich, dimensional reflections."
+  design_style: "Transitional, updated traditional, classic modern — the designer's alternative to chrome"
+  search_keywords: "polished nickel, nickel, warm silver, nickel bathroom"
+  sentences:
+    - "Polished Nickel gives this {product} a warm silver glow — richer than chrome, with subtle golden undertones that designers choose for transitional bathrooms."
+    - "The Polished Nickel finish brings warm, mirror-like depth to this {product} — the designer's alternative when the room calls for softer metallic tones."
+    - "In Polished Nickel, this {product} offers reflective clarity with a warmer undertone that coordinates with both silver and gold fixtures."
+    - "This {product} in Polished Nickel delivers warm silver tones that split the difference between chrome's brightness and brass's warmth."
+  avoid: "Don't say just like chrome — the warmth is the point. Don't confuse with satin nickel."
+
+Satin Nickel:
+  code: SN
+  visual: "Warm, brushed silver-gray with soft directional sheen. Fingerprint-resistant. The most popular upgrade finish in residential hardware."
+  design_style: "Transitional, contemporary, modern farmhouse, coastal — works in virtually any style"
+  search_keywords: "satin nickel, brushed nickel, nickel, brushed nickel bathroom"
+  sentences:
+    - "Satin Nickel finishes this {product} with a warm, brushed surface that hides fingerprints and water spots — the most versatile finish in bathroom hardware."
+    - "The Satin Nickel finish gives this {product} soft silver warmth that pairs with brushed nickel faucets and coordinates across virtually any bathroom style."
+    - "In Satin Nickel, this {product} blends into the room while adding warmth — brushed texture meets the neutral silver tone that works with everything."
+    - "This {product} in Satin Nickel delivers practical elegance — warm, brushed silver that resists fingerprints while matching most existing bathroom fixtures."
+  avoid: "Don't overthink it — satin nickel's appeal is easy versatility. Don't confuse with satin chrome."
+
+Antique Pewter:
+  code: PEW
+  visual: "Soft, silvery-gray with subtle warm undertones and aged appearance. Less reflective than satin nickel, more gray. Quiet and understated."
+  design_style: "Traditional, vintage, transitional, English cottage, French country"
+  search_keywords: "antique pewter, pewter, gray hardware vintage, pewter finish"
+  sentences:
+    - "Antique Pewter gives this {product} a soft, silvery-gray warmth — quieter than nickel, with gentle aged character."
+    - "The Antique Pewter finish wraps this {product} in muted silver-gray tones that bridge traditional and transitional styles."
+    - "In Antique Pewter, this {product} carries understated elegance — a finish that feels collected rather than coordinated."
+    - "This {product} in Antique Pewter brings the soft warmth of aged silver to traditional and vintage-inspired bathrooms."
+  avoid: "Don't call it gray metal. Don't confuse with satin nickel — pewter has more warmth and aged character."
+
+# === BRONZE FAMILY ===
+
+Oil Rubbed Bronze:
+  code: ORB
+  visual: "Deep, dark brown-black with subtle copper/bronze highlights at edges. Rich, warm, with visible hand-rubbed character. The darkest bronze."
+  design_style: "Traditional, rustic, industrial, craftsman, transitional"
+  search_keywords: "oil rubbed bronze, ORB, dark bronze, bronze bathroom"
+  sentences:
+    - "Oil Rubbed Bronze gives this {product} rich, dark depth with subtle warm highlights that catch the light at edges."
+    - "The Oil Rubbed Bronze finish brings Old World character to this {product} with deep brown tones and copper highlights."
+    - "In Oil Rubbed Bronze, this {product} adds the warm, rich depth that makes a bathroom feel grounded and inviting."
+    - "This {product} in Oil Rubbed Bronze delivers the dark, warm character of heritage hardware with subtle copper accents at edges and high points."
+  avoid: "Don't confuse with Venetian Bronze — ORB is darker. Don't say black — the warm bronze undertone is the point."
+
+Venetian Bronze:
+  code: VB
+  visual: "Medium warm bronze with golden and copper undertones. Lighter than ORB with more visible warmth. Dimensional, shifts in different lighting."
+  design_style: "Traditional, Mediterranean, Tuscan, transitional"
+  search_keywords: "venetian bronze, warm bronze, medium bronze, tuscan bronze"
+  sentences:
+    - "Venetian Bronze wraps this {product} in warm, golden-bronze tones that shift beautifully in different lighting."
+    - "The Venetian Bronze finish brings Mediterranean depth to this {product} with warm copper undertones that enrich the room."
+    - "In Venetian Bronze, this {product} carries dimensional warmth — a medium bronze that glows with golden undertones in bathroom lighting."
+    - "This {product} in Venetian Bronze delivers the warm, layered bronze tones that evoke European craftsmanship."
+  avoid: "Don't confuse with ORB — Venetian is lighter and warmer. Don't call it brown."
+
+Brushed Bronze:
+  code: BBR
+  visual: "Warm, earthy bronze with softly brushed surface texture. More matte than polished bronze, with visible directional grain."
+  design_style: "Transitional, rustic modern, warm contemporary, lodge style"
+  search_keywords: "brushed bronze, bronze brushed, satin bronze (metal), matte bronze"
+  sentences:
+    - "Brushed Bronze finishes this {product} with warm, earthy tones and a softly textured surface that brings natural warmth to transitional bathrooms."
+    - "The Brushed Bronze finish adds depth without gloss to this {product} — warm bronze tones with a practical brushed grain."
+    - "In Brushed Bronze, this {product} bridges rustic and refined — warm bronze color with the practical brushed texture of modern design."
+    - "This {product} in Brushed Bronze combines earthy warmth with a fingerprint-hiding brushed surface for everyday use."
+  avoid: "Don't confuse with ORB — BBR has visible brushing, ORB has rubbed highlights. Don't say flat."
+
+Antique Bronze:
+  code: ABZ
+  visual: "Deep brown with subtle warm highlights. More uniform aged character than ORB. Less high-contrast, more subtle warmth."
+  design_style: "Traditional, transitional, rustic, heritage"
+  search_keywords: "antique bronze, aged bronze, dark bronze, vintage bronze"
+  sentences:
+    - "Antique Bronze gives this {product} the warm, aged character of heritage hardware — deep brown tones with subtle highlights."
+    - "The Antique Bronze finish wraps this {product} in deep, warm tones that complement traditional bathrooms with quiet authority."
+    - "In Antique Bronze, this {product} looks like it belongs in the room rather than being added to it — warm, aged, and grounded."
+    - "This {product} in Antique Bronze brings the depth and warmth of heritage metalwork to bathrooms with traditional character."
+  avoid: "Don't confuse with Antique Brass — completely different color family. Say heritage, not old-looking."
+
+# === COPPER ===
+
+Antique Copper:
+  code: CA
+  visual: "Warm reddish-brown with natural-looking patina variation. Not bright penny-copper — muted, with organic tonal shifts."
+  design_style: "Craftsman, rustic, farmhouse, industrial, artisan"
+  search_keywords: "antique copper, copper, aged copper, copper bathroom"
+  sentences:
+    - "Antique Copper gives this {product} warm, reddish-brown tones with organic variation — the natural character that makes copper inviting."
+    - "The Antique Copper finish brings artisan warmth to this {product} with aged tones that pair with Craftsman tile and natural stone."
+    - "In Antique Copper, this {product} feels handcrafted — warm, varied tones that create organic character."
+    - "This {product} in Antique Copper delivers warm, reddish-brown tones with the natural variation that gives copper its artisan appeal."
+  avoid: "Don't say penny copper or bright copper. Don't promise further patina — it's a fixed finish."
+
+# === MODERN NEUTRALS ===
+
+Matte Black:
+  code: BKM
+  visual: "Deep, uniform black with zero reflections. Smooth, non-glossy surface. High visual contrast against light walls. Bold and architectural."
+  design_style: "Modern, industrial, contemporary, minimalist, farmhouse modern — fastest growing finish"
+  search_keywords: "matte black, black, black bathroom hardware, flat black"
+  sentences:
+    - "Matte Black makes this {product} a bold architectural element — the zero-reflection surface creates clean contrast against light tile."
+    - "The Matte Black finish turns this {product} into a design statement with a smooth, non-reflective surface that anchors contemporary bathrooms."
+    - "In Matte Black, this {product} delivers modern contrast that defines current bathroom design — bold enough to stand out, neutral enough to pair with any color."
+    - "This {product} in Matte Black creates striking visual definition against white and light-toned bathrooms with a sleek, uniform surface."
+  avoid: "Don't say dark as the primary descriptor — say bold or architectural. Don't undersell it as basic."
+
+Matte Gray:
+  code: GYM
+  visual: "Uniform, flat gray with no reflective sheen. Clean and modern. Cooler than pewter, more contemporary than silver."
+  design_style: "Contemporary, industrial, Scandinavian, minimalist, concrete-inspired"
+  search_keywords: "matte gray, gray, grey bathroom hardware, gunmetal"
+  sentences:
+    - "Matte Gray gives this {product} the quiet confidence of concrete and steel — a flat surface that disappears into modern bathrooms while adding texture."
+    - "The Matte Gray finish brings industrial refinement to this {product} with a smooth surface that complements concrete and natural wood."
+    - "In Matte Gray, this {product} is design-forward without being loud — neutral gray that works with every color while adding modern material quality."
+    - "This {product} in Matte Gray delivers the understated sophistication of industrial design with a clean, non-reflective surface."
+  avoid: "Don't say boring or plain. Don't confuse with Antique Pewter — pewter is warmer and more traditional."
+
+Matte White:
+  code: WHM
+  visual: "Clean, bright white with smooth matte surface. No gloss, no reflections. Fresh and airy."
+  design_style: "Coastal, Scandinavian, modern minimalist, spa-like, all-white bathrooms"
+  search_keywords: "matte white, white, white bathroom hardware, white towel bar"
+  sentences:
+    - "Matte White lets this {product} blend seamlessly into coastal or all-white bathrooms — the matte surface creates spa-like calm."
+    - "The Matte White finish makes this {product} feel like part of the architecture — a bright surface that keeps the room feeling open."
+    - "In Matte White, this {product} brings fresh simplicity — clean, quiet hardware that lets tile, stone, and natural materials take center stage."
+    - "This {product} in Matte White delivers the bright, non-reflective surface that creates calm, spa-inspired bathroom spaces."
+  avoid: "Don't say it will match any white — whites vary. Don't describe it as invisible."
+
+# === DESIGNER STATEMENT COLORS ===
+
+Fire Engine Red:
+  code: FER
+  visual: "Bold, saturated true red with crisp, even color and subtle sheen. High impact."
+  design_style: "Eclectic, contemporary bold, retro, designer statement"
+  search_keywords: "red bathroom hardware, red towel bar, colorful bathroom, bold hardware"
+  sentences:
+    - "Fire Engine Red transforms this {product} from bathroom hardware into a conversation starter — bold, saturated color on solid brass."
+    - "The Fire Engine Red finish makes this {product} the focal point of the room — fearless color that turns functional hardware into a design choice."
+    - "In Fire Engine Red, this {product} reflects the homeowner's personality — someone who treats their bathroom as a canvas."
+    - "This {product} in Fire Engine Red delivers bold, saturated color that proves bathroom hardware can be as expressive as any design element."
+  avoid: "Don't be apologetic about the color. Don't suggest it's fun in a diminishing way."
+
+Mediterranean Blue:
+  code: MBL
+  visual: "Deep, sophisticated blue with subtle purple undertones. Rich and saturated, like deep coastal water. Jewel-toned."
+  design_style: "Mediterranean, coastal luxury, eclectic, Moroccan-inspired"
+  search_keywords: "blue bathroom hardware, blue towel bar, mediterranean, coastal blue, navy"
+  sentences:
+    - "Mediterranean Blue brings the depth of coastal waters to this {product} — a rich, jewel-toned blue that turns hardware into a design element."
+    - "The Mediterranean Blue finish gives this {product} sophisticated depth — bold enough for a statement, refined enough for a primary bathroom."
+    - "In Mediterranean Blue, this {product} carries the richness of the Mediterranean coast — deep blue with subtle warmth that pairs with white tile and natural stone."
+    - "This {product} in Mediterranean Blue delivers jewel-toned sophistication inspired by coastal waters and Mediterranean design."
+  avoid: "Don't say navy — it has warmth navy lacks. Don't compare to kid's room colors."
+
+Lavender:
+  code: LVN
+  visual: "Soft, calming purple with gentle luster. Muted and spa-like. Delicate and unexpected."
+  design_style: "Soft modern, spa-inspired, eclectic, contemporary romantic"
+  search_keywords: "lavender bathroom hardware, purple bathroom, pastel hardware"
+  sentences:
+    - "Lavender adds unexpected calm to this {product} — a soft purple tone that turns a bathroom into a retreat."
+    - "The Lavender finish gives this {product} a spa-like quality with soft purple tones that complement white and gray palettes."
+    - "In Lavender, this {product} introduces gentle color that says this bathroom was designed, not just decorated."
+    - "This {product} in Lavender brings soft, calming color — a sophisticated accent that elevates the bathroom atmosphere."
+  avoid: "Don't say feminine exclusively. Don't minimize it as cute or girly."
+
+Pink:
+  code: PNK
+  visual: "Modern pink with gentle luster. Not hot pink — sophisticated, contemporary. Fresh and energetic."
+  design_style: "Contemporary playful, eclectic, Hollywood glam, bold personal expression"
+  search_keywords: "pink bathroom hardware, pink towel bar, blush, rose bathroom"
+  sentences:
+    - "Pink gives this {product} modern energy and personality — a fresh, contemporary color that makes a bathroom feel intentional."
+    - "The Pink finish transforms this {product} into a personal statement — sophisticated color that proves hardware doesn't have to be neutral."
+    - "In Pink, this {product} celebrates individuality — deliberate color that turns a bathroom from functional space to personal expression."
+    - "This {product} in Pink delivers fresh, modern color on solid brass — confident design for bathrooms with personality."
+  avoid: "Don't call it girly. Don't be condescending. This is a confident design choice."
+
+Golden Yellow:
+  code: GLY
+  visual: "Warm, vibrant golden-yellow with soft reflections. Sunny, optimistic, luminous."
+  design_style: "Contemporary eclectic, bohemian, bold modern, tropical"
+  search_keywords: "yellow bathroom hardware, golden bathroom, colorful bath hardware, bright"
+  sentences:
+    - "Golden Yellow radiates warmth on this {product} — a sunny, vibrant finish that brings optimistic energy to bathrooms with personality."
+    - "The Golden Yellow finish makes this {product} glow with warm, cheerful tones that brighten the room."
+    - "In Golden Yellow, this {product} brings the warmth of sunlight — vibrant color for homeowners who believe hardware should spark joy."
+    - "This {product} in Golden Yellow delivers warm, luminous color that transforms a bathroom with cheerful, sunlit energy."
+  avoid: "Don't compare to brass — completely different. Don't call it loud negatively."
+
+Sea Foam Green:
+  code: SFG
+  visual: "Muted, soft green with gentle satin sheen. Ocean-inspired, serene, natural."
+  design_style: "Coastal, spa-inspired, soft modern, transitional beach house"
+  search_keywords: "sea foam green, seafoam, green bathroom hardware, coastal hardware, ocean"
+  sentences:
+    - "Sea Foam Green brings coastal calm to this {product} — soft, ocean-inspired green that makes a bathroom feel like a waterside retreat."
+    - "The Sea Foam Green finish gives this {product} the tranquil quality of sea glass with muted green tones that complement natural materials."
+    - "In Sea Foam Green, this {product} connects the bathroom to nature — a calming, coastal color that pairs with sand and driftwood palettes."
+    - "This {product} in Sea Foam Green delivers soft, ocean-inspired color for bathrooms designed with coastal serenity in mind."
+  avoid: "Don't say mint — different shade. Don't limit to beach houses."
+
+Glokzin Teal:
+  code: GLT
+  visual: "Rich, jewel-toned teal with subtle depth. Deeper than sea foam, more saturated. Sophisticated and artistic."
+  design_style: "Contemporary eclectic, bohemian luxury, art-inspired, jewel-toned interiors"
+  search_keywords: "teal bathroom hardware, teal towel bar, turquoise, jewel tone"
+  sentences:
+    - "Glokzin Teal adds jewel-toned depth to this {product} — rich, sophisticated teal that brings artistic character to modern bathrooms."
+    - "The Glokzin Teal finish gives this {product} the visual weight of a jewel — deep, saturated color that anchors eclectic design."
+    - "In Glokzin Teal, this {product} becomes a curated accent — deliberate color that tells visitors this bathroom was designed with attention."
+    - "This {product} in Glokzin Teal delivers rich, jewel-toned sophistication that elevates contemporary and eclectic bathroom designs."
+  avoid: "Don't call it turquoise — it's deeper. Don't treat it as casual."
+
+Autumn Sparkle:
+  code: ASP
+  visual: "Warm, golden-amber with subtle shimmer and sparkle particles. Multi-dimensional — shifts in light."
+  design_style: "Transitional eclectic, warm contemporary, artisan-inspired"
+  search_keywords: "sparkle bathroom hardware, gold sparkle, autumn colored, textured gold"
+  sentences:
+    - "Autumn Sparkle catches the light on this {product} with warm, golden shimmer — a multi-dimensional finish that brings seasonal warmth year-round."
+    - "The Autumn Sparkle finish gives this {product} unexpected depth with warm amber tones and subtle sparkle particles that shift in bathroom lighting."
+    - "In Autumn Sparkle, this {product} is something you notice twice — first the warm golden tone, then the subtle shimmer that makes it unique."
+    - "This {product} in Autumn Sparkle delivers warm, shimmering depth that adds a dimensional quality no other finish can match."
+  avoid: "Don't say glittery — say shimmer or sparkle. Don't undersell the sophistication."
+
+Shaded Beige:
+  code: SHB
+  visual: "Soft, warm neutral beige with smooth surface. A true warm neutral — understated and grounding."
+  design_style: "Transitional, soft modern, neutral palette design, organic modern"
+  search_keywords: "beige bathroom hardware, neutral bathroom, beige towel bar, warm neutral, tan"
+  sentences:
+    - "Shaded Beige wraps this {product} in sophisticated warmth — a soft neutral that complements natural materials without metallic shine."
+    - "The Shaded Beige finish gives this {product} the warmth of natural clay — an organic neutral that grounds the room in earthy tones."
+    - "In Shaded Beige, this {product} adds a soft, non-metallic accent that feels intentional and design-forward in warm-neutral bathrooms."
+    - "This {product} in Shaded Beige delivers warm, organic neutrality for bathrooms designed around natural materials and earth tones."
+  avoid: "Don't call it boring. Don't compare to flesh tone. It's a deliberate organic design choice."
+
+Spanish Gold:
+  code: SGL
+  visual: "Rich, ornate gold with warm amber tones and dimensional reflections. More opulent than polished brass. European-inspired."
+  design_style: "Mediterranean, luxury traditional, Tuscan, Hollywood Regency, Old World"
+  search_keywords: "gold bathroom hardware, spanish gold, luxury gold, ornate gold, designer gold"
+  sentences:
+    - "Spanish Gold elevates this {product} with rich, warm gold tones that evoke European craftsmanship — more opulent than brass."
+    - "The Spanish Gold finish brings Old World richness to this {product} with warm amber-gold tones and dimensional reflections."
+    - "In Spanish Gold, this {product} carries Mediterranean warmth — a distinguished gold that speaks to rooms designed for lasting impact."
+    - "This {product} in Spanish Gold delivers the rich, ornate gold tones of European hardware for bathrooms with Old World character."
+  avoid: "Don't confuse with polished brass — Spanish Gold is richer. Don't call it gaudy."
+
+Flat Troll Blue:
+  code: FTB
+  visual: "Distinctive muted blue-gray with flat, matte surface. Artistic and unconventional. Sophisticated, desaturated blue."
+  design_style: "Contemporary eclectic, artistic, design-forward, Scandinavian modern"
+  search_keywords: "blue gray hardware, matte blue, unique bathroom hardware, artistic bath"
+  sentences:
+    - "Flat Troll Blue brings distinctly artistic character to this {product} — a muted blue-gray that adds creative depth to contemporary bathrooms."
+    - "The Flat Troll Blue finish gives this {product} gallery-worthy character with a flat, muted surface that reads as design-forward."
+    - "In Flat Troll Blue, this {product} stands apart — a sophisticated, desaturated blue that proves bathroom hardware can be both functional and artistic."
+    - "This {product} in Flat Troll Blue delivers muted, artistic blue-gray tones for bathrooms designed with creative intention."
+  avoid: "Don't try to explain the name. Just describe the color. Don't call it weird."
+
+# === FINISH COMPARISON QUICK REFERENCE ===
+# Used when positioning a finish relative to alternatives in descriptions.
+#
+# Polished Chrome vs Polished Nickel:
+#   Chrome = cool silver (blue undertones), Nickel = warm silver (golden undertones)
+#
+# Satin Brass vs Unlacquered Brass:
+#   Satin = fixed brushed golden finish, Unlacquered = living finish that evolves
+#
+# Oil Rubbed Bronze vs Venetian Bronze:
+#   ORB = darker (deep brown-black + copper highlights), Venetian = warmer and lighter
+#
+# Polished Brass vs Satin Brass:
+#   Polished = mirror-like/traditional/high-shine, Satin = brushed/modern/low-maintenance
+#
+# Matte Black vs Matte Gray:
+#   Black = high contrast (bold), Gray = low contrast (quiet sophistication)
+#
+# Antique Pewter vs Satin Nickel:
+#   Pewter = warmer/grayer/more aged, Satin Nickel = brighter/more neutral/more contemporary
