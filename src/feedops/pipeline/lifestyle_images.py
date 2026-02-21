@@ -22,6 +22,173 @@ from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 from pydantic import BaseModel
 
+from feedops.pipeline.collection_descriptions import (
+    get_collection_description,
+    sanitize_collection_description,
+)
+
+
+# =============================================================================
+# Three-Dimensional Image Intelligence: Finish + Category + Collection
+# =============================================================================
+
+# Finish-specific lighting and rendering guidance for all 28 Allied Brass finishes.
+# Ensures the AI renders each finish with accurate material properties.
+FINISH_LIGHTING: dict[str, str] = {
+    "Antique Brass": "warm amber lighting, soft shadows to highlight the antiqued patina, golden-brown tones with subtle depth",
+    "Antique Bronze": "warm directional lighting with deep brown tones, shadows accentuate the aged bronze texture and subtle highlights",
+    "Antique Copper": "warm reddish-amber lighting, soft side lighting to reveal the aged copper tones and organic patina variations",
+    "Antique Pewter": "cool neutral lighting with soft diffuse illumination, matte gray-silver surface with subtle aged character",
+    "Autumn Sparkle": "warm golden light that catches the sparkle accents, multi-directional lighting to reveal dimensional shimmer",
+    "Brushed Bronze": "warm directional lighting with deep bronze tones, brushed texture visible at close range, rich earthy warmth",
+    "Fire Engine Red": "bright even studio lighting, bold saturated red finish with crisp reflections, high visual impact",
+    "Flat Troll Blue": "even studio lighting, matte flat finish with no reflections, cool blue tones with consistent color saturation",
+    "Glokzin Teal": "even diffuse lighting, rich teal finish with subtle depth, jewel-toned with clean edge definition",
+    "Golden Yellow": "warm bright lighting, vibrant golden-yellow finish with soft even reflections, cheerful and luminous",
+    "Lavender": "soft diffuse lighting, delicate lavender finish with gentle sheen, pastel tones with even color distribution",
+    "Matte Black": "even studio lighting, minimal reflections, high contrast against surroundings, deep uniform black surface",
+    "Matte Gray": "soft diffuse lighting, uniform gray surface with no specular highlights, clean and understated",
+    "Matte White": "bright even studio lighting, clean white matte finish with no harsh reflections, crisp and fresh",
+    "Mediterranean Blue": "bright diffuse lighting, rich blue finish with subtle depth, coastal-inspired with clean color saturation",
+    "Oil Rubbed Bronze": "warm directional lighting with amber tones, shadows emphasize the aged patina texture, deep brown with subtle warm highlights",
+    "Pink": "soft diffuse lighting, delicate pink finish with gentle luster, feminine and bright with even color",
+    "Polished Brass": "warm golden ambient light, soft lustrous reflections, brilliant mirror-like shine with rich golden tones",
+    "Polished Chrome": "bright diffuse lighting, crisp mirror-like reflections, cool silver tones with high-contrast highlights",
+    "Polished Nickel": "bright neutral lighting, polished mirror finish with crisp reflections, warm silver tones slightly richer than chrome",
+    "Satin Brass": "warm soft lighting, brushed golden surface with subtle sheen, muted luster without harsh mirror reflections",
+    "Satin Chrome": "cool diffuse lighting, brushed texture visible at close range, subtle directional sheen without harsh reflections",
+    "Satin Nickel": "soft diffuse lighting, subtle brushed sheen without harsh reflections, warm silver-gray tones",
+    "Sea Foam Green": "soft natural lighting, muted seafoam green finish with gentle satin sheen, coastal and serene",
+    "Shaded Beige": "warm natural lighting, soft beige finish with subtle warm undertones, neutral and understated elegance",
+    "Spanish Gold": "warm rich lighting with golden amber tones, ornate gold finish with dimensional reflections, luxurious warmth",
+    "Unlacquered Brass": "natural warm lighting, living finish that shows character and warmth, golden tones that evolve naturally",
+    "Venetian Bronze": "warm moody lighting with deep bronze tones and subtle copper undertones, rich dimensional depth",
+}
+
+# Category-specific scene descriptions for major Allied Brass product categories.
+# Drives the scene environment in the image prompt.
+CATEGORY_SCENE: dict[str, str] = {
+    "grab bars": "modern accessible bathroom with quality tile walls, near shower or tub surround, safety hardware elegantly integrated into the space",
+    "towel bars": "clean contemporary bathroom wall, neutral tile, near vanity or shower enclosure at standard 48-inch height",
+    "towel bar": "clean contemporary bathroom wall, neutral tile, near vanity or shower enclosure at standard 48-inch height",
+    "four tier towel bar": "spacious family bathroom with multiple towels demonstrating full family use, each bar holding a different towel",
+    "toilet paper holders": "beside toilet in clean bathroom setting, complementary tile visible, at standard 26-inch height",
+    "toilet paper holder": "beside toilet in clean bathroom setting, complementary tile visible, at standard 26-inch height",
+    "paper holder": "beside toilet in clean bathroom setting, complementary tile visible, at standard 26-inch height",
+    "paper towel holders": "bright kitchen with stone countertop or modern bathroom vanity, near sink area for easy access",
+    "paper towel holder": "bright kitchen with stone countertop or modern bathroom vanity, near sink area for easy access",
+    "soap dispensers": "bathroom vanity countertop or kitchen sink area, clean surfaces with coordinating accessories",
+    "soap dispenser": "bathroom vanity countertop or kitchen sink area, clean surfaces with coordinating accessories",
+    "garment rods": "walk-in closet or dressing room with soft ambient lighting, organized clothing visible",
+    "garment rod": "walk-in closet or dressing room with soft ambient lighting, organized clothing visible",
+    "towel rings": "beside bathroom vanity mirror, complementary fixtures visible, at comfortable reach height",
+    "towel ring": "beside bathroom vanity mirror, complementary fixtures visible, at comfortable reach height",
+    "robe hooks": "behind bathroom door or in dressing area, robe draped naturally from hook",
+    "robe hook": "behind bathroom door or in dressing area, robe draped naturally from hook",
+    "hook": "bathroom wall near shower entry, single item hanging naturally from hook",
+    "shelves": "bathroom wall above toilet or vanity, styled with decorative toiletries and small accessories",
+    "glass shelf": "above a floating bathroom vanity, premium toiletries and accessories arranged on glass surface",
+    "corner shelf": "shower corner with 8-12 shower products organized across all tiers, demonstrating full storage capacity",
+    "cabinet knobs": "on cabinet drawer or door in bathroom vanity or kitchen cabinetry, complementary hardware visible",
+    "cabinet knob": "on cabinet drawer or door in bathroom vanity or kitchen cabinetry, complementary hardware visible",
+    "shower curtain rods": "spanning shower opening with curtain installed, clean bathroom setting with tile walls",
+    "shower curtain rod": "spanning shower opening with curtain installed, clean bathroom setting with tile walls",
+    "multi hook": "bathroom wall or entryway with multiple items organized, demonstrating multi-person capacity",
+    "heated towel rack": "luxury master bathroom with 3-5 folded towels positioned for warming, spa-like atmosphere",
+    "medicine cabinets": "above bathroom sink vanity, integrated into bathroom wall with mirror visible",
+    "medicine cabinet": "above bathroom sink vanity, integrated into bathroom wall with mirror visible",
+    "bathroom accessories": "clean contemporary bathroom, product mounted at appropriate height with complementary fixtures",
+}
+
+# Default scene for categories not in the dict
+_DEFAULT_CATEGORY_SCENE = "clean contemporary bathroom with neutral tile walls and quality fixtures, product mounted at appropriate height"
+
+
+def _build_enhanced_image_prompt(
+    product_type: str,
+    finish_name: str,
+    category: str,
+    collection_name: str | None,
+    inventory: str,
+    usage_constraints: str,
+    technical: str,
+    reference_images_text: str,
+) -> str:
+    """Build an enhanced lifestyle image generation prompt with three-dimensional intelligence.
+
+    Incorporates:
+    1. Product fidelity (non-negotiable, first section)
+    2. Finish-specific lighting/rendering guidance
+    3. Category-specific scene environment
+    4. Collection design DNA from CSV
+
+    Args:
+        product_type: Product type description (e.g., "towel bar", "robe hook")
+        finish_name: Finish name (e.g., "Oil Rubbed Bronze")
+        category: Product category for scene lookup
+        collection_name: Collection name for design DNA lookup
+        inventory: Product component inventory description
+        usage_constraints: Product usage validation rules
+        technical: Photography technical specs
+        reference_images_text: Reference image list
+
+    Returns:
+        Complete enhanced prompt for image generation
+    """
+    # Look up finish lighting guidance (graceful fallback)
+    finish_lighting = FINISH_LIGHTING.get(
+        finish_name,
+        f"professional studio lighting that accurately renders the {finish_name} finish material properties",
+    )
+
+    # Look up category scene (graceful fallback)
+    category_lower = (category or "").lower()
+    scene = None
+    for key, scene_desc in CATEGORY_SCENE.items():
+        if key in category_lower:
+            scene = scene_desc
+            break
+    if not scene:
+        scene = _DEFAULT_CATEGORY_SCENE
+
+    # Look up collection design DNA (graceful fallback)
+    collection_section = ""
+    if collection_name:
+        raw_desc = get_collection_description(collection_name)
+        if raw_desc:
+            sanitized_desc = sanitize_collection_description(raw_desc)
+            if sanitized_desc:
+                collection_section = f"\n- Collection: {collection_name} — {sanitized_desc}. The staging environment should evoke this design aesthetic."
+
+    return f"""CRITICAL: This is PRODUCT PHOTOGRAPHY with lifestyle context. REPLICATE the exact product shown in the reference images - do not interpret or redesign.
+
+REFERENCE IMAGES:
+{reference_images_text}
+
+If any reference image includes staging elements (towels, toilet paper) that obscure product details,
+prioritize the clearest image for component fidelity.
+
+PRODUCT FIDELITY (NON-NEGOTIABLE):
+- The {finish_name} finish must be rendered with absolute precision. {finish_lighting}.
+- Product dimensions and design details must be indistinguishable from the actual physical product.
+- Product occupies 50-70% of frame as the clear focal point.
+- Scene enhances the product, never competes with it.
+- DO NOT compromise product accuracy for scene aesthetics. The product must be identifiable as the exact Allied Brass {product_type}.
+
+PRODUCT VISUAL INVENTORY:
+{inventory}
+
+SCENE ENVIRONMENT:
+- Setting: {scene}{collection_section}
+
+{usage_constraints}
+
+TECHNICAL SPECIFICATIONS:
+{technical}
+- Apply {finish_lighting} to ensure accurate material rendering.
+
+Remember: The product must be an EXACT REPLICA of the reference. Study every detail carefully."""
+
 # IPTC Digital Source Type URI for AI-generated content
 IPTC_TRAINED_ALGORITHMIC_MEDIA = (
     "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia"
@@ -1893,27 +2060,66 @@ def generate_lifestyle_images_for_sku(
 
     print(f"  Using {len(product_image_urls)} reference images from {selected_finish} finish")
 
-    # Step 5: Build prompts using existing helpers
+    # Step 5: Build enhanced prompt using three-dimensional image intelligence
     inventory = get_product_inventory(category, title)
-    scene = get_customer_focused_scene(
-        category=category, style=style, product_title=title
-    )
     technical = get_technical_specs(style)
+    usage_constraints = get_usage_constraints(category)
+    reference_images_text = LifestyleImageGenerator(
+        api_key=gemini_api_key, output_dir=Path("/tmp")
+    ).build_reference_images_text(product_image_urls)
 
-    # Step 6: Generate images
+    # Extract collection name from product data (stored in category or a collection field)
+    collection_name = first_row.get("collection") or first_row.get("collection_name")
+
+    # Extract product type for the prompt
+    product_type = category.lower() if category else "bathroom accessory"
+
+    enhanced_prompt = _build_enhanced_image_prompt(
+        product_type=product_type,
+        finish_name=selected_finish,
+        category=category,
+        collection_name=collection_name,
+        inventory=inventory,
+        usage_constraints=usage_constraints,
+        technical=technical,
+        reference_images_text=reference_images_text,
+    )
+
+    # Step 6: Generate images using the enhanced prompt
     output_dir = Path(
         os.environ.get("LIFESTYLE_IMAGES_OUTPUT_DIR", "/tmp/lifestyle_images")
     )
     generator = LifestyleImageGenerator(api_key=gemini_api_key, output_dir=output_dir)
-    lifestyle_results = generator.generate_for_product(
-        product_image_urls=product_image_urls,
-        master_sku=master_sku,
-        inventory=inventory,
-        scene=scene,
-        technical=technical,
-        category=category,
-        num_variations=num_variations,
-    )
+
+    # Download reference images for generation
+    reference_images = []
+    seen_urls: set[str] = set()
+    for url in product_image_urls:
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        image = generator.download_image(url)
+        if image is not None:
+            reference_images.append(image)
+
+    if not reference_images:
+        raise ValueError(f"Failed to download reference images for {master_sku}")
+
+    print(f"Prompt length: {len(enhanced_prompt)} characters")
+    print(f"Reference images used: {len(reference_images)}")
+    print(f"Collection: {collection_name or 'N/A'}")
+    print(f"Finish lighting: {FINISH_LIGHTING.get(selected_finish, 'generic')[:60]}...")
+
+    # Generate variations using the enhanced prompt directly
+    lifestyle_results = []
+    for i in range(1, num_variations + 1):
+        result = generator.generate_single_variation(
+            enhanced_prompt, reference_images, master_sku, variation_num=i
+        )
+        lifestyle_results.append(result)
+
+    successful_count = sum(1 for r in lifestyle_results if r.generation_success)
+    print(f"\nGenerated {successful_count}/{num_variations} variations")
 
     successful_results = [r for r in lifestyle_results if r.generation_success]
     if not successful_results:
