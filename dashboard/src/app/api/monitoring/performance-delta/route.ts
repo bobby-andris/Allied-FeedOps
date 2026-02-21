@@ -1,59 +1,68 @@
-/**
- * GET /api/monitoring/performance-delta
- *
- * Calculate performance changes between baseline and post-publish snapshots.
- * Shows which SKUs improved/degraded after content optimization.
- *
- * Query params:
- * - master_sku?: Filter by specific SKU
- * - platform?: Filter by platform (google/bing)
- * - min_days?: Minimum days since publish (default: 7)
- * - max_days?: Maximum days since publish (default: 30)
- *
- * Returns:
- * - SKU performance deltas (baseline vs current)
- * - Statistical significance indicators
- * - Trend direction (improving/declining/stable)
- */
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+
+type ImpactLabel = 'positive' | 'negative' | 'neutral'
+
+interface MetricDelta {
+  pre_value: number | null
+  post_value: number | null
+  control_pre: number | null
+  control_post: number | null
+  did_lift_pct: number | null
+}
 
 interface PerformanceDelta {
   master_sku: string
   platform: string
   environment: string
-  days_since_publish: number
   publish_event_id: number
   content_version: number | null
+  published_at: string | null
+  days_since_publish: number | null
+  label: ImpactLabel
+  confidence: number
+  sample_size_treated: number
+  sample_size_control: number
+  primary_roas_did_lift_pct: number | null
+  guardrails: {
+    impressions: number | null
+    conversions: number | null
+    ctr: number | null
+    cvr: number | null
+    clicks: number | null
+    cost: number | null
+    conversion_value: number | null
+  }
+  metrics: Record<string, MetricDelta>
+}
 
-  // Baseline metrics
-  baseline_impressions: number
-  baseline_clicks: number
-  baseline_ctr: number
-  baseline_conversions: number
-  baseline_cvr: number
-  baseline_roas: number
+const metricNames = [
+  'roas',
+  'cvr',
+  'ctr',
+  'clicks',
+  'conversions',
+  'cost',
+  'conversion_value',
+  'impressions',
+] as const
 
-  // Current metrics
-  current_impressions: number
-  current_clicks: number
-  current_ctr: number
-  current_conversions: number
-  current_cvr: number
-  current_roas: number
+const toNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined) return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
 
-  // Deltas (percentage change)
-  impressions_delta: number
-  clicks_delta: number
-  ctr_delta: number
-  conversions_delta: number
-  cvr_delta: number
-  roas_delta: number
+const getSignificance = (confidence: number): 'high' | 'medium' | 'low' => {
+  if (confidence >= 0.8) return 'high'
+  if (confidence >= 0.55) return 'medium'
+  return 'low'
+}
 
-  // Trend
-  trend: 'improving' | 'declining' | 'stable'
-  significance: 'high' | 'medium' | 'low' | 'insufficient_data'
+const parseDate = (value: unknown): Date | null => {
+  if (!value) return null
+  const dt = new Date(String(value))
+  return Number.isNaN(dt.getTime()) ? null : dt
 }
 
 export async function GET(request: NextRequest) {
@@ -62,185 +71,204 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     const filterSku = searchParams.get('master_sku')
-    const filterPlatform = searchParams.get('platform') as 'google' | 'bing' | null
-    const minDays = parseInt(searchParams.get('min_days') || '7')
-    const maxDays = parseInt(searchParams.get('max_days') || '30')
+    const filterPlatform = searchParams.get('platform') || 'google'
+    const filterEnvironment = searchParams.get('environment') || 'production'
 
-    // 1. Get latest snapshots for each SKU/platform combination
-    let snapshotQuery = supabase
-      .from('performance_snapshots')
-      .select('*')
-      .gte('days_since_publish', minDays)
-      .lte('days_since_publish', maxDays)
-      .order('snapshot_date', { ascending: false })
+    let impactQuery = supabase
+      .from('performance_impact_scores')
+      .select(
+        'publish_event_id,master_sku,platform,environment,metric_name,pre_value,post_value,control_pre,control_post,did_lift_pct,label,confidence,sample_size_treated,sample_size_control,window_pre_days,window_post_days,run_date,computed_at'
+      )
+      .eq('platform', filterPlatform)
+      .eq('environment', filterEnvironment)
+      .in('metric_name', [...metricNames])
+      .order('computed_at', { ascending: false })
+      .limit(10000)
 
     if (filterSku) {
-      snapshotQuery = snapshotQuery.eq('master_sku', filterSku)
-    }
-    if (filterPlatform) {
-      snapshotQuery = snapshotQuery.eq('platform', filterPlatform)
+      impactQuery = impactQuery.eq('master_sku', filterSku)
     }
 
-    const { data: snapshots, error: snapshotError } = await snapshotQuery
+    const { data: impactRows, error: impactError } = await impactQuery
+    if (impactError) {
+      return NextResponse.json(
+        { error: `Failed to fetch impact scores: ${impactError.message}` },
+        { status: 500 }
+      )
+    }
+
+    const { data: latestSnapshotRows, error: snapshotError } = await supabase
+      .from('performance_snapshots')
+      .select('snapshot_date')
+      .eq('platform', filterPlatform)
+      .eq('environment', filterEnvironment)
+      .order('snapshot_date', { ascending: false })
+      .limit(1)
 
     if (snapshotError) {
       return NextResponse.json(
-        { error: `Failed to fetch snapshots: ${snapshotError.message}` },
+        { error: `Failed to fetch snapshot freshness: ${snapshotError.message}` },
         { status: 500 }
       )
     }
 
-    if (!snapshots || snapshots.length === 0) {
+    const latestSnapshotDate = parseDate(latestSnapshotRows?.[0]?.snapshot_date)
+    const daysStale =
+      latestSnapshotDate !== null
+        ? Math.floor(
+            (Date.now() - latestSnapshotDate.getTime()) / (1000 * 60 * 60 * 24)
+          )
+        : null
+
+    if (!impactRows || impactRows.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'No snapshots found in specified time range',
+        message: 'No impact scorecards found',
         deltas: [],
+        summary: {
+          total: 0,
+          positive: 0,
+          negative: 0,
+          neutral: 0,
+          avg_roas_did_lift_pct: 0,
+        },
+        staleness: {
+          latest_snapshot_date:
+            latestSnapshotDate !== null
+              ? latestSnapshotDate.toISOString().slice(0, 10)
+              : null,
+          days_stale: daysStale,
+          is_stale: daysStale === null || daysStale > 2,
+        },
       })
     }
 
-    // Group by SKU+platform (get most recent snapshot for each)
-    const latestSnapshots = new Map<string, typeof snapshots[0]>()
-    for (const snapshot of snapshots) {
-      const key = `${snapshot.master_sku}:${snapshot.platform}`
-      if (!latestSnapshots.has(key)) {
-        latestSnapshots.set(key, snapshot)
+    const eventIds = Array.from(
+      new Set(impactRows.map((row) => Number(row.publish_event_id)).filter(Number.isFinite))
+    )
+    const publishEventMap = new Map<number, { published_at: string | null; content_version: number | null }>()
+    if (eventIds.length > 0) {
+      const { data: publishEvents } = await supabase
+        .from('publish_events')
+        .select('id,published_at,content_version')
+        .in('id', eventIds)
+
+      for (const event of publishEvents || []) {
+        publishEventMap.set(Number(event.id), {
+          published_at: event.published_at ?? null,
+          content_version:
+            event.content_version === null || event.content_version === undefined
+              ? null
+              : Number(event.content_version),
+        })
       }
     }
 
-    // 2. Get baselines for these SKUs
-    const skus = Array.from(new Set(snapshots.map((s) => s.master_sku)))
-    const { data: baselines, error: baselineError } = await supabase
-      .from('performance_baselines')
-      .select('*')
-      .in('master_sku', skus)
+    const scorecards = new Map<number, PerformanceDelta>()
 
-    if (baselineError) {
-      return NextResponse.json(
-        { error: `Failed to fetch baselines: ${baselineError.message}` },
-        { status: 500 }
-      )
+    for (const row of impactRows) {
+      const eventId = Number(row.publish_event_id)
+      if (!Number.isFinite(eventId)) continue
+
+      if (!scorecards.has(eventId)) {
+        const publishEvent = publishEventMap.get(eventId)
+        const publishedAtDate = parseDate(publishEvent?.published_at ?? null)
+        const daysSincePublish =
+          publishedAtDate !== null
+            ? Math.floor(
+                (Date.now() - publishedAtDate.getTime()) / (1000 * 60 * 60 * 24)
+              )
+            : null
+
+        scorecards.set(eventId, {
+          master_sku: String(row.master_sku),
+          platform: String(row.platform),
+          environment: String(row.environment),
+          publish_event_id: eventId,
+          content_version: publishEvent?.content_version ?? null,
+          published_at: publishEvent?.published_at ?? null,
+          days_since_publish: daysSincePublish,
+          label: (row.label as ImpactLabel) || 'neutral',
+          confidence: toNumber(row.confidence) ?? 0,
+          sample_size_treated: Number(row.sample_size_treated || 0),
+          sample_size_control: Number(row.sample_size_control || 0),
+          primary_roas_did_lift_pct: null,
+          guardrails: {
+            impressions: null,
+            conversions: null,
+            ctr: null,
+            cvr: null,
+            clicks: null,
+            cost: null,
+            conversion_value: null,
+          },
+          metrics: {},
+        })
+      }
+
+      const card = scorecards.get(eventId)!
+      const metricName = String(row.metric_name)
+      const metricDelta: MetricDelta = {
+        pre_value: toNumber(row.pre_value),
+        post_value: toNumber(row.post_value),
+        control_pre: toNumber(row.control_pre),
+        control_post: toNumber(row.control_post),
+        did_lift_pct: toNumber(row.did_lift_pct),
+      }
+
+      card.metrics[metricName] = metricDelta
+
+      if (metricName === 'roas') {
+        card.primary_roas_did_lift_pct = metricDelta.did_lift_pct
+        card.label = (row.label as ImpactLabel) || card.label
+        card.confidence = toNumber(row.confidence) ?? card.confidence
+        card.sample_size_treated = Number(row.sample_size_treated || card.sample_size_treated)
+        card.sample_size_control = Number(row.sample_size_control || card.sample_size_control)
+      }
+
+      if (metricName in card.guardrails) {
+        card.guardrails[metricName as keyof PerformanceDelta['guardrails']] =
+          metricDelta.did_lift_pct
+      }
     }
 
-    // Map SKU+platform -> baseline
-    const baselineMap = new Map<string, typeof baselines[0]>()
-    for (const baseline of baselines || []) {
-      const key = `${baseline.master_sku}:${baseline.platform}`
-      baselineMap.set(key, baseline)
-    }
-
-    // 3. Calculate deltas
-    const deltas: PerformanceDelta[] = []
-
-    for (const [key, snapshot] of latestSnapshots) {
-      const baseline = baselineMap.get(key)
-      if (!baseline) {
-        // No baseline - can't calculate delta
-        continue
+    const deltas = Array.from(scorecards.values()).sort((a, b) => {
+      const labelOrder: Record<ImpactLabel, number> = {
+        positive: 0,
+        neutral: 1,
+        negative: 2,
       }
-
-      // Calculate percentage changes
-      const calculateDelta = (current: number, baseline: number): number => {
-        if (baseline === 0) return current > 0 ? 100 : 0
-        return ((current - baseline) / baseline) * 100
-      }
-
-      const impressionsDelta = calculateDelta(snapshot.impressions || 0, baseline.avg_impressions || 0)
-      const clicksDelta = calculateDelta(snapshot.clicks || 0, baseline.avg_clicks || 0)
-      const ctrDelta = calculateDelta(snapshot.ctr || 0, baseline.avg_ctr || 0)
-      const conversionsDelta = calculateDelta(snapshot.conversions || 0, baseline.avg_conversions || 0)
-      const cvrDelta = calculateDelta(snapshot.cvr || 0, baseline.avg_cvr || 0)
-      const roasDelta = calculateDelta(snapshot.roas || 0, baseline.avg_roas || 0)
-
-      // Determine trend (simple heuristic: CTR + CVR + ROAS)
-      const trendScore = (ctrDelta + cvrDelta + roasDelta) / 3
-      let trend: PerformanceDelta['trend']
-      if (trendScore > 5) {
-        trend = 'improving'
-      } else if (trendScore < -5) {
-        trend = 'declining'
-      } else {
-        trend = 'stable'
-      }
-
-      // Determine significance based on sample size and magnitude
-      let significance: PerformanceDelta['significance']
-      const totalImpressions = (snapshot.impressions || 0) + (baseline.avg_impressions || 0)
-      const maxDelta = Math.max(
-        Math.abs(ctrDelta),
-        Math.abs(cvrDelta),
-        Math.abs(roasDelta)
-      )
-
-      if (totalImpressions < 100) {
-        significance = 'insufficient_data'
-      } else if (totalImpressions > 1000 && maxDelta > 10) {
-        significance = 'high'
-      } else if (totalImpressions > 500 || maxDelta > 5) {
-        significance = 'medium'
-      } else {
-        significance = 'low'
-      }
-
-      deltas.push({
-        master_sku: snapshot.master_sku,
-        platform: snapshot.platform,
-        environment: snapshot.environment,
-        days_since_publish: snapshot.days_since_publish || 0,
-        publish_event_id: snapshot.publish_event_id || 0,
-        content_version: snapshot.content_version,
-
-        baseline_impressions: baseline.avg_impressions || 0,
-        baseline_clicks: baseline.avg_clicks || 0,
-        baseline_ctr: baseline.avg_ctr || 0,
-        baseline_conversions: baseline.avg_conversions || 0,
-        baseline_cvr: baseline.avg_cvr || 0,
-        baseline_roas: baseline.avg_roas || 0,
-
-        current_impressions: snapshot.impressions || 0,
-        current_clicks: snapshot.clicks || 0,
-        current_ctr: snapshot.ctr || 0,
-        current_conversions: snapshot.conversions || 0,
-        current_cvr: snapshot.cvr || 0,
-        current_roas: snapshot.roas || 0,
-
-        impressions_delta: impressionsDelta,
-        clicks_delta: clicksDelta,
-        ctr_delta: ctrDelta,
-        conversions_delta: conversionsDelta,
-        cvr_delta: cvrDelta,
-        roas_delta: roasDelta,
-
-        trend,
-        significance,
-      })
-    }
-
-    // Sort by significance (high first) then by trend score
-    deltas.sort((a, b) => {
-      const sigOrder = { high: 0, medium: 1, low: 2, insufficient_data: 3 }
-      const sigDiff = sigOrder[a.significance] - sigOrder[b.significance]
-      if (sigDiff !== 0) return sigDiff
-
-      // Within same significance, sort by CTR delta (descending)
-      return b.ctr_delta - a.ctr_delta
+      const byLabel = labelOrder[a.label] - labelOrder[b.label]
+      if (byLabel !== 0) return byLabel
+      return (b.primary_roas_did_lift_pct ?? -Infinity) - (a.primary_roas_did_lift_pct ?? -Infinity)
     })
 
-    // Summary stats
-    const improving = deltas.filter((d) => d.trend === 'improving').length
-    const declining = deltas.filter((d) => d.trend === 'declining').length
-    const stable = deltas.filter((d) => d.trend === 'stable').length
+    const summary = {
+      total: deltas.length,
+      positive: deltas.filter((d) => d.label === 'positive').length,
+      negative: deltas.filter((d) => d.label === 'negative').length,
+      neutral: deltas.filter((d) => d.label === 'neutral').length,
+      avg_roas_did_lift_pct:
+        deltas.reduce((acc, item) => acc + (item.primary_roas_did_lift_pct ?? 0), 0) /
+          (deltas.length || 1),
+      significance_breakdown: {
+        high: deltas.filter((d) => getSignificance(d.confidence) === 'high').length,
+        medium: deltas.filter((d) => getSignificance(d.confidence) === 'medium').length,
+        low: deltas.filter((d) => getSignificance(d.confidence) === 'low').length,
+      },
+    }
 
     return NextResponse.json({
       success: true,
       deltas,
-      summary: {
-        total: deltas.length,
-        improving,
-        declining,
-        stable,
-        avg_ctr_delta: deltas.reduce((sum, d) => sum + d.ctr_delta, 0) / deltas.length || 0,
-        avg_cvr_delta: deltas.reduce((sum, d) => sum + d.cvr_delta, 0) / deltas.length || 0,
-        avg_roas_delta: deltas.reduce((sum, d) => sum + d.roas_delta, 0) / deltas.length || 0,
+      summary,
+      staleness: {
+        latest_snapshot_date:
+          latestSnapshotDate !== null
+            ? latestSnapshotDate.toISOString().slice(0, 10)
+            : null,
+        days_stale: daysStale,
+        is_stale: daysStale === null || daysStale > 2,
       },
     })
   } catch (error) {

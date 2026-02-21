@@ -75,3 +75,29 @@ test_output/
 # Git bundle files (backup artifacts, not stored in repo)
 *.bundle
 .mcp.json
+
+# macOS system directories (accidentally created in repo root)
+Library/
+
+# iCloud/Finder duplicate files (files with " 2" suffix)
+*\ 2.png
+*\ 2.md
+*\ 2.sql
+*\ 2.log
+
+# Agent skills (installed locally, not tracked)
+.agent/skills/
+.agents/skills/
+.claude/skills/
+.cursor/skills/
+
+# Claude checkpoints (session-specific, not tracked)
+.claude/checkpoints/
+
+# npm artifacts
+.npm/
+
+# GSD planning artifacts (local-only)
+.planning/config.json
+.planning/debug/
+.planning/v1.1-MILESTONE-AUDIT.md
