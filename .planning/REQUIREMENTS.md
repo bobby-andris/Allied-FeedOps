@@ -21,8 +21,8 @@
 
 ### Fixes
 
-- [ ] **FIX-01**: UI single-SKU regeneration path (/regenerate) uses the same rich prompt construction as batch path (segment strategy, keyword plan, gold examples from generator.py)
-- [ ] **FIX-02**: Unwired feature flags (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1) are connected to active generation code paths with observable activation
+- [x] **FIX-01**: UI single-SKU regeneration path (/regenerate) uses the same rich prompt construction as batch path (segment strategy, keyword plan, gold examples from generator.py)
+- [x] **FIX-02**: Unwired feature flags (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1) are connected to active generation code paths with observable activation
 
 ### Model Optimization
 
@@ -78,8 +78,8 @@
 | MEAS-02 | Phase 19 | Complete |
 | MEAS-03 | Phase 19 | Complete |
 | MEAS-04 | Phase 19 | Complete |
-| FIX-01 | Phase 20 | Pending |
-| FIX-02 | Phase 20 | Pending |
+| FIX-01 | Phase 20 | Complete |
+| FIX-02 | Phase 20 | Complete |
 | GOOG-04 | Phase 20 | Complete |
 | GOOG-05 | Phase 20 | Complete |
 | MODEL-03 | Phase 20 | Complete |
