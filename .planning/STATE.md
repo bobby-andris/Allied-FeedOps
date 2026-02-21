@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 17 of 20 (Google Shopping Intelligence & Model Research)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-21 — Phase 17 Plan 01 complete (Google Shopping ranking factors research)
+Last activity: 2026-02-21 — Phase 17 Plan 02 complete (LLM model benchmarking, GPT-5.2 recommendation)
 
-Progress: [█░░░░░░░░░] ~5% (v1.2 milestone — 1/TBD plans complete)
+Progress: [██░░░░░░░░] ~10% (v1.2 milestone — 2/TBD plans complete)
 
 ## Performance Metrics
 
@@ -51,6 +51,11 @@ Progress: [█░░░░░░░░░] ~5% (v1.2 milestone — 1/TBD plans c
 - [17-01] Grab bars campaign: 25,086 impressions, 1.00% CTR, 67.3% IS; "decorative grab bars" terms get 0% CTR — confirmed content quality problem
 - [17-01] 9 prompt changes for Phase 20 documented in docs/research/google-shopping-ranking-factors.md
 - [17-01] H1 CONFIRMED: Feed quality is primary gap. H2 PARTIALLY. H3 LIKELY CONFIRMED. H4 PARTIALLY. H5/H6/H7 UNCONFIRMED.
+- [17-02]: GPT-5.2 scored 90.0/100 vs GPT-4o baseline at 76.4/100 on same production prompt — 17.8% quality improvement confirmed
+- [17-02]: GPT-4o disqualified — instruction leak observed (literal prompt text in output for 1/5 SKUs)
+- [17-02]: Claude Sonnet 4.6 disqualified for production — fabricated claims in 2/5 SKUs (mounting hardware included not in evidence)
+- [17-02]: All models cost under $20 for full 2,784 SKU catalog at batch pricing — cost not a selection factor
+- [17-02]: Gemini 2.5 Pro strong for offline batch (87.8/100, 1M context) but 3.4x slower; not recommended for real-time generation
 
 ### Blockers/Concerns
 
@@ -67,5 +72,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 17-01-PLAN.md (Google Shopping ranking factors research)
+Stopped at: Completed 17-02-PLAN.md (LLM model benchmarking — GPT-5.2 recommended for Phase 20)
 Resume file: None

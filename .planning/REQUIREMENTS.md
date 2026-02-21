@@ -26,8 +26,8 @@
 
 ### Model Optimization
 
-- [ ] **MODEL-01**: Research GPT-5.2 capabilities, pricing, and best practices for product content generation — compare against current model (GPT-4o or equivalent) on quality, speed, and cost per SKU
-- [ ] **MODEL-02**: Evaluate alternative models (Claude, Gemini, open-source) for cost-effective feed content generation with quality benchmarks
+- [x] **MODEL-01**: Research GPT-5.2 capabilities, pricing, and best practices for product content generation — compare against current model (GPT-4o or equivalent) on quality, speed, and cost per SKU
+- [x] **MODEL-02**: Evaluate alternative models (Claude, Gemini, open-source) for cost-effective feed content generation with quality benchmarks
 - [ ] **MODEL-03**: If a superior model is identified, implement model switch in Python pipeline with A/B quality comparison on sample SKUs
 
 ### Google Shopping Intelligence
@@ -68,8 +68,8 @@
 | GOOG-01 | Phase 17 | Complete |
 | GOOG-02 | Phase 17 | Pending |
 | GOOG-03 | Phase 17 | Complete |
-| MODEL-01 | Phase 17 | Pending |
-| MODEL-02 | Phase 17 | Pending |
+| MODEL-01 | Phase 17 | Complete |
+| MODEL-02 | Phase 17 | Complete |
 | DIAG-01 | Phase 18 | Pending |
 | DIAG-02 | Phase 18 | Pending |
 | DIAG-03 | Phase 18 | Pending |
