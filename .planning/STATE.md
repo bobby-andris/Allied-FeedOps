@@ -5,24 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Transform low-performing product feeds into high-converting assets with AI content generation informed by Google Shopping ranking intelligence
-**Current focus:** No active milestone — run `/gsd:new-milestone` to start next
+**Current focus:** v1.3a Content Generation Excellence
 
 ## Position
 
-**Milestone:** (none — v1.2 completed 2026-02-21)
-**Current phase:** (none)
-**Current plan:** (none)
-**Status:** Between milestones
+**Milestone:** v1.3a Content Generation Excellence
+**Current phase:** Not started (defining requirements)
+**Current plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-02-21 — Milestone v1.3a started
 
 ## Session Log
 
-- 2026-02-21: v1.2 milestone completed and archived
-- 2026-02-21: All 18 requirements satisfied (18/18), tech_debt status (8 non-blocking items)
-- 2026-02-21: Phases 17-22 complete (17 plans total)
+- 2026-02-21: v1.3a milestone started — Content Generation Excellence
 
 ## Decisions
 
-(Carried from v1.2 — see .planning/milestones/v1.2-ROADMAP.md for full history)
+(None yet for v1.3a)
 
 ## Accumulated Context
 
@@ -33,3 +32,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 - 2 orphaned components: GmcDisapprovalBadge, PromptLineagePanel (built but not surfaced in UI)
 - Phase 20 SUMMARY frontmatter key convention (underscore vs hyphen)
 - Pre-existing duplicate migration file numbers (026, 032, 033)
+
+### GPT-5.2 Known Bugs (to fix in v1.3a)
+- temperature=0.7 passed alongside reasoning_effort — mutually exclusive on GPT-5.2
+- reasoning_effort defaults to none if env var unset — model runs with zero reasoning
+- Uses legacy json_object instead of json_schema strict mode
+- No prompt_cache_retention="24h" — cache expires in 5-10 min during batch runs
+- System prompt uses === headers instead of XML tags (GPT-5.2 parses XML better)
+- Full analysis: docs/research/gpt52-best-practices.md

@@ -96,7 +96,19 @@ that fail to differentiate Allied Brass from mass-market competitors.
 
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to start v1.3a)
+## Current Milestone: v1.3a Content Generation Excellence
+
+**Goal:** Fix content quality at its source — repair GPT-5.2 integration bugs, rewrite prompts from compliance documents to creative briefs, wire 8 runtime configs into the generation pipeline, create gold standard examples, and validate with human evaluation.
+
+**Target features:**
+- Fix critical GPT-5.2 bugs (temperature/reasoning conflict, missing cache retention, legacy JSON mode)
+- Wire all 8 runtime YAML configs into prompt_builder.py
+- Rewrite SYSTEM_PROMPT from compliance document → creative brief with XML tags
+- Create 10-15 gold standard examples across major product categories
+- Expand category guidance beyond current 3 groups
+- Rewrite quality rubric to reward differentiation and emotional resonance over compliance
+- Generate, evaluate, and iterate on 10 representative test SKUs
+- Success: human-rated "significantly better" for 8/10 test SKUs
 
 ### Out of Scope
 
@@ -170,4 +182,4 @@ All configs are loaded by `prompt_builder.py` and injected into GPT-5.2's prompt
 - **Content API:** Works until Aug 2026 — Merchant API used only for diagnostic queries
 
 ---
-*Last updated: 2026-02-21 — added v1.3 roadmap, dual-use skill architecture, content quality crisis context*
+*Last updated: 2026-02-21 after milestone v1.3a started*
