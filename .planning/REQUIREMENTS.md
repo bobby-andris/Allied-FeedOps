@@ -33,7 +33,7 @@
 ### Google Shopping Intelligence
 
 - [x] **GOOG-01**: Deep research into Google Shopping ranking factors — what signals drive product surfacing in Shopping results (feed quality, bid strategy, seller ratings, product data completeness, structured data, historical performance, landing page quality)
-- [ ] **GOOG-02**: Competitive analysis methodology — understand why competitors show 5x for search terms where Allied Brass products are better suited (analyze: auction dynamics, impression share, product data gaps, category targeting, bid strategies)
+- [x] **GOOG-02**: Competitive analysis methodology — understand why competitors show 5x for search terms where Allied Brass products are better suited (analyze: auction dynamics, impression share, product data gaps, category targeting, bid strategies)
 - [x] **GOOG-03**: Generate actionable checklist of Google Shopping optimization factors with priority ranking — which factors are within feed control vs require account-level changes
 - [ ] **GOOG-04**: Update content generation prompts to incorporate Google Shopping ranking intelligence — titles, descriptions, and structured data should reflect what Google's algorithm actually rewards
 - [ ] **GOOG-05**: Image generation guidance updated to reflect Google Shopping visual ranking factors (product clarity, lifestyle context, image quality signals that affect CTR and Quality Score)
@@ -66,7 +66,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | GOOG-01 | Phase 17 | Complete |
-| GOOG-02 | Phase 17 | Pending |
+| GOOG-02 | Phase 17 | Complete |
 | GOOG-03 | Phase 17 | Complete |
 | MODEL-01 | Phase 17 | Complete |
 | MODEL-02 | Phase 17 | Complete |

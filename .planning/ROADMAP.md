@@ -47,7 +47,7 @@
 
 **Milestone Goal:** Diagnose why existing content generation and publishing is not producing measurable Google Shopping impact, and apply minimal evidence-backed fixes.
 
-- [ ] **Phase 17: Google Shopping Intelligence & Model Research** - Deep research into Google Shopping ranking factors and model alternatives before touching any code
+- [x] **Phase 17: Google Shopping Intelligence & Model Research** - Deep research into Google Shopping ranking factors and model alternatives before touching any code (completed 2026-02-21)
 - [ ] **Phase 18: Diagnosis — Establish Ground Truth** - Trace the end-to-end runtime path, audit feature flag wiring, and quantify SKU coverage funnel with zero or minimal code changes
 - [ ] **Phase 19: Measurement Infrastructure** - Add feature flag logging, GMC disapproval visibility, prompt hash lineage, and bottleneck classification to make impact measurable
 - [ ] **Phase 20: Targeted Fixes & Intelligence Application** - Apply evidence-backed fixes to generation path, feature flag wiring, prompts, and image guidance — one fix at a time
@@ -110,7 +110,7 @@ Plans:
 | 01-04 | Phase 0 | 11/11 | Complete | 2026-02-13 |
 | 05-08 | v1.0 | 16/16 | Complete | 2026-02-13 |
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
-| 17. Google Shopping Intelligence & Model Research | 2/3 | In Progress|  | - |
+| 17. Google Shopping Intelligence & Model Research | 3/3 | Complete   | 2026-02-21 | - |
 | 18. Diagnosis — Establish Ground Truth | v1.2 | 0/TBD | Not started | - |
 | 19. Measurement Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 20. Targeted Fixes & Intelligence Application | v1.2 | 0/TBD | Not started | - |

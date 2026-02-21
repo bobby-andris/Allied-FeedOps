@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 17 of 20 (Google Shopping Intelligence & Model Research)
-Plan: 2 of TBD in current phase
+Plan: 3 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-21 — Phase 17 Plan 02 complete (LLM model benchmarking, GPT-5.2 recommendation)
+Last activity: 2026-02-21 — Phase 17 Plan 03 complete (competitive gap analysis, PMax Zombie SKUs discovery, optimization checklist)
 
-Progress: [██░░░░░░░░] ~10% (v1.2 milestone — 2/TBD plans complete)
+Progress: [███░░░░░░░] ~15% (v1.2 milestone — 3/TBD plans complete)
 
 ## Performance Metrics
 
@@ -40,6 +40,8 @@ Progress: [██░░░░░░░░] ~10% (v1.2 milestone — 2/TBD plans 
 - [17-01]: Merchant Center account ID ≠ Google Ads customer ID — user must provide MC ID for disapproval diagnostic
 - [17-01]: Feed content coverage (79/2,784 SKUs = 2.8%) is primary scale bottleneck; content quality (89.4/100 avg) is already production-ready
 - [17-01]: {FINISH_NAME} placeholder found in approved content (SKU 102) — expand-variants.ts substitution bug needs immediate fix
+- [Phase 17-03]: PMax Zombie SKUs (126K impressions, 54.6% IS Lost to Rank) identified as highest-value Phase 20 target — content generation priority 1
+- [Phase 17-03]: Decorative grab bar CTR gap confirmed: 741 impressions at 0% CTR traced to title language mismatch — fix is adding 'Decorative' to Pipeline/Cube Design grab bar titles
 
 ### Key Context Carried Forward
 
@@ -51,6 +53,11 @@ Progress: [██░░░░░░░░] ~10% (v1.2 milestone — 2/TBD plans 
 - [17-01] Grab bars campaign: 25,086 impressions, 1.00% CTR, 67.3% IS; "decorative grab bars" terms get 0% CTR — confirmed content quality problem
 - [17-01] 9 prompt changes for Phase 20 documented in docs/research/google-shopping-ranking-factors.md
 - [17-01] H1 CONFIRMED: Feed quality is primary gap. H2 PARTIALLY. H3 LIKELY CONFIRMED. H4 PARTIALLY. H5/H6/H7 UNCONFIRMED.
+- [17-03]: 741 decorative grab bar impressions at 0% CTR confirmed — title language mismatch ("Pipeline Collection Grab Bar" vs "Decorative Grab Bar") is the entire explanation
+- [17-03]: PMax "Zombie SKUs" campaign discovered: 126,283 impressions, 54.6% IS Lost to Rank — highest IS-loss in account, not in Plan 01 analysis
+- [17-03]: Phase 20 priority order confirmed by data: PMax Zombie SKUs > garment rods > retractable hooks > grab bars > paper towel holders
+- [17-03]: Kingston Brass wins via Home Depot/Amazon (DA 90+) — structural gap, mitigation is superior content quality on niche/specialty search terms
+- [17-03]: 15 total prompt changes for Phase 20 (9 from Plan 01 + 6 new from this plan)
 - [17-02]: GPT-5.2 scored 90.0/100 vs GPT-4o baseline at 76.4/100 on same production prompt — 17.8% quality improvement confirmed
 - [17-02]: GPT-4o disqualified — instruction leak observed (literal prompt text in output for 1/5 SKUs)
 - [17-02]: Claude Sonnet 4.6 disqualified for production — fabricated claims in 2/5 SKUs (mounting hardware included not in evidence)
@@ -72,5 +79,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 17-02-PLAN.md (LLM model benchmarking — GPT-5.2 recommended for Phase 20)
+Stopped at: Completed 17-03-PLAN.md (competitive gap analysis — PMax Zombie SKUs + decorative grab bar fix confirmed)
 Resume file: None
