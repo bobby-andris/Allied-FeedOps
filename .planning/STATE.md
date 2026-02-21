@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 24 of 25 (Prompt Architecture — rewrite prompts, wire configs, expand guidance)
-**Current plan:** Not yet planned
-**Status:** Phase 23 complete, phase 24 not started
-**Last activity:** 2026-02-21 — Phase 23 complete: GPT-5.2 bugs fixed, gold standards loaded, 10-criterion rubric live
+**Current plan:** 24-01 complete, 24-02 next
+**Status:** Phase 24 in progress — plan 01 complete
+**Last activity:** 2026-02-21 — 24-01: SYSTEM_PROMPT rewritten as creative brief, skill_loader.py built, 8 skills injected into generation prompts (254K chars batch mode)
 
-Progress: [████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~10% (v1.3a)
+Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] ~20% (v1.3a)
 
 ## Performance Metrics
 
@@ -23,12 +23,13 @@ Progress: [████░░░░░░░░░░░░░░░░░░░
 - Total plans completed: 68
 - Milestones shipped: 4 (Phase 0, v1.0, v1.1, v1.2)
 
-**v1.3a plans:** 2 completed (TBD total)
+**v1.3a plans:** 3 completed (TBD total)
 
 | Plan | Duration | Tasks | Files | Date |
 |------|----------|-------|-------|------|
 | 23-01 GPT-5.2 bug fixes | 4 min | 2 | 3 | 2026-02-21 |
 | 23-02 Gold standards + 10-criterion rubric | 276s | 2 | 2 | 2026-02-21 |
+| 24-01 Creative brief + skill loader | 3 min | 2 | 4 | 2026-02-21 |
 
 ## Accumulated Context
 
@@ -42,6 +43,9 @@ Progress: [████░░░░░░░░░░░░░░░░░░░
 - [v1.2]: Unified build_core_prompt() — single code path for all 4 generation paths
 - [Phase 23-foundation]: 10-criterion rubric replaces 6-criterion self_score: hook_quality (15%), product_specificity (15%), competitive_diff (12%), keyword_integration (10%), customer_scenario (10%), emotional_resonance (10%), factual_accuracy (10%), platform_compliance (8%), finish_integration (5%), variety_score (5%)
 - [Phase 23-foundation]: 15 gold standard examples loaded into feedops_v3 template: 10 from google-shopping-content skill, 5 improved from quality-evaluation skill, covering 15 product categories
+- [24-01]: SYSTEM_PROMPT opens with creative_direction — good/bad examples, one-two punch framing, before any rules. Accuracy guardrail moved lower.
+- [24-01]: skill_loader.py uses lru_cache pattern from shopping_intelligence.py; batch mode loads all 8 skills (254K), single mode loads core + platform-relevant (172K)
+- [24-01]: Cloud Run Dockerfile needs COPY .claude/skills /app/.claude/skills before skills-enabled production deployment
 
 ### Open Blockers
 
@@ -64,5 +68,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed .planning/phases/23-foundation/23-02-PLAN.md
-Resume file: .planning/phases/23-foundation/23-02-SUMMARY.md
+Stopped at: Completed .planning/phases/24-prompt-architecture/24-01-PLAN.md
+Resume file: .planning/phases/24-prompt-architecture/24-01-SUMMARY.md
