@@ -122,6 +122,10 @@ app.include_router(search_insights_router)
 from feedops.api.monitoring import router as monitoring_router
 app.include_router(monitoring_router)
 
+# Include GMC sync router
+from feedops.api.gmc_sync import router as gmc_sync_router
+app.include_router(gmc_sync_router)
+
 # Include performance baseline router
 from feedops.api.performance_baseline import router as performance_baseline_router
 app.include_router(performance_baseline_router)
