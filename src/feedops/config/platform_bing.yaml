@@ -1,5 +1,8 @@
 # Bing Shopping Platform Config — Runtime rules for GPT-5.2 prompt injection
 # Keep under 50 lines. Loaded by prompt_builder.py for Bing content generation.
+# Base config: shopping_intelligence.yaml (Google). This file contains Bing-specific OVERRIDES.
+# Key differences from Google: broader synonym matching, quality-signal-responsive audience,
+# style descriptors earn placement, warranty mention matters more, front-load specs in first 200 chars.
 
 platform: bing
 title_limit: 150

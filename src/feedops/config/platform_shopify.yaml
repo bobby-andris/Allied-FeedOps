@@ -1,5 +1,9 @@
 # Shopify Platform Config — Runtime rules for GPT-5.2 prompt injection
 # Keep under 50 lines. Loaded by prompt_builder.py for Shopify content generation.
+# Base config: shopping_intelligence.yaml (Google). This file contains Shopify-specific OVERRIDES.
+# Key differences from Google: on-site conversion (not ad click-through), HTML format,
+# finish-agnostic master SKU, longer descriptions (250-400 words vs 700-900 chars),
+# buyer is already on the page — eliminate hesitation, not attract a click.
 
 platform: shopify
 title_limit: 255
