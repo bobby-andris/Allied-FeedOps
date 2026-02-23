@@ -108,13 +108,15 @@ Plans:
   4. At least 8 of the 10 new descriptions pass the differentiation test: a reader can identify them as Allied Brass, not a generic hardware store
   5. Average quality score across the 10 test SKUs on the new rubric is at or above 85%
   6. The test batch is published to Google Sheets supplemental feed so CTR/CVR delta measurement can begin
-**Plans**: 5 plans
+**Plans**: 7 plans
 Plans:
 - [x] 25-01-PLAN.md — Deploy skill-enriched prompts to Cloud Run, select 10 representative SKUs, regenerate, build blind A/B comparison document
 - [x] 25-02-PLAN.md — Human blind evaluation, quality scoring (Round 1: FAIL — 0/10 titles, 6/10 desc, 3/10 diff)
 - [ ] 25-03-PLAN.md — Approve and publish highest-scoring SKU to Google Sheets supplemental feed
-- [ ] 25-04-PLAN.md — Gap closure: refactor prompt architecture (skills as authority, product-specific data, finish in titles, accuracy guardrail)
-- [ ] 25-05-PLAN.md — Gap closure: regenerate all 10 SKUs with refactored prompts, Round 2 human evaluation
+- [x] 25-04-PLAN.md — Gap closure: refactor prompt architecture (skills as authority, product-specific data, finish in titles, accuracy guardrail)
+- [x] 25-05-PLAN.md — Gap closure: regenerate all 10 SKUs with refactored prompts, Round 2 human evaluation (FAIL — 4/10 titles, 6/10 desc consensus)
+- [ ] 25-06-PLAN.md — Gap closure: update skills (remove competitor materials, add Robert's title formula, evidence exclusion rules) + SYSTEM_PROMPT prohibitions
+- [ ] 25-07-PLAN.md — Gap closure: regenerate all 10 SKUs with Round 3 fixes, Round 3 human evaluation
 
 ## Progress
 
@@ -126,7 +128,7 @@ Plans:
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23 | v1.3a | 2/2 | Complete | 2026-02-21 |
 | 24 | 2/2 | Complete    | 2026-02-21 | - |
-| 25 | 2/5 | In Progress|  | - |
+| 25 | 4/7 | In Progress|  | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
