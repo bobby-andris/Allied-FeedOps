@@ -1,0 +1,107 @@
+User Prompt Template for GPT-5.2 Content Generation (v2)
+=========================================================
+
+This template is assembled at runtime by prompt_builder.py.
+All placeholders are filled with per-SKU data from evidence tables,
+shopping_intelligence.yaml, Supabase, and product catalog.
+
+Removed from current template:
+- {segment_strategy_guidance} -- absorbed into system prompt constraints
+- Gold examples remain here as fallback; may move to system prompt after A/B testing
+
+---
+
+<task>
+Generate one complete JSON object for MasterSKU: {master_sku}.
+Use only information in the inputs below. Every claim must trace to a field in the evidence table.
+</task>
+
+<inputs>
+
+<evidence_table>
+{evidence_table}
+</evidence_table>
+
+<keyword_placement>
+{keyword_placement}
+</keyword_placement>
+
+<category_guidance>
+{category_guidance}
+</category_guidance>
+
+<product_design_story>
+{customer_context}
+</product_design_story>
+
+<competitive_positioning>
+{competitive_context}
+</competitive_positioning>
+
+<gold_examples>
+{gold_examples}
+</gold_examples>
+
+</inputs>
+
+<output_contract>
+Return ONLY valid JSON matching this schema:
+{schema}
+</output_contract>
+
+=========================================================
+VARIANT USER PROMPT TEMPLATE (for finish-specific generation)
+=========================================================
+
+<task>
+Generate one complete JSON object for variant: {variant_sku} (finish: {finish_name}).
+Use only information in the inputs below. Every claim must trace to a field in the evidence table.
+</task>
+
+<inputs>
+
+<evidence_table>
+{evidence_table}
+</evidence_table>
+
+<keyword_placement>
+{keyword_placement}
+</keyword_placement>
+
+<category_guidance>
+{category_guidance}
+</category_guidance>
+
+<product_design_story>
+{customer_context}
+</product_design_story>
+
+<competitive_positioning>
+{competitive_context}
+</competitive_positioning>
+
+<finish_context>
+Generating content for: {finish_name}
+
+Finish details:
+- Category: {finish_category}
+- Character: {finish_character}
+- Style context: {style_context}
+
+Weave "{finish_name}" naturally into the FIRST SENTENCE of the description.
+Do NOT use "Available in {finish_name}. {finish_name} features..." pattern.
+
+Good: "This 18-inch towel bar in {finish_name} coordinates with modern bathroom fixtures."
+Bad: "Available in {finish_name}. {finish_name} features a bright mirror-like surface."
+</finish_context>
+
+<gold_examples>
+{gold_examples}
+</gold_examples>
+
+</inputs>
+
+<output_contract>
+Return ONLY valid JSON matching this schema:
+{schema}
+</output_contract>
