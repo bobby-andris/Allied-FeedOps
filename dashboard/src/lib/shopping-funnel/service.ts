@@ -831,11 +831,17 @@ export async function getNeedsDecisionTerms(
   const limit = options.limit ?? 500
   const offset = options.offset ?? 0
   const sortBy = options.sortBy ?? 'impressions_desc'
+  const searchQuery = options.search?.toLowerCase().trim() || ''
 
   const terms: NeedsDecisionTerm[] = []
 
   for (const [normalizedTerm, labelMap] of grouped.entries()) {
     if (isTermInAnySharedList(context, normalizedTerm)) {
+      continue
+    }
+
+    if (searchQuery && !normalizedTerm.includes(searchQuery) &&
+        ![...labelMap.values()].some(a => a.customLabel0.toLowerCase().includes(searchQuery))) {
       continue
     }
 
@@ -926,11 +932,17 @@ export async function getExistingFunnelTerms(
   const limit = options.limit ?? 2000
   const offset = options.offset ?? 0
   const sortBy = options.sortBy ?? 'impressions_desc'
+  const searchQuery = options.search?.toLowerCase().trim() || ''
 
   const terms: ExistingFunnelTerm[] = []
   let errorTermCount = 0
 
   for (const [normalizedTerm, labelMap] of grouped.entries()) {
+    if (searchQuery && !normalizedTerm.includes(searchQuery) &&
+        ![...labelMap.values()].some(a => a.customLabel0.toLowerCase().includes(searchQuery))) {
+      continue
+    }
+
     const totalImpressions = [...labelMap.values()].reduce((sum, value) => sum + value.impressions, 0)
     if (totalImpressions < minImpressions) {
       continue

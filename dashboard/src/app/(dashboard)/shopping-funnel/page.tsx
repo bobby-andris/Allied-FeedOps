@@ -356,6 +356,9 @@ export default function ShoppingFunnelPage() {
       if (customLabelFilter !== 'all') {
         params.set('custom_label_0', customLabelFilter)
       }
+      if (deferredNeedsSearch.trim()) {
+        params.set('search', deferredNeedsSearch.trim())
+      }
       const response = await fetch(`/api/search-terms/needs-decision?${params.toString()}`)
       if (!response.ok) {
         throw new Error(await response.text())
@@ -385,7 +388,7 @@ export default function ShoppingFunnelPage() {
     } finally {
       setNeedsLoading(false)
     }
-  }, [customLabelFilter, fetchStagedDecisions, minImpressionsNum, needsOffset, needsSort, range])
+  }, [customLabelFilter, deferredNeedsSearch, fetchStagedDecisions, minImpressionsNum, needsOffset, needsSort, range])
 
   const fetchExistingWithParams = useCallback(
     async ({
@@ -395,6 +398,7 @@ export default function ShoppingFunnelPage() {
       errorsOnly,
       offsetValue,
       sortByValue,
+      searchValue,
     }: {
       rangeValue: DateRangePreset
       customLabel: string
@@ -402,6 +406,7 @@ export default function ShoppingFunnelPage() {
       errorsOnly: boolean
       offsetValue: number
       sortByValue?: ExistingSortOption
+      searchValue?: string
     }) => {
       const params = new URLSearchParams({
         range: rangeValue,
@@ -411,6 +416,9 @@ export default function ShoppingFunnelPage() {
         offset: String(offsetValue),
         sort_by: sortByValue ?? 'errors_first',
       })
+      if (searchValue?.trim()) {
+        params.set('search', searchValue.trim())
+      }
       if (customLabel !== 'all') {
         params.set('custom_label_0', customLabel)
       }
@@ -435,6 +443,7 @@ export default function ShoppingFunnelPage() {
         errorsOnly: showErrorsOnly,
         offsetValue: existingOffset,
         sortByValue: existingSort,
+        searchValue: deferredExistingSearch,
       })
       setExistingData(payload)
       setExistingUpdates({})
@@ -444,7 +453,7 @@ export default function ShoppingFunnelPage() {
     } finally {
       setExistingLoading(false)
     }
-  }, [customLabelFilter, existingOffset, existingSort, fetchExistingWithParams, minImpressionsNum, range, showErrorsOnly])
+  }, [customLabelFilter, deferredExistingSearch, existingOffset, existingSort, fetchExistingWithParams, minImpressionsNum, range, showErrorsOnly])
 
   const fetchDataLineage = useCallback(async () => {
     setLineageLoading(true)
@@ -489,6 +498,7 @@ export default function ShoppingFunnelPage() {
           errorsOnly: nextErrorsOnly,
           offsetValue: 0,
           sortByValue: existingSort,
+          searchValue: deferredExistingSearch,
         })
         setExistingData(payload)
         setExistingUpdates({})
@@ -1371,9 +1381,12 @@ export default function ShoppingFunnelPage() {
                       value={needsSearch}
                       onChange={(event) => {
                         const nextValue = event.target.value
-                        startTransition(() => setNeedsSearch(nextValue))
+                        startTransition(() => {
+                          setNeedsSearch(nextValue)
+                          setNeedsOffset(0)
+                        })
                       }}
-                      placeholder="Filter visible rows..."
+                      placeholder="Search all terms..."
                       className="pl-8"
                     />
                   </div>
@@ -1771,9 +1784,12 @@ export default function ShoppingFunnelPage() {
                       value={existingSearch}
                       onChange={(event) => {
                         const nextValue = event.target.value
-                        startTransition(() => setExistingSearch(nextValue))
+                        startTransition(() => {
+                          setExistingSearch(nextValue)
+                          setExistingOffset(0)
+                        })
                       }}
-                      placeholder="Filter visible rows..."
+                      placeholder="Search all terms..."
                       className="pl-8"
                     />
                   </div>

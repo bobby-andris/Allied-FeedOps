@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
     const validNeedsSorts = new Set(['impact_desc', 'impressions_desc', 'cost_desc', 'conversions_desc', 'labels_desc', 'search_asc'])
     const sortBy = validNeedsSorts.has(sortByRaw ?? '') ? sortByRaw as 'impact_desc' | 'impressions_desc' | 'cost_desc' | 'conversions_desc' | 'labels_desc' | 'search_asc' : 'impressions_desc'
 
+    const search = searchParams.get('search')?.trim() || undefined
+
     const result = await getNeedsDecisionTerms({
       startDate,
       endDate,
@@ -33,6 +35,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
       sortBy,
+      search,
     })
 
     return NextResponse.json(result)

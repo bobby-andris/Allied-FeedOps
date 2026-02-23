@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
     const validExistingSorts = new Set(['impressions_desc', 'cost_desc', 'conversions_desc', 'search_asc', 'errors_first'])
     const sortBy = validExistingSorts.has(sortByRaw ?? '') ? sortByRaw as 'impressions_desc' | 'cost_desc' | 'conversions_desc' | 'search_asc' | 'errors_first' : 'errors_first'
 
+    const search = searchParams.get('search')?.trim() || undefined
+
     const result = await getExistingFunnelTerms({
       startDate,
       endDate,
@@ -39,6 +41,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
       sortBy,
+      search,
     })
 
     return NextResponse.json(result)
