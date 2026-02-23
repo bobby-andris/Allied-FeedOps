@@ -136,3 +136,15 @@ Plans:
 *v1.1 milestone completed: 2026-02-21*
 *v1.2 milestone completed: 2026-02-21*
 *v1.3a roadmap created: 2026-02-21*
+
+### Phase 25.1: Prompt Architecture Research (INSERTED)
+
+**Goal:** Investigate why GPT-5.2 produces keyword-stuffed, monotonous, filler-heavy content despite 3 rounds of iteration. Audit the assembled prompt for anti-patterns and contradictions, design a completely rethought prompt architecture based on GPT-5.2 best practices, and validate with A/B tests before returning to Phase 25 evaluation.
+**Depends on:** Phase 25
+**Requirements:** (research phase — serves v1.3a Content Generation Excellence)
+**Plans:** 3 plans
+
+Plans:
+- [ ] 25.1-01-PLAN.md — Track 1 internal audit: dump full assembled prompt, token count, contradiction map, GPT-5.2 anti-pattern scorecard
+- [ ] 25.1-02-PLAN.md — Design new prompt architecture from scratch: CTCO framework, distilled constraints, new system prompt under 15K chars
+- [ ] 25.1-03-PLAN.md — A/B test 3 prompt variations on representative + unseen SKUs, mini human review checkpoint
