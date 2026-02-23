@@ -8,9 +8,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 25.1-prompt-architecture-research
-**Current Plan:** 2 of 3
-**Status:** 25.1-01 complete — internal prompt audit with exact token counts, 12 contradictions mapped, 2.7/10 anti-pattern score.
-**Progress:** [███████░░░] 71%
+**Current Plan:** 3 of 3
+**Status:** 25.1-02 complete — new CTCO prompt architecture (~8.2K chars, 97% reduction) with zero contradictions and P0-P3 constraint hierarchy.
+**Progress:** [████████░░] 79%
 
 ## Decisions
 
@@ -30,6 +30,11 @@ See: .planning/PROJECT.md
 - 12 contradictions identified: 3 CRITICAL, 4 HIGH, 5 MEDIUM — competitor materials contradiction is root cause of "die-cast zinc" in 6/10 descriptions
 - GPT-5.2 anti-pattern composite score: 2.7/10 — fundamental architectural misalignment confirmed
 - Top recommendation: Replace SKILL.md injection with purpose-built 3-4K token GPT-5.2 prompt
+- Self-score simplified to 3 criteria (accuracy, specificity, engagement) — full 10-criterion rubric for separate eval pass
+- Gold examples: keep in user prompt pending A/B test; system prompt placement is more cache-efficient
+- All competitor material references removed from all sources — single P0 prohibition
+- Description length standardized to 700-900 chars (resolves 600-800 vs 700-900 schema conflict)
+- prompt_version feature flag for A/B testing without breaking production
 
 ## Performance Metrics
 
@@ -38,6 +43,7 @@ See: .planning/PROJECT.md
 | 25-04      | 10min    | 2     | 2     |
 | 25-06      | 7min     | 2     | 5     |
 | 25.1-01    | 4min     | 1     | 2     |
+| 25.1-02    | 5min     | 2     | 3     |
 
 ## Accumulated Context
 
@@ -55,5 +61,6 @@ See: .planning/PROJECT.md
 - 2026-02-23: Round 2 FAIL — needs Round 3 with skill updates + content prohibitions
 - 2026-02-23: Completed 25-06-PLAN.md (Round 2 gap closure — skills, SYSTEM_PROMPT, prompt_builder)
 - 2026-02-23: Completed 25.1-01-PLAN.md (internal prompt audit — 57K tokens, 12 contradictions, 2.7/10 anti-pattern score)
-- Last session: 2026-02-23T22:41:00Z
-- Stopped at: Completed 25.1-01-PLAN.md. Next: execute 25.1-02 (external research + prompt redesign)
+- 2026-02-23: Completed 25.1-02-PLAN.md (new CTCO prompt architecture — 8.2K chars, zero contradictions, all 12 audit findings resolved)
+- Last session: 2026-02-23T22:48:04Z
+- Stopped at: Completed 25.1-02-PLAN.md. Next: execute 25.1-03 (A/B testing with new prompt)
