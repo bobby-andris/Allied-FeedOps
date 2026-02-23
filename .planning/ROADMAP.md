@@ -128,7 +128,7 @@ Plans:
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23 | v1.3a | 2/2 | Complete | 2026-02-21 |
 | 24 | 2/2 | Complete    | 2026-02-21 | - |
-| 25 | 4/7 | In Progress|  | - |
+| 25 | 5/7 | In Progress|  | - |
 
 ---
 *Phase 0 completed: 2026-02-13*

@@ -8,9 +8,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 25-evaluate-iterate
-**Current Plan:** 5 of 5
-**Status:** Round 2 evaluation complete — FAIL (below 8/10 thresholds) — Round 3 needed
-**Progress:** [========..] 2/5 plans complete (25-01, 25-04); 25-05 Task 1 done (regen + comparison), Tasks 2-3 done (human eval + tally)
+**Current Plan:** 7 of 7
+**Status:** 25-06 complete — skill updates, SYSTEM_PROMPT prohibitions, 28-finishes suppression applied. Ready for 25-07 Round 3 regen.
+**Progress:** [=========.] 5/7 plans complete (25-01, 25-02, 25-04, 25-05, 25-06)
 
 ## Decisions
 
@@ -22,12 +22,17 @@ See: .planning/PROJECT.md
 - mode="single" parameter is dead code — should be removed in cleanup
 - Round 2 FAILED: consensus 4/10 title wins, 6/10 desc wins (target 8/10 each)
 - Round 3 required: skill updates + SYSTEM_PROMPT prohibitions + data fixes (see evaluation report)
+- Competitor material references prohibited in all content (positive-only brass framing)
+- Robert's title formula codified: finish first, Collection keyword, dimension only when varies
+- Evidence exclusion rules: weight capacity, detailed dimensions, installation specifics excluded
+- Product type issues for 1024/1020 are model inference errors, not data errors
 
 ## Performance Metrics
 
 | Phase-Plan | Duration | Tasks | Files |
 |------------|----------|-------|-------|
 | 25-04      | 10min    | 2     | 2     |
+| 25-06      | 7min     | 2     | 5     |
 
 ## Session Log
 
@@ -37,5 +42,6 @@ See: .planning/PROJECT.md
 - 2026-02-23: Bobby + Robert completed Round 2 blind evaluation
 - 2026-02-23: Wrote comprehensive evaluation report (25-02-evaluation-results.md)
 - 2026-02-23: Round 2 FAIL — needs Round 3 with skill updates + content prohibitions
-- Last session: 2026-02-23T19:45:00Z
-- Stopped at: Round 2 evaluation report committed. Next: create 25-06/25-07 gap closure plans for Round 3
+- 2026-02-23: Completed 25-06-PLAN.md (Round 2 gap closure — skills, SYSTEM_PROMPT, prompt_builder)
+- Last session: 2026-02-23T21:16:40Z
+- Stopped at: Completed 25-06-PLAN.md. Next: execute 25-07 (Round 3 regeneration + evaluation)

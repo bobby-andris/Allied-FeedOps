@@ -32,8 +32,8 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 
 ### Evaluation & Iteration
 
-- [ ] **EVAL-01**: Content regenerated for 10 representative SKUs spanning different product categories
-- [ ] **EVAL-02**: Old vs new descriptions compared side-by-side with human evaluation
+- [x] **EVAL-01**: Content regenerated for 10 representative SKUs spanning different product categories
+- [x] **EVAL-02**: Old vs new descriptions compared side-by-side with human evaluation
 - [x] **EVAL-03**: Human evaluator rates new descriptions as "significantly better" for at least 8/10 test SKUs
 - [x] **EVAL-04**: New descriptions pass differentiation test (identifiable as Allied Brass, not generic)
 - [x] **EVAL-05**: Quality scores on new rubric average >85% across test SKUs
@@ -84,8 +84,8 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | GOLD-02 | Phase 23 | Complete |
 | GOLD-03 | Phase 23 | Complete |
 | GOLD-04 | Phase 23 | Complete |
-| EVAL-01 | Phase 25 | Pending |
-| EVAL-02 | Phase 25 | Pending |
+| EVAL-01 | Phase 25 | Complete |
+| EVAL-02 | Phase 25 | Complete |
 | EVAL-03 | Phase 25 | Complete |
 | EVAL-04 | Phase 25 | Complete |
 | EVAL-05 | Phase 25 | Complete |
