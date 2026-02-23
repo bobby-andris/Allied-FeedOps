@@ -351,7 +351,7 @@ export default function ShoppingFunnelPage() {
         min_impressions: String(minImpressionsNum),
         limit: String(NEEDS_DECISION_LIMIT),
         offset: String(needsOffset),
-        sort_by: needsSort === 'impact_desc' ? 'impact_desc' : 'impressions_desc',
+        sort_by: needsSort,
       })
       if (customLabelFilter !== 'all') {
         params.set('custom_label_0', customLabelFilter)
@@ -394,12 +394,14 @@ export default function ShoppingFunnelPage() {
       minImpressionsValue,
       errorsOnly,
       offsetValue,
+      sortByValue,
     }: {
       rangeValue: DateRangePreset
       customLabel: string
       minImpressionsValue: number
       errorsOnly: boolean
       offsetValue: number
+      sortByValue?: ExistingSortOption
     }) => {
       const params = new URLSearchParams({
         range: rangeValue,
@@ -407,6 +409,7 @@ export default function ShoppingFunnelPage() {
         show_errors_only: errorsOnly ? 'true' : 'false',
         limit: String(EXISTING_FUNNEL_LIMIT),
         offset: String(offsetValue),
+        sort_by: sortByValue ?? 'errors_first',
       })
       if (customLabel !== 'all') {
         params.set('custom_label_0', customLabel)
@@ -431,6 +434,7 @@ export default function ShoppingFunnelPage() {
         minImpressionsValue: minImpressionsNum,
         errorsOnly: showErrorsOnly,
         offsetValue: existingOffset,
+        sortByValue: existingSort,
       })
       setExistingData(payload)
       setExistingUpdates({})
@@ -440,7 +444,7 @@ export default function ShoppingFunnelPage() {
     } finally {
       setExistingLoading(false)
     }
-  }, [customLabelFilter, existingOffset, fetchExistingWithParams, minImpressionsNum, range, showErrorsOnly])
+  }, [customLabelFilter, existingOffset, existingSort, fetchExistingWithParams, minImpressionsNum, range, showErrorsOnly])
 
   const fetchDataLineage = useCallback(async () => {
     setLineageLoading(true)
@@ -484,6 +488,7 @@ export default function ShoppingFunnelPage() {
           minImpressionsValue: minImpressionsNum,
           errorsOnly: nextErrorsOnly,
           offsetValue: 0,
+          sortByValue: existingSort,
         })
         setExistingData(payload)
         setExistingUpdates({})
@@ -496,6 +501,7 @@ export default function ShoppingFunnelPage() {
     },
     [
       customLabelFilter,
+      existingSort,
       fetchExistingWithParams,
       minImpressionsNum,
       range,
@@ -1377,7 +1383,10 @@ export default function ShoppingFunnelPage() {
                   <Select
                     value={needsSort}
                     onValueChange={(value) =>
-                      startTransition(() => setNeedsSort(value as NeedsSortOption))
+                      startTransition(() => {
+                        setNeedsSort(value as NeedsSortOption)
+                        setNeedsOffset(0)
+                      })
                     }
                   >
                     <SelectTrigger>
@@ -1691,10 +1700,12 @@ export default function ShoppingFunnelPage() {
                                 Select a funnel tier for every custom_label_0 before confirming this term.
                               </p>
                             )}
-                            {term.custom_label_0s.map((assignment) => (
+                            {term.custom_label_0s.map((assignment, labelIndex) => (
                               <div
                                 key={`${term.search_term}-${assignment.custom_label_0}`}
-                                className="grid gap-2 rounded-md border p-2 md:grid-cols-[1fr_220px]"
+                                className={`grid gap-2 rounded-md border p-2 md:grid-cols-[1fr_220px] ${
+                                  labelIndex % 2 === 1 ? 'bg-slate-100 dark:bg-slate-800/50' : 'bg-white dark:bg-transparent'
+                                }`}
                               >
                                 <div>
                                   <p className="font-medium">{assignment.custom_label_0}</p>
@@ -1773,7 +1784,10 @@ export default function ShoppingFunnelPage() {
                   <Select
                     value={existingSort}
                     onValueChange={(value) =>
-                      startTransition(() => setExistingSort(value as ExistingSortOption))
+                      startTransition(() => {
+                        setExistingSort(value as ExistingSortOption)
+                        setExistingOffset(0)
+                      })
                     }
                   >
                     <SelectTrigger>
@@ -1935,7 +1949,7 @@ export default function ShoppingFunnelPage() {
 
                         {isExpanded && (
                           <div className="mt-3 grid gap-2">
-                            {term.funnels.map((funnel) => {
+                            {term.funnels.map((funnel, funnelIndex) => {
                               const key = updateKey(term.search_term, funnel.custom_label_0)
                               const existingUpdate = existingUpdates[key]
                               const selectedValue =
@@ -1948,7 +1962,7 @@ export default function ShoppingFunnelPage() {
                                 <div
                                   key={key}
                                   className={`grid gap-2 rounded-md border p-2 md:grid-cols-[1fr_240px] ${
-                                    funnel.error ? 'border-red-300 bg-red-50' : ''
+                                    funnel.error ? 'border-red-300 bg-red-50' : funnelIndex % 2 === 1 ? 'bg-slate-100 dark:bg-slate-800/50' : 'bg-white dark:bg-transparent'
                                   }`}
                                 >
                                   <div>

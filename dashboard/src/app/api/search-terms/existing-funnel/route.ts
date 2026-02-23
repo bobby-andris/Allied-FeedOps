@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
     const minImpressions = sanitizeMinImpressions(searchParams.get('min_impressions'))
     const limit = sanitizeLimit(searchParams.get('limit'), 2000, 5000)
     const offset = sanitizeOffset(searchParams.get('offset'))
+    const sortByRaw = searchParams.get('sort_by')
+    const validExistingSorts = new Set(['impressions_desc', 'cost_desc', 'conversions_desc', 'search_asc', 'errors_first'])
+    const sortBy = validExistingSorts.has(sortByRaw ?? '') ? sortByRaw as 'impressions_desc' | 'cost_desc' | 'conversions_desc' | 'search_asc' | 'errors_first' : 'errors_first'
 
     const result = await getExistingFunnelTerms({
       startDate,
@@ -35,6 +38,7 @@ export async function GET(request: NextRequest) {
       minImpressions,
       limit,
       offset,
+      sortBy,
     })
 
     return NextResponse.json(result)

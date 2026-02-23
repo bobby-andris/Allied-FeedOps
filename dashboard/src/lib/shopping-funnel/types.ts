@@ -77,7 +77,7 @@ export interface GetNeedsDecisionOptions {
   minImpressions?: number
   limit?: number
   offset?: number
-  sortBy?: 'impressions_desc' | 'impact_desc'
+  sortBy?: 'impressions_desc' | 'impact_desc' | 'cost_desc' | 'conversions_desc' | 'labels_desc' | 'search_asc'
 }
 
 export interface GetExistingFunnelOptions {
@@ -89,6 +89,7 @@ export interface GetExistingFunnelOptions {
   minImpressions?: number
   limit?: number
   offset?: number
+  sortBy?: 'impressions_desc' | 'cost_desc' | 'conversions_desc' | 'search_asc' | 'errors_first'
 }
 
 export interface NeedsDecisionResponse {

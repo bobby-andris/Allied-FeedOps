@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
     const limit = sanitizeLimit(searchParams.get('limit'), 500, 3000)
     const offset = sanitizeOffset(searchParams.get('offset'))
     const sortByRaw = searchParams.get('sort_by')
-    const sortBy = sortByRaw === 'impact_desc' ? 'impact_desc' : 'impressions_desc'
+    const validNeedsSorts = new Set(['impact_desc', 'impressions_desc', 'cost_desc', 'conversions_desc', 'labels_desc', 'search_asc'])
+    const sortBy = validNeedsSorts.has(sortByRaw ?? '') ? sortByRaw as 'impact_desc' | 'impressions_desc' | 'cost_desc' | 'conversions_desc' | 'labels_desc' | 'search_asc' : 'impressions_desc'
 
     const result = await getNeedsDecisionTerms({
       startDate,

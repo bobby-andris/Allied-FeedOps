@@ -875,13 +875,26 @@ export async function getNeedsDecisionTerms(
 
   const enrichedTerms = terms.map(enrichNeedsDecisionTerm)
 
+  const sumMetric = (term: NeedsDecisionTerm, field: 'impressions' | 'clicks' | 'cost_micros' | 'conversions' | 'conversions_value') =>
+    term.custom_label_0s.reduce((sum, value) => sum + value[field], 0)
+
   enrichedTerms.sort((a, b) => {
     if (sortBy === 'impact_desc') {
       return (b.value_score?.impact_score ?? 0) - (a.value_score?.impact_score ?? 0)
     }
-    const aImpressions = a.custom_label_0s.reduce((sum, value) => sum + value.impressions, 0)
-    const bImpressions = b.custom_label_0s.reduce((sum, value) => sum + value.impressions, 0)
-    return bImpressions - aImpressions
+    if (sortBy === 'cost_desc') {
+      return sumMetric(b, 'cost_micros') - sumMetric(a, 'cost_micros')
+    }
+    if (sortBy === 'conversions_desc') {
+      return sumMetric(b, 'conversions') - sumMetric(a, 'conversions')
+    }
+    if (sortBy === 'labels_desc') {
+      return b.custom_label_0s.length - a.custom_label_0s.length
+    }
+    if (sortBy === 'search_asc') {
+      return a.search_term.localeCompare(b.search_term)
+    }
+    return sumMetric(b, 'impressions') - sumMetric(a, 'impressions')
   })
 
   const pagedTerms = enrichedTerms.slice(offset, offset + limit)
@@ -912,6 +925,7 @@ export async function getExistingFunnelTerms(
   const minImpressions = options.minImpressions ?? 0
   const limit = options.limit ?? 2000
   const offset = options.offset ?? 0
+  const sortBy = options.sortBy ?? 'impressions_desc'
 
   const terms: ExistingFunnelTerm[] = []
   let errorTermCount = 0
@@ -982,7 +996,18 @@ export async function getExistingFunnelTerms(
     })
   }
 
-  terms.sort((a, b) => b.total_impressions - a.total_impressions)
+  terms.sort((a, b) => {
+    if (sortBy === 'errors_first') {
+      const aHasError = a.funnels.some((f) => f.error)
+      const bHasError = b.funnels.some((f) => f.error)
+      if (aHasError !== bHasError) return aHasError ? -1 : 1
+      return b.total_impressions - a.total_impressions
+    }
+    if (sortBy === 'cost_desc') return b.total_cost_micros - a.total_cost_micros
+    if (sortBy === 'conversions_desc') return b.total_conversions - a.total_conversions
+    if (sortBy === 'search_asc') return a.search_term.localeCompare(b.search_term)
+    return b.total_impressions - a.total_impressions
+  })
 
   const pagedTerms = terms.slice(offset, offset + limit)
 
