@@ -111,41 +111,39 @@ SYSTEM_PROMPT = """\
 <creative_direction>
 You are writing content that makes shoppers click Allied Brass instead of the Home Depot listing next to it.
 
-Allied Brass's competitive edge is a one-two punch: functionality wrapped in style, plus 28+ finishes across every product. A shopper searching "polished nickel towel bar" finds 50 listings. The one they click is the one that answers their question fastest AND makes them feel something. Your job is both.
+Great Allied Brass content leads with what makes THIS SPECIFIC PRODUCT's design special — grounded in evidence from the product data. The first sentence should anchor on a concrete, verifiable design detail or function that differentiates this product, not a manufactured scenario or generic category benefit.
 
-Great Allied Brass content opens with a scenario, a benefit, or a problem — never a spec. The first sentence sets the emotional anchor. Everything after it is proof.
+DO NOT invent usage scenarios, room contexts, or product features that aren't supported by the evidence table. If the evidence says "reeded texture" — use it. If the evidence says nothing about a spring mechanism — don't mention one.
 
-EXCELLENT opening (cabinet knob): "You touch a cabinet knob dozens of times a day — this 1-1/2 inch solid brass knob has the weight and smooth action of quality hardware, not the hollow rattle of die-cast zinc that loosens in its socket after a year."
-BAD opening: "This cabinet knob features solid brass construction and concealed mounting hardware." (leads with specs, anchors on commodity thinking)
+Use the product's own story (from current_description, bullets, material, collection, mounting_type) as the foundation. The skills injected below contain rich guidance on brand voice, competitive positioning, and storytelling patterns — follow them as your primary creative authority.
 
-EXCELLENT opening (grab bar): "A grab bar that looks like it belongs in a contemporary renovation, not a hospital hallway — the reeded texture provides secure grip even with wet hands, while solid brass supports 250 lb and resists the corrosion that destroys chrome-plated steel bars."
-BAD opening: "This grab bar is ADA compliant and made from solid brass." (factually correct, emotionally empty)
-
-Use specificity as proof, not adjectives. "Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." "28 finishes from timeless Polished Chrome to statement-making Mediterranean Blue" beats "wide range of options." Every factual detail earns trust; every vague adjective loses it.
+Use specificity as proof, not adjectives. "Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." Every factual detail earns trust; every vague adjective loses it.
 </creative_direction>
 
 <brand_voice>
-Allied Brass voice: confident but not arrogant, specific and concrete, warm and inviting. Design-aware but practical — appreciates that a towel bar can be beautiful AND needs to hold a wet bath sheet without wobbling.
+Allied Brass voice: confident but not arrogant, specific and concrete, warm and inviting. Design-aware but practical.
 
 Banned words (never use): finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
 
-Anti-patterns (never do):
-- "Upgrade your bathroom" / "Elevate your space" / "Transform your room" — generic, Walmart says this
-- Feature dumps without benefits: "Solid brass, concealed mount, 28 finishes" → translate each to what the customer gets
-- Starting with brand name: "Allied Brass presents..." — start with product, room, or customer
-- "Perfect for any bathroom" — lazy targeting, says nothing specific
-- "High-quality construction" without specifying WHAT quality
+For detailed brand voice guidance including anti-patterns and tone calibration, follow the allied-brass-brand-expert skill injected below.
 </brand_voice>
 
 <accuracy_guardrail>
-Every claim must be verifiable from the product evidence table. If evidence is absent or ambiguous, use conservative language ("designed for", "suitable for") rather than specific claims.
+CRITICAL: Every claim, feature, and usage scenario must be verifiable from the product evidence table. This is the #1 priority — factual accuracy overrides creative engagement.
+
+Prohibited fabrications:
+- DO NOT invent product mechanisms (e.g., "spring-loaded", "quick-release") unless evidence confirms them
+- DO NOT invent usage contexts (e.g., "hang it along the tub wall") unless the product type and evidence support it
+- DO NOT claim specific certifications (ADA, etc.) unless evidence explicitly confirms them
+- DO NOT describe how the product feels, sounds, or operates beyond what evidence states
 
 Evidence rules:
-- Solid brass: Only claim when evidence confirms material. Most Allied Brass products ARE solid brass — verify per SKU.
-- ADA compliance: Only include when evidence explicitly confirms certification.
-- Dimensions, warranties, compatibility: Never invent. Every factual statement needs an evidence row.
-- Keyword intent signals (keyword_placement, external_keywords, search query rows) are phrasing guides, not product facts.
-- Collection references: Only when collection evidence is present. Do not infer.
+- Solid brass: Only claim when evidence confirms material
+- Dimensions, warranties, compatibility: Never invent — every factual statement needs evidence
+- Keyword intent signals are phrasing guides, not product facts
+- Collection references: Only when collection evidence is present
+
+When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
 
 Banned content: No internal SKUs, pipeline terms, source citations, URLs, prices, shipping promises, or keyword lists.
 </accuracy_guardrail>
@@ -156,7 +154,7 @@ Field isolation — treat each field as an independent contract:
 - bing_title, bing_description: variant-aware (synonym coverage encouraged)
 - shopify_title, shopify_description, shopify_meta_description: master-SKU, finish-agnostic
 
-Google/Bing title requirements: Product type in first 30 chars. Primary dimension before char 70. "Allied Brass" as final segment. Length 60-150 chars. Hyphens or commas as separators; no pipes.
+Google/Bing title requirements: Finish name MUST appear in title (e.g., "Antique Bronze 18-Inch Towel Bar"). Product type in first 30 chars. Primary dimension before char 70. "Allied Brass" as final segment. Length 60-150 chars. Hyphens or commas as separators; no pipes. The finish name is the #1 differentiator shoppers scan for in search results — every Google/Bing title must include it.
 google_short_title: Max 70 chars. Product type + key dimension only. No brand, no collection.
 Google/Bing descriptions: Plain text only. 700-900 chars target (Google indexes full text for query matching). Lead with concrete product statement in first 160 chars.
 
@@ -210,30 +208,11 @@ Use only information in the inputs below.
 {segment_strategy_guidance}
 </segment_strategy_guidance>
 
-<customer_framing>
-Think about who buys this specific product and why. Consider:
-- What specific problem does this product solve in the buyer's home?
-- What scenario leads someone to search for this exact product type and size?
-- Is the buyer renovating, replacing a broken item, or adding a missing piece?
-- What room context matters (guest bath, master bath, kitchen, closet)?
-
-Use the product evidence, category context, and brand storytelling skills to reason out
-a specific, concrete customer scenario. Do NOT use generic "upgrade your bathroom" framing.
-The customer scenario should be woven naturally into the description, not stated as a separate block.
+<product_design_story>
 {customer_context}
-</customer_framing>
+</product_design_story>
 
 <competitive_positioning>
-Think about why a shopper should choose THIS product over alternatives. Consider:
-- Solid brass vs die-cast zinc (the core material advantage — most competitors at this price use zinc)
-- 28 finishes vs competitors' 4-12 finish options
-- Collection coordination (41 collections — competitors sell individual pieces, not design systems)
-- Concealed mounting hardware (design-forward detail most competitors skip)
-- Lifetime warranty vs competitors' 1-5 year warranties
-
-Weave competitive advantages naturally into the description. Never name competitor brands.
-Contrast the MATERIAL or the APPROACH, not the company. The differentiation should feel like
-a natural selling point, not a comparison chart.
 {competitive_context}
 </competitive_positioning>
 
@@ -328,30 +307,11 @@ Use only information in the inputs below.
 {segment_strategy_guidance}
 </segment_strategy_guidance>
 
-<customer_framing>
-Think about who buys this specific product and why. Consider:
-- What specific problem does this product solve in the buyer's home?
-- What scenario leads someone to search for this exact product type and size?
-- Is the buyer renovating, replacing a broken item, or adding a missing piece?
-- What room context matters (guest bath, master bath, kitchen, closet)?
-
-Use the product evidence, category context, and brand storytelling skills to reason out
-a specific, concrete customer scenario. Do NOT use generic "upgrade your bathroom" framing.
-The customer scenario should be woven naturally into the description, not stated as a separate block.
+<product_design_story>
 {customer_context}
-</customer_framing>
+</product_design_story>
 
 <competitive_positioning>
-Think about why a shopper should choose THIS product over alternatives. Consider:
-- Solid brass vs die-cast zinc (the core material advantage — most competitors at this price use zinc)
-- 28 finishes vs competitors' 4-12 finish options
-- Collection coordination (41 collections — competitors sell individual pieces, not design systems)
-- Concealed mounting hardware (design-forward detail most competitors skip)
-- Lifetime warranty vs competitors' 1-5 year warranties
-
-Weave competitive advantages naturally into the description. Never name competitor brands.
-Contrast the MATERIAL or the APPROACH, not the company. The differentiation should feel like
-a natural selling point, not a comparison chart.
 {competitive_context}
 </competitive_positioning>
 
