@@ -44,7 +44,9 @@ Every product exists within a design system. When describing hardware:
 
 3. **Reference design intent**: Why would a designer choose THIS piece? The geometry of the
    backplate, the proportion of the post, the weight of the finial — these are design decisions,
-   not manufacturing accidents.
+   not manufacturing accidents. Focus on the design DECISIONS that make the product special, not
+   the technical measurements. A designer cares that the backplate geometry creates clean lines —
+   not that it measures 2.75 x 2.75 inches.
 
 ### Material Creates Mood
 
@@ -233,6 +235,42 @@ Turn specs into stories. Never list a feature without translating it.
 | Tempered glass | Safety glass | Won't shatter dangerously | "Tempered glass shelves hold your heaviest bottles safely — and if ever broken, crumble into small pieces instead of sharp shards." |
 | ADA compliant | Accessibility | Safety without sacrifice | "ADA-compliant in 28 designer finishes — because accessible hardware should be invisible, not institutional." |
 | Wall-mount design | Space saving | Floor stays clear | "Wall-mounted to keep floors clear and cleaning simple — no pedestal footprint competing with your tile work." |
+
+---
+
+## Evidence Exclusion Rules
+
+Not all product evidence belongs in marketing descriptions. Some data is useful for spec sheets but harmful in descriptions because it creates doubt, clutters the narrative, or bores the reader.
+
+### EXCLUDE from descriptions (always):
+
+1. **Weight capacity** — Robert (company founder): "I do not like the idea of a weight capacity. The weight capacity is generally not a problem and this may just have a consumer stray from the product because of a stated weight limit." Weight capacity creates doubt rather than confidence.
+
+2. **Detailed dimensions** (width, height, projection, depth) — Only include the PRIMARY dimension that shoppers search for:
+   - Towel bars: overall length (18", 24", 30", 36")
+   - Mirrors: diameter or overall dimensions
+   - Glass shelves: length
+   - Everything else: omit dimensions unless the product varies by size
+   - Robert: "Too much dimensional information. All of that detailed information can be gotten from the spec file."
+
+3. **Installation specifics** — Mounting type is fine ("wall-mounted," "freestanding"). Installation procedures, screw counts, anchoring requirements, and step-by-step instructions are NOT marketing content.
+
+4. **Technical specifications** — Thread sizes, bore diameters, material grades, engineering tolerances. These belong in spec sheets.
+
+5. **"Bathroom humidity" as a key selling point** — Bobby (product manager): "I don't think [bathroom humidity] is a huge selling point for our product and is again one of those selling points that seems stretched and fluffy and made up." Humidity resistance is technically true but reads as filler. Mention at most once in passing ("even in humid environments"), never as a headline differentiator or dedicated sentence. Prefer specific design advantages (clean lines, coordinated finishes, solid feel) over generic durability claims.
+
+### INCLUDE in descriptions (use from evidence):
+
+1. **Material** — "Solid brass" is the #1 differentiator. Always include when evidence confirms.
+2. **Mounting type** — "Wall-mounted," "freestanding," "countertop" — confirms product type match.
+3. **Primary searchable dimension** — The one dimension shoppers filter by.
+4. **Collection name** — Coordination opportunity.
+5. **Product design story** — narrative_copy, bullets that describe design intent.
+6. **Style/aesthetic** — Contemporary, traditional, transitional — design context.
+
+### When in doubt: OMIT
+
+Omitting a technical detail is always better than including it in a marketing description. The spec sheet exists for a reason. Descriptions sell the design story; spec sheets provide the measurements.
 
 ---
 

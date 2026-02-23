@@ -74,8 +74,8 @@ From Allied Brass's own Google Ads search term data (1M+ impressions analyzed):
 
 ### Allied Brass Differentiation (Use These — They're Real)
 
-- **Solid brass construction** — Kingston Brass uses zinc alloy for many products, Moen uses chrome-plated steel, Delta uses plastic cores. Allied Brass is genuine solid brass. Say it.
-- **28 finishes** — Competitors offer 4-12. Specialty finishes like Unlacquered Brass, Venetian Bronze, and Antique Copper are finishes competitors don't carry.
+- **Solid brass construction** — Machined, not cast. Won't corrode, pit, or loosen. Say it positively without naming competitor materials.
+- **28 finishes** — Specialty finishes like Unlacquered Brass, Venetian Bronze, and Antique Copper give homeowners choices most brands can't match.
 - **Lifetime decorative finish** — Not a warranty claim (don't state a warranty duration unless evidence confirms it). The finishes are designed to last.
 - **41 named collections** — Full bathroom coordination. A shopper can match their towel bar, robe hook, soap dish, and toilet paper holder in the same finish and design language.
 - **Lifestyle images** — Allied Brass has AI-generated lifestyle photography in the feed. Competitors mostly have white-background product shots.
@@ -96,31 +96,39 @@ From Allied Brass's own Google Ads search term data (1M+ impressions analyzed):
 
 The first 70 characters of your title are your entire ad. On mobile, it's often less than 50. Every word must earn its place. Product type and key attributes go first. Brand goes last.
 
-### Flexible Framework
+### Robert's Title Formula (Expert Domain Knowledge)
 
-There is no single template. The right title structure depends on the product category, the primary search intent, and what differentiates this specific product. Here are the building blocks, ordered by priority:
+Robert (company founder, original description author) provided specific title structure rules based on decades of selling Allied Brass products:
 
-1. **Finish Name** (first 25 chars when variant-specific) — matches finish-specific searches
-2. **Key Dimension** (before char 40) — matches size-specific searches
-3. **Product Type** (before char 30) — ensures category match
-4. **Material or Key Differentiator** — "Solid Brass", "ADA Compliant", "Decorative"
-5. **Mounting Type** (if relevant) — "Wall Mount", "Countertop", "Freestanding"
-6. **Collection Name** (after key attributes) — design coordination signal
-7. **"Allied Brass"** (always last segment) — brand signal
+1. **Finish name FIRST** — "{FINISH_NAME}" must be the very first element in Google/Bing titles. It is the #1 search-matching and visual-differentiation signal.
+2. **Collection name + "Collection" keyword** — Always include the word "Collection" after collection names (e.g., "Skyline Collection" not just "Skyline"). This captures collection-specific searches.
+3. **Product function early** — Product type (e.g., "Towel Bar," "Robe Hook," "Multi Hook") should appear within the first 40 characters.
+4. **Dimensions ONLY when product varies by size** — Towel bars come in 18", 24", 30", 36" -> include dimension. Robe hooks are one size -> omit dimension. If the product doesn't vary by size, the dimension is wasted title space.
+5. **"Solid Brass" NOT in prime early position** — The early part of the title is reserved for words that convert best (finish, product type, collection). "Solid Brass" should appear after these, not before them.
+6. **Style references that VARY** — Include style descriptors (Contemporary, Traditional, Modern, etc.) but vary them across products to capture different search terms. Don't use the same style word for every product.
+7. **"Allied Brass" as final segment** — Brand name always last.
+
+**Formula:** `{FINISH_NAME} [Collection] Collection [Dimension if varies] [Product Type] - [Style Reference] [Solid Brass] - Allied Brass`
+
+**Examples applying this formula:**
+- `{FINISH_NAME} Skyline Collection 24-Inch Towel Bar - Contemporary Solid Brass - Allied Brass` (towel bar varies by size -> include dimension)
+- `{FINISH_NAME} Waverly Place Collection Robe Hook - Transitional Solid Brass - Allied Brass` (robe hook is one size -> omit dimension)
+- `{FINISH_NAME} Pipeline Collection Multi Hook - Industrial Solid Brass Wall Mount - Allied Brass` (multi hook is one size -> omit dimension)
+- `{FINISH_NAME} Carolina Crystal Collection Toilet Paper Holder - Traditional Solid Brass - Allied Brass` (one size -> omit dimension)
 
 ### Five Variations of the Same Product
 
 Product: Skyline Collection 24-Inch Towel Bar, Solid Brass, Wall Mount
 
-**Variation 1 (finish-first, general search):**
-> Polished Nickel 24-Inch Solid Brass Towel Bar - Wall Mount - Skyline Collection - Allied Brass
+**Variation 1 (Robert's formula — finish-first, collection keyword):**
+> Polished Nickel Skyline Collection 24-Inch Towel Bar - Contemporary Solid Brass Wall Mount - Allied Brass
 
-Why it works: Matches "polished nickel towel bar" (finish-specific, 2.5x CTR premium). Finish, size, material all visible within 70 chars.
+Why it works: Follows Robert's formula — finish name FIRST, "Collection" keyword included, dimension included because towel bars vary by size, "Solid Brass" after product type not before. Matches "polished nickel towel bar" (finish-specific, 2.5x CTR premium).
 
 **Variation 2 (material-first, quality-conscious buyer):**
 > Solid Brass 24-Inch Wall-Mounted Towel Bar in Polished Nickel - Skyline - Allied Brass
 
-Why it works: Leads with material differentiator for shoppers comparing brass vs zinc alloy. "Solid Brass" appears in first 12 characters.
+Why it works: Leads with material differentiator. "Solid Brass" appears in first 12 characters.
 
 **Variation 3 (size-first, dimension shopper):**
 > 24-Inch Polished Nickel Towel Bar - Solid Brass Wall Mount - Skyline Collection - Allied Brass
@@ -139,10 +147,13 @@ Why it works: 46 characters. No brand, no collection. Pure product identity for 
 
 ### Title Rules (Hard Requirements)
 
+- **Finish name ({FINISH_NAME}) MUST be the first element** in Google/Bing titles — the #1 search differentiator
 - **Google Merchant Center limit:** 150 characters maximum. Google displays ~70 characters in Shopping ads (less on mobile). Use up to 150 chars — the full text helps with query matching even if truncated in display.
 - **Short title (google_short_title):** Max 65-70 characters. Product type + key dimension + finish only. No brand, no collection.
-- **Product type in first 30 characters** — Google uses early-position words more heavily for matching
-- **Primary dimension before character 70** — must be visible in Shopping tile
+- **Product type in first 40 characters** — Google uses early-position words more heavily for matching
+- **Only include dimensions when the product varies by size** (e.g., towel bars: 18/24/30/36 -> yes; robe hooks -> no)
+- **Primary dimension before character 70** (when included) — must be visible in Shopping tile
+- **"Solid Brass" should NOT appear in the first 30 characters** — reserve that space for finish, product type, and collection
 - **"Allied Brass" as final segment** in google_title
 - **Separators:** Use hyphens or commas. Never pipes (`|`).
 - **Dimension format:** "24-Inch" (not "24in", "24 in.", or "24\"")
@@ -247,7 +258,7 @@ Every description should answer: **"Is this the right product for my bathroom?"*
 
 This means:
 - Confirm the product type and size match what they searched
-- Confirm the material quality justifies the price (solid brass, not zinc)
+- Confirm the material quality justifies the price (solid brass construction)
 - Help them picture it in their space (style context, coordination)
 - Give them confidence it will last (construction quality, not warranty hype)
 
@@ -259,38 +270,38 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 
 **Key patterns across all 10 gold standards:**
 1. Every description opens with a benefit or scenario, never a spec dump
-2. Every description includes at least one direct competitor contrast (naming the inferior material, not the brand)
+2. Every description frames solid brass POSITIVELY (what it does, how it performs) — never by naming competitor materials
 3. {FINISH_SENTENCE} is placed after the opening hook and before construction details
 4. Collection coordination is framed as a practical benefit, not marketing
 5. No two descriptions share the same opening structure (each uses a different hook approach)
-6. Every title includes "Solid Brass" and product type within the first 70 characters
+6. Every title follows Robert's formula: finish first, Collection keyword, dimension only when varies by size, Solid Brass after product type
 7. No banned words appear (finest, luxurious, premium, exclusive, exceptional, etc.)
 
 ### 1. Paper Towel Holder — Skyline Collection (SKU: 1025U) — Score: 89/100
 
 **Google Title:**
-> Solid Brass Wall Mounted Paper Towel Holder - Skyline Collection Kitchen Hardware - Allied Brass
+> {FINISH_NAME} Skyline Collection Wall Mounted Paper Towel Holder - Solid Brass Kitchen Hardware - Allied Brass
 
 **Google Short Title:**
-> Solid Brass Wall Mounted Paper Towel Holder - Skyline
+> {FINISH_NAME} Wall Mounted Solid Brass Paper Towel Holder
 
 **Google Description (756 chars):**
-> Free up counter space and keep a full roll at tearing height — this wall-mounted paper towel holder is constructed of solid brass, not the hollow zinc tubing that loosens after a few months of one-handed pulls. {FINISH_SENTENCE} The 5-inch projection holds standard and jumbo rolls without crowding your backsplash, while concealed screw mounting keeps the wall clean with no visible hardware. Solid brass construction means this holder won't corrode, wobble, or need replacing — even mounted next to the sink where steam and splashes are constant. Part of the Skyline Collection, so it coordinates with matching towel bars, soap dishes, and hooks across 28 finishes for a kitchen or bathroom where every detail speaks the same design language. One of the most-searched categories in bathroom hardware — and the difference between solid brass and plated zinc is something you feel every time you tear off a sheet.
+> Free up counter space and keep a full roll at tearing height — this wall-mounted paper towel holder is constructed of solid brass that won't loosen or corrode after months of one-handed pulls. {FINISH_SENTENCE} The 5-inch projection holds standard and jumbo rolls without crowding your backsplash, while concealed screw mounting keeps the wall clean with no visible hardware. Solid brass construction means this holder won't wobble or need replacing — even mounted next to the sink where steam and splashes are constant. Part of the Skyline Collection, so it coordinates with matching towel bars, soap dishes, and hooks across 28 finishes for a kitchen or bathroom where every detail speaks the same design language. One of the most-searched categories in bathroom hardware — and the solid brass difference is something you feel every time you tear off a sheet.
 
-**Why it's excellent:** Opens with a benefit scenario (counter space, tearing height) matching the #1 search intent. Differentiates immediately against zinc competitors with a tactile contrast. Naturally integrates: "wall mounted paper towel holder," "solid brass," "kitchen hardware." {FINISH_SENTENCE} sits after the hook and before construction details.
+**Why it's excellent:** Opens with a benefit scenario (counter space, tearing height) matching the #1 search intent. Differentiates positively through solid brass construction benefits. Naturally integrates: "wall mounted paper towel holder," "solid brass," "kitchen hardware." {FINISH_SENTENCE} sits after the hook and before construction details.
 
 ---
 
 ### 2. Freestanding Toilet Paper Holder — Carolina Crystal (SKU: CC-29) — Score: 90/100
 
 **Google Title:**
-> Freestanding Euro Style Toilet Paper Holder - Crystal Accents Solid Brass Stand - Carolina Crystal - Allied Brass
+> {FINISH_NAME} Carolina Crystal Collection Freestanding Toilet Paper Holder - Euro Style Solid Brass Stand - Allied Brass
 
 **Google Short Title:**
-> Freestanding Euro Style Solid Brass Toilet Paper Stand
+> {FINISH_NAME} Freestanding Euro Style Solid Brass Toilet Paper Stand
 
 **Google Description (893 chars):**
-> No drilling, no wall damage, and no compromising on style — this freestanding toilet paper holder stands on a weighted solid brass base that stays put on tile, marble, or hardwood without tipping. The European-style hook lets you swap rolls with one hand, while Carolina Crystal's signature crystal accents turn a purely functional fixture into a bathroom statement piece. {FINISH_SENTENCE} The heavy weighted base provides anti-tipping stability that cheap plastic stands can't match — solid brass construction means this holder won't corrode, crack, or wobble after years beside the toilet where humidity is highest. Ideal for renters who cannot drill walls, powder rooms where wall space is limited, or anyone who wants a unique freestanding toilet paper holder that guests actually notice. Coordinates with Carolina Crystal towel bars, soap dishes, and robe hooks in 28 finishes for a bathroom where every accessory shares the same crystal-accented design language.
+> No drilling, no wall damage, and no compromising on style — this freestanding toilet paper holder stands on a weighted solid brass base that stays put on tile, marble, or hardwood without tipping. The European-style hook lets you swap rolls with one hand, while Carolina Crystal's signature crystal accents turn a purely functional fixture into a bathroom statement piece. {FINISH_SENTENCE} The heavy weighted base provides anti-tipping stability on any surface — solid brass construction means this holder won't corrode, crack, or wobble after years of daily use. Ideal for renters who cannot drill walls, powder rooms where wall space is limited, or anyone who wants a unique freestanding toilet paper holder that guests actually notice. Coordinates with Carolina Crystal towel bars, soap dishes, and robe hooks in 28 finishes for a bathroom where every accessory shares the same crystal-accented design language.
 
 **Why it's excellent:** Opens with the three biggest objections to wall-mounted holders and resolves all three immediately. Euro-style hook is a genuine differentiator. Three distinct buyer scenarios (renters, powder rooms, design-conscious). 893 characters using the full budget.
 
@@ -299,13 +310,13 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 3. Decorative Reeded Grab Bar — Cube Design 18-Inch (SKU: CU-GRR-18) — Score: 92/100
 
 **Google Title:**
-> Decorative 18-Inch Reeded Solid Brass Grab Bar - ADA Compliant 250 lb Capacity - Cube Design Contemporary - Allied Brass
+> {FINISH_NAME} Cube Design Collection 18-Inch Decorative Reeded Grab Bar - ADA Compliant Solid Brass - Allied Brass
 
 **Google Short Title:**
-> Decorative 18-Inch Reeded Solid Brass Grab Bar, ADA Compliant
+> {FINISH_NAME} Decorative 18-Inch Reeded Solid Brass Grab Bar, ADA Compliant
 
 **Google Description (861 chars):**
-> A grab bar that looks like it belongs in a contemporary renovation, not a hospital hallway — the Cube Design Reeded Grab Bar brings ADA-compliant safety to bathrooms without the institutional aesthetic that makes most grab bars an eyesore. The reeded texture provides secure grip even with wet or soapy hands, while solid brass construction supports 250 lb and resists the corrosion that destroys chrome-plated steel bars in wet shower environments. {FINISH_SENTENCE} The 18-inch length fits beside a shower entry, along a tub wall, or next to a toilet — mounting vertically, horizontally, or diagonally depending on where you need the grip most. Corrosion-free solid brass means this bar performs in the exact humid conditions that cause cheaper metals to pit and weaken. Whether you are outfitting an aging parent's bathroom or adding safety to your own shower, the Cube Design proves that ADA compliance and contemporary style belong in the same sentence. Coordinates with Cube Design accessories in 28 finishes.
+> A grab bar that looks like it belongs in a contemporary renovation, not a hospital hallway — the Cube Design Reeded Grab Bar brings ADA-compliant safety to bathrooms without the institutional aesthetic that makes most grab bars an eyesore. The reeded texture provides secure grip even with wet or soapy hands, while solid brass construction supports 250 lb and resists corrosion in wet shower environments. {FINISH_SENTENCE} The 18-inch length fits beside a shower entry, along a tub wall, or next to a toilet — mounting vertically, horizontally, or diagonally depending on where you need the grip most. Corrosion-free solid brass means this bar performs in the exact humid conditions that cause cheaper metals to pit and weaken. Whether you are outfitting an aging parent's bathroom or adding safety to your own shower, the Cube Design proves that ADA compliance and contemporary style belong in the same sentence. Coordinates with Cube Design accessories in 28 finishes.
 
 **Why it's excellent:** Opens by naming the core objection ("hospital hallway") and resolving it with contemporary aesthetic. "Decorative" in both title and description captures search terms current listings miss (741 impressions at 0% CTR). Reeded texture as both design and function. Two buyer personas (aging parent, own shower). Highest-scoring example at 92/100.
 
@@ -314,13 +325,13 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 4. Cabinet Knob (SKU: 101) — Score: 87/100
 
 **Google Title:**
-> Solid Brass 1-1/2 Inch Round Cabinet Knob - 28 Designer Finishes - Kitchen and Bathroom Hardware - Allied Brass
+> {FINISH_NAME} 1-1/2 Inch Round Cabinet Knob - Solid Brass Kitchen and Bathroom Hardware - Allied Brass
 
 **Google Short Title:**
-> Solid Brass 1-1/2 Inch Round Cabinet Knob
+> {FINISH_NAME} 1-1/2 Inch Round Solid Brass Cabinet Knob
 
 **Google Description (789 chars):**
-> You touch a cabinet knob dozens of times a day — this 1-1/2 inch solid brass knob has the weight and smooth action of quality hardware, not the hollow rattle of die-cast zinc that loosens in its socket after a year. {FINISH_SENTENCE} The round profile sits comfortably under your fingers and the standard mounting bolt fits most cabinet doors and drawer fronts without modification. Solid brass won't crack, corrode, or strip its threads the way plated zinc alternatives do — and at 1-1/2 inches, it is sized for both bathroom vanity drawers and kitchen cabinetry. Available in 28 finishes, from Matte Black and Polished Chrome to Antique Copper and Satin Brass, so you can match your cabinet hardware to the bathroom fixtures or kitchen faucet you have already chosen. Swap out a roomful of knobs in an afternoon for a finish that ties the whole space together.
+> You touch a cabinet knob dozens of times a day — this 1-1/2 inch solid brass knob has the weight and smooth action that holds its threads for years of daily use. {FINISH_SENTENCE} The round profile sits comfortably under your fingers and the standard mounting bolt fits most cabinet doors and drawer fronts without modification. Solid brass won't crack, corrode, or strip its threads — and at 1-1/2 inches, it is sized for both bathroom vanity drawers and kitchen cabinetry. Available in 28 finishes, from Matte Black and Polished Chrome to Antique Copper and Satin Brass, so you can match your cabinet hardware to the bathroom fixtures or kitchen faucet you have already chosen. Swap out a roomful of knobs in an afternoon for a finish that ties the whole space together.
 
 **Why it's excellent:** The "simple product" gold standard — demonstrates that even a basic cabinet knob can have compelling content. Sensory hook (you touch it dozens of times) elevates a commodity product. Differentiates on tactile quality (weight vs hollow rattle). Dual-room applicability (bathroom + kitchen).
 
@@ -329,10 +340,10 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 5. Ceiling Hung Mirror (SKU: CH-90) — Score: 91/100
 
 **Google Title:**
-> 22-Inch Frameless Round Ceiling Hung Mirror - Beveled Edge Solid Brass Hardware - Adjustable Height - Allied Brass
+> {FINISH_NAME} 22-Inch Frameless Round Ceiling Hung Mirror - Beveled Edge Solid Brass Hardware - Adjustable Height - Allied Brass
 
 **Google Short Title:**
-> 22-Inch Frameless Round Ceiling Hung Mirror, Beveled Edge
+> {FINISH_NAME} 22-Inch Frameless Round Ceiling Hung Mirror, Beveled Edge
 
 **Google Description (900 chars):**
 > A mirror that floats from the ceiling and becomes the room's focal point — this 22-inch round frameless mirror hangs from solid brass hardware at an adjustable height, creating the kind of statement that wall-mounted mirrors simply cannot make. The beveled edge adds visual depth around the perimeter without the weight of a frame, and at 28 lb, this is real glass with genuine optical clarity, not a lightweight acrylic imitation. {FINISH_SENTENCE} The adjustable-length hardware adapts to different ceiling heights, making this mirror work in a primary bathroom vanity area, a dressing room, or a retail fitting room where overhead mounting keeps floor and wall space completely open. Solid brass mounting hardware carries the full 28 lb securely — engineered for the weight, not adapted from wall-mount brackets. The ceiling-hung design creates a dramatic floating effect that draws the eye and gives any room a sense of architectural intention that fixed wall mirrors cannot replicate. Available in 28 finishes to match existing fixtures.
@@ -344,13 +355,13 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 6. Height Adjustable Makeup Mirror 2X (SKU: DM-1/2X) — Score: 90/100
 
 **Google Title:**
-> 8-Inch 2X Magnifying Makeup Mirror - Height Adjustable 17-23 Inch Countertop - Solid Brass - Allied Brass
+> {FINISH_NAME} 8-Inch 2X Magnifying Makeup Mirror - Height Adjustable Countertop - Solid Brass - Allied Brass
 
 **Google Short Title:**
-> 8-Inch 2X Magnifying Makeup Mirror, Height Adjustable
+> {FINISH_NAME} 8-Inch 2X Magnifying Makeup Mirror, Height Adjustable
 
 **Google Description (880 chars):**
-> See every detail at your own height — this 8-inch countertop makeup mirror adjusts from 17 to 23 inches, so it works whether you are sitting at a vanity, standing at a bathroom counter, or sharing the space with someone a foot taller. The 2X magnification provides clear, natural detail for daily makeup application and grooming without the distortion that higher magnifications create at normal viewing distance. {FINISH_SENTENCE} The solid brass construction gives this mirror real weight on the countertop — it stays where you position it instead of sliding or tipping when you lean in close. The pivoting head tilts to any angle, locking into position so you are not readjusting mid-application. Unlike lightweight mirrors with plastic gears that strip after months of daily tilting, the solid brass pivot mechanism maintains smooth, precise tension for the life of the mirror. Available in 28 finishes to coordinate with your faucet, towel bar, and other bathroom fixtures from any Allied Brass collection.
+> See every detail at your own height — this 8-inch countertop makeup mirror adjusts from 17 to 23 inches, so it works whether you are sitting at a vanity, standing at a bathroom counter, or sharing the space with someone a foot taller. The 2X magnification provides clear, natural detail for daily makeup application and grooming without the distortion that higher magnifications create at normal viewing distance. {FINISH_SENTENCE} The solid brass construction gives this mirror real weight on the countertop — it stays where you position it instead of sliding or tipping when you lean in close. The pivoting head tilts to any angle, locking into position so you are not readjusting mid-application. The solid brass pivot mechanism maintains smooth, precise tension for the life of the mirror — no stripping, no loosening after months of daily tilting. Available in 28 finishes to coordinate with your faucet, towel bar, and other bathroom fixtures from any Allied Brass collection.
 
 **Why it's excellent:** Opens with the defining feature (height adjustability) framed as a personal benefit. Three use scenarios (sitting, standing, sharing). 2X magnification positioned as the practical daily-use choice vs higher magnification distortion. Pivot mechanism contrasted with plastic gears.
 
@@ -359,28 +370,28 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 7. Glass Shelf — Skyline Collection 18-Inch (SKU: 1033/18) — Score: 88/100
 
 **Google Title:**
-> 18-Inch Tempered Glass Shelf with Solid Brass Wall Mount Brackets - Skyline Collection - Allied Brass
+> {FINISH_NAME} Skyline Collection 18-Inch Tempered Glass Shelf - Solid Brass Wall Mount Brackets - Allied Brass
 
 **Google Short Title:**
-> 18-Inch Tempered Glass Shelf, Solid Brass Brackets
+> {FINISH_NAME} 18-Inch Tempered Glass Shelf, Solid Brass Brackets
 
 **Google Description (867 chars):**
-> Add bathroom storage without closing in a small room — this 18-inch tempered glass shelf holds your heaviest bottles and jars while keeping the visual openness that wire racks and wooden shelves block. The 1/4-inch thick tempered glass is stronger and safer than standard glass — if ever broken, it crumbles into small pieces instead of dangerous shards. {FINISH_SENTENCE} Solid brass wall-mount brackets carry the weight without the flex or corrosion you get from chrome-plated plastic brackets after a year of bathroom humidity. The Skyline Collection's clean contemporary lines mean these brackets complement the shelf rather than competing with it — and they coordinate with Skyline towel bars, robe hooks, and toilet paper holders for a bathroom where every piece of hardware shares the same design language. Glass shelves are the most-searched bathroom storage category after towel bars, and the combination of tempered glass with solid brass brackets is a quality level most competitors at this price point cannot match.
+> Add bathroom storage without closing in a small room — this 18-inch tempered glass shelf holds your heaviest bottles and jars while keeping the visual openness that wire racks and wooden shelves block. The 1/4-inch thick tempered glass is stronger and safer than standard glass — if ever broken, it crumbles into small pieces instead of dangerous shards. {FINISH_SENTENCE} Solid brass wall-mount brackets carry the weight without flexing or corroding — built to perform for years, not just the first season. The Skyline Collection's clean contemporary lines mean these brackets complement the shelf rather than competing with it — and they coordinate with Skyline towel bars, robe hooks, and toilet paper holders for a bathroom where every piece of hardware shares the same design language. Glass shelves are the most-searched bathroom storage category after towel bars, and the combination of tempered glass with solid brass brackets is a quality level most competitors at this price point cannot match.
 
-**Why it's excellent:** Opens with the visual-openness benefit — the primary reason shoppers choose glass over wood/wire. Tempered glass safety (crumbles vs shards) addresses a real concern. Bracket material differentiation (solid brass vs chrome-plated plastic).
+**Why it's excellent:** Opens with the visual-openness benefit — the primary reason shoppers choose glass over wood/wire. Tempered glass safety (crumbles vs shards) addresses a real concern. Bracket material positively differentiated (solid brass durability).
 
 ---
 
 ### 8. Multi Hook — Skyline Collection 2-Position (SKU: 1020-2) — Score: 88/100
 
 **Google Title:**
-> Solid Brass 2-Position Wall Hook - Robe, Towel, and Coat Hook - Skyline Collection - Allied Brass
+> {FINISH_NAME} Skyline Collection 2-Position Wall Hook - Robe, Towel, and Coat Hook - Solid Brass - Allied Brass
 
 **Google Short Title:**
-> Solid Brass 2-Position Multi Hook, Wall Mount
+> {FINISH_NAME} 2-Position Solid Brass Multi Hook, Wall Mount
 
 **Google Description (838 chars):**
-> Two hooks on a single mount — hang a robe and a towel, or a coat and a bag, without drilling twice. This Skyline Collection wall hook is constructed of solid brass, so each hook holds its shape under the daily weight of wet bath towels and heavy winter coats without bending or loosening the way die-cast zinc hooks do. {FINISH_SENTENCE} The compact 2-position design fits spaces where a hook strip looks cluttered and a single hook is not enough — behind a bathroom door, inside a closet, beside the shower, or in an entryway. Concealed screw mounting keeps the wall clean, with no visible hardware to interrupt the Skyline Collection's contemporary lines. Coordinates with Skyline towel bars, glass shelves, and toilet paper holders in 28 finishes for a bathroom, closet, or mudroom where every piece of hardware matches. Solid brass means these hooks carry real weight — the kind of hooks you grab without thinking and they never let you down.
+> Two hooks on a single mount — hang a robe and a towel, or a coat and a bag, without drilling twice. This Skyline Collection wall hook is constructed of solid brass, so each hook holds its shape under the daily weight of wet bath towels and heavy winter coats without bending or loosening over time. {FINISH_SENTENCE} The compact 2-position design fits spaces where a hook strip looks cluttered and a single hook is not enough — behind a bathroom door, inside a closet, beside the shower, or in an entryway. Concealed screw mounting keeps the wall clean, with no visible hardware to interrupt the Skyline Collection's contemporary lines. Coordinates with Skyline towel bars, glass shelves, and toilet paper holders in 28 finishes for a bathroom, closet, or mudroom where every piece of hardware matches. Solid brass means these hooks carry real weight — the kind of hooks you grab without thinking and they never let you down.
 
 **Why it's excellent:** Opens with the core value proposition (two hooks, one mount, fewer holes). Naturally uses "robe hook," "towel hook," "coat hook," "wall hook" — capturing multiple search intents. Four placement scenarios expand perceived use cases.
 
@@ -389,10 +400,10 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 9. Guest Towel Holder — Freestanding 2-Ring (SKU: 953) — Score: 89/100
 
 **Google Title:**
-> Freestanding 2-Ring Guest Towel Holder - Countertop Solid Brass Hand Towel Stand - Allied Brass
+> {FINISH_NAME} Freestanding 2-Ring Guest Towel Holder - Countertop Solid Brass Hand Towel Stand - Allied Brass
 
 **Google Short Title:**
-> Freestanding 2-Ring Solid Brass Guest Towel Holder
+> {FINISH_NAME} Freestanding 2-Ring Solid Brass Guest Towel Holder
 
 **Google Description (890 chars):**
 > Display a hand towel and a guest towel side by side without mounting a single bracket — this countertop towel holder stands on a heavy weighted solid brass base that stays put on marble, granite, or quartz vanity tops without scratching or tipping. The two-ring design solves a problem single towel rings cannot: keeping an everyday hand towel and a decorative guest towel both accessible and beautifully presented. {FINISH_SENTENCE} Contemporary styling sets this holder apart from the traditional towel stands that dominate the category — clean lines and a sleek silhouette that suits modern and transitional bathrooms equally. The heavy weighted base means no wobble even on wet countertops, and the solid brass construction will not corrode beside the sink where water contact is constant. Ideal for powder rooms where wall space is limited, guest bathrooms where presentation matters, or rental homes where drilling walls is not an option. Available in 28 finishes to match your faucet and other bathroom hardware — from Polished Nickel to Matte Black to Satin Brass.
@@ -404,13 +415,13 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 ### 10. Corner Shower Basket (SKU: BSK-10ST) — Score: 91/100
 
 **Google Title:**
-> Solid Brass Corner Shower Basket - Wall Mount Soap and Shampoo Caddy - Open Drain Design - Allied Brass
+> {FINISH_NAME} Corner Shower Basket - Wall Mount Soap and Shampoo Caddy - Open Drain Solid Brass - Allied Brass
 
 **Google Short Title:**
-> Solid Brass Corner Shower Basket, Wall Mount
+> {FINISH_NAME} Solid Brass Corner Shower Basket, Wall Mount
 
 **Google Description (876 chars):**
-> Reclaim dead corner space in your shower — this solid brass corner basket turns the unused angle between two walls into organized storage for soap, shampoo, and conditioner without taking up any wall or floor area. The open basket design lets water drain through so you never get the standing-water soap scum that collects in solid-bottom caddies. {FINISH_SENTENCE} Solid brass construction means this basket will not rust — the single biggest reason cheap chrome-plated steel and plastic shower caddies end up in the trash after one season. Wall-mounted with concealed hardware, this corner basket stays where you install it permanently. No suction cups that release at 3 AM, no adhesive strips that peel in steam, no tension poles that slip on wet tile. The corner-specific design maximizes shower real estate in small bathrooms and tiled showers where every inch of wall space counts. Available in 28 finishes to match your showerhead, faucet handle, and bathroom hardware — because even shower storage should look like it belongs in the room.
+> Reclaim dead corner space in your shower — this solid brass corner basket turns the unused angle between two walls into organized storage for soap, shampoo, and conditioner without taking up any wall or floor area. The open basket design lets water drain through so you never get the standing-water soap scum that collects in solid-bottom caddies. {FINISH_SENTENCE} Solid brass construction means this basket will not rust — shower caddies should last longer than a single season, and solid brass delivers exactly that. Wall-mounted with concealed hardware, this corner basket stays where you install it permanently. No suction cups that release at 3 AM, no adhesive strips that peel in steam, no tension poles that slip on wet tile. The corner-specific design maximizes shower real estate in small bathrooms and tiled showers where every inch of wall space counts. Available in 28 finishes to match your showerhead, faucet handle, and bathroom hardware — because even shower storage should look like it belongs in the room.
 
 **Why it's excellent:** Opens with spatial benefit (dead corner space). Open-drain design solves soap scum problem. Three competitor alternatives dismissed in one punchy sentence (suction cups, adhesive strips, tension poles) — strongest competitive differentiation in the set. "Will not rust" addresses the #1 complaint in shower caddy reviews.
 
@@ -463,7 +474,7 @@ These 10 examples were rewritten using evidence-backed research: competitor SERP
 **Primary search intent:** Replace a basic holder with a specific style (recessed, freestanding, with shelf) in a specific finish.
 
 **Differentiating phrases:**
-- "solid brass construction outlasts chrome-plated plastic holders"
+- "solid brass construction that won't corrode, crack, or loosen"
 - "Euro-style hook for effortless roll changes"
 - "coordinates with matching bathroom hardware in 28 finishes"
 
