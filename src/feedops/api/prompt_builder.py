@@ -326,6 +326,15 @@ def build_core_prompt(
     )
     if competitive_parts:
         competitive_block += "\n" + "\n".join(competitive_parts)
+
+    # Suppress "28 finishes" for Google/Bing — these descriptions get expanded to
+    # finish-specific variants, making finish count references irrelevant.
+    if platform in {"google", "bing"}:
+        competitive_block += (
+            "\n\nIMPORTANT: Do NOT mention '28 finishes,' '28+ finishes,' or finish variety counts "
+            "in Google/Bing descriptions. These descriptions will be expanded into finish-specific "
+            "variants — mentioning '28 other finishes' on an Antique Bronze listing confuses shoppers."
+        )
     sections.append(competitive_block)
 
     # --- 10. Finish context ---

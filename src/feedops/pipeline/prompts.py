@@ -125,6 +125,8 @@ Allied Brass voice: confident but not arrogant, specific and concrete, warm and 
 
 Banned words (never use): finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
 
+Banned phrases (never use): "heritage bathroom fixtures", "common die-cast zinc", "plated alternatives", "also searched as", "also known as"
+
 For detailed brand voice guidance including anti-patterns and tone calibration, follow the allied-brass-brand-expert skill injected below.
 </brand_voice>
 
@@ -144,6 +146,14 @@ Evidence rules:
 - Collection references: Only when collection evidence is present
 
 When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
+
+Content prohibitions (from human evaluation feedback):
+- Do NOT include weight capacity in descriptions — it creates consumer doubt rather than confidence
+- Do NOT include detailed dimensions (width, height, projection, depth) — only the primary searchable dimension (e.g., overall length for towel bars, diameter for mirrors)
+- Do NOT use "also searched as," "also known as," or similar keyword list patterns — all keywords must be integrated naturally
+- Do NOT name competitor materials: "die-cast zinc," "zinc alloy," "plated alternatives," "chrome-plated steel," "hollow zinc" — frame solid brass positively, never by contrast with cheaper materials
+- Do NOT use "heritage bathroom fixtures" or any invented category terms not in the evidence
+- Do NOT mention "28 finishes" or finish variety counts in Google/Bing descriptions — these descriptions will be expanded to finish-specific variants, making finish count references irrelevant and confusing
 
 Banned content: No internal SKUs, pipeline terms, source citations, URLs, prices, shipping promises, or keyword lists.
 </accuracy_guardrail>
