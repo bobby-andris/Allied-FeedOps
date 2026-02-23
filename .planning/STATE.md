@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 25-evaluate-iterate
-**Current Plan:** 7 of 7
-**Status:** 25-06 complete — skill updates, SYSTEM_PROMPT prohibitions, 28-finishes suppression applied. Ready for 25-07 Round 3 regen.
-**Progress:** [=========.] 5/7 plans complete (25-01, 25-02, 25-04, 25-05, 25-06)
+**Current phase:** 25.1-prompt-architecture-research
+**Current Plan:** 2 of 3
+**Status:** 25.1-01 complete — internal prompt audit with exact token counts, 12 contradictions mapped, 2.7/10 anti-pattern score.
+**Progress:** [███████░░░] 71%
 
 ## Decisions
 
@@ -26,6 +26,10 @@ See: .planning/PROJECT.md
 - Robert's title formula codified: finish first, Collection keyword, dimension only when varies
 - Evidence exclusion rules: weight capacity, detailed dimensions, installation specifics excluded
 - Product type issues for 1024/1020 are model inference errors, not data errors
+- System prompt is 57,504 tokens (266K chars) — 97.6% from SKILL.md files designed for Claude Code, not GPT-5.2
+- 12 contradictions identified: 3 CRITICAL, 4 HIGH, 5 MEDIUM — competitor materials contradiction is root cause of "die-cast zinc" in 6/10 descriptions
+- GPT-5.2 anti-pattern composite score: 2.7/10 — fundamental architectural misalignment confirmed
+- Top recommendation: Replace SKILL.md injection with purpose-built 3-4K token GPT-5.2 prompt
 
 ## Performance Metrics
 
@@ -33,6 +37,7 @@ See: .planning/PROJECT.md
 |------------|----------|-------|-------|
 | 25-04      | 10min    | 2     | 2     |
 | 25-06      | 7min     | 2     | 5     |
+| 25.1-01    | 4min     | 1     | 2     |
 
 ## Accumulated Context
 
@@ -49,5 +54,6 @@ See: .planning/PROJECT.md
 - 2026-02-23: Wrote comprehensive evaluation report (25-02-evaluation-results.md)
 - 2026-02-23: Round 2 FAIL — needs Round 3 with skill updates + content prohibitions
 - 2026-02-23: Completed 25-06-PLAN.md (Round 2 gap closure — skills, SYSTEM_PROMPT, prompt_builder)
-- Last session: 2026-02-23T21:16:40Z
-- Stopped at: Completed 25-06-PLAN.md. Next: execute 25-07 (Round 3 regeneration + evaluation)
+- 2026-02-23: Completed 25.1-01-PLAN.md (internal prompt audit — 57K tokens, 12 contradictions, 2.7/10 anti-pattern score)
+- Last session: 2026-02-23T22:41:00Z
+- Stopped at: Completed 25.1-01-PLAN.md. Next: execute 25.1-02 (external research + prompt redesign)
