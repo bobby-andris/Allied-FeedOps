@@ -252,71 +252,100 @@ def build_core_prompt(
     if examples:
         sections.append(f"Gold Standard Examples (data-only guidance):\n{examples}")
 
-    # --- 8. Customer framing context (PRMT-04) ---
-    # GPT-5.2 reasons out the customer scenario from evidence + skills.
-    # We provide any available category-level hints from the evidence.
-    customer_context_parts: list[str] = []
+    # --- 8. Product design story (PRMT-04, Gap 2 fix) ---
+    # Extract product-specific data that makes THIS product unique.
+    # This replaces the generic customer_framing block that only had category/collection.
+    product_story_parts: list[str] = []
+
+    # Product category and collection (keep these)
     if parent_sku.category:
-        customer_context_parts.append(f"Product category: {parent_sku.category}")
-    # Extract any collection info for scenario context
+        product_story_parts.append(f"Product category: {parent_sku.category}")
     for item in parent_sku.merchant_center_items or []:
         collection = item.get("collection") or ""
         if collection:
-            customer_context_parts.append(f"Collection: {collection}")
+            product_story_parts.append(f"Collection: {collection}")
             break
-    customer_context = "\n".join(customer_context_parts) if customer_context_parts else ""
 
-    customer_block = (
-        "Customer Framing:\n"
-        "Think about who buys this specific product and why. Consider:\n"
-        "- What specific problem does this product solve in the buyer's home?\n"
-        "- What scenario leads someone to search for this exact product type and size?\n"
-        "- Is the buyer renovating, replacing a broken item, or adding a missing piece?\n"
-        "- What room context matters (guest bath, master bath, kitchen, closet)?\n"
-        "Use the product evidence and category context to reason out a specific, concrete "
-        "customer scenario. Do NOT use generic 'upgrade your bathroom' framing.\n"
-        "The customer scenario should be woven naturally into the description."
+    # Extract narrative copy (manufacturer's description of what makes this product special)
+    if parent_sku.current_description and parent_sku.current_description != parent_sku.current_title:
+        product_story_parts.append(f"Manufacturer description: {parent_sku.current_description}")
+
+    # Extract product bullets (specific selling points from the manufacturer)
+    bullets = []
+    for attr in ["bullet_1", "bullet_2", "bullet_3", "bullet_4"]:
+        val = getattr(parent_sku, attr, None)
+        if val and val.strip():
+            bullets.append(val.strip())
+    if bullets:
+        product_story_parts.append("Product selling points:\n" + "\n".join(f"- {b}" for b in bullets))
+
+    # Extract material, mounting, dimensions from evidence
+    for ev in evidence:
+        if isinstance(ev, dict):
+            for field_name, label in [
+                ("mounting_type", "Mounting type"),
+                ("weight_capacity", "Weight capacity"),
+                ("style", "Style"),
+            ]:
+                val = ev.get(field_name) or ev.get(field_name.replace("_", " ").title())
+                if val and str(val).strip():
+                    product_story_parts.append(f"{label}: {val}")
+            break  # Only need first evidence row
+
+    product_story = "\n".join(product_story_parts) if product_story_parts else ""
+
+    product_block = (
+        "Product Design Story:\n"
+        "The following is THIS product's specific data — use it as the foundation for differentiation.\n"
+        "Do NOT invent features or scenarios beyond what this data supports.\n"
+        "The skills contain guidance on how to transform this data into compelling copy."
     )
-    if customer_context:
-        customer_block += f"\n{customer_context}"
-    sections.append(customer_block)
+    if product_story:
+        product_block += f"\n\n{product_story}"
+    sections.append(product_block)
 
-    # --- 9. Competitive positioning context (PRMT-05) ---
-    # GPT-5.2 reasons from skills + evidence. We provide material info if available.
-    competitive_context_parts: list[str] = []
-    # Material confirmation from evidence
+    # --- 9. Competitive positioning guidance (PRMT-05, Gap 2+5 fix) ---
+    # Defer to skills for competitive positioning. Only provide product-specific
+    # material confirmation from evidence — not a fixed checklist.
+    competitive_parts: list[str] = []
+
+    # Material confirmation from evidence (keep this — it's product-specific)
     for ev in evidence:
         if isinstance(ev, dict):
             material = ev.get("material") or ev.get("Material") or ""
             if "brass" in str(material).lower():
-                competitive_context_parts.append("Evidence confirms: solid brass construction")
+                competitive_parts.append("Evidence confirms: solid brass construction (key differentiator vs zinc competitors)")
                 break
-    competitive_context = "\n".join(competitive_context_parts) if competitive_context_parts else ""
 
     competitive_block = (
         "Competitive Positioning:\n"
-        "Think about why a shopper should choose THIS product over alternatives. Consider:\n"
-        "- Solid brass vs die-cast zinc (most competitors at this price use zinc)\n"
-        "- 28 finishes vs competitors' 4-12 finish options\n"
-        "- Collection coordination (41 collections — competitors sell individual pieces)\n"
-        "- Concealed mounting hardware (design-forward detail most competitors skip)\n"
-        "- Lifetime warranty vs competitors' 1-5 year warranties\n"
-        "Weave competitive advantages naturally into the description. Never name competitor brands."
+        "The allied-brass-brand-expert skill contains detailed competitive positioning guidance.\n"
+        "Use THIS product's specific evidence data to ground competitive advantages — do not rely on\n"
+        "generic brand-level talking points. The differentiation should come from what makes THIS\n"
+        "specific product's design, construction, or functionality better than alternatives."
     )
-    if competitive_context:
-        competitive_block += f"\n{competitive_context}"
+    if competitive_parts:
+        competitive_block += "\n" + "\n".join(competitive_parts)
     sections.append(competitive_block)
 
     # --- 10. Finish context ---
     # Platform-specific finish handling (mirrors _build_generation_user_prompt logic).
     context_lines: list[str] = []
     if platform in {"google", "bing"}:
-        context_lines.append(
-            "Entity context: variant listing copy (finish-aware when variant finish context is available)."
-        )
         if finish_code:
             context_lines.append(
-                f"Requested variant finish code: {finish_code}. Integrate this variant context naturally."
+                f"Entity context: variant listing (finish: {finish_code}). "
+                f"Integrate this finish naturally into the title and description."
+            )
+            context_lines.append(
+                f"Requested variant finish code: {finish_code}."
+            )
+        else:
+            context_lines.append(
+                "Entity context: Google/Bing listing. Titles MUST include a finish name. "
+                "Since no specific finish was requested, use the product's default or most popular "
+                "finish from the evidence data. If no finish is determinable from evidence, use "
+                "the placeholder {FINISH_NAME} which will be expanded during variant publishing."
             )
         context_lines.append(
             "Use finish names from evidence data only; do not invent unsupported finish language."
