@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 25.4-production-impact-audit
+**Current phase:** 25.5-prompt-rewrite-skill-updates
 **Current Plan:** Not started
-**Status:** Milestone complete
-**Progress:** [██████████] 95% (25.4 audit done, human review + deploy remaining)
+**Status:** Gap closure phases created (25.5, 25.6, 25.7)
+**Progress:** [████████░░] 84% (21/25 requirements satisfied, 4 EVAL gaps in gap closure phases)
 
 ## Decisions
 

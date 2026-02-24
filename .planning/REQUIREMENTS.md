@@ -94,10 +94,10 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | GOLD-04 | Phase 23 | Complete |
 | EVAL-01 | Phase 25 | Complete |
 | EVAL-02 | Phase 25 | Complete |
-| EVAL-03 | Phase 25 | In Progress |
-| EVAL-04 | Phase 25 | In Progress |
-| EVAL-05 | Phase 25 | In Progress |
-| EVAL-06 | Phase 25 | In Progress |
+| EVAL-03 | Phase 25 → 25.5/25.6 | Pending |
+| EVAL-04 | Phase 25 → 25.5/25.6 | Pending |
+| EVAL-05 | Phase 25 → 25.6 | Pending |
+| EVAL-06 | Phase 25 → 25.6 | Pending |
 | AUDIT-01 | Phase 25.4 | Complete |
 | AUDIT-02 | Phase 25.4 | Complete |
 | AUDIT-03 | Phase 25.4 | Complete |
@@ -113,4 +113,4 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-24 — milestone audit: corrected EVAL-03..06 from premature [x] to [ ], added AUDIT-01..05*
+*Last updated: 2026-02-24 — gap closure phases 25.5-25.7 created, EVAL requirements reassigned to gap closure phases*

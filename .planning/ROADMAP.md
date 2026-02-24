@@ -6,7 +6,7 @@
 - ✅ **v1.0 Historical Data Backfill** — Phases 05-08 (shipped 2026-02-13)
 - ✅ **v1.1 Dashboard UX & Quality** — Phases 9-16 (shipped 2026-02-21)
 - ✅ **v1.2 Impact Debug & Fix** — Phases 17-22 (shipped 2026-02-21)
-- 🚧 **v1.3a Content Generation Excellence** — Phases 23-25 (in progress)
+- 🚧 **v1.3a Content Generation Excellence** — Phases 23-25.7 (in progress)
 
 ## Phases
 
@@ -65,6 +65,9 @@
 - [x] **Phase 23: Foundation** — Fix GPT-5.2 bugs, create gold standards, rewrite quality rubric (completed 2026-02-21)
 - [x] **Phase 24: Prompt Architecture** — Rewrite SYSTEM_PROMPT as creative brief, wire all 8 runtime configs, expand category guidance (completed 2026-02-21)
 - [ ] **Phase 25: Evaluate & Iterate** — Generate 10 test SKUs, human eval, iterate, publish test batch
+- [ ] **Phase 25.5: Prompt Rewrite & Skill Updates** — Gap closure: rewrite prompts as creative briefs, update skills from Round 2 feedback, fix v2 Score wiring
+- [ ] **Phase 25.6: Round 3 Validation & Test Batch** — Gap closure: Round 3 human eval, quality scoring, publish test batch, activate v2
+- [ ] **Phase 25.7: Merge Assessment & Production Deploy** — Gap closure: final verification, FEEDOPS_PROMPT_VERSION=v2 in production
 
 ## Phase Details
 
@@ -127,8 +130,12 @@ Plans:
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23 | v1.3a | 2/2 | Complete | 2026-02-21 |
-| 24 | 2/2 | Complete    | 2026-02-21 | - |
-| 25 | 5/7 | In Progress|  | - |
+| 24 | v1.3a | 2/2 | Complete | 2026-02-21 |
+| 25 | v1.3a | 5/7 | In Progress | - |
+| 25.4 | v1.3a | 1/1 | Complete | 2026-02-24 |
+| 25.5 | v1.3a | 0/1 | Not Started | - |
+| 25.6 | v1.3a | 0/1 | Not Started | - |
+| 25.7 | v1.3a | 0/1 | Not Started | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
@@ -248,3 +255,53 @@ Plans:
 - [ ] 25.3-02-PLAN.md — Rewrite per-platform system prompts as GPT-5.2 creative briefs; enrich per-platform user prompts with product design story and competitive positioning
 - [ ] 25.3-03-PLAN.md — 10-SKU validation with Bobby/Robert gut-check review (success gate: 8/10 consensus wins)
 - [ ] 25.3-04-PLAN.md — Deploy FEEDOPS_PROMPT_VERSION=v2 to production, close v1.3a
+
+### Phase 25.5: Prompt Rewrite & Skill Updates (GAP CLOSURE)
+
+**Goal:** Close the content quality gap by rewriting per-platform system prompts as GPT-5.2 creative briefs (not extracted skill snippets), updating skills with Round 2 human feedback, and fixing the v2 Score model wiring so quality data isn't silently discarded.
+**Depends on:** Phase 25.4 (audit confirms v1 path safe)
+**Requirements:** EVAL-03 (partial), EVAL-04 (partial), EVAL-05 (partial)
+**Gap Closure:** Closes audit gaps — integration (v2 self_score → Score model), flow (v2 Score data), skills (competitor materials, title formula, evidence exclusion)
+
+Tasks:
+- Cherry-pick useful Codex changes (JSON parser, skill sanitizer, enrichment fix)
+- Update skills: remove competitor material naming, add Robert's title formula, add evidence exclusion rules
+- Add SYSTEM_PROMPT prohibitions (weight capacity, detailed dimensions, "heritage bathroom fixtures", keyword stuffing)
+- Rewrite per-platform system prompts as GPT-5.2 creative briefs with Round 2 feedback encoded
+- Fix v2 generate_per_platform() to parse self_score into Score model (close integration gap)
+- Wire shopping_intelligence into v2 per-platform builders (close PRMT-03 regression)
+
+Plans:
+- [ ] 25.5-01-PLAN.md — TBD (plan phase before execution)
+
+### Phase 25.6: Round 3 Validation & Test Batch (GAP CLOSURE)
+
+**Goal:** Validate that the rewritten prompts produce content meeting the 8/10 human evaluation threshold, run numeric quality scoring, and publish a test batch to Google Sheets to begin CTR/CVR delta measurement.
+**Depends on:** Phase 25.5
+**Requirements:** EVAL-03, EVAL-04, EVAL-05, EVAL-06
+**Gap Closure:** Closes all 4 unsatisfied EVAL requirements and the v2 production activation flow gap.
+
+Tasks:
+- Regenerate 10 SKUs with v2 rewritten prompts
+- Round 3 blind human evaluation (Bobby + Robert) — success gate: 8/10 consensus wins for titles AND descriptions
+- Run numeric quality scoring on Round 3 output (target: >85% avg)
+- Publish highest-scoring SKUs to Google Sheets supplemental feed (closes EVAL-06)
+
+Plans:
+- [ ] 25.6-01-PLAN.md — TBD (plan phase before execution)
+
+### Phase 25.7: Production Deploy (GAP CLOSURE)
+
+**Goal:** Set FEEDOPS_PROMPT_VERSION=v2 in Cloud Run production environment, verify v2 is serving correctly, and close v1.3a milestone.
+**Depends on:** Phase 25.6 (8/10 human eval threshold met)
+**Requirements:** (milestone closure)
+**Gap Closure:** Closes v2 activation flow gap.
+
+Tasks:
+- Set FEEDOPS_PROMPT_VERSION=v2 in Cloud Run environment variables
+- Verify production generation uses v2 path (smoke test)
+- Run `/gsd:audit-milestone` to confirm all 25/25 requirements satisfied
+- Run `/gsd:complete-milestone v1.3a` to archive
+
+Plans:
+- [ ] 25.7-01-PLAN.md — TBD (plan phase before execution)
