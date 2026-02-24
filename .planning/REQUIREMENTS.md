@@ -39,6 +39,14 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 - [x] **EVAL-05**: Quality scores on new rubric average >85% across test SKUs
 - [x] **EVAL-06**: Test batch published for CTR/CVR delta measurement
 
+### Production Impact Audit (Inserted)
+
+- [x] **AUDIT-01**: Score model fields match CANDIDATE_SCHEMA 10-criterion rubric
+- [x] **AUDIT-02**: parse_candidate_response reads 10 new field names from LLM response
+- [x] **AUDIT-03**: All previously-failing pipeline tests pass with no regressions
+- [x] **AUDIT-04**: v1 code path regression test exercises build_core_prompt and get_system_prompt
+- [x] **AUDIT-05**: Audit report documents every HIGH/MEDIUM risk change with disposition
+
 ## v1.3b+ Requirements
 
 Deferred to future milestones. Tracked but not in current roadmap.
@@ -90,12 +98,17 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | EVAL-04 | Phase 25 | Complete |
 | EVAL-05 | Phase 25 | Complete |
 | EVAL-06 | Phase 25 | Complete |
+| AUDIT-01 | Phase 25.4 | Complete |
+| AUDIT-02 | Phase 25.4 | Complete |
+| AUDIT-03 | Phase 25.4 | Complete |
+| AUDIT-04 | Phase 25.4 | Complete |
+| AUDIT-05 | Phase 25.4 | Complete |
 
 **Coverage:**
-- v1.3a requirements: 20 total
-- Mapped to phases: 20
+- v1.3a requirements: 25 total (20 original + 5 audit)
+- Mapped to phases: 25
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 — traceability complete after roadmap creation*
+*Last updated: 2026-02-24 — added AUDIT-01 through AUDIT-05 for Phase 25.4*

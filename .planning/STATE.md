@@ -8,8 +8,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 25.4-production-impact-audit
-**Current Plan:** 25.4-01-PLAN.md (COMPLETE)
-**Status:** Phase 25.4 production impact audit complete. Score model aligned to 10-criterion rubric, 3 failing pipeline tests fixed, v1 regression tests created, comprehensive audit report documenting all v1-path-affecting changes from Phases 23-25.3. 562 tests passing, 8 pre-existing infra failures unchanged.
+**Current Plan:** Not started
+**Status:** Milestone complete
 **Progress:** [██████████] 95% (25.4 audit done, human review + deploy remaining)
 
 ## Decisions
