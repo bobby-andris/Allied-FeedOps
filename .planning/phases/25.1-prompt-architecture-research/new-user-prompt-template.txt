@@ -1,19 +1,24 @@
-User Prompt Template for GPT-5.2 Content Generation (v2)
-=========================================================
+User Prompt Template for GPT-5.2 Content Generation (v2.1 — Variant-Level Primary)
+=====================================================================================
 
-This template is assembled at runtime by prompt_builder.py.
-All placeholders are filled with per-SKU data from evidence tables,
-shopping_intelligence.yaml, Supabase, and product catalog.
+IMPORTANT: Google/Bing content is ALWAYS variant-level (a specific finish).
+The VARIANT template below is the PRIMARY template for A/B testing and production.
+The master-SKU template is used ONLY for Shopify (finish-agnostic) content.
 
-Removed from current template:
-- {segment_strategy_guidance} -- absorbed into system prompt constraints
-- Gold examples remain here as fallback; may move to system prompt after A/B testing
+Removed from v1 template:
+- {segment_strategy_guidance} — absorbed into system prompt constraints
+- Gold examples moved to system prompt (static, cacheable)
 
 ---
 
+PRIMARY TEMPLATE: VARIANT (for Google/Bing finish-specific generation)
+======================================================================
+
 <task>
-Generate one complete JSON object for MasterSKU: {master_sku}.
+Generate one complete JSON object for variant: {master_sku} in {finish_name} finish.
 Use only information in the inputs below. Every claim must trace to a field in the evidence table.
+
+CRITICAL: Google and Bing titles MUST start with "{finish_name}" as the very first element.
 </task>
 
 <inputs>
@@ -24,48 +29,11 @@ Use only information in the inputs below. Every claim must trace to a field in t
 
 <keyword_placement>
 {keyword_placement}
-</keyword_placement>
 
-<category_guidance>
-{category_guidance}
-</category_guidance>
-
-<product_design_story>
-{customer_context}
-</product_design_story>
-
-<competitive_positioning>
-{competitive_context}
-</competitive_positioning>
-
-<gold_examples>
-{gold_examples}
-</gold_examples>
-
-</inputs>
-
-<output_contract>
-Return ONLY valid JSON matching this schema:
-{schema}
-</output_contract>
-
-=========================================================
-VARIANT USER PROMPT TEMPLATE (for finish-specific generation)
-=========================================================
-
-<task>
-Generate one complete JSON object for variant: {variant_sku} (finish: {finish_name}).
-Use only information in the inputs below. Every claim must trace to a field in the evidence table.
-</task>
-
-<inputs>
-
-<evidence_table>
-{evidence_table}
-</evidence_table>
-
-<keyword_placement>
-{keyword_placement}
+IMPORTANT: If any competitor brand names appear in keyword data (e.g., "jan barboglio",
+"kingston brass", "moen"), use them ONLY as query-matching intelligence — understand what
+shoppers are searching for — but NEVER include competitor brand names in the generated
+content. Generate content that WINS the click on those searches without naming competitors.
 </keyword_placement>
 
 <category_guidance>
@@ -81,23 +49,67 @@ Use only information in the inputs below. Every claim must trace to a field in t
 </competitive_positioning>
 
 <finish_context>
-Generating content for: {finish_name}
+Generating content for finish: {finish_name}
+
+{finish_name} MUST be the FIRST element in every Google and Bing title.
 
 Finish details:
-- Category: {finish_category}
-- Character: {finish_character}
-- Style context: {style_context}
+- Finish code: {finish_code}
+- Visual character: {finish_visual}
+- Design style: {finish_design_style}
+- Pairs with: {finish_pairs_with}
+- Search behavior: {finish_search_terms}
 
-Weave "{finish_name}" naturally into the FIRST SENTENCE of the description.
-Do NOT use "Available in {finish_name}. {finish_name} features..." pattern.
+Finish sentence for {FINISH_SENTENCE} placeholder:
+{finish_compelling_sentence}
 
-Good: "This 18-inch towel bar in {finish_name} coordinates with modern bathroom fixtures."
-Bad: "Available in {finish_name}. {finish_name} features a bright mirror-like surface."
+Integration rules for {FINISH_SENTENCE}:
+- Place AFTER the opening hook sentence and BEFORE construction details
+- Flow naturally as part of the product narrative — do not start a new paragraph with it
+- GOOD: "This 24-inch towel bar is constructed of solid brass for lasting durability. {FINISH_SENTENCE} The Waverly Place Collection's clean lines suit both modern and transitional bathroom designs."
+- BAD: "Available in {finish_name}. {finish_name} features a bright mirror-like surface."
+- The finish name should appear naturally in the description — woven into the first sentence or the finish sentence, not bolted on.
 </finish_context>
 
-<gold_examples>
-{gold_examples}
-</gold_examples>
+</inputs>
+
+<output_contract>
+Return ONLY valid JSON matching this schema:
+{schema}
+</output_contract>
+
+
+SECONDARY TEMPLATE: MASTER SKU (for Shopify finish-agnostic generation)
+=======================================================================
+
+<task>
+Generate one complete JSON object for MasterSKU: {master_sku}.
+Use only information in the inputs below. Every claim must trace to a field in the evidence table.
+
+This is master-SKU level content for Shopify — finish-agnostic. Do NOT include specific finish names.
+</task>
+
+<inputs>
+
+<evidence_table>
+{evidence_table}
+</evidence_table>
+
+<keyword_placement>
+{keyword_placement}
+</keyword_placement>
+
+<category_guidance>
+{category_guidance}
+</category_guidance>
+
+<product_design_story>
+{customer_context}
+</product_design_story>
+
+<competitive_positioning>
+{competitive_context}
+</competitive_positioning>
 
 </inputs>
 
