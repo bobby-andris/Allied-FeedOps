@@ -8,8 +8,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 26 (Human Evaluation & Test Batch)
-**Current Plan:** 26-01 (v1 pipeline bugfix)
-**Status:** Plans restructured. Bug found and documented. Ready to execute.
+**Current Plan:** 26-02 (generate 10 test SKUs)
+**Status:** v2 activated on Cloud Run. Smoke test passed. Ready for test batch generation.
 **Progress:** [█████████░] 90% (21/25 requirements satisfied, 4 EVAL requirements remain)
 
 ## What's Done
@@ -45,13 +45,14 @@ All content generation code work is complete and pushed to master:
 - Per-platform generation: separate GPT-5.2 calls for Google, Bing, Shopify, finish sentences
 - prompt_version feature flag routes v1 (legacy single-call) vs v2 (per-platform multi-call)
 - Per-platform prompts are ~8-10K creative briefs (down from 57K skill dump)
-- Production currently on v1 — v2 activated only by FEEDOPS_PROMPT_VERSION=v2
+- Production now on v2 — FEEDOPS_PROMPT_VERSION=v2 set on Cloud Run (revision feedops-pipeline-00222-gc4)
 - Score model uses 10-criterion rubric with composite denominator of 100
 - Description length standardized to 700-900 chars
 - "28 finishes" suppressed for Google/Bing (descriptions expand to variant-specific)
 
 ## Session Log
 
+- 2026-02-24: Phase 26-01 complete. Set FEEDOPS_PROMPT_VERSION=v2 on Cloud Run. Smoke test passed: SKU 1016 title + description + 28 finish sentences all correct via v2 per-platform pipeline.
 - 2026-02-24: Found critical v1 bug: _extract_content_from_schema_response() discards content (returns "" → {FINISH_SENTENCE}). Fix: `if field_key and field_key in response:` at main.py:460. Restructured Phase 26 to 3 waves: bugfix → v2 generation → human eval.
 - 2026-02-24: Roadmap cleanup — consolidated 10 completed phases under collapsible details, removed duplicate phases 25.5-25.7, renumbered remaining work to Phase 26 (human eval) and Phase 27 (deploy)
 - Previous session: Phase 25.4 audit complete, all code pushed to master
