@@ -64,6 +64,26 @@ CANDIDATE_SCHEMA = {
                 "required": ["claim", "source_field", "source_value"],
             },
         },
+        "self_score": {
+            "type": "object",
+            "properties": {
+                "hook_quality": {"type": "integer", "minimum": 0, "maximum": 10, "description": "First sentence engagement: 0=fragment/dump, 5=generic, 10=specific+engaging"},
+                "product_specificity": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Could ONLY describe this product: 0=any competitor, 5=mentions brand generically, 10=unmistakable"},
+                "competitive_diff": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Why THIS over cheaper alternative: 0=none, 5=generic brass mention, 10=advantage woven naturally"},
+                "keyword_integration": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Keywords natural or stuffed: 0=stuffed/missing, 5=present but awkward, 10=invisible"},
+                "customer_scenario": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Real buying situation: 0=spec dump, 5=generic upgrade, 10=specific resonant scenario"},
+                "emotional_resonance": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Creates desire: 0=database export, 5=pleasant but forgettable, 10=genuine want"},
+                "factual_accuracy": {"type": "integer", "minimum": 0, "maximum": 10, "description": "All claims traceable to evidence: 10=yes, 0=fabricated specs"},
+                "platform_compliance": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Meets platform format/length rules: 10=perfect, 5=minor issues, 0=wrong format"},
+                "finish_integration": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Finish as design choice or afterthought: 0=raw placeholder, 5=generic, 10=woven into narrative"},
+                "variety_score": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Different from catalog peers: 0=identical pattern, 5=same skeleton, 10=unique structure"},
+            },
+            "required": [
+                "hook_quality", "product_specificity", "competitive_diff",
+                "keyword_integration", "customer_scenario", "emotional_resonance",
+                "factual_accuracy", "platform_compliance", "finish_integration", "variety_score",
+            ],
+        },
     },
     "required": [
         "google_title",
@@ -75,6 +95,7 @@ CANDIDATE_SCHEMA = {
         "shopify_description",
         "shopify_meta_description",
         "claims",
+        "self_score",
     ],
 }
 
@@ -286,7 +307,7 @@ Great Allied Brass content leads with what makes THIS SPECIFIC PRODUCT's design 
 
 DO NOT invent usage scenarios, room contexts, or product features that aren't supported by the evidence table. If the evidence says "reeded texture" — use it. If the evidence says nothing about a spring mechanism — don't mention one.
 
-Use the product's own story (from current_description, bullets, material, collection, mounting_type) as the foundation. Find the ONE design detail that makes THIS product worth noticing and lead with it — what would a bathroom designer point out that a shopper wouldn't?
+Use the product's own story (from current_description, bullets, material, collection, mounting_type) as the foundation. The skills injected below contain rich guidance on brand voice, competitive positioning, and storytelling patterns — follow them as your primary creative authority.
 
 Use specificity as proof, not adjectives. "Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." Every factual detail earns trust; every vague adjective loses it.
 </creative_direction>
@@ -310,7 +331,7 @@ Banned words (never use): finest, luxurious, premium, exclusive, exceptional, un
 
 Banned phrases (never use): "heritage bathroom fixtures", "common die-cast zinc", "plated alternatives", "also searched as", "also known as"
 
-Banned content: no competitor material names (die-cast zinc, zinc alloy, chrome-plated steel, hollow zinc), no internal SKUs, no URLs, no prices, no shipping promises.
+For detailed brand voice guidance including anti-patterns and tone calibration, follow the allied-brass-brand-expert skill injected below.
 </brand_voice>
 
 <accuracy_guardrail>
@@ -322,25 +343,30 @@ Prohibited fabrications:
 - DO NOT claim specific certifications (ADA, etc.) unless evidence explicitly confirms them
 - DO NOT describe how the product feels, sounds, or operates beyond what evidence states
 
+Evidence rules:
+- Solid brass: Only claim when evidence confirms material
+- Dimensions, warranties, compatibility: Never invent — every factual statement needs evidence
+- Keyword intent signals are phrasing guides, not product facts
+- Collection references: Only when collection evidence is present
+
+When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
+
 Content prohibitions (from human evaluation feedback):
 - Do NOT include weight capacity in descriptions — it creates consumer doubt rather than confidence
-- Do NOT include detailed dimensions (width, height, projection, depth) — only the primary searchable dimension
-- Do NOT use "also searched as," "also known as," or similar keyword list patterns
-- Do NOT name competitor materials: "die-cast zinc," "zinc alloy," "plated alternatives," "chrome-plated steel," "hollow zinc"
+- Do NOT include detailed dimensions (width, height, projection, depth) — only the primary searchable dimension (e.g., overall length for towel bars, diameter for mirrors)
+- Do NOT use "also searched as," "also known as," or similar keyword list patterns — all keywords must be integrated naturally
+- Do NOT name competitor materials: "die-cast zinc," "zinc alloy," "plated alternatives," "chrome-plated steel," "hollow zinc" — frame solid brass positively, never by contrast with cheaper materials
 - Do NOT use "heritage bathroom fixtures" or any invented category terms not in the evidence
 - In variant-facing descriptions, do NOT mention finish variety counts (e.g., "28 finishes")
 - Never use banned promo words in customer-facing copy: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
 
-When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
+Banned content: No internal SKUs, pipeline terms, source citations, URLs, prices, shipping promises, or keyword lists.
 </accuracy_guardrail>
 
 <scoring_rubric>
-self_score criteria (3 dimensions, each 0-10):
-- accuracy: How well all claims stay grounded in evidence. 10 = every claim traceable; 0 = fabricated specs.
-- specificity: How specific content is to this exact product. 10 = unmistakable; 0 = could describe any competitor.
-- engagement: How compelling and shopper-relevant the copy feels. 10 = genuine want; 0 = database export.
+self_score criteria and weights: hook_quality (15%), product_specificity (15%), competitive_diff (12%), keyword_integration (10%), customer_scenario (10%), emotional_resonance (10%), factual_accuracy (10%), platform_compliance (8%), finish_integration (5%), variety_score (5%).
 
-Calibration: A description that follows all rules but is generic should score 50-60, not 80+. Score each criterion independently. Do NOT inflate to hit a target.
+Calibration: A description that follows all rules but is generic should score 50-60, not 80+. Score each criterion 0-10 independently. Do NOT inflate to hit a target. A fragment opening is 0-2; a complete but generic sentence is 3-5; specific, engaging, scenario-driven is 7-10.
 </scoring_rubric>
 
 <output_contract>
