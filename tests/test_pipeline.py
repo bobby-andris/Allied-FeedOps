@@ -888,7 +888,7 @@ def test_build_variant_prompt_includes_gold_examples_when_available(sample_paren
 
 
 def test_candidate_schema_has_required_fields():
-    """Schema includes platform fields and claims."""
+    """Schema includes platform fields, claims, and self_score."""
     assert "google_title" in str(CANDIDATE_SCHEMA)
     assert "google_short_title" in str(CANDIDATE_SCHEMA)
     assert "google_description" in str(CANDIDATE_SCHEMA)

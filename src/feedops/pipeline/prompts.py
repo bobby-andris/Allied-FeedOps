@@ -105,6 +105,32 @@ _CLAIMS_SCHEMA = {
     },
 }
 
+_SELF_SCORE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "accuracy": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "How well all claims stay grounded in evidence.",
+        },
+        "specificity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "How specific content is to this exact product.",
+        },
+        "engagement": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "How compelling and shopper-relevant the copy feels.",
+        },
+    },
+    "required": ["accuracy", "specificity", "engagement"],
+    "additionalProperties": False,
+}
+
 GOOGLE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -131,12 +157,14 @@ GOOGLE_SCHEMA = {
             "minLength": 700,
         },
         "claims": _CLAIMS_SCHEMA,
+        "self_score": _SELF_SCORE_SCHEMA,
     },
     "required": [
         "google_title",
         "google_short_title",
         "google_description",
         "claims",
+        "self_score",
     ],
     "additionalProperties": False,
 }
@@ -162,8 +190,9 @@ BING_SCHEMA = {
             "minLength": 700,
         },
         "claims": _CLAIMS_SCHEMA,
+        "self_score": _SELF_SCORE_SCHEMA,
     },
-    "required": ["bing_title", "bing_description", "claims"],
+    "required": ["bing_title", "bing_description", "claims", "self_score"],
     "additionalProperties": False,
 }
 
@@ -192,12 +221,14 @@ SHOPIFY_SCHEMA = {
             "maxLength": 160,
         },
         "claims": _CLAIMS_SCHEMA,
+        "self_score": _SELF_SCORE_SCHEMA,
     },
     "required": [
         "shopify_title",
         "shopify_description",
         "shopify_meta_description",
         "claims",
+        "self_score",
     ],
     "additionalProperties": False,
 }
@@ -302,6 +333,15 @@ Content prohibitions (from human evaluation feedback):
 
 When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
 </accuracy_guardrail>
+
+<scoring_rubric>
+self_score criteria (3 dimensions, each 0-10):
+- accuracy: How well all claims stay grounded in evidence. 10 = every claim traceable; 0 = fabricated specs.
+- specificity: How specific content is to this exact product. 10 = unmistakable; 0 = could describe any competitor.
+- engagement: How compelling and shopper-relevant the copy feels. 10 = genuine want; 0 = database export.
+
+Calibration: A description that follows all rules but is generic should score 50-60, not 80+. Score each criterion independently. Do NOT inflate to hit a target.
+</scoring_rubric>
 
 <output_contract>
 Return ONE valid JSON object that matches the platform schema exactly. Do not add extra keys.
@@ -423,7 +463,7 @@ What to EXCLUDE (these kill conversions or create doubt):
 </description_brief>
 
 <output_contract>
-Return JSON with keys: google_title, google_short_title, google_description, claims.
+Return JSON with keys: google_title, google_short_title, google_description, claims, self_score.
 </output_contract>
 
 <final_quality_gate>
@@ -502,7 +542,7 @@ Also ban promo words in customer-facing copy: finest, luxurious, premium, exclus
 </description_brief>
 
 <output_contract>
-Return JSON with keys: bing_title, bing_description, claims.
+Return JSON with keys: bing_title, bing_description, claims, self_score.
 </output_contract>
 
 <final_quality_gate>
@@ -560,7 +600,7 @@ Include product type, key differentiator, and collection name.
 </meta_description>
 
 <output_contract>
-Return JSON with keys: shopify_title, shopify_description, shopify_meta_description, claims.
+Return JSON with keys: shopify_title, shopify_description, shopify_meta_description, claims, self_score.
 </output_contract>
 """
 

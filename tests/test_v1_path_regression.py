@@ -162,6 +162,7 @@ def test_get_system_prompt_returns_valid_prompt():
     assert "<creative_direction>" in system_prompt
     assert "<brand_voice>" in system_prompt
     assert "<accuracy_guardrail>" in system_prompt
+    assert "<scoring_rubric>" in system_prompt
     # Skill content should be present (at least brand/finish content)
     prompt_lower = system_prompt.lower()
     assert "allied brass" in prompt_lower, "System prompt should include Allied Brass brand content"

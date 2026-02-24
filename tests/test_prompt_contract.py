@@ -8,6 +8,7 @@ def test_system_prompt_uses_required_section_contracts() -> None:
         "<objective_hierarchy>",
         "<brand_voice>",
         "<accuracy_guardrail>",
+        "<scoring_rubric>",
         "<output_contract>",
     ]
     for section in required_sections:
