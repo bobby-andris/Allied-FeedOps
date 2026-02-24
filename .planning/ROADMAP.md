@@ -205,7 +205,9 @@ Plans:
 8. Quality validated across 6+ test SKUs spanning different product categories
 9. API parameters verified against current OpenAI docs
 
+**Plans:** 3 plans
+
 Plans:
-- [ ] 25.2-01-PLAN.md — Research + foundation: Query OpenAI docs via MCP for GPT-5.2 prompting best practices. Audit current API parameters (`openai_provider.py`). Audit how skills are loaded and used (`skill_loader.py`, `prompt_builder.py`). Understand the Agent Skills spec and how our skills should be structured for GPT-5.2 consumption. Determine optimal generation architecture (per-platform calls vs single call). Run exploratory tests with real product data to understand GPT-5.2's behavior.
-- [ ] 25.2-02-PLAN.md — Build and validate: Implement the generation approach from plan 01 findings. Fix skill loading to use platform-appropriate knowledge. Handle evidence sanitization and {FINISH_SENTENCE} mechanism. Build new prompt(s) incrementally — validate each piece with local GPT-5.2 tests before adding more.
-- [ ] 25.2-03-PLAN.md — Full validation + Bobby gut-check: Run full 6-SKU test across all platforms. Present side-by-side results. Bobby reviews and approves or identifies remaining issues.
+- [ ] 25.2-01-PLAN.md — Per-platform schemas, platform-specific system prompts with extracted skill knowledge, test harness extension, empirical GPT-5.2 validation (placeholder preservation, constraint adherence)
+- [ ] 25.2-02-PLAN.md — Wire per-platform generation into pipeline endpoints (prompt_builder, generator, main.py, hybrid_generation) with FEEDOPS_PROMPT_VERSION feature flag
+- [ ] 25.2-03-PLAN.md — Full 6-SKU validation across all platforms, side-by-side comparison, Bobby gut-check review
