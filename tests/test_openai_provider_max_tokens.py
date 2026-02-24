@@ -23,5 +23,5 @@ async def test_openai_provider_sets_max_completion_tokens_for_gpt5(monkeypatch):
     result = await provider.generate(prompt="{}", schema={})
     assert result == {}
     assert "max_completion_tokens" in captured
+    assert captured["max_completion_tokens"] == 8000
     assert "max_tokens" not in captured
-

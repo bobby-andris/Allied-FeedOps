@@ -90,6 +90,23 @@ def test_build_keyword_placement_plan_prefers_search_query_anchor():
     assert "18 inch towel bar" in plan.description_terms
 
 
+def test_build_keyword_placement_plan_distills_noisy_query_fragments():
+    parent_sku = _make_parent_sku()
+    evidence = [
+        Evidence(
+            field="search_queries_top",
+            value='"if you are searching for bathroom towel bar wall mount" (2.4K vol), "best 18 inch towel bar near me" (1.2K vol)',
+            source="search_insights",
+        ),
+    ]
+
+    plan = build_keyword_placement_plan(parent_sku, evidence)
+
+    assert "searching" not in " ".join(plan.distilled_intent_terms)
+    assert "near me" not in " ".join(plan.distilled_intent_terms)
+    assert any("towel bar" in term for term in plan.distilled_intent_terms)
+
+
 def test_build_keyword_placement_plan_filters_material_mismatch():
     parent_sku = _make_parent_sku(material="Brass")
     evidence = [

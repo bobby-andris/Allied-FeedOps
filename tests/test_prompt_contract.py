@@ -5,9 +5,9 @@ from feedops.pipeline.prompts import SYSTEM_PROMPT
 def test_system_prompt_uses_required_section_contracts() -> None:
     required_sections = [
         "<creative_direction>",
+        "<objective_hierarchy>",
         "<brand_voice>",
         "<accuracy_guardrail>",
-        "<platform_rules>",
         "<scoring_rubric>",
         "<output_contract>",
     ]

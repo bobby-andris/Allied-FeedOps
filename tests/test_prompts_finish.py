@@ -1,9 +1,9 @@
-from feedops.pipeline.prompts import SYSTEM_PROMPT
+from feedops.pipeline.prompts import SHOPIFY_BRIEF, SYSTEM_PROMPT
 
 
 def test_system_prompt_calls_out_finish_neutral_master_descriptions() -> None:
-    # Shopify fields are finish-agnostic per platform_rules and output_contract
-    assert "finish-agnostic" in SYSTEM_PROMPT
+    # Shopify brief is finish-agnostic by design.
+    assert "finish-agnostic" in SHOPIFY_BRIEF
 
 
 def test_system_prompt_includes_competitor_material_prohibition() -> None:
