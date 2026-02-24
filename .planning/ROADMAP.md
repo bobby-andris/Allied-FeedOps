@@ -195,7 +195,7 @@ Plans:
 6. **Build incrementally and validate** — Start simple, validate it works, add complexity only when needed. Don't design a complete system and test end-to-end.
 
 **Success Criteria** (what must be TRUE):
-1. Google/Bing titles consistently follow the formula: {FINISH_NAME} [Collection] [Product Type] [Dimension] - [Style] - Allied Brass
+1. Google/Bing titles start with {FINISH_NAME} (the only hard rule). Collection name included only when the product belongs to one of the 41 named collections (see `data/Nov2024 New Collection Descriptions.xlsx`). Beyond that, the LLM should craft the best title for the product — no rigid formula that restricts output quality.
 2. Descriptions are compelling, specific to the product, and pass Bobby's gut-check
 3. Zero competitor brand names in any generated content
 4. Zero banned words (finest, luxurious, premium, etc.) in any generated content
