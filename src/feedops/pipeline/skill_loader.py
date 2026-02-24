@@ -22,6 +22,7 @@ Public API:
 from __future__ import annotations
 
 import logging
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -37,6 +38,29 @@ CORE_SKILLS = [
     "quality-evaluation",          # 10-criterion rubric with anchors and examples
     "product-storytelling",        # interior designer perspective, scenarios, emotional resonance
 ]
+
+PLATFORM_SKILL_MAP = {
+    "google": [
+        "google-shopping-content",
+        "allied-brass-brand-expert",
+        "product-storytelling",
+    ],
+    "bing": [
+        "bing-shopping-content",
+        "allied-brass-brand-expert",
+    ],
+    "shopify": [
+        "shopify-conversion-content",
+        "allied-brass-brand-expert",
+        "product-storytelling",
+        "collection-storytelling",
+    ],
+    "finish": [
+        "finish-expertise",
+        "collection-storytelling",
+        "product-storytelling",
+    ],
+}
 
 PLATFORM_SKILLS = {
     "google": "google-shopping-content",
@@ -54,6 +78,277 @@ ALL_SKILLS = (
     + list(PLATFORM_SKILLS.values())
     + CONDITIONAL_SKILLS
 )
+
+ACTIONABLE_XML_TAGS = ("rules", "examples", "formula", "constraints", "brand_voice")
+EXCLUDED_SECTION_KEYWORDS = (
+    "companion",
+    "when to use",
+    "workflow",
+    "integration with existing pipeline",
+    "metadata",
+    "quick reference",
+    "cross-platform comparison",
+)
+
+SKILL_SECTION_KEYWORDS = {
+    "google-shopping-content": (
+        "shopper's reality",
+        "title architecture",
+        "title rules",
+        "description architecture",
+        "description structure",
+        "bad-to-good",
+        "gold standard",
+    ),
+    "bing-shopping-content": (
+        "how bing differs",
+        "title optimization",
+        "title rules",
+        "description architecture",
+        "synonym coverage",
+        "gold standard",
+    ),
+    "shopify-conversion-content": (
+        "shopify buyer journey",
+        "html structure",
+        "title strategy",
+        "title rules",
+        "meta description",
+        "character budget",
+        "gold standard",
+    ),
+    "finish-expertise": (
+        "the 28 finishes",
+        "finish",
+        "search behavior",
+        "compelling sentences",
+        "avoid",
+    ),
+    "allied-brass-brand-expert": (
+        "critical: competitor material prohibition",
+        "the allied brass truth",
+        "how to express",
+        "the allied brass voice",
+        "voice anti-patterns",
+        "accuracy rules",
+    ),
+    "product-storytelling": (
+        "interior designer's perspective",
+        "customer scenario library",
+        "design style hooks",
+        "finish as design language",
+        "feature-to-benefit translation",
+        "evidence exclusion rules",
+    ),
+    "collection-storytelling": (
+        "why collections matter",
+        "collection profiles",
+        "style categories",
+        "collection integration patterns",
+        "cross-selling language",
+    ),
+}
+
+PLATFORM_ROLE_MAP = {
+    "google": "Google Shopping",
+    "bing": "Bing Shopping",
+    "shopify": "Shopify storefront",
+    "finish": "finish-sentence",
+}
+
+SHARED_ACCURACY_RULES = """\
+- Ground every factual claim in provided evidence.
+- Never invent dimensions, certifications, warranties, or mechanisms.
+- Do not mention competitor brands or inferior material names.
+- Prefer concrete specifics over adjectives and marketing hype.
+- Preserve required placeholders exactly when a schema requires them.
+"""
+
+
+def _strip_frontmatter(content: str) -> str:
+    """Remove YAML frontmatter and leading title noise from SKILL.md content."""
+    return re.sub(r"^---\n.*?\n---\n", "", content, flags=re.DOTALL).strip()
+
+
+def _extract_xml_sections(content: str) -> list[str]:
+    """Extract known actionable XML-tag sections when present."""
+    extracted: list[str] = []
+    for tag in ACTIONABLE_XML_TAGS:
+        pattern = rf"<{tag}[^>]*>(.*?)</{tag}>"
+        for match in re.finditer(pattern, content, flags=re.IGNORECASE | re.DOTALL):
+            body = match.group(1).strip()
+            if body:
+                extracted.append(f"<{tag}>\n{body}\n</{tag}>")
+    return extracted
+
+
+def _split_markdown_sections(content: str) -> list[tuple[str, str]]:
+    """Split markdown content into heading + body sections."""
+    sections: list[tuple[str, str]] = []
+    heading = "Overview"
+    lines: list[str] = []
+
+    for line in content.splitlines():
+        if re.match(r"^##+\s+", line):
+            body = "\n".join(lines).strip()
+            if body:
+                sections.append((heading, body))
+            heading = re.sub(r"^##+\s*", "", line).strip()
+            lines = []
+            continue
+        lines.append(line)
+
+    tail = "\n".join(lines).strip()
+    if tail:
+        sections.append((heading, tail))
+    return sections
+
+
+def _is_excluded_section(heading: str) -> bool:
+    heading_lower = heading.lower()
+    return any(token in heading_lower for token in EXCLUDED_SECTION_KEYWORDS)
+
+
+def _select_markdown_sections(skill_name: str, content: str) -> list[str]:
+    """Select actionable markdown sections when XML tags are unavailable."""
+    selected: list[str] = []
+    sections = _split_markdown_sections(content)
+    keywords = SKILL_SECTION_KEYWORDS.get(skill_name, ())
+
+    prioritized: list[tuple[str, str]] = []
+    fallback: list[tuple[str, str]] = []
+
+    for heading, body in sections:
+        if _is_excluded_section(heading):
+            continue
+        lower = heading.lower()
+        if keywords and any(token in lower for token in keywords):
+            prioritized.append((heading, body))
+        else:
+            fallback.append((heading, body))
+
+    ordered = prioritized if prioritized else fallback
+    for heading, body in ordered:
+        selected.append(f"## {heading}\n{body.strip()}")
+    return selected
+
+
+def _fit_chunks_to_window(
+    chunks: list[str],
+    min_chars: int,
+    max_chars: int,
+) -> str:
+    """Assemble selected chunks into a bounded-size prompt section."""
+    assembled: list[str] = []
+    total_chars = 0
+
+    for chunk in chunks:
+        clean = re.sub(r"\n{3,}", "\n\n", chunk).strip()
+        if not clean:
+            continue
+        projected = total_chars + len(clean) + (2 if assembled else 0)
+        if projected > max_chars:
+            remaining = max_chars - total_chars
+            if remaining > 300:
+                clipped = clean[:remaining].rstrip()
+                last_break = clipped.rfind("\n")
+                if last_break > 120:
+                    clipped = clipped[:last_break]
+                assembled.append(clipped.strip() + " …")
+            break
+        assembled.append(clean)
+        total_chars = projected
+        if total_chars >= min_chars:
+            break
+
+    if not assembled and chunks:
+        return chunks[0][:max_chars].strip()
+    return "\n\n".join(assembled).strip()
+
+
+@lru_cache(maxsize=64)
+def extract_actionable_skill_knowledge(
+    skill_name: str,
+    min_chars: int = 2000,
+    max_chars: int = 4000,
+) -> str:
+    """Extract actionable, platform-usable knowledge from a SKILL.md file."""
+    content = load_skill_content(skill_name)
+    if not content:
+        return ""
+
+    normalized = _strip_frontmatter(content)
+    xml_sections = _extract_xml_sections(normalized)
+    if xml_sections:
+        return _fit_chunks_to_window(xml_sections, min_chars=min_chars, max_chars=max_chars)
+
+    markdown_sections = _select_markdown_sections(skill_name, normalized)
+    if markdown_sections:
+        return _fit_chunks_to_window(
+            markdown_sections, min_chars=min_chars, max_chars=max_chars
+        )
+
+    return normalized[:max_chars].strip()
+
+
+def get_platform_system_prompt(platform: str) -> str:
+    """Build a platform-specific system prompt from extracted skill knowledge."""
+    platform_key = (platform or "").strip().lower()
+    if platform_key not in PLATFORM_SKILL_MAP:
+        raise ValueError(
+            f"Unsupported platform '{platform}'. "
+            f"Expected one of: {', '.join(sorted(PLATFORM_SKILL_MAP))}"
+        )
+
+    skill_names = PLATFORM_SKILL_MAP[platform_key]
+    role_label = PLATFORM_ROLE_MAP.get(platform_key, platform_key)
+
+    brand_voice = ""
+    if "allied-brass-brand-expert" in skill_names:
+        brand_voice = extract_actionable_skill_knowledge(
+            "allied-brass-brand-expert", min_chars=2000, max_chars=4200
+        )
+
+    platform_rules_blocks: list[str] = []
+    for skill_name in skill_names:
+        if skill_name == "allied-brass-brand-expert":
+            continue
+        min_chars = 1800 if skill_name.endswith("content") else 1200
+        max_chars = 4200 if skill_name.endswith("content") else 2600
+        extracted = extract_actionable_skill_knowledge(
+            skill_name, min_chars=min_chars, max_chars=max_chars
+        )
+        if extracted:
+            platform_rules_blocks.append(
+                f"<skill name=\"{skill_name}\">\n{extracted}\n</skill>"
+            )
+
+    if not brand_voice:
+        brand_voice = (
+            "Use concrete, verifiable language. Keep tone confident, specific, and "
+            "design-aware. Avoid hype and generic filler."
+        )
+
+    if not platform_rules_blocks:
+        platform_rules_blocks.append(
+            "Use product-specific, evidence-grounded language tailored to this platform."
+        )
+
+    prompt = (
+        f"<role>You write {role_label} content for Allied Brass solid brass "
+        f"bathroom hardware.</role>\n\n"
+        f"<brand_voice>\n{brand_voice}\n</brand_voice>\n\n"
+        f"<platform_rules>\n{chr(10).join(platform_rules_blocks)}\n</platform_rules>\n\n"
+        f"<accuracy>\n{SHARED_ACCURACY_RULES}\n</accuracy>"
+    )
+
+    logger.info(
+        "Platform system prompt built: platform=%s skills=%s chars=%d",
+        platform_key,
+        ",".join(skill_names),
+        len(prompt),
+    )
+    return prompt
 
 
 def _find_skills_dir() -> Path | None:

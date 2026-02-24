@@ -100,6 +100,202 @@ CANDIDATE_SCHEMA = {
 }
 
 # ---------------------------------------------------------------------------
+# PLATFORM-SPECIFIC SCHEMAS (additive for Phase 25.2 architecture testing)
+# ---------------------------------------------------------------------------
+
+_CLAIMS_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "claim": {
+                "type": "string",
+                "description": "The factual claim text included in content.",
+            },
+            "source_field": {
+                "type": "string",
+                "description": "Evidence field name backing this claim.",
+            },
+            "source_value": {
+                "type": "string",
+                "description": "Exact evidence value backing this claim.",
+            },
+        },
+        "required": ["claim", "source_field", "source_value"],
+        "additionalProperties": False,
+    },
+}
+
+_SELF_SCORE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "accuracy": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "How well all claims stay grounded in evidence.",
+        },
+        "specificity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "How specific content is to this exact product.",
+        },
+        "engagement": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "How compelling and shopper-relevant the copy feels.",
+        },
+    },
+    "required": ["accuracy", "specificity", "engagement"],
+    "additionalProperties": False,
+}
+
+GOOGLE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "google_title": {
+            "type": "string",
+            "description": (
+                "Google Shopping title. Must start with literal {FINISH_NAME}. "
+                "Max 150 chars."
+            ),
+            "maxLength": 150,
+            "pattern": r"^\{FINISH_NAME\}.+",
+        },
+        "google_short_title": {
+            "type": "string",
+            "description": "Google short title (max 70 chars).",
+            "maxLength": 70,
+        },
+        "google_description": {
+            "type": "string",
+            "description": (
+                "Google Shopping description, 700-900 chars. Must include literal "
+                "{FINISH_SENTENCE} placeholder."
+            ),
+            "minLength": 700,
+            "maxLength": 900,
+            "pattern": r"(?s).*\{FINISH_SENTENCE\}.*",
+        },
+        "claims": _CLAIMS_SCHEMA,
+        "self_score": _SELF_SCORE_SCHEMA,
+    },
+    "required": [
+        "google_title",
+        "google_short_title",
+        "google_description",
+        "claims",
+        "self_score",
+    ],
+    "additionalProperties": False,
+}
+
+BING_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "bing_title": {
+            "type": "string",
+            "description": (
+                "Bing Shopping title. Must start with literal {FINISH_NAME}. "
+                "Max 150 chars."
+            ),
+            "maxLength": 150,
+            "pattern": r"^\{FINISH_NAME\}.+",
+        },
+        "bing_description": {
+            "type": "string",
+            "description": (
+                "Bing Shopping description, 700-1000 chars. Front-load key specs "
+                "in first 200 chars and include literal {FINISH_SENTENCE}."
+            ),
+            "minLength": 700,
+            "maxLength": 1000,
+            "pattern": r"(?s).*\{FINISH_SENTENCE\}.*",
+        },
+        "claims": _CLAIMS_SCHEMA,
+        "self_score": _SELF_SCORE_SCHEMA,
+    },
+    "required": ["bing_title", "bing_description", "claims", "self_score"],
+    "additionalProperties": False,
+}
+
+SHOPIFY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "shopify_title": {
+            "type": "string",
+            "description": (
+                "Shopify title for master SKU content. Finish-agnostic; do not "
+                "include finish names."
+            ),
+            "maxLength": 255,
+        },
+        "shopify_description": {
+            "type": "string",
+            "description": (
+                "Shopify HTML description, 250-400 words. Start with a buyer-problem "
+                "or buyer-outcome opening. Never include {FINISH_NAME} or "
+                "{FINISH_SENTENCE} placeholders."
+            ),
+        },
+        "shopify_meta_description": {
+            "type": "string",
+            "description": "Shopify meta description (max 160 chars).",
+            "maxLength": 160,
+        },
+        "claims": _CLAIMS_SCHEMA,
+        "self_score": _SELF_SCORE_SCHEMA,
+    },
+    "required": [
+        "shopify_title",
+        "shopify_description",
+        "shopify_meta_description",
+        "claims",
+        "self_score",
+    ],
+    "additionalProperties": False,
+}
+
+FINISH_SENTENCES_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "sentences": {
+            "type": "array",
+            "description": "Exactly 28 finish sentences, one per supported finish.",
+            "minItems": 28,
+            "maxItems": 28,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "finish_code": {
+                        "type": "string",
+                        "description": "Internal finish code (e.g., PNI, ORB).",
+                    },
+                    "finish_name": {
+                        "type": "string",
+                        "description": "Display finish name.",
+                    },
+                    "sentence": {
+                        "type": "string",
+                        "description": (
+                            "Product-specific finish sentence, 40-80 characters."
+                        ),
+                        "minLength": 40,
+                        "maxLength": 80,
+                    },
+                },
+                "required": ["finish_code", "finish_name", "sentence"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["sentences"],
+    "additionalProperties": False,
+}
+
+# ---------------------------------------------------------------------------
 # STATIC SYSTEM PROMPT (cacheable across all SKUs and variants)
 # ---------------------------------------------------------------------------
 # This prompt is sent as a system/developer message. It must be byte-for-byte
