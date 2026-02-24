@@ -150,55 +150,62 @@ Plans:
 - [x] 25.1-02-PLAN.md — Design new prompt architecture from scratch: CTCO framework, distilled constraints, new system prompt under 15K chars
 - [x] 25.1-03-PLAN.md — A/B test 3 prompt variations on representative + unseen SKUs, mini human review checkpoint (RESULT: C_Optimized best but still fails constraints)
 
-### Phase 25.2: GPT-5.2 Prompt Engineering — Empirical Approach (INSERTED)
+### Phase 25.2: Optimal Content Generation (INSERTED)
 
-**Goal:** Determine exactly what GPT-5.2 does and does not follow at different reasoning effort levels through empirical atomic testing, then build a production prompt validated one constraint at a time — not theoretically designed and tested all at once.
+**Goal:** Achieve optimal baseline content generation quality for every SKU in the catalog. Google and Bing need variant-level content (finish-specific). Shopify needs master-SKU content (finish-agnostic). The output must be content Bobby would approve on first read — correct titles, compelling descriptions, zero constraint violations.
 
 **Depends on:** Phase 25.1 (findings)
 **Requirements:** (research + implementation phase — serves v1.3a Content Generation Excellence)
 
-**Why this phase exists:** Phase 25.1 revealed that writing a prompt "for GPT-5.2" based on documentation and Claude-optimized patterns doesn't work. Three iterations have failed because we're designing prompts theoretically and testing them as a complete unit. Key findings:
-1. **All 8 SKILL.md files (~260K chars) dumped raw into GPT-5.2 system prompt** — these were written for Claude Code (an AI coding assistant), not for GPT-5.2 runtime consumption. They contain markdown, interactive instructions, "you the AI assistant" guidance.
-2. **Platform-specific skill loading is dead code** — `get_system_prompt()` is called with no arguments everywhere. GPT-5.2 always gets google + bing + shopify skills simultaneously, creating conflicting guidance.
-3. **Generating 8+ fields (3 platforms) in one call is architecturally flawed** — GPT-5.2 can't apply google-shopping rules to Google fields AND bing-shopping rules to Bing fields AND shopify rules to Shopify fields simultaneously. Evidence: A_Current returned EMPTY Bing/Shopify for 2/3 SKUs.
-4. GPT-5.2 at reasoning_effort=medium skims constraint lists — banned words leak, integration patterns ignored
-5. Evidence table contains "poison pills" (banned words, bad grammar) that GPT-5.2 echoes due to conservative grounding bias
-6. {FINISH_SENTENCE} as a publishing-pipeline concept has no mechanism in the JSON schema
-7. We've never tested what GPT-5.2 actually follows vs ignores — only tested full prompts end-to-end
+**Why this phase exists:** 5+ prompt iterations have failed to produce content that passes human review. The failures aren't about prompt size — they're about not understanding how to construct a prompt that produces perfect output from GPT-5.2 for our specific use case. Key problems:
+
+1. **Skills are model-agnostic but aren't being used correctly** — Agent Skills (agentskills.io) are an open format designed for ANY LLM (Claude, GPT, Gemini, etc.). The spec recommends SKILL.md < 5000 tokens with references/ loaded on demand. Our skills are 5-10x oversized and ALL 8 are dumped into every GPT-5.2 call simultaneously (~260K chars). The skill knowledge is valuable — it just needs to be loaded correctly per the spec.
+2. **Platform-specific skill routing is broken** — `skill_loader.py` has platform-specific loading (`google-shopping-content` for Google, etc.) but `get_system_prompt()` is called with no arguments everywhere — so GPT-5.2 gets Google + Bing + Shopify guidance simultaneously, creating conflicting rules for a single generation call.
+3. **Generation architecture forces impossible multi-tasking** — One call generates 8+ fields across 3 platforms with different rules each. A_Current returned EMPTY Bing/Shopify for 2/3 test SKUs.
+4. **Evidence table feeds GPT-5.2 content we explicitly ban** — banned words ("finest"), bad grammar ("insure"), competitor names in keywords. GPT-5.2's grounding bias echoes evidence over instructions.
+5. **{FINISH_SENTENCE} has no mechanism in the output schema** — GPT-5.2 can't produce a placeholder it doesn't know about.
 
 **Tools & Resources:**
-- `mcp__openaiDeveloperDocs__*` — Search/fetch OpenAI developer docs for GPT-5.2 prompting best practices, structured outputs, reasoning effort, prompt caching. USE THESE FIRST before making assumptions about GPT-5.2 behavior.
-- `docs/research/gpt52-best-practices.md` — Existing research (may be outdated or incomplete — cross-reference with live docs)
-- `scripts/ab_prompt_test.py` — Existing test harness (v2.1, variant-level, 6 SKUs)
-- `.planning/phases/25.1-prompt-architecture-research/` — All Phase 25.1 artifacts (audit, architecture, test results)
-- `.planning/phases/25.2-gpt52-prompt-engineering/ROOT-CAUSE-ANALYSIS.md` — Detailed failure analysis
+- `mcp__openaiDeveloperDocs__*` — USE FIRST to verify current GPT-5.2 API behavior, prompting best practices, structured outputs, reasoning effort. Do not assume — verify against live docs.
+- Agent Skills spec: https://agentskills.io/specification — Skills are model-agnostic, < 5000 tokens recommended, references/ loaded on demand
+- `.claude/skills/` — The 8 content skills (model-agnostic, need right-sizing per spec)
+- `src/feedops/config/*.yaml` — YAML runtime configs (overlap with skills — may need consolidation)
+- `src/feedops/pipeline/skill_loader.py` — Current skill injection (loads ALL skills, platform routing dead code)
+- `src/feedops/api/prompt_builder.py` — Assembles user prompt with evidence, keywords, category guidance
+- `src/feedops/providers/openai_provider.py` — GPT-5.2 API call parameters
+- `scripts/ab_prompt_test.py` — Test harness (v2.1, variant-level, 6 SKUs)
+- `.planning/phases/25.2-gpt52-prompt-engineering/ROOT-CAUSE-ANALYSIS.md` — Failure analysis from 5+ iterations
 
 **Critical instructions for agents:**
-1. **Check OpenAI docs FIRST** — Use `mcp__openaiDeveloperDocs__search_openai_docs` and `mcp__openaiDeveloperDocs__fetch_openai_doc` to verify current GPT-5.2 API behavior before writing any prompts or API calls. Our existing research may be wrong or outdated.
-2. **Verify we're using the API correctly** — Check: Are we passing `reasoning_effort` correctly? Is `temperature` conflicting? Is `json_schema` strict mode configured right? Is `max_completion_tokens` appropriate? Is `text.verbosity` being used? Are we using the right model string?
-3. **Understand the skill architecture** — There are TWO separate systems:
-   - **Claude Code skills** (`.claude/skills/*/SKILL.md`): Written for Claude Code as an AI assistant. 260K chars total. Currently ALL dumped into GPT-5.2 system prompt via `skill_loader.py`. This is wrong — they were never designed for GPT-5.2.
-   - **YAML runtime configs** (`src/feedops/config/*.yaml`): Distilled versions meant for GPT-5.2. Loaded by `prompt_builder.py` via `shopping_intelligence.py`. Some overlap/conflict with the SKILL.md injection.
-   - The skills contain genuinely valuable domain expertise that must be properly distilled for GPT-5.2 — not raw-dumped or ignored.
-4. **Think deeply about prompt construction** — The fundamental question is: "What does GPT-5.2 need to produce a perfect title and description for ONE product on ONE platform?" Consider:
-   - Should generation be split by platform? (Google call, Bing call, Shopify call — each with platform-specific skill knowledge and schema)
-   - How should product information flow into the prompt? (Raw evidence dump vs. curated per-platform data)
-   - What's the right balance of constraints vs. examples vs. product data?
-   - How do we distill skill knowledge (title formula, finish rules, brand voice, buyer scenarios) into something GPT-5.2 actually follows?
-5. **Run local tests** — Every change must be validated with actual GPT-5.2 API calls, not just dry-runs. Use `--sku 1025U` for quick single-SKU tests. Validate outputs against constraint checklist before declaring success.
-6. **Build bottom-up** — Start with the simplest possible prompt that works, add constraints one at a time, validate each addition. Do NOT design a complete prompt theoretically and test it end-to-end.
+
+1. **The goal is OPTIMAL CONTENT, not prompt optimization** — Every decision should be evaluated by: "Does this produce better titles and descriptions?" Not "Is this fewer tokens?" or "Is this architecturally clean?" The only metric that matters is Bobby reading the output and saying "yes, this is good."
+
+2. **Check OpenAI docs via MCP FIRST** — Use `mcp__openaiDeveloperDocs__search_openai_docs` and `mcp__openaiDeveloperDocs__fetch_openai_doc` to understand how GPT-5.2 wants to receive prompts. Cross-reference our `openai_provider.py` parameters against current docs. Our existing research (`docs/research/gpt52-best-practices.md`) may be outdated.
+
+3. **Understand the skill format** — Agent Skills (agentskills.io) are model-agnostic. They work with Claude, GPT, Gemini, and others. The format is: SKILL.md (< 5000 tokens recommended) + references/ loaded on demand. Our skills are oversized but contain the right domain knowledge. Figure out how to use them correctly — either right-size them per spec, or extract the essential knowledge into the prompt properly.
+
+4. **Think about what GPT-5.2 needs per output** — For each product:
+   - **Google variant**: Needs finish name, title formula, product evidence, category guidance, gold examples, brand voice. Produces: google_title, google_short_title, google_description.
+   - **Bing variant**: Needs finish name, Bing-specific rules (front-load specs, synonym coverage), product evidence. Produces: bing_title, bing_description.
+   - **Shopify master**: Needs product evidence, HTML format rules, buyer scenarios, trust signals. Finish-agnostic. Produces: shopify_title, shopify_description, shopify_meta_description.
+   - Should these be separate calls with platform-specific prompts? Or one call with clear field isolation? What actually produces better output?
+
+5. **Run local tests for EVERY change** — Actual GPT-5.2 API calls with real product data. `--sku 1025U` for quick validation. No dry-runs, no theoretical analysis. The output either passes Bobby's review or it doesn't.
+
+6. **Build incrementally and validate** — Start simple, validate it works, add complexity only when needed. Don't design a complete system and test end-to-end.
 
 **Success Criteria** (what must be TRUE):
-1. A constraint adherence map exists showing which instruction types GPT-5.2 follows at low/medium/high reasoning effort
-2. Evidence sanitization rules exist that prevent the evidence table from feeding banned words/patterns to the model
-3. The {FINISH_SENTENCE} mechanism works correctly — either as a literal placeholder or a separate generation step
-4. Zero competitor brand leaks across 6+ test SKUs
-5. Zero banned words across 6+ test SKUs
-6. Title formula followed consistently (finish first, collection, product type) across 6+ test SKUs
-7. Description quality passes Bobby's gut-check on representative SKUs
-8. API call parameters verified against current OpenAI docs (reasoning_effort, temperature, json_schema, max_completion_tokens, text.verbosity)
+1. Google/Bing titles consistently follow the formula: {FINISH_NAME} [Collection] [Product Type] [Dimension] - [Style] - Allied Brass
+2. Descriptions are compelling, specific to the product, and pass Bobby's gut-check
+3. Zero competitor brand names in any generated content
+4. Zero banned words (finest, luxurious, premium, etc.) in any generated content
+5. {FINISH_SENTENCE} correctly integrated into variant descriptions (not standalone)
+6. Shopify content is finish-agnostic, HTML formatted, with buyer-problem-first openings
+7. All fields populated (no empty Bing/Shopify fields)
+8. Quality validated across 6+ test SKUs spanning different product categories
+9. API parameters verified against current OpenAI docs
 
 Plans:
-- [ ] 25.2-01-PLAN.md — Research + API audit: Query OpenAI docs via MCP for current GPT-5.2 best practices (prompting, structured outputs, reasoning effort). Audit our API call parameters against docs. Audit skill/config wiring in prompt_builder.py. Atomic constraint testing: test individual instructions (banned words, title formula, finish placement, competitor prohibition) in isolation at low/medium/high reasoning effort. Build an empirical adherence map. Run local tests to validate.
-- [ ] 25.2-02-PLAN.md — Evidence sanitization + {FINISH_SENTENCE} mechanism: clean evidence table inputs, decide and implement the finish sentence approach, test field-splitting if needed (separate Google/Bing/Shopify calls). Local test validation.
-- [ ] 25.2-03-PLAN.md — Build production prompt from validated constraints: assemble only instructions GPT-5.2 demonstrably follows, run full 6-SKU test, Bobby gut-check
+- [ ] 25.2-01-PLAN.md — Research + foundation: Query OpenAI docs via MCP for GPT-5.2 prompting best practices. Audit current API parameters (`openai_provider.py`). Audit how skills are loaded and used (`skill_loader.py`, `prompt_builder.py`). Understand the Agent Skills spec and how our skills should be structured for GPT-5.2 consumption. Determine optimal generation architecture (per-platform calls vs single call). Run exploratory tests with real product data to understand GPT-5.2's behavior.
+- [ ] 25.2-02-PLAN.md — Build and validate: Implement the generation approach from plan 01 findings. Fix skill loading to use platform-appropriate knowledge. Handle evidence sanitization and {FINISH_SENTENCE} mechanism. Build new prompt(s) incrementally — validate each piece with local GPT-5.2 tests before adding more.
+- [ ] 25.2-03-PLAN.md — Full validation + Bobby gut-check: Run full 6-SKU test across all platforms. Present side-by-side results. Bobby reviews and approves or identifies remaining issues.
