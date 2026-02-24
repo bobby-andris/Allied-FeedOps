@@ -4,6 +4,7 @@ import asyncio
 import base64
 import json
 import logging
+import os
 import time
 from typing import Any
 
@@ -143,8 +144,9 @@ class OpenAIProvider(LLMProvider):
         return self.model.startswith("gpt-5")
 
     def _default_max_tokens(self) -> int:
-        # JSON outputs can be large (descriptions + claims), so keep this generous.
-        return 2000
+        # Quality-first default: keep a high completion ceiling so strict JSON
+        # responses don't truncate before emitting any payload content.
+        return 8000
 
     @property
     def name(self) -> str:
@@ -227,15 +229,12 @@ class OpenAIProvider(LLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         # Build reasoning_effort kwarg for models that support it.
-        reasoning_params: dict[str, str] = {}
-        if reasoning_effort and self._supports_reasoning_effort():
-            reasoning_params["reasoning_effort"] = reasoning_effort
-
-        # Temperature and reasoning_effort are mutually exclusive on GPT-5.2.
-        # Only pass temperature when reasoning_effort is NOT set.
-        sampling_params: dict[str, float] = {}
-        if not reasoning_params:
-            sampling_params["temperature"] = 0.7
+        effective_reasoning_effort = (
+            reasoning_effort or os.environ.get("FEEDOPS_REASONING_EFFORT", "high")
+        )
+        current_reasoning_effort = (
+            effective_reasoning_effort if self._supports_reasoning_effort() else None
+        )
 
         # Build strict response format from the schema requested by the caller.
         response_format = _build_strict_schema(schema)
@@ -246,7 +245,18 @@ class OpenAIProvider(LLMProvider):
         content = ""
 
         for attempt in range(self.max_retries):
+            response = None
             try:
+                reasoning_params: dict[str, str] = {}
+                if current_reasoning_effort:
+                    reasoning_params["reasoning_effort"] = current_reasoning_effort
+
+                # Temperature and reasoning_effort are mutually exclusive on GPT-5.2.
+                # Only pass temperature when reasoning_effort is NOT set.
+                sampling_params: dict[str, float] = {}
+                if not reasoning_params:
+                    sampling_params["temperature"] = 0.7
+
                 token_params: dict[str, int] = {}
                 if self._use_max_completion_tokens():
                     token_params["max_completion_tokens"] = max_output_tokens
@@ -324,12 +334,48 @@ class OpenAIProvider(LLMProvider):
 
             except json.JSONDecodeError as e:
                 last_error = str(e)
+                finish_reason = None
+                raw_chars = len(content or "")
+                if response is not None and getattr(response, "choices", None):
+                    finish_reason = getattr(response.choices[0], "finish_reason", None)
                 metrics_registry.increment(
                     "provider_retry_total", provider=self.name, reason="json_decode"
                 )
                 logger.warning(
-                    f"JSON parse error (attempt {attempt + 1}): {last_error}"
+                    f"JSON parse error (attempt {attempt + 1}): {last_error} "
+                    f"(finish_reason={finish_reason}, raw_chars={raw_chars}, "
+                    f"max_completion_tokens={max_output_tokens}, "
+                    f"reasoning_effort={current_reasoning_effort})"
                 )
+
+                # High-reasoning strict JSON responses can occasionally terminate at
+                # the completion ceiling before emitting any visible JSON.
+                if (
+                    finish_reason == "length"
+                    and raw_chars == 0
+                    and attempt < self.max_retries - 1
+                ):
+                    new_budget = max(max_output_tokens * 2, 10000)
+                    if new_budget > max_output_tokens:
+                        max_output_tokens = new_budget
+                        metrics_registry.increment(
+                            "provider_retry_total",
+                            provider=self.name,
+                            reason="completion_budget",
+                        )
+                        delay = compute_backoff_seconds(attempt)
+                        log_event(
+                            logger,
+                            logging.WARNING,
+                            "provider.generate.retry",
+                            provider=self.name,
+                            attempt=attempt + 1,
+                            delay_seconds=round(delay, 4),
+                            reason=f"length_empty_output; bump_tokens={max_output_tokens}",
+                        )
+                        await asyncio.sleep(delay)
+                        continue
+
                 if image:
                     current_prompt = (
                         "Your response was not valid JSON.\n"
@@ -339,7 +385,8 @@ class OpenAIProvider(LLMProvider):
                     )
                 else:
                     # Add repair instruction for next attempt
-                    messages.append({"role": "assistant", "content": content})
+                    if (content or "").strip():
+                        messages.append({"role": "assistant", "content": content})
                     messages.append(
                         {
                             "role": "user",

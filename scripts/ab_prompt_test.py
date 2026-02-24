@@ -18,9 +18,23 @@ from pathlib import Path
 from typing import Any
 
 import tiktoken
-from openai import AsyncOpenAI
+from openai import (
+    APIConnectionError,
+    APITimeoutError,
+    AsyncOpenAI,
+    InternalServerError,
+    RateLimitError,
+)
 
-from feedops.api.prompt_builder import build_core_prompt
+from feedops.api.prompt_builder import (
+    build_bing_prompt,
+    build_google_prompt,
+    build_shopify_prompt,
+)
+from feedops.api.prompt_loader import (
+    format_gold_standard_examples_bundle,
+    get_category_guidance,
+)
 from feedops.api.supabase_loader import load_parent_sku_from_supabase
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.prompts import (
@@ -96,6 +110,17 @@ STOP_WORDS = {
     "bathroom",
 }
 
+META_SEARCH_COMMENTARY_PATTERNS = [
+    re.compile(r"\bif\s+you(?:'re|\s+are)?\s+(?:searching|looking|shopping)\b", re.IGNORECASE),
+    re.compile(r"\bif\s+you(?:'ve|\s+have)?\s+been\s+comparing\b", re.IGNORECASE),
+    re.compile(r"\bsearch(?:ed|ing)?\s+for\b", re.IGNORECASE),
+]
+
+METADATA_DUMP_PATTERN = re.compile(
+    r"\b(?:upc|gtin|category|mastersku|master sku|custom[_\s-]*label|item[_\s-]*group)\s*:",
+    re.IGNORECASE,
+)
+
 ENCODING = tiktoken.get_encoding("o200k_base")
 
 
@@ -157,27 +182,124 @@ def extract_usage(response: Any) -> dict[str, int]:
     return usage
 
 
+def _platform_completion_tokens(platform: str, requested_tokens: int) -> int:
+    """Ensure finish generation has enough completion budget in strict JSON mode."""
+    if platform == "finish":
+        return max(requested_tokens, 10000)
+    return requested_tokens
+
+
 def parse_json_payload(raw: str) -> Any:
     """Parse model output into JSON with light normalization/fallbacks."""
+    def _unwrap_content_wrapper(value: Any) -> Any:
+        current = value
+        for _ in range(3):
+            if isinstance(current, dict) and set(current.keys()) == {"content"}:
+                inner = current.get("content")
+                if isinstance(inner, (dict, list)):
+                    current = inner
+                    continue
+                if isinstance(inner, str):
+                    stripped = inner.strip()
+                    if not stripped:
+                        break
+                    try:
+                        current = json.loads(stripped)
+                        continue
+                    except json.JSONDecodeError:
+                        break
+            break
+        return current
+
     text = (raw or "").strip()
     if not text:
         raise json.JSONDecodeError("empty response", raw, 0)
 
     try:
-        return json.loads(text)
+        return _unwrap_content_wrapper(json.loads(text))
     except json.JSONDecodeError:
         # Handle occasional markdown-wrapped JSON.
         fenced = re.search(r"```(?:json)?\\s*(.*?)```", text, flags=re.DOTALL)
         if fenced:
-            return json.loads(fenced.group(1).strip())
+            return _unwrap_content_wrapper(json.loads(fenced.group(1).strip()))
 
         # Last-resort brace extraction.
         start = text.find("{")
         end = text.rfind("}")
         if start != -1 and end != -1 and end > start:
-            return json.loads(text[start : end + 1])
+            return _unwrap_content_wrapper(json.loads(text[start : end + 1]))
 
         raise
+
+
+def extract_response_diagnostics(response: Any) -> dict[str, Any]:
+    """Extract finish_reason/refusal/raw-content metadata for debugging."""
+    choice = response.choices[0]
+    message = choice.message
+    raw = message.content or ""
+    return {
+        "finish_reason": getattr(choice, "finish_reason", None),
+        "refusal": getattr(message, "refusal", None),
+        "raw_content_chars": len(raw),
+    }
+
+
+def _should_escalate_budget(diagnostics: dict[str, Any] | None) -> bool:
+    """Escalate output budget only for strict-json empty-length failures."""
+    if not diagnostics:
+        return False
+    return (
+        diagnostics.get("finish_reason") == "length"
+        and int(diagnostics.get("raw_content_chars") or 0) == 0
+    )
+
+
+def _is_transient_error(exc: Exception) -> bool:
+    return isinstance(
+        exc,
+        (
+            asyncio.TimeoutError,
+            APITimeoutError,
+            APIConnectionError,
+            RateLimitError,
+            InternalServerError,
+        ),
+    )
+
+
+async def _create_completion_with_retry(
+    client: AsyncOpenAI,
+    *,
+    model: str,
+    messages: list[dict[str, Any]],
+    response_format: dict[str, Any],
+    reasoning_effort: str,
+    max_completion_tokens: int,
+    request_timeout_sec: int = 180,
+    max_attempts: int = 3,
+) -> Any:
+    """Retry transient OpenAI errors with bounded exponential backoff."""
+    last_error: Exception | None = None
+    for attempt in range(max_attempts):
+        try:
+            return await asyncio.wait_for(
+                client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    response_format=response_format,
+                    reasoning_effort=reasoning_effort,
+                    max_completion_tokens=max_completion_tokens,
+                ),
+                timeout=request_timeout_sec,
+            )
+        except Exception as exc:  # pragma: no cover - exercised via integration runs
+            last_error = exc
+            if not _is_transient_error(exc) or attempt == max_attempts - 1:
+                break
+            await asyncio.sleep(0.75 * (2**attempt))
+
+    assert last_error is not None
+    raise last_error
 
 
 def extract_strings(payload: Any) -> list[str]:
@@ -193,6 +315,32 @@ def extract_strings(payload: Any) -> list[str]:
     return strings
 
 
+def extract_customer_content_strings(platform: str, payload: dict[str, Any]) -> list[str]:
+    """Return only customer-facing content fields (exclude claims/self_score)."""
+    if platform == "google":
+        return [
+            str(payload.get("google_title", "") or ""),
+            str(payload.get("google_short_title", "") or ""),
+            str(payload.get("google_description", "") or ""),
+        ]
+    if platform == "bing":
+        return [
+            str(payload.get("bing_title", "") or ""),
+            str(payload.get("bing_description", "") or ""),
+        ]
+    if platform == "shopify":
+        return [
+            str(payload.get("shopify_title", "") or ""),
+            str(payload.get("shopify_meta_description", "") or ""),
+            str(payload.get("shopify_description", "") or ""),
+        ]
+    if platform == "finish":
+        sentences = payload.get("sentences", [])
+        if isinstance(sentences, list):
+            return [str(item.get("sentence", "") or "") for item in sentences if isinstance(item, dict)]
+    return []
+
+
 def detect_banned_words(text: str) -> list[str]:
     text_lower = text.lower()
     return [word for word in BANNED_WORDS if word in text_lower]
@@ -201,6 +349,14 @@ def detect_banned_words(text: str) -> list[str]:
 def detect_competitor_brands(text: str) -> list[str]:
     text_lower = text.lower()
     return [brand for brand in COMPETITOR_BRANDS if brand in text_lower]
+
+
+def detect_meta_search_commentary(text: str) -> list[str]:
+    return [pattern.pattern for pattern in META_SEARCH_COMMENTARY_PATTERNS if pattern.search(text or "")]
+
+
+def detect_metadata_dump(text: str) -> list[str]:
+    return [METADATA_DUMP_PATTERN.pattern] if METADATA_DUMP_PATTERN.search(text or "") else []
 
 
 def infer_product_keywords(parent_sku: Any) -> set[str]:
@@ -225,33 +381,34 @@ def build_user_prompt(
     finish_pairs: list[tuple[str, str]],
 ) -> str:
     if platform in {"google", "bing", "shopify"}:
-        content_type = "platform content package"
-        prompt = build_core_prompt(
-            parent_sku=parent_sku,
+        category_guidance = get_category_guidance(getattr(parent_sku, "category", ""))
+
+        if platform == "google":
+            try:
+                gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+            except Exception:
+                gold_examples = ""
+            return build_google_prompt(
+                sku_data=parent_sku,
+                evidence=evidence,
+                keywords=None,
+                category_guidance=category_guidance,
+                gold_examples=gold_examples,
+            )
+
+        if platform == "bing":
+            return build_bing_prompt(
+                sku_data=parent_sku,
+                evidence=evidence,
+                keywords=None,
+                category_guidance=category_guidance,
+            )
+
+        return build_shopify_prompt(
+            sku_data=parent_sku,
             evidence=evidence,
-            evidence_markdown=evidence_markdown,
-            platform=platform,
-            content_type=content_type,
-            finish_code=None,
-            mode="batch",
+            category_guidance=category_guidance,
         )
-        if platform in {"google", "bing"}:
-            prompt += (
-                "\n\n<placeholder_requirements>\n"
-                "Use literal placeholder strings exactly as written:\n"
-                "- {FINISH_NAME} must be the first token in titles.\n"
-                "- {FINISH_SENTENCE} must appear in descriptions.\n"
-                "Do not expand these placeholders.\n"
-                "</placeholder_requirements>"
-            )
-        else:
-            prompt += (
-                "\n\n<placeholder_requirements>\n"
-                "Shopify output is finish-agnostic. Never include {FINISH_NAME} or "
-                "{FINISH_SENTENCE}.\n"
-                "</placeholder_requirements>"
-            )
-        return prompt
 
     finish_lines = "\n".join(
         f"- {finish_code}: {finish_name}" for finish_code, finish_name in finish_pairs
@@ -323,52 +480,83 @@ async def generate_per_platform(
     )
 
     started_at = time.time()
-    response = await client.chat.completions.create(
+    response_format = build_response_format(schema_name, schema)
+    platform_completion_tokens = _platform_completion_tokens(
+        platform, max_completion_tokens
+    )
+    base_messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    response = await _create_completion_with_retry(
+        client,
         model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        response_format=build_response_format(schema_name, schema),
+        messages=base_messages,
+        response_format=response_format,
         reasoning_effort=reasoning_effort,
-        max_completion_tokens=max_completion_tokens,
+        max_completion_tokens=platform_completion_tokens,
     )
 
     message = response.choices[0].message
     raw = message.content
+    diagnostics = {
+        "initial": extract_response_diagnostics(response),
+        "repair": None,
+    }
     if raw is None:
         raise RuntimeError(
             f"Platform {platform} returned no content "
-            f"(finish_reason={response.choices[0].finish_reason})"
+            f"(finish_reason={diagnostics['initial'].get('finish_reason')}, "
+            f"refusal={diagnostics['initial'].get('refusal')}, "
+            f"raw_chars={diagnostics['initial'].get('raw_content_chars')})"
         )
 
     try:
         payload = parse_json_payload(raw)
     except json.JSONDecodeError:
         # One retry with explicit repair instruction before failing.
-        repair = await client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-                {
-                    "role": "assistant",
-                    "content": raw,
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        "Return valid JSON only that matches the response schema. "
-                        "No prose, no markdown fences."
-                    ),
-                },
-            ],
-            response_format=build_response_format(schema_name, schema),
-            reasoning_effort=reasoning_effort,
-            max_completion_tokens=max_completion_tokens,
+        repair_completion_tokens = platform_completion_tokens
+        repair_reasoning_effort = reasoning_effort
+        if _should_escalate_budget(diagnostics["initial"]):
+            repair_completion_tokens = max(platform_completion_tokens * 2, 10000)
+
+        repair_messages: list[dict[str, str]] = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        if raw.strip():
+            repair_messages.append({"role": "assistant", "content": raw})
+        repair_messages.append(
+            {
+                "role": "user",
+                "content": (
+                    "Return valid JSON only that matches the response schema. "
+                    "No prose, no markdown fences."
+                ),
+            }
         )
+        repair = await _create_completion_with_retry(
+            client,
+            model=model,
+            messages=repair_messages,
+            response_format=response_format,
+            reasoning_effort=repair_reasoning_effort,
+            max_completion_tokens=repair_completion_tokens,
+        )
+        diagnostics["repair"] = extract_response_diagnostics(repair)
+        diagnostics["repair_completion_tokens"] = repair_completion_tokens
+        diagnostics["repair_reasoning_effort"] = repair_reasoning_effort
         repaired_raw = repair.choices[0].message.content or ""
-        payload = parse_json_payload(repaired_raw)
+        try:
+            payload = parse_json_payload(repaired_raw)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                f"Platform {platform} invalid JSON after repair "
+                f"(initial_finish_reason={diagnostics['initial'].get('finish_reason')}, "
+                f"initial_raw_chars={diagnostics['initial'].get('raw_content_chars')}, "
+                f"repair_finish_reason={diagnostics['repair'].get('finish_reason')}, "
+                f"repair_raw_chars={diagnostics['repair'].get('raw_content_chars')})"
+            ) from exc
         usage = extract_usage(response)
         repair_usage = extract_usage(repair)
         usage["prompt_tokens"] += repair_usage.get("prompt_tokens", 0)
@@ -377,8 +565,10 @@ async def generate_per_platform(
     else:
         usage = extract_usage(response)
 
-    if message.refusal:
-        raise RuntimeError(f"Platform {platform} refusal: {message.refusal}")
+    if diagnostics["initial"].get("refusal"):
+        raise RuntimeError(
+            f"Platform {platform} refusal: {diagnostics['initial']['refusal']}"
+        )
 
     return {
         "platform": platform,
@@ -391,18 +581,31 @@ async def generate_per_platform(
         "usage": usage,
         "latency_sec": round(time.time() - started_at, 2),
         "payload": payload,
+        "diagnostics": diagnostics,
     }
 
 
 def evaluate_platform_output(platform: str, payload: dict[str, Any], parent_sku: Any) -> dict[str, Any]:
     checks: dict[str, dict[str, Any]] = {}
+    category_lower = str(getattr(parent_sku, "category", "") or "").lower()
 
-    all_text = "\n".join(extract_strings(payload))
+    all_text = "\n".join(extract_customer_content_strings(platform, payload))
     banned = detect_banned_words(all_text)
     competitors = detect_competitor_brands(all_text)
+    meta_search = detect_meta_search_commentary(all_text)
+    metadata_dump = detect_metadata_dump(all_text)
 
     checks["no_banned_words"] = {"passed": not banned, "details": banned}
     checks["no_competitor_brands"] = {"passed": not competitors, "details": competitors}
+    if platform in {"google", "bing"}:
+        checks["no_meta_search_commentary"] = {
+            "passed": not meta_search,
+            "details": meta_search,
+        }
+        checks["no_metadata_dump"] = {
+            "passed": not metadata_dump,
+            "details": metadata_dump,
+        }
 
     if platform == "google":
         title = payload.get("google_title", "")
@@ -415,10 +618,17 @@ def evaluate_platform_output(platform: str, payload: dict[str, Any], parent_sku:
             "passed": "{FINISH_SENTENCE}" in description,
             "details": description,
         }
-        checks["description_length_700_900"] = {
-            "passed": 700 <= len(description) <= 900,
-            "details": len(description),
-        }
+        if "towel bar" in category_lower or "towel bars" in category_lower:
+            title_lower = str(title).lower()
+            short_title_lower = str(payload.get("google_short_title", "")).lower()
+            checks["title_matches_category_product_noun"] = {
+                "passed": "towel bar" in title_lower and "towel rack" not in title_lower,
+                "details": title,
+            }
+            checks["short_title_matches_category_product_noun"] = {
+                "passed": "towel bar" in short_title_lower and "towel rack" not in short_title_lower,
+                "details": payload.get("google_short_title", ""),
+            }
 
     elif platform == "bing":
         title = payload.get("bing_title", "")
@@ -431,10 +641,12 @@ def evaluate_platform_output(platform: str, payload: dict[str, Any], parent_sku:
             "passed": "{FINISH_SENTENCE}" in description,
             "details": description,
         }
-        checks["description_length_700_1000"] = {
-            "passed": 700 <= len(description) <= 1000,
-            "details": len(description),
-        }
+        if "towel bar" in category_lower or "towel bars" in category_lower:
+            title_lower = str(title).lower()
+            checks["title_matches_category_product_noun"] = {
+                "passed": "towel bar" in title_lower and "towel rack" not in title_lower,
+                "details": title,
+            }
 
     elif platform == "shopify":
         title = payload.get("shopify_title", "")
@@ -452,7 +664,7 @@ def evaluate_platform_output(platform: str, payload: dict[str, Any], parent_sku:
             },
         }
         checks["meta_description_lt_160"] = {
-            "passed": len(meta) < 160,
+            "passed": len(meta) <= 160,
             "details": len(meta),
         }
 
@@ -565,6 +777,14 @@ def render_results_markdown(
         lines.append("")
         for check_name, check in checks.items():
             lines.append(format_check_line(check_name, check))
+        failed_checks = [name for name, check in checks.items() if not check.get("passed")]
+        if failed_checks:
+            lines.append(
+                "- Diagnostics: "
+                f"{json.dumps(item.get('diagnostics', {}), ensure_ascii=False)}"
+            )
+            if item.get("error"):
+                lines.append(f"- Generation error: {item.get('error')}")
         lines.append("")
 
     placeholder_findings: list[str] = []
@@ -611,6 +831,7 @@ async def run_platform_tests(
     model: str,
     reasoning_effort: str,
     max_completion_tokens: int,
+    platform_timeout_sec: int = 210,
 ) -> tuple[Any, dict[str, Any]]:
     parent_sku = load_parent_sku_from_supabase(sku)
     if not parent_sku:
@@ -626,32 +847,75 @@ async def run_platform_tests(
     client = AsyncOpenAI(api_key=api_key)
     results: dict[str, Any] = {}
 
-    for platform in selected_platforms:
+    async def _run_platform(platform: str) -> tuple[str, dict[str, Any]]:
         print(f"\nGenerating {platform}...")
-        generated = await generate_per_platform(
-            client=client,
-            parent_sku=parent_sku,
-            evidence=evidence,
-            evidence_markdown=evidence_markdown,
-            platform=platform,
-            model=model,
-            reasoning_effort=reasoning_effort,
-            max_completion_tokens=max_completion_tokens,
-        )
-        generated["checks"] = evaluate_platform_output(
-            platform=platform,
-            payload=generated["payload"],
-            parent_sku=parent_sku,
-        )
-        results[platform] = generated
+        try:
+            generated = await asyncio.wait_for(
+                generate_per_platform(
+                    client=client,
+                    parent_sku=parent_sku,
+                    evidence=evidence,
+                    evidence_markdown=evidence_markdown,
+                    platform=platform,
+                    model=model,
+                    reasoning_effort=reasoning_effort,
+                    max_completion_tokens=max_completion_tokens,
+                ),
+                timeout=platform_timeout_sec,
+            )
+            generated["checks"] = evaluate_platform_output(
+                platform=platform,
+                payload=generated["payload"],
+                parent_sku=parent_sku,
+            )
+            results[platform] = generated
 
-        passed = sum(1 for c in generated["checks"].values() if c.get("passed"))
-        total = len(generated["checks"])
-        print(
-            f"  {platform}: {passed}/{total} checks passed | "
-            f"prompt_tokens={generated['usage']['prompt_tokens']} "
-            f"completion_tokens={generated['usage']['completion_tokens']}"
-        )
+            passed = sum(1 for c in generated["checks"].values() if c.get("passed"))
+            total = len(generated["checks"])
+            print(
+                f"  {platform}: {passed}/{total} checks passed | "
+                f"prompt_tokens={generated['usage']['prompt_tokens']} "
+                f"completion_tokens={generated['usage']['completion_tokens']}"
+            )
+            failed_checks = [
+                name
+                for name, check in generated["checks"].items()
+                if not check.get("passed")
+            ]
+            if failed_checks:
+                print(f"  diagnostics={generated.get('diagnostics', {})}")
+            return platform, generated
+        except Exception as exc:
+            error_message = f"{type(exc).__name__}: {exc}"
+            print(f"  {platform}: ERROR — {error_message}")
+            return platform, {
+                "platform": platform,
+                "error": error_message,
+                "system_prompt_chars": 0,
+                "system_prompt_tokens": 0,
+                "user_prompt_chars": 0,
+                "user_prompt_tokens": 0,
+                "usage": {"prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0},
+                "latency_sec": 0.0,
+                "payload": {},
+                "diagnostics": {
+                    "initial": {
+                        "finish_reason": None,
+                        "refusal": None,
+                        "raw_content_chars": 0,
+                    },
+                    "repair": None,
+                },
+                "checks": {
+                    "generation_succeeded": {"passed": False, "details": error_message},
+                },
+            }
+
+    platform_results = await asyncio.gather(
+        *[_run_platform(platform) for platform in selected_platforms]
+    )
+    for platform, generated in platform_results:
+        results[platform] = generated
 
     return parent_sku, results
 
@@ -677,19 +941,30 @@ def main() -> None:
     parser.add_argument(
         "--reasoning-effort",
         choices=["low", "medium", "high"],
-        default="medium",
+        default="high",
         help="reasoning_effort passed to GPT-5.2",
     )
     parser.add_argument(
         "--max-completion-tokens",
         type=int,
-        default=4000,
+        default=8000,
         help="max_completion_tokens for each platform call",
+    )
+    parser.add_argument(
+        "--platform-timeout-sec",
+        type=int,
+        default=210,
+        help="Hard timeout per platform generation call in seconds.",
     )
     parser.add_argument(
         "--results-path",
         default=str(DEFAULT_RESULTS_PATH),
         help="Markdown output path",
+    )
+    parser.add_argument(
+        "--raw-dir",
+        default="/tmp/ab_test_outputs",
+        help="Directory for raw JSON payload outputs",
     )
     parser.add_argument(
         "--dry-run",
@@ -699,13 +974,15 @@ def main() -> None:
     args = parser.parse_args()
 
     platforms = parse_platforms(args.platform)
+    run_timestamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
     print(
         "Running per-platform test:\n"
         f"  SKU={args.sku}\n"
         f"  platforms={platforms}\n"
         f"  model={args.model}\n"
         f"  reasoning_effort={args.reasoning_effort}\n"
-        f"  max_completion_tokens={args.max_completion_tokens}"
+        f"  max_completion_tokens={args.max_completion_tokens}\n"
+        f"  platform_timeout_sec={args.platform_timeout_sec}"
     )
 
     if args.dry_run:
@@ -719,6 +996,7 @@ def main() -> None:
                 model=args.model,
                 reasoning_effort=args.reasoning_effort,
                 max_completion_tokens=args.max_completion_tokens,
+                platform_timeout_sec=args.platform_timeout_sec,
             )
         )
     except Exception as exc:
@@ -732,11 +1010,20 @@ def main() -> None:
         results=results,
     )
 
-    results_path = Path(args.results_path)
+    default_results = str(DEFAULT_RESULTS_PATH)
+    requested_results = Path(args.results_path)
+    if args.results_path == default_results or requested_results.exists():
+        results_path = requested_results.with_name(
+            f"{requested_results.stem}-{args.sku.replace('/', '-')}-{run_timestamp}{requested_results.suffix or '.md'}"
+        )
+    else:
+        results_path = requested_results
     results_path.parent.mkdir(parents=True, exist_ok=True)
     results_path.write_text(report)
 
-    raw_dir = Path("/tmp/ab_test_outputs")
+    raw_dir = Path(args.raw_dir)
+    if raw_dir.exists():
+        raw_dir = raw_dir / f"run-{args.sku.replace('/', '-')}-{run_timestamp}"
     raw_dir.mkdir(parents=True, exist_ok=True)
     safe_sku = args.sku.replace("/", "-")
     for platform, data in results.items():

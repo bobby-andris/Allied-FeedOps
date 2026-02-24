@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
+_SPACE_RE = re.compile(r"\s+")
 _FINISH_MODIFIERS = {
     # Common finish adjectives/modifiers (not finish identifiers on their own).
     "antique",
@@ -45,6 +46,88 @@ _FINISH_MODIFIERS = {
     "venetian",
 }
 
+_BANNED_PROMO_WORDS = (
+    "finest",
+    "luxurious",
+    "premium",
+    "exclusive",
+    "exceptional",
+    "unparalleled",
+    "superior",
+    "exquisite",
+    "ultimate",
+)
+
+_COMPETITOR_BRANDS = (
+    "jan barboglio",
+    "kingston brass",
+    "moen",
+    "delta",
+    "kohler",
+    "american standard",
+    "pfister",
+    "brizo",
+    "grohe",
+    "hansgrohe",
+    "restoration hardware",
+    "pottery barn",
+    "home depot",
+    "lowes",
+)
+
+_PROSE_FIELDS_STRIP_BANNED = {
+    "current_description",
+    "bullet_1",
+    "bullet_2",
+    "bullet_3",
+    "bullet_4",
+    "bullet_5",
+    "bullet_6",
+    "collection_description",
+    "feature_benefits",
+    "key_differentiators",
+    "competitive_edge",
+}
+
+_KEYWORD_FIELDS_STRIP_COMPETITORS = {
+    "external_keywords",
+    "keyword_intent_master",
+    "search_queries_top",
+    "search_query_themes",
+    "variant_top_queries",
+    "keyword_gaps_current_title",
+    "query_filter_reason_top",
+}
+
+# Exclude feed metadata and raw search/keyword diagnostics from
+# customer-facing copy context. These rows can leak into generated
+# prose if surfaced in the prompt evidence table.
+_COPY_CONTEXT_EXCLUDED_FIELDS = {
+    "master_sku",
+    "category",
+    "gtin",
+    "upc",
+    "custom_label_0",
+    "main_image_url",
+    "search_queries_top",
+    "variant_top_queries",
+    "keyword_intent_master",
+    "external_keywords",
+    "keyword_gaps_current_title",
+    "query_filter_kept_count",
+    "query_filter_dropped_count",
+    "query_filter_reason_top",
+}
+
+_BANNED_WORD_PATTERNS = tuple(
+    re.compile(rf"(?<!\w){re.escape(word)}(?!\w)", flags=re.IGNORECASE)
+    for word in _BANNED_PROMO_WORDS
+)
+_COMPETITOR_PATTERNS = tuple(
+    re.compile(rf"(?<!\w){re.escape(brand)}(?!\w)", flags=re.IGNORECASE)
+    for brand in _COMPETITOR_BRANDS
+)
+
 
 def _tokenize(text: str) -> list[str]:
     return _WORD_RE.findall((text or "").lower())
@@ -52,6 +135,58 @@ def _tokenize(text: str) -> list[str]:
 
 def _normalize_phrase(text: str) -> str:
     return " ".join(_tokenize(text))
+
+
+def sanitize_prompt_text(
+    text: str,
+    *,
+    strip_banned_words: bool = False,
+    strip_competitor_brands: bool = False,
+) -> str:
+    """Sanitize prompt-facing evidence text without mutating source data.
+
+    This function is intentionally conservative: it only removes explicitly
+    banned words/competitor brands and then normalizes spacing.
+    """
+    sanitized = str(text or "")
+    if not sanitized:
+        return ""
+
+    if strip_competitor_brands:
+        for pattern in _COMPETITOR_PATTERNS:
+            sanitized = pattern.sub("", sanitized)
+
+    if strip_banned_words:
+        for pattern in _BANNED_WORD_PATTERNS:
+            sanitized = pattern.sub("", sanitized)
+
+    sanitized = re.sub(r"\s+([,.;:!?])", r"\1", sanitized)
+    sanitized = re.sub(r"([,.;:!?]){2,}", r"\1", sanitized)
+    sanitized = _SPACE_RE.sub(" ", sanitized).strip()
+    return sanitized.strip(" ,;:-")
+
+
+def sanitize_evidence_value(field: str, value: str, source: str = "") -> str:
+    """Apply evidence-specific sanitization based on field/source semantics."""
+    field_name = (field or "").strip()
+    source_name = (source or "").lower()
+
+    strip_banned_words = field_name in _PROSE_FIELDS_STRIP_BANNED
+    strip_competitor_brands = (
+        field_name in _KEYWORD_FIELDS_STRIP_COMPETITORS
+        or "search" in source_name
+        or "keyword" in source_name
+    )
+    return sanitize_prompt_text(
+        value,
+        strip_banned_words=strip_banned_words,
+        strip_competitor_brands=strip_competitor_brands,
+    )
+
+
+def sanitize_catalog_prose(text: str) -> str:
+    """Sanitize catalog-derived prose used in prompt narratives."""
+    return sanitize_prompt_text(text, strip_banned_words=True)
 
 
 def _dedupe_phrases(phrases: list[str]) -> list[str]:
@@ -525,10 +660,30 @@ def build_evidence_table(parent_sku: ParentSKU) -> list[Evidence]:
     enrichment = enrich_product(parent_sku)
     evidence.extend(enrichment.to_evidence_rows())
 
-    return evidence
+    # Prompt-context sanitization boundary. Source data in DB is never mutated.
+    sanitized_rows: list[Evidence] = []
+    for row in evidence:
+        sanitized_rows.append(
+            Evidence(
+                field=row.field,
+                value=sanitize_evidence_value(row.field, row.value, row.source),
+                source=row.source,
+            )
+        )
+
+    return sanitized_rows
 
 
-def format_evidence_markdown(evidence: list[Evidence]) -> str:
+def _filter_evidence_for_copy_context(evidence: list[Evidence]) -> list[Evidence]:
+    """Return evidence rows safe for customer-copy generation context."""
+    return [row for row in evidence if row.field not in _COPY_CONTEXT_EXCLUDED_FIELDS]
+
+
+def format_evidence_markdown(
+    evidence: list[Evidence],
+    *,
+    for_customer_copy: bool = False,
+) -> str:
     """Format evidence as markdown table for prompt.
 
     Args:
@@ -537,6 +692,8 @@ def format_evidence_markdown(evidence: list[Evidence]) -> str:
     Returns:
         Markdown table string.
     """
+    rows = _filter_evidence_for_copy_context(evidence) if for_customer_copy else evidence
+
     lines = [
         "## Available Product Data",
         "",
@@ -544,9 +701,9 @@ def format_evidence_markdown(evidence: list[Evidence]) -> str:
         "|-----------|-------|--------|",
     ]
 
-    for e in evidence:
-        # Escape pipe characters in values
-        value = str(e.value).replace("|", "\\|")
+    for e in rows:
+        # Prompt-markdown sanitization boundary (belt-and-suspenders safety).
+        value = sanitize_evidence_value(e.field, str(e.value), e.source).replace("|", "\\|")
         lines.append(f"| {e.field} | {value} | {e.source} |")
 
     return "\n".join(lines)

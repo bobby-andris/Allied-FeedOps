@@ -145,7 +145,7 @@ async def optimize_parent_sku(
         candidate_weights = parse_candidate_weights(
             os.environ.get("FEEDOPS_CANDIDATE_WEIGHTS")
         )
-    reasoning_effort = os.environ.get("FEEDOPS_REASONING_EFFORT", "medium")
+    reasoning_effort = os.environ.get("FEEDOPS_REASONING_EFFORT", "high")
     candidates, generation_errors = await generate_candidates(
         parent_sku, provider, num_candidates, reasoning_effort=reasoning_effort
     )

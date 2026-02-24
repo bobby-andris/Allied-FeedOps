@@ -43,8 +43,8 @@ CANDIDATE_SCHEMA = {
         },
         "shopify_meta_description": {
             "type": "string",
-            "description": "Shopify SEO meta description (target 140-155 characters). Compelling standalone summary with primary keyword.",
-            "maxLength": 155,
+            "description": "Shopify SEO meta description (target 140-160 characters). Compelling standalone summary with primary keyword.",
+            "maxLength": 160,
         },
         "claims": {
             "type": "array",
@@ -176,8 +176,6 @@ GOOGLE_SCHEMA = {
                 "{FINISH_SENTENCE} placeholder."
             ),
             "minLength": 700,
-            "maxLength": 900,
-            "pattern": r"(?s).*\{FINISH_SENTENCE\}.*",
         },
         "claims": _CLAIMS_SCHEMA,
         "self_score": _SELF_SCORE_SCHEMA,
@@ -211,8 +209,6 @@ BING_SCHEMA = {
                 "in first 200 chars and include literal {FINISH_SENTENCE}."
             ),
             "minLength": 700,
-            "maxLength": 1000,
-            "pattern": r"(?s).*\{FINISH_SENTENCE\}.*",
         },
         "claims": _CLAIMS_SCHEMA,
         "self_score": _SELF_SCORE_SCHEMA,
@@ -316,6 +312,18 @@ Use the product's own story (from current_description, bullets, material, collec
 Use specificity as proof, not adjectives. "Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." Every factual detail earns trust; every vague adjective loses it.
 </creative_direction>
 
+<objective_hierarchy>
+Primary objective: produce the strongest product-specific content for the target platform so the right shopper clicks and buys.
+
+Priority order:
+1. Product truth and factual accuracy from evidence.
+2. Clear, product-specific differentiation a real shopper can understand quickly.
+3. Platform readability and format compliance.
+4. Keyword enrichment only when it improves priorities 1-3.
+
+If a keyword hint conflicts with product truth, category fidelity, or natural language clarity, ignore the hint.
+</objective_hierarchy>
+
 <brand_voice>
 Allied Brass voice: confident but not arrogant, specific and concrete, warm and inviting. Design-aware but practical.
 
@@ -349,27 +357,11 @@ Content prohibitions (from human evaluation feedback):
 - Do NOT use "also searched as," "also known as," or similar keyword list patterns — all keywords must be integrated naturally
 - Do NOT name competitor materials: "die-cast zinc," "zinc alloy," "plated alternatives," "chrome-plated steel," "hollow zinc" — frame solid brass positively, never by contrast with cheaper materials
 - Do NOT use "heritage bathroom fixtures" or any invented category terms not in the evidence
-- Do NOT mention "28 finishes" or finish variety counts in Google/Bing descriptions — these descriptions will be expanded to finish-specific variants, making finish count references irrelevant and confusing
+- In variant-facing descriptions, do NOT mention finish variety counts (e.g., "28 finishes")
+- Never use banned promo words in customer-facing copy: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
 
 Banned content: No internal SKUs, pipeline terms, source citations, URLs, prices, shipping promises, or keyword lists.
 </accuracy_guardrail>
-
-<platform_rules>
-Field isolation — treat each field as an independent contract:
-- google_title, google_short_title, google_description: variant-aware (finish context allowed)
-- bing_title, bing_description: variant-aware (synonym coverage encouraged)
-- shopify_title, shopify_description, shopify_meta_description: master-SKU, finish-agnostic
-
-Google/Bing title requirements: Finish name MUST appear in title (e.g., "Antique Bronze 18-Inch Towel Bar"). Product type in first 30 chars. Primary dimension before char 70. "Allied Brass" as final segment. Length 60-150 chars. Hyphens or commas as separators; no pipes. The finish name is the #1 differentiator shoppers scan for in search results — every Google/Bing title must include it.
-google_short_title: Max 70 chars. Product type + key dimension only. No brand, no collection.
-Google/Bing descriptions: Plain text only. 700-900 chars target (Google indexes full text for query matching). Lead with concrete product statement in first 160 chars.
-
-Shopify title: Max 255 chars. H1-friendly, finish-agnostic. Must NOT include "Allied Brass".
-Shopify description: HTML required. Start with <p> containing buyer problem or desired outcome. Follow with <ul><li> benefits. Include trust signals (material, warranty) when evidence supports.
-Shopify meta description: 140-155 chars. Standalone summary with primary keyword.
-
-Never apply Shopify HTML rules to Google/Bing. Never apply feed-fuel keyword density rules to Shopify narrative sections.
-</platform_rules>
 
 <scoring_rubric>
 self_score criteria and weights: hook_quality (15%), product_specificity (15%), competitive_diff (12%), keyword_integration (10%), customer_scenario (10%), emotional_resonance (10%), factual_accuracy (10%), platform_compliance (8%), finish_integration (5%), variety_score (5%).
@@ -378,7 +370,8 @@ Calibration: A description that follows all rules but is generic should score 50
 </scoring_rubric>
 
 <output_contract>
-Return ONE valid JSON object with all required fields. Google/Bing fields are variant-aware (include finish when context provided). Shopify fields are finish-agnostic master-SKU copy. The claims array must trace every factual claim to a specific evidence field and value.
+Return ONE valid JSON object that matches the platform schema exactly. Do not add extra keys.
+The claims array must trace every factual claim to a specific evidence field and value.
 </output_contract>
 """
 
@@ -396,19 +389,62 @@ Return ONE valid JSON object with all required fields. Google/Bing fields are va
 # ---------------------------------------------------------------------------
 
 GOOGLE_BRIEF = """\
+<platform_rules>
+Google fields only:
+- google_title: variant-aware and must begin with literal {FINISH_NAME}
+- google_short_title: concise scannable short title
+- google_description: plain text variant description that includes literal {FINISH_SENTENCE}
+
+Do not generate Bing or Shopify behavior in this task.
+</platform_rules>
+
+<google_objective_priority>
+Google optimization order:
+1. Product truth and category-faithful naming.
+2. Specific differentiation that helps a shopper choose this product.
+3. Readable, scan-friendly phrasing that sounds human.
+4. Keyword enrichment only when it improves 1-3.
+
+Never force awkward copy to satisfy keyword hints.
+Write product copy, not commentary about search behavior.
+</google_objective_priority>
+
+<finish_sentence_contract>
+{FINISH_SENTENCE} is generated in a separate finish-sentence API call from the same product evidence.
+In this Google description call, treat {FINISH_SENTENCE} as a pre-written sentence that will be inserted
+during variant expansion (one finish sentence per variant).
+
+Integration requirements:
+- Use {FINISH_SENTENCE} exactly once, as its own sentence.
+- Keep sentence flow natural before and after insertion.
+- Do not rewrite, paraphrase, or expand {FINISH_SENTENCE}.
+
+Good flow:
+"[Product-specific opening sentence]. {FINISH_SENTENCE} [Evidence-based support sentence]."
+Good flow:
+"[Concrete spec opening sentence.] [Differentiator sentence.] {FINISH_SENTENCE} [Trust close sentence]."
+Anti-example:
+"If you're searching for options, {FINISH_SENTENCE} {FINISH_SENTENCE} [fragment]."
+</finish_sentence_contract>
+
 <title_formula>
 Write Google Shopping titles using this exact structure:
 
-{FINISH_NAME} [Product Function] [Collection Name Collection] [Primary Dimension*] [Style Reference*] - Allied Brass
+{FINISH_NAME} [Product Function] [Collection Name Collection*] [Primary Dimension*] [Optional Style Cue*] - Allied Brass
 
 Rules:
 - {FINISH_NAME} is ALWAYS the first element. It is a literal placeholder — output it exactly.
 - Product function in the first 30 characters after {FINISH_NAME} (e.g., "Towel Bar", "Robe Hook", "Soap Dish").
+- Product noun must match the category intent in evidence:
+  - Category "Towel Bars" -> use "Towel Bar" (not "Towel Rack")
+- Category "Robe Hooks" -> use "Robe Hook"
+- Category "Toilet Paper Holders" -> use "Toilet Paper Holder"
 - If the product belongs to a named collection, include "[Name] Collection" (always with the word "Collection").
 - Include the primary dimension ONLY when the product varies by size (towel bars: yes; robe hooks: no).
-- Vary style references across products: "Traditional", "Contemporary", "Minimalist", "Art Deco", etc. — do NOT use the same style word for every SKU.
+- Add a style cue only when evidence supports it (style, collection language, or current description). If unsupported, omit it.
 - "Solid Brass" should NOT appear in the title — save prime title space for converting keywords.
 - "Allied Brass" is always the final segment, separated by a dash or comma.
+- For towel-bar categories, NEVER include the phrase "towel rack" in Google title text. Use "Towel Bar" only.
 - Total length: 60-150 characters. Shorter is better if it captures the key terms.
 
 Good: {FINISH_NAME} 24-Inch Towel Bar - Skyline Collection - Allied Brass
@@ -419,15 +455,17 @@ Bad: {FINISH_NAME} Solid Brass Robe Hook (2.5" x 2.5" x 1.5") - Allied Brass  �
 
 <google_short_title>
 Max 70 characters. Product type + primary dimension only. No brand, no collection, no finish.
+Category-fidelity rule still applies:
+- "Towel Bars" category -> short title must use "Towel Bar" (never "Towel Rack")
 Example: "24-Inch Wall Mounted Towel Bar" or "Double Robe Hook"
 </google_short_title>
 
 <description_brief>
 Write a Google Shopping description that makes a shopper pick Allied Brass over the generic listing next to it.
 
-Structure (700-900 characters total, plain text):
+Structure (700-900 characters target, plain text; never add filler just to hit length):
 1. OPEN with what makes THIS product's design special — a concrete detail from the evidence (e.g., "petite spherical end pieces," "reeded texture grip," "concealed post design"). Not a generic benefit.
-2. Place {FINISH_SENTENCE} where finish context flows naturally — typically after the design opening or as a transition sentence. It is a literal placeholder; output it exactly as {FINISH_SENTENCE}.
+2. Place {FINISH_SENTENCE} exactly once where finish context flows naturally — typically after the design opening or as a transition sentence. It is a literal placeholder; output it exactly as {FINISH_SENTENCE}.
 3. BUILD with 2-3 evidence-grounded selling points: solid brass durability, collection coordination, mounting style, or a design detail that differentiates this product.
 4. CLOSE with a practical trust signal: warranty, what's included, or installation confidence.
 
@@ -435,7 +473,8 @@ What to INCLUDE:
 - Product-specific design details from the evidence (dimensions, mounting type, design elements)
 - The primary searchable dimension (overall length for bars, diameter for mirrors)
 - Collection name when available (for coordination selling)
-- Natural keyword integration — weave search terms into the narrative
+- Natural keyword integration only when it improves clarity and buying intent.
+- Translate keyword hints into clean buyer language; do not mirror raw query fragments.
 
 What to EXCLUDE (these kill conversions or create doubt):
 - Weight capacity (creates doubt, not confidence)
@@ -443,37 +482,114 @@ What to EXCLUDE (these kill conversions or create doubt):
 - Competitor material names (die-cast zinc, plated alternatives, zinc alloy, chrome-plated steel)
 - "Heritage bathroom fixtures" or invented category terms
 - "Also searched as" or keyword list patterns
+- Meta-search commentary (e.g., mentioning what someone searched for)
 - "28 finishes" or finish count references (this listing IS a specific finish variant)
 - "Bathroom humidity" as a key selling point (technically true but feels like filler)
 - Installation specifics (screw sizes, exact hardware counts)
 </description_brief>
+
+<output_contract>
+Return JSON with keys: google_title, google_short_title, google_description, claims, self_score.
+</output_contract>
+
+<final_quality_gate>
+Before returning JSON, perform one silent final pass:
+- Remove banned promo words (finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate).
+- Remove any meta-search narration ("if you're searching", "if you've been comparing", etc.).
+- For "Towel Bars" category, keep "Towel Bar" terminology in both google_title and google_short_title.
+If any violation appears, rewrite before returning.
+</final_quality_gate>
 """
 
 BING_BRIEF = """\
+<platform_rules>
+Bing fields only:
+- bing_title: variant-aware and must begin with literal {FINISH_NAME}
+- bing_description: plain text variant description that includes literal {FINISH_SENTENCE}
+
+Do not generate Google or Shopify behavior in this task.
+</platform_rules>
+
+<bing_objective_priority>
+Bing optimization order:
+1. Product truth and category-faithful naming.
+2. Specific differentiation that helps a shopper choose this product.
+3. Readable, scan-friendly phrasing that sounds human.
+4. Keyword enrichment only when it improves 1-3.
+
+Never force awkward copy to satisfy keyword hints.
+Write product copy, not commentary about search behavior.
+</bing_objective_priority>
+
+<finish_sentence_contract>
+{FINISH_SENTENCE} is generated in a separate finish-sentence API call from the same product evidence.
+In this Bing description call, treat {FINISH_SENTENCE} as a pre-written sentence inserted during
+variant expansion (one finish sentence per variant).
+
+Integration requirements:
+- Use {FINISH_SENTENCE} exactly once, as its own sentence.
+- Keep sentence flow natural before and after insertion.
+- Do not rewrite, paraphrase, or expand {FINISH_SENTENCE}.
+
+Good flow:
+"[Spec-led opening sentence]. {FINISH_SENTENCE} [Evidence-based support sentence]."
+Good flow:
+"[Concrete product sentence.] [Practical value sentence.] {FINISH_SENTENCE} [Trust close sentence]."
+Anti-example:
+"If you're comparing options, {FINISH_SENTENCE} {FINISH_SENTENCE} [fragment]."
+</finish_sentence_contract>
+
 <title_formula>
 Same structure as Google titles:
 {FINISH_NAME} [Product Function] [Collection Name Collection] [Primary Dimension*] - Allied Brass
 
 Bing shoppers scan titles quickly. Front-load the most important product identifier after {FINISH_NAME}.
-Use synonym variations from Google titles where natural (e.g., "Towel Holder" vs "Towel Bar").
+Keep title nouns literal and category-faithful. Use synonym variations in the description body, not in the title.
+When category intent is explicit in evidence, keep the primary noun exact:
+- "Towel Bars" category -> "Towel Bar" (NEVER "Towel Rack" in title)
+- "Robe Hooks" category -> "Robe Hook"
+- "Toilet Paper Holders" category -> "Toilet Paper Holder"
 </title_formula>
 
 <description_brief>
-Write a Bing Shopping description optimized for literal keyword matching and quick scanning.
+Write a Bing Shopping description optimized for literal relevance and natural shopper readability.
 
 Structure (700-1000 characters total, plain text):
 1. OPEN with a concrete product specification sentence — what this product IS, its primary dimension, and material. Bing rewards front-loaded specs in the first 200 characters.
-2. Place {FINISH_SENTENCE} naturally after the opening specs. Output it exactly as a literal placeholder.
-3. BUILD with design details and practical selling points, naturally integrating high-intent synonym keywords (towel bar / towel rack / towel holder) in complete sentences.
+2. Place {FINISH_SENTENCE} naturally after the opening specs. Output it exactly once as a literal placeholder sentence.
+3. BUILD with design details and practical selling points, using synonym variants only when they fit naturally and improve clarity.
 4. CLOSE with collection coordination or warranty.
 
-Bing-specific: Cover synonym variations naturally. If the product is a "towel bar," also work in "towel rack" or "towel holder" once each in natural sentences. Never use "also searched as" lists.
+Bing-specific: Keep wording literal and clean. Use synonym variants conditionally, never by quota.
+Never use "also searched as" lists or mention what someone searched for.
 
 Same EXCLUDE rules as Google: no weight capacity, no detailed dims, no competitor materials, no "28 finishes," no keyword stuffing.
+Also ban promo words in customer-facing copy: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate.
 </description_brief>
+
+<output_contract>
+Return JSON with keys: bing_title, bing_description, claims, self_score.
+</output_contract>
+
+<final_quality_gate>
+Before returning JSON, perform one silent final pass:
+- Remove banned promo words (finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate).
+- Remove any meta-search narration ("if you're searching", "if you've been comparing", etc.).
+- For "Towel Bars" category, keep "Towel Bar" terminology in bing_title.
+If any violation appears, rewrite before returning.
+</final_quality_gate>
 """
 
 SHOPIFY_BRIEF = """\
+<platform_rules>
+Shopify fields only:
+- shopify_title: finish-agnostic product page heading
+- shopify_description: finish-agnostic HTML conversion copy
+- shopify_meta_description: short SERP summary
+
+Do not generate Google/Bing variant behavior in this task.
+</platform_rules>
+
 <title_rules>
 Shopify product title — this is the H1 on the product page.
 - Finish-agnostic (no specific finish names — the product page covers all finishes)
@@ -482,6 +598,7 @@ Shopify product title — this is the H1 on the product page.
 - Include primary dimension when the product varies by size
 - Max 255 characters, but shorter is better (aim for 40-80 chars)
 - Must work as a page heading a shopper would actually read
+- Keep product noun faithful to category intent ("Towel Bar" for towel-bar categories).
 
 Good: "Skyline Collection 24-Inch Wall Mounted Towel Bar"
 Good: "Contemporary Double Robe Hook - Waverly Place Collection"
@@ -500,15 +617,27 @@ Structure:
 Do NOT mention any specific finish — this content serves all 28 variants.
 Do NOT include weight capacity, detailed dimensions, or installation specifics.
 Do NOT use "heritage bathroom fixtures" or competitor material names.
+Do NOT use banned promo words in customer-facing copy: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate.
 </description_brief>
 
 <meta_description>
-140-155 characters. Standalone summary with the primary keyword. Must work as a Google SERP snippet.
+140-160 characters. Standalone summary with the primary keyword. Must work as a Google SERP snippet.
 Include product type, key differentiator, and collection name.
 </meta_description>
+
+<output_contract>
+Return JSON with keys: shopify_title, shopify_description, shopify_meta_description, claims, self_score.
+</output_contract>
 """
 
 FINISH_BRIEF = """\
+<platform_rules>
+Finish-sentence fields only:
+- sentences: array of finish sentence objects
+
+Do not generate Google/Bing/Shopify long-form copy in this task.
+</platform_rules>
+
 <finish_sentence_rules>
 Generate exactly 28 finish sentences — one for each Allied Brass finish.
 
@@ -525,6 +654,10 @@ Good for a robe hook: "Polished Chrome keeps the curved hook bright and easy to 
 Bad (generic): "Antique Brass adds warm tones to your bathroom." ← not product-specific
 Bad (too long): "The Antique Brass finish gives this 24-inch wall-mounted towel bar a soft, aged warmth that coordinates with traditional bathroom hardware." ← exceeds 80 chars
 </finish_sentence_rules>
+
+<output_contract>
+Return JSON with key: sentences.
+</output_contract>
 """
 
 # ---------------------------------------------------------------------------

@@ -35,7 +35,12 @@ from feedops.api.prompt_loader import (
     get_finish_list,
 )
 from feedops.models.parent_sku import ParentSKU
-from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.evidence import (
+    build_evidence_table,
+    format_evidence_markdown,
+    sanitize_catalog_prose,
+    sanitize_prompt_text,
+)
 from feedops.pipeline.feature_flags import (
     is_prompt_contract_v2_enabled,
     is_segment_strategy_v1_enabled,
@@ -58,6 +63,16 @@ _SEGMENT_TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 def _normalize_segment_token(value: str) -> str:
     return " ".join(_SEGMENT_TOKEN_RE.findall((value or "").lower()))
+
+
+def _ev_value(ev: Any, field_name: str) -> str:
+    """Read evidence value from either Evidence dataclass rows or dict rows."""
+    if isinstance(ev, dict):
+        value = ev.get(field_name) or ev.get(field_name.replace("_", " ").title())
+        return str(value).strip() if value is not None else ""
+    if getattr(ev, "field", "") == field_name:
+        return str(getattr(ev, "value", "")).strip()
+    return ""
 
 
 def _extract_custom_label_0(parent_sku: ParentSKU) -> str | None:
@@ -98,12 +113,21 @@ def _coerce_keyword_section(
     keywords: Any = None,
 ) -> str:
     if isinstance(keywords, str) and keywords.strip():
-        return keywords.strip()
+        return sanitize_prompt_text(
+            keywords.strip(),
+            strip_competitor_brands=True,
+        )
     if keywords and hasattr(keywords, "must_include"):
-        return format_keyword_placement_section(keywords)
+        return sanitize_prompt_text(
+            format_keyword_placement_section(keywords),
+            strip_competitor_brands=True,
+        )
     try:
         plan = build_keyword_placement_plan(sku_data, evidence_rows)
-        return format_keyword_placement_section(plan)
+        return sanitize_prompt_text(
+            format_keyword_placement_section(plan),
+            strip_competitor_brands=True,
+        )
     except Exception as exc:
         logger.warning("Keyword placement section skipped for %s: %s", sku_data.master_sku, exc)
         return ""
@@ -144,26 +168,29 @@ def _build_product_design_story(sku_data: ParentSKU, evidence_rows: list[dict[st
         parts.append(f"Collection: {sku_data.collection}")
 
     if sku_data.current_description and sku_data.current_description != sku_data.current_title:
-        parts.append(f"Manufacturer description: {sku_data.current_description}")
+        cleaned_description = sanitize_catalog_prose(sku_data.current_description)
+        if cleaned_description:
+            parts.append(f"Manufacturer description: {cleaned_description}")
 
     bullets = []
     for attr in ["bullet_1", "bullet_2", "bullet_3", "bullet_4"]:
         val = getattr(sku_data, attr, None)
         if val and val.strip():
-            bullets.append(val.strip())
+            cleaned_bullet = sanitize_catalog_prose(val.strip())
+            if cleaned_bullet:
+                bullets.append(cleaned_bullet)
     if bullets:
         parts.append("Product selling points:\n" + "\n".join(f"- {b}" for b in bullets))
 
-    for ev in evidence_rows:
-        if isinstance(ev, dict):
-            for field_name, label in [
-                ("mounting_type", "Mounting type"),
-                ("style", "Style"),
-            ]:
-                val = ev.get(field_name) or ev.get(field_name.replace("_", " ").title())
-                if val and str(val).strip():
-                    parts.append(f"{label}: {val}")
-            break
+    for field_name, label in [
+        ("mounting_type", "Mounting type"),
+        ("style", "Style"),
+    ]:
+        for ev in evidence_rows:
+            val = _ev_value(ev, field_name)
+            if val:
+                parts.append(f"{label}: {val}")
+                break
 
     return "\n".join(parts) if parts else ""
 
@@ -172,20 +199,22 @@ def _build_competitive_context(sku_data: ParentSKU, evidence_rows: list[dict[str
     """Build product-specific competitive positioning from evidence."""
     parts: list[str] = []
     for ev in evidence_rows:
-        if isinstance(ev, dict):
-            material = ev.get("material") or ev.get("Material") or ""
-            if "brass" in str(material).lower():
-                parts.append(
-                    "Solid brass construction confirmed — frame this positively "
-                    "(won't corrode, pit, or tarnish) without naming competitor materials."
-                )
-                break
+        material = _ev_value(ev, "material")
+        if "brass" in material.lower():
+            parts.append(
+                "Solid brass construction confirmed — frame this positively "
+                "(won't corrode, pit, or tarnish) without naming competitor materials."
+            )
+            break
 
     parts.append(
         "Focus on what makes THIS product's design better than alternatives. "
         "Never mention competitor materials by name."
     )
-    return "\n".join(parts)
+    return sanitize_prompt_text(
+        "\n".join(parts),
+        strip_competitor_brands=True,
+    )
 
 
 def build_google_prompt(
@@ -197,18 +226,41 @@ def build_google_prompt(
 ) -> str:
     """Build Google-specific user prompt for variant-level generation."""
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
-    evidence_markdown = format_evidence_markdown(evidence_rows)
+    evidence_markdown = format_evidence_markdown(
+        evidence_rows,
+        for_customer_copy=True,
+    )
     keyword_section = _coerce_keyword_section(sku_data, evidence_rows, keywords)
     product_story = _build_product_design_story(sku_data, evidence_rows)
     competitive_context = _build_competitive_context(sku_data, evidence_rows)
+    cleaned_category_guidance = sanitize_prompt_text(
+        category_guidance or "",
+        strip_competitor_brands=True,
+        strip_banned_words=True,
+    ).strip()
+    cleaned_gold_examples = sanitize_prompt_text(
+        gold_examples or "",
+        strip_competitor_brands=True,
+        strip_banned_words=True,
+    ).strip()
 
     sections = [
         f"<task>Generate Google Shopping content for MasterSKU: {sku_data.master_sku}.</task>",
         (
+            "<objective>\n"
+            "Create the best product-specific Google title and description for this exact product.\n"
+            "Prioritize conversion clarity and factual accuracy over keyword density.\n"
+            "</objective>"
+        ),
+        (
             "<placeholders>\n"
             "Use the literal string {FINISH_NAME} where the finish name belongs in the title.\n"
-            "Use the literal string {FINISH_SENTENCE} where finish context flows naturally in the description.\n"
-            "These are literal placeholders — output them exactly. Do not expand or replace them.\n"
+            "{FINISH_SENTENCE} is generated by a separate finish-sentence API call and inserted during variant expansion.\n"
+            "In this call, place the literal string {FINISH_SENTENCE} exactly once as its own sentence where finish context flows naturally.\n"
+            "Good flow: [Design-specific opening.] {FINISH_SENTENCE} [Material or trust close.]\n"
+            "Good flow: [Concrete spec opening.] [Benefit sentence.] {FINISH_SENTENCE} [Warranty/what's included close.]\n"
+            "Bad flow: [Awkward transition ...] {FINISH_SENTENCE} {FINISH_SENTENCE} [duplicate or broken sentence].\n"
+            "These are literal placeholders — output them exactly. Do not expand, paraphrase, or replace them.\n"
             "</placeholders>"
         ),
         f"<evidence_table>\n{evidence_markdown}\n</evidence_table>",
@@ -222,11 +274,21 @@ def build_google_prompt(
             f"<competitive_positioning>\n{competitive_context}\n</competitive_positioning>"
         )
     if keyword_section:
-        sections.append(f"<keyword_placement>\n{keyword_section}\n</keyword_placement>")
-    if category_guidance:
-        sections.append(f"<category_guidance>\n{category_guidance}\n</category_guidance>")
-    if gold_examples:
-        sections.append(f"<gold_examples>\n{gold_examples}\n</gold_examples>")
+        sections.append(
+            "<keyword_enrichment_hints>\n"
+            "Use keyword hints only when they improve shopper clarity and conversion relevance.\n"
+            "Do not force awkward phrasing. Distill hints into clean buyer language instead of mirroring raw query fragments.\n"
+            "Do not mention what a shopper searched for; write direct product copy.\n"
+            "If a hint conflicts with product truth, category fidelity, or natural language, ignore it.\n\n"
+            f"{keyword_section}\n"
+            "</keyword_enrichment_hints>"
+        )
+    if cleaned_category_guidance:
+        sections.append(
+            f"<category_guidance>\n{cleaned_category_guidance}\n</category_guidance>"
+        )
+    if cleaned_gold_examples:
+        sections.append(f"<gold_examples>\n{cleaned_gold_examples}\n</gold_examples>")
     sections.append(
         "<output>Return JSON with keys: google_title, google_short_title, "
         "google_description, claims, self_score.</output>"
@@ -242,18 +304,36 @@ def build_bing_prompt(
 ) -> str:
     """Build Bing-specific user prompt with literal-match emphasis."""
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
-    evidence_markdown = format_evidence_markdown(evidence_rows)
+    evidence_markdown = format_evidence_markdown(
+        evidence_rows,
+        for_customer_copy=True,
+    )
     keyword_section = _coerce_keyword_section(sku_data, evidence_rows, keywords)
     product_story = _build_product_design_story(sku_data, evidence_rows)
     competitive_context = _build_competitive_context(sku_data, evidence_rows)
+    cleaned_category_guidance = sanitize_prompt_text(
+        category_guidance or "",
+        strip_competitor_brands=True,
+        strip_banned_words=True,
+    ).strip()
 
     sections = [
         f"<task>Generate Bing Shopping content for MasterSKU: {sku_data.master_sku}.</task>",
         (
+            "<objective>\n"
+            "Create product-specific Bing copy that is accurate, readable, and conversion-oriented.\n"
+            "Treat keyword hints as optional support, not mandatory phrasing.\n"
+            "</objective>"
+        ),
+        (
             "<placeholders>\n"
             "Use the literal string {FINISH_NAME} in the title.\n"
-            "Use the literal string {FINISH_SENTENCE} in the description.\n"
-            "Do not expand placeholders.\n"
+            "{FINISH_SENTENCE} is generated by a separate finish-sentence API call and inserted during variant expansion.\n"
+            "Place {FINISH_SENTENCE} exactly once as its own sentence in the description.\n"
+            "Good flow: [Spec-led opening.] {FINISH_SENTENCE} [Design detail sentence.]\n"
+            "Good flow: [Product truth opening.] [Utility sentence.] {FINISH_SENTENCE} [Trust close.]\n"
+            "Bad flow: [Searchy narration ...] {FINISH_SENTENCE} [fragment or duplicated placeholder].\n"
+            "Do not expand, paraphrase, or duplicate placeholders.\n"
             "</placeholders>"
         ),
         f"<evidence_table>\n{evidence_markdown}\n</evidence_table>",
@@ -267,9 +347,19 @@ def build_bing_prompt(
             f"<competitive_positioning>\n{competitive_context}\n</competitive_positioning>"
         )
     if keyword_section:
-        sections.append(f"<keyword_placement>\n{keyword_section}\n</keyword_placement>")
-    if category_guidance:
-        sections.append(f"<category_guidance>\n{category_guidance}\n</category_guidance>")
+        sections.append(
+            "<keyword_enrichment_hints>\n"
+            "Use keyword hints only when they improve readability and literal query relevance.\n"
+            "Do not force synonym quotas or unnatural stuffing.\n"
+            "Never narrate what a shopper searched for; write direct product copy.\n"
+            "If a hint conflicts with product truth, category fidelity, or natural language, ignore it.\n\n"
+            f"{keyword_section}\n"
+            "</keyword_enrichment_hints>"
+        )
+    if cleaned_category_guidance:
+        sections.append(
+            f"<category_guidance>\n{cleaned_category_guidance}\n</category_guidance>"
+        )
     sections.append(
         "<output>Return JSON with keys: bing_title, bing_description, claims, self_score.</output>"
     )
@@ -286,6 +376,11 @@ def build_shopify_prompt(
     evidence_markdown = format_evidence_markdown(evidence_rows)
     product_story = _build_product_design_story(sku_data, evidence_rows)
     competitive_context = _build_competitive_context(sku_data, evidence_rows)
+    cleaned_category_guidance = sanitize_prompt_text(
+        category_guidance or "",
+        strip_competitor_brands=True,
+        strip_banned_words=True,
+    ).strip()
 
     sections = [
         f"<task>Generate Shopify product page content for MasterSKU: {sku_data.master_sku}.</task>",
@@ -306,8 +401,10 @@ def build_shopify_prompt(
         sections.append(
             f"<competitive_positioning>\n{competitive_context}\n</competitive_positioning>"
         )
-    if category_guidance:
-        sections.append(f"<category_guidance>\n{category_guidance}\n</category_guidance>")
+    if cleaned_category_guidance:
+        sections.append(
+            f"<category_guidance>\n{cleaned_category_guidance}\n</category_guidance>"
+        )
     sections.append(
         "<output>Return JSON with keys: shopify_title, shopify_description, "
         "shopify_meta_description, claims, self_score.</output>"
@@ -321,16 +418,17 @@ def build_finish_prompt(
 ) -> str:
     """Build prompt for product-specific finish sentence generation."""
     finish_rows = finish_metadata or _default_finish_metadata(sku_data)
-    bullet_lines = [
-        bullet.strip()
-        for bullet in [
-            sku_data.bullet_1,
-            sku_data.bullet_2,
-            sku_data.bullet_3,
-            sku_data.bullet_4,
-        ]
-        if isinstance(bullet, str) and bullet.strip()
-    ]
+    bullet_lines: list[str] = []
+    for bullet in [
+        sku_data.bullet_1,
+        sku_data.bullet_2,
+        sku_data.bullet_3,
+        sku_data.bullet_4,
+    ]:
+        if isinstance(bullet, str) and bullet.strip():
+            cleaned = sanitize_catalog_prose(bullet.strip())
+            if cleaned:
+                bullet_lines.append(cleaned)
     bullet_block = "\n".join(f"- {line}" for line in bullet_lines) or "- No bullet data provided."
     finish_lines = []
     for row in finish_rows:
@@ -348,7 +446,7 @@ def build_finish_prompt(
                 "<product_context>\n"
                 f"Category: {sku_data.category}\n"
                 f"Collection: {sku_data.collection or 'N/A'}\n"
-                f"Current title: {sku_data.current_title}\n"
+                f"Current title: {sanitize_catalog_prose(sku_data.current_title)}\n"
                 "</product_context>"
             ),
             f"<selling_points>\n{bullet_block}\n</selling_points>",
@@ -405,6 +503,22 @@ def build_core_prompt(
     """
     sections: list[str] = []
 
+    # Use a copy-safe evidence projection for Google/Bing so metadata labels
+    # and raw query rows do not leak into customer-facing generation context.
+    if platform in {"google", "bing"}:
+        try:
+            evidence_markdown = format_evidence_markdown(
+                evidence if isinstance(evidence, list) else [],
+                for_customer_copy=True,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Copy-safe evidence formatting failed for %s (%s): %s",
+                parent_sku.master_sku,
+                platform,
+                exc,
+            )
+
     # --- 1. Evidence table ---
     sections.append(f"Product Evidence Table:\n{evidence_markdown}")
 
@@ -413,17 +527,33 @@ def build_core_prompt(
         f"Target platform: {platform}\nContent type to generate: {content_type}"
     )
 
+    if platform in {"google", "bing"}:
+        sections.append(
+            "Placeholder contract:\n"
+            "- {FINISH_NAME} is a literal title placeholder.\n"
+            "- {FINISH_SENTENCE} is generated by a separate finish-sentence API call.\n"
+            "- Use {FINISH_SENTENCE} exactly once as its own sentence in the description.\n"
+            "- Never paraphrase, expand, or duplicate placeholders.\n"
+            "- Never narrate what someone searched for."
+        )
+
     # --- 3. Keyword placement plan ---
     # Gracefully skip if keyword data is unavailable or errors out.
     keyword_section = ""
     try:
         if evidence:
             keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
-            keyword_section = format_keyword_placement_section(keyword_plan)
+            keyword_section = sanitize_prompt_text(
+                format_keyword_placement_section(keyword_plan),
+                strip_competitor_brands=True,
+            )
         else:
             # Build with empty evidence list — the plan will use fallback logic
             keyword_plan = build_keyword_placement_plan(parent_sku, [])
-            keyword_section = format_keyword_placement_section(keyword_plan)
+            keyword_section = sanitize_prompt_text(
+                format_keyword_placement_section(keyword_plan),
+                strip_competitor_brands=True,
+            )
     except Exception as exc:
         logger.warning(
             "Keyword placement plan skipped for %s: %s", parent_sku.master_sku, exc
@@ -431,7 +561,13 @@ def build_core_prompt(
         keyword_section = ""
 
     if keyword_section:
-        sections.append(keyword_section)
+        sections.append(
+            "Keyword Enrichment Hints (secondary to product truth and buyer clarity):\n"
+            "- Use only if they improve conversion-relevant language.\n"
+            "- Never force awkward phrasing or list patterns.\n"
+            "- Ignore any hint that conflicts with evidence-grounded product truth.\n\n"
+            f"{keyword_section}"
+        )
 
     # --- 4. Segment strategy guidance ---
     # FIX-02: SEGMENT_STRATEGY_V1 gates this section.
@@ -501,7 +637,13 @@ def build_core_prompt(
     # shopping_intelligence.yaml is the canonical source (PRMT-03)
     category_guidance = get_category_guidance(parent_sku.category)
     if category_guidance:
-        sections.append(f"Category Guidance:\n{category_guidance}")
+        cleaned_category_guidance = sanitize_prompt_text(
+            category_guidance,
+            strip_competitor_brands=True,
+            strip_banned_words=True,
+        ).strip()
+        if cleaned_category_guidance:
+            sections.append(f"Category Guidance:\n{cleaned_category_guidance}")
 
     # --- 7. Gold standard examples ---
     # Use bundle format (cross-platform) when available — mirrors generator.py.
@@ -532,7 +674,13 @@ def build_core_prompt(
             examples = ""
 
     if examples:
-        sections.append(f"Gold Standard Examples (data-only guidance):\n{examples}")
+        cleaned_examples = sanitize_prompt_text(
+            examples,
+            strip_competitor_brands=True,
+            strip_banned_words=True,
+        ).strip()
+        if cleaned_examples:
+            sections.append(f"Gold Standard Examples (data-only guidance):\n{cleaned_examples}")
 
     # --- 8. Product design story (PRMT-04, Gap 2 fix) ---
     # Extract product-specific data that makes THIS product unique.
@@ -550,29 +698,34 @@ def build_core_prompt(
 
     # Extract narrative copy (manufacturer's description of what makes this product special)
     if parent_sku.current_description and parent_sku.current_description != parent_sku.current_title:
-        product_story_parts.append(f"Manufacturer description: {parent_sku.current_description}")
+        cleaned_description = sanitize_catalog_prose(parent_sku.current_description)
+        if cleaned_description:
+            product_story_parts.append(f"Manufacturer description: {cleaned_description}")
 
     # Extract product bullets (specific selling points from the manufacturer)
     bullets = []
     for attr in ["bullet_1", "bullet_2", "bullet_3", "bullet_4"]:
         val = getattr(parent_sku, attr, None)
         if val and val.strip():
-            bullets.append(val.strip())
+            cleaned_bullet = sanitize_catalog_prose(val.strip())
+            if cleaned_bullet:
+                bullets.append(cleaned_bullet)
     if bullets:
         product_story_parts.append("Product selling points:\n" + "\n".join(f"- {b}" for b in bullets))
 
     # Extract material, mounting, dimensions from evidence
-    for ev in evidence:
-        if isinstance(ev, dict):
-            for field_name, label in [
-                ("mounting_type", "Mounting type"),
-                ("weight_capacity", "Weight capacity"),
-                ("style", "Style"),
-            ]:
-                val = ev.get(field_name) or ev.get(field_name.replace("_", " ").title())
-                if val and str(val).strip():
-                    product_story_parts.append(f"{label}: {val}")
-            break  # Only need first evidence row
+    for field_name, label in [
+        ("mounting_type", "Mounting type"),
+        ("weight_capacity", "Weight capacity"),
+        ("style", "Style"),
+    ]:
+        for ev in evidence:
+            val = _ev_value(ev, field_name)
+            if val:
+                cleaned_val = sanitize_catalog_prose(val)
+                if cleaned_val:
+                    product_story_parts.append(f"{label}: {cleaned_val}")
+                break
 
     product_story = "\n".join(product_story_parts) if product_story_parts else ""
 
@@ -593,11 +746,10 @@ def build_core_prompt(
 
     # Material confirmation from evidence (keep this — it's product-specific)
     for ev in evidence:
-        if isinstance(ev, dict):
-            material = ev.get("material") or ev.get("Material") or ""
-            if "brass" in str(material).lower():
-                competitive_parts.append("Evidence confirms: solid brass construction (key differentiator vs zinc competitors)")
-                break
+        material = _ev_value(ev, "material")
+        if "brass" in material.lower():
+            competitive_parts.append("Evidence confirms: solid brass construction (key differentiator vs zinc competitors)")
+            break
 
     competitive_block = (
         "Competitive Positioning:\n"

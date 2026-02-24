@@ -58,16 +58,14 @@ _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> str:
-    """Use lower reasoning for finish sentence generation to avoid token blowups."""
-    if platform == "finish" and default_reasoning_effort in {"medium", "high"}:
-        return "low"
+    """Resolve per-platform reasoning effort."""
     return default_reasoning_effort
 
 
 def _platform_completion_cap(platform: str, base_cap: int) -> int:
     """Finish sentence generation can require a higher completion cap."""
     if platform == "finish":
-        return max(base_cap, 5000)
+        return max(base_cap, 10000)
     return base_cap
 
 
@@ -331,8 +329,8 @@ async def generate_per_platform(
     prompt_version: str = "v2",
     *,
     feedback_by_platform: dict[str, str] | None = None,
-    reasoning_effort: str = "medium",
-    max_completion_tokens: int = 4000,
+    reasoning_effort: str = "high",
+    max_completion_tokens: int = 8000,
 ) -> dict[str, object]:
     """Generate content via per-platform prompts/schemas (v2) or legacy (v1)."""
     if (prompt_version or "v2").lower() == "v1":

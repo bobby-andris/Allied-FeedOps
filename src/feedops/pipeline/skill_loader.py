@@ -347,10 +347,10 @@ def get_platform_system_prompt(platform: str) -> str:
     """Build a platform-specific system prompt from SYSTEM_PROMPT + creative brief.
 
     Architecture (v2 — Phase 25.3):
-    - SYSTEM_PROMPT provides shared creative direction, brand voice, accuracy
-      guardrails, platform rules, and scoring rubric (~3.5K chars, cacheable).
-    - Platform briefs (GOOGLE_BRIEF, etc.) provide platform-specific title
-      formula, description structure, and content rules (~1-2K chars each).
+    - SYSTEM_PROMPT provides shared creative direction, objective hierarchy,
+      brand voice, and global accuracy/scoring guardrails (cacheable).
+    - Platform briefs (GOOGLE_BRIEF, etc.) provide platform-specific rules,
+      field contracts, title/description structures, and output keys.
     - Total: ~4.5-5.5K chars — purpose-built GPT-5.2 instructions, not
       extracted skill snippets.
     """

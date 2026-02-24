@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from feedops.models import Candidate, ParentSKU
 from feedops.pipeline import evidence as evidence_module
@@ -19,6 +19,26 @@ _BING_DIMENSION_DUMP_PATTERN = re.compile(
     re.IGNORECASE,
 )
 _STOP_WORDS = {"and", "or", "the", "a", "an", "with", "for", "in", "of", "on"}
+_INTENT_NOISE_TOKENS = {
+    "if",
+    "you",
+    "your",
+    "search",
+    "searching",
+    "searched",
+    "looking",
+    "shop",
+    "shopping",
+    "compare",
+    "comparing",
+    "best",
+    "buy",
+    "online",
+    "near",
+    "me",
+    "vs",
+    "versus",
+}
 
 _MATERIAL_PHRASES = [
     "solid brass",
@@ -307,6 +327,8 @@ class KeywordPlacementPlan:
     brand: str = _DEFAULT_BRAND
     room_context: str | None = None
     enforce_alignment: bool = False
+    distilled_intent_terms: list[str] = field(default_factory=list)
+    buyer_phrasing_hints: list[str] = field(default_factory=list)
 
 
 def _normalize(text: str) -> str:
@@ -338,6 +360,46 @@ def _dedupe_terms(terms: list[str]) -> list[str]:
         seen.add(key)
         out.append(term)
     return out
+
+
+def _distill_intent_term(term: str) -> str | None:
+    """Collapse raw query fragments into clean buyer-intent phrases."""
+    tokens = _WORD_RE.findall((term or "").lower())
+    if not tokens:
+        return None
+
+    cleaned: list[str] = []
+    for token in tokens:
+        if token in _INTENT_NOISE_TOKENS:
+            continue
+        if len(token) == 1 and not token.isdigit():
+            continue
+        cleaned.append(token)
+
+    if not cleaned:
+        return None
+
+    phrase = " ".join(cleaned[:6]).strip()
+    if len(phrase) < 4:
+        return None
+    return phrase
+
+
+def _distill_intent_terms(terms: list[str], *, top_n: int = 6) -> list[str]:
+    distilled: list[str] = []
+    seen: set[str] = set()
+    for term in terms:
+        phrase = _distill_intent_term(term)
+        if not phrase:
+            continue
+        key = _normalize(phrase)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        distilled.append(phrase)
+        if len(distilled) >= top_n:
+            break
+    return distilled
 
 
 def _parse_metric_score(metric: str) -> float:
@@ -526,12 +588,17 @@ def build_keyword_placement_plan(
     all_terms = _dedupe_terms(
         search_query_terms + intent_terms + external_terms + secondary_terms
     )
+    distilled_terms = _distill_intent_terms(all_terms, top_n=6)
 
     category_tokens = _category_tokens(parent_sku.category)
     anchor_source = "fallback"
-    anchor = _select_anchor(search_query_terms, category_tokens)
+    anchor = _select_anchor(distilled_terms, category_tokens)
     if anchor:
-        anchor_source = "search_queries_top"
+        anchor_source = "distilled_intent_terms"
+    if not anchor:
+        anchor = _select_anchor(search_query_terms, category_tokens)
+        if anchor:
+            anchor_source = "search_queries_top"
     if not anchor:
         anchor = _select_anchor(intent_terms, category_tokens)
         if anchor:
@@ -542,20 +609,34 @@ def build_keyword_placement_plan(
             anchor_source = "external_keywords"
     if not anchor:
         anchor = _fallback_anchor(parent_sku.category, parent_sku.current_title)
+    distilled_anchor = _distill_intent_term(anchor)
+    if distilled_anchor:
+        anchor = distilled_anchor
 
     title_support_terms = [
         term
-        for term in _dedupe_terms(search_query_terms + intent_terms + external_terms)
+        for term in _distill_intent_terms(
+            _dedupe_terms(search_query_terms + intent_terms + external_terms),
+            top_n=6,
+        )
         if term != anchor
     ][:2]
 
     description_terms = [
         term
-        for term in _dedupe_terms(search_query_terms + all_terms)
+        for term in _distill_intent_terms(
+            _dedupe_terms(search_query_terms + all_terms),
+            top_n=6,
+        )
         if term != anchor
     ]
     if len(description_terms) < 2:
-        description_terms.extend(_fallback_description_terms(parent_sku.category))
+        description_terms.extend(
+            _distill_intent_terms(
+                _fallback_description_terms(parent_sku.category),
+                top_n=6,
+            )
+        )
         description_terms = _dedupe_terms(description_terms)
 
     short_title_anchor = None
@@ -564,6 +645,8 @@ def build_keyword_placement_plan(
             short_title_anchor = anchor
         else:
             short_title_anchor = _truncate_phrase(anchor, 70)
+
+    buyer_hints = [term for term in description_terms if term != anchor][:4]
 
     return KeywordPlacementPlan(
         title_anchor=anchor,
@@ -575,6 +658,8 @@ def build_keyword_placement_plan(
         brand=_DEFAULT_BRAND,
         room_context=get_room_context(parent_sku.category),
         enforce_alignment=anchor_source != "fallback",
+        distilled_intent_terms=distilled_terms,
+        buyer_phrasing_hints=buyer_hints,
     )
 
 
@@ -585,8 +670,13 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
         "",
         "These phrases represent search intent only; do NOT treat them as product facts or claims.",
         "",
-        f"Primary search term (include naturally in the title; adapt wording to accurately describe THIS product): {plan.title_anchor}",
+        f"Primary intent anchor (use naturally in the title; adapt wording to accurately describe THIS product): {plan.title_anchor}",
     ]
+    if plan.distilled_intent_terms:
+        lines.append("")
+        lines.append("Distilled high-signal intent terms (top 6):")
+        for term in plan.distilled_intent_terms:
+            lines.append(f"- {term}")
     if plan.short_title_anchor:
         lines.append(f"Google short title must include: {plan.short_title_anchor}")
     if plan.title_support_terms:
@@ -602,6 +692,11 @@ def format_keyword_placement_section(plan: KeywordPlacementPlan) -> str:
         )
         for term in plan.description_terms:
             lines.append(f"- {term}")
+    if plan.buyer_phrasing_hints:
+        lines.append("")
+        lines.append("Optional buyer phrasing hints (use only if natural):")
+        for hint in plan.buyer_phrasing_hints:
+            lines.append(f"- {hint}")
     lines.append("")
     lines.append(
         f"Brand rule: google_title and bing_title must end with {plan.brand}"
