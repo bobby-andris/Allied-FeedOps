@@ -130,6 +130,64 @@ def _default_finish_metadata(sku_data: ParentSKU) -> list[dict[str, Any]]:
     return finish_rows
 
 
+def _build_product_design_story(sku_data: ParentSKU, evidence_rows: list[dict[str, Any]]) -> str:
+    """Extract product-specific data that makes THIS product unique.
+
+    This is the foundation for differentiation — what makes this specific
+    product's design special, grounded in real evidence.
+    """
+    parts: list[str] = []
+
+    if sku_data.category:
+        parts.append(f"Category: {sku_data.category}")
+    if sku_data.collection:
+        parts.append(f"Collection: {sku_data.collection}")
+
+    if sku_data.current_description and sku_data.current_description != sku_data.current_title:
+        parts.append(f"Manufacturer description: {sku_data.current_description}")
+
+    bullets = []
+    for attr in ["bullet_1", "bullet_2", "bullet_3", "bullet_4"]:
+        val = getattr(sku_data, attr, None)
+        if val and val.strip():
+            bullets.append(val.strip())
+    if bullets:
+        parts.append("Product selling points:\n" + "\n".join(f"- {b}" for b in bullets))
+
+    for ev in evidence_rows:
+        if isinstance(ev, dict):
+            for field_name, label in [
+                ("mounting_type", "Mounting type"),
+                ("style", "Style"),
+            ]:
+                val = ev.get(field_name) or ev.get(field_name.replace("_", " ").title())
+                if val and str(val).strip():
+                    parts.append(f"{label}: {val}")
+            break
+
+    return "\n".join(parts) if parts else ""
+
+
+def _build_competitive_context(sku_data: ParentSKU, evidence_rows: list[dict[str, Any]]) -> str:
+    """Build product-specific competitive positioning from evidence."""
+    parts: list[str] = []
+    for ev in evidence_rows:
+        if isinstance(ev, dict):
+            material = ev.get("material") or ev.get("Material") or ""
+            if "brass" in str(material).lower():
+                parts.append(
+                    "Solid brass construction confirmed — frame this positively "
+                    "(won't corrode, pit, or tarnish) without naming competitor materials."
+                )
+                break
+
+    parts.append(
+        "Focus on what makes THIS product's design better than alternatives. "
+        "Never mention competitor materials by name."
+    )
+    return "\n".join(parts)
+
+
 def build_google_prompt(
     sku_data: ParentSKU,
     evidence: list[dict[str, Any]] | None,
@@ -141,26 +199,37 @@ def build_google_prompt(
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
     evidence_markdown = format_evidence_markdown(evidence_rows)
     keyword_section = _coerce_keyword_section(sku_data, evidence_rows, keywords)
+    product_story = _build_product_design_story(sku_data, evidence_rows)
+    competitive_context = _build_competitive_context(sku_data, evidence_rows)
 
     sections = [
-        "Target: Google Shopping variant content package.",
+        f"<task>Generate Google Shopping content for MasterSKU: {sku_data.master_sku}.</task>",
         (
-            "This content is for a variant-level Google Shopping listing. "
-            "Use the literal string {FINISH_NAME} where the finish name belongs. "
-            "Use the literal string {FINISH_SENTENCE} where finish context flows naturally. "
-            "These are placeholders that will be replaced during variant publishing."
+            "<placeholders>\n"
+            "Use the literal string {FINISH_NAME} where the finish name belongs in the title.\n"
+            "Use the literal string {FINISH_SENTENCE} where finish context flows naturally in the description.\n"
+            "These are literal placeholders — output them exactly. Do not expand or replace them.\n"
+            "</placeholders>"
         ),
-        f"Product Evidence Table:\n{evidence_markdown}",
+        f"<evidence_table>\n{evidence_markdown}\n</evidence_table>",
     ]
+    if product_story:
+        sections.append(
+            f"<product_design_story>\n{product_story}\n</product_design_story>"
+        )
+    if competitive_context:
+        sections.append(
+            f"<competitive_positioning>\n{competitive_context}\n</competitive_positioning>"
+        )
     if keyword_section:
-        sections.append(keyword_section)
+        sections.append(f"<keyword_placement>\n{keyword_section}\n</keyword_placement>")
     if category_guidance:
-        sections.append(f"Category Guidance:\n{category_guidance}")
+        sections.append(f"<category_guidance>\n{category_guidance}\n</category_guidance>")
     if gold_examples:
-        sections.append(f"Gold Standard Examples (Google-focused):\n{gold_examples}")
+        sections.append(f"<gold_examples>\n{gold_examples}\n</gold_examples>")
     sections.append(
-        "Return JSON with keys: google_title, google_short_title, "
-        "google_description, claims, self_score."
+        "<output>Return JSON with keys: google_title, google_short_title, "
+        "google_description, claims, self_score.</output>"
     )
     return "\n\n".join(sections)
 
@@ -175,26 +244,34 @@ def build_bing_prompt(
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
     evidence_markdown = format_evidence_markdown(evidence_rows)
     keyword_section = _coerce_keyword_section(sku_data, evidence_rows, keywords)
+    product_story = _build_product_design_story(sku_data, evidence_rows)
+    competitive_context = _build_competitive_context(sku_data, evidence_rows)
 
     sections = [
-        "Target: Bing Shopping variant content package.",
+        f"<task>Generate Bing Shopping content for MasterSKU: {sku_data.master_sku}.</task>",
         (
-            "Use the literal string {FINISH_NAME} where the finish name belongs in the title. "
-            "Use the literal string {FINISH_SENTENCE} in the description. "
-            "Do not expand placeholders."
+            "<placeholders>\n"
+            "Use the literal string {FINISH_NAME} in the title.\n"
+            "Use the literal string {FINISH_SENTENCE} in the description.\n"
+            "Do not expand placeholders.\n"
+            "</placeholders>"
         ),
-        (
-            "Bing optimization: front-load concrete product specifications in the first 200 characters, "
-            "and cover high-intent synonym language naturally in complete sentences."
-        ),
-        f"Product Evidence Table:\n{evidence_markdown}",
+        f"<evidence_table>\n{evidence_markdown}\n</evidence_table>",
     ]
+    if product_story:
+        sections.append(
+            f"<product_design_story>\n{product_story}\n</product_design_story>"
+        )
+    if competitive_context:
+        sections.append(
+            f"<competitive_positioning>\n{competitive_context}\n</competitive_positioning>"
+        )
     if keyword_section:
-        sections.append(keyword_section)
+        sections.append(f"<keyword_placement>\n{keyword_section}\n</keyword_placement>")
     if category_guidance:
-        sections.append(f"Category Guidance:\n{category_guidance}")
+        sections.append(f"<category_guidance>\n{category_guidance}\n</category_guidance>")
     sections.append(
-        "Return JSON with keys: bing_title, bing_description, claims, self_score."
+        "<output>Return JSON with keys: bing_title, bing_description, claims, self_score.</output>"
     )
     return "\n\n".join(sections)
 
@@ -207,24 +284,33 @@ def build_shopify_prompt(
     """Build Shopify master-SKU prompt (finish agnostic, HTML output)."""
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
     evidence_markdown = format_evidence_markdown(evidence_rows)
+    product_story = _build_product_design_story(sku_data, evidence_rows)
+    competitive_context = _build_competitive_context(sku_data, evidence_rows)
 
     sections = [
-        "Target: Shopify master-SKU product content package.",
+        f"<task>Generate Shopify product page content for MasterSKU: {sku_data.master_sku}.</task>",
         (
-            "This is master-SKU content — do NOT mention any specific finish. "
-            "The content must work for all 28 finish variants."
+            "<constraints>\n"
+            "This is master-SKU content — do NOT mention any specific finish.\n"
+            "The content must work for all 28 finish variants.\n"
+            "Do NOT include {FINISH_NAME} or {FINISH_SENTENCE} placeholders.\n"
+            "</constraints>"
         ),
-        (
-            "Write Shopify-friendly HTML description. Start with buyer-problem or buyer-outcome framing, "
-            "then support with concrete specs, installation confidence, and trust signals."
-        ),
-        f"Product Evidence Table:\n{evidence_markdown}",
+        f"<evidence_table>\n{evidence_markdown}\n</evidence_table>",
     ]
+    if product_story:
+        sections.append(
+            f"<product_design_story>\n{product_story}\n</product_design_story>"
+        )
+    if competitive_context:
+        sections.append(
+            f"<competitive_positioning>\n{competitive_context}\n</competitive_positioning>"
+        )
     if category_guidance:
-        sections.append(f"Category Guidance:\n{category_guidance}")
+        sections.append(f"<category_guidance>\n{category_guidance}\n</category_guidance>")
     sections.append(
-        "Return JSON with keys: shopify_title, shopify_description, "
-        "shopify_meta_description, claims, self_score."
+        "<output>Return JSON with keys: shopify_title, shopify_description, "
+        "shopify_meta_description, claims, self_score.</output>"
     )
     return "\n\n".join(sections)
 
@@ -257,18 +343,19 @@ def build_finish_prompt(
 
     return "\n\n".join(
         [
-            "Target: finish sentence generation for variant expansion.",
+            f"<task>Generate 28 finish sentences for MasterSKU: {sku_data.master_sku}.</task>",
             (
-                "Generate 28 finish sentences for THIS product only. "
-                "Each sentence must be specific to THIS product paired with THIS finish. "
-                "Do not write generic finish blurbs."
+                "<product_context>\n"
+                f"Category: {sku_data.category}\n"
+                f"Collection: {sku_data.collection or 'N/A'}\n"
+                f"Current title: {sku_data.current_title}\n"
+                "</product_context>"
             ),
-            f"Master SKU: {sku_data.master_sku}\nCategory: {sku_data.category}\nCollection: {sku_data.collection or 'N/A'}\nCurrent title: {sku_data.current_title}",
-            f"Product selling points:\n{bullet_block}",
-            f"Finish metadata (28 finishes):\n{finish_block}",
+            f"<selling_points>\n{bullet_block}\n</selling_points>",
+            f"<finish_metadata>\n{finish_block}\n</finish_metadata>",
             (
-                "Return JSON with key 'sentences' as an array of objects:\n"
-                "[{\"finish_code\": \"...\", \"finish_name\": \"...\", \"sentence\": \"...\"}]"
+                "<output>Return JSON with key 'sentences' as an array of objects:\n"
+                '[{"finish_code": "...", "finish_name": "...", "sentence": "..."}]</output>'
             ),
         ]
     )

@@ -385,6 +385,149 @@ Return ONE valid JSON object with all required fields. Google/Bing fields are va
 # Category guidance now served exclusively by shopping_intelligence.yaml (see shopping_intelligence.py)
 
 # ---------------------------------------------------------------------------
+# PLATFORM-SPECIFIC CREATIVE BRIEFS (v2 per-platform prompts)
+# ---------------------------------------------------------------------------
+# These are purpose-built GPT-5.2 instructions that replace the extracted
+# skill snippets. They encode Bobby/Robert's Round 2 evaluation feedback
+# as actionable creative direction, not reference material.
+#
+# Each brief is combined with SYSTEM_PROMPT by get_platform_system_prompt()
+# in skill_loader.py to form the complete system prompt for that platform.
+# ---------------------------------------------------------------------------
+
+GOOGLE_BRIEF = """\
+<title_formula>
+Write Google Shopping titles using this exact structure:
+
+{FINISH_NAME} [Product Function] [Collection Name Collection] [Primary Dimension*] [Style Reference*] - Allied Brass
+
+Rules:
+- {FINISH_NAME} is ALWAYS the first element. It is a literal placeholder — output it exactly.
+- Product function in the first 30 characters after {FINISH_NAME} (e.g., "Towel Bar", "Robe Hook", "Soap Dish").
+- If the product belongs to a named collection, include "[Name] Collection" (always with the word "Collection").
+- Include the primary dimension ONLY when the product varies by size (towel bars: yes; robe hooks: no).
+- Vary style references across products: "Traditional", "Contemporary", "Minimalist", "Art Deco", etc. — do NOT use the same style word for every SKU.
+- "Solid Brass" should NOT appear in the title — save prime title space for converting keywords.
+- "Allied Brass" is always the final segment, separated by a dash or comma.
+- Total length: 60-150 characters. Shorter is better if it captures the key terms.
+
+Good: {FINISH_NAME} 24-Inch Towel Bar - Skyline Collection - Allied Brass
+Good: {FINISH_NAME} Robe Hook, Contemporary Wall Mount - Waverly Place Collection - Allied Brass
+Bad: {FINISH_NAME} 24-Inch Wall Mounted Solid Brass Towel Rack - Skyline Bathroom Towel Holder Brass - Allied Brass  ← keyword-stuffed
+Bad: {FINISH_NAME} Solid Brass Robe Hook (2.5" x 2.5" x 1.5") - Allied Brass  ← unnecessary dims
+</title_formula>
+
+<google_short_title>
+Max 70 characters. Product type + primary dimension only. No brand, no collection, no finish.
+Example: "24-Inch Wall Mounted Towel Bar" or "Double Robe Hook"
+</google_short_title>
+
+<description_brief>
+Write a Google Shopping description that makes a shopper pick Allied Brass over the generic listing next to it.
+
+Structure (700-900 characters total, plain text):
+1. OPEN with what makes THIS product's design special — a concrete detail from the evidence (e.g., "petite spherical end pieces," "reeded texture grip," "concealed post design"). Not a generic benefit.
+2. Place {FINISH_SENTENCE} where finish context flows naturally — typically after the design opening or as a transition sentence. It is a literal placeholder; output it exactly as {FINISH_SENTENCE}.
+3. BUILD with 2-3 evidence-grounded selling points: solid brass durability, collection coordination, mounting style, or a design detail that differentiates this product.
+4. CLOSE with a practical trust signal: warranty, what's included, or installation confidence.
+
+What to INCLUDE:
+- Product-specific design details from the evidence (dimensions, mounting type, design elements)
+- The primary searchable dimension (overall length for bars, diameter for mirrors)
+- Collection name when available (for coordination selling)
+- Natural keyword integration — weave search terms into the narrative
+
+What to EXCLUDE (these kill conversions or create doubt):
+- Weight capacity (creates doubt, not confidence)
+- Detailed dimensions beyond the primary one (width, height, projection, depth — these belong in the spec sheet)
+- Competitor material names (die-cast zinc, plated alternatives, zinc alloy, chrome-plated steel)
+- "Heritage bathroom fixtures" or invented category terms
+- "Also searched as" or keyword list patterns
+- "28 finishes" or finish count references (this listing IS a specific finish variant)
+- "Bathroom humidity" as a key selling point (technically true but feels like filler)
+- Installation specifics (screw sizes, exact hardware counts)
+</description_brief>
+"""
+
+BING_BRIEF = """\
+<title_formula>
+Same structure as Google titles:
+{FINISH_NAME} [Product Function] [Collection Name Collection] [Primary Dimension*] - Allied Brass
+
+Bing shoppers scan titles quickly. Front-load the most important product identifier after {FINISH_NAME}.
+Use synonym variations from Google titles where natural (e.g., "Towel Holder" vs "Towel Bar").
+</title_formula>
+
+<description_brief>
+Write a Bing Shopping description optimized for literal keyword matching and quick scanning.
+
+Structure (700-1000 characters total, plain text):
+1. OPEN with a concrete product specification sentence — what this product IS, its primary dimension, and material. Bing rewards front-loaded specs in the first 200 characters.
+2. Place {FINISH_SENTENCE} naturally after the opening specs. Output it exactly as a literal placeholder.
+3. BUILD with design details and practical selling points, naturally integrating high-intent synonym keywords (towel bar / towel rack / towel holder) in complete sentences.
+4. CLOSE with collection coordination or warranty.
+
+Bing-specific: Cover synonym variations naturally. If the product is a "towel bar," also work in "towel rack" or "towel holder" once each in natural sentences. Never use "also searched as" lists.
+
+Same EXCLUDE rules as Google: no weight capacity, no detailed dims, no competitor materials, no "28 finishes," no keyword stuffing.
+</description_brief>
+"""
+
+SHOPIFY_BRIEF = """\
+<title_rules>
+Shopify product title — this is the H1 on the product page.
+- Finish-agnostic (no specific finish names — the product page covers all finishes)
+- Do NOT include "Allied Brass" in the title
+- Include collection name with "Collection" keyword when available
+- Include primary dimension when the product varies by size
+- Max 255 characters, but shorter is better (aim for 40-80 chars)
+- Must work as a page heading a shopper would actually read
+
+Good: "Skyline Collection 24-Inch Wall Mounted Towel Bar"
+Good: "Contemporary Double Robe Hook - Waverly Place Collection"
+Bad: "Allied Brass Skyline Collection Solid Brass 24-Inch Wall Mount Towel Bar Holder Rack"
+</title_rules>
+
+<description_brief>
+Write a Shopify product description in HTML that helps a shopper who landed on this page decide to buy.
+
+Structure:
+1. Opening <p>: Start with a buyer problem or desired outcome, then connect it to THIS product. What gap does this product fill in the bathroom? Be specific to the product, not generic.
+2. Design story <p>: What makes this product's design special? Collection identity, design elements, style context.
+3. Benefits <ul><li>: 4-6 bullet points covering solid brass construction, key dimensions, mounting style, and collection coordination. Use <strong> for the lead phrase of each bullet.
+4. Closing <p>: Trust signal — warranty, what's included, or collection coordination call-to-action.
+
+Do NOT mention any specific finish — this content serves all 28 variants.
+Do NOT include weight capacity, detailed dimensions, or installation specifics.
+Do NOT use "heritage bathroom fixtures" or competitor material names.
+</description_brief>
+
+<meta_description>
+140-155 characters. Standalone summary with the primary keyword. Must work as a Google SERP snippet.
+Include product type, key differentiator, and collection name.
+</meta_description>
+"""
+
+FINISH_BRIEF = """\
+<finish_sentence_rules>
+Generate exactly 28 finish sentences — one for each Allied Brass finish.
+
+Each sentence connects THIS SPECIFIC PRODUCT to THIS SPECIFIC FINISH. Not generic finish blurbs.
+
+Rules:
+- 40-80 characters per sentence (concise — these get inserted into descriptions)
+- Reference the product type or a design detail, not just the finish color
+- Vary the sentence structure across finishes — don't use the same template 28 times
+- The sentence should read naturally when dropped into a product description mid-paragraph
+
+Good for a towel bar: "Antique Brass warms the straight bar with a soft, aged glow."
+Good for a robe hook: "Polished Chrome keeps the curved hook bright and easy to clean."
+Bad (generic): "Antique Brass adds warm tones to your bathroom." ← not product-specific
+Bad (too long): "The Antique Brass finish gives this 24-inch wall-mounted towel bar a soft, aged warmth that coordinates with traditional bathroom hardware." ← exceeds 80 chars
+</finish_sentence_rules>
+"""
+
+# ---------------------------------------------------------------------------
 # DYNAMIC USER PROMPT (per-SKU, assembled at runtime)
 # ---------------------------------------------------------------------------
 # Contains only the evidence table, keyword placement plan, and master SKU.

@@ -4,14 +4,15 @@ from feedops.pipeline.prompts import SYSTEM_PROMPT
 
 def test_system_prompt_uses_required_section_contracts() -> None:
     required_sections = [
-        "=== P0_GLOBAL_FACTUAL_RULES ===",
-        "=== P0_FIELD_ISOLATION_RULES ===",
-        "=== P1_GOOGLE_BING_FEED_RULES ===",
-        "=== P1_SHOPIFY_CONVERSION_RULES ===",
-        "=== P2_STYLE_GUIDANCE ===",
+        "<creative_direction>",
+        "<brand_voice>",
+        "<accuracy_guardrail>",
+        "<platform_rules>",
+        "<scoring_rubric>",
+        "<output_contract>",
     ]
     for section in required_sections:
-        assert section in SYSTEM_PROMPT
+        assert section in SYSTEM_PROMPT, f"Missing section: {section}"
 
 
 def test_system_prompt_removes_clickbait_conflict_language() -> None:
@@ -36,7 +37,13 @@ def test_get_system_prompt_warns_when_threshold_exceeded(monkeypatch) -> None:
         def warning(self, msg: str, *args) -> None:
             messages.append(msg % args if args else msg)
 
-    monkeypatch.setattr(prompt_loader, "CANONICAL_SYSTEM_PROMPT", "x" * 20_001)
+        def info(self, msg: str, *args) -> None:
+            pass
+
+        def debug(self, msg: str, *args) -> None:
+            pass
+
+    monkeypatch.setattr(prompt_loader, "CANONICAL_SYSTEM_PROMPT", "x" * 280_001)
     monkeypatch.setattr(prompt_loader, "_prompt_size_warning_emitted", False)
     monkeypatch.setattr(prompt_loader, "logger", _LoggerStub())
 

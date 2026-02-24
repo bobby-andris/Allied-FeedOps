@@ -344,60 +344,44 @@ def extract_actionable_skill_knowledge(
 
 
 def get_platform_system_prompt(platform: str) -> str:
-    """Build a platform-specific system prompt from extracted skill knowledge."""
-    platform_key = (platform or "").strip().lower()
-    if platform_key not in PLATFORM_SKILL_MAP:
-        raise ValueError(
-            f"Unsupported platform '{platform}'. "
-            f"Expected one of: {', '.join(sorted(PLATFORM_SKILL_MAP))}"
-        )
+    """Build a platform-specific system prompt from SYSTEM_PROMPT + creative brief.
 
-    skill_names = PLATFORM_SKILL_MAP[platform_key]
-    role_label = PLATFORM_ROLE_MAP.get(platform_key, platform_key)
-
-    brand_voice = ""
-    if "allied-brass-brand-expert" in skill_names:
-        brand_voice = extract_actionable_skill_knowledge(
-            "allied-brass-brand-expert", min_chars=2000, max_chars=4200
-        )
-
-    platform_rules_blocks: list[str] = []
-    for skill_name in skill_names:
-        if skill_name == "allied-brass-brand-expert":
-            continue
-        min_chars = 1800 if skill_name.endswith("content") else 1200
-        max_chars = 4200 if skill_name.endswith("content") else 2600
-        extracted = extract_actionable_skill_knowledge(
-            skill_name, min_chars=min_chars, max_chars=max_chars
-        )
-        if extracted:
-            platform_rules_blocks.append(
-                f"<skill name=\"{skill_name}\">\n{extracted}\n</skill>"
-            )
-
-    if not brand_voice:
-        brand_voice = (
-            "Use concrete, verifiable language. Keep tone confident, specific, and "
-            "design-aware. Avoid hype and generic filler."
-        )
-
-    if not platform_rules_blocks:
-        platform_rules_blocks.append(
-            "Use product-specific, evidence-grounded language tailored to this platform."
-        )
-
-    prompt = (
-        f"<role>You write {role_label} content for Allied Brass solid brass "
-        f"bathroom hardware.</role>\n\n"
-        f"<brand_voice>\n{brand_voice}\n</brand_voice>\n\n"
-        f"<platform_rules>\n{chr(10).join(platform_rules_blocks)}\n</platform_rules>\n\n"
-        f"<accuracy>\n{SHARED_ACCURACY_RULES}\n</accuracy>"
+    Architecture (v2 — Phase 25.3):
+    - SYSTEM_PROMPT provides shared creative direction, brand voice, accuracy
+      guardrails, platform rules, and scoring rubric (~3.5K chars, cacheable).
+    - Platform briefs (GOOGLE_BRIEF, etc.) provide platform-specific title
+      formula, description structure, and content rules (~1-2K chars each).
+    - Total: ~4.5-5.5K chars — purpose-built GPT-5.2 instructions, not
+      extracted skill snippets.
+    """
+    from feedops.pipeline.prompts import (
+        BING_BRIEF,
+        FINISH_BRIEF,
+        GOOGLE_BRIEF,
+        SHOPIFY_BRIEF,
+        SYSTEM_PROMPT,
     )
 
+    platform_key = (platform or "").strip().lower()
+    briefs = {
+        "google": GOOGLE_BRIEF,
+        "bing": BING_BRIEF,
+        "shopify": SHOPIFY_BRIEF,
+        "finish": FINISH_BRIEF,
+    }
+
+    if platform_key not in briefs:
+        raise ValueError(
+            f"Unsupported platform '{platform}'. "
+            f"Expected one of: {', '.join(sorted(briefs))}"
+        )
+
+    brief = briefs[platform_key]
+    prompt = f"{SYSTEM_PROMPT}\n\n{brief}"
+
     logger.info(
-        "Platform system prompt built: platform=%s skills=%s chars=%d",
+        "Platform system prompt built: platform=%s chars=%d",
         platform_key,
-        ",".join(skill_names),
         len(prompt),
     )
     return prompt
