@@ -57,6 +57,20 @@ logger = logging.getLogger(__name__)
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
+def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> str:
+    """Use lower reasoning for finish sentence generation to avoid token blowups."""
+    if platform == "finish" and default_reasoning_effort in {"medium", "high"}:
+        return "low"
+    return default_reasoning_effort
+
+
+def _platform_completion_cap(platform: str, base_cap: int) -> int:
+    """Finish sentence generation can require a higher completion cap."""
+    if platform == "finish":
+        return max(base_cap, 5000)
+    return base_cap
+
+
 def _trim_google_short_title(title: str, max_len: int = 70) -> str:
     """Trim google_short_title to fit overlay constraints."""
     cleaned = title.strip()
@@ -426,13 +440,15 @@ async def generate_per_platform(
     latency_by_platform: dict[str, int] = {}
 
     for platform in ("google", "bing", "shopify", "finish"):
+        platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
+        platform_cap = _platform_completion_cap(platform, max_completion_tokens)
         started = time.perf_counter()
         payload = await provider.generate(
             prompt=user_prompts[platform],
             schema=platform_schemas[platform],
             system_prompt=system_prompts[platform],
-            reasoning_effort=reasoning_effort,
-            max_completion_tokens=max_completion_tokens,
+            reasoning_effort=platform_reasoning,
+            max_completion_tokens=platform_cap,
         )
         latency_by_platform[platform] = int((time.perf_counter() - started) * 1000)
         raw_by_platform[platform] = payload
@@ -441,11 +457,13 @@ async def generate_per_platform(
             usage_snapshot if isinstance(usage_snapshot, dict) else {}
         )
         logger.info(
-            "Per-platform generation usage: sku=%s platform=%s usage=%s latency_ms=%s",
+            "Per-platform generation usage: sku=%s platform=%s usage=%s latency_ms=%s cap=%s reasoning=%s",
             parent_sku.master_sku,
             platform,
             usage_by_platform[platform],
             latency_by_platform[platform],
+            platform_cap,
+            platform_reasoning,
         )
 
     finish_sentences = _normalize_finish_sentence_payload(

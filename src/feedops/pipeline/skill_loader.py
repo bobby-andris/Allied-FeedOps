@@ -90,6 +90,26 @@ EXCLUDED_SECTION_KEYWORDS = (
     "cross-platform comparison",
 )
 
+# Strip stale guidance lines from non-brand skills that conflict with
+# current owner-approved policy guardrails.
+_SKILL_LINE_BANLIST = (
+    "die-cast zinc",
+    "plated alternatives",
+    "zinc alloy",
+    "zamak",
+    "chrome-plated steel",
+    "hollow zinc",
+    "heritage bathroom fixtures",
+    "also searched as",
+    "also known as",
+    "spring-loaded",
+    "60 grab bar",
+)
+
+_SKILL_LINE_WARNING_BANLIST = (
+    "weight capacity",
+)
+
 SKILL_SECTION_KEYWORDS = {
     "google-shopping-content": (
         "shopper's reality",
@@ -266,6 +286,34 @@ def _fit_chunks_to_window(
     return "\n\n".join(assembled).strip()
 
 
+def _sanitize_extracted_knowledge(skill_name: str, content: str) -> str:
+    """Remove stale/conflicting examples from extracted skill snippets.
+
+    We preserve prohibition language but remove outdated "wrong example"
+    lines that can bleed into model output.
+    """
+    if not content:
+        return content
+
+    cleaned_lines: list[str] = []
+    for line in content.splitlines():
+        lower = line.lower()
+        if "wrong:" in lower:
+            continue
+        if any(term in lower for term in _SKILL_LINE_BANLIST):
+            # Keep explicit prohibition language in the brand skill only.
+            if skill_name == "allied-brass-brand-expert" and "banned terms:" in lower:
+                cleaned_lines.append(line)
+            continue
+        if any(term in lower for term in _SKILL_LINE_WARNING_BANLIST):
+            # Remove prescriptive lines that bias non-grab-bar copy toward
+            # capacity callouts; brand/system prompt handles final policy.
+            continue
+        cleaned_lines.append(line)
+
+    return "\n".join(cleaned_lines).strip()
+
+
 @lru_cache(maxsize=64)
 def extract_actionable_skill_knowledge(
     skill_name: str,
@@ -280,15 +328,19 @@ def extract_actionable_skill_knowledge(
     normalized = _strip_frontmatter(content)
     xml_sections = _extract_xml_sections(normalized)
     if xml_sections:
-        return _fit_chunks_to_window(xml_sections, min_chars=min_chars, max_chars=max_chars)
+        fitted = _fit_chunks_to_window(
+            xml_sections, min_chars=min_chars, max_chars=max_chars
+        )
+        return _sanitize_extracted_knowledge(skill_name, fitted)
 
     markdown_sections = _select_markdown_sections(skill_name, normalized)
     if markdown_sections:
-        return _fit_chunks_to_window(
+        fitted = _fit_chunks_to_window(
             markdown_sections, min_chars=min_chars, max_chars=max_chars
         )
+        return _sanitize_extracted_knowledge(skill_name, fitted)
 
-    return normalized[:max_chars].strip()
+    return _sanitize_extracted_knowledge(skill_name, normalized[:max_chars].strip())
 
 
 def get_platform_system_prompt(platform: str) -> str:

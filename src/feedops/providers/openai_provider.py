@@ -21,6 +21,58 @@ from feedops.providers.reliability import (
 logger = logging.getLogger(__name__)
 
 
+def _parse_json_payload(raw: str) -> dict[str, Any]:
+    """Parse JSON payload with light normalization for provider edge cases."""
+
+    def _unwrap_content_wrapper(value: Any) -> Any:
+        current = value
+        for _ in range(3):
+            if isinstance(current, dict) and set(current.keys()) == {"content"}:
+                inner = current.get("content")
+                if isinstance(inner, (dict, list)):
+                    current = inner
+                    continue
+                if isinstance(inner, str):
+                    stripped = inner.strip()
+                    if not stripped:
+                        break
+                    try:
+                        current = json.loads(stripped)
+                        continue
+                    except json.JSONDecodeError:
+                        break
+            break
+        return current
+
+    text = (raw or "").strip()
+    if not text:
+        raise json.JSONDecodeError("empty response", raw, 0)
+
+    try:
+        parsed = _unwrap_content_wrapper(json.loads(text))
+    except json.JSONDecodeError:
+        fenced_start = text.find("```")
+        if fenced_start != -1:
+            fenced_end = text.rfind("```")
+            if fenced_end > fenced_start:
+                fenced_body = text[fenced_start + 3 : fenced_end].strip()
+                if fenced_body.startswith("json"):
+                    fenced_body = fenced_body[4:].strip()
+                parsed = _unwrap_content_wrapper(json.loads(fenced_body))
+            else:
+                raise
+        else:
+            start = text.find("{")
+            end = text.rfind("}")
+            if start == -1 or end == -1 or end <= start:
+                raise
+            parsed = _unwrap_content_wrapper(json.loads(text[start : end + 1]))
+
+    if not isinstance(parsed, dict):
+        raise json.JSONDecodeError("parsed payload is not an object", raw, 0)
+    return parsed
+
+
 def _build_strict_schema(
     schema: dict[str, Any],
     *,
@@ -254,7 +306,7 @@ class OpenAIProvider(LLMProvider):
                     )
                 else:
                     logger.debug(f"Token usage: {self._last_usage}")
-                result = json.loads(content)
+                result = _parse_json_payload(content)
                 circuit_breakers.record_success(self.name)
                 metrics_registry.observe(
                     "provider_latency_seconds",

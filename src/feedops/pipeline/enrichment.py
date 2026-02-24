@@ -247,7 +247,7 @@ _DESIGN_STYLE_PATTERNS = {
         "signals": ["traditional", "classic", "ornate", "regal", "victorian", "heritage", 
                     "engraved", "floral", "carolina", "essex", "monte carlo", "retro"],
         "tone": "elegant, timeless, refined, luxurious",
-        "keywords": ["traditional bathroom hardware", "classic bath accessories", "heritage bathroom fixtures"],
+        "keywords": ["traditional bathroom hardware", "classic bath accessories", "traditional bath fixtures"],
     },
     "modern": {
         "signals": ["modern", "contemporary", "minimalist", "sleek", "cube", "geometric",
