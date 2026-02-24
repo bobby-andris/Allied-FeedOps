@@ -56,7 +56,7 @@
 
 </details>
 
-### 🚧 v1.3a Content Generation Excellence (In Progress)
+### v1.3a Content Generation Excellence (In Progress)
 
 **Milestone Goal:** Fix content quality at its source — repair GPT-5.2 integration bugs, establish gold standards and a differentiation-first quality rubric, rewrite prompts as creative briefs, wire all 8 runtime configs, and validate with human evaluation across 10 representative SKUs.
 
@@ -136,6 +136,16 @@ Plans:
 *v1.1 milestone completed: 2026-02-21*
 *v1.2 milestone completed: 2026-02-21*
 *v1.3a roadmap created: 2026-02-21*
+
+### Phase 25.4: Production Impact Audit (INSERTED)
+
+**Goal:** Retroactive audit of all v1-path-affecting source code changes from Phases 23-25.3 (already deployed to production on master). Align Score model and parse_candidate_response with the 10-criterion CANDIDATE_SCHEMA, fix 3 failing pipeline tests, and document every change with risk classification and disposition.
+**Depends on:** Phase 25.3
+**Requirements:** AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04, AUDIT-05
+**Plans:** 1 plan
+
+Plans:
+- [ ] 25.4-01-PLAN.md — Align Score model + parser with CANDIDATE_SCHEMA, fix 3 failing tests, produce audit report
 
 ### Phase 25.1: Prompt Architecture Research (INSERTED)
 
