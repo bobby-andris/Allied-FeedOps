@@ -185,12 +185,16 @@ def verify_claims(candidate: Candidate, parent_sku: ParentSKU) -> tuple[Candidat
         accuracy_score = 10  # No claims = no violations
 
     verified_score = Score(
-        specificity=candidate.self_score.specificity,
-        benefit_coverage=candidate.self_score.benefit_coverage,
-        keyword_inclusion=candidate.self_score.keyword_inclusion,
-        format_adherence=candidate.self_score.format_adherence,
-        brand_voice=candidate.self_score.brand_voice,
+        hook_quality=candidate.self_score.hook_quality,
+        product_specificity=candidate.self_score.product_specificity,
+        competitive_diff=candidate.self_score.competitive_diff,
+        keyword_integration=candidate.self_score.keyword_integration,
+        customer_scenario=candidate.self_score.customer_scenario,
+        emotional_resonance=candidate.self_score.emotional_resonance,
         factual_accuracy=accuracy_score,
+        platform_compliance=candidate.self_score.platform_compliance,
+        finish_integration=candidate.self_score.finish_integration,
+        variety_score=candidate.self_score.variety_score,
     )
 
     verified_candidate = candidate.model_copy(

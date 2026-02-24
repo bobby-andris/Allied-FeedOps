@@ -374,12 +374,16 @@ def generate_report(
 
 | Dimension | Score |
 |-----------|-------|
-| Specificity | {score.specificity}/10 |
-| Benefit Coverage | {score.benefit_coverage}/10 |
-| Keyword Inclusion | {score.keyword_inclusion}/10 |
-| Format Adherence | {score.format_adherence}/10 |
-| Brand Voice | {score.brand_voice}/10 |
+| Hook Quality | {score.hook_quality}/10 |
+| Product Specificity | {score.product_specificity}/10 |
+| Competitive Diff | {score.competitive_diff}/10 |
+| Keyword Integration | {score.keyword_integration}/10 |
+| Customer Scenario | {score.customer_scenario}/10 |
+| Emotional Resonance | {score.emotional_resonance}/10 |
 | Factual Accuracy | {score.factual_accuracy}/10 |
+| Platform Compliance | {score.platform_compliance}/10 |
+| Finish Integration | {score.finish_integration}/10 |
+| Variety Score | {score.variety_score}/10 |
 | **Composite** | **{score.composite}%** |
 
 ---

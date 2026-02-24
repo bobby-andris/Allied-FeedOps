@@ -222,12 +222,16 @@ def parse_candidate_response(response: dict) -> Candidate:
 
     score_data = response.get("self_score", {})
     self_score = Score(
-        specificity=score_data.get("specificity", 5),
-        benefit_coverage=score_data.get("benefit_coverage", 5),
-        keyword_inclusion=score_data.get("keyword_inclusion", 5),
-        format_adherence=score_data.get("format_adherence", 5),
-        brand_voice=score_data.get("brand_voice", 5),
+        hook_quality=score_data.get("hook_quality", 5),
+        product_specificity=score_data.get("product_specificity", 5),
+        competitive_diff=score_data.get("competitive_diff", 5),
+        keyword_integration=score_data.get("keyword_integration", 5),
+        customer_scenario=score_data.get("customer_scenario", 5),
+        emotional_resonance=score_data.get("emotional_resonance", 5),
         factual_accuracy=score_data.get("factual_accuracy", 5),
+        platform_compliance=score_data.get("platform_compliance", 5),
+        finish_integration=score_data.get("finish_integration", 5),
+        variety_score=score_data.get("variety_score", 5),
     )
 
     google_title = trim_title_to_length(response["google_title"], 150)

@@ -254,7 +254,7 @@ def test_build_evidence_table_keyword_gaps_are_category_relevant_and_finish_excl
     monkeypatch.setattr(
         evidence_module,
         "fetch_search_queries_for_master_sku",
-        lambda master_sku: [
+        lambda master_sku, **kwargs: [
             {"query_text": "bathroom towel bar wall mount", "avg_monthly_searches": 2400},
             {"query_text": "antique brass towel bar", "avg_monthly_searches": 2100},
             {"query_text": "kitchen faucet pull down", "avg_monthly_searches": 3000},
@@ -263,7 +263,7 @@ def test_build_evidence_table_keyword_gaps_are_category_relevant_and_finish_excl
     monkeypatch.setattr(
         evidence_module,
         "format_search_queries_for_evidence",
-        lambda queries, context: [],
+        lambda queries, context, **kwargs: [],
     )
 
     evidence = evidence_module.build_evidence_table(sample_parent_sku)
@@ -369,12 +369,16 @@ def test_verify_claims_marks_valid_claims(sample_parent_sku):
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, errors = verify_claims(candidate, sample_parent_sku)
@@ -397,12 +401,16 @@ def test_verify_claims_rejects_invalid_claims(sample_parent_sku):
             Claim(claim="made of Steel", source_field="material", source_value="Steel"),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, errors = verify_claims(candidate, sample_parent_sku)
@@ -429,12 +437,16 @@ def test_verify_claims_requires_exact_material_match(sample_parent_sku):
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, errors = verify_claims(candidate, sample_parent_sku)
@@ -477,12 +489,16 @@ def test_verify_claims_accepts_numeric_units_and_trailing_decimals(sample_parent
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, errors = verify_claims(candidate, parent)
@@ -516,12 +532,16 @@ def test_verify_claims_auto_extracts_finish_capacity_dimension(sample_parent_sku
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, errors = verify_claims(candidate, parent)
@@ -553,12 +573,16 @@ def test_verify_claims_auto_extracts_material_literal_mismatch(sample_parent_sku
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, errors = verify_claims(candidate, parent)
@@ -589,12 +613,16 @@ def test_verify_claims_dedupes_auto_extracted_dimensions(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     verified, _ = verify_claims(candidate, parent)
@@ -617,12 +645,16 @@ def test_extract_durability_claims_verified_for_brass(sample_parent_sku):
         shopify_description="<p>This rust-free and tarnish-resistant towel bar is built to last.</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     claims = extract_claims(candidate, sample_parent_sku)
@@ -666,12 +698,16 @@ def test_extract_durability_claims_unverified_for_other_materials():
         shopify_description="<p>This rust-free towel bar is built to last.</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     claims = extract_claims(candidate, parent)
@@ -701,12 +737,16 @@ def test_validate_candidate_content_rejects_catalog_csv_references():
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     errors = validate_candidate_content(candidate)
@@ -728,12 +768,16 @@ def test_validate_candidate_content_rejects_speculative_competitive_claims():
         shopify_description="<p>Set this apart from competitors with stronger design.</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     errors = validate_candidate_content(candidate)
@@ -756,12 +800,16 @@ def test_validate_candidate_content_allows_evidence_style_comparison_language():
         shopify_description="<p>Solid brass build for lasting bathroom performance.</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     errors = validate_candidate_content(candidate)
@@ -870,12 +918,16 @@ def test_parse_candidate_response_trims_google_short_title():
         "shopify_description": "<p>Test description</p>",
         "claims": [],
         "self_score": {
-            "specificity": 5,
-            "benefit_coverage": 5,
-            "keyword_inclusion": 5,
-            "format_adherence": 5,
-            "brand_voice": 5,
+            "hook_quality": 5,
+            "product_specificity": 5,
+            "competitive_diff": 5,
+            "keyword_integration": 5,
+            "customer_scenario": 5,
+            "emotional_resonance": 5,
             "factual_accuracy": 5,
+            "platform_compliance": 5,
+            "finish_integration": 5,
+            "variety_score": 5,
         },
     }
 
@@ -905,12 +957,16 @@ async def test_generate_candidate_fetches_image_and_passes_to_provider(
         "shopify_description": "<p>Test description</p>",
         "claims": [],
         "self_score": {
-            "specificity": 5,
-            "benefit_coverage": 5,
-            "keyword_inclusion": 5,
-            "format_adherence": 5,
-            "brand_voice": 5,
+            "hook_quality": 5,
+            "product_specificity": 5,
+            "competitive_diff": 5,
+            "keyword_integration": 5,
+            "customer_scenario": 5,
+            "emotional_resonance": 5,
             "factual_accuracy": 5,
+            "platform_compliance": 5,
+            "finish_integration": 5,
+            "variety_score": 5,
         },
     }
 
@@ -940,12 +996,16 @@ async def test_generate_candidate_skips_image_when_missing(sample_parent_sku):
         "shopify_description": "<p>Test description</p>",
         "claims": [],
         "self_score": {
-            "specificity": 5,
-            "benefit_coverage": 5,
-            "keyword_inclusion": 5,
-            "format_adherence": 5,
-            "brand_voice": 5,
+            "hook_quality": 5,
+            "product_specificity": 5,
+            "competitive_diff": 5,
+            "keyword_integration": 5,
+            "customer_scenario": 5,
+            "emotional_resonance": 5,
             "factual_accuracy": 5,
+            "platform_compliance": 5,
+            "finish_integration": 5,
+            "variety_score": 5,
         },
     }
 
@@ -971,6 +1031,18 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
         source_url="https://example.com/image.png",
     )
     llm = AsyncMock(spec=LLMProvider)
+    _default_score = {
+        "hook_quality": 5,
+        "product_specificity": 5,
+        "competitive_diff": 5,
+        "keyword_integration": 5,
+        "customer_scenario": 5,
+        "emotional_resonance": 5,
+        "factual_accuracy": 5,
+        "platform_compliance": 5,
+        "finish_integration": 5,
+        "variety_score": 5,
+    }
     llm.generate.side_effect = [
         {
             "google_title": "18-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
@@ -981,14 +1053,7 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
             "shopify_title": "Test Shopify Title 1",
             "shopify_description": "<p>Test description</p>",
             "claims": [],
-            "self_score": {
-                "specificity": 5,
-                "benefit_coverage": 5,
-                "keyword_inclusion": 5,
-                "format_adherence": 5,
-                "brand_voice": 5,
-                "factual_accuracy": 5,
-            },
+            "self_score": _default_score,
         },
         {
             "google_title": "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
@@ -999,14 +1064,7 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
             "shopify_title": "Test Shopify Title 2",
             "shopify_description": "<p>Test description</p>",
             "claims": [],
-            "self_score": {
-                "specificity": 5,
-                "benefit_coverage": 5,
-                "keyword_inclusion": 5,
-                "format_adherence": 5,
-                "brand_voice": 5,
-                "factual_accuracy": 5,
-            },
+            "self_score": _default_score,
         },
         {
             "google_title": "30-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
@@ -1017,20 +1075,16 @@ async def test_generate_candidates_fetches_image_once_and_generates_n(
             "shopify_title": "Test Shopify Title 3",
             "shopify_description": "<p>Test description</p>",
             "claims": [],
-            "self_score": {
-                "specificity": 5,
-                "benefit_coverage": 5,
-                "keyword_inclusion": 5,
-                "format_adherence": 5,
-                "brand_voice": 5,
-                "factual_accuracy": 5,
-            },
+            "self_score": _default_score,
         },
     ]
 
     with patch(
         "feedops.pipeline.generator.fetch_image", new_callable=AsyncMock
-    ) as mock_fetch:
+    ) as mock_fetch, patch(
+        "feedops.pipeline.generator._needs_keyword_alignment_retry",
+        return_value=[],
+    ):
         mock_fetch.return_value = image_input
         candidates, errors = await generate_candidates(sample_parent_sku, llm, 3)
 
@@ -1046,6 +1100,18 @@ async def test_generate_candidates_skips_failed_attempts(sample_parent_sku):
     """generate_candidates skips invalid responses and continues."""
     sample_parent_sku.variants[0].main_image_url = None
     llm = AsyncMock(spec=LLMProvider)
+    _default_score = {
+        "hook_quality": 5,
+        "product_specificity": 5,
+        "competitive_diff": 5,
+        "keyword_integration": 5,
+        "customer_scenario": 5,
+        "emotional_resonance": 5,
+        "factual_accuracy": 5,
+        "platform_compliance": 5,
+        "finish_integration": 5,
+        "variety_score": 5,
+    }
     llm.generate.side_effect = [
         {
             "google_short_title": "Test Short Title",
@@ -1055,14 +1121,7 @@ async def test_generate_candidates_skips_failed_attempts(sample_parent_sku):
             "shopify_title": "Test Shopify Title",
             "shopify_description": "<p>Test description</p>",
             "claims": [],
-            "self_score": {
-                "specificity": 5,
-                "benefit_coverage": 5,
-                "keyword_inclusion": 5,
-                "format_adherence": 5,
-                "brand_voice": 5,
-                "factual_accuracy": 5,
-            },
+            "self_score": _default_score,
         },
         {
             "google_title": "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass",
@@ -1073,21 +1132,19 @@ async def test_generate_candidates_skips_failed_attempts(sample_parent_sku):
             "shopify_title": "Test Shopify Title 2",
             "shopify_description": "<p>Test description</p>",
             "claims": [],
-            "self_score": {
-                "specificity": 5,
-                "benefit_coverage": 5,
-                "keyword_inclusion": 5,
-                "format_adherence": 5,
-                "brand_voice": 5,
-                "factual_accuracy": 5,
-            },
+            "self_score": _default_score,
         },
     ]
 
-    candidates, errors = await generate_candidates(sample_parent_sku, llm, 2)
+    with patch(
+        "feedops.pipeline.generator._needs_keyword_alignment_retry",
+        return_value=[],
+    ):
+        candidates, errors = await generate_candidates(sample_parent_sku, llm, 2)
 
     assert len(candidates) == 1
-    assert candidates[0].google_title == "24-Inch Towel Bar, Skyline Collection, Solid Brass, Allied Brass"
+    # Title normalization reorders: collection moves before "Allied Brass" brand segment
+    assert candidates[0].google_title == "24-Inch Towel Bar, Solid Brass, Skyline Collection, Allied Brass"
     assert len(errors) == 1
 
 
@@ -1111,12 +1168,16 @@ def test_generate_report_includes_scores(sample_parent_sku):
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     report = generate_report(sample_parent_sku, candidate, [])
@@ -1143,12 +1204,16 @@ def test_generate_report_includes_llm_input_details(sample_parent_sku):
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     evidence_table = "\n".join(
@@ -1204,12 +1269,16 @@ def test_generate_report_includes_soft_gate_warnings(sample_parent_sku):
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     base_platform = HeuristicScore(ctr_proxy=5, cvr_proxy=5, brand_voice=5)
@@ -1258,12 +1327,16 @@ def test_generate_report_includes_mc_metadata_section(sample_parent_sku):
             ),
         ],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     mc_metadata = {
@@ -1311,12 +1384,16 @@ def test_generate_google_patch_preview_structure(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     patch = generate_patch_preview(sample_parent_sku, candidate, platform="google")
@@ -1337,12 +1414,16 @@ def test_generate_bing_patch_preview_structure(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     patch = generate_patch_preview(sample_parent_sku, candidate, platform="bing")
@@ -1382,12 +1463,16 @@ def test_generate_google_variant_preview_updates_size_when_size_is_in_option_sku
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
 
@@ -1413,12 +1498,16 @@ def test_generate_shopify_patch_preview_structure(sample_parent_sku):
         shopify_description="<p>Test description</p>",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
     patch = generate_patch_preview(sample_parent_sku, candidate, platform="shopify")
@@ -1456,12 +1545,16 @@ def test_generate_shopify_patch_preview_multi_size_body_html_is_size_agnostic(
         ),
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
 

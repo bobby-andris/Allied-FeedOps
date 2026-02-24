@@ -3,9 +3,9 @@ from pydantic import BaseModel, computed_field, field_validator
 
 
 class Score(BaseModel):
-    """Quality score across 6 dimensions (0-10 each).
+    """Quality score across 10 dimensions (0-10 each).
 
-    Composite score = (sum of all scores) / 60 * 100
+    Composite score = (sum of all scores) / 100 * 100
 
     Approval thresholds:
     - >= 80%: approved
@@ -14,27 +14,40 @@ class Score(BaseModel):
     - factual_accuracy < 8: always rejected regardless of composite
     """
 
-    specificity: int
-    """0-10: Specific/verifiable claims vs generic claims."""
+    hook_quality: int
+    """0-10: First sentence engagement: 0=fragment/dump, 5=generic, 10=specific+engaging."""
 
-    benefit_coverage: int
-    """0-10: Benefits addressed in first 150 characters."""
+    product_specificity: int
+    """0-10: Could ONLY describe this product: 0=any competitor, 5=mentions brand generically, 10=unmistakable."""
 
-    keyword_inclusion: int
-    """0-10: Target keywords in optimal positions."""
+    competitive_diff: int
+    """0-10: Why THIS over cheaper alternative: 0=none, 5=generic brass mention, 10=advantage woven naturally."""
 
-    format_adherence: int
-    """0-10: Compliance with character limits and structure."""
+    keyword_integration: int
+    """0-10: Keywords natural or stuffed: 0=stuffed/missing, 5=present but awkward, 10=invisible."""
 
-    brand_voice: int
-    """0-10: Premium, confident tone without superlatives."""
+    customer_scenario: int
+    """0-10: Real buying situation: 0=spec dump, 5=generic upgrade, 10=specific resonant scenario."""
+
+    emotional_resonance: int
+    """0-10: Creates desire: 0=database export, 5=pleasant but forgettable, 10=genuine want."""
 
     factual_accuracy: int
-    """0-10: Every claim traceable to product data. MUST be >= 8."""
+    """0-10: All claims traceable to evidence: 10=yes, 0=fabricated specs. MUST be >= 8."""
+
+    platform_compliance: int
+    """0-10: Meets platform format/length rules: 10=perfect, 5=minor issues, 0=wrong format."""
+
+    finish_integration: int
+    """0-10: Finish as design choice or afterthought: 0=raw placeholder, 5=generic, 10=woven into narrative."""
+
+    variety_score: int
+    """0-10: Different from catalog peers: 0=identical pattern, 5=same skeleton, 10=unique structure."""
 
     @field_validator(
-        'specificity', 'benefit_coverage', 'keyword_inclusion',
-        'format_adherence', 'brand_voice', 'factual_accuracy'
+        'hook_quality', 'product_specificity', 'competitive_diff',
+        'keyword_integration', 'customer_scenario', 'emotional_resonance',
+        'factual_accuracy', 'platform_compliance', 'finish_integration', 'variety_score'
     )
     @classmethod
     def validate_score_range(cls, v: int) -> int:
@@ -48,14 +61,18 @@ class Score(BaseModel):
     def composite(self) -> float:
         """Calculate composite score as percentage (0-100)."""
         total = (
-            self.specificity +
-            self.benefit_coverage +
-            self.keyword_inclusion +
-            self.format_adherence +
-            self.brand_voice +
-            self.factual_accuracy
+            self.hook_quality +
+            self.product_specificity +
+            self.competitive_diff +
+            self.keyword_integration +
+            self.customer_scenario +
+            self.emotional_resonance +
+            self.factual_accuracy +
+            self.platform_compliance +
+            self.finish_integration +
+            self.variety_score
         )
-        return round(total / 60 * 100, 2)
+        return round(total / 100 * 100, 2)
 
     @computed_field
     @property
