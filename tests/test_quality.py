@@ -92,12 +92,16 @@ def test_score_candidate_weighted_composite_matches_platform_scores():
         ),
         claims=[],
         self_score=Score(
-            specificity=5,
-            benefit_coverage=5,
-            keyword_inclusion=5,
-            format_adherence=5,
-            brand_voice=5,
+            hook_quality=5,
+            product_specificity=5,
+            competitive_diff=5,
+            keyword_integration=5,
+            customer_scenario=5,
+            emotional_resonance=5,
             factual_accuracy=5,
+            platform_compliance=5,
+            finish_integration=5,
+            variety_score=5,
         ),
     )
     weights = {"google": 0.7, "bing": 0.15, "shopify": 0.15}
@@ -148,12 +152,16 @@ def test_score_candidate_penalizes_keyword_alignment_misses():
         shopify_description="<p>A clean rail design with solid brass construction and concealed hardware.</p>",
         claims=[],
         self_score=Score(
-            specificity=5,
-            benefit_coverage=5,
-            keyword_inclusion=5,
-            format_adherence=5,
-            brand_voice=5,
+            hook_quality=5,
+            product_specificity=5,
+            competitive_diff=5,
+            keyword_integration=5,
+            customer_scenario=5,
+            emotional_resonance=5,
             factual_accuracy=5,
+            platform_compliance=5,
+            finish_integration=5,
+            variety_score=5,
         ),
     )
     weights = {"google": 0.7, "bing": 0.15, "shopify": 0.15}

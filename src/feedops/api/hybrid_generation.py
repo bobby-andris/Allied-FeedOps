@@ -69,12 +69,16 @@ def validate_adapted_variant_content(
         "shopify_description": default_description,
         "claims": [],
         "self_score": Score(
-            specificity=10,
-            benefit_coverage=10,
-            keyword_inclusion=10,
-            format_adherence=10,
-            brand_voice=10,
+            hook_quality=10,
+            product_specificity=10,
+            competitive_diff=10,
+            keyword_integration=10,
+            customer_scenario=10,
+            emotional_resonance=10,
             factual_accuracy=10,
+            platform_compliance=10,
+            finish_integration=10,
+            variety_score=10,
         ),
     }
     payload[target_field] = sanitized_content

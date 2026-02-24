@@ -117,24 +117,30 @@ def test_claim_defaults_to_unverified():
 
 # Task 2.4: Score Model Tests
 def test_score_composite_calculation():
-    """Composite = sum of all scores / 60 * 100."""
+    """Composite = sum of all scores / 100 * 100."""
     score = Score(
-        specificity=8,
-        benefit_coverage=9,
-        keyword_inclusion=7,
-        format_adherence=10,
-        brand_voice=8,
+        hook_quality=8,
+        product_specificity=8,
+        competitive_diff=8,
+        keyword_integration=7,
+        customer_scenario=8,
+        emotional_resonance=8,
         factual_accuracy=9,
+        platform_compliance=10,
+        finish_integration=8,
+        variety_score=8,
     )
-    # (8+9+7+10+8+9) / 60 * 100 = 51/60 * 100 = 85%
-    assert score.composite == 85.0
+    # (8+8+8+7+8+8+9+10+8+8) / 100 * 100 = 82%
+    assert score.composite == 82.0
 
 
 def test_score_approval_status_approved():
     """Score >= 80% and factual_accuracy >= 8 is approved."""
     score = Score(
-        specificity=8, benefit_coverage=8, keyword_inclusion=8,
-        format_adherence=8, brand_voice=8, factual_accuracy=8,
+        hook_quality=8, product_specificity=8, competitive_diff=8,
+        keyword_integration=8, customer_scenario=8, emotional_resonance=8,
+        factual_accuracy=8, platform_compliance=8, finish_integration=8,
+        variety_score=8,
     )
     assert score.composite == 80.0
     assert score.approval_status == "approved"
@@ -143,8 +149,10 @@ def test_score_approval_status_approved():
 def test_score_approval_status_rejected_low_accuracy():
     """Factual accuracy < 8 is always rejected."""
     score = Score(
-        specificity=10, benefit_coverage=10, keyword_inclusion=10,
-        format_adherence=10, brand_voice=10, factual_accuracy=7,
+        hook_quality=10, product_specificity=10, competitive_diff=10,
+        keyword_integration=10, customer_scenario=10, emotional_resonance=10,
+        factual_accuracy=7, platform_compliance=10, finish_integration=10,
+        variety_score=10,
     )
     assert score.composite > 80.0
     assert score.approval_status == "rejected"
@@ -153,10 +161,12 @@ def test_score_approval_status_rejected_low_accuracy():
 def test_score_approval_status_revise():
     """Score 70-79% with factual_accuracy >= 8 needs revision."""
     score = Score(
-        specificity=7, benefit_coverage=7, keyword_inclusion=7,
-        format_adherence=7, brand_voice=7, factual_accuracy=8,
+        hook_quality=7, product_specificity=7, competitive_diff=7,
+        keyword_integration=7, customer_scenario=7, emotional_resonance=7,
+        factual_accuracy=8, platform_compliance=7, finish_integration=7,
+        variety_score=7,
     )
-    # (7+7+7+7+7+8) / 60 * 100 = 43/60 * 100 = 71.67%
+    # (7*9 + 8) / 100 * 100 = 71%
     assert 70 <= score.composite < 80
     assert score.approval_status == "revise"
 
@@ -169,8 +179,10 @@ def test_candidate_model_structure():
         Claim(claim="solid brass", source_field="material", source_value="Brass"),
     ]
     self_score = Score(
-        specificity=8, benefit_coverage=9, keyword_inclusion=7,
-        format_adherence=10, brand_voice=8, factual_accuracy=9,
+        hook_quality=8, product_specificity=9, competitive_diff=7,
+        keyword_integration=7, customer_scenario=8, emotional_resonance=8,
+        factual_accuracy=9, platform_compliance=10, finish_integration=8,
+        variety_score=8,
     )
     candidate = Candidate(
         google_title="ADA-Compliant 18-Inch Grab Bar 500lb Capacity | Solid Brass | Allied Brass",
@@ -186,7 +198,8 @@ def test_candidate_model_structure():
     assert len(candidate.google_title) < 150
     assert len(candidate.google_short_title) < 70
     assert len(candidate.claims) == 2
-    assert candidate.self_score.composite == 85.0
+    # (8+9+7+7+8+8+9+10+8+8) / 100 * 100 = 82%
+    assert candidate.self_score.composite == 82.0
 
 
 def test_candidate_selection_metadata_defaults_to_none():
@@ -201,12 +214,16 @@ def test_candidate_selection_metadata_defaults_to_none():
         shopify_description="<p>Valid description</p>",
         claims=[],
         self_score=Score(
-            specificity=5,
-            benefit_coverage=5,
-            keyword_inclusion=5,
-            format_adherence=5,
-            brand_voice=5,
+            hook_quality=5,
+            product_specificity=5,
+            competitive_diff=5,
+            keyword_integration=5,
+            customer_scenario=5,
+            emotional_resonance=5,
             factual_accuracy=5,
+            platform_compliance=5,
+            finish_integration=5,
+            variety_score=5,
         ),
     )
     assert candidate.heuristic_score is None
@@ -229,8 +246,10 @@ def test_candidate_google_title_max_length():
             shopify_description="<p>Valid description</p>",
             claims=[],
             self_score=Score(
-                specificity=5, benefit_coverage=5, keyword_inclusion=5,
-                format_adherence=5, brand_voice=5, factual_accuracy=5,
+                hook_quality=5, product_specificity=5, competitive_diff=5,
+                keyword_integration=5, customer_scenario=5, emotional_resonance=5,
+                factual_accuracy=5, platform_compliance=5, finish_integration=5,
+                variety_score=5,
             ),
         )
 
@@ -248,8 +267,10 @@ def test_candidate_shopify_title_max_length():
             shopify_description="<p>Valid description</p>",
             claims=[],
             self_score=Score(
-                specificity=5, benefit_coverage=5, keyword_inclusion=5,
-                format_adherence=5, brand_voice=5, factual_accuracy=5,
+                hook_quality=5, product_specificity=5, competitive_diff=5,
+                keyword_integration=5, customer_scenario=5, emotional_resonance=5,
+                factual_accuracy=5, platform_compliance=5, finish_integration=5,
+                variety_score=5,
             ),
         )
 
@@ -267,7 +288,9 @@ def test_candidate_google_short_title_max_length():
             shopify_description="<p>Valid description</p>",
             claims=[],
             self_score=Score(
-                specificity=5, benefit_coverage=5, keyword_inclusion=5,
-                format_adherence=5, brand_voice=5, factual_accuracy=5,
+                hook_quality=5, product_specificity=5, competitive_diff=5,
+                keyword_integration=5, customer_scenario=5, emotional_resonance=5,
+                factual_accuracy=5, platform_compliance=5, finish_integration=5,
+                variety_score=5,
             ),
         )

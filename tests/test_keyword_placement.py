@@ -42,12 +42,16 @@ def _make_candidate(*, title: str, short_title: str, description: str, shopify_t
         shopify_description=f"<p>{description}</p>",
         claims=[],
         self_score=Score(
-            specificity=5,
-            benefit_coverage=5,
-            keyword_inclusion=5,
-            format_adherence=5,
-            brand_voice=5,
+            hook_quality=5,
+            product_specificity=5,
+            competitive_diff=5,
+            keyword_integration=5,
+            customer_scenario=5,
+            emotional_resonance=5,
             factual_accuracy=5,
+            platform_compliance=5,
+            finish_integration=5,
+            variety_score=5,
         ),
     )
 

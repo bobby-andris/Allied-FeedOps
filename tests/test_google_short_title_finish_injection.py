@@ -28,12 +28,16 @@ def test_google_short_title_prefers_finish_first_when_it_fits(monkeypatch) -> No
         shopify_meta_description="desc",
         claims=[],
         self_score=Score(
-            specificity=8,
-            benefit_coverage=8,
-            keyword_inclusion=8,
-            format_adherence=8,
-            brand_voice=8,
+            hook_quality=8,
+            product_specificity=8,
+            competitive_diff=8,
+            keyword_integration=8,
+            customer_scenario=8,
+            emotional_resonance=8,
             factual_accuracy=8,
+            platform_compliance=8,
+            finish_integration=8,
+            variety_score=8,
         ),
     )
 
