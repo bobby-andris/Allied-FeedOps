@@ -58,6 +58,7 @@ See: .planning/PROJECT.md
 ### Roadmap Evolution
 
 - Phase 25.1 inserted after Phase 25: Prompt Architecture Research (URGENT)
+- Phase 25.4 inserted after Phase 25: Production Impact Audit (URGENT) — verify all source file changes are safe for v1 production path before merging to master
 
 ## Session Log
 
