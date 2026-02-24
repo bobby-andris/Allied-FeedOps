@@ -104,8 +104,8 @@ def test_runtime_generation_default_completion_cap_is_quality_safe() -> None:
 
 
 def test_prompt_contract_bans_promo_words_globally() -> None:
-    # Banned words must appear in SYSTEM_PROMPT (in the brand_voice section)
-    assert "finest, luxurious, premium, exclusive" in SYSTEM_PROMPT
+    required = "Never use banned promo words in customer-facing copy"
+    assert required in SYSTEM_PROMPT
 
 
 def test_prompt_contract_bans_towel_rack_in_google_towel_bar_titles() -> None:
