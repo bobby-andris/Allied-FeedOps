@@ -8,9 +8,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 26 (Human Evaluation & Test Batch)
-**Current Plan:** 26-02 (generate 10 test SKUs)
-**Status:** v2 activated on Cloud Run. Smoke test passed. Ready for test batch generation.
-**Progress:** [█████████░] 90% (21/25 requirements satisfied, 4 EVAL requirements remain)
+**Current Plan:** 26-03 (human evaluation and test batch publish)
+**Status:** 10 test SKUs generated with v2 pipeline. Blind A/B comparison ready for Bobby + Robert. Awaiting human evaluation.
+**Progress:** [█████████░] 92% (23/25 requirements satisfied, 2 EVAL requirements remain)
 
 ## What's Done
 
@@ -46,12 +46,15 @@ All content generation code work is complete and pushed to master:
 - prompt_version feature flag routes v1 (legacy single-call) vs v2 (per-platform multi-call)
 - Per-platform prompts are ~8-10K creative briefs (down from 57K skill dump)
 - Production now on v2 — FEEDOPS_PROMPT_VERSION=v2 set on Cloud Run (revision feedops-pipeline-00222-gc4)
-- Score model uses 10-criterion rubric with composite denominator of 100
+- v2 per-platform self-score uses 3-criterion rubric (accuracy, specificity, engagement) not 10-criterion legacy rubric
+- Score model uses 10-criterion rubric with composite denominator of 100 (legacy v1 only)
 - Description length standardized to 700-900 chars
 - "28 finishes" suppressed for Google/Bing (descriptions expand to variant-specific)
+- [Phase 26]: v2 self-score uses 3-criterion rubric (accuracy/specificity/engagement), adapted quality scoring accordingly
 
 ## Session Log
 
+- 2026-02-24: Phase 26-02 complete. Generated v2 content for all 10 test SKUs (Google + Bing). Zero constraint violations. Avg self-score 80.5/100. Blind A/B comparison document ready for Bobby + Robert evaluation.
 - 2026-02-24: Phase 26-01 complete. Set FEEDOPS_PROMPT_VERSION=v2 on Cloud Run. Smoke test passed: SKU 1016 title + description + 28 finish sentences all correct via v2 per-platform pipeline.
 - 2026-02-24: Found critical v1 bug: _extract_content_from_schema_response() discards content (returns "" → {FINISH_SENTENCE}). Fix: `if field_key and field_key in response:` at main.py:460. Restructured Phase 26 to 3 waves: bugfix → v2 generation → human eval.
 - 2026-02-24: Roadmap cleanup — consolidated 10 completed phases under collapsible details, removed duplicate phases 25.5-25.7, renumbered remaining work to Phase 26 (human eval) and Phase 27 (deploy)

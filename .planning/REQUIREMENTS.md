@@ -35,8 +35,8 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 - [x] **EVAL-01**: Content regenerated for 10 representative SKUs spanning different product categories
 - [x] **EVAL-02**: Old vs new descriptions compared side-by-side with human evaluation
 - [ ] **EVAL-03**: Human evaluator rates new descriptions as "significantly better" for at least 8/10 test SKUs
-- [ ] **EVAL-04**: New descriptions pass differentiation test (identifiable as Allied Brass, not generic)
-- [ ] **EVAL-05**: Quality scores on new rubric average >85% across test SKUs
+- [x] **EVAL-04**: New descriptions pass differentiation test (identifiable as Allied Brass, not generic)
+- [x] **EVAL-05**: Quality scores on new rubric average >85% across test SKUs
 - [ ] **EVAL-06**: Test batch published for CTR/CVR delta measurement
 
 ### Production Impact Audit (Inserted)
@@ -95,8 +95,8 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | EVAL-01 | Phase 25 | Complete |
 | EVAL-02 | Phase 25 | Complete |
 | EVAL-03 | Phase 26 | Pending |
-| EVAL-04 | Phase 26 | Pending |
-| EVAL-05 | Phase 26 | Pending |
+| EVAL-04 | Phase 26 | Complete |
+| EVAL-05 | Phase 26 | Complete |
 | EVAL-06 | Phase 26 | Pending |
 | AUDIT-01 | Phase 25.4 | Complete |
 | AUDIT-02 | Phase 25.4 | Complete |

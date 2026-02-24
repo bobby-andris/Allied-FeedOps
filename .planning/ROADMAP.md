@@ -176,7 +176,7 @@
 - shopping_intelligence may not be wired into v2 per-platform builders (PRMT-03 regression check)
 - These are quick code fixes, not architecture work — fix during execution if found
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 26-01-PLAN.md — Generate 10 test SKUs with v2, compute quality scores, build blind A/B comparison
@@ -212,7 +212,7 @@ Plans:
 | 25.2 | v1.3a | 2/2 | Complete | 2026-02-24 |
 | 25.3 | v1.3a | 3/3 | Complete | 2026-02-24 |
 | 25.4 | v1.3a | 1/1 | Complete | 2026-02-24 |
-| 26 | 1/3 | In Progress|  | - |
+| 26 | 2/3 | In Progress|  | - |
 | 27 | v1.3a | 0/? | Not Started | - |
 
 ---
