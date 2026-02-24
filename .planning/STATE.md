@@ -7,86 +7,50 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 25.5-prompt-rewrite-skill-updates
+**Current phase:** 26 (Human Evaluation & Test Batch)
 **Current Plan:** Not started
-**Status:** Gap closure phases created (25.5, 25.6, 25.7)
-**Progress:** [████████░░] 84% (21/25 requirements satisfied, 4 EVAL gaps in gap closure phases)
+**Status:** All code work complete. v2 behind feature flag. Human review needed.
+**Progress:** [█████████░] 90% (21/25 requirements satisfied, 4 EVAL requirements remain)
+
+## What's Done
+
+All content generation code work is complete and pushed to master:
+- GPT-5.2 bugs fixed (Phase 23)
+- Prompt architecture rewritten (Phase 24)
+- 2 rounds of human evaluation with iteration (Phase 25)
+- Prompt architecture research + audit (Phase 25.1)
+- Per-platform generation with schemas + feature flag (Phase 25.2)
+- Per-platform prompts rewritten as GPT-5.2 creative briefs (Phase 25.3)
+- Production impact audit + Score model alignment (Phase 25.4)
+- Skills updated with Round 2 feedback (Phase 25 Plan 06)
+- Automated checks: 120/120 canonical, 63/63 unseen, 49 unit tests pass
+
+## What's Left
+
+1. **Phase 26:** Generate 10 SKUs with v2, Bobby + Robert gut-check review (8/10 threshold), publish test batch
+2. **Phase 27:** Set FEEDOPS_PROMPT_VERSION=v2 in production, close milestone
+
+**Quick code fixes that may be needed during Phase 26:**
+- v2 Score model wiring (self_score -> Score model in generate_per_platform)
+- shopping_intelligence wiring in v2 per-platform builders
 
 ## Decisions
 
 - Skills are the creative authority for content generation; SYSTEM_PROMPT provides scaffolding only
 - Product-specific data (narrative_copy, bullets) extracted as Product Design Story in prompts
 - Finish name uses {FINISH_NAME} placeholder when no finish_code for Google/Bing
-- Hardcoded competitive checklist removed in favor of skills-deferred positioning
-- All 8 skills loaded for EVERY generation (batch and single) — no cost savings from reducing skills
-- mode="single" parameter is dead code — should be removed in cleanup
-- Round 2 FAILED: consensus 4/10 title wins, 6/10 desc wins (target 8/10 each)
-- Round 3 required: skill updates + SYSTEM_PROMPT prohibitions + data fixes (see evaluation report)
 - Competitor material references prohibited in all content (positive-only brass framing)
 - Robert's title formula codified: finish first, Collection keyword, dimension only when varies
 - Evidence exclusion rules: weight capacity, detailed dimensions, installation specifics excluded
-- Product type issues for 1024/1020 are model inference errors, not data errors
-- System prompt is 57,504 tokens (266K chars) — 97.6% from SKILL.md files designed for Claude Code, not GPT-5.2
-- 12 contradictions identified: 3 CRITICAL, 4 HIGH, 5 MEDIUM — competitor materials contradiction is root cause of "die-cast zinc" in 6/10 descriptions
-- GPT-5.2 anti-pattern composite score: 2.7/10 — fundamental architectural misalignment confirmed
-- Top recommendation: Replace SKILL.md injection with purpose-built 3-4K token GPT-5.2 prompt
-- Self-score simplified to 3 criteria (accuracy, specificity, engagement) — full 10-criterion rubric for separate eval pass
-- Gold examples: keep in user prompt pending A/B test; system prompt placement is more cache-efficient
-- All competitor material references removed from all sources — single P0 prohibition
-- Description length standardized to 700-900 chars (resolves 600-800 vs 700-900 schema conflict)
-- prompt_version feature flag for A/B testing without breaking production
-- Per-platform strict schemas added for Google, Bing, Shopify, and finish sentences without removing legacy schema path
-- Platform-specific skill extraction added via `get_platform_system_prompt(platform)` to avoid loading all skills for every call
-- Empirical 1025U run results: Google 1/5 checks, Bing 1/5, Shopify 3/4, Finish 7/7
-- Per-platform test harness now includes JSON parse repair retry to recover from non-parseable model output
-- Production generation now supports `FEEDOPS_PROMPT_VERSION` routing: `v1` legacy single-call path and `v2` per-platform multi-call path
-- Finish sentence payloads are normalized to consumer-compatible mapping for variant expansion storage
-
-- Score model composite denominator changed from 60 to 100 (10 fields x 10 max = 100)
-- Score field rename cascaded to reporter.py, verifier.py, hybrid_generation.py and 11 test files (beyond plan scope)
-- v1 production path does NOT use CANDIDATE_SCHEMA or parse_candidate_response -- Score fix is defensive
-- All 8 pre-existing test failures confirmed unrelated to v1.3a changes
-
-## Performance Metrics
-
-| Phase-Plan | Duration | Tasks | Files |
-|------------|----------|-------|-------|
-| 25-04      | 10min    | 2     | 2     |
-| 25-06      | 7min     | 2     | 5     |
-| 25.1-01    | 4min     | 1     | 2     |
-| 25.1-02    | 5min     | 2     | 3     |
-| Phase 25.2 P01 | 17 min | 2 tasks | 4 files |
-| Phase 25.2 P02 | n/a | 2 tasks | 9 files |
-| 25.4-01 | 15min | 2 tasks | 15 files |
-
-## Accumulated Context
-
-### Roadmap Evolution
-
-- Phase 25.1 inserted after Phase 25: Prompt Architecture Research (URGENT)
-- Phase 25.4 inserted after Phase 25: Production Impact Audit (URGENT) — verify all source file changes are safe for v1 production path before merging to master
+- Per-platform generation: separate GPT-5.2 calls for Google, Bing, Shopify, finish sentences
+- prompt_version feature flag routes v1 (legacy single-call) vs v2 (per-platform multi-call)
+- Per-platform prompts are ~8-10K creative briefs (down from 57K skill dump)
+- Production currently on v1 — v2 activated only by FEEDOPS_PROMPT_VERSION=v2
+- Score model uses 10-criterion rubric with composite denominator of 100
+- Description length standardized to 700-900 chars
+- "28 finishes" suppressed for Google/Bing (descriptions expand to variant-specific)
 
 ## Session Log
 
-- 2026-02-23: STATE.md regenerated by /gsd:health --repair
-- 2026-02-23: Completed 25-04-PLAN.md (gap closure — prompt architecture refactoring)
-- 2026-02-23: Completed 25-05 Task 1 (regenerated 10 SKUs, built Round 2 blind comparison)
-- 2026-02-23: Bobby + Robert completed Round 2 blind evaluation
-- 2026-02-23: Wrote comprehensive evaluation report (25-02-evaluation-results.md)
-- 2026-02-23: Round 2 FAIL — needs Round 3 with skill updates + content prohibitions
-- 2026-02-23: Completed 25-06-PLAN.md (Round 2 gap closure — skills, SYSTEM_PROMPT, prompt_builder)
-- 2026-02-23: Completed 25.1-01-PLAN.md (internal prompt audit — 57K tokens, 12 contradictions, 2.7/10 anti-pattern score)
-- 2026-02-23: Completed 25.1-02-PLAN.md (new CTCO prompt architecture — 8.2K chars, zero contradictions, all 12 audit findings resolved)
-- 2026-02-24: Completed 25.1-03-PLAN.md A/B test (3 representative SKUs). Results: C_Optimized wins on structure (finish in titles, no competitor leaks, 93% token reduction) but fails on constraint adherence (banned words leak, {FINISH_SENTENCE} wrong pattern, keyword stuffing worse, generic openings, evidence poison pills echoed)
-- 2026-02-24: Root cause analysis: prompt designed for Claude not GPT-5.2, evidence table feeds banned content, gold examples surface-copied not abstracted, never tested constraints atomically
-- 2026-02-24: Created Phase 25.2 (GPT-5.2 Prompt Engineering — Empirical Approach) with 3 plans
-- 2026-02-24: Completed 25.2-01-PLAN.md (per-platform schemas, selective platform prompts, empirical harness)
-- 2026-02-24: Ran 4-platform empirical validation for SKU 1025U and saved 25.2-01-test-results.md
-- 2026-02-24: Completed 25.2-02-PLAN.md (pipeline wiring in prompt_builder/generator/main/hybrid with per-platform architecture and v1 fallback)
-- 2026-02-24: Verified v2 smoke generation for SKU 1025U with non-empty Google/Bing/Shopify content and 28 finish sentences
-- 2026-02-24: Executed 25.2-03 Task 1 across 6 SKUs and generated `25.2-03-test-results.md` + `25.2-03-comparison.md`
-- 2026-02-24: Deep review of Codex changes — diagnosed wrong approach (post-processing instead of prompt fix)
-- 2026-02-24: Created Phase 25.3 (Prompt Rewrite from Human Feedback) with 4 plans
-- 2026-02-24: Completed 25.4-01-PLAN.md (production impact audit: Score model alignment, 3 test fixes, v1 regression tests, audit report)
-- Last session: 2026-02-24
-- Stopped at: Phase 25.4 audit complete. All v1-path changes documented. Ready for human review of prompt quality and merge to master.
+- 2026-02-24: Roadmap cleanup — consolidated 10 completed phases under collapsible details, removed duplicate phases 25.5-25.7, renumbered remaining work to Phase 26 (human eval) and Phase 27 (deploy)
+- Previous session: Phase 25.4 audit complete, all code pushed to master
