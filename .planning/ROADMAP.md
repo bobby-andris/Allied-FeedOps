@@ -211,3 +211,30 @@ Plans:
 - [x] 25.2-01-PLAN.md — Per-platform schemas, platform-specific system prompts with extracted skill knowledge, test harness extension, empirical GPT-5.2 validation (placeholder preservation, constraint adherence)
 - [x] 25.2-02-PLAN.md — Wire per-platform generation into pipeline endpoints (prompt_builder, generator, main.py, hybrid_generation) with FEEDOPS_PROMPT_VERSION feature flag
 - [ ] 25.2-03-PLAN.md — Full 6-SKU validation across all platforms, side-by-side comparison, Bobby gut-check review
+
+### Phase 25.3: Prompt Rewrite from Human Feedback (INSERTED)
+
+**Goal:** Write the prompt GPT-5.2 actually needs — a purpose-built creative brief based on Bobby/Robert's feedback — instead of dumping extracted skill snippets and adding post-processing to fix bad output.
+
+**Depends on:** Phase 25.2 (per-platform architecture), Round 2 evaluation (Bobby/Robert feedback)
+
+**Why this phase exists:** After 6+ iterations of prompt work (Phases 25, 25.1, 25.2, Codex attempt), the architecture is solid (per-platform calls, schemas, feature flag) but the actual prompt content is wrong. The per-platform system prompts are extracted snippets from Claude Code skill files — research documents, not GPT-5.2 instructions. The per-platform user prompts are thin (missing product design story, competitive positioning, segment strategy). Codex tried to fix this by adding ~200 lines of Python post-processing to regex-fix model output. That's the wrong approach. The prompt itself needs to be rewritten.
+
+**Root cause (confirmed by review):**
+- System prompts read like compliance checklists, not creative briefs
+- Skill knowledge is dumped as reference material, not distilled into actionable instructions
+- Per-platform user prompts are missing context that build_core_prompt() has
+- Round 2 feedback from Bobby/Robert gives EXACT specifications for what good content looks like
+- None of that feedback has been encoded into the prompt
+
+**Success Criteria:**
+1. GPT-5.2 produces content that passes Bobby's gut-check for 8/10 test SKUs (titles AND descriptions)
+2. No post-processing layer needed beyond basic safety (max length trim, JSON validation)
+3. Robert's title formula is followed by the model without enforcement code
+4. Zero constraint violations (banned words, competitor names, etc.) from the model itself
+
+**Plans:**
+- [ ] 25.3-01-PLAN.md — Cherry-pick useful Codex changes (JSON parser, skill sanitizer, enrichment fix), discard post-processing layer
+- [ ] 25.3-02-PLAN.md — Rewrite per-platform system prompts as GPT-5.2 creative briefs; enrich per-platform user prompts with product design story and competitive positioning
+- [ ] 25.3-03-PLAN.md — 10-SKU validation with Bobby/Robert gut-check review (success gate: 8/10 consensus wins)
+- [ ] 25.3-04-PLAN.md — Deploy FEEDOPS_PROMPT_VERSION=v2 to production, close v1.3a

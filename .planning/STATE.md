@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 25.2-gpt52-prompt-engineering
-**Current Plan:** 25.2-03-PLAN.md
-**Status:** Phase 25.2 in progress — Plan 01 and Plan 02 complete (per-platform schemas/prompts + production wiring behind feature flag). Next is 6-SKU validation and human gut-check in Plan 03.
-**Progress:** [████████░░] 84%
+**Current phase:** 25.3-prompt-rewrite
+**Current Plan:** Not yet planned
+**Status:** Phase 25.3 created after deep review of Codex's failed 25.2 implementation. Codex added ~200 lines of post-processing to fix bad model output instead of fixing the prompt. Real root cause: the prompt itself is not written as a GPT-5.2 creative brief — it's extracted skill snippets + compliance rules. Phase 25.3 rewrites the prompt from scratch based on Bobby/Robert's Round 2 evaluation feedback.
+**Progress:** [█████████░] 90% (architecture done, prompt rewrite + validation remaining)
 
 ## Decisions
 
@@ -77,5 +77,8 @@ See: .planning/PROJECT.md
 - 2026-02-24: Ran 4-platform empirical validation for SKU 1025U and saved 25.2-01-test-results.md
 - 2026-02-24: Completed 25.2-02-PLAN.md (pipeline wiring in prompt_builder/generator/main/hybrid with per-platform architecture and v1 fallback)
 - 2026-02-24: Verified v2 smoke generation for SKU 1025U with non-empty Google/Bing/Shopify content and 28 finish sentences
+- 2026-02-24: Executed 25.2-03 Task 1 across 6 SKUs and generated `25.2-03-test-results.md` + `25.2-03-comparison.md`
+- 2026-02-24: Deep review of Codex changes — diagnosed wrong approach (post-processing instead of prompt fix)
+- 2026-02-24: Created Phase 25.3 (Prompt Rewrite from Human Feedback) with 4 plans
 - Last session: 2026-02-24
-- Stopped at: Plan 25.2-02 complete. Next: execute 25.2-03 (6-SKU validation + Bobby review checkpoint)
+- Stopped at: Phase 25.3 created with detailed continue-here. Next: cherry-pick Codex's 4 useful changes, discard rest, then rewrite the actual prompt.
