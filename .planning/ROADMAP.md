@@ -142,7 +142,7 @@ Plans:
 **Goal:** Retroactive audit of all v1-path-affecting source code changes from Phases 23-25.3 (already deployed to production on master). Align Score model and parse_candidate_response with the 10-criterion CANDIDATE_SCHEMA, fix 3 failing pipeline tests, and document every change with risk classification and disposition.
 **Depends on:** Phase 25.3
 **Requirements:** AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04, AUDIT-05
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 25.4-01-PLAN.md — Align Score model + parser with CANDIDATE_SCHEMA, fix 3 failing tests, produce audit report

@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 25.3-prompt-rewrite
-**Current Plan:** Not yet planned
-**Status:** Phase 25.3 created after deep review of Codex's failed 25.2 implementation. Codex added ~200 lines of post-processing to fix bad model output instead of fixing the prompt. Real root cause: the prompt itself is not written as a GPT-5.2 creative brief — it's extracted skill snippets + compliance rules. Phase 25.3 rewrites the prompt from scratch based on Bobby/Robert's Round 2 evaluation feedback.
-**Progress:** [█████████░] 90% (architecture done, prompt rewrite + validation remaining)
+**Current phase:** 25.4-production-impact-audit
+**Current Plan:** 25.4-01-PLAN.md (COMPLETE)
+**Status:** Phase 25.4 production impact audit complete. Score model aligned to 10-criterion rubric, 3 failing pipeline tests fixed, v1 regression tests created, comprehensive audit report documenting all v1-path-affecting changes from Phases 23-25.3. 562 tests passing, 8 pre-existing infra failures unchanged.
+**Progress:** [██████████] 95% (25.4 audit done, human review + deploy remaining)
 
 ## Decisions
 
@@ -42,6 +42,11 @@ See: .planning/PROJECT.md
 - Production generation now supports `FEEDOPS_PROMPT_VERSION` routing: `v1` legacy single-call path and `v2` per-platform multi-call path
 - Finish sentence payloads are normalized to consumer-compatible mapping for variant expansion storage
 
+- Score model composite denominator changed from 60 to 100 (10 fields x 10 max = 100)
+- Score field rename cascaded to reporter.py, verifier.py, hybrid_generation.py and 11 test files (beyond plan scope)
+- v1 production path does NOT use CANDIDATE_SCHEMA or parse_candidate_response -- Score fix is defensive
+- All 8 pre-existing test failures confirmed unrelated to v1.3a changes
+
 ## Performance Metrics
 
 | Phase-Plan | Duration | Tasks | Files |
@@ -52,6 +57,7 @@ See: .planning/PROJECT.md
 | 25.1-02    | 5min     | 2     | 3     |
 | Phase 25.2 P01 | 17 min | 2 tasks | 4 files |
 | Phase 25.2 P02 | n/a | 2 tasks | 9 files |
+| 25.4-01 | 15min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -81,5 +87,6 @@ See: .planning/PROJECT.md
 - 2026-02-24: Executed 25.2-03 Task 1 across 6 SKUs and generated `25.2-03-test-results.md` + `25.2-03-comparison.md`
 - 2026-02-24: Deep review of Codex changes — diagnosed wrong approach (post-processing instead of prompt fix)
 - 2026-02-24: Created Phase 25.3 (Prompt Rewrite from Human Feedback) with 4 plans
+- 2026-02-24: Completed 25.4-01-PLAN.md (production impact audit: Score model alignment, 3 test fixes, v1 regression tests, audit report)
 - Last session: 2026-02-24
-- Stopped at: Phase 25.3 created with detailed continue-here. Next: cherry-pick Codex's 4 useful changes, discard rest, then rewrite the actual prompt.
+- Stopped at: Phase 25.4 audit complete. All v1-path changes documented. Ready for human review of prompt quality and merge to master.
