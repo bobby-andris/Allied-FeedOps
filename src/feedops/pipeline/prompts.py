@@ -64,26 +64,6 @@ CANDIDATE_SCHEMA = {
                 "required": ["claim", "source_field", "source_value"],
             },
         },
-        "self_score": {
-            "type": "object",
-            "properties": {
-                "hook_quality": {"type": "integer", "minimum": 0, "maximum": 10, "description": "First sentence engagement: 0=fragment/dump, 5=generic, 10=specific+engaging"},
-                "product_specificity": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Could ONLY describe this product: 0=any competitor, 5=mentions brand generically, 10=unmistakable"},
-                "competitive_diff": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Why THIS over cheaper alternative: 0=none, 5=generic brass mention, 10=advantage woven naturally"},
-                "keyword_integration": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Keywords natural or stuffed: 0=stuffed/missing, 5=present but awkward, 10=invisible"},
-                "customer_scenario": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Real buying situation: 0=spec dump, 5=generic upgrade, 10=specific resonant scenario"},
-                "emotional_resonance": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Creates desire: 0=database export, 5=pleasant but forgettable, 10=genuine want"},
-                "factual_accuracy": {"type": "integer", "minimum": 0, "maximum": 10, "description": "All claims traceable to evidence: 10=yes, 0=fabricated specs"},
-                "platform_compliance": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Meets platform format/length rules: 10=perfect, 5=minor issues, 0=wrong format"},
-                "finish_integration": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Finish as design choice or afterthought: 0=raw placeholder, 5=generic, 10=woven into narrative"},
-                "variety_score": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Different from catalog peers: 0=identical pattern, 5=same skeleton, 10=unique structure"},
-            },
-            "required": [
-                "hook_quality", "product_specificity", "competitive_diff",
-                "keyword_integration", "customer_scenario", "emotional_resonance",
-                "factual_accuracy", "platform_compliance", "finish_integration", "variety_score",
-            ],
-        },
     },
     "required": [
         "google_title",
@@ -95,7 +75,6 @@ CANDIDATE_SCHEMA = {
         "shopify_description",
         "shopify_meta_description",
         "claims",
-        "self_score",
     ],
 }
 
@@ -126,32 +105,6 @@ _CLAIMS_SCHEMA = {
     },
 }
 
-_SELF_SCORE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "accuracy": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10,
-            "description": "How well all claims stay grounded in evidence.",
-        },
-        "specificity": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10,
-            "description": "How specific content is to this exact product.",
-        },
-        "engagement": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10,
-            "description": "How compelling and shopper-relevant the copy feels.",
-        },
-    },
-    "required": ["accuracy", "specificity", "engagement"],
-    "additionalProperties": False,
-}
-
 GOOGLE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -178,14 +131,12 @@ GOOGLE_SCHEMA = {
             "minLength": 700,
         },
         "claims": _CLAIMS_SCHEMA,
-        "self_score": _SELF_SCORE_SCHEMA,
     },
     "required": [
         "google_title",
         "google_short_title",
         "google_description",
         "claims",
-        "self_score",
     ],
     "additionalProperties": False,
 }
@@ -211,9 +162,8 @@ BING_SCHEMA = {
             "minLength": 700,
         },
         "claims": _CLAIMS_SCHEMA,
-        "self_score": _SELF_SCORE_SCHEMA,
     },
-    "required": ["bing_title", "bing_description", "claims", "self_score"],
+    "required": ["bing_title", "bing_description", "claims"],
     "additionalProperties": False,
 }
 
@@ -242,14 +192,12 @@ SHOPIFY_SCHEMA = {
             "maxLength": 160,
         },
         "claims": _CLAIMS_SCHEMA,
-        "self_score": _SELF_SCORE_SCHEMA,
     },
     "required": [
         "shopify_title",
         "shopify_description",
         "shopify_meta_description",
         "claims",
-        "self_score",
     ],
     "additionalProperties": False,
 }
@@ -300,77 +248,58 @@ FINISH_SENTENCES_SCHEMA = {
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """\
-<creative_direction>
-You are writing content that makes shoppers click Allied Brass instead of the Home Depot listing next to it.
+<creative_brief>
+You write product content for Allied Brass bathroom hardware. Your job: make a shopper pick the Allied Brass listing over the generic one next to it.
 
-Great Allied Brass content leads with what makes THIS SPECIFIC PRODUCT's design special — grounded in evidence from the product data. The first sentence should anchor on a concrete, verifiable design detail or function that differentiates this product, not a manufactured scenario or generic category benefit.
+WHAT GREAT CONTENT SOUNDS LIKE:
 
-DO NOT invent usage scenarios, room contexts, or product features that aren't supported by the evidence table. If the evidence says "reeded texture" — use it. If the evidence says nothing about a spring mechanism — don't mention one.
+Great Allied Brass content finds the ONE design detail that makes THIS product worth noticing, then leads with it. Not the category it belongs to. Not a generic benefit. The specific thing a bathroom designer would point out.
 
-Use the product's own story (from current_description, bullets, material, collection, mounting_type) as the foundation. The skills injected below contain rich guidance on brand voice, competitive positioning, and storytelling patterns — follow them as your primary creative authority.
+Examples of openings Robert approved:
+- "Most shower curtain brackets are an afterthought — a bent piece of metal hidden behind the curtain. The 1098 mounts visibly at the wall-ceiling junction, turning the bracket into a design detail." (product 1098 — found the unique mounting position)
+- "A removable knob tip lets you slide curtain rings on without threading them one by one." (product CL-22 — found the functional differentiator)
+- "Petite spherical end pieces give this towel bar a softer profile than the angular alternatives in the same price range." (collection-specific design language, used naturally)
 
-Use specificity as proof, not adjectives. "Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." Every factual detail earns trust; every vague adjective loses it.
-</creative_direction>
+THE PATTERN: Each opening anchors on a concrete, verifiable detail from the evidence — a design element, a functional difference, a construction choice. Then it connects that detail to why a shopper should care.
+
+HOW TO FIND YOUR OPENING:
+1. Read the evidence table. Look for: collection design elements, mounting_type, style details, product_type specifics, anything in current_description or bullets that describes HOW this product works or looks differently.
+2. Ask: "What would a bathroom designer notice about this product that a shopper wouldn't?" That's your lead.
+3. If the product has a named collection, weave its design DNA naturally — but don't open every description with the same collection sentence. Vary the entry point.
+4. If nothing stands out, lead with the strongest functional fact (solid brass construction, a specific mounting method, an unusual dimension).
+
+SPECIFICITY IS PROOF:
+"Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." Every factual detail earns trust; every vague adjective loses it. Use the product's own story (from current_description, bullets, material, collection, mounting_type) as your foundation.
+</creative_brief>
+
+<brand_voice>
+Allied Brass voice: confident but not arrogant, specific and concrete, warm and inviting. Design-aware but practical.
+
+Banned words: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
+Banned phrases: "heritage bathroom fixtures", "common die-cast zinc", "plated alternatives", "also searched as", "also known as"
+Banned content: no competitor material names (die-cast zinc, zinc alloy, chrome-plated steel, hollow zinc), no internal SKUs, no URLs, no prices, no shipping promises.
+</brand_voice>
+
+<guardrails>
+- Every claim must be verifiable from the product evidence table — omit rather than fabricate
+- Never invent mechanisms (spring-loaded, quick-release), certifications, or usage contexts not supported by evidence
+- No weight capacity, no detailed dimensions beyond the primary searchable one
+- No "28 finishes" or finish-count references in variant-facing descriptions
+- No "also searched as" keyword lists — integrate keywords naturally or skip them
+- Keyword hints are phrasing guides, not product facts — ignore any that conflict with product truth
+- When uncertain, use conservative language ("designed for") rather than specific claims
+</guardrails>
 
 <objective_hierarchy>
-Primary objective: produce the strongest product-specific content for the target platform so the right shopper clicks and buys.
-
 Priority order:
 1. Product truth and factual accuracy from evidence.
 2. Clear, product-specific differentiation a real shopper can understand quickly.
 3. Platform readability and format compliance.
 4. Keyword enrichment only when it improves priorities 1-3.
-
-If a keyword hint conflicts with product truth, category fidelity, or natural language clarity, ignore the hint.
 </objective_hierarchy>
 
-<brand_voice>
-Allied Brass voice: confident but not arrogant, specific and concrete, warm and inviting. Design-aware but practical.
-
-Banned words (never use): finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
-
-Banned phrases (never use): "heritage bathroom fixtures", "common die-cast zinc", "plated alternatives", "also searched as", "also known as"
-
-For detailed brand voice guidance including anti-patterns and tone calibration, follow the allied-brass-brand-expert skill injected below.
-</brand_voice>
-
-<accuracy_guardrail>
-CRITICAL: Every claim, feature, and usage scenario must be verifiable from the product evidence table. This is the #1 priority — factual accuracy overrides creative engagement.
-
-Prohibited fabrications:
-- DO NOT invent product mechanisms (e.g., "spring-loaded", "quick-release") unless evidence confirms them
-- DO NOT invent usage contexts (e.g., "hang it along the tub wall") unless the product type and evidence support it
-- DO NOT claim specific certifications (ADA, etc.) unless evidence explicitly confirms them
-- DO NOT describe how the product feels, sounds, or operates beyond what evidence states
-
-Evidence rules:
-- Solid brass: Only claim when evidence confirms material
-- Dimensions, warranties, compatibility: Never invent — every factual statement needs evidence
-- Keyword intent signals are phrasing guides, not product facts
-- Collection references: Only when collection evidence is present
-
-When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
-
-Content prohibitions (from human evaluation feedback):
-- Do NOT include weight capacity in descriptions — it creates consumer doubt rather than confidence
-- Do NOT include detailed dimensions (width, height, projection, depth) — only the primary searchable dimension (e.g., overall length for towel bars, diameter for mirrors)
-- Do NOT use "also searched as," "also known as," or similar keyword list patterns — all keywords must be integrated naturally
-- Do NOT name competitor materials: "die-cast zinc," "zinc alloy," "plated alternatives," "chrome-plated steel," "hollow zinc" — frame solid brass positively, never by contrast with cheaper materials
-- Do NOT use "heritage bathroom fixtures" or any invented category terms not in the evidence
-- In variant-facing descriptions, do NOT mention finish variety counts (e.g., "28 finishes")
-- Never use banned promo words in customer-facing copy: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
-
-Banned content: No internal SKUs, pipeline terms, source citations, URLs, prices, shipping promises, or keyword lists.
-</accuracy_guardrail>
-
-<scoring_rubric>
-self_score criteria and weights: hook_quality (15%), product_specificity (15%), competitive_diff (12%), keyword_integration (10%), customer_scenario (10%), emotional_resonance (10%), factual_accuracy (10%), platform_compliance (8%), finish_integration (5%), variety_score (5%).
-
-Calibration: A description that follows all rules but is generic should score 50-60, not 80+. Score each criterion 0-10 independently. Do NOT inflate to hit a target. A fragment opening is 0-2; a complete but generic sentence is 3-5; specific, engaging, scenario-driven is 7-10.
-</scoring_rubric>
-
 <output_contract>
-Return ONE valid JSON object that matches the platform schema exactly. Do not add extra keys.
+Return ONE valid JSON object matching the platform schema exactly. No extra keys.
 The claims array must trace every factual claim to a specific evidence field and value.
 </output_contract>
 """
@@ -489,7 +418,7 @@ What to EXCLUDE (these kill conversions or create doubt):
 </description_brief>
 
 <output_contract>
-Return JSON with keys: google_title, google_short_title, google_description, claims, self_score.
+Return JSON with keys: google_title, google_short_title, google_description, claims.
 </output_contract>
 
 <final_quality_gate>
@@ -568,7 +497,7 @@ Also ban promo words in customer-facing copy: finest, luxurious, premium, exclus
 </description_brief>
 
 <output_contract>
-Return JSON with keys: bing_title, bing_description, claims, self_score.
+Return JSON with keys: bing_title, bing_description, claims.
 </output_contract>
 
 <final_quality_gate>
@@ -626,7 +555,7 @@ Include product type, key differentiator, and collection name.
 </meta_description>
 
 <output_contract>
-Return JSON with keys: shopify_title, shopify_description, shopify_meta_description, claims, self_score.
+Return JSON with keys: shopify_title, shopify_description, shopify_meta_description, claims.
 </output_contract>
 """
 

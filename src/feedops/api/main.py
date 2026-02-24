@@ -649,8 +649,8 @@ def _persist_generated_content_and_history(
         "mode": mode,
         "new_content": content,
         "model_version": generation_model,
-        "system_prompt": system_prompt[:5000],
-        "user_prompt": user_prompt[:5000],
+        "system_prompt": system_prompt[:50000],
+        "user_prompt": user_prompt[:50000],
         "prompt_hash": prompt_hash,
         "generated_content_id": generated_content_id,
         "feature_flags_active": capture_flag_snapshot(),
@@ -1241,8 +1241,8 @@ async def regenerate_content(request: RegenerateRequest):
                     "feedback_text": request.feedback,
                     "new_content": content,
                     "model_version": provider.name,
-                    "system_prompt": system_prompt[:5000],  # Truncate for DB
-                    "user_prompt": user_prompt[:5000],
+                    "system_prompt": system_prompt[:50000],  # Truncate for DB
+                    "user_prompt": user_prompt[:50000],
                     "prompt_hash": prompt_hash,
                     "generated_content_id": generated_content_id,
                     "feature_flags_active": capture_flag_snapshot(),

@@ -4,11 +4,10 @@ from feedops.pipeline.prompts import SYSTEM_PROMPT
 
 def test_system_prompt_uses_required_section_contracts() -> None:
     required_sections = [
-        "<creative_direction>",
+        "<creative_brief>",
         "<objective_hierarchy>",
         "<brand_voice>",
-        "<accuracy_guardrail>",
-        "<scoring_rubric>",
+        "<guardrails>",
         "<output_contract>",
     ]
     for section in required_sections:

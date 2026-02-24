@@ -888,7 +888,7 @@ def test_build_variant_prompt_includes_gold_examples_when_available(sample_paren
 
 
 def test_candidate_schema_has_required_fields():
-    """Schema includes platform fields, claims, self_score."""
+    """Schema includes platform fields and claims."""
     assert "google_title" in str(CANDIDATE_SCHEMA)
     assert "google_short_title" in str(CANDIDATE_SCHEMA)
     assert "google_description" in str(CANDIDATE_SCHEMA)
@@ -897,7 +897,6 @@ def test_candidate_schema_has_required_fields():
     assert "shopify_title" in str(CANDIDATE_SCHEMA)
     assert "shopify_description" in str(CANDIDATE_SCHEMA)
     assert "claims" in str(CANDIDATE_SCHEMA)
-    assert "self_score" in str(CANDIDATE_SCHEMA)
 
 
 def test_parse_candidate_response_trims_google_short_title():

@@ -99,16 +99,20 @@ _KEYWORD_FIELDS_STRIP_COMPETITORS = {
     "query_filter_reason_top",
 }
 
-# Exclude feed metadata and raw search/keyword diagnostics from
-# customer-facing copy context. These rows can leak into generated
-# prose if surfaced in the prompt evidence table.
+# Exclude feed metadata, raw search/keyword diagnostics, and fields that
+# the system prompt explicitly prohibits from customer-facing copy.
+# Sending data the prompt says to ignore wastes tokens and creates
+# conflicting signals (model sees "28 finish options" then is told not to
+# mention finish counts).
 _COPY_CONTEXT_EXCLUDED_FIELDS = {
+    # Feed metadata (not content-relevant)
     "master_sku",
     "category",
     "gtin",
     "upc",
     "custom_label_0",
     "main_image_url",
+    # Raw search/keyword diagnostics (leak into prose)
     "search_queries_top",
     "variant_top_queries",
     "keyword_intent_master",
@@ -117,6 +121,18 @@ _COPY_CONTEXT_EXCLUDED_FIELDS = {
     "query_filter_kept_count",
     "query_filter_dropped_count",
     "query_filter_reason_top",
+    # Human evaluation feedback: explicitly banned from descriptions
+    "weight_capacity",       # "creates consumer doubt" — Robert Round 2
+    "product_height",        # detailed dimensions banned — spec sheet only
+    "product_width",         # detailed dimensions banned — spec sheet only
+    "projection",            # detailed dimensions banned — spec sheet only
+    "product_weight",        # not useful for customer copy
+    # Enrichment fields that cause banned content
+    "available_finishes",    # 28-finish list; variant descriptions are finish-specific
+    "finish_variety",        # "Multiple designer finish options" = noise for variants
+    "competitive_edge",      # contains "28 finish options" = directly banned
+    "key_differentiators",   # same as competitive_edge
+    "design_intent_keywords",  # raw keyword list = stuffing magnet
 }
 
 _BANNED_WORD_PATTERNS = tuple(
