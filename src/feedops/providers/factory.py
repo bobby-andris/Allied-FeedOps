@@ -106,12 +106,14 @@ class FallbackProvider(LLMProvider):
         image: ImageInput | None = None,
         system_prompt: str | None = None,
         reasoning_effort: str | None = None,
+        max_completion_tokens: int | None = None,
     ) -> dict:
         """Try primary, fall back to secondary on failure."""
         try:
             return await self.primary.generate(
                 prompt, schema, image=image, system_prompt=system_prompt,
                 reasoning_effort=reasoning_effort,
+                max_completion_tokens=max_completion_tokens,
             )
         except Exception as e:
             metrics_registry.increment(
@@ -129,4 +131,5 @@ class FallbackProvider(LLMProvider):
             return await self.fallback.generate(
                 prompt, schema, image=image, system_prompt=system_prompt,
                 reasoning_effort=reasoning_effort,
+                max_completion_tokens=max_completion_tokens,
             )

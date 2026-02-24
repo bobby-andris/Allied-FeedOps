@@ -99,6 +99,7 @@ class GeminiProvider(LLMProvider):
         image: ImageInput | None = None,
         system_prompt: str | None = None,
         reasoning_effort: str | None = None,
+        max_completion_tokens: int | None = None,
     ) -> dict[str, Any]:
         """Generate structured JSON response.
 
@@ -109,6 +110,7 @@ class GeminiProvider(LLMProvider):
             system_prompt: Optional static system prompt. For Gemini, prepended
                 to prompt (Gemini does not have a separate system message channel).
             reasoning_effort: Not used by Gemini; accepted for interface compatibility.
+            max_completion_tokens: Not used by Gemini; accepted for interface compatibility.
 
         Returns:
             Parsed JSON dict.

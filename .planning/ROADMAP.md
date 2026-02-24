@@ -205,9 +205,9 @@ Plans:
 8. Quality validated across 6+ test SKUs spanning different product categories
 9. API parameters verified against current OpenAI docs
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 25.2-01-PLAN.md — Per-platform schemas, platform-specific system prompts with extracted skill knowledge, test harness extension, empirical GPT-5.2 validation (placeholder preservation, constraint adherence)
-- [ ] 25.2-02-PLAN.md — Wire per-platform generation into pipeline endpoints (prompt_builder, generator, main.py, hybrid_generation) with FEEDOPS_PROMPT_VERSION feature flag
+- [x] 25.2-01-PLAN.md — Per-platform schemas, platform-specific system prompts with extracted skill knowledge, test harness extension, empirical GPT-5.2 validation (placeholder preservation, constraint adherence)
+- [x] 25.2-02-PLAN.md — Wire per-platform generation into pipeline endpoints (prompt_builder, generator, main.py, hybrid_generation) with FEEDOPS_PROMPT_VERSION feature flag
 - [ ] 25.2-03-PLAN.md — Full 6-SKU validation across all platforms, side-by-side comparison, Bobby gut-check review

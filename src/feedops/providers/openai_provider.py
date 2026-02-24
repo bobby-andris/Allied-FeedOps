@@ -11,7 +11,6 @@ from openai import AsyncOpenAI
 
 from feedops.observability import log_event
 from feedops.observability.metrics import metrics_registry
-from feedops.pipeline.prompts import CANDIDATE_SCHEMA
 from feedops.providers.base import ImageInput, LLMError, LLMProvider
 from feedops.providers.reliability import (
     circuit_breakers,
@@ -22,8 +21,12 @@ from feedops.providers.reliability import (
 logger = logging.getLogger(__name__)
 
 
-def _build_strict_schema() -> dict[str, Any]:
-    """Convert CANDIDATE_SCHEMA to OpenAI strict json_schema format.
+def _build_strict_schema(
+    schema: dict[str, Any],
+    *,
+    schema_name: str = "feedops_response",
+) -> dict[str, Any]:
+    """Convert a schema to OpenAI strict json_schema format.
 
     Strict mode requires:
     - "additionalProperties": false on every object type
@@ -52,28 +55,15 @@ def _build_strict_schema() -> dict[str, Any]:
             result["items"] = _make_strict(result["items"])
         return result
 
-    strict_schema = _make_strict(CANDIDATE_SCHEMA)
+    strict_schema = _make_strict(schema)
     return {
         "type": "json_schema",
         "json_schema": {
-            "name": "candidate_content",
+            "name": schema_name,
             "strict": True,
             "schema": strict_schema,
         },
     }
-
-
-def _build_response_format() -> dict[str, Any]:
-    """Return the preferred response_format for structured output.
-
-    Primary: json_schema strict mode (GPT-5.2 native structured output).
-    Fallback: json_object (legacy mode, included as docstring reference only).
-    """
-    return _build_strict_schema()
-
-
-# Compute once at import time to avoid rebuilding per-request.
-_STRICT_RESPONSE_FORMAT = _build_strict_schema()
 
 
 class OpenAIProvider(LLMProvider):
@@ -136,6 +126,7 @@ class OpenAIProvider(LLMProvider):
         image: ImageInput | None = None,
         system_prompt: str | None = None,
         reasoning_effort: str | None = None,
+        max_completion_tokens: int | None = None,
     ) -> dict[str, Any]:
         """Generate structured JSON response with retry loop.
 
@@ -149,6 +140,7 @@ class OpenAIProvider(LLMProvider):
             system_prompt: Optional static system prompt for cache efficiency.
             reasoning_effort: Optional reasoning effort level ("low", "medium",
                 "high"). Only applied to models that support it (GPT-5.x, o-series).
+            max_completion_tokens: Optional max completion token budget override.
 
         Returns:
             Parsed JSON dict.
@@ -193,6 +185,10 @@ class OpenAIProvider(LLMProvider):
         if not reasoning_params:
             sampling_params["temperature"] = 0.7
 
+        # Build strict response format from the schema requested by the caller.
+        response_format = _build_strict_schema(schema)
+        max_output_tokens = max_completion_tokens or self._default_max_tokens()
+
         current_prompt = prompt
         last_error = None
         content = ""
@@ -201,9 +197,9 @@ class OpenAIProvider(LLMProvider):
             try:
                 token_params: dict[str, int] = {}
                 if self._use_max_completion_tokens():
-                    token_params["max_completion_tokens"] = self._default_max_tokens()
+                    token_params["max_completion_tokens"] = max_output_tokens
                 else:
-                    token_params["max_tokens"] = self._default_max_tokens()
+                    token_params["max_tokens"] = max_output_tokens
 
                 if image:
                     encoded = base64.b64encode(image.data).decode("utf-8")
@@ -229,7 +225,7 @@ class OpenAIProvider(LLMProvider):
                     response = await self.client.chat.completions.create(
                         model=self.model,
                         messages=image_messages,
-                        response_format=_STRICT_RESPONSE_FORMAT,
+                        response_format=response_format,
                         extra_body={"prompt_cache_retention": "24h"},
                         **token_params,
                         **sampling_params,
@@ -241,7 +237,7 @@ class OpenAIProvider(LLMProvider):
                     response = await self.client.chat.completions.create(
                         model=self.model,
                         messages=messages,
-                        response_format=_STRICT_RESPONSE_FORMAT,
+                        response_format=response_format,
                         extra_body={"prompt_cache_retention": "24h"},
                         **token_params,
                         **sampling_params,

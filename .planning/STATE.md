@@ -8,9 +8,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 25.2-gpt52-prompt-engineering
-**Current Plan:** 25.2-02-PLAN.md
-**Status:** Phase 25.2 in progress — Plan 01 complete (per-platform schema/prompt foundation + empirical harness). Google/Bing constraint adherence remains low and is the focus of Plan 02 wiring.
-**Progress:** [███████░░░] 71%
+**Current Plan:** 25.2-03-PLAN.md
+**Status:** Phase 25.2 in progress — Plan 01 and Plan 02 complete (per-platform schemas/prompts + production wiring behind feature flag). Next is 6-SKU validation and human gut-check in Plan 03.
+**Progress:** [████████░░] 84%
 
 ## Decisions
 
@@ -39,6 +39,8 @@ See: .planning/PROJECT.md
 - Platform-specific skill extraction added via `get_platform_system_prompt(platform)` to avoid loading all skills for every call
 - Empirical 1025U run results: Google 1/5 checks, Bing 1/5, Shopify 3/4, Finish 7/7
 - Per-platform test harness now includes JSON parse repair retry to recover from non-parseable model output
+- Production generation now supports `FEEDOPS_PROMPT_VERSION` routing: `v1` legacy single-call path and `v2` per-platform multi-call path
+- Finish sentence payloads are normalized to consumer-compatible mapping for variant expansion storage
 
 ## Performance Metrics
 
@@ -49,6 +51,7 @@ See: .planning/PROJECT.md
 | 25.1-01    | 4min     | 1     | 2     |
 | 25.1-02    | 5min     | 2     | 3     |
 | Phase 25.2 P01 | 17 min | 2 tasks | 4 files |
+| Phase 25.2 P02 | n/a | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -72,5 +75,7 @@ See: .planning/PROJECT.md
 - 2026-02-24: Created Phase 25.2 (GPT-5.2 Prompt Engineering — Empirical Approach) with 3 plans
 - 2026-02-24: Completed 25.2-01-PLAN.md (per-platform schemas, selective platform prompts, empirical harness)
 - 2026-02-24: Ran 4-platform empirical validation for SKU 1025U and saved 25.2-01-test-results.md
+- 2026-02-24: Completed 25.2-02-PLAN.md (pipeline wiring in prompt_builder/generator/main/hybrid with per-platform architecture and v1 fallback)
+- 2026-02-24: Verified v2 smoke generation for SKU 1025U with non-empty Google/Bing/Shopify content and 28 finish sentences
 - Last session: 2026-02-24
-- Stopped at: Plan 25.2-01 complete. Next: execute 25.2-02 (pipeline wiring with feature flag)
+- Stopped at: Plan 25.2-02 complete. Next: execute 25.2-03 (6-SKU validation + Bobby review checkpoint)

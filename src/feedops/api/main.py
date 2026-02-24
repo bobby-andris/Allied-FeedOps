@@ -49,6 +49,7 @@ from feedops.api.prompt_loader import (
     get_category_guidance,
     format_gold_standard_examples,
     get_finish_list,
+    get_platform_system_prompt_hash,
 )
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.models.parent_sku import ParentSKU
@@ -78,6 +79,7 @@ from feedops.api.runtime_controls import (
     finish_sentence_regeneration_enabled,
 )
 from feedops.pipeline.feature_flags import capture_flag_snapshot
+from feedops.pipeline.generator import generate_per_platform
 from feedops.observability import get_request_id, log_event, request_context
 from feedops.observability.metrics import metrics_registry
 
@@ -412,20 +414,33 @@ def _normalize_generation_options(options: dict | None) -> dict:
     return normalized
 
 
+def _get_prompt_version() -> str:
+    """Resolve prompt architecture version from environment."""
+    return (os.environ.get("FEEDOPS_PROMPT_VERSION", "v1") or "v1").strip().lower()
+
+
+def _content_field_key(platform: str, content_type: str) -> str:
+    """Map platform/content_type to per-platform result field key."""
+    field_map = {
+        ("google", "title"): "google_title",
+        ("google", "description"): "google_description",
+        ("bing", "title"): "bing_title",
+        ("bing", "description"): "bing_description",
+        ("shopify", "title"): "shopify_title",
+        ("shopify", "description"): "shopify_description",
+    }
+    return field_map[(platform, content_type)]
+
+
 def _extract_content_from_schema_response(
     response: dict,
     platform: str,
     content_type: str,
 ) -> str:
-    """Extract platform+content_type specific content from CANDIDATE_SCHEMA response.
-
-    The OpenAI provider always uses _STRICT_RESPONSE_FORMAT (built from CANDIDATE_SCHEMA)
-    which returns keys like google_title, google_description, bing_title, etc.
-    Per-call prompts ask the model to populate only one field; this function
-    extracts that field by name.
+    """Extract platform/content content from schema response payload.
 
     Args:
-        response: Parsed JSON dict from provider.generate() — CANDIDATE_SCHEMA shape.
+        response: Parsed JSON dict from provider.generate().
         platform: "google", "bing", or "shopify".
         content_type: "title" or "description".
 
@@ -874,55 +889,30 @@ async def optimize_single_sku(request: OptimizeRequest):
 
         # Get LLM provider
         provider = get_provider()
-        prompt_hash = get_system_prompt_hash()
-        system_prompt = get_system_prompt()
+        prompt_version = _get_prompt_version()
 
         results = []
         platforms = ["google", "bing", "shopify"]
         content_types = ["title", "description"]
 
-        # Generate for each platform and content type
-        for platform in platforms:
-            for content_type in content_types:
-                # FIX-01: Use shared build_core_prompt() — structurally identical to batch path
-                user_prompt = build_core_prompt(
-                    parent_sku=parent_sku,
-                    evidence=evidence,
-                    evidence_markdown=evidence_markdown,
-                    platform=platform,
-                    content_type=content_type,
-                )
-                simple_schema = {
-                    "type": "object",
-                    "properties": {"content": {"type": "string"}},
-                    "required": ["content"],
-                }
+        if prompt_version == "v2":
+            generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+            prompt_hashes = generated.get("prompt_hashes", {})
+            system_prompts = generated.get("system_prompts", {})
+            user_prompts = generated.get("user_prompts", {})
+            latencies = generated.get("latency_by_platform", {})
 
-                _gen_start = time.time()
-                response = await _generate_with_metrics(
-                    endpoint="optimize_single_sku",
-                    provider=provider,
-                    prompt=user_prompt,
-                    schema=simple_schema,
-                    system_prompt=system_prompt,
-                    platform=platform,
-                    content_type=content_type,
-                )
-                _gen_latency_ms = int((time.time() - _gen_start) * 1000)
-
-                content = _extract_content_from_schema_response(response, platform, content_type)
-                finish_sentences: dict[str, str] | None = None
-                if content_type == "description" and platform in {"google", "bing"}:
-                    content, finish_sentences = await _enforce_finish_sentence_parity(
-                        provider=provider,
-                        content=content,
-                        master_sku=canonical_master_sku,
-                        platform=platform,
-                        endpoint="optimize_single_sku",
-                    )
-                results.append(f"{platform}/{content_type}: {content[:100]}...")
-
-                if not request.dry_run:
+            for platform in platforms:
+                for content_type in content_types:
+                    field_key = _content_field_key(platform, content_type)
+                    content = str(generated.get(field_key, "")).strip()
+                    results.append(f"{platform}/{content_type}: {content[:100]}...")
+                    if request.dry_run:
+                        continue
                     _persist_generated_content_and_history(
                         supabase=supabase,
                         master_sku=canonical_master_sku,
@@ -930,21 +920,96 @@ async def optimize_single_sku(request: OptimizeRequest):
                         content_type=content_type,
                         content=content,
                         generation_model=provider.name,
-                        prompt_hash=prompt_hash,
-                        system_prompt=system_prompt,
-                        user_prompt=user_prompt,
-                        mode="full_generation",
-                        latency_ms=_gen_latency_ms,
+                        prompt_hash=str(
+                            prompt_hashes.get(
+                                platform, get_platform_system_prompt_hash(platform)
+                            )
+                        ),
+                        system_prompt=str(system_prompts.get(platform, "")),
+                        user_prompt=str(user_prompts.get(platform, "")),
+                        mode="full_generation_v2",
+                        latency_ms=int(latencies.get(platform, 0) or 0),
                     )
-                    if finish_sentences:
-                        supabase.table("variant_finish_sentences").upsert(
-                            {
-                                "master_sku": canonical_master_sku,
-                                "platform": platform,
-                                "finish_sentences": finish_sentences,
-                            },
-                            on_conflict="master_sku,platform",
-                        ).execute()
+
+            finish_sentences = generated.get("finish_sentences", {})
+            if not request.dry_run and isinstance(finish_sentences, dict):
+                for platform in ("google", "bing"):
+                    supabase.table("variant_finish_sentences").upsert(
+                        {
+                            "master_sku": canonical_master_sku,
+                            "platform": platform,
+                            "finish_sentences": finish_sentences,
+                        },
+                        on_conflict="master_sku,platform",
+                    ).execute()
+        else:
+            prompt_hash = get_system_prompt_hash()
+            system_prompt = get_system_prompt()
+
+            # Generate for each platform and content type
+            for platform in platforms:
+                for content_type in content_types:
+                    # FIX-01: Use shared build_core_prompt() — structurally identical to batch path
+                    user_prompt = build_core_prompt(
+                        parent_sku=parent_sku,
+                        evidence=evidence,
+                        evidence_markdown=evidence_markdown,
+                        platform=platform,
+                        content_type=content_type,
+                    )
+                    simple_schema = {
+                        "type": "object",
+                        "properties": {"content": {"type": "string"}},
+                        "required": ["content"],
+                    }
+
+                    _gen_start = time.time()
+                    response = await _generate_with_metrics(
+                        endpoint="optimize_single_sku",
+                        provider=provider,
+                        prompt=user_prompt,
+                        schema=simple_schema,
+                        system_prompt=system_prompt,
+                        platform=platform,
+                        content_type=content_type,
+                    )
+                    _gen_latency_ms = int((time.time() - _gen_start) * 1000)
+
+                    content = _extract_content_from_schema_response(response, platform, content_type)
+                    finish_sentences: dict[str, str] | None = None
+                    if content_type == "description" and platform in {"google", "bing"}:
+                        content, finish_sentences = await _enforce_finish_sentence_parity(
+                            provider=provider,
+                            content=content,
+                            master_sku=canonical_master_sku,
+                            platform=platform,
+                            endpoint="optimize_single_sku",
+                        )
+                    results.append(f"{platform}/{content_type}: {content[:100]}...")
+
+                    if not request.dry_run:
+                        _persist_generated_content_and_history(
+                            supabase=supabase,
+                            master_sku=canonical_master_sku,
+                            platform=platform,
+                            content_type=content_type,
+                            content=content,
+                            generation_model=provider.name,
+                            prompt_hash=prompt_hash,
+                            system_prompt=system_prompt,
+                            user_prompt=user_prompt,
+                            mode="full_generation",
+                            latency_ms=_gen_latency_ms,
+                        )
+                        if finish_sentences:
+                            supabase.table("variant_finish_sentences").upsert(
+                                {
+                                    "master_sku": canonical_master_sku,
+                                    "platform": platform,
+                                    "finish_sentences": finish_sentences,
+                                },
+                                on_conflict="master_sku,platform",
+                            ).execute()
 
         return OptimizeResponse(
             success=True,
@@ -1009,6 +1074,7 @@ async def regenerate_content(request: RegenerateRequest):
         # Get LLM provider
         provider = get_provider()
 
+        prompt_version = _get_prompt_version()
         prompt_hash = get_system_prompt_hash()
 
         # Load persistent corrections for this SKU (FIX-01: feedback layer)
@@ -1050,55 +1116,104 @@ async def regenerate_content(request: RegenerateRequest):
             feedback_parts.append(request.feedback)
         session_feedback = "\n".join(feedback_parts) if feedback_parts else None
 
-        # Build user prompt via shared prompt_builder (FIX-01: parity with batch path)
-        # FIX-02: Shopping intelligence gated by PROMPT_CONTRACT_V2.
-        # Toggling flag produces structurally different prompt (with/without Shopping section).
-        # INTENT_CURATOR_V1 effect is in evidence.py (curated vs raw evidence content).
-        # SEGMENT_STRATEGY_V1 gates segment strategy guidance section.
-        core = build_core_prompt(
-            parent_sku=parent_sku,
-            evidence=evidence,
-            evidence_markdown=evidence_markdown,
-            platform=request.platform,
-            content_type=request.content_type,
-            finish_code=request.finish_code,
-        )
-        user_prompt = apply_feedback_layer(
-            core, corrections=corrections, session_feedback=session_feedback
-        )
-        simple_schema = {
-            "type": "object",
-            "properties": {"content": {"type": "string"}},
-            "required": ["content"],
-        }
-
-        _regen_start = time.time()
-        response = await _generate_with_metrics(
-            endpoint="regenerate",
-            provider=provider,
-            prompt=user_prompt,
-            schema=simple_schema,
-            system_prompt=get_system_prompt(),
-            platform=request.platform,
-            content_type=request.content_type,
-        )
-        _regen_latency_ms = int((time.time() - _regen_start) * 1000)
-
-        content = _extract_content_from_schema_response(response, request.platform, request.content_type)
         finish_sentences: dict[str, str] | None = None
+        system_prompt = get_system_prompt()
+        user_prompt = ""
+        _regen_latency_ms = 0
 
-        if request.content_type == "description" and request.platform in {"google", "bing"}:
-            content, finish_sentences = await _enforce_finish_sentence_parity(
+        if prompt_version == "v2":
+            feedback_lines: list[str] = []
+            if corrections:
+                correction_lines = []
+                for correction in corrections:
+                    text = correction.get("correction_text") or correction.get("text") or correction.get("correction")
+                    if text:
+                        correction_lines.append(f"- {text}")
+                if correction_lines:
+                    feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
+            if session_feedback:
+                feedback_lines.append("Reviewer Feedback:\n" + session_feedback)
+
+            generated = await generate_per_platform(
+                parent_sku=parent_sku,
                 provider=provider,
-                content=content,
-                master_sku=canonical_master_sku,
-                platform=request.platform,
-                endpoint="regenerate",
+                prompt_version="v2",
+                feedback_by_platform={
+                    request.platform: "\n\n".join(feedback_lines)
+                }
+                if feedback_lines
+                else None,
             )
+            field_key = _content_field_key(request.platform, request.content_type)
+            content = str(generated.get(field_key, "")).strip()
+            prompt_hash = str(
+                generated.get("prompt_hashes", {}).get(
+                    request.platform, get_platform_system_prompt_hash(request.platform)
+                )
+            )
+            system_prompt = str(
+                generated.get("system_prompts", {}).get(
+                    request.platform, get_system_prompt()
+                )
+            )
+            user_prompt = str(
+                generated.get("user_prompts", {}).get(request.platform, "")
+            )
+            _regen_latency_ms = int(
+                generated.get("latency_by_platform", {}).get(request.platform, 0) or 0
+            )
+            if request.content_type == "description" and request.platform in {"google", "bing"}:
+                raw_finish = generated.get("finish_sentences")
+                if isinstance(raw_finish, dict):
+                    finish_sentences = raw_finish
+        else:
+            # Build user prompt via shared prompt_builder (FIX-01: parity with batch path)
+            # FIX-02: Shopping intelligence gated by PROMPT_CONTRACT_V2.
+            # Toggling flag produces structurally different prompt (with/without Shopping section).
+            # INTENT_CURATOR_V1 effect is in evidence.py (curated vs raw evidence content).
+            # SEGMENT_STRATEGY_V1 gates segment strategy guidance section.
+            core = build_core_prompt(
+                parent_sku=parent_sku,
+                evidence=evidence,
+                evidence_markdown=evidence_markdown,
+                platform=request.platform,
+                content_type=request.content_type,
+                finish_code=request.finish_code,
+            )
+            user_prompt = apply_feedback_layer(
+                core, corrections=corrections, session_feedback=session_feedback
+            )
+            simple_schema = {
+                "type": "object",
+                "properties": {"content": {"type": "string"}},
+                "required": ["content"],
+            }
+
+            _regen_start = time.time()
+            response = await _generate_with_metrics(
+                endpoint="regenerate",
+                provider=provider,
+                prompt=user_prompt,
+                schema=simple_schema,
+                system_prompt=system_prompt,
+                platform=request.platform,
+                content_type=request.content_type,
+            )
+            _regen_latency_ms = int((time.time() - _regen_start) * 1000)
+
+            content = _extract_content_from_schema_response(response, request.platform, request.content_type)
+
+            if request.content_type == "description" and request.platform in {"google", "bing"}:
+                content, finish_sentences = await _enforce_finish_sentence_parity(
+                    provider=provider,
+                    content=content,
+                    master_sku=canonical_master_sku,
+                    platform=request.platform,
+                    endpoint="regenerate",
+                )
 
         # Save to regeneration_history
         try:
-            system_prompt = get_system_prompt()
             supabase.table("generated_content").upsert(
                 {
                     "master_sku": canonical_master_sku,
@@ -1575,77 +1690,127 @@ async def process_batch_job(
             if not parent_sku:
                 raise ValueError(f"SKU not found: {canonical_sku}")
 
-            # Build evidence and generate content
-            evidence = build_evidence_table(parent_sku)
-            evidence_markdown = format_evidence_markdown(evidence)
-
             provider = get_provider()
-            prompt_hash = get_system_prompt_hash()
-            system_prompt = get_system_prompt()
+            prompt_version = _get_prompt_version()
 
-            # Generate for each platform
-            for platform in platforms:
-                for content_type in content_types:
-                    # FIX-01: Use shared build_core_prompt() — structurally identical to single-SKU path
-                    user_prompt = build_core_prompt(
-                        parent_sku=parent_sku,
-                        evidence=evidence,
-                        evidence_markdown=evidence_markdown,
-                        platform=platform,
-                        content_type=content_type,
-                    )
-                    simple_schema = {
-                        "type": "object",
-                        "properties": {"content": {"type": "string"}},
-                        "required": ["content"],
-                    }
+            if prompt_version == "v2":
+                generated = await generate_per_platform(
+                    parent_sku=parent_sku,
+                    provider=provider,
+                    prompt_version="v2",
+                )
+                prompt_hashes = generated.get("prompt_hashes", {})
+                system_prompts = generated.get("system_prompts", {})
+                user_prompts = generated.get("user_prompts", {})
+                latencies = generated.get("latency_by_platform", {})
 
-                    _batch_gen_start = time.time()
-                    response = await _generate_with_metrics(
-                        endpoint="process_batch_job",
-                        provider=provider,
-                        prompt=user_prompt,
-                        schema=simple_schema,
-                        system_prompt=system_prompt,
-                        platform=platform,
-                        content_type=content_type,
-                    )
-                    _batch_gen_latency_ms = int((time.time() - _batch_gen_start) * 1000)
+                if not dry_run:
+                    for platform in platforms:
+                        for content_type in content_types:
+                            field_key = _content_field_key(platform, content_type)
+                            content = str(generated.get(field_key, "")).strip()
+                            _persist_generated_content_and_history(
+                                supabase=supabase,
+                                master_sku=canonical_sku,
+                                platform=platform,
+                                content_type=content_type,
+                                content=content,
+                                generation_model=provider.name,
+                                prompt_hash=str(
+                                    prompt_hashes.get(
+                                        platform,
+                                        get_platform_system_prompt_hash(platform),
+                                    )
+                                ),
+                                system_prompt=str(system_prompts.get(platform, "")),
+                                user_prompt=str(user_prompts.get(platform, "")),
+                                mode="full_generation_v2",
+                                latency_ms=int(latencies.get(platform, 0) or 0),
+                            )
 
-                    content = _extract_content_from_schema_response(response, platform, content_type)
-                    finish_sentences: dict[str, str] | None = None
-                    if content_type == "description" and platform in {"google", "bing"}:
-                        content, finish_sentences = await _enforce_finish_sentence_parity(
-                            provider=provider,
-                            content=content,
-                            master_sku=canonical_sku,
-                            platform=platform,
-                            endpoint="process_batch_job",
-                        )
+                    finish_sentences = generated.get("finish_sentences", {})
+                    if isinstance(finish_sentences, dict):
+                        for platform in ("google", "bing"):
+                            if platform in platforms:
+                                supabase.table("variant_finish_sentences").upsert(
+                                    {
+                                        "master_sku": canonical_sku,
+                                        "platform": platform,
+                                        "finish_sentences": finish_sentences,
+                                    },
+                                    on_conflict="master_sku,platform",
+                                ).execute()
+            else:
+                # Build evidence and generate content
+                evidence = build_evidence_table(parent_sku)
+                evidence_markdown = format_evidence_markdown(evidence)
 
-                    if not dry_run:
-                        _persist_generated_content_and_history(
-                            supabase=supabase,
-                            master_sku=canonical_sku,
+                prompt_hash = get_system_prompt_hash()
+                system_prompt = get_system_prompt()
+
+                # Generate for each platform
+                for platform in platforms:
+                    for content_type in content_types:
+                        # FIX-01: Use shared build_core_prompt() — structurally identical to single-SKU path
+                        user_prompt = build_core_prompt(
+                            parent_sku=parent_sku,
+                            evidence=evidence,
+                            evidence_markdown=evidence_markdown,
                             platform=platform,
                             content_type=content_type,
-                            content=content,
-                            generation_model=provider.name,
-                            prompt_hash=prompt_hash,
-                            system_prompt=system_prompt,
-                            user_prompt=user_prompt,
-                            mode="full_generation",
-                            latency_ms=_batch_gen_latency_ms,
                         )
-                        if finish_sentences:
-                            supabase.table("variant_finish_sentences").upsert(
-                                {
-                                    "master_sku": canonical_sku,
-                                    "platform": platform,
-                                    "finish_sentences": finish_sentences,
-                                },
-                                on_conflict="master_sku,platform",
-                            ).execute()
+                        simple_schema = {
+                            "type": "object",
+                            "properties": {"content": {"type": "string"}},
+                            "required": ["content"],
+                        }
+
+                        _batch_gen_start = time.time()
+                        response = await _generate_with_metrics(
+                            endpoint="process_batch_job",
+                            provider=provider,
+                            prompt=user_prompt,
+                            schema=simple_schema,
+                            system_prompt=system_prompt,
+                            platform=platform,
+                            content_type=content_type,
+                        )
+                        _batch_gen_latency_ms = int((time.time() - _batch_gen_start) * 1000)
+
+                        content = _extract_content_from_schema_response(response, platform, content_type)
+                        finish_sentences: dict[str, str] | None = None
+                        if content_type == "description" and platform in {"google", "bing"}:
+                            content, finish_sentences = await _enforce_finish_sentence_parity(
+                                provider=provider,
+                                content=content,
+                                master_sku=canonical_sku,
+                                platform=platform,
+                                endpoint="process_batch_job",
+                            )
+
+                        if not dry_run:
+                            _persist_generated_content_and_history(
+                                supabase=supabase,
+                                master_sku=canonical_sku,
+                                platform=platform,
+                                content_type=content_type,
+                                content=content,
+                                generation_model=provider.name,
+                                prompt_hash=prompt_hash,
+                                system_prompt=system_prompt,
+                                user_prompt=user_prompt,
+                                mode="full_generation",
+                                latency_ms=_batch_gen_latency_ms,
+                            )
+                            if finish_sentences:
+                                supabase.table("variant_finish_sentences").upsert(
+                                    {
+                                        "master_sku": canonical_sku,
+                                        "platform": platform,
+                                        "finish_sentences": finish_sentences,
+                                    },
+                                    on_conflict="master_sku,platform",
+                                ).execute()
 
             completed += 1
 
@@ -1744,6 +1909,7 @@ async def process_hybrid_batch_job(
         content_types.append("description")
 
     provider = get_provider()
+    prompt_version = _get_prompt_version()
     prompt_hash = get_system_prompt_hash()
     system_prompt = get_system_prompt()
 
@@ -1809,9 +1975,62 @@ async def process_hybrid_batch_job(
             else:
                 expanded_failed += 1
 
-    # Helper function for full generation
+    # Helper function for v2 full per-platform generation.
+    async def generate_full_content_v2(sku: str):
+        """Generate and persist per-platform package for one SKU."""
+        canonical_sku = resolve_canonical_master_sku(supabase, sku)
+        parent_sku = load_parent_sku_from_supabase(canonical_sku)
+        if not parent_sku:
+            raise ValueError(f"SKU not found: {canonical_sku}")
+
+        generated = await generate_per_platform(
+            parent_sku=parent_sku,
+            provider=provider,
+            prompt_version="v2",
+        )
+        prompt_hashes = generated.get("prompt_hashes", {})
+        system_prompts = generated.get("system_prompts", {})
+        user_prompts = generated.get("user_prompts", {})
+        latencies = generated.get("latency_by_platform", {})
+
+        for platform in platforms:
+            for content_type in content_types:
+                field_key = _content_field_key(platform, content_type)
+                content = str(generated.get(field_key, "")).strip()
+                _persist_generated_content_and_history(
+                    supabase=supabase,
+                    master_sku=canonical_sku,
+                    platform=platform,
+                    content_type=content_type,
+                    content=content,
+                    generation_model=provider.name,
+                    prompt_hash=str(
+                        prompt_hashes.get(
+                            platform,
+                            get_platform_system_prompt_hash(platform),
+                        )
+                    ),
+                    system_prompt=str(system_prompts.get(platform, "")),
+                    user_prompt=str(user_prompts.get(platform, "")),
+                    mode="full_generation_v2",
+                    latency_ms=int(latencies.get(platform, 0) or 0),
+                )
+        finish_sentences = generated.get("finish_sentences", {})
+        if isinstance(finish_sentences, dict):
+            for platform in ("google", "bing"):
+                if platform in platforms and "description" in content_types:
+                    supabase.table("variant_finish_sentences").upsert(
+                        {
+                            "master_sku": canonical_sku,
+                            "platform": platform,
+                            "finish_sentences": finish_sentences,
+                        },
+                        on_conflict="master_sku,platform",
+                    ).execute()
+
+    # Helper function for v1 full generation.
     async def generate_full_content(sku: str, platform: str, content_type: str):
-        """Generate content using full pipeline."""
+        """Generate content using v1 full pipeline."""
         canonical_sku = resolve_canonical_master_sku(supabase, sku)
         parent_sku = load_parent_sku_from_supabase(canonical_sku)
         if not parent_sku:
@@ -1887,18 +2106,26 @@ async def process_hybrid_batch_job(
         logger.info(f"Processing {len(single_skus)} single SKUs")
         for sku in single_skus:
             sku_failed = False
-            for platform in platforms:
-                for content_type in content_types:
-                    try:
-                        await generate_full_content(sku, platform, content_type)
-                        logger.info(
-                            f"✓ Generated {sku} / {platform} / {content_type}"
-                        )
-                    except Exception as e:
-                        sku_failed = True
-                        logger.error(
-                            f"✗ Failed {sku} / {platform} / {content_type}: {e}"
-                        )
+            if prompt_version == "v2":
+                try:
+                    await generate_full_content_v2(sku)
+                    logger.info("✓ Generated %s via per-platform v2 package", sku)
+                except Exception as e:
+                    sku_failed = True
+                    logger.error("✗ Failed %s via per-platform v2 package: %s", sku, e)
+            else:
+                for platform in platforms:
+                    for content_type in content_types:
+                        try:
+                            await generate_full_content(sku, platform, content_type)
+                            logger.info(
+                                f"✓ Generated {sku} / {platform} / {content_type}"
+                            )
+                        except Exception as e:
+                            sku_failed = True
+                            logger.error(
+                                f"✗ Failed {sku} / {platform} / {content_type}: {e}"
+                            )
 
             _record_sku_result(sku, success=not sku_failed)
             _update_job_progress()
@@ -1912,56 +2139,82 @@ async def process_hybrid_batch_job(
             base_sku = family.base_sku
 
             base_sku_failed = False
-            for platform in platforms:
-                for content_type in content_types:
-                    try:
-                        await generate_full_content(base_sku, platform, content_type)
-                        logger.info(
-                            f"✓ Generated BASE {base_sku} / {platform} / {content_type}"
-                        )
-                    except Exception as e:
-                        base_sku_failed = True
-                        logger.error(
-                            f"✗ Failed BASE {base_sku} / {platform} / {content_type}: {e}"
-                        )
+            if prompt_version == "v2":
+                try:
+                    await generate_full_content_v2(base_sku)
+                    logger.info("✓ Generated BASE %s via per-platform v2 package", base_sku)
+                except Exception as e:
+                    base_sku_failed = True
+                    logger.error(
+                        "✗ Failed BASE %s via per-platform v2 package: %s",
+                        base_sku,
+                        e,
+                    )
+            else:
+                for platform in platforms:
+                    for content_type in content_types:
+                        try:
+                            await generate_full_content(base_sku, platform, content_type)
+                            logger.info(
+                                f"✓ Generated BASE {base_sku} / {platform} / {content_type}"
+                            )
+                        except Exception as e:
+                            base_sku_failed = True
+                            logger.error(
+                                f"✗ Failed BASE {base_sku} / {platform} / {content_type}: {e}"
+                            )
 
             _record_sku_result(base_sku, success=not base_sku_failed)
             _update_job_progress()
 
-            # Step 2: Adapt variant SKUs
+            # Step 2: Variant SKUs
             for variant_sku in family.variant_skus:
                 base_spec, variant_spec = extract_spec_difference(
                     base_sku, variant_sku
                 )
                 variant_sku_failed = False
-
-                for platform in platforms:
-                    for content_type in content_types:
-                        try:
-                            result = await adapt_variant_content(
-                                supabase,
-                                base_sku,
-                                variant_sku,
-                                platform,
-                                content_type,
-                                base_spec,
-                                variant_spec,
-                            )
-
-                            if result["success"]:
-                                logger.info(
-                                    f"✓ Adapted VARIANT {variant_sku} / {platform} / {content_type} (from {base_sku})"
+                if prompt_version == "v2":
+                    try:
+                        await generate_full_content_v2(variant_sku)
+                        logger.info(
+                            "✓ Generated VARIANT %s via per-platform v2 package",
+                            variant_sku,
+                        )
+                    except Exception as e:
+                        variant_sku_failed = True
+                        logger.error(
+                            "✗ Failed VARIANT %s via per-platform v2 package: %s",
+                            variant_sku,
+                            e,
+                        )
+                else:
+                    for platform in platforms:
+                        for content_type in content_types:
+                            try:
+                                result = await adapt_variant_content(
+                                    supabase,
+                                    base_sku,
+                                    variant_sku,
+                                    platform,
+                                    content_type,
+                                    base_spec,
+                                    variant_spec,
                                 )
-                            else:
+
+                                if result["success"]:
+                                    logger.info(
+                                        f"✓ Adapted VARIANT {variant_sku} / {platform} / {content_type} (from {base_sku})"
+                                    )
+                                else:
+                                    variant_sku_failed = True
+                                    logger.error(
+                                        f"✗ Failed VARIANT {variant_sku} / {platform} / {content_type}: {result.get('error')}"
+                                    )
+                            except Exception as e:
                                 variant_sku_failed = True
                                 logger.error(
-                                    f"✗ Failed VARIANT {variant_sku} / {platform} / {content_type}: {result.get('error')}"
+                                    f"✗ Exception for VARIANT {variant_sku} / {platform} / {content_type}: {e}"
                                 )
-                        except Exception as e:
-                            variant_sku_failed = True
-                            logger.error(
-                                f"✗ Exception for VARIANT {variant_sku} / {platform} / {content_type}: {e}"
-                            )
 
                 _record_sku_result(variant_sku, success=not variant_sku_failed)
                 _update_job_progress()

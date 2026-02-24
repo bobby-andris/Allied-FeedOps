@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import Any
 
 from feedops.api.prompt_loader import (
     format_gold_standard_examples,
@@ -34,10 +35,12 @@ from feedops.api.prompt_loader import (
     get_finish_list,
 )
 from feedops.models.parent_sku import ParentSKU
+from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.pipeline.feature_flags import (
     is_prompt_contract_v2_enabled,
     is_segment_strategy_v1_enabled,
 )
+from feedops.pipeline.finish_injection import get_finish_metadata
 from feedops.pipeline.keyword_placement import (
     build_keyword_placement_plan,
     format_keyword_placement_section,
@@ -77,6 +80,198 @@ def _extract_custom_label_0(parent_sku: ParentSKU) -> str | None:
             return value
     # Fall back to parent_sku.category (same values in practice, different source)
     return parent_sku.category or None
+
+
+def _coerce_evidence_rows(
+    sku_data: ParentSKU,
+    evidence: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    if evidence:
+        return evidence
+    generated = build_evidence_table(sku_data)
+    return generated if isinstance(generated, list) else []
+
+
+def _coerce_keyword_section(
+    sku_data: ParentSKU,
+    evidence_rows: list[dict[str, Any]],
+    keywords: Any = None,
+) -> str:
+    if isinstance(keywords, str) and keywords.strip():
+        return keywords.strip()
+    if keywords and hasattr(keywords, "must_include"):
+        return format_keyword_placement_section(keywords)
+    try:
+        plan = build_keyword_placement_plan(sku_data, evidence_rows)
+        return format_keyword_placement_section(plan)
+    except Exception as exc:
+        logger.warning("Keyword placement section skipped for %s: %s", sku_data.master_sku, exc)
+        return ""
+
+
+def _default_finish_metadata(sku_data: ParentSKU) -> list[dict[str, Any]]:
+    finish_code_lookup = {
+        (variant.finish or "").strip(): (variant.finish_code or "").strip()
+        for variant in sku_data.variants
+        if getattr(variant, "finish", None)
+    }
+    finish_rows: list[dict[str, Any]] = []
+    for finish_name in get_finish_list():
+        meta = get_finish_metadata(finish_name) or {}
+        finish_rows.append(
+            {
+                "finish_name": finish_name,
+                "finish_code": finish_code_lookup.get(finish_name, finish_name),
+                "functional_description": meta.get("functional_description", ""),
+                "style_affinities": meta.get("style_affinities", []),
+                "coordination_note": meta.get("coordination_note", ""),
+            }
+        )
+    return finish_rows
+
+
+def build_google_prompt(
+    sku_data: ParentSKU,
+    evidence: list[dict[str, Any]] | None,
+    keywords: Any,
+    category_guidance: str | None,
+    gold_examples: str | None,
+) -> str:
+    """Build Google-specific user prompt for variant-level generation."""
+    evidence_rows = _coerce_evidence_rows(sku_data, evidence)
+    evidence_markdown = format_evidence_markdown(evidence_rows)
+    keyword_section = _coerce_keyword_section(sku_data, evidence_rows, keywords)
+
+    sections = [
+        "Target: Google Shopping variant content package.",
+        (
+            "This content is for a variant-level Google Shopping listing. "
+            "Use the literal string {FINISH_NAME} where the finish name belongs. "
+            "Use the literal string {FINISH_SENTENCE} where finish context flows naturally. "
+            "These are placeholders that will be replaced during variant publishing."
+        ),
+        f"Product Evidence Table:\n{evidence_markdown}",
+    ]
+    if keyword_section:
+        sections.append(keyword_section)
+    if category_guidance:
+        sections.append(f"Category Guidance:\n{category_guidance}")
+    if gold_examples:
+        sections.append(f"Gold Standard Examples (Google-focused):\n{gold_examples}")
+    sections.append(
+        "Return JSON with keys: google_title, google_short_title, "
+        "google_description, claims, self_score."
+    )
+    return "\n\n".join(sections)
+
+
+def build_bing_prompt(
+    sku_data: ParentSKU,
+    evidence: list[dict[str, Any]] | None,
+    keywords: Any,
+    category_guidance: str | None,
+) -> str:
+    """Build Bing-specific user prompt with literal-match emphasis."""
+    evidence_rows = _coerce_evidence_rows(sku_data, evidence)
+    evidence_markdown = format_evidence_markdown(evidence_rows)
+    keyword_section = _coerce_keyword_section(sku_data, evidence_rows, keywords)
+
+    sections = [
+        "Target: Bing Shopping variant content package.",
+        (
+            "Use the literal string {FINISH_NAME} where the finish name belongs in the title. "
+            "Use the literal string {FINISH_SENTENCE} in the description. "
+            "Do not expand placeholders."
+        ),
+        (
+            "Bing optimization: front-load concrete product specifications in the first 200 characters, "
+            "and cover high-intent synonym language naturally in complete sentences."
+        ),
+        f"Product Evidence Table:\n{evidence_markdown}",
+    ]
+    if keyword_section:
+        sections.append(keyword_section)
+    if category_guidance:
+        sections.append(f"Category Guidance:\n{category_guidance}")
+    sections.append(
+        "Return JSON with keys: bing_title, bing_description, claims, self_score."
+    )
+    return "\n\n".join(sections)
+
+
+def build_shopify_prompt(
+    sku_data: ParentSKU,
+    evidence: list[dict[str, Any]] | None,
+    category_guidance: str | None,
+) -> str:
+    """Build Shopify master-SKU prompt (finish agnostic, HTML output)."""
+    evidence_rows = _coerce_evidence_rows(sku_data, evidence)
+    evidence_markdown = format_evidence_markdown(evidence_rows)
+
+    sections = [
+        "Target: Shopify master-SKU product content package.",
+        (
+            "This is master-SKU content — do NOT mention any specific finish. "
+            "The content must work for all 28 finish variants."
+        ),
+        (
+            "Write Shopify-friendly HTML description. Start with buyer-problem or buyer-outcome framing, "
+            "then support with concrete specs, installation confidence, and trust signals."
+        ),
+        f"Product Evidence Table:\n{evidence_markdown}",
+    ]
+    if category_guidance:
+        sections.append(f"Category Guidance:\n{category_guidance}")
+    sections.append(
+        "Return JSON with keys: shopify_title, shopify_description, "
+        "shopify_meta_description, claims, self_score."
+    )
+    return "\n\n".join(sections)
+
+
+def build_finish_prompt(
+    sku_data: ParentSKU,
+    finish_metadata: list[dict[str, Any]] | None,
+) -> str:
+    """Build prompt for product-specific finish sentence generation."""
+    finish_rows = finish_metadata or _default_finish_metadata(sku_data)
+    bullet_lines = [
+        bullet.strip()
+        for bullet in [
+            sku_data.bullet_1,
+            sku_data.bullet_2,
+            sku_data.bullet_3,
+            sku_data.bullet_4,
+        ]
+        if isinstance(bullet, str) and bullet.strip()
+    ]
+    bullet_block = "\n".join(f"- {line}" for line in bullet_lines) or "- No bullet data provided."
+    finish_lines = []
+    for row in finish_rows:
+        finish_lines.append(
+            f"- {row.get('finish_code', row.get('finish_name', 'UNKNOWN'))}: {row.get('finish_name', 'Unknown')} "
+            f"| functional: {row.get('functional_description', '')} "
+            f"| styles: {', '.join(row.get('style_affinities', []) if isinstance(row.get('style_affinities'), list) else [])}"
+        )
+    finish_block = "\n".join(finish_lines)
+
+    return "\n\n".join(
+        [
+            "Target: finish sentence generation for variant expansion.",
+            (
+                "Generate 28 finish sentences for THIS product only. "
+                "Each sentence must be specific to THIS product paired with THIS finish. "
+                "Do not write generic finish blurbs."
+            ),
+            f"Master SKU: {sku_data.master_sku}\nCategory: {sku_data.category}\nCollection: {sku_data.collection or 'N/A'}\nCurrent title: {sku_data.current_title}",
+            f"Product selling points:\n{bullet_block}",
+            f"Finish metadata (28 finishes):\n{finish_block}",
+            (
+                "Return JSON with key 'sentences' as an array of objects:\n"
+                "[{\"finish_code\": \"...\", \"finish_name\": \"...\", \"sentence\": \"...\"}]"
+            ),
+        ]
+    )
 
 
 def build_core_prompt(

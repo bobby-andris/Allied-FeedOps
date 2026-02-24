@@ -19,11 +19,13 @@ from feedops.api.prompt_loader import (
     get_system_prompt,
     get_system_prompt_hash,
 )
+from feedops.api.supabase_loader import load_parent_sku_from_supabase
 from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
 from feedops.models import Candidate, Score
 from feedops.observability import log_event
 from feedops.observability.metrics import metrics_registry
+from feedops.pipeline.generator import generate_per_platform
 from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
 )
@@ -34,6 +36,7 @@ from feedops.pipeline.finish_sentence_placeholder import (
     strip_generic_finish_count_claims,
 )
 from feedops.pipeline.validators import validate_candidate_content
+from feedops.providers import get_provider
 
 logger = logging.getLogger(__name__)
 
@@ -255,6 +258,152 @@ async def adapt_variant_content(
             content_type=content_type,
             include_finish_sentences=include_finish_sentences,
         )
+        prompt_version = (os.getenv("FEEDOPS_PROMPT_VERSION", "v1") or "v1").strip().lower()
+        if prompt_version == "v2":
+            parent_sku = load_parent_sku_from_supabase(variant_sku)
+            if not parent_sku:
+                return {
+                    "success": False,
+                    "error": f"SKU not found for v2 variant generation: {variant_sku}",
+                }
+
+            provider = get_provider()
+            generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+            field_map = {
+                ("google", "title"): "google_title",
+                ("google", "description"): "google_description",
+                ("bing", "title"): "bing_title",
+                ("bing", "description"): "bing_description",
+                ("shopify", "title"): "shopify_title",
+                ("shopify", "description"): "shopify_description",
+            }
+            field_key = field_map.get((platform, content_type))
+            if not field_key:
+                return {
+                    "success": False,
+                    "error": f"Unsupported platform/content_type: {platform}/{content_type}",
+                }
+
+            new_content = str(generated.get(field_key, "")).strip()
+            finish_sentences = None
+            if content_type == "description" and platform in {"google", "bing"}:
+                raw_finish_sentences = generated.get("finish_sentences")
+                if isinstance(raw_finish_sentences, dict):
+                    finish_sentences = raw_finish_sentences
+
+            content_validation_errors = validate_adapted_variant_content(
+                content_type=content_type,
+                platform=platform,
+                content=new_content,
+            )
+            if content_validation_errors:
+                metrics_registry.increment(
+                    "validation_failure_total",
+                    type="variant_content_validation",
+                    platform=platform,
+                )
+                return {
+                    "success": False,
+                    "error": (
+                        "Variant adaptation failed policy validation: "
+                        + "; ".join(content_validation_errors[:3])
+                    ),
+                    "validation_errors": content_validation_errors,
+                }
+
+            current_result = (
+                supabase.table("generated_content")
+                .select("*")
+                .eq("master_sku", variant_sku)
+                .eq("platform", platform)
+                .eq("content_type", content_type)
+                .maybe_single()
+                .execute()
+            )
+            current_data = current_result.data if current_result and hasattr(current_result, "data") else None
+            current_version = current_data["version"] if current_data else 0
+            next_version = current_version + 1
+
+            prompt_hash = str(
+                generated.get("prompt_hashes", {}).get(platform, get_system_prompt_hash())
+            )
+            system_prompt = str(generated.get("system_prompts", {}).get(platform, get_system_prompt()))
+            user_prompt = str(generated.get("user_prompts", {}).get(platform, ""))
+            model = provider.name
+
+            if current_data:
+                supabase.table("generated_content").update(
+                    {
+                        "candidate_content": new_content,
+                        "version": next_version,
+                        "is_current": True,
+                        "generation_model": f"{model}-variant-v2",
+                        "generation_prompt_hash": prompt_hash,
+                        "generation_timestamp": datetime.now(timezone.utc).isoformat(),
+                    }
+                ).eq("id", current_data["id"]).execute()
+            else:
+                supabase.table("generated_content").insert(
+                    {
+                        "master_sku": variant_sku,
+                        "platform": platform,
+                        "content_type": content_type,
+                        "candidate_content": new_content,
+                        "version": 1,
+                        "is_current": True,
+                        "generation_model": f"{model}-variant-v2",
+                        "generation_prompt_hash": prompt_hash,
+                        "generation_timestamp": datetime.now(timezone.utc).isoformat(),
+                    }
+                ).execute()
+
+            content_id_result = (
+                supabase.table("generated_content")
+                .select("id")
+                .eq("master_sku", variant_sku)
+                .eq("platform", platform)
+                .eq("content_type", content_type)
+                .single()
+                .execute()
+            )
+            supabase.table("regeneration_history").insert(
+                {
+                    "generated_content_id": content_id_result.data["id"],
+                    "master_sku": variant_sku,
+                    "platform": platform,
+                    "content_type": content_type,
+                    "system_prompt": system_prompt,
+                    "user_prompt": user_prompt,
+                    "model_version": model,
+                    "prompt_hash": prompt_hash,
+                    "mode": "variant-adaptation-v2",
+                }
+            ).execute()
+
+            if finish_sentences and platform in {"google", "bing"}:
+                supabase.table("variant_finish_sentences").upsert(
+                    {
+                        "master_sku": variant_sku,
+                        "platform": platform,
+                        "finish_sentences": finish_sentences,
+                    },
+                    on_conflict="master_sku,platform",
+                ).execute()
+
+            metrics_registry.observe(
+                "generation_latency_seconds",
+                time.perf_counter() - started,
+                endpoint="adapt_variant_content",
+                provider=model,
+                platform=platform,
+                content_type=content_type,
+            )
+            return {"success": True, "content": new_content, "mode": "v2"}
+
         # Get base content
         base_result = (
             supabase.table("generated_content")

@@ -5,14 +5,25 @@ import json
 import logging
 import os
 import re
+import time
 
 from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_category_guidance,
+    get_finish_list,
+    get_platform_system_prompt_hash,
+    get_system_prompt_hash,
     get_system_prompt,
+)
+from feedops.api.prompt_builder import (
+    build_bing_prompt,
+    build_finish_prompt,
+    build_google_prompt,
+    build_shopify_prompt,
 )
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.finish_sentence_placeholder import build_fallback_finish_sentences
 from feedops.pipeline.finish_injection import get_finish_metadata
 from feedops.pipeline.images import fetch_image
 from feedops.pipeline.keyword_placement import (
@@ -22,9 +33,13 @@ from feedops.pipeline.keyword_placement import (
     validate_candidate_keyword_placement,
 )
 from feedops.pipeline.prompts import (
+    BING_SCHEMA,
     CANDIDATE_SCHEMA,
+    FINISH_SENTENCES_SCHEMA,
     FINISH_CONTEXT_TEMPLATE,
+    GOOGLE_SCHEMA,
     OPTIMIZATION_TEMPLATE,
+    SHOPIFY_SCHEMA,
     USER_PROMPT_TEMPLATE,
     VARIANT_USER_PROMPT_TEMPLATE,
 )
@@ -33,6 +48,7 @@ from feedops.pipeline.segment_strategy import (
     format_segment_strategy_guidance,
     resolve_segment_strategy,
 )
+from feedops.pipeline.skill_loader import get_platform_system_prompt
 from feedops.pipeline.feature_flags import is_segment_strategy_v1_enabled
 from feedops.pipeline.title_normalization import trim_title_to_length
 from feedops.providers.base import LLMProvider
@@ -230,6 +246,237 @@ def parse_candidate_response(response: dict) -> Candidate:
         claims=claims,
         self_score=self_score,
     )
+
+
+def _build_finish_metadata_rows(parent_sku: ParentSKU) -> list[dict[str, object]]:
+    """Build canonical finish metadata rows for finish sentence prompting."""
+    code_lookup = {
+        (variant.finish or "").strip(): (variant.finish_code or "").strip()
+        for variant in parent_sku.variants
+        if getattr(variant, "finish", None)
+    }
+    rows: list[dict[str, object]] = []
+    for finish_name in get_finish_list():
+        finish_meta = get_finish_metadata(finish_name) or {}
+        rows.append(
+            {
+                "finish_name": finish_name,
+                "finish_code": code_lookup.get(finish_name, finish_name),
+                "functional_description": finish_meta.get("functional_description", ""),
+                "style_affinities": finish_meta.get("style_affinities", []),
+                "coordination_note": finish_meta.get("coordination_note", ""),
+            }
+        )
+    return rows
+
+
+def _normalize_finish_sentence_payload(
+    payload: dict[str, object],
+    parent_sku: ParentSKU,
+) -> dict[str, str]:
+    """Normalize finish sentence payload to canonical finish-name mapping."""
+    canonical_finishes = get_finish_list()
+    fallback_map = build_fallback_finish_sentences(canonical_finishes)
+    code_lookup = {
+        (variant.finish_code or "").strip().upper(): (variant.finish or "").strip()
+        for variant in parent_sku.variants
+        if getattr(variant, "finish_code", None) and getattr(variant, "finish", None)
+    }
+    normalized: dict[str, str] = {}
+    sentences = payload.get("sentences", [])
+    if isinstance(sentences, list):
+        for entry in sentences:
+            if not isinstance(entry, dict):
+                continue
+            sentence = str(entry.get("sentence", "")).strip()
+            if not sentence:
+                continue
+            finish_name = str(entry.get("finish_name", "")).strip()
+            finish_code = str(entry.get("finish_code", "")).strip().upper()
+            resolved_finish = ""
+            if finish_name in canonical_finishes:
+                resolved_finish = finish_name
+            elif finish_code in code_lookup and code_lookup[finish_code] in canonical_finishes:
+                resolved_finish = code_lookup[finish_code]
+            if resolved_finish:
+                normalized[resolved_finish] = sentence
+
+    # Enforce complete canonical coverage to avoid downstream publish failures.
+    completed: dict[str, str] = {}
+    for finish_name in canonical_finishes:
+        completed[finish_name] = normalized.get(
+            finish_name,
+            fallback_map.get(finish_name, ""),
+        )
+    return completed
+
+
+async def generate_per_platform(
+    parent_sku: ParentSKU,
+    provider: LLMProvider,
+    prompt_version: str = "v2",
+    *,
+    feedback_by_platform: dict[str, str] | None = None,
+    reasoning_effort: str = "medium",
+    max_completion_tokens: int = 4000,
+) -> dict[str, object]:
+    """Generate content via per-platform prompts/schemas (v2) or legacy (v1)."""
+    if (prompt_version or "v2").lower() == "v1":
+        system_prompt, user_prompt = build_split_prompt(parent_sku)
+        response = await provider.generate(
+            user_prompt,
+            CANDIDATE_SCHEMA,
+            system_prompt=system_prompt,
+            reasoning_effort=reasoning_effort,
+            max_completion_tokens=max_completion_tokens,
+        )
+        candidate = parse_candidate_response(response)
+        return {
+            "google_title": candidate.google_title,
+            "google_short_title": candidate.google_short_title,
+            "google_description": candidate.google_description,
+            "bing_title": candidate.bing_title,
+            "bing_description": candidate.bing_description,
+            "shopify_title": candidate.shopify_title,
+            "shopify_description": candidate.shopify_description,
+            "shopify_meta_description": candidate.shopify_meta_description,
+            "finish_sentences": build_fallback_finish_sentences(get_finish_list()),
+            "prompt_hashes": {
+                "google": get_system_prompt_hash(mode="batch"),
+                "bing": get_system_prompt_hash(mode="batch"),
+                "shopify": get_system_prompt_hash(mode="batch"),
+                "finish": get_system_prompt_hash(mode="batch"),
+            },
+            "system_prompts": {
+                "google": system_prompt,
+                "bing": system_prompt,
+                "shopify": system_prompt,
+                "finish": system_prompt,
+            },
+            "user_prompts": {
+                "google": user_prompt,
+                "bing": user_prompt,
+                "shopify": user_prompt,
+                "finish": user_prompt,
+            },
+            "usage_by_platform": {},
+            "latency_by_platform": {},
+            "raw_by_platform": {"legacy": response},
+        }
+
+    evidence = build_evidence_table(parent_sku)
+    category_guidance = get_category_guidance(parent_sku.category) or ""
+    keyword_section = format_keyword_placement_section(
+        build_keyword_placement_plan(parent_sku, evidence)
+    )
+    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+    finish_metadata = _build_finish_metadata_rows(parent_sku)
+
+    user_prompts: dict[str, str] = {
+        "google": build_google_prompt(
+            parent_sku,
+            evidence,
+            keyword_section,
+            category_guidance,
+            gold_examples,
+        ),
+        "bing": build_bing_prompt(
+            parent_sku,
+            evidence,
+            keyword_section,
+            category_guidance,
+        ),
+        "shopify": build_shopify_prompt(
+            parent_sku,
+            evidence,
+            category_guidance,
+        ),
+        "finish": build_finish_prompt(parent_sku, finish_metadata),
+    }
+    if feedback_by_platform:
+        for platform, feedback in feedback_by_platform.items():
+            if (
+                isinstance(feedback, str)
+                and feedback.strip()
+                and platform in user_prompts
+            ):
+                user_prompts[platform] = (
+                    user_prompts[platform]
+                    + "\n\nReviewer Feedback:\n"
+                    + feedback.strip()
+                )
+
+    system_prompts: dict[str, str] = {
+        platform: get_platform_system_prompt(platform)
+        for platform in ("google", "bing", "shopify", "finish")
+    }
+    prompt_hashes: dict[str, str] = {
+        platform: get_platform_system_prompt_hash(platform)
+        for platform in ("google", "bing", "shopify", "finish")
+    }
+    platform_schemas = {
+        "google": GOOGLE_SCHEMA,
+        "bing": BING_SCHEMA,
+        "shopify": SHOPIFY_SCHEMA,
+        "finish": FINISH_SENTENCES_SCHEMA,
+    }
+
+    raw_by_platform: dict[str, dict[str, object]] = {}
+    usage_by_platform: dict[str, dict[str, int]] = {}
+    latency_by_platform: dict[str, int] = {}
+
+    for platform in ("google", "bing", "shopify", "finish"):
+        started = time.perf_counter()
+        payload = await provider.generate(
+            prompt=user_prompts[platform],
+            schema=platform_schemas[platform],
+            system_prompt=system_prompts[platform],
+            reasoning_effort=reasoning_effort,
+            max_completion_tokens=max_completion_tokens,
+        )
+        latency_by_platform[platform] = int((time.perf_counter() - started) * 1000)
+        raw_by_platform[platform] = payload
+        usage_snapshot = getattr(provider, "last_usage", {})
+        usage_by_platform[platform] = (
+            usage_snapshot if isinstance(usage_snapshot, dict) else {}
+        )
+        logger.info(
+            "Per-platform generation usage: sku=%s platform=%s usage=%s latency_ms=%s",
+            parent_sku.master_sku,
+            platform,
+            usage_by_platform[platform],
+            latency_by_platform[platform],
+        )
+
+    finish_sentences = _normalize_finish_sentence_payload(
+        raw_by_platform.get("finish", {}),
+        parent_sku,
+    )
+    google_payload = raw_by_platform.get("google", {})
+    bing_payload = raw_by_platform.get("bing", {})
+    shopify_payload = raw_by_platform.get("shopify", {})
+
+    return {
+        "google_title": str(google_payload.get("google_title", "")).strip(),
+        "google_short_title": _trim_google_short_title(
+            str(google_payload.get("google_short_title", "")).strip()
+        ),
+        "google_description": str(google_payload.get("google_description", "")).strip(),
+        "bing_title": str(bing_payload.get("bing_title", "")).strip(),
+        "bing_description": str(bing_payload.get("bing_description", "")).strip(),
+        "shopify_title": str(shopify_payload.get("shopify_title", "")).strip(),
+        "shopify_description": str(shopify_payload.get("shopify_description", "")).strip(),
+        "shopify_meta_description": str(
+            shopify_payload.get("shopify_meta_description", "")
+        ).strip(),
+        "finish_sentences": finish_sentences,
+        "prompt_hashes": prompt_hashes,
+        "system_prompts": system_prompts,
+        "user_prompts": user_prompts,
+        "usage_by_platform": usage_by_platform,
+        "latency_by_platform": latency_by_platform,
+        "raw_by_platform": raw_by_platform,
+    }
 
 
 async def generate_candidate(

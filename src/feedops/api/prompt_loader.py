@@ -19,6 +19,7 @@ from typing import Any, TypedDict
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.pipeline.feature_flags import is_prompt_contract_v2_enabled
 from feedops.pipeline.prompts import SYSTEM_PROMPT as CANONICAL_SYSTEM_PROMPT
+from feedops.pipeline.skill_loader import get_platform_system_prompt
 from feedops.pipeline.skill_loader import load_skills_for_prompt
 
 logger = logging.getLogger(__name__)
@@ -222,6 +223,16 @@ def get_system_prompt_hash(
     return hashlib.sha256(
         get_system_prompt(mode=mode, platform=platform).encode()
     ).hexdigest()[:16]
+
+
+def get_platform_system_prompt_hash(platform: str) -> str:
+    """Get stable short hash for platform-specific system prompts.
+
+    This hash uses the extracted, platform-targeted system prompt from
+    ``skill_loader.get_platform_system_prompt`` so audit logs can trace
+    which platform prompt variant produced each content payload.
+    """
+    return hashlib.sha256(get_platform_system_prompt(platform).encode()).hexdigest()[:16]
 
 
 def get_category_guidance(category: str | None) -> str | None:

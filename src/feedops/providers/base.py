@@ -28,6 +28,7 @@ class LLMProvider(ABC):
         image: ImageInput | None = None,
         system_prompt: str | None = None,
         reasoning_effort: str | None = None,
+        max_completion_tokens: int | None = None,
     ) -> dict[str, Any]:
         """Generate structured JSON response from prompt.
 
@@ -41,6 +42,8 @@ class LLMProvider(ABC):
             reasoning_effort: Optional reasoning effort level for models that
                 support it (e.g. GPT-5.2). One of "low", "medium", "high".
                 When None, the model uses its default.
+            max_completion_tokens: Optional max completion/output token budget.
+                Providers that don't support this can ignore it.
 
         Returns:
             Parsed JSON dict matching the schema.
