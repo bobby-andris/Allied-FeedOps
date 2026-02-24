@@ -494,7 +494,7 @@ async def generate_content(
             ],
             response_format=schema_format,
             reasoning_effort="medium",
-            max_completion_tokens=4000,
+            max_completion_tokens=16000,
         )
         content = response.choices[0].message.content
         usage = {

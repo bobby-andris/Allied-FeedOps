@@ -142,9 +142,63 @@ Plans:
 **Goal:** Investigate why GPT-5.2 produces keyword-stuffed, monotonous, filler-heavy content despite 3 rounds of iteration. Audit the assembled prompt for anti-patterns and contradictions, design a completely rethought prompt architecture based on GPT-5.2 best practices, and validate with A/B tests before returning to Phase 25 evaluation.
 **Depends on:** Phase 25
 **Requirements:** (research phase — serves v1.3a Content Generation Excellence)
-**Plans:** 2/3 plans executed
+**Status:** PARTIAL — audit + architecture done, A/B test revealed deeper GPT-5.2 adherence problems. Superseded by Phase 25.2.
+**Plans:** 3/3 plans executed (plan 03 revealed fundamental issues → spawned 25.2)
 
 Plans:
-- [ ] 25.1-01-PLAN.md — Track 1 internal audit: dump full assembled prompt, token count, contradiction map, GPT-5.2 anti-pattern scorecard
-- [ ] 25.1-02-PLAN.md — Design new prompt architecture from scratch: CTCO framework, distilled constraints, new system prompt under 15K chars
-- [ ] 25.1-03-PLAN.md — A/B test 3 prompt variations on representative + unseen SKUs, mini human review checkpoint
+- [x] 25.1-01-PLAN.md — Track 1 internal audit: dump full assembled prompt, token count, contradiction map, GPT-5.2 anti-pattern scorecard
+- [x] 25.1-02-PLAN.md — Design new prompt architecture from scratch: CTCO framework, distilled constraints, new system prompt under 15K chars
+- [x] 25.1-03-PLAN.md — A/B test 3 prompt variations on representative + unseen SKUs, mini human review checkpoint (RESULT: C_Optimized best but still fails constraints)
+
+### Phase 25.2: GPT-5.2 Prompt Engineering — Empirical Approach (INSERTED)
+
+**Goal:** Determine exactly what GPT-5.2 does and does not follow at different reasoning effort levels through empirical atomic testing, then build a production prompt validated one constraint at a time — not theoretically designed and tested all at once.
+
+**Depends on:** Phase 25.1 (findings)
+**Requirements:** (research + implementation phase — serves v1.3a Content Generation Excellence)
+
+**Why this phase exists:** Phase 25.1 revealed that writing a prompt "for GPT-5.2" based on documentation and Claude-optimized patterns doesn't work. Three iterations have failed because we're designing prompts theoretically and testing them as a complete unit. Key findings:
+1. **All 8 SKILL.md files (~260K chars) dumped raw into GPT-5.2 system prompt** — these were written for Claude Code (an AI coding assistant), not for GPT-5.2 runtime consumption. They contain markdown, interactive instructions, "you the AI assistant" guidance.
+2. **Platform-specific skill loading is dead code** — `get_system_prompt()` is called with no arguments everywhere. GPT-5.2 always gets google + bing + shopify skills simultaneously, creating conflicting guidance.
+3. **Generating 8+ fields (3 platforms) in one call is architecturally flawed** — GPT-5.2 can't apply google-shopping rules to Google fields AND bing-shopping rules to Bing fields AND shopify rules to Shopify fields simultaneously. Evidence: A_Current returned EMPTY Bing/Shopify for 2/3 SKUs.
+4. GPT-5.2 at reasoning_effort=medium skims constraint lists — banned words leak, integration patterns ignored
+5. Evidence table contains "poison pills" (banned words, bad grammar) that GPT-5.2 echoes due to conservative grounding bias
+6. {FINISH_SENTENCE} as a publishing-pipeline concept has no mechanism in the JSON schema
+7. We've never tested what GPT-5.2 actually follows vs ignores — only tested full prompts end-to-end
+
+**Tools & Resources:**
+- `mcp__openaiDeveloperDocs__*` — Search/fetch OpenAI developer docs for GPT-5.2 prompting best practices, structured outputs, reasoning effort, prompt caching. USE THESE FIRST before making assumptions about GPT-5.2 behavior.
+- `docs/research/gpt52-best-practices.md` — Existing research (may be outdated or incomplete — cross-reference with live docs)
+- `scripts/ab_prompt_test.py` — Existing test harness (v2.1, variant-level, 6 SKUs)
+- `.planning/phases/25.1-prompt-architecture-research/` — All Phase 25.1 artifacts (audit, architecture, test results)
+- `.planning/phases/25.2-gpt52-prompt-engineering/ROOT-CAUSE-ANALYSIS.md` — Detailed failure analysis
+
+**Critical instructions for agents:**
+1. **Check OpenAI docs FIRST** — Use `mcp__openaiDeveloperDocs__search_openai_docs` and `mcp__openaiDeveloperDocs__fetch_openai_doc` to verify current GPT-5.2 API behavior before writing any prompts or API calls. Our existing research may be wrong or outdated.
+2. **Verify we're using the API correctly** — Check: Are we passing `reasoning_effort` correctly? Is `temperature` conflicting? Is `json_schema` strict mode configured right? Is `max_completion_tokens` appropriate? Is `text.verbosity` being used? Are we using the right model string?
+3. **Understand the skill architecture** — There are TWO separate systems:
+   - **Claude Code skills** (`.claude/skills/*/SKILL.md`): Written for Claude Code as an AI assistant. 260K chars total. Currently ALL dumped into GPT-5.2 system prompt via `skill_loader.py`. This is wrong — they were never designed for GPT-5.2.
+   - **YAML runtime configs** (`src/feedops/config/*.yaml`): Distilled versions meant for GPT-5.2. Loaded by `prompt_builder.py` via `shopping_intelligence.py`. Some overlap/conflict with the SKILL.md injection.
+   - The skills contain genuinely valuable domain expertise that must be properly distilled for GPT-5.2 — not raw-dumped or ignored.
+4. **Think deeply about prompt construction** — The fundamental question is: "What does GPT-5.2 need to produce a perfect title and description for ONE product on ONE platform?" Consider:
+   - Should generation be split by platform? (Google call, Bing call, Shopify call — each with platform-specific skill knowledge and schema)
+   - How should product information flow into the prompt? (Raw evidence dump vs. curated per-platform data)
+   - What's the right balance of constraints vs. examples vs. product data?
+   - How do we distill skill knowledge (title formula, finish rules, brand voice, buyer scenarios) into something GPT-5.2 actually follows?
+5. **Run local tests** — Every change must be validated with actual GPT-5.2 API calls, not just dry-runs. Use `--sku 1025U` for quick single-SKU tests. Validate outputs against constraint checklist before declaring success.
+6. **Build bottom-up** — Start with the simplest possible prompt that works, add constraints one at a time, validate each addition. Do NOT design a complete prompt theoretically and test it end-to-end.
+
+**Success Criteria** (what must be TRUE):
+1. A constraint adherence map exists showing which instruction types GPT-5.2 follows at low/medium/high reasoning effort
+2. Evidence sanitization rules exist that prevent the evidence table from feeding banned words/patterns to the model
+3. The {FINISH_SENTENCE} mechanism works correctly — either as a literal placeholder or a separate generation step
+4. Zero competitor brand leaks across 6+ test SKUs
+5. Zero banned words across 6+ test SKUs
+6. Title formula followed consistently (finish first, collection, product type) across 6+ test SKUs
+7. Description quality passes Bobby's gut-check on representative SKUs
+8. API call parameters verified against current OpenAI docs (reasoning_effort, temperature, json_schema, max_completion_tokens, text.verbosity)
+
+Plans:
+- [ ] 25.2-01-PLAN.md — Research + API audit: Query OpenAI docs via MCP for current GPT-5.2 best practices (prompting, structured outputs, reasoning effort). Audit our API call parameters against docs. Audit skill/config wiring in prompt_builder.py. Atomic constraint testing: test individual instructions (banned words, title formula, finish placement, competitor prohibition) in isolation at low/medium/high reasoning effort. Build an empirical adherence map. Run local tests to validate.
+- [ ] 25.2-02-PLAN.md — Evidence sanitization + {FINISH_SENTENCE} mechanism: clean evidence table inputs, decide and implement the finish sentence approach, test field-splitting if needed (separate Google/Bing/Shopify calls). Local test validation.
+- [ ] 25.2-03-PLAN.md — Build production prompt from validated constraints: assemble only instructions GPT-5.2 demonstrably follows, run full 6-SKU test, Bobby gut-check

@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3a Content Generation Excellence
-**Current phase:** 25.1-prompt-architecture-research
-**Current Plan:** 3 of 3
-**Status:** 25.1-02 complete — new CTCO prompt architecture (~8.2K chars, 97% reduction) with zero contradictions and P0-P3 constraint hierarchy.
-**Progress:** [████████░░] 79%
+**Current phase:** 25.2-gpt52-prompt-engineering
+**Current Plan:** not yet planned
+**Status:** Phase 25.1 complete (partial success) — audit + architecture done, A/B test revealed GPT-5.2 doesn't follow complex constraint prompts at reasoning_effort=medium. Phase 25.2 created for empirical approach.
+**Progress:** [████████░░] 80%
 
 ## Decisions
 
@@ -62,5 +62,8 @@ See: .planning/PROJECT.md
 - 2026-02-23: Completed 25-06-PLAN.md (Round 2 gap closure — skills, SYSTEM_PROMPT, prompt_builder)
 - 2026-02-23: Completed 25.1-01-PLAN.md (internal prompt audit — 57K tokens, 12 contradictions, 2.7/10 anti-pattern score)
 - 2026-02-23: Completed 25.1-02-PLAN.md (new CTCO prompt architecture — 8.2K chars, zero contradictions, all 12 audit findings resolved)
-- Last session: 2026-02-23T22:48:04Z
-- Stopped at: Completed 25.1-02-PLAN.md. Next: execute 25.1-03 (A/B testing with new prompt)
+- 2026-02-24: Completed 25.1-03-PLAN.md A/B test (3 representative SKUs). Results: C_Optimized wins on structure (finish in titles, no competitor leaks, 93% token reduction) but fails on constraint adherence (banned words leak, {FINISH_SENTENCE} wrong pattern, keyword stuffing worse, generic openings, evidence poison pills echoed)
+- 2026-02-24: Root cause analysis: prompt designed for Claude not GPT-5.2, evidence table feeds banned content, gold examples surface-copied not abstracted, never tested constraints atomically
+- 2026-02-24: Created Phase 25.2 (GPT-5.2 Prompt Engineering — Empirical Approach) with 3 plans
+- Last session: 2026-02-24
+- Stopped at: Phase 25.2 roadmap entry created. Next: plan phase 25.2
