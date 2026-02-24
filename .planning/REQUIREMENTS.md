@@ -37,7 +37,7 @@ Requirements for Content Generation Excellence milestone. Each maps to roadmap p
 - [x] **EVAL-03**: Human evaluator rates new descriptions as "significantly better" for at least 8/10 test SKUs
 - [x] **EVAL-04**: New descriptions pass differentiation test (identifiable as Allied Brass, not generic)
 - [x] **EVAL-05**: Quality scores on new rubric average >85% across test SKUs
-- [ ] **EVAL-06**: Test batch published for CTR/CVR delta measurement
+- [x] **EVAL-06**: Test batch published for CTR/CVR delta measurement
 
 ## v1.3b+ Requirements
 
@@ -89,7 +89,7 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | EVAL-03 | Phase 25 | Complete |
 | EVAL-04 | Phase 25 | Complete |
 | EVAL-05 | Phase 25 | Complete |
-| EVAL-06 | Phase 25 | Pending |
+| EVAL-06 | Phase 25 | Complete |
 
 **Coverage:**
 - v1.3a requirements: 20 total

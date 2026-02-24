@@ -8,9 +8,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3a Content Generation Excellence
 **Current phase:** 25.2-gpt52-prompt-engineering
-**Current Plan:** not yet planned
-**Status:** Phase 25.1 complete (partial success) — audit + architecture done, A/B test revealed GPT-5.2 doesn't follow complex constraint prompts at reasoning_effort=medium. Phase 25.2 created for empirical approach.
-**Progress:** [████████░░] 80%
+**Current Plan:** 25.2-02-PLAN.md
+**Status:** Phase 25.2 in progress — Plan 01 complete (per-platform schema/prompt foundation + empirical harness). Google/Bing constraint adherence remains low and is the focus of Plan 02 wiring.
+**Progress:** [███████░░░] 71%
 
 ## Decisions
 
@@ -35,6 +35,10 @@ See: .planning/PROJECT.md
 - All competitor material references removed from all sources — single P0 prohibition
 - Description length standardized to 700-900 chars (resolves 600-800 vs 700-900 schema conflict)
 - prompt_version feature flag for A/B testing without breaking production
+- Per-platform strict schemas added for Google, Bing, Shopify, and finish sentences without removing legacy schema path
+- Platform-specific skill extraction added via `get_platform_system_prompt(platform)` to avoid loading all skills for every call
+- Empirical 1025U run results: Google 1/5 checks, Bing 1/5, Shopify 3/4, Finish 7/7
+- Per-platform test harness now includes JSON parse repair retry to recover from non-parseable model output
 
 ## Performance Metrics
 
@@ -44,6 +48,7 @@ See: .planning/PROJECT.md
 | 25-06      | 7min     | 2     | 5     |
 | 25.1-01    | 4min     | 1     | 2     |
 | 25.1-02    | 5min     | 2     | 3     |
+| Phase 25.2 P01 | 17 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -65,5 +70,7 @@ See: .planning/PROJECT.md
 - 2026-02-24: Completed 25.1-03-PLAN.md A/B test (3 representative SKUs). Results: C_Optimized wins on structure (finish in titles, no competitor leaks, 93% token reduction) but fails on constraint adherence (banned words leak, {FINISH_SENTENCE} wrong pattern, keyword stuffing worse, generic openings, evidence poison pills echoed)
 - 2026-02-24: Root cause analysis: prompt designed for Claude not GPT-5.2, evidence table feeds banned content, gold examples surface-copied not abstracted, never tested constraints atomically
 - 2026-02-24: Created Phase 25.2 (GPT-5.2 Prompt Engineering — Empirical Approach) with 3 plans
+- 2026-02-24: Completed 25.2-01-PLAN.md (per-platform schemas, selective platform prompts, empirical harness)
+- 2026-02-24: Ran 4-platform empirical validation for SKU 1025U and saved 25.2-01-test-results.md
 - Last session: 2026-02-24
-- Stopped at: Phase 25.2 roadmap entry created. Next: plan phase 25.2
+- Stopped at: Plan 25.2-01 complete. Next: execute 25.2-02 (pipeline wiring with feature flag)
