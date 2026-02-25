@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets with AI content generation informed by Google Shopping ranking intelligence
-**Current focus:** v1.3b Phase 29 — Content-Performance Feedback Linkage
+**Current focus:** v1.3b Phase 30 — Historical Funnel Persistence
 
 ## Position
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
-**Phase:** 29 of 31 (Content-Performance Feedback Linkage)
-**Plan:** 3 of 3 in Phase 29 complete
-**Status:** Milestone complete
-**Last activity:** 2026-02-25 — Completed 29-03 (Content Impact Detail Page)
+**Phase:** 30 of 31 (Historical Funnel Persistence) — next
+**Plan:** Not started
+**Status:** In progress
+**Last activity:** 2026-02-25 — Completed Phase 29 (Content-Performance Feedback Linkage)
 
 Progress: [██████░░░░] 50%
 
