@@ -1052,6 +1052,25 @@ export async function POST(request: NextRequest) {
 
     console.log(`[publishBatch] Batch status updated successfully to ${finalBatchStatus}`)
 
+    // FEED-03: Capture search query snapshots for all successfully published SKUs.
+    // Fire-and-forget — don't block the batch response on snapshot capture.
+    if (successCount > 0) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+          || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+        const publishedSkus = [...new Set(
+          results.filter(r => r.success).map(r => r.master_sku)
+        )]
+        for (const sku of publishedSkus) {
+          fetch(`${baseUrl}/api/monitoring/snapshot-capture?master_sku=${encodeURIComponent(sku)}`, {
+            method: 'POST',
+          }).catch(err => console.error(`[FEED-03] Snapshot capture failed for ${sku} (non-blocking):`, err.message))
+        }
+      } catch (err) {
+        console.error('[FEED-03] Snapshot capture trigger failed (non-blocking):', err)
+      }
+    }
+
     // 7. Return detailed results
     const batchResult: BatchPublishResult = {
       success: failedCount === 0,

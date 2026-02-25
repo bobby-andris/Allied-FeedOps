@@ -747,6 +747,20 @@ export async function POST(request: NextRequest) {
     const failedCount = results.filter((r) => !r.success).length
     const overallSuccess = failedCount === 0
 
+    // FEED-03: Capture search query snapshot after successful publish for term delta analysis.
+    // Fire-and-forget — don't block the publish response on snapshot capture.
+    if (successCount > 0) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+          || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+        fetch(`${baseUrl}/api/monitoring/snapshot-capture?master_sku=${encodeURIComponent(master_sku)}`, {
+          method: 'POST',
+        }).catch(err => console.error('[FEED-03] Snapshot capture failed (non-blocking):', err.message))
+      } catch (err) {
+        console.error('[FEED-03] Snapshot capture trigger failed (non-blocking):', err)
+      }
+    }
+
     return NextResponse.json({
       success: overallSuccess,
       master_sku,
