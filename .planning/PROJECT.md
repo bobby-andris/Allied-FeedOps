@@ -108,7 +108,17 @@ that fail to differentiate Allied Brass from mass-market competitors.
 
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to start v1.3b)
+## Current Milestone: v1.3b Architecture Validation & Data Persistence
+
+**Goal:** Validate and prepare the data architecture so that v1.3c (Actionable Intelligence) and v1.4 (Closed-Loop Optimization) can be built on a solid foundation.
+
+**Target features:**
+- Architecture audit: complete data flow map from Google Ads → DB → Dashboard → Actions with no dead ends
+- Deferred migration evaluation: apply, prune, or remove the 18 deferred tables (034b + 035b)
+- Content↔performance feedback linkage: table/view connecting generated content to CTR/CVR outcomes
+- Historical data persistence: daily snapshots of ephemeral service.ts Google Ads queries
+- Data pipeline validation: end-to-end flow verified, empty optimization tables populated or removed
+- API quota analysis: confirm live query approach is sustainable vs caching strategy
 
 ### Out of Scope
 
@@ -188,4 +198,4 @@ Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 
 - **Content API:** Works until Aug 2026 — Merchant API used only for diagnostic queries
 
 ---
-*Last updated: 2026-02-25 after v1.3a milestone completed*
+*Last updated: 2026-02-25 after v1.3b milestone started*
