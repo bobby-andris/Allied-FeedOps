@@ -16,9 +16,9 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 
 ### Tier Scoring
 
-- [ ] **TIER-01**: User can view dynamically computed tier performance distributions (p25/p50/p75 ROAS/CVR/CPC/CTR per tier) replacing hardcoded 3.6/3.1/2.6 thresholds
-- [ ] **TIER-02**: User can see tier boundary thresholds that auto-adjust based on actual MEDIUM tier percentiles (LOW floor = MEDIUM p75, HIGH ceiling = MEDIUM p25)
-- [ ] **TIER-03**: User can view per-term scoring with robust z-scores (median/MAD) accounting for right-skewed ROAS distributions
+- [x] **TIER-01**: User can view dynamically computed tier performance distributions (p25/p50/p75 ROAS/CVR/CPC/CTR per tier) replacing hardcoded 3.6/3.1/2.6 thresholds
+- [x] **TIER-02**: User can see tier boundary thresholds that auto-adjust based on actual MEDIUM tier percentiles (LOW floor = MEDIUM p75, HIGH ceiling = MEDIUM p25)
+- [x] **TIER-03**: User can view per-term scoring with robust z-scores (median/MAD) accounting for right-skewed ROAS distributions
 - [ ] **TIER-04**: User can see hierarchical fallback scoring when per-group data is sparse (per-group → global → sensible defaults)
 - [ ] **TIER-05**: User can see "Insufficient data" degraded state when a tier has fewer than 5 terms with non-zero metrics
 - [ ] **TIER-06**: User can view confidence scores based on data volume, consistency, statistical significance, and NLP intent alignment
@@ -122,9 +122,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPS-02 | Phase 32 | Pending |
 | OPS-03 | Phase 32 | Pending |
 | OPS-04 | Phase 32 | Pending |
-| TIER-01 | Phase 33 | Pending |
-| TIER-02 | Phase 33 | Pending |
-| TIER-03 | Phase 33 | Pending |
+| TIER-01 | Phase 33 | Complete |
+| TIER-02 | Phase 33 | Complete |
+| TIER-03 | Phase 33 | Complete |
 | TIER-04 | Phase 33 | Pending |
 | TIER-05 | Phase 33 | Pending |
 | TIER-06 | Phase 33 | Pending |

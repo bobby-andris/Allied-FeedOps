@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets through data-driven content optimization at scale
-**Current focus:** Phase 32 — Operational Prerequisites
+**Current focus:** Phase 33 — Tier Scoring Engine
 
 ## Current Position
 
-Phase: 32 (1 of 6 in v1.3c) — COMPLETE
-Plan: 3 of 3 in current phase
-Status: All plans executed, verifying
-Last activity: 2026-02-25 — Phase 32 execution complete (3/3 plans, migration applied, scheduler active, backfill done, validation passing)
+Phase: 33 (2 of 6 in v1.3c) — IN PROGRESS
+Plan: 2 of 4 in current phase (33-01 and 33-02 complete)
+Status: Executing phase plans
+Last activity: 2026-02-25 — Phase 33 Plan 01 complete (tier scoring engine: types, computation module, 21 tests passing)
 
-Progress: [█░░░░░░░░░] 16% (v1.3c)
+Progress: [██░░░░░░░░] 24% (v1.3c)
 
 ## Performance Metrics
 
@@ -60,10 +60,12 @@ Recent decisions affecting current work:
 - [v1.3c research]: Background computation preferred over on-demand to avoid Vercel timeout at ~3K terms
 - [v1.3c research]: Show revenue estimate ranges from day 1, never point values
 - [v1.3c research]: Robust z-scores (median/MAD) over standard z-scores for right-skewed ROAS data
+- [Phase 33-02]: Used createAdminClient for API route DB writes (service role needed for upsert)
+- [Phase 33-02]: Client-side customLabel0 filtering for getLabelTierPerformance (function doesn't accept that param)
 
 ### Pending Todos
 
-None yet.
+- Apply migration 038 (unique index on query_value_scores) to production Supabase
 
 ### Blockers/Concerns
 
@@ -73,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: v1.3c roadmap created, ready to plan Phase 32
+Stopped at: Completed 33-02-PLAN.md (tier scoring API route + migration)
 Resume file: None
