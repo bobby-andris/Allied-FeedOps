@@ -26,7 +26,14 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
 
-const navigation = [
+interface NavItem {
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  badge?: string
+}
+
+const navigation: NavItem[] = [
   { name: 'Overview', href: '/', icon: Home },
   { name: 'Generate', href: '/generate', icon: Sparkles },
   { name: 'Review Queue', href: '/review', icon: ClipboardList },
@@ -36,8 +43,8 @@ const navigation = [
   { name: 'Content Impact', href: '/content-impact', icon: TrendingUp },
   { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
-  { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge },
-  { name: 'Intent Control', href: '/intent-control-center', icon: Gauge },
+  { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge, badge: 'Soon' },
+  { name: 'Intent Control', href: '/intent-control-center', icon: Gauge, badge: 'Soon' },
   { name: 'Search Governance', href: '/search-governance', icon: GitBranch },
   { name: 'Experiment Lab', href: '/experiment-lab', icon: FlaskConical },
   { name: 'Attribution Forensics', href: '/attribution-forensics', icon: Siren },
@@ -95,6 +102,11 @@ export function Sidebar() {
             >
               <item.icon className="h-5 w-5" />
               {item.name}
+              {item.badge && (
+                <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           )
         })}
