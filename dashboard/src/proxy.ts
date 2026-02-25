@@ -46,6 +46,7 @@ export async function proxy(request: NextRequest) {
     '/api/performance/capture-snapshot',
     '/api/monitoring/snapshot-capture',
     '/api/funnel-snapshots/capture',
+    '/api/funnel-snapshots/backfill',
   ].includes(request.nextUrl.pathname)
 
   const isPublicRoute = isLoginPage || (isApiRoute && isReadOnlyMethod) || isCronEndpoint
