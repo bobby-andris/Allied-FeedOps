@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 29 of 31 (Content-Performance Feedback Linkage)
-**Plan:** 2 of 3 in Phase 29 complete
-**Status:** Phase 29 in progress — Plan 02 complete
-**Last activity:** 2026-02-25 — Completed 29-02 (Content Impact Landing Page)
+**Plan:** 3 of 3 in Phase 29 complete
+**Status:** Phase 29 complete — all 3 plans executed
+**Last activity:** 2026-02-25 — Completed 29-03 (Content Impact Detail Page)
 
-Progress: [█████░░░░░] 44%
+Progress: [██████░░░░] 50%
 
 ## What's Done
 
@@ -44,6 +44,9 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 29-02: Window aggregation excludes day 0 per research pitfall #4
 - 29-02: Minimum 50-impression threshold per window prevents misleading CTR from low-traffic SKUs
 - 29-02: Best available window for delta column (30d > 14d > 7d)
+- 29-03: Search term comparison uses closest pre-publish and earliest post-publish snapshots per query
+- 29-03: Control cohort section defaults collapsed; methodology always accessible on expand
+- 29-03: Publish history only renders when 2+ events exist for same SKU+platform pair
 - 28-01: Circular flow validation included as section within data flow map (not separate doc)
 - 28-01: 3 redundant shopping_performance_view query paths identified -- recommend Python consolidation
 - 28-01: service.ts ephemeral cache is highest-severity gap for funnel analysis (7 GAQL, 2-min TTL, zero persist)
@@ -68,3 +71,5 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 2026-02-25: Phase 28 complete — all 3 plans executed, all 5 AUDIT requirements addressed
 - 2026-02-25: Completed 29-01 — Schema creation + prompt_hash enforcement + snapshot capture wiring
 - 2026-02-25: Completed 29-02 — Content Impact landing page with 4-table join API and 10-column table
+- 2026-02-25: Completed 29-03 — Content Impact detail page with search terms, control cohort, publish history
+- 2026-02-25: Phase 29 complete — all 3 plans executed, FEED-01/02/03/04 requirements addressed

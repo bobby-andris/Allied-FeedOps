@@ -79,7 +79,7 @@
 **Milestone Goal:** Validate and prepare the data architecture so the circular feedback loop (capture, monitor, analyze, learn, optimize, repeat) can be built on a solid foundation for v1.3c and v1.4.
 
 - [x] **Phase 28: Architecture Audit & Migration Triage** - Map complete data flow, confirm API quota sustainability, triage all 18 deferred tables, audit join chain integrity (completed 2026-02-25)
-- [ ] **Phase 29: Content-Performance Feedback Linkage** - Connect published content to CTR/CVR outcomes via feedback view, populate impact scores, enforce content versioning
+- [x] **Phase 29: Content-Performance Feedback Linkage** - Connect published content to CTR/CVR outcomes via feedback view, populate impact scores, enforce content versioning (completed 2026-02-25)
 - [ ] **Phase 30: Historical Funnel Persistence** - Persist ephemeral service.ts Google Ads data into daily snapshots with trend indicators on dashboard
 - [ ] **Phase 31: Schema Cleanup & End-to-End Validation** - Apply kept migrations, prune dead code, wire or remove orphaned components, validate full data loop
 
@@ -110,7 +110,7 @@ Plans:
   2. Performance impact scores exist for published SKUs using diff-in-diff methodology (treated vs control cohort lift)
   3. After a publish event, search query snapshots capture which terms gained or lost impressions compared to pre-publish state
   4. New publish events cannot be created with a NULL prompt_hash — the content versioning chain is enforced
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 29-01-PLAN.md — Schema migrations (impact scores table, snapshot columns) + prompt_hash enforcement
 - [ ] 29-02-PLAN.md — Content Impact landing page + API route with 4-table join and window aggregation
@@ -151,7 +151,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
-| 29. Feedback Linkage | 2/3 | In Progress|  | - |
+| 29. Feedback Linkage | 3/3 | Complete   | 2026-02-25 | - |
 | 30. Funnel Persistence | v1.3b | 0/TBD | Not started | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 
