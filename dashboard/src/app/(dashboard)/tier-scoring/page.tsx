@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -10,53 +10,15 @@ import { GroupOverview } from './components/GroupOverview'
 import { GroupDetail } from './components/GroupDetail'
 import { TierDetail } from './components/TierDetail'
 import { TermScorecard } from './components/TermScorecard'
-import type { GroupDistributions, TermScore, ImpactRange, TierDistribution, FallbackLevel } from '@/lib/optimization/tier-scoring.types'
+import { useTierScoring } from './hooks/useTierScoring'
+import type { TermScore } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 
-interface TierScoringResponse {
-  distributions: Record<string, GroupDistributions>
-  globalFallback: Record<FunnelTier, TierDistribution>
-  scores: TermScore[]
-  heroCallout: string
-  computedAt: string
-  totalGroups: number
-  totalTermsScored: number
-  totalMisplaced: number
-  totalImpact: ImpactRange
-}
-
 export default function TierScoringPage() {
-  const [data, setData] = useState<TierScoringResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data, loading, error, refresh } = useTierScoring()
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [selectedTier, setSelectedTier] = useState<FunnelTier | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<TermScore | null>(null)
-
-  const fetchScores = useCallback(async (forceRefresh = false) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const url = forceRefresh
-        ? '/api/shopping-funnel/tier-scoring?forceRefresh=true'
-        : '/api/shopping-funnel/tier-scoring'
-      const res = await fetch(url)
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.error || `API returned ${res.status}`)
-      }
-      const json = await res.json()
-      setData(json)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tier scoring data')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchScores()
-  }, [fetchScores])
 
   if (loading) {
     return (
@@ -86,7 +48,7 @@ export default function TierScoringPage() {
             <AlertCircle className="h-10 w-10 text-destructive" />
             <p className="text-lg font-medium">Failed to load tier intelligence</p>
             <p className="text-sm text-muted-foreground">{error}</p>
-            <Button variant="outline" onClick={() => fetchScores()}>
+            <Button variant="outline" onClick={() => refresh()}>
               Try Again
             </Button>
           </CardContent>
@@ -119,7 +81,7 @@ export default function TierScoringPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => fetchScores(true)}
+            onClick={() => refresh(true)}
           >
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
             Refresh
