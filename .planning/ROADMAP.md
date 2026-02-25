@@ -95,7 +95,7 @@
   3. Every one of the 18 deferred tables (035b + 034b) has a KEEP/DEFER/PRUNE decision with documented reasoning
   4. NULL rate percentages for publish_events.prompt_hash and performance_snapshots.content_version are known and documented, with a go/no-go decision for the feedback view
   5. API quota analysis confirms whether daily snapshot capture fits within Google Ads Standard Access limits
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 Plans:
 - [ ] 28-01-PLAN.md — Data flow mapping & circular loop validation
 - [ ] 28-02-PLAN.md — Migration triage (18 deferred tables)
@@ -146,7 +146,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
-| 28. Audit & Triage | v1.3b | 0/TBD | Not started | - |
+| 28. Audit & Triage | 2/3 | In Progress|  | - |
 | 29. Feedback Linkage | v1.3b | 0/TBD | Not started | - |
 | 30. Funnel Persistence | v1.3b | 0/TBD | Not started | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |

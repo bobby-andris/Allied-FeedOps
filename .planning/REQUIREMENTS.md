@@ -9,11 +9,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Architecture Audit
 
-- [ ] **AUDIT-01**: Data flow audit document maps complete path from Google Ads API → service.ts → database → dashboard → actions → Google Ads, marking every dead end
+- [x] **AUDIT-01**: Data flow audit document maps complete path from Google Ads API → service.ts → database → dashboard → actions → Google Ads, marking every dead end
 - [ ] **AUDIT-02**: API quota analysis confirms daily snapshot capture is sustainable within Google Ads Standard Access limits and recommends caching strategy
 - [ ] **AUDIT-03**: Migration triage produces KEEP/DEFER/PRUNE decision for all 18 deferred tables (035b + 034b) with documented reasoning for each
 - [ ] **AUDIT-04**: NULL rate audit on join chain keys (publish_events.prompt_hash, performance_snapshots.content_version) confirms feedback view will produce meaningful results
-- [ ] **AUDIT-05**: Circular flow validation confirms database schema can support the full loop: capture → monitor & evaluate → analyze & learn → optimize → repeat, with no missing tables or broken linkages
+- [x] **AUDIT-05**: Circular flow validation confirms database schema can support the full loop: capture → monitor & evaluate → analyze & learn → optimize → repeat, with no missing tables or broken linkages
 
 ### Content-Performance Feedback
 
@@ -68,11 +68,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 28 | Pending |
+| AUDIT-01 | Phase 28 | Complete |
 | AUDIT-02 | Phase 28 | Pending |
 | AUDIT-03 | Phase 28 | Pending |
 | AUDIT-04 | Phase 28 | Pending |
-| AUDIT-05 | Phase 28 | Pending |
+| AUDIT-05 | Phase 28 | Complete |
 | FEED-01 | Phase 29 | Pending |
 | FEED-02 | Phase 29 | Pending |
 | FEED-03 | Phase 29 | Pending |

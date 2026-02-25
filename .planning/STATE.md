@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 28 of 31 (Architecture Audit & Migration Triage)
-**Plan:** 0 of TBD in current phase
-**Status:** Ready to plan
-**Last activity:** 2026-02-25 — Roadmap created (4 phases, 16 requirements mapped)
+**Plan:** 2 of 3 in current phase
+**Status:** Executing
+**Last activity:** 2026-02-25 — Completed 28-02 (Migration Triage)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████░░░░] 66%
 
 ## What's Done
 
@@ -36,9 +36,13 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 
 ## Decisions
 
-(None yet for v1.3b)
+- 28-01: Circular flow validation included as section within data flow map (not separate doc)
+- 28-01: 3 redundant shopping_performance_view query paths identified -- recommend Python consolidation
+- 28-01: service.ts ephemeral cache is highest-severity gap for funnel analysis (7 GAQL, 2-min TTL, zero persist)
+- 28-01: 034b GA4 tables missing from SCHEMA.md -- need production verification
 
 ## Session Log
 
 - 2026-02-25: v1.3b milestone started — Architecture Validation & Data Persistence
 - 2026-02-25: Roadmap created — 4 phases (28-31), 16 requirements, 100% coverage
+- 2026-02-25: Completed 28-01 — Data flow map with 10 Mermaid diagrams, circular loop validated
