@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Info } from "lucide-react"
@@ -24,6 +24,8 @@ import { VariantIndex, VariantApproval } from "@/lib/supabase/types"
 import { buildPlatformProgress, computePlatformReadinessForSku, type LatestPublishSnapshot } from '@/lib/review/platform-progress'
 import { getPublishReadinessHelpText } from './approval-copy'
 import { PLACEHOLDERS } from "@/lib/finish-data"
+import { GmcDisapprovalBadge } from "@/components/gmc/GmcDisapprovalBadge"
+import { PromptLineagePanel } from "@/components/lineage/PromptLineagePanel"
 
 interface ContentRecord {
   id: string
@@ -422,6 +424,23 @@ export function SkuReviewClient({
   }, [searchParams, pathname, router])
 
   const masterSku = content[0]?.master_sku || sku
+
+  const [gmcStatus, setGmcStatus] = useState<{ issueCount: number; disapprovalCount: number } | null>(null)
+
+  useEffect(() => {
+    fetch(`/api/gmc/status?master_sku=${encodeURIComponent(masterSku)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data?.summary) {
+          setGmcStatus({
+            issueCount: (data.summary.disapproved || 0) + (data.summary.limited || 0),
+            disapprovalCount: data.summary.disapproved || 0,
+          })
+        }
+      })
+      .catch(() => {}) // Silently fail — don't block page render
+  }, [masterSku])
+
   const hasGoogleContent = content.some(c => c.platform === 'google')
   const hasBingContent = content.some(c => c.platform === 'bing')
   const hasShopifyContent = content.some(c => c.platform === 'shopify')
@@ -480,6 +499,12 @@ export function SkuReviewClient({
               <div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-2xl font-bold">{masterSku}</h1>
+                  {gmcStatus && gmcStatus.issueCount > 0 && (
+                    <GmcDisapprovalBadge
+                      issueCount={gmcStatus.issueCount}
+                      disapprovalCount={gmcStatus.disapprovalCount}
+                    />
+                  )}
                   <GenerationSourceBadge generationModel={
                     content.find(c => c.content_type === 'title')?.generation_model ?? null
                   } />
@@ -580,6 +605,9 @@ export function SkuReviewClient({
                 />
               )}
             </div>
+
+            {/* Prompt Lineage */}
+            <PromptLineagePanel masterSku={masterSku} platform={selectedPlatform || 'google'} />
 
             {/* Approval actions */}
             <div className="flex items-center justify-between border-t pt-6">
