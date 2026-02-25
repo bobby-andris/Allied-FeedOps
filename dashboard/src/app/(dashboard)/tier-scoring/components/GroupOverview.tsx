@@ -63,7 +63,7 @@ export function GroupOverview({ distributions, scores, onSelectGroup }: GroupOve
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
           <p className="text-amber-800">
             <span className="font-semibold italic">{topGroup.group.customLabel0}</span>
-            {' '}has {topGroup.misplacedCount} misplaced term{topGroup.misplacedCount !== 1 ? 's' : ''}
+            {' '}has {topGroup.misplacedCount} optimization {topGroup.misplacedCount !== 1 ? 'opportunities' : 'opportunity'}
             {topGroup.misplacedImpact > 0 && (
               <> with {formatDollars(topGroup.misplacedImpact)}/mo potential impact</>
             )}
@@ -109,7 +109,7 @@ export function GroupOverview({ distributions, scores, onSelectGroup }: GroupOve
                     <FallbackIndicator level={dominantFallback} groupName={group.customLabel0} />
                     {misplacedCount > 0 && (
                       <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-medium">
-                        {misplacedCount} misplaced
+                        {misplacedCount} {misplacedCount !== 1 ? 'opportunities' : 'opportunity'}
                       </span>
                     )}
                   </div>
@@ -155,7 +155,7 @@ export function GroupOverview({ distributions, scores, onSelectGroup }: GroupOve
                   <span>
                     {group.scoredTerms} of {group.totalTerms} terms scored
                     {misplacedCount > 0 && (
-                      <> &middot; <span className="text-amber-600 font-medium">{misplacedCount} misplaced</span></>
+                      <> &middot; <span className="text-amber-600 font-medium">{misplacedCount} {misplacedCount !== 1 ? 'opportunities' : 'opportunity'}</span></>
                     )}
                   </span>
                   <ArrowRight className="h-3.5 w-3.5" />
