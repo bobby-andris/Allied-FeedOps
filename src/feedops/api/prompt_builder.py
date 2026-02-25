@@ -291,7 +291,7 @@ def build_google_prompt(
         sections.append(f"<gold_examples>\n{cleaned_gold_examples}\n</gold_examples>")
     sections.append(
         "<output>Return JSON with keys: google_title, google_short_title, "
-        "google_description, claims, self_score.</output>"
+        "google_description, claims.</output>"
     )
     return "\n\n".join(sections)
 
@@ -361,7 +361,7 @@ def build_bing_prompt(
             f"<category_guidance>\n{cleaned_category_guidance}\n</category_guidance>"
         )
     sections.append(
-        "<output>Return JSON with keys: bing_title, bing_description, claims, self_score.</output>"
+        "<output>Return JSON with keys: bing_title, bing_description, claims.</output>"
     )
     return "\n\n".join(sections)
 
@@ -407,7 +407,7 @@ def build_shopify_prompt(
         )
     sections.append(
         "<output>Return JSON with keys: shopify_title, shopify_description, "
-        "shopify_meta_description, claims, self_score.</output>"
+        "shopify_meta_description, claims.</output>"
     )
     return "\n\n".join(sections)
 
