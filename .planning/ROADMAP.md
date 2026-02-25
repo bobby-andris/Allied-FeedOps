@@ -151,7 +151,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
-| 29. Feedback Linkage | 3/3 | Complete   | 2026-02-25 | - |
+| 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
 | 30. Funnel Persistence | v1.3b | 0/TBD | Not started | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 

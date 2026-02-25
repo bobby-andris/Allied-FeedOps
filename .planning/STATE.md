@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 29 of 31 (Content-Performance Feedback Linkage)
 **Plan:** 3 of 3 in Phase 29 complete
-**Status:** Phase 29 complete — all 3 plans executed
+**Status:** Milestone complete
 **Last activity:** 2026-02-25 — Completed 29-03 (Content Impact Detail Page)
 
 Progress: [██████░░░░] 50%
