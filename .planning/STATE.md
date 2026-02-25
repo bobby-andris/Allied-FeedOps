@@ -62,6 +62,8 @@ Recent decisions affecting current work:
 - [v1.3c research]: Robust z-scores (median/MAD) over standard z-scores for right-skewed ROAS data
 - [Phase 33-02]: Used createAdminClient for API route DB writes (service role needed for upsert)
 - [Phase 33-02]: Client-side customLabel0 filtering for getLabelTierPerformance (function doesn't accept that param)
+- [Phase 33-01]: Robust z-scores use median/MAD — ROAS capped at p99, tier fit weighted 50% ROAS / 20% CVR / 15% CPC / 15% CTR
+- [Phase 33-01]: MAD=0 returns z-score 0 (handles all-identical-values edge case gracefully)
 
 ### Pending Todos
 
@@ -75,5 +77,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 33-02-PLAN.md (tier scoring API route + migration)
+Stopped at: Completed 33-01-PLAN.md (tier scoring computation module)
 Resume file: None
