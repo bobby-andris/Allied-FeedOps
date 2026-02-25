@@ -111,21 +111,23 @@
   3. `experiment_outcomes` table has `p_value`, `confidence_interval`, and `minimum_sample_size` columns available
 **Plans**: TBD
 
-### Phase 33: Tier Scoring Engine
+### Phase 33: Tier Scoring Engine ✓ COMPLETE 2026-02-25
 **Goal**: Users can see dynamically computed tier boundaries and per-term scoring that adapts to actual performance distributions instead of hardcoded thresholds
 **Depends on**: Phase 32
 **Requirements**: TIER-01, TIER-02, TIER-03, TIER-04, TIER-05, TIER-06
 **Success Criteria** (what must be TRUE):
-  1. User sees tier performance distributions (p25/p50/p75 for ROAS, CVR, CPC, CTR per tier) that update when underlying data changes, not static 3.6/3.1/2.6 values
-  2. User sees per-term placement scores using robust z-scores (median/MAD) with hierarchical fallback displayed when per-group data is sparse
-  3. User sees "Insufficient data" degraded state for any tier with fewer than 5 terms with non-zero metrics
-  4. User sees confidence scores per term that combine data volume, consistency, statistical significance, and NLP intent alignment into a single 0-1 value
-  5. Tier boundary thresholds auto-adjust based on actual MEDIUM tier percentiles without manual configuration
+  1. ✓ User sees tier performance distributions (p25/p50/p75 for ROAS, CVR, CPC, CTR per tier) that update when underlying data changes, not static 3.6/3.1/2.6 values
+  2. ✓ User sees per-term placement scores using robust z-scores (median/MAD) with hierarchical fallback displayed when per-group data is sparse
+  3. ✓ User sees "Insufficient data" degraded state for any tier with fewer than 5 terms with non-zero metrics
+  4. ✓ User sees confidence scores per term that combine data volume, consistency, statistical significance, and NLP intent alignment into a single 0-1 value
+  5. ✓ Tier boundary thresholds auto-adjust based on actual MEDIUM tier percentiles without manual configuration
 **Plans**: 4 plans
-- [ ] 33-01-PLAN.md — Core computation module (TDD): types, distributions, scoring, confidence, impact
-- [ ] 33-02-PLAN.md — Infrastructure: install simple-statistics, unique index migration, API route
-- [ ] 33-03-PLAN.md — UI: Hero callout, Level 1 groups overview, Level 2 group detail, sidebar nav
-- [ ] 33-04-PLAN.md — UI: Level 3 tier detail, Level 4 term scorecard, misplaced terms section
+- [x] 33-01-PLAN.md — Core computation module (TDD): types, distributions, scoring, confidence, impact (Complete 2026-02-25)
+- [x] 33-02-PLAN.md — Infrastructure: install simple-statistics, unique index migration, API route (Complete 2026-02-25)
+- [x] 33-03-PLAN.md — UI: Hero callout, Level 1 groups overview, Level 2 group detail, sidebar nav (Complete 2026-02-25)
+- [x] 33-04-PLAN.md — UI: Level 3 tier detail, Level 4 term scorecard, misplaced terms section (Complete 2026-02-25)
+
+**Outcome**: Phase 33 infrastructure verified by user. All 4 levels of drill-down working. Identified follow-up phases 33.1 (calibration investigation) and 33.2 (UI redesign) to address 95% misplaced rate and $0 impact issues.
 
 ### Phase 34: Revenue Leakage and Execution
 **Goal**: Users can identify revenue opportunities with dollar-value estimates and act on them with one-click tier movements that persist and can be undone
@@ -188,7 +190,7 @@ Note: Phase 35 depends only on Phase 33 (not Phase 34), so it can begin after Ph
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
 | 32. Operational Prerequisites | 3/3 | Complete    | 2026-02-25 | - |
-| 33. Tier Scoring Engine | 3/4 | In Progress|  | - |
+| 33. Tier Scoring Engine | 4/4 | Complete | 2026-02-25 | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |
 | 36. Automation and Experiments | v1.3c | 0/TBD | Not started | - |
