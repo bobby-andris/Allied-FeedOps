@@ -64,7 +64,7 @@ export function TierDetail({
     if (misplacedTerms.length === 0) {
       return {
         type: 'success' as const,
-        text: `All ${scores.length} terms are a good fit for ${tier} tier`,
+        text: `All ${scores.length} terms align with ${tier} tier — data confirms placement`,
       }
     }
     const topTerm = misplacedTerms[0]
@@ -73,7 +73,7 @@ export function TierDetail({
       : ''
     return {
       type: 'warning' as const,
-      text: `This tier has ${misplacedTerms.length} term${misplacedTerms.length !== 1 ? 's' : ''} that may perform better in ${topTerm.recommendedTier} — the top opportunity is "${topTerm.searchTerm}" with ${impactStr} potential impact`,
+      text: `Data suggests ${misplacedTerms.length} term${misplacedTerms.length !== 1 ? 's' : ''} could perform better in ${topTerm.recommendedTier} — the top opportunity is "${topTerm.searchTerm}" with ${impactStr} potential impact`,
     }
   }, [misplacedTerms, scores.length, tier])
 
@@ -252,7 +252,7 @@ export function TierDetail({
                     ) : (
                       <span className="text-xs text-green-700 flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
-                        Well-placed
+                        {term.dataConfirmed ? 'Data-confirmed' : 'Aligned'}
                       </span>
                     )}
                   </TableCell>
@@ -268,7 +268,7 @@ export function TierDetail({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
-              Misplaced Terms in {tier} Tier ({misplacedTerms.length})
+              Opportunities in {tier} Tier ({misplacedTerms.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
