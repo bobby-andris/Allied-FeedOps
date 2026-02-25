@@ -43,6 +43,7 @@ function aggregateImpact(scores: TermScore[]): ImpactRange {
     high: Math.round(totals.high * 100) / 100,
     currency: 'USD',
     period: 'monthly',
+    direction: 'lateral' as const,
   }
 }
 
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
         totalGroups: 0,
         totalTermsScored: 0,
         totalMisplaced: 0,
-        totalImpact: { low: 0, mid: 0, high: 0, currency: 'USD', period: 'monthly' },
+        totalImpact: { low: 0, mid: 0, high: 0, currency: 'USD', period: 'monthly', direction: 'lateral' as const },
         message: 'No tier performance data available for the selected date range.',
       })
     }

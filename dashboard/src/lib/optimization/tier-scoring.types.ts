@@ -5,6 +5,24 @@ export type { FunnelTier, QueryIntentFeatures }
 export type FallbackLevel = 'per_group' | 'global' | 'defaults'
 export type ConfidenceLevel = 'High' | 'Medium' | 'Low'
 
+export interface CalibrationConfig {
+  /** Minimum fit score delta between current and recommended tier to flag as opportunity */
+  minFitScoreDelta: number
+  /** Minimum confidence score to flag a term */
+  minConfidence: number
+  /** Minimum monthly impressions for a term to be scoreable */
+  minImpressions: number
+  /** AOV for impact estimation */
+  averageOrderValue: number
+}
+
+export const DEFAULT_CALIBRATION: CalibrationConfig = {
+  minFitScoreDelta: 0.3,
+  minConfidence: 0.40,
+  minImpressions: 50,
+  averageOrderValue: 85,
+}
+
 export interface MetricDistribution {
   p25: number
   p50: number // median
@@ -56,6 +74,8 @@ export interface TermScore {
   recommendedTier: FunnelTier
   isMisplaced: boolean
   tierFitScores: Record<FunnelTier, number> // robust z-score per tier
+  fitScoreDelta: number // delta between recommended and current fit scores
+  dataConfirmed: boolean // true when data agrees with gut-assigned tier
   confidence: ConfidenceResult
   impact: ImpactRange | null // null if not misplaced
   fallbackLevel: FallbackLevel
@@ -82,6 +102,7 @@ export interface ImpactRange {
   high: number // optimistic (p75 scenario)
   currency: 'USD'
   period: 'monthly'
+  direction: 'upward' | 'downward' | 'lateral' // movement direction for Phase 34 wasted spend
 }
 
 export interface ScoringResult {
