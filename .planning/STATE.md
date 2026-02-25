@@ -8,8 +8,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3
 **Current phase:** 31-schema-cleanup-end-to-end-validation
-**Current plan:** 31-02 (complete)
-**Status:** In progress
+**Current plan:** 31-03 (complete) — final plan in phase
+**Status:** Phase 31 complete
 
 ## Decisions
 
@@ -22,6 +22,10 @@ See: .planning/PROJECT.md
 - Phase 31-02: DEFER'd pages converted from client to server components (no interactivity needed)
 - Phase 31-01: content_performance_summary does not exist — referenced in plan but never created
 - Phase 31-01: Verification via migration SQL cross-reference (MCP unavailable in executor context)
+- Phase 31-03: FT-16 selected as validation SKU (richest data coverage)
+- Phase 31-03: content_performance_summary confirmed non-existent — gap for v1.3c/v1.4
+- Phase 31-03: funnel_snapshots_daily has 0 rows — needs re-backfill
+- Phase 31-03: Used insert instead of upsert for term_intent_state (functional unique index)
 
 ## Session Log
 
@@ -29,3 +33,4 @@ See: .planning/PROJECT.md
 - 2026-02-25: Phase 30.1-01 complete — funnel snapshot backfill endpoint created, 4,093 rows backfilled across 31 distinct dates, FunnelTrendCards now shows real trend data
 - 2026-02-25: Phase 31-02 complete — wired GmcDisapprovalBadge and PromptLineagePanel into SKU Review, replaced DEFER'd pages with Coming Soon cards, added sidebar badges
 - 2026-02-25: Phase 31-01 complete — verified 18 deferred table schemas, rebuilt SCHEMA.md with 56 tables and [KEEP]/[DEFER] tags
+- 2026-02-25: Phase 31-03 complete — E2E validation with FT-16, seed script validated KEEP'd pages, 5 gaps documented for v1.3c
