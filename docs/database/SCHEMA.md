@@ -4,6 +4,8 @@
 
 This document provides a comprehensive reference for all database tables, columns, constraints, and common query patterns.
 
+**Last schema update**: 2026-02-25 — `performance_impact_scores` table created in production, `cohort_type`/`product_category` columns added to `performance_snapshots` (migration `20260225083710_create_performance_impact_scores.sql`). Schema drift from Phase 28 audit resolved.
+
 ---
 
 ## Table of Contents
