@@ -11,9 +11,8 @@ set -euo pipefail
 #   1. Add CRON_SECRET to Vercel env vars (Dashboard > Settings > Environment Variables)
 #   2. gcloud CLI authenticated with appropriate project access
 #
-# NOTE: 5 AM ET = 2 AM PT. Google Ads data for yesterday may be ~95% settled at this time
-# (full settlement typically by 3-4 AM PT). If snapshot data appears incomplete, consider
-# changing schedule to "0 8 * * *" (8 AM ET / 5 AM PT) for full data settlement.
+# Schedule: 6 AM UTC daily (fixed timezone, no DST shift)
+# Google Ads data for yesterday is typically fully settled by this time.
 
 PROJECT="bobbys-project-346400"
 LOCATION="us-east1"
@@ -42,25 +41,34 @@ fi
 
 CRON_SECRET="$1"
 
-echo "Creating Cloud Scheduler job: ${JOB_NAME}..."
-echo "  Schedule: 5 AM ET daily"
-echo "  Target:   ${URI}"
+SCHEDULER_ARGS=(
+  --project="${PROJECT}"
+  --location="${LOCATION}"
+  --schedule="0 6 * * *"
+  --time-zone="UTC"
+  --uri="${URI}"
+  --http-method=POST
+  --headers="Content-Type=application/json,Authorization=Bearer ${CRON_SECRET}"
+  --message-body='{}'
+  --attempt-deadline="120s"
+  --max-retry-attempts=2
+  --min-backoff="300s"
+  --max-backoff="300s"
+)
 
-gcloud scheduler jobs create http "${JOB_NAME}" \
-  --project="${PROJECT}" \
-  --location="${LOCATION}" \
-  --schedule="0 5 * * *" \
-  --time-zone="America/New_York" \
-  --uri="${URI}" \
-  --http-method=POST \
-  --headers="Content-Type=application/json,Authorization=Bearer ${CRON_SECRET}" \
-  --message-body='{}' \
-  --attempt-deadline="120s" \
-  --max-retry-attempts=3 \
-  --min-backoff="60s" \
-  --max-backoff="300s" \
-  --description="Daily funnel snapshot capture - persists Google Ads shopping tier data"
+if gcloud scheduler jobs describe "${JOB_NAME}" --project="${PROJECT}" --location="${LOCATION}" --quiet 2>/dev/null; then
+  echo "Job ${JOB_NAME} already exists. Updating..."
+  echo "  Schedule: 6 AM UTC daily (fixed timezone, no DST shift)"
+  echo "  Target:   ${URI}"
+  gcloud scheduler jobs update http "${JOB_NAME}" "${SCHEDULER_ARGS[@]}"
+else
+  echo "Creating Cloud Scheduler job: ${JOB_NAME}..."
+  echo "  Schedule: 6 AM UTC daily (fixed timezone, no DST shift)"
+  echo "  Target:   ${URI}"
+  gcloud scheduler jobs create http "${JOB_NAME}" "${SCHEDULER_ARGS[@]}" \
+    --description="Daily funnel snapshot capture - persists Google Ads shopping tier data"
+fi
 
 echo ""
-echo "Done. Job ${JOB_NAME} created."
+echo "Done. Job ${JOB_NAME} configured."
 echo "Verify with: gcloud scheduler jobs describe ${JOB_NAME} --project=${PROJECT} --location=${LOCATION}"
