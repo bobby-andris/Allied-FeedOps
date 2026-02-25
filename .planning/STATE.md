@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets through data-driven content optimization at scale
-**Current focus:** Phase 33 — Tier Scoring Engine
+**Current focus:** Phase 33.1 — Scoring Calibration
 
 ## Current Position
 
-Phase: 33 (2 of 6 in v1.3c) — COMPLETE
-Plan: 4 of 4 in current phase (33-01, 33-02, 33-03, 33-04 complete)
-Status: Phase complete; awaiting next phase assignment
-Last activity: 2026-02-25 — Phase 33 Plan 04 complete (4-level drill-down: TierDetail, TermScorecard, MisplacedTermRow)
+Phase: 33.1 (next up in v1.3c) — NOT STARTED
+Plan: 0 of TBD
+Status: Awaiting planning (`/gsd:plan-phase 33.1`)
+Last activity: 2026-02-25 — Phase 33 complete, decimal phases 33.1 and 33.2 created
 
 Progress: [███░░░░░░░] 28% (v1.3c)
 
@@ -70,7 +70,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Apply migration 038 (unique index on query_value_scores) to production Supabase
+- ~~Apply migration 038 (unique index on query_value_scores) to production Supabase~~ DONE
+- [Phase 33.1]: Investigate $0 impact bug in estimateImpact()
+- [Phase 33.1]: Calibrate scoring to reduce 95% misplaced rate to 10-20%
+- [Phase 33.1]: Account for gut-assigned tiers (Robert's manual assignments, no historical data basis)
+- [Phase 33.2]: Redesign UI from statistical exploration to action-oriented decision-making
 
 ### Blockers/Concerns
 

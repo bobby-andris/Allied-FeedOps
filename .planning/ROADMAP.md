@@ -94,6 +94,8 @@
 
 - [x] **Phase 32: Operational Prerequisites** - Activate Cloud Scheduler, backfill funnel data, extend schemas for adaptive scoring and experiments (completed 2026-02-25)
 - [ ] **Phase 33: Tier Scoring Engine** - Distribution-based scoring with hierarchical fallback replacing hardcoded ROAS thresholds
+- [ ] **Phase 33.1: Scoring Calibration** - Fix $0 impact bug, calibrate 95% misplaced rate down to actionable 10-20%
+- [ ] **Phase 33.2: UI Redesign** - Redesign Tier Intelligence from statistical exploration to action-oriented decision-making
 - [ ] **Phase 34: Revenue Leakage and Execution** - Dollar-value leakage dashboard with one-click tier movement execution and undo
 - [ ] **Phase 35: Market Intelligence** - Demand gap analysis, competitive intel, product group BCG matrix, seasonal patterns
 - [ ] **Phase 36: Automation and Experiments** - Rule-based tier rebalancing with safety guardrails and A/B testing framework
@@ -129,9 +131,34 @@
 
 **Outcome**: Phase 33 infrastructure verified by user. All 4 levels of drill-down working. Identified follow-up phases 33.1 (calibration investigation) and 33.2 (UI redesign) to address 95% misplaced rate and $0 impact issues.
 
+### Phase 33.1: Scoring Calibration
+**Goal**: Calibrate the tier scoring engine so it produces trustworthy, actionable results — fix $0 impact bug, reduce 95% misplaced rate to actionable 10-20%, reframe UX language for gut-assigned tiers
+**Depends on**: Phase 33
+**Requirements**: TIER-01, TIER-02, TIER-03 (calibration refinements)
+**Success Criteria** (what must be TRUE):
+  1. estimateImpact() returns non-zero dollar values for terms with meaningful performance differences between tiers
+  2. Misplaced term rate is 10-25% (not 95%), filtered by minimum confidence and impact thresholds
+  3. Hero callout shows a credible dollar range that reflects actual optimization opportunity
+  4. Scoring accounts for context that tiers were manually assigned by business owner intuition, not historical data
+**Plans**: TBD
+**Context**: Tiers were manually assigned by Robert (business owner) based on gut feeling — not historical performance data. The scoring engine correctly identifies where data disagrees with intuition, but needs calibration to surface only high-confidence, high-impact disagreements.
+
+### Phase 33.2: Tier Intelligence UI Redesign
+**Goal**: Redesign the Tier Intelligence page from statistical exploration to action-oriented decision-making — prioritized action queue, plain English, progressive disclosure
+**Depends on**: Phase 33.1
+**Requirements**: TIER-01, TIER-02, TIER-03, TIER-04, TIER-05, TIER-06 (presentation refinements)
+**Success Criteria** (what must be TRUE):
+  1. Business owner can understand the page in under 2 minutes without statistical knowledge
+  2. Page shows top 10-20 highest-impact terms as a prioritized action queue (not all 4,000+)
+  3. Every term verdict is in plain English ("This term earns 2x return but has premium placement") not statistical jargon
+  4. Statistical details (z-scores, distributions, MAD) preserved behind progressive disclosure for operator use
+  5. Page connects to execution workflow (Phase 34) with clear next-action CTAs
+**Plans**: TBD
+**Note**: Consider merging into Phase 34 planning if scope overlaps significantly with Revenue Leakage UI.
+
 ### Phase 34: Revenue Leakage and Execution
 **Goal**: Users can identify revenue opportunities with dollar-value estimates and act on them with one-click tier movements that persist and can be undone
-**Depends on**: Phase 33
+**Depends on**: Phase 33.1
 **Requirements**: LEAK-01, LEAK-02, LEAK-03, LEAK-04, LEAK-05, LEAK-06, EXEC-01, EXEC-02, EXEC-03, EXEC-04, EXEC-05
 **Success Criteria** (what must be TRUE):
   1. User sees a hero number showing total revenue leakage as a range with confidence coloring and a "Last computed" timestamp
@@ -178,8 +205,9 @@
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 32 → 33 → 34 → 35 → 36 → 37
-Note: Phase 35 depends only on Phase 33 (not Phase 34), so it can begin after Phase 33 completes.
+Phases execute in numeric order: 32 → 33 → 33.1 → 33.2 → 34 → 35 → 36 → 37
+Note: Phase 35 depends only on Phase 33.1 (not Phase 34), so it can begin after 33.1 completes.
+Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -191,6 +219,8 @@ Note: Phase 35 depends only on Phase 33 (not Phase 34), so it can begin after Ph
 | 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
 | 32. Operational Prerequisites | 3/3 | Complete    | 2026-02-25 | - |
 | 33. Tier Scoring Engine | 4/4 | Complete | 2026-02-25 | - |
+| 33.1 Scoring Calibration | v1.3c | 0/TBD | Not started | - |
+| 33.2 UI Redesign | v1.3c | 0/TBD | Not started | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |
 | 36. Automation and Experiments | v1.3c | 0/TBD | Not started | - |
