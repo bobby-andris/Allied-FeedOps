@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-25T20:29:51.670Z"
+last_updated: "2026-02-25T20:52:33Z"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets through data-driven content optimization at scale
-**Current focus:** Phase 33.1 — Scoring Calibration
+**Current focus:** Phase 33.2 — UI Redesign
 
 ## Current Position
 
-Phase: 33.1 (v1.3c) — COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 33.1 complete; ready for 33.2
-Last activity: 2026-02-25 — Completed 33.1-02 (UX language reframe from misplaced to opportunity)
+Phase: 33.2 (v1.3c) — IN PROGRESS
+Plan: 1 of 3 complete
+Status: 33.2-01 complete (foundation utilities); 33.2-02 next
+Last activity: 2026-02-25 — Completed 33.2-01 (shared formatDollars, useTierScoring hook, plain English verdicts)
 
-Progress: [███░░░░░░░] 28% (v1.3c)
+Progress: [████░░░░░░] 33% (v1.3c)
 
 ## Performance Metrics
 
@@ -72,6 +72,9 @@ Recent decisions affecting current work:
 - [Phase 33.1-01]: Three-gate isMisplaced: all three thresholds must pass to flag a term
 - [Phase 33.1-02]: Keep isMisplaced boolean and variable names unchanged; only change user-facing text to "opportunity"
 - [Phase 33.1-02]: Show "Data-confirmed" vs "Aligned" based on dataConfirmed flag for well-placed terms
+- [Phase 33.2-01]: Shared formatDollars in @/lib/formatting (consolidated from 6 copies)
+- [Phase 33.2-01]: useTierScoring hook returns { data, loading, error, refresh } for reuse across views
+- [Phase 33.2-01]: Verdicts use premium/mid-tier/budget labels instead of HIGH/MEDIUM/LOW
 
 ### Pending Todos
 
@@ -89,7 +92,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 33.1-02-PLAN.md (UX language reframe — phase 33.1 complete)
+Stopped at: Completed 33.2-01-PLAN.md (foundation utilities for UI redesign)
 Resume file: None
 
 **Phase 33 Completion Summary**:
