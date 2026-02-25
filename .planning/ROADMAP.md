@@ -124,8 +124,9 @@ Plans:
   1. The funnel_snapshots_daily table contains at least 7 days of historical search term tier data, persisted from the same GAQL queries service.ts runs live
   2. A Cloud Scheduler job triggers daily capture without any user intervention, and the live service.ts query path has zero latency increase
   3. The Shopping Funnel dashboard page displays 7-day vs previous-7-day trend indicators (up/down/flat) for key funnel metrics
-**Plans:** 2 plans
+**Plans:** 3 plans
 Plans:
+- [ ] 30-00-PLAN.md — Test scaffolds for capture, trends, and FunnelTrendCards (Wave 0)
 - [ ] 30-01-PLAN.md — Schema creation + capture endpoint + Cloud Scheduler setup script
 - [ ] 30-02-PLAN.md — Trends API route + FunnelTrendCards UI component
 
@@ -155,7 +156,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
 | 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
-| 30. Funnel Persistence | v1.3b | 0/2 | Not started | - |
+| 30. Funnel Persistence | v1.3b | 0/3 | Not started | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 
 ---
