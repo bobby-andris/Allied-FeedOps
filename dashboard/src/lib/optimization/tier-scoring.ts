@@ -29,7 +29,9 @@ import type {
   ConfidenceFactors,
   ImpactRange,
   ScoringResult,
+  CalibrationConfig,
 } from './tier-scoring.types'
+import { DEFAULT_CALIBRATION } from './tier-scoring.types'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -37,7 +39,6 @@ import type {
 
 const MAX_BOUNDARY_SHIFT_PERCENT = 0.15
 const MIN_SAMPLE_SIZE = 5
-const DEFAULT_AOV = 85 // Allied Brass average order value in USD
 const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
 const DEFAULT_METRIC_DIST: MetricDistribution = {
@@ -325,25 +326,36 @@ export function computeConfidence(
 export function estimateImpact(
   term: ExistingFunnelTerm,
   currentDist: TierDistribution,
-  targetDist: TierDistribution
+  targetDist: TierDistribution,
+  config: CalibrationConfig = DEFAULT_CALIBRATION
 ): ImpactRange {
-  const impressions = term.total_impressions // assume 30-day window
+  const monthlySpend = term.total_cost_micros / 1_000_000
 
-  const currentCvr = currentDist.metrics.cvr.p50
-  const targetCvrP25 = targetDist.metrics.cvr.p25
-  const targetCvrP50 = targetDist.metrics.cvr.p50
-  const targetCvrP75 = targetDist.metrics.cvr.p75
+  // Use ROAS delta as primary signal (aligned with 50% weighting in scoring)
+  const currentRoas = currentDist.metrics.roas.p50
+  const targetRoasP25 = targetDist.metrics.roas.p25
+  const targetRoasP50 = targetDist.metrics.roas.p50
+  const targetRoasP75 = targetDist.metrics.roas.p75
 
-  const lowDelta = targetCvrP25 - currentCvr
-  const midDelta = targetCvrP50 - currentCvr
-  const highDelta = targetCvrP75 - currentCvr
+  // Impact = spend * (targetROAS - currentROAS) = incremental revenue
+  const lowDelta = targetRoasP25 - currentRoas
+  const midDelta = targetRoasP50 - currentRoas
+  const highDelta = targetRoasP75 - currentRoas
+
+  // Determine movement direction
+  const tierRank: Record<FunnelTier, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 }
+  const direction: 'upward' | 'downward' | 'lateral' =
+    tierRank[targetDist.tier] > tierRank[currentDist.tier] ? 'upward'
+    : tierRank[targetDist.tier] < tierRank[currentDist.tier] ? 'downward'
+    : 'lateral'
 
   return {
-    low: Math.max(0, impressions * lowDelta * DEFAULT_AOV),
-    mid: Math.max(0, impressions * midDelta * DEFAULT_AOV),
-    high: Math.max(0, impressions * highDelta * DEFAULT_AOV),
+    low: Math.max(0, monthlySpend * lowDelta),
+    mid: Math.max(0, monthlySpend * midDelta),
+    high: Math.max(0, monthlySpend * highDelta),
     currency: 'USD',
     period: 'monthly',
+    direction,
   }
 }
 
