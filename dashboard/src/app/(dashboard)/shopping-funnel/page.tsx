@@ -44,6 +44,8 @@ import {
   NEEDS_DECISION_UI_LIMIT,
 } from '@/lib/shopping-funnel/ui-performance'
 
+import FunnelTrendCards from './FunnelTrendCards'
+
 const TierMovementsPanel = lazy(() => import('./TierMovementsPanel'))
 
 type DateRangePreset = '7d' | '30d' | '60d' | '90d'
@@ -1344,6 +1346,8 @@ export default function ShoppingFunnelPage() {
           </CardContent>
         </Card>
       )}
+
+      <FunnelTrendCards />
 
       <Tabs
         value={activeTab}
