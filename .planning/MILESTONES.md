@@ -61,7 +61,18 @@
 
 ## Current
 
-(No active milestone — next: v1.3c Actionable Shopping Intelligence)
+### v1.3c Actionable Shopping Intelligence
+**Started:** 2026-02-25
+**Goal:** Transform the shopping funnel from passive reporting into an active revenue optimization engine with distribution-based scoring, dollar-value leakage detection, market intelligence, and semi-automated tier optimization with measurement
+**Phases:** 32-37 (6 phases, 49 requirements)
+**Status:** Roadmap created, Phase 32 ready to plan
+
+**Phase structure:**
+- Phase 32: Operational Prerequisites (4 requirements)
+- Phase 33: Tier Scoring Engine (6 requirements)
+- Phase 34: Revenue Leakage and Execution (11 requirements)
+- Phase 35: Market Intelligence (11 requirements)
+- Phase 36: Automation and Experiments (11 requirements)
+- Phase 37: Reporting and Benchmarks (6 requirements)
 
 ---
-
