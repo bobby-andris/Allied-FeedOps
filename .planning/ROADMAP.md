@@ -153,7 +153,11 @@ Plans:
   3. GmcDisapprovalBadge and PromptLineagePanel are either visible on a dashboard page or removed from the codebase
   4. SCHEMA.md accurately reflects the true production database state — every table listed exists, every existing table is listed
   5. A single SKU can be traced through the complete loop: generate content, publish, capture performance snapshot, see feedback in the content-performance view
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 31-01-PLAN.md — Schema verification (18 deferred tables) + SCHEMA.md full rebuild from production
+- [ ] 31-02-PLAN.md — Wire orphaned components (GmcDisapprovalBadge, PromptLineagePanel) + Coming Soon gates + sidebar badges
+- [ ] 31-03-PLAN.md — Seed data validation for KEEP'd pages + E2E loop walkthrough with real production SKU
 
 ## Progress
 
