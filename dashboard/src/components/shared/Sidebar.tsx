@@ -19,6 +19,7 @@ import {
   Siren,
   GitBranch,
   FlaskConical,
+  TrendingUp,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -32,6 +33,7 @@ const navigation = [
   { name: 'Competitors', href: '/competitors', icon: Eye },
   { name: 'Batches', href: '/batches', icon: Layers },
   { name: 'Performance', href: '/performance', icon: BarChart3 },
+  { name: 'Content Impact', href: '/content-impact', icon: TrendingUp },
   { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
   { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge },
