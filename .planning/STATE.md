@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 28 of 31 (Architecture Audit & Migration Triage)
 **Plan:** 3 of 3 in current phase
-**Status:** Phase complete
+**Status:** Milestone complete
 **Last activity:** 2026-02-25 — Completed 28-03 (NULL Audit & Quota Analysis)
 
 Progress: [██████████] 100%
