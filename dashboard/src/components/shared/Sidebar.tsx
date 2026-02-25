@@ -19,6 +19,7 @@ import {
   Siren,
   GitBranch,
   FlaskConical,
+  Target,
   TrendingUp,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -43,6 +44,7 @@ const navigation: NavItem[] = [
   { name: 'Content Impact', href: '/content-impact', icon: TrendingUp },
   { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
+  { name: 'Tier Intelligence', href: '/tier-scoring', icon: Target },
   { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge, badge: 'Soon' },
   { name: 'Intent Control', href: '/intent-control-center', icon: Gauge, badge: 'Soon' },
   { name: 'Search Governance', href: '/search-governance', icon: GitBranch },
