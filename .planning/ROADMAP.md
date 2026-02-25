@@ -188,7 +188,7 @@ Note: Phase 35 depends only on Phase 33 (not Phase 34), so it can begin after Ph
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
 | 32. Operational Prerequisites | 3/3 | Complete    | 2026-02-25 | - |
-| 33. Tier Scoring Engine | 2/4 | In Progress|  | - |
+| 33. Tier Scoring Engine | 3/4 | In Progress|  | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |
 | 36. Automation and Experiments | v1.3c | 0/TBD | Not started | - |

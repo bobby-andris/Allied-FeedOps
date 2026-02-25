@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 33 (2 of 6 in v1.3c) — IN PROGRESS
-Plan: 2 of 4 in current phase (33-01 and 33-02 complete)
+Plan: 3 of 4 in current phase (33-01, 33-02, 33-03 complete)
 Status: Executing phase plans
-Last activity: 2026-02-25 — Phase 33 Plan 01 complete (tier scoring engine: types, computation module, 21 tests passing)
+Last activity: 2026-02-25 — Phase 33 Plan 03 complete (tier intelligence UI: page, hero, groups grid, drill-down)
 
-Progress: [██░░░░░░░░] 24% (v1.3c)
+Progress: [███░░░░░░░] 28% (v1.3c)
 
 ## Performance Metrics
 
@@ -64,6 +64,9 @@ Recent decisions affecting current work:
 - [Phase 33-02]: Client-side customLabel0 filtering for getLabelTierPerformance (function doesn't accept that param)
 - [Phase 33-01]: Robust z-scores use median/MAD — ROAS capped at p99, tier fit weighted 50% ROAS / 20% CVR / 15% CPC / 15% CTR
 - [Phase 33-01]: MAD=0 returns z-score 0 (handles all-identical-values edge case gracefully)
+- [Phase 33-03]: Used Target icon for sidebar (BarChart3 already used by Performance)
+- [Phase 33-03]: Attention-needed sorting: primary misplaced count, secondary dollar impact
+- [Phase 33-03]: DistributionChart 3-zone stacked bar: orange (below p25), tier-color (healthy), blue (above p75)
 
 ### Pending Todos
 
@@ -77,5 +80,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 33-01-PLAN.md (tier scoring computation module)
+Stopped at: Completed 33-03-PLAN.md (tier intelligence UI)
 Resume file: None
