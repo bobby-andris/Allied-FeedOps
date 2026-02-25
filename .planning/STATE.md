@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.3
 **Current phase:** 30.1-funnel-snapshot-backfill
 **Current plan:** 30.1-01 (complete)
-**Status:** Phase 30.1 complete
+**Status:** Milestone complete
 
 ## Decisions
 
