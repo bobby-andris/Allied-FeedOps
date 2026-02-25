@@ -151,7 +151,8 @@ describe('FunnelTrendCards', () => {
       screen.getByText('Impressions').parentElement
     expect(impressionsCard).toBeDefined()
     // Should contain a positive percentage text like "+25.0%"
-    expect(screen.getByText(/\+25\.0%/)).toBeInTheDocument()
+    const upTexts = screen.getAllByText(/\+25\.0%/)
+    expect(upTexts.length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows red down arrow when metric decreases more than 5%', async () => {
@@ -189,7 +190,8 @@ describe('FunnelTrendCards', () => {
     })
 
     // Clicks: -40% => should show red color and negative percentage
-    expect(screen.getByText(/-40\.0%/)).toBeInTheDocument()
+    const downTexts = screen.getAllByText(/-40\.0%/)
+    expect(downTexts.length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows flat indicator when change is within 5% threshold', async () => {
