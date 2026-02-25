@@ -1,282 +1,324 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Adding content-performance feedback loops, historical data persistence, and deferred migration evaluation to an existing feed optimization platform
+**Domain:** Actionable Shopping Intelligence -- distribution-based scoring, automated tier movements, A/B testing, and revenue leakage detection for Google Shopping campaign management
 **Researched:** 2026-02-25
-**System context:** Allied FeedOps v1.3b (36+ tables, 2,784 SKUs, Python pipeline + Next.js dashboard)
-
----
+**Confidence:** HIGH (based on codebase analysis of existing service.ts, policy.ts, tier-movement.ts, query-intelligence.ts, control-center.ts, experiment schema, and milestone spec)
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, data corruption, or multi-week delays.
+### Pitfall 1: Distribution Cold Start -- Degenerate Percentiles from Sparse Tiers
 
-### Pitfall 1: Duplicating Existing Performance Infrastructure
+**What goes wrong:**
+The spec says to compute p25/p50/p75 ROAS distributions per tier per `custom_label_0` to set dynamic thresholds. With 59 product groups x 3 tiers = 177 combinations, many will have very few search terms (some product groups may have 2-5 terms in a tier). Computing percentiles on 3 data points produces unstable thresholds that flip wildly between scoring runs. A single new conversion can move the p75 ROAS from 2.0 to 8.0, causing the scoring engine to recommend mass movements.
 
-**What goes wrong:** A new "content-performance feedback" table gets created that overlaps with what `performance_baselines`, `performance_snapshots`, `performance_impact_scores`, `regeneration_history`, and `publish_events` already track. You end up with two sources of truth for "what content was published and how did it perform."
+**Why it happens:**
+Developers test with aggregate data ("we have thousands of terms total") and miss that per-group-per-tier slicing reduces sample sizes dramatically. The hardcoded thresholds (ROAS 3.6/3.1/2.6) "worked" precisely because they avoided this problem -- they were wrong but stable.
 
-**Why it happens:** The existing schema already has the building blocks but they are not linked together with a clean JOIN path. `performance_snapshots` has `publish_event_id` and `content_version`, `publish_events` has `prompt_hash` and `final_payload_hash`, and `regeneration_history` has `generated_content_id` and `prompt_hash`. The gap is data quality in the JOIN keys (NULLs, missing rows) and a convenient view — not a new table.
+**How to avoid:**
+- Set a minimum sample size floor per distribution (e.g., 10 terms with 20+ clicks each). Below this, fall back to cross-group tier-level distributions (all product groups combined for that tier).
+- Use hierarchical fallback: per-group-per-tier -> per-tier-global -> hardcoded defaults. Never return "no data" -- always have a fallback.
+- Apply Bayesian smoothing: blend per-group distributions with global priors weighted by sample size. With 3 terms, the prior dominates; with 30 terms, the group data dominates.
+- Log which fallback level was used so operators can see "this group's thresholds are based on global averages, not group-specific data."
 
-**Consequences:**
-- Two codepaths for "get performance of content X" — dashboard and pipeline diverge
-- Migration bloat (36 tables already, duplicate migration numbers 026/032/033 exist)
-- Stale data when one table gets updated but its duplicate does not
-- Every future feature (v1.3c scoring, v1.4 closed-loop) must pick which source to use
+**Warning signs:**
+- Threshold values changing >20% between consecutive runs with no major campaign changes
+- Product groups with <5 terms in any tier (check before launch)
+- Revenue leakage estimates that swing from $500/month to $5,000/month between page loads
+- "100% of terms in tier X are misplaced" -- this means the distribution is degenerate, not that everything is wrong
 
-**Prevention:**
-- Before creating ANY new table, write the SQL JOIN that connects `regeneration_history.prompt_hash` -> `publish_events.prompt_hash` -> `performance_snapshots.publish_event_id`. If this JOIN works, you need a VIEW or materialized view, not a table.
-- If a lightweight linking table is needed (e.g., to cache computed feedback scores), it should reference existing PKs only — never duplicate columns like `impressions`, `clicks`, `ctr` that already live in `performance_snapshots`.
-- Rule: new table columns should be ONLY the new data (feedback scores, learning signals, optimization recommendations). All performance metrics come via FK joins.
-
-**Detection:** If a new migration has columns named `impressions`, `clicks`, `ctr`, `conversions`, or `content_version` — it is almost certainly duplicating existing data.
-
----
-
-### Pitfall 2: Applying Deferred Migrations Without Pruning Dead Code First
-
-**What goes wrong:** 035b's 14 intent execution tables get applied to production Supabase, making the 32 TypeScript files in `dashboard/src/lib/intent/` "work" — but the underlying logic has hardcoded thresholds (ROAS 3.6/3.1/2.6 in `control-center.ts`, CVR 5%/3% gates) that produce zero results for Allied Brass's actual data. You now have live tables being written to but showing nothing useful, and the next developer assumes the feature works.
-
-**Why it happens:** The migration files exist, the TypeScript code exists, and the temptation is to "just apply and see." But the 032/033/034b/035b migration chain was written speculatively during v1.2 research phases — the code was never tested against real data because the tables never existed in production.
-
-**Consequences:**
-- 14 empty tables consuming Supabase resources and schema complexity
-- Dashboard pages (Shopping Funnel recommendations, Optimization Control, Intent Control, Search Governance, Experiment Lab) show UI but with zero rows — users see "working" pages with no data, which is worse than a clean "coming soon" state
-- Maintenance burden: any schema change to "real" tables must now avoid breaking the speculative tables
-- Future v1.3c work must untangle which tables are actually needed vs which were speculative
-
-**Prevention:**
-1. Categorize each of the 18 deferred tables (4 from 034b, 14 from 035b) into: KEEP (needed for v1.3b/c/1.4), DEFER (not needed yet but valid design), or REMOVE (speculative, no clear use case within 6 months)
-2. For KEEP tables: verify the TypeScript code that references them actually works by writing integration tests BEFORE applying the migration
-3. For REMOVE tables: delete the TypeScript files first, verify build passes, THEN remove the migration file
-4. Never apply a migration without a consumer that will populate and read the data within the same milestone
-
-**Detection:** After applying any migration, query `SELECT COUNT(*) FROM [new_table]` after 7 days. If zero, the table is dead weight.
+**Phase to address:**
+Phase 1 (Adaptive Tier Scoring Engine) -- this is the foundation. If the scoring engine is unstable, every downstream feature (revenue leakage, automation rules, A/B testing) inherits the instability.
 
 ---
 
-### Pitfall 3: Breaking the Live Google Ads Query Path in service.ts
+### Pitfall 2: Automation Without Spend Caps -- Runaway Budget Drain
 
-**What goes wrong:** Adding persistence to `service.ts`'s 6 GAQL queries (~1,600 lines of live Google Ads API integration) introduces a write layer that blocks the response path, returns stale data from Supabase instead of live API, or causes API quota overruns by accidentally doubling query volume (once for cache, once for persistence).
+**What goes wrong:**
+The tier-movement pipeline (`tier-movement.ts`) writes negative keywords to live Google Ads campaigns. Automated rules that fire "if ROAS > X for Y days, auto-promote" can promote terms into higher-bid tiers en masse. If the scoring engine miscalculates (see Pitfall 1) or data is stale, automation could promote 50 terms from LOW to MEDIUM simultaneously, instantly increasing ad spend by thousands of dollars/month with no human in the loop.
 
-**Why it happens:** `service.ts` runs 6 parallel GAQL queries against live Google Ads API with a 2-minute in-memory cache (`CACHE_TTL_MS = 2 * 60 * 1000`). The "add persistence" requirement means writing results to Supabase. But the write path adds latency, the read-then-write pattern can fail silently (Supabase timeout on large result sets), and changing cache behavior changes what the Shopping Funnel dashboard displays in real time.
+**Why it happens:**
+The existing `executeTierMovementBatch()` function has guardrails (`evaluateGuardrails()`) but they check spend *deltas* (40% spike) and attribution quality -- they do NOT cap the number of simultaneous movements or the total budget impact of a batch. The guardrails were designed for human-initiated movements, not autonomous scheduling.
 
-**Consequences:**
-- Dashboard shows stale data (user sees yesterday's numbers, thinks today's campaign is failing)
-- Google Ads API quota exhaustion if persistence layer triggers additional queries (standard access: 15,000 operations/day)
-- Silent data loss if Supabase writes fail but the in-memory cache still serves (no one notices persistence is broken for weeks)
-- Race conditions: 6 parallel GAQL queries complete at different times, partial writes create inconsistent daily snapshots
+**How to avoid:**
+- Add a **max-movements-per-run** cap (e.g., 10 movements per automated evaluation). Even if the engine recommends 50, execute only the top 10 by confidence.
+- Add a **max-daily-spend-impact** cap: sum the `expected_cost_change` for all recommendations in a batch, reject the batch if total exceeds a configurable threshold (e.g., $50/day incremental spend).
+- Require **dry-run-first**: every automated rule must execute a dry run, persist the preview to `routing_recommendations`, and only execute after a cooling period (24h) unless operator approves sooner.
+- Add a **circuit breaker**: if 3+ automated batches in a row have >50% rejection rate from operators reviewing after the fact, disable the rule and alert.
+- Never auto-execute "block" or "demote" actions for terms with >$100 spend/month without operator approval -- these terms are revenue-generating and blocking them has immediate negative impact.
 
-**Prevention:**
-1. Persistence must be WRITE-BEHIND, not read-through. The live query path stays unchanged. After serving the response, asynchronously persist to Supabase.
-2. Add a separate "historical snapshot" endpoint/job that reads from Supabase — never modify the live query endpoint to read from the persistence layer.
-3. Use a transaction or batch insert for the 6 query results — all succeed or all fail, never partial snapshots.
-4. API quota analysis FIRST: calculate current queries-per-day, confirm adding daily persistence stays within limits.
-5. Feature flag the persistence layer so it can be disabled without a deploy if Supabase writes cause latency spikes.
+**Warning signs:**
+- Automated rule executes 20+ movements in a single run
+- No human has reviewed automated movements in 7+ days
+- `policy_action_execution_log` shows exclusively automated entries (no manual approvals)
+- Daily spend increases >15% without corresponding revenue increase
 
-**Detection:** Monitor `service.ts` response times before and after. If P95 latency increases >20%, the persistence layer is blocking the response path.
-
----
-
-### Pitfall 4: Feedback Loop Without Content Versioning Linkage
-
-**What goes wrong:** A feedback mechanism gets built that says "CTR improved 15% after publish" but cannot answer "which specific prompt version, skill configuration, or content variant caused the improvement." The feedback is observational but not actionable — you know THAT something improved but not WHAT to repeat.
-
-**Why it happens:** The system has multiple content versioning mechanisms that are not fully connected:
-- `generated_content.version` and `generated_content.generation_prompt_hash`
-- `regeneration_history.prompt_hash` and `regeneration_history.feature_flags_active`
-- `publish_events.prompt_hash` and `publish_events.final_payload_hash`
-- `performance_snapshots.content_version` (often NULL in practice)
-- `prompt_version_aliases.alias` (maps hash to human-readable name)
-
-The chain is: generation -> approval -> publish -> snapshot. But `content_version` in `performance_snapshots` is often NULL because `capture-snapshot` does not always have the content version available at capture time.
-
-**Consequences:**
-- Feedback loop becomes "content changed and performance changed" — correlation without causation
-- Cannot compare prompt strategies (v2 creative brief vs v1 compliance doc) because prompt version is not reliably linked to outcomes
-- v1.4 closed-loop optimization is impossible without this linkage — it is a hard prerequisite
-
-**Prevention:**
-1. Audit current NULL rates: `SELECT COUNT(*) FROM publish_events WHERE prompt_hash IS NULL AND published_at > '2026-02-01'` and `SELECT COUNT(*) FROM performance_snapshots WHERE content_version IS NULL`
-2. Make `publish_events.prompt_hash` NOT NULL for new publishes going forward (it was added in migration 034 but is nullable)
-3. Ensure `capture-snapshot` endpoint populates `content_version` from the most recent `publish_events` record for that SKU+platform
-4. Build the feedback query as: `regeneration_history` JOIN `publish_events` ON `prompt_hash` JOIN `performance_snapshots` ON `publish_event_id` — verify this chain has no NULL gaps for recently published SKUs before building any feedback UI
-5. Add a data quality check: after each publish batch, verify that every published SKU has a non-NULL `prompt_hash` in `publish_events`
-
-**Detection:** Run the NULL audit queries above. If >10% of recent records have NULL in the join chain, the feedback loop will produce incomplete results.
+**Phase to address:**
+Phase 3 (Automated Tier Rebalancing Rules) -- but the caps and circuit breaker should be built into the tier-scoring engine in Phase 1 so they're available when automation is wired up.
 
 ---
 
-## Moderate Pitfalls
+### Pitfall 3: Statistical Significance Theater -- Underpowered A/B Tests on Shopping Tiers
 
-### Pitfall 5: Multi-SKU Product Performance Attribution Error
+**What goes wrong:**
+The experiment framework (Phase 3.2) splits terms into treatment and control groups and measures ROAS/CVR differences. With luxury bathroom accessories (high AOV ~$50-200, low volume per term), most individual search terms get 10-50 clicks/month. An A/B test on tier assignment for a single product group might have 20 terms in treatment and 20 in control, each with 20 clicks. At p<0.05, you need ~380 conversions per group to detect a 10% CVR lift. With a 3% CVR, you'd need ~12,600 clicks per group -- roughly 6+ months of data for a single product group.
 
-**What goes wrong:** Performance feedback incorrectly attributes CTR changes to a single `master_sku` when multiple master_skus share the same `product_id`. Google Ads aggregates at product_id level, so DMF-2/2X, DMF-2/3X, DMF-2/4X, and DMF-2/5X (all sharing product_id `4539975336068`) show blended performance even if only one SKU's content changed.
+The danger: declaring a winner at p=0.15 because "we need to move fast" or because the UI shows a green arrow on the lift number without displaying the p-value.
 
-**Why it happens:** `performance_baselines` and `performance_snapshots` key on `master_sku`, but Google Ads data comes at `product_id` granularity. The data collection pipeline handles this (see `metadata` JSONB field in `performance_baselines` noting multi-SKU families), but a feedback loop that treats each master_sku's performance as independent will produce wrong conclusions about which content change drove the improvement.
+**Why it happens:**
+The `experiment_outcomes` table has `observed_lift` and `sample_size` but no `p_value` or `confidence_interval` columns. Without these stored, the UI will likely display lift without significance, and operators will act on noise. The schema also has no `min_sample_size` or `min_duration` columns to enforce experiment validity.
 
-**Prevention:**
-- Any feedback score must account for multi-SKU families: if one SKU in a family was published and others were not, the performance delta for ALL sibling SKUs is contaminated
-- Use `variant_index` to identify product_id families before computing feedback
-- Flag multi-SKU family feedback as LOWER confidence than single-SKU feedback
-- Consider family-level feedback aggregation (one score per product_id, not per master_sku)
+**How to avoid:**
+- Add `p_value numeric(8,6)` and `confidence_interval_lower/upper numeric(14,6)` columns to `experiment_outcomes` (or store in `metadata` JSONB).
+- Add `min_sample_size` and `min_duration_days` columns to `experiment_registry`. Enforce: experiments cannot be resolved before both thresholds are met.
+- Use sequential testing (not fixed-horizon): compute a running p-value and only declare significance when it crosses 0.05 after a minimum observation window (14 days).
+- For shopping tier experiments specifically, run experiments at the **product group level** (not individual terms) to aggregate enough volume. A product group with 200 terms across 3 tiers has enough volume to detect meaningful effects in 30-60 days.
+- Display confidence intervals on all lift estimates in the UI. Show "Lift: +12% (95% CI: -8% to +32%)" not just "Lift: +12%".
+- Default experiment duration to 30 days minimum. Allow extension but not shortening.
 
-**Detection:** `SELECT product_id, COUNT(DISTINCT master_sku) FROM variant_index GROUP BY product_id HAVING COUNT(DISTINCT master_sku) > 1` — cross-reference with any content-performance feedback scores.
+**Warning signs:**
+- Experiments resolved (status='success'/'failure') with sample_size < 100
+- Experiments resolved in <14 days
+- Multiple experiments showing "significant" lifts of opposite signs on the same product group
+- No experiments ever reach 'inconclusive' status (suggests the bar is too low)
 
----
-
-### Pitfall 6: Empty Optimization Tables Create False "Working" State
-
-**What goes wrong:** Existing tables from migrations 032/033 (`sku_bottleneck_classifications`, optimization control tables) have schemas but zero rows because the classification logic uses hardcoded thresholds no SKU meets. Adding new data persistence on top of these tables (or building new features that JOIN to them) silently produces empty results. Worse: dashboard pages render with proper UI but zero data, creating a "looks functional but empty" experience that confuses users.
-
-**Why it happens:** The optimization pipeline was built speculatively with thresholds like ROAS > 3.6 and CVR > 5% that were never calibrated against Allied Brass's actual performance data. The tables exist but are empty, and queries that LEFT JOIN to them return NULLs that propagate silently through aggregations.
-
-**Prevention:**
-1. Before building anything on top of existing optimization tables, run `SELECT table_name, n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup` — this gives a complete row count census
-2. Any table with zero rows should be classified: populate with real data, remove, or explicitly mark as "v1.3c prerequisite"
-3. Never LEFT JOIN to a table you have not verified has data — use INNER JOIN so missing data produces visible empty results rather than silent NULLs
-4. For empty dashboard pages: add explicit "No data yet - this feature requires [prerequisite]" messaging rather than empty tables
-
-**Detection:** A dashboard page that renders a table/chart but shows empty space is the symptom. Run the schema-wide row count audit at the start of the milestone.
+**Phase to address:**
+Phase 3 (A/B Testing Framework). The schema additions should be in the migration that creates `automation_rules`. The UI must show significance from day 1 -- adding it later means operators have already learned to trust raw lift numbers.
 
 ---
 
-### Pitfall 7: Per-Platform Content Generation Complicates Feedback Schema
+### Pitfall 4: Revenue Estimates That Erode Trust -- False Precision in Dollar Impact
 
-**What goes wrong:** The v1.3a per-platform v2 generation architecture means each SKU has separate content for Google, Bing, and Shopify (6 records in `generated_content`: title + description for each platform). A feedback loop that measures "content performance" must handle that Google performance data only applies to Google content, Bing data only to Bing content, and Shopify has different metrics entirely (page views, add-to-cart rather than impressions/clicks).
+**What goes wrong:**
+The spec shows `netMonthlyImpact: number // dollars` with messages like "Moving 'brass towel bar' from HIGH to MEDIUM could generate ~$Y additional monthly revenue." These estimates use formulas like `(target_tier_avg_cvr - current_tier_avg_cvr) x current_impressions x target_tier_avg_aov`. Each variable has 20-50% uncertainty, and they multiply: if CVR estimate is 30% off, impressions 20% off, and AOV 25% off, the combined estimate can be 2-3x off in either direction.
 
-**Why it happens:** The v2 per-platform architecture shipped in v1.3a. Anyone building the feedback loop who last looked at the system pre-v1.3a will assume one content set per SKU. The `generated_content` table has a `(master_sku, platform, content_type)` unique constraint, making it obvious at the schema level — but the feedback schema design may not account for platform-specific metrics.
+Operators see "$2,400/month revenue leakage" as a precise number. When they execute the recommendation and revenue changes by $800 (or drops $200), they lose trust in the entire system. The "total leakage estimate" hero number is especially dangerous because it sums estimates across dozens of terms, compounding errors.
 
-**Prevention:**
-- Feedback table/view must be keyed on `(master_sku, platform)`, not just `master_sku`
-- Google/Bing feedback uses CTR/CVR from Google Ads / Bing Ads
-- Shopify feedback needs different metrics (page conversion rate, bounce rate) which are NOT currently captured in any table
-- For v1.3b: scope feedback to Google only (the platform with the most data and the most complete measurement infrastructure). Bing and Shopify feedback are v1.4 scope.
+**Why it happens:**
+Developers show dollar estimates because the spec says "every recommendation must show a dollar-value estimate." But without communicating uncertainty, a helpful estimate becomes a false promise.
 
-**Detection:** If the feedback schema has `master_sku` as a unique key without `platform`, it is wrong.
+**How to avoid:**
+- Show **ranges, not point estimates**: "$800 - $3,200/month" not "$2,400/month". Use Monte Carlo simulation or propagate the coefficient of variation through the formula.
+- Color-code by confidence: green (high data volume, tight range), yellow (moderate), red (low data volume, wide range). Terms with <50 clicks should always be red.
+- The hero "total leakage" number should show the conservative bound: "At least $X/month in revenue opportunities detected (conservative estimate)." Use p25 of the distribution of estimates, not the sum of medians.
+- Track prediction accuracy: after each executed movement, compare the predicted impact to actual outcome at 14/30 days. Store in `performance_impact_scores`. Report hit rate: "Our estimates have been within 50% of actual 72% of the time."
+- Use the word "estimate" or "opportunity" everywhere, never "leakage" in isolation (which implies certainty).
 
----
+**Warning signs:**
+- Revenue estimates that are >50% of total campaign spend (mathematically implausible)
+- Operator approval rate dropping below 50% (they've stopped trusting recommendations)
+- No feedback loop tracking predicted vs actual impact
+- Single-term estimates exceeding $500/month for terms with <20 clicks
 
-### Pitfall 8: Migration Numbering Conflicts and Ordering Issues
-
-**What goes wrong:** New migrations collide with existing migration numbers. The repo already has duplicate numbers (026, 032, 033 each have two files) plus the deferred 034b/035b files. Adding new migrations requires careful numbering to avoid Supabase migration runner conflicts.
-
-**Why it happens:** Supabase migration system tracks applied migrations by filename/timestamp. Duplicate numbers with different suffixes (034 vs 034b) can confuse the runner. The deferred files are marked "DEFERRED" in the filename but still exist in the `supabase/migrations/` directory, and Supabase may attempt to run them.
-
-**Prevention:**
-1. Before creating any migration, run `ls supabase/migrations/ | sort` and pick the next available number
-2. If pruning deferred migrations, MOVE files out of the migrations directory entirely (to `supabase/migrations_archive/`) rather than relying on naming conventions
-3. Use sequential numbering from the current highest (037+) — never insert between existing numbers
-4. Apply migrations one at a time in a development environment, verify each succeeds before the next
-5. Note in the 034b/035b headers: "STATUS: Tables created out-of-band" — these tables may already exist in production even though the migration was "deferred." Verify with `SELECT tablename FROM pg_tables WHERE schemaname = 'public'` before deciding to apply or remove.
-
-**Detection:** `supabase migration list` shows conflicts or "already applied" errors.
+**Phase to address:**
+Phase 1 (Revenue Leakage Dashboard). The range display and confidence coloring must be in the first implementation. Adding "accuracy tracking" is Phase 4 (Impact Tracker) but the UI language must be right from the start.
 
 ---
 
-### Pitfall 9: Historical Snapshot Storage Grows Unbounded
+### Pitfall 5: Cache Staleness Cascade -- 2-Minute Cache Meets Heavy Computation
 
-**What goes wrong:** Daily persistence of service.ts Google Ads data for 2,784 SKUs with 6 query types generates 15,000-50,000 rows per day. Within a year: 5-18 million rows. Supabase query performance degrades, storage costs increase, and the simplest dashboard query (latest snapshot) requires scanning through months of historical data.
+**What goes wrong:**
+`service.ts` has a 2-minute cache (`CACHE_TTL_MS = 120000`). The revenue leakage API route will call `getExistingFunnelTerms()` and `getLabelTierPerformance()`, run distribution computation, z-score calculation, impact estimation, and return results. If the computation takes 15-30 seconds (177 campaigns x thousands of terms x percentile calculations), and two requests arrive 2 minutes apart, the second triggers a fresh Google Ads API call (6 parallel GAQL queries) PLUS the full computation, easily timing out the Vercel serverless function (default 10s for hobby, 60s for pro).
 
-**Why it happens:** The "persist everything" instinct is strong when moving from ephemeral 2-minute cache to historical storage. Without a retention policy, the table grows forever. The initial implementation focuses on writing data, not on pruning it.
+Worse: if the scoring engine persists results to `query_value_scores` and `routing_recommendations` tables, a partial write during a timeout leaves the database in an inconsistent state where some terms have new scores and others have stale scores.
 
-**Prevention:**
-1. Define retention policy BEFORE creating the table: daily granularity for 90 days, weekly aggregates for 1 year, monthly aggregates beyond that
-2. Build the rollup/prune job in the SAME PR as the table creation — not as "future work"
-3. Partition the table by month (Supabase supports PostgreSQL native partitioning)
-4. Calculate expected storage: (rows_per_day * avg_row_bytes * 365) and compare to Supabase plan limits
-5. Add an index on `snapshot_date DESC` and use `WHERE snapshot_date > NOW() - INTERVAL '90 days'` in all default queries
+**Why it happens:**
+The existing cache works for the Shopping Funnel page because it returns raw data quickly. Adding heavy computation on top of the cached data path changes the performance profile without changing the caching strategy.
 
-**Detection:** `SELECT pg_total_relation_size('table_name')` quarterly. Alert if growth rate exceeds 1GB/quarter.
+**How to avoid:**
+- **Separate computation from serving**: Run the scoring engine as a background job (Cloud Scheduler or on-demand trigger) that writes results to `query_value_scores` and `routing_recommendations` tables. The API route reads from these tables (fast) instead of computing on-demand.
+- **Compute-and-cache pattern**: The first request triggers computation and stores results with a timestamp. Subsequent requests serve the stored results until they're stale (e.g., 1 hour). Show "Last computed: 47 minutes ago" in the UI.
+- If computing on-demand, add a computation lock: if another request is already computing, return the last cached result with a "refreshing" indicator.
+- Set API route timeout to 60s (Vercel Pro) and add `export const maxDuration = 60` to the route.
+- Use database transactions for persisting scores: all-or-nothing writes prevent partial updates.
 
----
+**Warning signs:**
+- Revenue leakage page takes >5 seconds to load (spec says <3 seconds)
+- Vercel function logs showing 504 Gateway Timeout on scoring routes
+- `query_value_scores` table has mixed timestamps (some rows from 10am, others from 2pm, in the same scoring run)
+- Google Ads API quota utilization increasing >5% (currently at 1.2%)
 
-## Minor Pitfalls
-
-### Pitfall 10: Offer ID Case Sensitivity Breaks Feedback Joins
-
-**What goes wrong:** Performance data uses lowercase offer IDs (`shopify_us_...`) while GMC uses uppercase (`shopify_US_...`). Feedback queries that JOIN across tables without normalizing case silently return zero rows, making it look like published content has no performance data.
-
-**Prevention:** All JOINs involving `gmc_offer_id` must use `LOWER()` on both sides, or normalize to lowercase in the persistence layer. This is a known issue (documented in CLAUDE.md) but easy to forget in new query code. Add it to code review checklist.
-
----
-
-### Pitfall 11: Score Model Dead in v2 Path Creates Misleading Quality Data
-
-**What goes wrong:** The 10-criterion quality score model from v1.3a is only consumed by the v1 code path. The v2 `generate_per_platform()` returns raw dicts with no quality gating. If the feedback loop correlates `quality_score` from `generated_content` with performance, it may use v1-era scores that do not reflect the v2-generated content — or find NULLs for all v2 content.
-
-**Prevention:**
-- Verify that `quality_score` is populated for v2-generated content: `SELECT COUNT(*) FROM generated_content WHERE quality_score IS NOT NULL AND generation_timestamp > '2026-02-20'`
-- If not populated, either wire the score model into v2 (v1.3b scope?) or explicitly exclude `quality_score` from feedback correlations
-- Document which columns are reliably populated in the v2 era vs legacy v1 data
+**Phase to address:**
+Phase 1 (Revenue Leakage Dashboard). The architecture decision (compute-on-demand vs background job) must be made before building the API route. Background job is strongly recommended given the data volume.
 
 ---
 
-### Pitfall 12: Background Tasks vs Migration Application Timing
+### Pitfall 6: Funnel Snapshot Gap -- Trend Analysis on Empty History
 
-**What goes wrong:** Applying Supabase migrations while Cloud Run is processing batch jobs causes table locks or schema mismatches mid-generation. Cloud Run uses `run_async_in_thread()` for long-running tasks that survive HTTP responses — these threads hold open database connections that can conflict with DDL changes.
+**What goes wrong:**
+`funnel_snapshots_daily` was created and backfilled with 4,093 rows, but the production table "appears empty" (per PROJECT.md tech debt). Cloud Scheduler is not yet activated. If Phase 1 builds trend analysis ("ROAS trending up 12% this week") without first confirming historical data exists, operators see misleading "0% change" or errors. Worse, if the backfill endpoint is re-run but the scheduler isn't activated, you get a one-time snapshot with no ongoing data, making "7d vs prev-7d" comparisons impossible after the first week.
 
-**Prevention:**
-- Apply migrations during off-hours or after confirming no active batch jobs: `SELECT * FROM batch_generation_jobs WHERE status = 'running'`
-- Column additions (ALTER TABLE ADD COLUMN) are generally non-blocking in PostgreSQL
-- Column modifications, constraint additions, and index creation on large tables CAN lock — use `CREATE INDEX CONCURRENTLY` where possible
+**Why it happens:**
+The infrastructure was built in v1.3b but the operational activation (scheduler + backfill) is a manual step that's easy to forget. The code works, the tables exist, the endpoints exist -- the gap is operational, not technical.
 
----
+**How to avoid:**
+- **Gate Phase 1 on funnel data activation**: Before any Phase 1 code is written, run the backfill endpoint and activate the Cloud Scheduler. Verify data exists with a SQL count.
+- Add a **data availability check** to every API route that uses historical data. If `funnel_snapshots_daily` has <14 rows for the queried group, return a degraded response with "Insufficient historical data -- trends will be available after [date]" instead of misleading zero-change numbers.
+- Use `service.ts` live data for current-state analysis and ONLY use `funnel_snapshots_daily` for trend comparisons. Don't block the scoring engine on historical data availability.
+- Set up a monitoring alert: if `funnel_snapshots_daily` hasn't received new rows in 48 hours, alert (means scheduler died or endpoint is failing silently).
 
-### Pitfall 13: 034b GA4 Tables Already Exist Out-of-Band
+**Warning signs:**
+- `SELECT COUNT(*) FROM funnel_snapshots_daily` returns 0 (still empty)
+- Trend cards showing "0% change" across all product groups (not realistic)
+- `7d vs prev-7d` comparison using the same 7 days for both windows (no new data flowing in)
+- Cloud Scheduler script exists but CRON_SECRET is not set
 
-**What goes wrong:** The deferred migration files contain `CREATE TABLE IF NOT EXISTS` statements, and the file headers note "Tables created out-of-band; this file is reference only." This means the tables MAY already exist in production Supabase despite the migration being "deferred." Attempting to evaluate "should we apply this migration?" misses that the tables are already there, potentially with stale schemas if the migration file was updated after out-of-band creation.
-
-**Prevention:**
-- Before ANY migration evaluation, query production: `SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename LIKE 'ga4_%' OR tablename LIKE 'intent_%' OR tablename LIKE 'term_%' OR tablename LIKE 'policy_%' OR tablename LIKE 'experiment_%'`
-- Compare actual table schemas against migration file definitions to check for drift
-- The evaluation is not "apply or not" — it may be "the tables exist, do we keep/modify/drop them"
-
----
-
-## Phase-Specific Warnings
-
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Architecture audit | Pitfall 6 (empty tables) | Run `pg_stat_user_tables` census first; document every table with row count |
-| Architecture audit | Pitfall 11 (dead score model) | Verify which columns are populated for v2-era content |
-| Architecture audit | Pitfall 13 (tables exist out-of-band) | Query production schema before evaluating migration files |
-| Migration evaluation | Pitfall 2 (applying without pruning) | Categorize KEEP/DEFER/REMOVE before touching any migration |
-| Migration evaluation | Pitfall 8 (numbering conflicts) | Move deferred files out of migrations directory; verify numbering |
-| Content-performance linkage | Pitfall 1 (duplicating infrastructure) | Write the JOIN first, only create new table for genuinely new data |
-| Content-performance linkage | Pitfall 4 (broken version chain) | Audit NULL rates in prompt_hash and publish_event_id for recent publishes |
-| Content-performance linkage | Pitfall 5 (multi-SKU attribution) | Account for product_id families in feedback schema |
-| Content-performance linkage | Pitfall 7 (per-platform) | Key feedback on (master_sku, platform), scope to Google-only for v1.3b |
-| Data persistence | Pitfall 3 (breaking live queries) | Write-behind pattern, feature-flagged, separate read endpoint |
-| Data persistence | Pitfall 9 (unbounded growth) | Retention policy in the same PR as table creation |
-| All phases | Pitfall 10 (offer ID case) | LOWER() on all gmc_offer_id joins; add to code review checklist |
-| All phases | Pitfall 12 (migrations during jobs) | Confirm no active batch jobs before applying migrations |
+**Phase to address:**
+Pre-Phase 1 prerequisite. This is an operational task, not a coding task. Run `bash scripts/setup-funnel-scheduler.sh` and POST to `/api/funnel-snapshots/backfill` before starting Phase 1 development.
 
 ---
 
-## Risk Summary
+### Pitfall 7: Experiment Contamination -- Shared Negative Lists Leak Between Treatment and Control
 
-| Risk Level | Count | Key Theme |
-|------------|-------|-----------|
-| Critical | 4 | Schema duplication, untested migrations, breaking live APIs, missing version linkage |
-| Moderate | 5 | Multi-SKU attribution, empty tables, per-platform complexity, migration numbering, storage growth |
-| Minor | 4 | Case sensitivity, dead score model, migration timing, out-of-band tables |
+**What goes wrong:**
+The 3-tier Shopping funnel uses shared negative keyword lists (`AVD - Global Block`, `AVD - Competitor Terms`, `AVD - BRANDED_SEARCH_TERMS - US`). When running an A/B test that moves treatment terms to a different tier (by adding/removing campaign-level negatives), the shared lists still apply to both treatment and control. If a term in the treatment group gets added to the Global Block list during the experiment (by another process or manual action), it's removed from both treatment and control, contaminating the experiment.
 
-**The single highest-risk pitfall is Pitfall 1 (duplicating performance infrastructure).** The system already has the data needed for feedback loops scattered across 5 tables. The gap is JOIN quality (NULL foreign keys) and a convenient aggregation layer — not new tables. Building a new "feedback" table that re-stores performance metrics will create a maintenance nightmare that compounds with every future milestone.
+More subtly: tier movements work by adding negative keywords to the tiers a term should NOT appear in. If the experiment moves term "brass towel bar" from LOW to MEDIUM by removing its MEDIUM campaign negative, but another automated process (or Phase 3 automation rules) simultaneously adds it back, the experiment is silently sabotaged.
 
-**The second highest risk is Pitfall 4 (broken version linkage).** Without reliable `prompt_hash` -> `publish_event_id` -> performance data chain, the entire v1.4 closed-loop optimization milestone becomes impossible. This must be fixed as infrastructure before any feedback feature is built.
+**Why it happens:**
+The experiment framework (`experiment_registry`, `experiment_assignments`) tracks which terms are in treatment/control, but there's no mechanism to LOCK those terms from modification by other processes during the experiment. The `negative_registry` table logs changes but doesn't prevent conflicting changes.
+
+**How to avoid:**
+- Add an **experiment lock** check to `executeTierMovement()`: before executing any movement, check if the term is assigned to an active experiment. If yes, reject the movement with reason code `experiment_locked`.
+- Add `locked_by_experiment text NULL` column to `negative_registry` or create a `experiment_term_locks` table. Active experiments register their terms, and all movement paths check the lock.
+- Automation rules (Phase 3.1) must respect experiment locks: the `evaluate-rules` endpoint must filter out experiment-enrolled terms.
+- Log experiment integrity violations: if a shared list modification affects experiment terms, log it to `experiment_outcomes.metadata` so the analysis can account for contamination.
+- Consider using only **product group level** experiments (all terms in a product group are treatment or control) to reduce cross-contamination risk.
+
+**Warning signs:**
+- `negative_registry` rows created during an active experiment that affect experiment-enrolled terms
+- Treatment and control groups having different term counts at experiment end vs start
+- Experiment results showing identical performance for treatment and control (terms were moved back)
+- `experiment_outcomes` with `observed_lift = 0` for all metrics (likely contamination, not no effect)
+
+**Phase to address:**
+Phase 3 (A/B Testing Framework). The lock mechanism must be built before the first experiment runs. Retroactively adding locks after experiments have been contaminated is useless.
 
 ---
+
+### Pitfall 8: Z-Score Misuse -- Normal Distribution Assumption on Skewed ROAS Data
+
+**What goes wrong:**
+The spec proposes using z-scores to determine tier placement: "Compute z-score of term's ROAS relative to each tier's ROAS distribution. Term belongs in the tier where its z-score is closest to 0." Z-scores assume normally distributed data. ROAS distributions in Google Shopping are heavily right-skewed: most terms have ROAS 0-2 (lots of impressions, few conversions), with occasional outliers at ROAS 10-50 (one conversion on low spend). The mean is dragged up by outliers, making the z-score meaningless for the majority of terms.
+
+**Why it happens:**
+Z-scores are the textbook approach for "how far from average." Developers use them without checking the underlying distribution shape. With ROAS data, the median is typically 50-70% of the mean, and the standard deviation can exceed the mean.
+
+**How to avoid:**
+- Use **percentile ranks** instead of z-scores: "this term's ROAS is at the 85th percentile of its tier" is meaningful regardless of distribution shape.
+- If z-scores are needed for the scoring formula, use **robust z-scores**: `(value - median) / MAD` where MAD = median absolute deviation. This is resistant to outliers.
+- Alternatively, log-transform ROAS before computing z-scores: `log(ROAS + 0.01)` is closer to normal for most Shopping data.
+- Cap outlier ROAS at p99 before computing any distribution statistics. A single term with ROAS = 47 (one $200 sale on $4.25 spend) should not dominate the tier's average.
+- Validate the approach: before launch, compute z-scores for all existing funnel terms and check if the "misplaced" recommendations make intuitive sense. If >50% of terms are flagged as misplaced, the model is wrong.
+
+**Warning signs:**
+- Standard deviation of tier ROAS > 2x the mean (the distribution is too skewed for z-scores)
+- >40% of terms flagged as misplaced (the model is fitting outliers, not the majority)
+- Recommendations dominated by terms with very low spend (these have extreme ROAS ratios from small denominators)
+- ROAS tier boundaries that are negative (mathematically possible with z-scores on skewed data, nonsensical in practice)
+
+**Phase to address:**
+Phase 1 (Adaptive Tier Scoring Engine). This is a modeling decision that must be validated before the scoring engine ships. Use percentile ranks as the primary approach; add z-scores only if there's a specific need.
+
+---
+
+## Technical Debt Patterns
+
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Compute scores on-demand instead of background job | Simpler architecture, no scheduler needed | API timeouts, inconsistent data, high API quota usage | Only during development/testing with <100 terms |
+| Skip confidence intervals on revenue estimates | Faster UI development, simpler display | Operator trust erosion, bad decisions on noise | Never -- show ranges from day 1 |
+| Use global distributions instead of per-group | Avoids cold start, always has data | Misses group-specific patterns (towel bars vs mirrors have very different ROAS profiles) | Acceptable as fallback, not as default for groups with sufficient data |
+| Store experiment p-values in metadata JSONB instead of typed columns | Avoids migration, flexible schema | No DB-level constraints on validity, harder to query/aggregate | Acceptable for MVP if a typed migration follows within 2 sprints |
+| Hardcode max-movements-per-run in code instead of configurable | Ship automation faster | Operators can't tune safety margins | Never -- hardcoded safety limits inevitably need adjustment |
+
+## Integration Gotchas
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Google Ads API (negative keywords) | Executing 50+ keyword mutations in a single API call, hitting operations-per-minute rate limit | Batch mutations in groups of 10-20 with 1-second delays between batches. The existing `service.ts` retry logic handles transient errors but not rate limit backpressure. |
+| Google Ads API (GAQL queries) | Running additional GAQL queries for trend data (7d vs prev-7d) on top of the 6 existing parallel queries in `service.ts`, doubling API load | Use `funnel_snapshots_daily` table for historical comparisons. Only use live GAQL for current state. |
+| Supabase (query_value_scores writes) | Upserting thousands of score rows one-by-one in a loop | Use Supabase bulk upsert with `onConflict` on the composite key. Batch in groups of 500. |
+| Vercel serverless (computation timeouts) | Assuming default 10s timeout is sufficient for scoring computation | Set `export const maxDuration = 60` on computation routes. For background scoring, use Cloud Run instead of Vercel. |
+| Google Sheets (supplemental feed updates) | Updating `custom_label_0` values for promoted/demoted terms without checking if the row already has the correct value | Read the current sheet state first. Only update changed rows. The existing `updateSupplementalFeedTiers()` in `tier-movement.ts` handles this correctly -- don't duplicate the logic. |
+| `service.ts` cache | Calling `getExistingFunnelTerms()` from multiple API routes within the same 2-minute window and expecting identical data | The cache is module-level in `service.ts` and works correctly. But if a route calls it, mutates Google Ads (tier movement), and calls it again within 2 minutes, the cache returns stale pre-mutation data. Clear cache or wait for TTL expiry after mutations. |
+
+## Performance Traps
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Computing percentiles on every page load | Revenue leakage page takes 10+ seconds, increasing linearly with term count | Pre-compute and cache. Recompute on schedule (every 1-6 hours) or on-demand with a "Refresh" button | >500 terms in funnel (likely already there) |
+| N+1 queries joining `search_queries` with `keyword_metrics` for demand gap analysis | Demand gaps page takes 30+ seconds; Supabase connection pool exhaustion | Single JOIN query with indexes on `keyword` column. Precompute impression share gaps in a cached table | >2,000 keyword_metrics rows (currently ~2,784 SKUs x multiple terms) |
+| Client-side sorting/filtering of 10,000+ recommendation rows | Browser freezes when opening revenue leakage page | Server-side pagination with `LIMIT/OFFSET`. Return top 50 with total count. Add filters (product group, tier, min confidence) | >1,000 recommendations |
+| Bubble chart rendering with 59 product groups | Chart renders slowly, overlapping bubbles are unreadable | Use virtualized charting library. Limit to top 20 groups by spend with "Other" aggregate. Provide table view as default, chart as optional | Always -- 59 bubbles with overlapping labels is inherently messy |
+| `getLabelTierPerformance()` returning 177 rows (59 groups x 3 tiers) and computing distributions for each | Scoring engine takes 20+ seconds for full computation | Compute distributions in parallel using `Promise.all()` per tier. Cache intermediate results. | >100 product groups |
+
+## Security Mistakes
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Automation rules executing without operator authentication check | Unauthorized tier movements burning ad spend | All automated execution routes must verify caller identity -- Cloud Scheduler calls should use a CRON_SECRET header, operator-initiated calls should require session auth |
+| Storing Google Ads API credentials in automation rule metadata | Credential exposure through `automation_rules` table reads | Never store credentials in rule definitions. Rules reference the credential source (env var name), not the credential itself |
+| Revenue leakage data exposed without role-based access | Competitive intelligence data (dollar estimates, search terms, tier assignments) visible to unauthorized users | Ensure all `/api/shopping-funnel/*` routes check authentication. The existing routes do -- verify new routes follow the same pattern |
+
+## UX Pitfalls
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Showing "0 recommendations" when scoring engine is initializing or data is insufficient | Operators think system is broken (same as current hardcoded threshold problem) | Show "Computing recommendations..." with a progress indicator, or "Insufficient data for this product group -- need N more days of data" |
+| Revenue leakage hero number updating on every page load with slightly different values | Operators lose trust in precision of estimates | Compute once per hour, show "as of [time]". Use consistent rounding ($2.4K not $2,387.42) |
+| Automation rules executing silently with no notification | Operators discover changes days later, can't correlate spend changes to automated actions | Push notification or dashboard alert after every automated execution batch. Show "3 terms moved automatically today" banner |
+| Experiment results page showing lift without context | "12% ROAS lift" sounds great but could mean $0.50/month | Always show absolute dollar impact alongside percentage lift |
+| BCG matrix quadrant names (Stars/Dogs/Cash Cows) for product groups | Operators managing "Towel Bars" don't think in BCG terms | Use action-oriented labels: "Scale Up" (Stars), "Optimize" (Question Marks), "Maintain" (Cash Cows), "Review" (Dogs) |
+
+## "Looks Done But Isn't" Checklist
+
+- [ ] **Adaptive scoring engine**: Often missing the fallback hierarchy for sparse data -- verify scoring works for a product group with only 2 terms in LOW tier
+- [ ] **Revenue leakage estimates**: Often missing uncertainty communication -- verify dollar estimates show ranges not point values
+- [ ] **A/B testing framework**: Often missing minimum sample size enforcement -- verify an experiment cannot be resolved with <100 sample size
+- [ ] **A/B testing framework**: Often missing experiment locking -- verify `executeTierMovement()` rejects movements for experiment-enrolled terms
+- [ ] **Automation rules**: Often missing daily spend impact caps -- verify a rule evaluation run cannot recommend >$50/day incremental spend
+- [ ] **Automation rules**: Often missing dry-run-first enforcement -- verify automated rules cannot execute without a dry-run preview persisted to `routing_recommendations`
+- [ ] **Weekly digest**: Often missing "no data" states -- verify digest handles product groups with zero activity gracefully
+- [ ] **Impact tracker**: Often missing predicted-vs-actual comparison -- verify executed movements have before/after performance stored
+- [ ] **Product matrix**: Often missing pagination -- verify the page loads in <3s with all 59 product groups
+- [ ] **Funnel data**: Often missing operational activation -- verify Cloud Scheduler is running and `funnel_snapshots_daily` has recent data before claiming trends are available
+
+## Recovery Strategies
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Degenerate distributions causing mass movements | MEDIUM | 1. Pause automation rules immediately. 2. Review `policy_action_execution_log` for recent automated movements. 3. Use `negative_registry` rollback_tokens to reverse movements. 4. Add minimum sample size checks. 5. Re-run scoring with fallback to global distributions. |
+| Runaway automated spend | HIGH | 1. Pause all automation rules. 2. Use `negative_registry` to identify and reverse recent automated movements. 3. Check Google Ads spend reports for impact. 4. Review and lower max-movements-per-run cap. 5. Require manual approval for 1 week while investigating. |
+| Underpowered experiment declared significant | LOW | 1. Mark experiment as 'inconclusive' in `experiment_registry`. 2. Reverse treatment movements using `negative_registry`. 3. Extend experiment duration. 4. Add p-value requirement. |
+| Trust erosion from bad revenue estimates | MEDIUM | 1. Switch all estimates to ranges. 2. Add "prediction accuracy" tracking. 3. Reduce hero number to conservative bound. 4. Rebuild operator trust over 2-4 weeks of accurate predictions. |
+| Cache staleness causing stale scoring | LOW | 1. Switch to background computation model. 2. Add `Last computed: X minutes ago` to UI. 3. Add manual "Refresh" button for operators who need fresh data. |
+| Experiment contamination from shared negatives | HIGH | 1. Mark affected experiments as contaminated. 2. Exclude contaminated data from analysis. 3. Add experiment locks before re-running. 4. Consider product-group-level experiments to reduce contamination surface. |
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Distribution cold start (degenerate percentiles) | Phase 1 -- Scoring Engine | Run scoring on all 59 groups; verify no group produces >50% misplaced terms |
+| Automation spend caps | Phase 1 (caps) + Phase 3 (enforcement) | Simulate 100 terms recommended for movement; verify batch is capped at 10 |
+| Underpowered A/B tests | Phase 3 -- A/B Testing | Create an experiment with sample_size=50; verify it cannot be resolved |
+| Revenue estimate false precision | Phase 1 -- Revenue Leakage Dashboard | Verify UI shows ranges, not point estimates; verify confidence color coding |
+| Cache staleness cascade | Phase 1 -- API route architecture | Load test: 5 concurrent requests to revenue leakage API; verify <3s response |
+| Funnel snapshot gap | Pre-Phase 1 prerequisite | `SELECT COUNT(*) FROM funnel_snapshots_daily WHERE snapshot_date > NOW() - INTERVAL '7 days'` returns >0 |
+| Experiment contamination | Phase 3 -- A/B Testing | Create experiment; attempt tier movement on enrolled term; verify rejection |
+| Z-score on skewed data | Phase 1 -- Scoring Engine | Compute ROAS skewness for each tier; verify percentile ranks used instead of z-scores |
 
 ## Sources
 
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/database/SCHEMA.md` — complete schema reference (36+ tables, column definitions, JOIN paths)
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/plans/2026-02-21-strategic-milestone-assessment.md` — strategic assessment identifying all gaps
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/.planning/PROJECT.md` — project context, known issues, tech debt inventory
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/035b_DEFERRED_unified_intent_execution_system.sql` — 14 deferred intent tables with "created out-of-band" note
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/034b_DEFERRED_ga4_attribution_forensics.sql` — 4 deferred GA4 tables with "created out-of-band" note
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard/src/lib/shopping-funnel/service.ts` — 1,600-line live Google Ads query layer with 2-min cache
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard/src/lib/optimization/control-center.ts` — hardcoded ROAS thresholds (3.6/3.1/2.6)
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/CLAUDE.md` — system conventions, known issues, architecture patterns
+- Codebase analysis: `service.ts` (2-min cache, 6 GAQL queries), `query-intelligence.ts` (hardcoded ROAS 3.6/3.1 thresholds), `control-center.ts` (BASELINE_TARGET_ROAS), `policy.ts` (PROMOTION_THRESHOLDS, evaluateGuardrails), `tier-movement.ts` (executeTierMovementBatch, CONFIDENCE_GATES)
+- Schema: `experiment_registry` (no p_value column), `experiment_outcomes` (no confidence_interval), `funnel_snapshots_daily` (empty production table), `negative_registry` (rollback_token for undo)
+- Milestone spec: `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md` (data volume: 177 campaigns x 59 product groups x 3 tiers)
+- PROJECT.md tech debt: Cloud Scheduler not activated, funnel data needs re-backfill
+- [Google Ads API Limits and Quotas](https://developers.google.com/google-ads/api/docs/best-practices/quotas) -- 10,000 operations per mutate request, token bucket rate limiting
+- [Google Ads Statistical Methodology for Experiments](https://support.google.com/google-ads/answer/9232676?hl=en) -- 95% confidence, two-tailed testing
+- [Shopping Campaign Priority Structures](https://savvyrevenue.com/blog/google-shopping-campaign-structure/) -- tier management patterns and priority-based funnel architecture
+- [Google Ads Negative Keyword Automation Guide](https://www.negator.io/post/google-ads-api-scripts-negative-keyword-automation-developer-guide) -- batch mutation patterns, rate limit considerations
+- [Google Ads Rate Limits](https://developers.google.com/google-ads/api/docs/productionize/rate-limits) -- token bucket algorithm, QPS per CID
 
 ---
-*Pitfalls research for: Allied FeedOps v1.3b — Architecture Validation & Data Persistence*
+*Pitfalls research for: Allied FeedOps v1.3c -- Actionable Shopping Intelligence*
 *Researched: 2026-02-25*

@@ -1,187 +1,198 @@
 # Project Research Summary
 
-**Project:** Allied FeedOps v1.3b — Architecture Validation & Data Persistence
-**Domain:** Feed optimization platform — content-performance feedback loops, historical data persistence, deferred migration triage
+**Project:** Allied FeedOps v1.3c — Actionable Shopping Intelligence
+**Domain:** Google Shopping tier optimization intelligence system
 **Researched:** 2026-02-25
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Allied FeedOps v1.3b is a focused infrastructure milestone whose singular purpose is to close the gap between content generation and measurable performance outcomes. The platform already has all the raw data it needs — publish events, performance baselines, performance snapshots, regeneration history — but none of it is connected. The recommended approach treats this milestone as plumbing, not features: create a materialized view that joins existing tables into a single content-performance feedback record, persist the ephemeral service.ts funnel data into a daily snapshot table, and surgically triage 18 deferred migration tables so the schema reflects reality rather than aspiration.
+v1.3c transforms the existing Allied FeedOps shopping funnel from a passive campaign management interface into an active revenue optimization engine. The core problem is simple but costly: hardcoded ROAS thresholds (3.6/3.1/2.6) do not match actual performance distributions across 59 product groups, causing the Tier Movements Panel to show zero recommendations despite real misplacement opportunities. The recommended solution is a distribution-based scoring engine (`tier-scoring.ts`) that computes dynamic percentile boundaries from live data and uses z-score analysis to identify misplaced search terms — then quantifies their dollar impact to prioritize operator action.
 
-The most important architectural decision for this milestone is to resist the temptation to build a new "feedback" table with its own write path. All the performance data already exists across five tables; the gap is a convenient JOIN and a reliable linkage chain (prompt_hash -> publish_event_id -> performance snapshots). A materialized view that refreshes daily costs nothing to maintain and puts zero new data in motion. This is the right tool. Similarly, the service.ts persistence problem is best solved by adding a write-behind snapshot endpoint — leaving the live query path completely unchanged — rather than rearchitecting the 1,600-line Google Ads integration.
+The recommended approach is deliberately conservative about new infrastructure: one new npm package (`simple-statistics`), zero new services, and maximum reuse of existing pipelines. The scoring engine calls existing service.ts functions, writes to already-provisioned but empty tables (`query_value_scores`, `routing_recommendations`), and triggers the already-built execution pipeline (`executeTierMovementBatch()`). The critical dependency chain is: distribution engine → misplaced term detection → dollar estimates → execution wiring → everything else. The most important design decision is whether to compute distributions on-demand or via background job; background computation is strongly recommended to avoid Vercel serverless timeout risk at this data volume (~3K search terms, 177 campaign-group combinations).
 
-The key risk is scope creep in two directions: applying all 18 deferred migration tables wholesale (which creates a schema full of empty aspirational tables), and building new write paths for data that already exists (which creates a maintenance fork). Research strongly recommends triage-first — audit actual production schema state before touching any migration file — and a strict rule that no new performance metric column (impressions, clicks, ctr) appears in any new table. This milestone lays the data foundation that v1.3c (distribution-based scoring) and v1.4 (closed-loop optimization) depend on. Getting the linkage chain right here is more important than delivering any user-visible feature.
-
----
+The primary risks cluster around statistical rigor and automation safety. ROAS distributions in Google Shopping are right-skewed, not normal — z-scores on raw ROAS data will produce nonsense; percentile ranks or robust z-scores are required. Sparse product groups (some tiers have 2-5 terms) need a hierarchical fallback to global distributions to prevent degenerate thresholds. Automated tier movements need hard spend caps and dry-run-first enforcement before any automation executes live, or a single miscalculated scoring run can promote dozens of terms into higher-bid tiers simultaneously. An operational prerequisite must be resolved before Phase 1 begins: `funnel_snapshots_daily` appears empty in production and Cloud Scheduler is not activated — this must be fixed first or trend analysis will silently return misleading zeros.
 
 ## Key Findings
 
 ### Recommended Stack
 
-v1.3b adds no new frameworks or services. Every addition is a native Supabase/PostgreSQL capability already available in the hosted environment. The stack research confirmed that the perceived "caching problem" with service.ts is actually a persistence problem — Redis or Upstash would solve the wrong problem and add a paid service to operate. Similarly, dbt and Airflow are overkill for a 3-table computation job that pg_cron handles in a SQL function. The only new developer dependency is Knip (dead code detection), installed as a dev tool only.
+v1.3c adds exactly one new dependency to the dashboard: `simple-statistics@^7.8.8`. It covers all statistical computation needed — percentiles, robust z-scores, chi-squared tests, t-tests, linear regression, and Bayesian smoothing — in a 30KB zero-dependency package with bundled TypeScript types. All visualization uses the already-installed Recharts 3.7 (ScatterChart with ZAxis for bubble charts; custom Bar shape for box plots). Heavy aggregation across all 2,784 SKUs uses PostgreSQL `percentile_cont()`, `stddev()`, and `width_bucket()` functions built into Supabase (PG 15). Scheduling uses existing Vercel Crons (vercel.json pattern already established) and pg_cron (available on Supabase).
 
 **Core technologies:**
-- **PostgreSQL materialized view** (Supabase Postgres 15, existing): `content_performance_feedback` — joins publish_events + performance_snapshots into a single queryable artifact; daily REFRESH CONCURRENTLY keeps it fresh without blocking reads
-- **Regular PostgreSQL table** (Supabase Postgres 15, existing): `funnel_snapshots_daily` — persists the 6 live GAQL query results from service.ts into daily rows; replaces 2-minute in-memory cache with queryable history
-- **pg_cron** (built into all Supabase plans, zero setup cost): scheduled computation of feedback aggregates and stale data cleanup; eliminates need for Cloud Scheduler on DB-internal jobs; max 8 concurrent jobs, 10-min runtime — sufficient for 2,784 SKU workloads
-- **Knip v5.x** (dev dependency only): Next.js-aware dead code detection; identifies which of the 32 intent TypeScript files are orphaned vs referenced by live routes; directly informs migration triage decisions
+- `simple-statistics` v7.8.8 (NEW): All statistical computation — zero deps, 30KB, TypeScript types included, actively maintained; covers quantile, zScore, chiSquaredGoodnessOfFit, tTestTwoSample, linearRegression
+- Recharts 3.7 (existing): All charts — ScatterChart for bubble/scatter, custom Bar shape for box plots, ComposedChart for trend bands
+- PostgreSQL 15 via Supabase (existing): Heavy aggregation — `percentile_cont()`, `width_bucket()`, window functions for z-scores across all SKUs
+- Vercel Crons (existing): Rule evaluation (daily 6am UTC), A/B experiment measurement (weekly Sunday 9am UTC)
+- pg_cron (existing): Distribution recomputation (daily 5:30am UTC) — pure SQL, no API calls needed
 
-**What NOT to add:** Redis, Prisma/Drizzle, dbt, Apache Airflow, BigQuery, Supabase Branching, pg_ivm (not available on hosted Supabase). Scale (2,784 SKUs, ~1M rows/year) does not justify any of these.
+**What NOT to add:** D3.js (Recharts wraps it internally), second chart library (Nivo/Victory/ApexCharts), mathjs (700KB, 23x heavier), jStat (stale since 2020), Redis/Upstash, Bull/BullMQ, node-cron, scipy Python side. The 59 product groups × ~3K terms data volume justifies none of these.
 
 ### Expected Features
 
-The milestone has a clear three-phase feature structure. Phase 1 is pure analysis with no code changes; Phase 2 creates the critical feedback linkage using only existing tables; Phase 3 adds persistence infrastructure for historical funnel data.
+The feature landscape is anchored by one critical path: the distribution scoring engine unlocks everything downstream. Without it, all other features (revenue leakage estimates, recommendation persistence, execution wiring) either do not work or produce misleading results.
 
-**Must have (table stakes — prerequisites for v1.3c and v1.4):**
-- **Data flow audit document** — no single document maps the complete flow from Google Ads API through every table to the dashboard; dead ends (empty optimization tables, orphaned components) are invisible without it; must come first
-- **API quota sustainability confirmation** — service.ts makes 6 GAQL queries per page load; Standard Access provides unlimited daily ops but adding daily snapshot capture must be confirmed within rate limits before building persistence
-- **Deferred migration triage** — 32 TypeScript files reference tables that don't exist in production; decision on each of 18 tables (KEEP 4, DEFER 4 to v1.4, PRUNE 10) must precede any schema work
-- **Content-performance feedback view** — the only missing link between "what content was published" and "how it performed"; keyed on (master_sku, platform); scoped to Google only for v1.3b; joins regeneration_history -> publish_events -> performance_snapshots via existing FK chain
-- **Historical funnel persistence** — `funnel_snapshots_daily` table with daily capture endpoint; Cloud Scheduler daily trigger; backfill initial 30-day window
+**Must have (table stakes):**
+- Distribution-based tier boundaries — replaces hardcoded ROAS 3.6/3.1/2.6 constants in `query-intelligence.ts` line 138, `control-center.ts` lines 3-7, and `policy.ts` lines 20-41; THE reason Tier Movements Panel shows zero recommendations
+- Misplaced term detection with percentile rank / robust z-score analysis — core value proposition; flags promotion and demotion candidates
+- Dollar-value impact estimates on every recommendation — shown as ranges ("$800-$3,200/month"), not point estimates; color-coded by confidence
+- Wasted spend alerts — terms with spend + zero conversions in 30 days; simple filter, immediate value
+- Revenue leakage hero number — single "at least $X,XXX/month in detected opportunities" (conservative bound); quantifies system value
+- One-click execution wiring — backend pipeline already exists (`executeTierMovementBatch()`); this is UI plumbing
+- Movement history + undo — `negative_registry` and `policy_action_execution_log` tables exist and store criterion IDs for reversal
+- Recommendation persistence — `routing_recommendations` table exists (migration 033, currently empty) with pending/accepted/rejected/expired workflow
+- Multi-factor confidence scoring — four-factor model: data volume (30%), consistency/CoV (30%), statistical significance (20%), NLP alignment (20%)
 
-**Should have (differentiators that increase feedback loop value):**
-- **Populate performance_impact_scores** — diff-in-diff scorecard table exists but is empty; compute job calculates treated vs control lift for published SKUs
-- **Populate search_query_snapshots after publish** — table exists with FK to publish_events but nothing writes to it; enables "which search terms changed after content update" analysis
-- **Wire or remove orphaned components** — GmcDisapprovalBadge and PromptLineagePanel exist but appear on no page; PromptLineagePanel is particularly valuable for feedback visibility
-
-**Defer to v1.3c:**
-- Distribution-based scoring for optimization tables (this is v1.3c Phase 1's entire scope — do not pre-build)
-- Full experiment framework UI
+**Should have (differentiators):**
+- BCG product group matrix — quadrant chart for 59 groups using `getLabelTierPerformance()` output; use action-oriented quadrant labels (Scale Up / Optimize / Maintain / Review) not BCG terminology
+- Competitor conquest tracking — group competitor-mentioning terms (16 tokens already in NLP) by brand; show per-competitor ROAS and spend
+- Under-invested winner detection — high-CVR terms with impression share < 30% using `keyword_metrics` data (both tables populated)
+- Seasonal demand pattern analysis — use `monthly_search_volumes` JSONB from `keyword_metrics` table to predict demand spikes
+- Brand vs non-brand revenue split — quantifies growth headroom; simple aggregation on existing NLP output
+- Automated tier rebalancing rules — configurable rule engine with three-stage rollout (dry-run → human-approved batch → auto with circuit breakers)
+- A/B testing framework — uses already-provisioned `experiment_registry/assignments/outcomes` tables (confirmed in production, empty)
 
 **Defer to v1.4:**
-- Content A/B attribution analysis (requires multiple publish cycles per SKU with different prompt_hashes)
-- Automated regeneration based on performance outcomes
-
-**Defer indefinitely:**
-- 034b GA4 attribution tables (4 tables, zero code references, no data pipeline)
-
-**Migration triage recommendation (035b — 14 intent execution tables):**
-- KEEP 4: policy_decision_log, policy_action_execution_log, negative_registry, search_buildout_recommendations
-- DEFER 4 to v1.4: experiment_registry, experiment_assignments, experiment_outcomes, term_intent_state
-- PRUNE 6: intent_taxonomy_versions, policy_snapshots, sku_margin_daily, order_line_returns_daily, attribution_confidence_daily, operator_review_audit
+- Full automation without human review
+- Email/Slack notifications
+- ML-based prediction models
+- Performance-informed content regeneration loop
 
 ### Architecture Approach
 
-The architecture is materialized-view-first for read-heavy cross-table analytics, snapshot-table-first for external API data that needs history. No new write paths should be introduced for data that already exists in source tables. The publish event (`publish_events.id`) is the universal linkage key — it already has prompt_hash, evidence_hash, quality_score, published content, and a direct FK to performance_snapshots. The materialized view makes this join explicit and cached; no new write pipeline needed.
+The architecture inserts new computation modules into the existing 4-stage pipeline (Data Acquisition → Intelligence → Aggregation → Execution) at well-defined points, without modifying the critical path. `service.ts` is strictly read-only (1600+ lines, live Google Ads integration used daily — do not touch). New modules consume its exports. `query-intelligence.ts` gets its hardcoded scoring logic delegated to a new `tier-scoring.ts`. All new API routes follow the existing pattern: heavy computation in `/lib/optimization/` modules, thin wrappers in `/app/api/`. Three-layer caching: service.ts 2-min memory cache → module-level distribution cache (10 min) → Supabase persisted scores (`query_value_scores`).
 
 **Major components:**
-1. **`content_performance_feedback` materialized view** — joins publish_events + generated_content + performance_baselines + performance_snapshots (via 4 LATERAL subqueries for 7/14/30-day windows); refreshed daily after snapshot capture; unique index on publish_event_id required for CONCURRENTLY refresh; surfaces CTR lift % in SKU review dashboard via new `/api/content-performance/summary` endpoint
-2. **`funnel_snapshots_daily` table + capture endpoint** — denormalized daily rows (snapshot_date, custom_label_0, tier, search_term, impressions, clicks, cost_micros, conversions); unique constraint on (snapshot_date, custom_label_0, tier, search_term) prevents duplicates; new `POST /api/funnel/capture-snapshot` Vercel route calls existing service.ts exports write-behind; Cloud Scheduler triggers daily alongside performance snapshot capture; 90-day retention at full granularity, weekly rollup beyond
-3. **Migration triage and cleanup** — verify production schema state first; KEEP 4 intent tables; DEFER 4 to v1.4; PRUNE 6 from 035b + all 4 from 034b; move deferred migration files to archive directory; delete or deprecate TypeScript files for pruned tables; update SCHEMA.md to reflect true state
+1. `tier-scoring.ts` (Phase 1, core) — distribution computation, percentile-rank/robust-z-score placement, dollar impact estimation; writes to `query_value_scores` and `routing_recommendations`; hierarchical fallback for sparse tiers
+2. `revenue-leakage.ts` (Phase 1) — misplacement detection, wasted spend alerts, under-investment identification; reads tier-scoring.ts output; returns ranges not point estimates
+3. `demand-gaps.ts` / `competitive-intel.ts` / `product-matrix.ts` (Phase 2) — market intelligence modules; all independent of Phase 1 execution pipeline and can build in parallel with Phase 1 UI work
+4. `automation-rules.ts` / `experiment-engine.ts` (Phase 3) — always route through existing `evaluateGuardrails()` → `executeTierMovementBatch()` pipeline; experiment engine must add lock check to `executeTierMovement()` before first experiment
+5. `impact-tracker.ts` / `weekly-digest.ts` (Phase 4) — pure read-only aggregation; require Phase 1-3 execution history to exist
+
+**Files NOT to modify:** `service.ts`, `policy.ts`, `tier-movement.ts`, `persistence.ts`, `taxonomy.ts`, all existing `/api/search-terms/` and `/api/ga4/` routes.
 
 ### Critical Pitfalls
 
-Research identified 13 pitfalls grounded in actual codebase inspection. The top 5 most likely to cause rewrites or milestone failure:
+1. **Distribution cold start with sparse tiers** — Per-group-per-tier slices can have 2-5 terms; percentiles on 3 data points produce unstable thresholds that flip wildly between runs. Mitigation: hierarchical fallback (per-group-per-tier → per-tier-global → hardcoded defaults); log which fallback level was used; if >50% of terms in any tier flag as misplaced, the distribution is degenerate, not the data.
 
-1. **Duplicating existing performance infrastructure** — the gap is JOIN quality and a convenient aggregation layer, not missing data. If any new migration contains columns named `impressions`, `clicks`, `ctr`, or `conversions`, it is duplicating data that already lives in `performance_snapshots`. Write the JOIN first; only create a new table if the JOIN reveals genuinely new data to store.
+2. **Z-scores on right-skewed ROAS data** — ROAS distributions are heavily right-skewed (most terms ROAS 0-2, occasional outliers at 10-50). Standard z-scores are meaningless on this data. Mitigation: use percentile ranks as primary approach; use robust z-scores `(value - median) / MAD` if z-score semantics are needed; cap ROAS at p99 before computing distribution statistics.
 
-2. **Applying deferred migrations without pruning dead code first** — the 032/033/034b/035b migration chain was written speculatively with thresholds (ROAS 3.6/3.1/2.6) that produce zero results for Allied Brass's actual data. Correct order: categorize KEEP/DEFER/PRUNE, delete TypeScript for PRUNE tables, verify build passes, then clean migration files. Never apply a migration without a consumer that will populate it within the same milestone.
+3. **Automation spend runaway** — `executeTierMovementBatch()` guardrails check spend deltas but do not cap simultaneous movement count or total budget impact per batch. A miscalculated scoring run can recommend 50+ promotions en masse. Mitigation: max 10 movements per automated evaluation run; max $50/day incremental spend per batch; dry-run-first with 24h cooling period; circuit breaker halts automation if 3+ consecutive batches have >50% operator rejection.
 
-3. **Breaking the live Google Ads query path in service.ts** — persistence must be write-behind only. The live query path stays completely unchanged. Daily snapshot triggered by a separate scheduled job, not the dashboard page load. Monitor service.ts P95 latency; if it increases >20% after any change, the persistence layer is blocking the response path.
+4. **Revenue estimate false precision** — Dollar estimates multiply 3 uncertain variables (CVR delta, impressions, AOV), compounding to 2-3x error range. Showing "$2,400/month" as a point estimate erodes operator trust when actual impact is $800 or -$200. Mitigation: show ranges from day 1 ("$800-$3,200/month"); color-code by confidence; use conservative bound (p25 of estimates) for hero number; use word "estimate" or "opportunity" everywhere.
 
-4. **Feedback loop without content versioning linkage** — audit NULL rates in `publish_events.prompt_hash` and `performance_snapshots.content_version` before building any feedback UI. If >10% of recent records have NULL in the join chain, the feedback loop will produce incomplete results. This is a hard prerequisite for v1.4 closed-loop optimization.
+5. **Funnel snapshot operational gap** — `funnel_snapshots_daily` appears empty in production and Cloud Scheduler is not activated. Building trend analysis before fixing this produces silent zero-change numbers. Mitigation: gate all Phase 1 coding behind verification that `SELECT COUNT(*) FROM funnel_snapshots_daily WHERE snapshot_date > NOW() - INTERVAL '7 days'` returns >0; add data-availability checks to every route using historical data.
 
-5. **Out-of-band tables already exist in production** — the 034b/035b migration headers state "Tables created out-of-band." Query production schema first (`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`) before evaluating any migration. The decision may be "tables exist with schema drift, compare and reconcile" rather than "apply or skip."
+6. **Experiment contamination via shared negative lists** — Shared campaign negative lists apply to both treatment and control groups. Modification to any shared list during an experiment silently contaminates both arms. Mitigation: add experiment lock check to `executeTierMovement()` that rejects movements for experiment-enrolled terms; build this lock before the first experiment runs.
 
----
+7. **Statistical significance theater in A/B tests** — `experiment_outcomes` table lacks `p_value` and `confidence_interval` columns. With luxury item volumes (~10-50 clicks/term), individual term experiments need 6+ months to reach significance. Mitigation: add p_value and CI columns; enforce minimum sample size and 30-day minimum duration in `experiment_registry` schema; display confidence intervals on all lift estimates from day 1.
 
 ## Implications for Roadmap
 
-Based on combined research, the milestone decomposes into 4 sequential phases. Phase ordering is driven by a hard dependency chain: you cannot safely build the feedback view or persistence layer until you know which tables actually exist in production and which join keys have NULL gaps.
+The critical path is strict: distribution scoring engine → misplaced term detection → everything else. Phase 2 intelligence modules can build in parallel with Phase 1 UI work. Phase 3 automation requires Phase 1 execution history. Phase 4 reporting requires Phase 1-3 data. The funnel snapshot operational task must precede all coding work.
 
-### Phase 1: Architecture Audit and Migration Triage
-**Rationale:** All subsequent phases depend on knowing actual production schema state. The deferred migration files note "created out-of-band" — tables may already exist with stale schemas. Empty optimization tables from migration 033 will corrupt any analytics built on top of them. This phase has zero risk of breaking anything because it produces only documentation and decisions, no code changes.
-**Delivers:** Data flow map (every table with writer, reader, row count), migration triage decisions (KEEP/DEFER/PRUNE for all 18 tables with rationale), NULL rate audit of join chain keys, API quota analysis confirming daily snapshot is sustainable, Knip report on which intent TypeScript files are orphaned
-**Addresses:** Table stakes features — data flow audit, API quota analysis, migration triage decision
-**Avoids:** Pitfall 2 (applying migrations without pruning), Pitfall 6 (building on empty tables), Pitfall 13 (out-of-band tables with schema drift)
-**Research flag:** None — pure codebase analysis and production schema queries; no external research needed
+### Pre-Phase 1: Operational Prerequisites
+**Rationale:** Two operational gaps block the entire milestone and cannot be resolved by writing code. Without verifying these, Phase 1 trend analysis silently returns misleading zeros and all scheduling work fails.
+**Delivers:** `funnel_snapshots_daily` populated with recent data; Cloud Scheduler activated and verified running; CRON_SECRET confirmed set
+**Actions:** Run `bash scripts/setup-funnel-scheduler.sh`; POST to `/api/funnel-snapshots/backfill`; verify with `SELECT COUNT(*) FROM funnel_snapshots_daily WHERE snapshot_date > NOW() - INTERVAL '7 days'`
+**Avoids:** Pitfall 5 (Funnel Snapshot Gap), silent zero-change trend analysis
 
-### Phase 2: Content-Performance Feedback Linkage
-**Rationale:** Uses only existing tables; no new infrastructure required. This is the highest-value deliverable of the milestone and the direct prerequisite for v1.4 closed-loop optimization. Doing this before the persistence work (Phase 3) validates the linkage chain on real data before more infrastructure is added.
-**Delivers:** `content_performance_feedback` materialized view, `/api/content-performance/summary` endpoint, CTR lift indicator in SKU review dashboard, validated end-to-end content-to-outcome linkage for 5+ published SKUs, prompt_hash NOT NULL constraint enforced for new publishes
-**Uses:** pg_cron for daily refresh scheduling; PostgreSQL LATERAL joins (full SQL provided in ARCHITECTURE.md); existing Supabase Postgres 15
-**Implements:** content_performance_feedback component (Pattern 1 — Materialized View for Cross-Table Analytics)
-**Avoids:** Pitfall 1 (duplicating performance infrastructure), Pitfall 4 (broken version chain — audit NULLs first), Pitfall 7 (per-platform complexity — key on master_sku + platform, scope to Google only for v1.3b)
-**Research flag:** None — LATERAL join pattern is standard PostgreSQL; complete SQL already documented in ARCHITECTURE.md; Supabase materialized view behavior documented in STACK.md
+### Phase 1: Revenue Leakage Detection and Tier Optimization
+**Rationale:** The distribution scoring engine is the single dependency that unlocks every other feature. Nothing downstream is useful until misplaced terms can be detected with statistical rigor and dollar-value estimates with communicated uncertainty. This phase transforms the dashboard from "reports that nothing is actionable" to "actionable prioritized recommendations with confidence ranges." Must be built and validated before automation (Phase 3) can be safely calibrated.
+**Delivers:** `tier-scoring.ts` with hierarchical fallback distributions; revenue leakage API and UI (hero number with conservative bound, range estimates, confidence coloring); one-click execution wiring to existing pipeline; movement history + undo; recommendation persistence to `routing_recommendations`
+**Addresses:** All 9 table-stakes features
+**Key decisions required:** Use percentile ranks as primary approach (not raw z-scores on skewed ROAS); background computation architecture preferred over on-demand to avoid Vercel timeout; show estimate ranges not point values from day 1; set `export const maxDuration = 60` on all scoring routes
+**Avoids:** Pitfall 1 (sparse tiers — hierarchical fallback), Pitfall 2 (skewed ROAS — percentile ranks), Pitfall 4 (false precision — ranges), Pitfall 5 (cache staleness — background computation)
+**Research flag:** Standard patterns — computation module + thin API route wrapper already established in codebase. No external research needed.
 
-### Phase 3: Historical Data Persistence
-**Rationale:** Depends on Phase 1 (quota analysis confirms safety) and benefits from Phase 2 insights (understanding what data shape is actually needed for trend analysis). Introduces new infrastructure (table, endpoint, scheduler) — more risk than Phase 2, so comes after the simpler feedback view is validated against real data.
-**Delivers:** `funnel_snapshots_daily` table with 90-day retention policy and weekly rollup job in same PR, `POST /api/funnel/capture-snapshot` Vercel endpoint (write-behind, feature-flagged), Cloud Scheduler daily trigger, backfilled 30-day history, 7d vs previous-7d trend query on Shopping Funnel page, data freshness indicator
-**Uses:** Cloud Scheduler (existing), Supabase Postgres 15, pg_cron for weekly rollup cleanup
-**Implements:** funnel_snapshots_daily component (Pattern 2 — Snapshot-Then-Query for Ephemeral API Data)
-**Avoids:** Pitfall 3 (breaking live service.ts queries — write-behind only with feature flag), Pitfall 9 (unbounded storage growth — retention policy in same PR as table creation), Pitfall 5 (multi-SKU attribution — funnel data is label-level not SKU-level, unaffected)
-**Research flag:** None — snapshot table pattern already validated by existing search_query_snapshots and performance_snapshots tables in the same codebase
+### Phase 2: Market Intelligence and Demand Gap Analysis
+**Rationale:** Three Phase 2 modules (`demand-gaps.ts`, `competitive-intel.ts`, `product-matrix.ts`) have zero dependency on Phase 1's execution pipeline — they only need service.ts exports and existing Supabase tables. They can begin in parallel with Phase 1's UI work once Phase 1's computation modules are validated. BCG matrix and competitive intel deliver strategic value operators can act on immediately, independent of tier movement recommendations.
+**Delivers:** BCG product group matrix with drill-down; competitor conquest tracking and brand/non-brand split; under-invested winner detection + CPC opportunity scoring; seasonal demand pattern analysis; long-tail vs head term analysis; competitive benchmark overlay
+**Uses:** Recharts ScatterChart + ZAxis for bubble chart (official example exists); `keyword_metrics.monthly_search_volumes` JSONB for seasonal patterns; `decomposeSearchTerm()` NLP output already computing brand/competitor flags
+**Key decisions required:** BCG matrix must limit to top 20 groups by spend with "Other" aggregate — 59 simultaneous bubbles with overlapping labels is unreadable; use action-oriented quadrant labels, not BCG terminology
+**Avoids:** Performance trap of N+1 queries joining `search_queries` with `keyword_metrics` (use single JOIN with indexes)
+**Research flag:** Standard patterns — all data sources verified populated. Recharts bubble chart has official example. No research needed.
 
-### Phase 4: Migration Cleanup and End-to-End Validation
-**Rationale:** Cleanup requires all prior phases to complete so informed prune/keep decisions can be made. Dropping tables that turn out to be needed by Phase 2 or 3 would require recovery. Comes last to avoid premature deletions.
-**Delivers:** Pruned schema (10 tables dropped from 035b/034b after confirming empty), deprecated or deleted TypeScript files for pruned tables, SCHEMA.md updated to true state, end-to-end data flow validated for a single SKU (generation -> publish -> performance -> feedback view), documented data flow for v1.3c and v1.4 consumption
-**Uses:** Knip (identifies which intent TypeScript files are safe to delete), TypeScript compiler (verify build passes after deletions), Supabase SQL Editor (DROP TABLE after row count confirmation)
-**Avoids:** Pitfall 8 (migration numbering conflicts — move deferred files to archive directory, use sequential numbers from 037+), Pitfall 12 (migrations during active batch jobs — confirm no running jobs before any DDL)
-**Research flag:** None — deterministic cleanup based on Phase 1 audit output; standard PostgreSQL operations
+### Phase 3: Intelligent Automation and A/B Testing
+**Rationale:** Automation and experiments both require Phase 1 execution history to validate safety. Rules calibrated on empty `policy_action_execution_log` during Phase 3 have no signal to calibrate against. The experiment lock mechanism must be built before the first experiment runs, not retrofitted after contamination occurs.
+**Delivers:** Automation rules engine with three-stage rollout (dry-run → human-approved batch → auto with circuit breakers); A/B testing framework with statistical rigor enforced in schema; `automation_rules` table migration; experiment lock mechanism in `executeTierMovement()`
+**Key decisions required:** Always route automation through existing `evaluateGuardrails()` → `executeTierMovementBatch()` — no bypasses; add p_value + confidence_interval columns to `experiment_outcomes` in the same migration that creates `automation_rules`; minimum 30-day experiment duration enforced in code, not just documented
+**Avoids:** Pitfall 3 (automation spend runaway — caps and circuit breakers), Pitfall 6 (experiment contamination — lock mechanism before first experiment), Pitfall 7 (underpowered tests — schema enforcement)
+**Research flag:** Automation guardrail patterns well-documented in industry (Optmyzr, SearchEngineLand). A/B testing statistics are standard. No additional research needed.
+
+### Phase 4: Executive Reporting
+**Rationale:** Impact tracking and weekly digest are pure read-only aggregations on data that only exists after Phases 1-3 have been operational for at least 14 days (required measurement lag for before/after comparison). Building reporting before execution history exists produces empty dashboards and erodes trust in the system.
+**Delivers:** Optimization impact tracker (predicted vs actual, tracked per executed movement); executive weekly digest (top performers, decliners, actions taken, recommended actions); competitive benchmarks scorecard
+**Key decisions required:** Impact tracker must store predicted impact at time of recommendation execution and compare to actual after 14/30 days — report hit rate ("estimates within 50% of actual X% of the time") to rebuild trust if early estimates were imprecise
+**Avoids:** "Looks done but isn't" — verify predicted-vs-actual comparison exists; verify digest handles product groups with zero activity gracefully
+**Research flag:** Standard patterns — all data sources from Phases 1-3. No external research needed.
 
 ### Phase Ordering Rationale
 
-- **Audit first** because the 034b/035b "created out-of-band" note means production schema state is genuinely unknown; building on unknown foundations risks immediate rework when the real state is discovered
-- **Feedback view second** because it uses only existing tables (zero new infrastructure risk) and delivers the milestone's highest business value — v1.4 cannot exist without this linkage
-- **Persistence third** because it introduces new infrastructure (table, endpoint, scheduler) and the quota analysis from Phase 1 is required to confirm the daily capture is within Google Ads API limits
-- **Cleanup last** because dropping tables before all phases complete risks deleting something a later phase needs; also, PRUNE decisions are more informed once Phase 2 and 3 reveal which tables are actually touched during the work
-- **Google-only scope for feedback in v1.3b**: Bing and Shopify feedback require different metric sources not currently captured; defer to v1.4 with explicit documentation
+- **Operational gates before code:** The funnel snapshot gap is an operational task, not a coding task. It must be verified complete (not just assumed done) before Phase 1 starts, or trend analysis returns silent zeros for weeks.
+- **Scoring engine is the keystone:** Every feature references `tier-scoring.ts` output. Building anything else first creates tech debt that requires rework when the distribution model is validated against real ROAS distributions.
+- **Phase 2 parallelism is safe:** The three intelligence modules are fully independent of the Phase 1 execution pipeline. They can begin as soon as Phase 1's computation modules are validated — no need to wait for Phase 1 UI completion.
+- **Statistical rigor must be in Phase 1 UI from day 1:** Confidence intervals, estimate ranges, and "as of" timestamps must be present in the first implementation. Operators who learn to trust point estimates cannot be retrained easily.
+- **Automation requires real operational data:** Rules calibrated during Phase 3 need 2-4 weeks of Phase 1 execution logs to have meaningful signal. Build automation infrastructure immediately after Phase 1, but do not enable auto-execution until execution history validates the scoring engine.
+- **Experiment locks before experiments:** The contamination risk from shared negative lists requires the lock mechanism to exist before any experiment is registered. Retrofitting locks after contamination is useless.
 
 ### Research Flags
 
-All phases use standard patterns already validated in this codebase. No phases require `/gsd:research-phase` during planning:
+No phases require `/gsd:research-phase` during planning. All patterns are well-documented:
 
-- **Phase 1:** Pure codebase analysis and production SQL queries — no external research needed
-- **Phase 2:** Materialized view pattern is standard PostgreSQL; complete LATERAL join SQL provided in ARCHITECTURE.md; Supabase limitations documented in STACK.md
-- **Phase 3:** Snapshot table pattern matches existing `search_query_snapshots` and `performance_snapshots` tables; capture endpoint follows identical structure to existing `/api/performance/capture-snapshot`
-- **Phase 4:** Deterministic cleanup based on Phase 1 output; Knip configuration documented in STACK.md with exact commands
-
----
+- **Phase 1:** Statistical scoring + persistence pattern already established in codebase (`query-intelligence.ts` + service.ts); PostgreSQL percentile functions standard since PG 9.4
+- **Phase 2:** All data sources verified and populated; Recharts patterns documented with official examples; NLP decomposition already computing all needed flags
+- **Phase 3:** Guardrail patterns in `policy.ts` are the template; experiment tables are provisioned; automation guardrail industry patterns documented from Optmyzr/SearchEngineLand
+- **Phase 4:** Pure aggregation on existing data; no external dependencies
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | No new frameworks; all additions are Supabase-native features verified in official documentation; Knip confirmed active at v5.x with Next.js plugin; pg_cron availability on all plans confirmed in Supabase docs |
-| Features | HIGH | Based on exhaustive codebase review of schema, migrations, service.ts, strategic assessment, and PROJECT.md; feature list derived from actual schema gaps, not speculation |
-| Architecture | HIGH | Materialized view SQL provided in full in ARCHITECTURE.md; funnel_snapshots_daily DDL provided in full; both patterns follow existing validated tables (performance_snapshots, search_query_snapshots) in the same codebase |
-| Pitfalls | HIGH | All 13 pitfalls sourced from actual code inspection: hardcoded ROAS thresholds in control-center.ts, NULL rates in join keys documented, out-of-band migration comments read directly, service.ts cache architecture inspected |
+| Stack | HIGH | Official docs verified for all packages; existing codebase confirms recharts/supabase patterns; simple-statistics API confirms all needed functions exist with TypeScript types |
+| Features | HIGH | Full source code audit of existing pipeline confirms what exists vs what needs building; critical path dependency confirmed in codebase (hardcoded thresholds at specific line numbers) |
+| Architecture | HIGH | Based on complete source audit of service.ts (1600+ lines), query-intelligence.ts, policy.ts, tier-movement.ts; integration points are unambiguous; caching strategy matches existing patterns |
+| Pitfalls | HIGH | Pitfalls derived from actual schema gaps (missing p_value columns in experiment_outcomes), actual empty tables (funnel_snapshots_daily), actual hardcoded values (query-intelligence.ts line 138), confirmed via codebase inspection |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Production schema true state is unknown until Phase 1 executes:** The "created out-of-band" note in 034b/035b means tables may already exist with schema drift from the migration files. This cannot be resolved by research alone — Phase 1 must query the live DB before any migration decisions.
+- **Vercel plan tier:** Vercel Crons plan limit (Hobby: 2 jobs; Pro: 40). v1.3c needs 4 cron entries. Verify during Pre-Phase 1 setup — if on Hobby plan, consolidate distribution recomputation + rule evaluation into single `/api/daily-jobs` endpoint that runs both sequentially.
 
-- **NULL rate in prompt_hash join chain:** Research identifies this as a critical prerequisite for the feedback view but cannot determine actual NULL rates without a live DB query. Phase 2 must audit `SELECT COUNT(*) FROM publish_events WHERE prompt_hash IS NULL AND published_at > '2026-02-01'` before building feedback UI. If >10% NULL, prompt_hash enforcement must be addressed before the view delivers meaningful results.
+- **ROAS distribution shape validation:** Research recommends percentile ranks over z-scores due to expected right-skew, but the actual distribution shape for Allied Brass's 177 campaign-group combinations is unverified. First task of Phase 1 scoring engine: compute actual ROAS skewness and validate the modeling assumption before building on it. If skewness < 1.0, standard z-scores may be acceptable.
 
-- **Quality score coverage in v2 content:** The v1.3a per-platform v2 architecture may not populate `quality_score` in `generated_content`. Phase 1 should verify with `SELECT COUNT(*) FROM generated_content WHERE quality_score IS NOT NULL AND generation_timestamp > '2026-02-20'`. If not populated, exclude quality_score from feedback correlations in v1.3b scope.
+- **Funnel snapshot production state:** PROJECT.md notes the table "appears empty." Exact row count and whether Cloud Scheduler setup script is ready to run without modification must be verified before committing to the Pre-Phase 1 timeline. Run the verification query before estimating Phase 1 start date.
 
-- **Which 035b/034b tables already exist in production:** The "created out-of-band" note changes the triage question from "should we apply this migration?" to "do these tables exist, and if so do their schemas match the migration files?" Only resolvable via Phase 1 production query.
-
----
+- **`query_value_scores` schema compatibility:** The existing migration 033 schema may not include `tier_fit_scores`, `recommended_tier`, or `net_monthly_impact` columns needed for adaptive scoring. Verify column list and add a migration if needed before Phase 1 persists adaptive scores.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `docs/database/SCHEMA.md` — complete 36+ table schema reference with column definitions, indexes, FK relationships
-- `docs/plans/2026-02-21-strategic-milestone-assessment.md` — Part 3 architecture gaps analysis, Part 7 migration analysis with specific table recommendations
-- `.planning/PROJECT.md` — v1.3b scope, known issues, tech debt inventory, deferred migration status
-- `supabase/migrations/035b_DEFERRED_unified_intent_execution_system.sql` — 14 deferred intent table definitions with "created out-of-band" note
-- `supabase/migrations/034b_DEFERRED_ga4_attribution_forensics.sql` — 4 deferred GA4 table definitions with "created out-of-band" note
-- `supabase/migrations/033_optimization_control_plane.sql` — empty optimization tables (empty due to hardcoded ROAS thresholds)
-- `dashboard/src/lib/shopping-funnel/service.ts` — 1,600-line live GAQL query layer, 2-min cache, AdsContext structure
-- `dashboard/src/lib/intent/persistence.ts` — graceful degradation pattern (insertRowsSafe, isMissingRelationError) for missing tables
-- `dashboard/src/lib/optimization/control-center.ts` — hardcoded ROAS thresholds (3.6/3.1/2.6) confirmed as reason optimization tables are empty
-- [Supabase pg_cron Documentation](https://supabase.com/docs/guides/database/extensions/pg_cron) — availability on all plans, max 8 concurrent jobs, 10-min runtime limit
-- [Supabase Materialized View Limitations — GitHub Discussion #16389](https://github.com/orgs/supabase/discussions/16389) — no RLS, no Realtime, no Dashboard visibility (rationale for regular table in some cases)
-- [Google Ads API Quotas and Access Levels](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — Standard Access = unlimited daily operations; 1 QPS Keyword Planner limit
-- [Knip v5.x](https://knip.dev/) — Next.js plugin confirmed, active maintenance, used by Vercel/Shopify/Microsoft
+- Source code audit: `dashboard/src/lib/shopping-funnel/service.ts` (1600+ lines) — data acquisition pipeline, 2-min cache behavior
+- Source code audit: `dashboard/src/lib/optimization/query-intelligence.ts` — hardcoded ROAS 3.6/3.1 thresholds at lines 116-145
+- Source code audit: `dashboard/src/lib/optimization/control-center.ts` — BASELINE_TARGET_ROAS constant at lines 3-7
+- Source code audit: `dashboard/src/lib/intent/policy.ts` — PROMOTION_THRESHOLDS at lines 20-41, evaluateGuardrails behavior
+- Source code audit: `dashboard/src/lib/intent/tier-movement.ts` — executeTierMovementBatch, CONFIDENCE_GATES
+- [simple-statistics GitHub](https://github.com/simple-statistics/simple-statistics) — v7.8.8, ISC license, TypeScript types included
+- [simple-statistics API docs](https://simple-statistics.github.io/docs/) — full function reference confirming all needed methods
+- [Recharts ScatterChart API](https://recharts.github.io/en-US/api/ScatterChart/) — ZAxis support for bubble charts
+- [Recharts Bubble Chart Example](https://recharts.github.io/en-US/examples/BubbleChart/) — official bubble chart pattern
+- [PostgreSQL Aggregate Functions](https://www.postgresql.org/docs/current/functions-aggregate.html) — percentile_cont, stddev, width_bucket
+- [Vercel Cron Jobs docs](https://vercel.com/docs/cron-jobs/manage-cron-jobs) — plan limits (Hobby: 2, Pro: 40)
+- [Google Ads Statistical Methodology for Experiments](https://support.google.com/google-ads/answer/9232676?hl=en) — 95% confidence, two-tailed testing
+- [Google Ads Help: Demand Gen A/B experiments](https://support.google.com/google-ads/answer/13719071?hl=en) — 50 conversion minimum per arm
 
 ### Secondary (MEDIUM confidence)
-- `docs/plans/2026-02-11-schema-scalability-and-backfill.md` — pg_cron discussed in Phase 4; this milestone follows through on that existing recommendation
-- `CLAUDE.md` — offer ID case sensitivity pattern (shopify_us_ vs shopify_US_), multi-SKU product pattern (product_id aggregation in Google Ads), established code conventions
+- [DataFeedWatch: Priority Bidding for Shopping ROAS](https://www.datafeedwatch.com/blog/how-to-increase-google-shopping-roas) — tiered campaign structure patterns
+- [Optmyzr: Budget automation guardrails](https://www.optmyzr.com/bfcm-google-ads-2025-budget-automation-guide/) — circuit breaker patterns
+- [SearchEngineLand: When Google AI bidding breaks](https://searchengineland.com/google-ai-bidding-breaks-take-control-466251) — guardrail failure modes
+- [Practical Ecommerce: BCG Matrix for Ecommerce](https://www.practicalecommerce.com/Using-the-BCG-Matrix-for-Ecommerce-Marketing-Decisions) — portfolio analysis methodology
+- [Google Ads API Negative Keyword Automation](https://www.negator.io/post/google-ads-api-scripts-negative-keyword-automation-developer-guide) — batch mutation patterns, rate limit considerations
+- [Google Ads Rate Limits](https://developers.google.com/google-ads/api/docs/productionize/rate-limits) — token bucket algorithm, QPS per CID
+
+### Tertiary (LOW confidence)
+- Milestone spec: `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md` — Phase 1-4 structure (plan, not validated implementation)
 
 ---
 *Research completed: 2026-02-25*

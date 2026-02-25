@@ -1,122 +1,160 @@
-# Technology Stack — v1.3b Architecture Validation & Data Persistence
+# Technology Stack — v1.3c Actionable Shopping Intelligence
 
-**Project:** Allied FeedOps v1.3b
+**Project:** Allied FeedOps v1.3c
 **Researched:** 2026-02-25
-**Milestone:** v1.3b (Architecture Validation & Data Persistence)
-**Confidence:** HIGH (Supabase-native features verified via official docs; no new frameworks)
+**Milestone:** v1.3c (Actionable Shopping Intelligence)
+**Confidence:** HIGH (all recommendations verified via official docs/GitHub)
 
-> **Scope note:** This document covers only NET NEW tooling needed for v1.3b.
-> Existing stack (Next.js 14, Python/FastAPI, Supabase Postgres 15, Cloud Run, GPT-5.2,
-> Google Ads API with Standard Access) is already installed and validated through v1.3a.
-> Do not re-install or alter those packages.
+> **Scope note:** This document covers only NET NEW tooling needed for v1.3c.
+> Existing stack (Next.js 16, Python/FastAPI, Supabase Postgres 15, Cloud Run, Recharts 3.7,
+> @tremor/react 3.18, google-ads-api 23.0, Vercel Crons, Cloud Scheduler, pg_cron)
+> is already installed and validated through v1.3b. Do not re-install or alter those packages.
 
 ---
 
 ## Guiding Principle
 
-v1.3b adds NO new frameworks or services. Every addition is a Supabase-native feature, a standard npm package, or a PostgreSQL capability already available on the hosted platform. The goal is to use what Supabase and PostgreSQL already provide, not to add moving parts.
+v1.3c adds ONE new npm package (`simple-statistics`). Everything else uses existing infrastructure: Recharts for visualization, PostgreSQL for heavy statistical computation, Vercel Crons for scheduling, and Supabase tables for caching computed distributions.
 
 ---
 
 ## Recommended Stack Additions
 
-### 1. Content-Performance Feedback: Regular Table (NOT Materialized View)
+### 1. Statistical Computation: `simple-statistics` (NEW)
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| PostgreSQL table + SQL view | Supabase Postgres 15 (existing) | `content_performance_feedback` table linking generated content to CTR/CVR outcomes | Regular table beats materialized view for this use case |
+| simple-statistics | ^7.8.8 | Percentiles, z-scores, chi-squared, t-tests, Bayesian classification, IQR, linear regression | Zero dependencies, ~30KB bundle, TypeScript types included (index.d.ts), functional API enables tree-shaking. Covers ALL v1.3c statistical needs in one package. |
 
-**Decision: Regular table populated by scheduled computation, NOT a materialized view.**
+**Confidence: HIGH** — verified via [official docs](https://simple-statistics.github.io/docs/) and [GitHub](https://github.com/simple-statistics/simple-statistics).
 
-Rationale:
-- Materialized views in Supabase lack Realtime support, have no Dashboard table visibility, and cannot have RLS policies applied directly (only via wrapping functions). [Source: Supabase GitHub Discussion #16389](https://github.com/orgs/supabase/discussions/16389)
-- The feedback data is computed at specific moments (after performance snapshot capture), not derived from a continuously-changing live join. A regular table with a `computed_at` timestamp is simpler and fully supported by all Supabase features (RLS, Realtime, Dashboard, supabase-js client).
-- The existing `performance_impact_scores` table already follows this exact pattern: it stores computed diff-in-diff results in a regular table, not a live view. Follow the established pattern.
-- A lightweight SQL VIEW (not materialized) can be layered on top for convenience queries that join `publish_events`, `regeneration_history`, and `performance_snapshots` without data duplication concerns.
+**Functions mapped to v1.3c features:**
 
-**What the table stores:** For each published SKU: `publish_event_id`, `prompt_hash` (from `publish_events.prompt_hash`), `content_version`, pre-publish baseline metrics (from `performance_baselines`), post-publish metrics at 7/14/30 day windows (from `performance_snapshots`), and computed deltas (CTR lift, CVR lift, ROAS change). The linkage chain is: `regeneration_history.prompt_hash` -> `publish_events.prompt_hash` -> `performance_snapshots.publish_event_id`.
+| v1.3c Feature | simple-statistics Function | Usage |
+|----------------|---------------------------|-------|
+| Adaptive tier scoring | `quantile()`, `quantileSorted()` | Compute dynamic percentile boundaries from actual ROAS/CVR distributions |
+| Outlier detection | `zScore()`, `standardDeviation()`, `mean()` | Flag SKUs performing >2 SD above/below tier mean |
+| Box plot rendering | `interquartileRange()`, `quantile([0.25, 0.5, 0.75])` | Compute Q1/median/Q3/whiskers for tier distribution charts |
+| A/B test significance | `chiSquaredGoodnessOfFit()` | Test conversion rate differences between experiment cohorts |
+| ROAS comparison | `tTestTwoSample()` | Compare mean ROAS between control/treatment tier assignments |
+| Revenue trend analysis | `linearRegression()`, `linearRegressionLine()` | Compute trend slopes for time-series revenue/CTR data |
+| Low-data smoothing | `bayesian()` / manual Bayesian avg | Smooth noisy metrics for SKUs with <30 clicks |
+| Permutation testing | `permutationTest()` | Non-parametric significance testing when distributions are non-normal |
 
-**Confidence:** HIGH — follows existing `performance_impact_scores` pattern already validated in production.
+**Why NOT alternatives:**
+
+| Criterion | simple-statistics | jStat | mathjs |
+|-----------|-------------------|-------|--------|
+| Bundle size | ~30KB (zero deps) | ~200KB | ~700KB |
+| TypeScript types | Included (index.d.ts) | @types/jstat (community) | Included |
+| All needed functions | Yes (see table above) | Yes | Missing chi-squared, t-test, z-score |
+| API style | Functional (tree-shakeable) | Object-oriented (all-or-nothing) | Object-oriented |
+| Maintenance | Active (7.8.8, updated 2025) | Stale (last major update 2020) | Active but 23x larger |
+| Decision | **USE THIS** | Too heavy, stale | Overkill — general math lib |
 
 ---
 
-### 2. Historical Data Persistence: `funnel_snapshots` Table
+### 2. Visualization: Recharts (EXISTING — no additions)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| PostgreSQL table | Supabase Postgres 15 (existing) | `funnel_snapshots` table persisting service.ts GAQL query results | Replace 2-min in-memory cache with daily persistence |
+| Technology | Version | Status | Why No New Library |
+|------------|---------|--------|-----|
+| recharts | ^3.7.0 (installed) | 3 components already using it | Handles all v1.3c chart types natively or with minimal custom components |
+| @tremor/react | ^3.18.7 (installed) | Used for metric cards | Keep for KPI scorecards and executive summary cards |
 
-**Decision: Daily snapshot table, populated by existing Cloud Scheduler infrastructure.**
+**Confidence: HIGH** — verified via [Recharts ScatterChart API](https://recharts.github.io/en-US/api/ScatterChart/) and [Bubble Chart Example](https://recharts.github.io/en-US/examples/BubbleChart/).
 
-Rationale:
-- `dashboard/src/lib/shopping-funnel/service.ts` runs 6 GAQL queries with a 2-minute in-memory cache (`CACHE_TTL_MS = 2 * 60 * 1000`). This data is lost on every Vercel cold start, has zero historical record, and cannot be used for trend analysis.
-- The project already has Cloud Scheduler calling performance capture endpoints daily. Add a companion endpoint or extend the existing one to also persist funnel data.
-- The 6 GAQL queries return: search term performance by campaign tier, label-tier aggregates, and campaign structure. Store as daily aggregated rows, NOT raw GAQL responses (which would balloon storage).
-- Estimated storage: ~100 labels x 3 tiers x 1 row/day = 300 rows/day = 110K rows/year. Trivial for Supabase free/pro tier.
-- Service.ts can then read from the persisted table (with a freshness check) instead of always hitting Google Ads API live, reducing API calls and eliminating cold-start data loss.
+**v1.3c chart requirements mapped to Recharts:**
 
-**Confidence:** HIGH — straightforward table design following existing `performance_snapshots` and `search_query_snapshots` patterns.
+| Chart Type | v1.3c Usage | Recharts Implementation | Complexity |
+|------------|-------------|------------------------|------------|
+| **Bubble chart** | BCG matrix (market share vs growth vs revenue) | `<ScatterChart>` + `<Scatter>` + `<ZAxis range={[50,400]}>` for bubble sizing. Official example exists. | Low — native support |
+| **Scatter plot** | ROAS vs CVR by tier, revenue leakage scatter | `<ScatterChart>` + `<Scatter>` with color-coded data series per tier | Low — native support |
+| **Distribution histogram** | Tier ROAS/CVR distributions | `<BarChart>` with computed bin data via `width_bucket()` SQL. Already using this pattern in `QualityDistribution.tsx`. | Low — existing pattern |
+| **Box plot** | Tier performance distributions (Q1/median/Q3/whiskers) | `<BarChart>` with `shape` prop on `<Bar>` rendering custom SVG. ~50 lines of custom component. | Medium — custom shape |
+| **Line chart with bands** | Time-series trends with confidence intervals | `<ComposedChart>` + `<Area>` (band) + `<Line>` (mean). Native Recharts composition. | Low — native support |
+| **Stacked bar** | Revenue breakdown by tier/product group | `<BarChart>` + multiple `<Bar stackId="a">`. Native support. | Low — native support |
 
----
+**What NOT to add and why:**
 
-### 3. Supabase pg_cron for Scheduled DB Computation
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| pg_cron | Built into Supabase (all plans) | Schedule feedback table computation and stale data cleanup | Eliminates need for external scheduler for DB-internal jobs |
-
-**Decision: Use pg_cron for DB-internal scheduled work; keep Cloud Scheduler for API calls that need network access.**
-
-Rationale:
-- pg_cron is available on all Supabase plans and runs SQL snippets or database functions on cron schedules. [Source: Supabase Cron Docs](https://supabase.com/docs/guides/cron)
-- Constraints: max 8 concurrent jobs, each max 10 minutes runtime. This is sufficient for computing feedback aggregates (~2,784 SKUs, simple joins).
-- Use pg_cron for: (1) computing `content_performance_feedback` rows from snapshots after daily capture, (2) cleaning up stale `funnel_snapshots` older than 180 days, (3) refreshing any convenience SQL views.
-- Keep Cloud Scheduler for: API endpoint calls that need network access (Google Ads GAQL queries, snapshot capture, Shopify polling).
-- The project already discussed using pg_cron in `docs/plans/2026-02-11-schema-scalability-and-backfill.md` Phase 4 — this follows through on that plan.
-
-**Confidence:** HIGH — Supabase documentation confirms availability, syntax, and limitations.
+| Library | Why NOT |
+|---------|---------|
+| @nivo/boxplot | Adds ~200KB for one chart type. Different theming system than Recharts. Inconsistent UX. |
+| ApexCharts / react-apexcharts | Duplicate of Recharts functionality. React wrapper less maintained. Would create two chart rendering paradigms. |
+| AG Charts | Commercial license required for advanced features. Enterprise-oriented. Overkill. |
+| D3.js directly | Recharts already wraps D3 internally. Adding raw D3 doubles the rendering paradigm. Custom SVG shapes within Recharts achieve the same result. |
+| Chart.js / react-chartjs-2 | Canvas-based (not SVG). Harder to customize, no React composition model. Bundle overlap with Recharts. |
 
 ---
 
-### 4. Dead Code Detection: Knip
+### 3. Heavy Distribution Computation: PostgreSQL (EXISTING — no additions)
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| knip | latest (5.x) | Detect dead TypeScript files, unused exports, unused dependencies in dashboard | De facto standard, replaces unmaintained ts-prune |
+| PostgreSQL | 15+ (Supabase) | Percentile boundaries, z-scores, distribution bins across all 2,784 SKUs | `percentile_cont()`, `stddev()`, `width_bucket()`, window functions are standard SQL. No extensions needed. |
 
-**Decision: Use Knip for migration evaluation dead code analysis.**
+**Confidence: HIGH** — PostgreSQL ordered-set aggregate functions have been stable since v9.4. [Source: PostgreSQL docs](https://www.postgresql.org/docs/current/functions-aggregate.html).
 
-Rationale:
-- ts-prune is unmaintained as of 2024. Knip is its successor and is used by Vercel, Shopify, Microsoft, and Google. [Source: Knip.dev](https://knip.dev/)
-- Knip has a built-in Next.js plugin, which is critical since the dashboard is Next.js 14. It understands page routes, API routes, and Next.js-specific entry points automatically.
-- Key capability for v1.3b: identify which of the 32 intent TypeScript files (`lib/intent/*.ts`) and 11 shopping-funnel files (`lib/shopping-funnel/*.ts`) are actually imported by live page/API routes vs completely orphaned. This directly informs whether to apply, prune, or remove the 18 deferred migration tables.
-- Install as dev dependency only. Run on-demand during migration evaluation, not in CI (yet).
+**Computation split — PostgreSQL vs TypeScript:**
 
-```bash
-cd dashboard && npm install -D knip
+| Computation | Where | Why |
+|-------------|-------|-----|
+| Tier percentile boundaries (p10/p25/p50/p75/p90) | **PostgreSQL** | `percentile_cont(ARRAY[0.1,0.25,0.5,0.75,0.9]) WITHIN GROUP (ORDER BY roas)` — single query across all 2,784 SKUs. No data transfer overhead. |
+| Z-scores for outlier flagging | **PostgreSQL** | `(value - AVG(value) OVER(PARTITION BY tier)) / NULLIF(STDDEV(value) OVER(PARTITION BY tier), 0)` — computed as window function inline. |
+| Distribution histogram bins | **PostgreSQL** | `width_bucket(roas, min_roas, max_roas, 20)` + `COUNT(*) GROUP BY` — server computes bins, client renders. |
+| Revenue leakage estimates | **PostgreSQL** | Dollar-value computations join `performance_snapshots`, `search_queries`, and tier data. Aggregate server-side, return summaries. |
+| Chi-squared A/B test | **TypeScript** | `chiSquaredGoodnessOfFit()` on small cohorts (~100-500 SKUs per experiment). Fast in browser, no round-trip needed. |
+| T-test for ROAS comparison | **TypeScript** | `tTestTwoSample()` on pre-aggregated metrics. Small datasets, instant computation. |
+| Box plot quartiles for rendering | **TypeScript** | Data already fetched for chart. `quantile()` on in-memory array is instant. Avoids extra DB call. |
+| Time-series trend slopes | **TypeScript** | `linearRegression()` on 30-90 data points from `funnel_snapshots_daily`. Trivial in-browser. |
+| Bayesian smoothing for low-data SKUs | **TypeScript** | Iterative computation on individual SKU metrics. Needs programmatic control flow. |
+
+**Rule of thumb:** Aggregate across ALL SKUs/tiers in PostgreSQL. Compute on subsets already fetched for rendering in TypeScript.
+
+---
+
+### 4. Scheduling: Vercel Crons + Cloud Scheduler (EXISTING — no additions)
+
+| Technology | Version | Purpose | Status |
+|------------|---------|---------|--------|
+| Vercel Crons | N/A (vercel.json config) | Dashboard API route scheduling | Already configured (1 job: GA4 snapshots) |
+| GCP Cloud Scheduler | N/A (existing) | Python pipeline scheduling (funnel snapshots) | Script ready, needs activation |
+| pg_cron | Supabase built-in | DB-internal scheduled computation | Available, used for feedback computation |
+
+**Confidence: HIGH** — Vercel Crons verified in existing `vercel.json`. Cloud Scheduler scripted. pg_cron documented from v1.3b research.
+
+**v1.3c scheduling plan:**
+
+| Task | Scheduler | Schedule | Why This Scheduler |
+|------|-----------|----------|-------------------|
+| Distribution recomputation | pg_cron | Daily 5:30am UTC | Pure SQL computation on existing tables. No API calls needed. |
+| Automated rule evaluation | Vercel Cron | Daily 6:00am UTC | Needs TypeScript logic (rule engine), writes recommendations to Supabase. |
+| A/B experiment measurement | Vercel Cron | Weekly Sunday 9:00am UTC | Needs TypeScript (simple-statistics significance testing), updates experiment_outcomes. |
+| GA4 snapshot capture | Vercel Cron | Daily 8:15am UTC | Already configured. Keep as-is. |
+| Funnel snapshot capture | Cloud Scheduler | Daily 8:00am UTC | Already scripted. Needs activation (CRON_SECRET + setup-funnel-scheduler.sh). |
+
+**Vercel Cron configuration** (updated `vercel.json`):
+```json
+{
+  "crons": [
+    { "path": "/api/ga4/snapshot-capture", "schedule": "15 8 * * *" },
+    { "path": "/api/scoring/recompute-distributions", "schedule": "0 6 * * *" },
+    { "path": "/api/rules/evaluate", "schedule": "30 6 * * *" },
+    { "path": "/api/experiments/measure", "schedule": "0 9 * * 0" }
+  ]
+}
 ```
 
-**Confidence:** HIGH — well-documented, active maintenance, Next.js plugin confirmed on knip.dev.
+**Important consideration:** Vercel Hobby plan supports 2 cron jobs; Pro plan supports 40. The project deploys to Vercel (auto-deploy on push). Verify the plan supports 4+ cron entries. If on Hobby, consolidate into a single `/api/daily-jobs` endpoint that runs distribution recomputation + rule evaluation sequentially.
 
----
-
-### 5. Google Ads API Quota Management: No New Library Needed
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Existing rate limiting | N/A | Validate current approach is sustainable | Document, don't add |
-
-**Decision: No new rate-limiting library. Current patterns are sufficient; add quota monitoring.**
-
-Rationale:
-- The project has **Standard Access** developer token = **unlimited daily operations** for GET/mutate. [Source: Google Ads API Quotas](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
-- Rate limiting is per-QPS per customer ID, using a token bucket algorithm. The existing `ThreadPoolExecutor(5)` with batch size 10 and GAQL chunk size 25 is well within limits. [Source: Google Ads API Rate Limits](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
-- Planning Service (Keyword Planner) is limited to **1 QPS** per customer ID — this is the only real constraint and is already handled by sequential calls in `google_ads_search_terms.py`.
-- GAQL `IN` clause maximum is **20,000 items** — current chunk size of 25 is far below this.
-- The real question for v1.3b is not "are we hitting limits?" but "should we cache more aggressively to reduce unnecessary API calls?" Answer: yes, via the `funnel_snapshots` persistence table (item 2 above), which eliminates the 6 live GAQL queries on every dashboard page load.
-- Optional: add a `api_quota_log` table to track daily API operations for long-term monitoring. LOW priority — implement only if quota concerns emerge.
-
-**Confidence:** HIGH — Standard Access confirmed in PROJECT.md, quota docs are authoritative.
+**pg_cron for distribution computation:**
+```sql
+-- Recompute tier scoring distributions daily at 5:30 AM UTC
+SELECT cron.schedule(
+  'recompute-tier-distributions',
+  '30 5 * * *',
+  $$SELECT recompute_tier_scoring_distributions()$$
+);
+```
 
 ---
 
@@ -124,154 +162,262 @@ Rationale:
 
 | Temptation | Why Avoid | What to Do Instead |
 |------------|-----------|-------------------|
-| **Redis / Upstash for caching** | The 2-min cache problem is a persistence problem, not a speed problem. Adding Redis adds a service to monitor and pay for. | Persist to Supabase table; read from table with freshness check |
-| **Prisma or Drizzle ORM** | 36+ tables already work with raw SQL via `supabase-js` and Python `supabase` client. Adding an ORM mid-project creates two data access patterns and migration confusion. | Continue raw SQL; document query patterns in SCHEMA.md |
-| **dbt for data transformations** | Overkill for 3-4 computed tables. Adds a build pipeline, dbt profiles, and a new deployment concern. | pg_cron + SQL functions handle scheduled computation |
-| **Apache Airflow / Prefect / Temporal** | Cloud Scheduler + pg_cron + Cloud Run background tasks cover all scheduling needs. A workflow orchestrator adds significant operational complexity. | Keep existing Cloud Scheduler for API calls, pg_cron for DB jobs |
-| **Separate analytics database (BigQuery, ClickHouse)** | 2,784 SKUs with daily snapshots = ~1M rows/year. Supabase handles this trivially. No OLAP workload justifies a second database. | PostgreSQL indexes and partitioning if needed (won't be) |
-| **pg_ivm (incremental materialized views)** | Not available on Supabase hosted platform per community discussions. | Regular tables with scheduled computation achieve the same result |
-| **New Python packages for dead code** | Python codebase is small (~20 files in `src/feedops/`) and well-structured. | Manual audit + grep sufficient for Python; Knip for TypeScript |
-| **Database branching / Supabase Branching** | Preview branches add complexity. Single production DB with careful migrations is sufficient at this scale. | Test migrations locally, apply via Supabase SQL Editor |
+| **D3.js** | Recharts wraps D3 internally. Adding raw D3 = two rendering paradigms, double bundle. | Custom SVG shapes within Recharts `<Bar shape={...}>` for box plots. |
+| **Nivo / Victory / ApexCharts** | Second charting library = inconsistent styling, doubled bundle, maintenance burden. | Recharts covers all chart types needed. |
+| **mathjs** | 700KB general math library. 23x heavier than simple-statistics. Missing key statistical tests. | simple-statistics at 30KB covers all needs. |
+| **jStat** | Last significant update 2020. Community-maintained TypeScript types. | simple-statistics is actively maintained with included types. |
+| **node-cron** | Server-side scheduler for always-on processes. Vercel is serverless. | Vercel Crons for API routes, pg_cron for DB-internal jobs. |
+| **Bull / BullMQ** | Job queue requiring Redis. Massive infrastructure addition for simple scheduled tasks. | Vercel Crons + pg_cron handle all scheduling. |
+| **Redis / Upstash** | Adding a cache layer when Supabase tables serve as persistent cache. Over-engineering. | Write computed distributions to `tier_scoring_cache` table. Read with freshness check. |
+| **scipy (Python side)** | All consumers are TypeScript dashboard components. Cross-language boundary adds latency and complexity. | simple-statistics in TypeScript, PostgreSQL for heavy aggregation. |
+| **Cube.js / Metabase** | Embedded analytics platforms. Adds another service to deploy/maintain. Dashboard already has custom charts. | Custom Recharts components with Supabase data. |
+| **TensorFlow.js** | Machine learning is not needed for v1.3c. Statistical methods (percentiles, z-scores, regression) are sufficient. | simple-statistics covers all analysis needs. |
 
 ---
 
-## Existing Stack (Validated, No Changes Needed)
+## Integration Patterns
 
-### Core Framework
-| Technology | Version | Purpose | Status |
-|------------|---------|---------|--------|
-| Next.js | 14.x | Dashboard | Stable, auto-deploys on Vercel |
-| Python / FastAPI | 3.11+ | Cloud Run pipeline | Stable, auto-deploys via Cloud Build |
-| Supabase | Postgres 15 | Database (36+ tables, 36+ migrations) | Stable |
-| Vercel | N/A | Dashboard hosting | Auto-deploy on push |
-| Cloud Run | N/A | Python pipeline hosting | Auto-deploy via Cloud Build |
-| Cloud Scheduler | N/A | Daily data collection jobs | Running |
+### simple-statistics: Adaptive Tier Scoring
 
-### Integrations (No Changes)
-| Technology | Purpose | Status |
-|------------|---------|--------|
-| Google Ads API (Standard Access) | Search terms, performance, Keyword Planner | Working, unlimited daily ops |
-| Google Sheets API | Supplemental feed publishing | Working |
-| Shopify Admin API | Product publishing | Working |
-| OpenAI API (GPT-5.2) | Content generation | Working |
+```typescript
+// dashboard/src/lib/scoring/adaptive-scorer.ts
+import {
+  quantile, zScore, standardDeviation, mean,
+  interquartileRange, linearRegression, linearRegressionLine
+} from 'simple-statistics';
 
-### Key Existing Tables for v1.3b (Join Targets)
-| Table | Role in v1.3b |
-|-------|--------------|
-| `performance_baselines` | Pre-publish metrics (join target for feedback computation) |
-| `performance_snapshots` | Post-publish daily metrics (primary data source for feedback) |
-| `performance_impact_scores` | Existing diff-in-diff pattern to follow |
-| `publish_events` | Links content to publish timestamp + `prompt_hash` |
-| `regeneration_history` | Links prompt_hash to content generation details |
-| `generated_content` | Content versions with quality scores |
-| `search_queries` | Persisted search term data (model for funnel persistence) |
+// Compute dynamic tier boundaries from actual data
+function computeTierBoundaries(roasValues: number[]) {
+  const sorted = roasValues.slice().sort((a, b) => a - b);
+  return {
+    low_ceiling: quantile(sorted, 0.33),
+    medium_ceiling: quantile(sorted, 0.67),
+    p10: quantile(sorted, 0.10),
+    p25: quantile(sorted, 0.25),
+    median: quantile(sorted, 0.50),
+    p75: quantile(sorted, 0.75),
+    p90: quantile(sorted, 0.90),
+    iqr: interquartileRange(sorted),
+    mean: mean(sorted),
+    sd: standardDeviation(sorted),
+  };
+}
+
+// Flag outlier SKUs for review
+function flagOutliers(values: number[], threshold = 2.0) {
+  const m = mean(values);
+  const sd = standardDeviation(values);
+  return values
+    .map((v, i) => ({ index: i, value: v, z: zScore(v, m, sd) }))
+    .filter(item => Math.abs(item.z) > threshold);
+}
+
+// Time-series trend for executive reporting
+function computeTrend(dataPoints: [number, number][]) {
+  const regression = linearRegression(dataPoints);
+  return {
+    slope: regression.m,
+    intercept: regression.b,
+    trendLine: linearRegressionLine(regression),
+    direction: regression.m > 0 ? 'improving' : 'declining',
+  };
+}
+```
+
+### simple-statistics: A/B Testing Significance
+
+```typescript
+// dashboard/src/lib/experiments/significance.ts
+import {
+  chiSquaredGoodnessOfFit,
+  tTestTwoSample,
+  permutationTest
+} from 'simple-statistics';
+
+interface ExperimentResult {
+  significant: boolean;
+  pValue: number;
+  method: string;
+  recommendation: 'adopt' | 'reject' | 'continue';
+}
+
+// Chi-squared test for conversion rate differences
+function testConversionSignificance(
+  controlConversions: number,
+  controlTotal: number,
+  treatmentConversions: number,
+  treatmentTotal: number,
+  alpha = 0.05
+): ExperimentResult {
+  const totalConversions = controlConversions + treatmentConversions;
+  const totalSamples = controlTotal + treatmentTotal;
+  const expectedRate = totalConversions / totalSamples;
+
+  const observed = [controlConversions, controlTotal - controlConversions];
+  const expectedFn = (i: number) =>
+    i === 0 ? expectedRate * controlTotal : (1 - expectedRate) * controlTotal;
+
+  const pValue = chiSquaredGoodnessOfFit(observed, expectedFn, 1);
+  return {
+    significant: pValue < alpha,
+    pValue,
+    method: 'chi-squared',
+    recommendation: pValue < alpha
+      ? (treatmentConversions / treatmentTotal > controlConversions / controlTotal ? 'adopt' : 'reject')
+      : 'continue',
+  };
+}
+
+// T-test for ROAS comparison between experiment arms
+function testRoasSignificance(
+  controlRoas: number[],
+  treatmentRoas: number[],
+  alpha = 0.05
+): ExperimentResult {
+  const pValue = tTestTwoSample(controlRoas, treatmentRoas);
+  return {
+    significant: pValue !== null && pValue < alpha,
+    pValue: pValue ?? 1,
+    method: 't-test',
+    recommendation: pValue !== null && pValue < alpha ? 'adopt' : 'continue',
+  };
+}
+```
+
+### PostgreSQL: Distribution Computation (daily pg_cron)
+
+```sql
+-- Function: Recompute tier scoring distributions
+-- Called by pg_cron daily. Results cached in tier_scoring_distributions table.
+CREATE OR REPLACE FUNCTION recompute_tier_scoring_distributions()
+RETURNS void AS $$
+BEGIN
+  -- Clear and recompute (atomic within transaction)
+  TRUNCATE tier_scoring_distributions;
+
+  INSERT INTO tier_scoring_distributions (
+    custom_label_0, tier, term_count,
+    roas_mean, roas_stddev, roas_p10, roas_p25, roas_p50, roas_p75, roas_p90,
+    cvr_mean, cvr_stddev, cvr_p10, cvr_p25, cvr_p50, cvr_p75, cvr_p90,
+    computed_at
+  )
+  SELECT
+    custom_label_0,
+    tier,
+    COUNT(*) as term_count,
+    AVG(roas) as roas_mean,
+    STDDEV(roas) as roas_stddev,
+    (percentile_cont(0.10) WITHIN GROUP (ORDER BY roas)),
+    (percentile_cont(0.25) WITHIN GROUP (ORDER BY roas)),
+    (percentile_cont(0.50) WITHIN GROUP (ORDER BY roas)),
+    (percentile_cont(0.75) WITHIN GROUP (ORDER BY roas)),
+    (percentile_cont(0.90) WITHIN GROUP (ORDER BY roas)),
+    AVG(cvr) as cvr_mean,
+    STDDEV(cvr) as cvr_stddev,
+    (percentile_cont(0.10) WITHIN GROUP (ORDER BY cvr)),
+    (percentile_cont(0.25) WITHIN GROUP (ORDER BY cvr)),
+    (percentile_cont(0.50) WITHIN GROUP (ORDER BY cvr)),
+    (percentile_cont(0.75) WITHIN GROUP (ORDER BY cvr)),
+    (percentile_cont(0.90) WITHIN GROUP (ORDER BY cvr)),
+    NOW()
+  FROM tier_performance_materialized  -- or a view joining relevant tables
+  GROUP BY custom_label_0, tier;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+### Recharts: Bubble Chart (BCG Matrix)
+
+```typescript
+// Product group BCG matrix
+import {
+  ScatterChart, Scatter, XAxis, YAxis, ZAxis,
+  Tooltip, CartesianGrid, ResponsiveContainer, Cell
+} from 'recharts';
+
+const QUADRANT_COLORS = {
+  star: '#22c55e',      // high growth, high share
+  question: '#f59e0b',  // high growth, low share
+  cashCow: '#3b82f6',   // low growth, high share
+  dog: '#ef4444',        // low growth, low share
+};
+
+<ResponsiveContainer width="100%" height={400}>
+  <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="marketShare" name="Relative Market Share" unit="%" />
+    <YAxis dataKey="growthRate" name="Revenue Growth" unit="%" />
+    <ZAxis dataKey="revenue" range={[50, 400]} name="Revenue" unit="$" />
+    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+    <Scatter name="Product Groups" data={productGroups}>
+      {productGroups.map((entry, index) => (
+        <Cell key={index} fill={QUADRANT_COLORS[entry.quadrant]} />
+      ))}
+    </Scatter>
+  </ScatterChart>
+</ResponsiveContainer>
+```
+
+### Recharts: Custom Box Plot Component
+
+```typescript
+// dashboard/src/components/charts/BoxPlot.tsx
+// ~50 lines of custom SVG shape for use with Recharts BarChart
+
+interface BoxPlotData {
+  name: string;
+  min: number;
+  q1: number;
+  median: number;
+  q3: number;
+  max: number;
+}
+
+const BoxPlotShape = (props: any) => {
+  const { x, y, width, payload, yAxisScale } = props;
+  const { min, q1, median, q3, max } = payload;
+
+  const yMin = yAxisScale(min);
+  const yQ1 = yAxisScale(q1);
+  const yMedian = yAxisScale(median);
+  const yQ3 = yAxisScale(q3);
+  const yMax = yAxisScale(max);
+  const cx = x + width / 2;
+
+  return (
+    <g>
+      {/* Box (Q1 to Q3) */}
+      <rect x={x} y={yQ3} width={width} height={yQ1 - yQ3}
+            fill="#8884d8" fillOpacity={0.6} stroke="#8884d8" />
+      {/* Median line */}
+      <line x1={x} x2={x + width} y1={yMedian} y2={yMedian}
+            stroke="#333" strokeWidth={2} />
+      {/* Upper whisker */}
+      <line x1={cx} x2={cx} y1={yMax} y2={yQ3} stroke="#333" />
+      <line x1={x + 4} x2={x + width - 4} y1={yMax} y2={yMax} stroke="#333" />
+      {/* Lower whisker */}
+      <line x1={cx} x2={cx} y1={yQ1} y2={yMin} stroke="#333" />
+      <line x1={x + 4} x2={x + width - 4} y1={yMin} y2={yMin} stroke="#333" />
+    </g>
+  );
+};
+```
 
 ---
 
 ## Installation
 
 ```bash
-# Only new dependency: dashboard dev dependency for dead code analysis
-cd dashboard && npm install -D knip
+# From dashboard directory — single new dependency
+cd dashboard && npm install simple-statistics
 
-# No new Python dependencies needed
-# No new Supabase extensions needed (pg_cron already available on all plans)
+# That's it. No other packages needed.
+# recharts 3.7.0 — already installed
+# @tremor/react 3.18.7 — already installed
+# Supabase (PostgreSQL) — already available
+# Vercel Crons — config-only (vercel.json)
+# pg_cron — already available on Supabase
 ```
-
-### pg_cron Setup (via Supabase SQL Editor or Dashboard > Integrations > Cron)
-
-```sql
--- Jobs are created in the cron schema
--- Supabase Cron can also be managed via Dashboard UI
-
--- Example: Compute content-performance feedback daily at 6 AM UTC
--- (runs after Cloud Scheduler captures performance snapshots at 5 AM)
-SELECT cron.schedule(
-  'compute-content-feedback',
-  '0 6 * * *',
-  $$SELECT compute_content_performance_feedback()$$
-);
-
--- Example: Clean up stale funnel snapshots (>180 days) weekly on Sunday 3 AM
-SELECT cron.schedule(
-  'cleanup-stale-funnel-data',
-  '0 3 * * 0',
-  $$DELETE FROM funnel_snapshots WHERE snapshot_date < CURRENT_DATE - INTERVAL '180 days'$$
-);
-
--- Monitor job execution
-SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 20;
-```
-
-### Knip Configuration
-
-```jsonc
-// dashboard/knip.json
-{
-  "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["src/app/**/*.{ts,tsx}"],
-  "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["src/**/*.test.{ts,tsx}"],
-  "next": true
-}
-```
-
-```bash
-# Run full dead code analysis
-cd dashboard && npx knip
-
-# Report unused exports only (most useful for migration evaluation)
-cd dashboard && npx knip --include exports
-
-# Report unused files only (identifies completely orphaned modules)
-cd dashboard && npx knip --include files
-```
-
----
-
-## Migration Evaluation Tooling Summary
-
-For evaluating the 18 deferred tables (034b: 4 GA4 tables, 035b: 14 intent tables):
-
-| Tool | What It Tells Us | How to Run |
-|------|-----------------|------------|
-| **Knip** | Which TS files in `lib/intent/` and `lib/shopping-funnel/` are imported by live page/API routes vs orphaned | `cd dashboard && npx knip --include files` |
-| **TypeScript compiler** | Which files have type errors from missing table types (32 files reference 035b tables) | `cd dashboard && npx tsc --noEmit 2>&1 \| grep -c error` |
-| **grep** | Which API routes reference specific table names — determines code cleanup scope | `grep -r "intent_taxonomy\|term_intent_state\|experiment_registry" dashboard/src/app/` |
-| **Supabase SQL** | Confirm which tables actually exist in production vs only in migration files | `SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename` |
-
-No additional tooling needed beyond Knip. The TypeScript compiler and grep are already available.
-
----
-
-## Schema Design Patterns for New Tables
-
-### Pattern: Follow `performance_impact_scores`
-
-The `performance_impact_scores` table is the model for `content_performance_feedback`:
-- Regular table (not view)
-- Populated by a computation function
-- Foreign key to `publish_events`
-- Indexed by `master_sku`, `publish_event_id`, computation date
-- RLS enabled with permissive policy
-- `computed_at` timestamp for freshness tracking
-
-### Pattern: Follow `search_query_snapshots` for `funnel_snapshots`
-
-- Daily fact table with `snapshot_date` column
-- Unique constraint on `(label, tier, snapshot_date)` to prevent duplicates
-- Index on `snapshot_date DESC` for recent-first queries
-- `fetched_at` timestamp for data lineage
-
-### RLS Policy Pattern (Existing)
-
-All existing tables use permissive RLS:
-```sql
-ALTER TABLE new_table ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all access" ON new_table FOR ALL USING (true);
-```
-
-This is appropriate for a single-tenant application where authentication is handled at the application layer (Supabase Auth), not per-row.
 
 ---
 
@@ -279,24 +425,25 @@ This is appropriate for a single-tenant application where authentication is hand
 
 | Component | Confidence | Rationale |
 |-----------|------------|-----------|
-| Regular table over materialized view | HIGH | Follows existing `performance_impact_scores` pattern; Supabase materialized view limitations well-documented in official discussions |
-| pg_cron for scheduled computation | HIGH | Official Supabase docs confirm availability on all plans; max 8 concurrent / 10 min runtime is sufficient |
-| Knip for dead code detection | HIGH | Active project (5.x), Next.js plugin confirmed, used by Vercel/Shopify/Microsoft |
-| No new rate-limiting library | HIGH | Standard Access = unlimited daily ops confirmed in Google Ads API docs |
-| funnel_snapshots persistence | HIGH | Straightforward table design; 110K rows/year is trivial; follows existing snapshot patterns |
-| No Redis/dbt/Airflow/ORM | HIGH | Scale (2,784 SKUs, ~1M rows/year) does not justify additional infrastructure complexity |
+| simple-statistics for all stats | HIGH | Official docs confirm quantile, zScore, chiSquaredGoodnessOfFit, tTestTwoSample, permutationTest, linearRegression. TypeScript types included. Zero deps. |
+| Recharts for all visualization | HIGH | ScatterChart + ZAxis = bubble charts (official example). Custom Bar shape = box plots (documented pattern). Already 3 components using Recharts in codebase. |
+| PostgreSQL for heavy computation | HIGH | percentile_cont, stddev, width_bucket are standard SQL since PG 9.4. Supabase runs PG 15. |
+| Vercel Crons for scheduling | HIGH | Already configured in vercel.json (1 existing job). Pattern established. |
+| No second charting library needed | HIGH | Mapped all 6 chart types to Recharts. Only box plot needs custom shape (~50 LOC). |
+| No Redis/Bull/separate analytics DB | HIGH | 2,784 SKUs, ~1M rows/year. Supabase tables as computed cache is sufficient. |
 
 ---
 
 ## Sources
 
-- [Supabase pg_cron Documentation](https://supabase.com/docs/guides/database/extensions/pg_cron) — HIGH confidence (official docs)
-- [Supabase Cron Documentation](https://supabase.com/docs/guides/cron) — HIGH confidence (official docs)
-- [Supabase Materialized View Limitations — GitHub Discussion #16389](https://github.com/orgs/supabase/discussions/16389) — HIGH confidence (official GitHub)
-- [Google Ads API Quotas and Access Levels](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — HIGH confidence (official docs)
-- [Google Ads API Rate Limits](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — HIGH confidence (official docs)
-- [Knip — Dead Code Detector for JavaScript/TypeScript](https://knip.dev/) — HIGH confidence (official project site)
-- [PostgreSQL REFRESH MATERIALIZED VIEW Documentation](https://www.postgresql.org/docs/current/sql-refreshmaterializedview.html) — HIGH confidence (official Postgres docs)
-- [Supabase Views Documentation](https://supabase.com/docs/guides/graphql/views) — HIGH confidence (official docs)
-- Existing project: `docs/plans/2026-02-11-schema-scalability-and-backfill.md` — pg_cron discussion (Phase 4)
-- Existing project: `docs/plans/2026-02-21-strategic-milestone-assessment.md` — content-performance feedback gap identified (Part 5)
+- [simple-statistics GitHub](https://github.com/simple-statistics/simple-statistics) — v7.8.8, ISC license, TypeScript types included — HIGH confidence
+- [simple-statistics API docs](https://simple-statistics.github.io/docs/) — Full function reference confirming all needed methods — HIGH confidence
+- [Recharts ScatterChart API](https://recharts.github.io/en-US/api/ScatterChart/) — ZAxis support for bubble charts — HIGH confidence
+- [Recharts Bubble Chart Example](https://recharts.github.io/en-US/examples/BubbleChart/) — Official bubble chart pattern — HIGH confidence
+- [PostgreSQL Aggregate Functions](https://www.postgresql.org/docs/current/functions-aggregate.html) — percentile_cont, stddev — HIGH confidence
+- [PostgreSQL percentile_cont tutorial](https://www.tigerdata.com/learn/understanding-percentile_cont-and-percentile_disc) — Usage patterns — MEDIUM confidence
+- [Vercel Cron Jobs docs](https://vercel.com/docs/cron-jobs/manage-cron-jobs) — Configuration and plan limits — HIGH confidence
+- [jStat docs](https://jstat.github.io/all.html) — Alternative considered (too heavy, stale) — HIGH confidence
+- Existing project: `dashboard/package.json` — current dependency inventory
+- Existing project: `dashboard/vercel.json` — current cron configuration
+- Existing project: `dashboard/src/components/dashboard/QualityDistribution.tsx` — existing Recharts histogram pattern

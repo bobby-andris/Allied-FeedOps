@@ -1,8 +1,8 @@
-# Feature Landscape: v1.3b Architecture Validation & Data Persistence
+# Feature Landscape: v1.3c Actionable Shopping Intelligence
 
-**Domain:** Feed optimization platform -- architecture validation, data persistence, content-performance feedback loops
+**Domain:** Google Shopping tier optimization intelligence system
 **Researched:** 2026-02-25
-**Confidence:** HIGH -- based on exhaustive codebase review of schema, migrations, service.ts, strategic assessment, and PROJECT.md
+**Confidence:** HIGH -- based on existing spec review, codebase analysis, and ecosystem research
 
 ---
 
@@ -12,240 +12,302 @@ Before categorizing new features, here is the infrastructure this milestone buil
 
 | Existing Asset | Location | Status |
 |---|---|---|
-| Performance baselines (30-day pre-publish) | `performance_baselines` table | Working, auto-captured |
-| Performance snapshots (post-publish daily) | `performance_snapshots` table with `days_since_publish`, `cohort_type` | Working, captured via API |
-| Diff-in-diff impact scores | `performance_impact_scores` table with treated/control, lift %, confidence | Schema exists, needs population |
-| Publish events with content snapshots | `publish_events` with `prompt_hash`, `evidence_hash`, `final_payload_hash` | Working, populated on publish |
-| Regeneration history with prompt tracking | `regeneration_history` with `prompt_hash`, quality before/after, feature flags | Working |
-| Prompt version aliases | `prompt_version_aliases` mapping hash to human name | Schema exists |
-| Search query snapshots (post-publish delta) | `search_query_snapshots` with `publish_event_id`, `days_since_publish` | Schema exists, FK to publish_events |
-| SKU bottleneck classifications | `sku_bottleneck_classifications` | Schema exists |
-| service.ts live Google Ads queries | 6 parallel GAQL queries, 2-min cache | Working but ephemeral |
-| Optimization control plane (033) | `query_value_scores`, `routing_recommendations`, `opportunity_clusters`, `query_intent_features` | Tables exist, EMPTY (hardcoded thresholds produce zero matches) |
-| Intent execution system (035b DEFERRED) | 14 tables for policy, experiments, negatives, margins | Migration file exists, NOT applied to production |
-| GA4 attribution forensics (034b DEFERRED) | 4 GA4 tables for source/medium, landing pages, attribution | Migration file exists, NOT applied, NO code references |
-| Intent TypeScript code | 32 files in `dashboard/src/lib/intent/` | Code exists, dead (no backing tables) |
-| Auto data collection | `ensureBaselineData()`, `ensureSkuData()` in ensure-data.ts | Working, triggers on SKU selection/regen |
+| 3-tier Shopping funnel (HIGH/MEDIUM/LOW) | 177 campaigns, 59 product groups | Working, used daily |
+| Live Google Ads integration | `service.ts` (6 parallel GAQL queries, 2-min cache) | Working |
+| NLP search term decomposition | `query-intelligence.ts` (brand/competitor/product detection) | Working -- KEEP the NLP, REPLACE the scoring |
+| Hardcoded tier scoring | `query-intelligence.ts` line 138 (ROAS 3.6/3.1/2.6, CVR 5%/3%) | Working but produces zero useful recommendations |
+| ROAS recommendations | `control-center.ts` (bounded +/-10% changes, confidence from volume) | Working but uses hardcoded baselines |
+| Opportunity clustering | `control-center.ts` (`buildOpportunityClusters()`) | Working for unassigned terms only |
+| Tier movement execution pipeline | `policy.ts` + `tier-movement.ts` (with dry-run support) | Working, logs to `policy_action_execution_log` |
+| Guardrail evaluation | `policy.ts` (`evaluateGuardrails()`) | Working but uses hardcoded thresholds |
+| Intent policy engine | `policy.ts` (`evaluatePromotionDemotion()`) | Working but hardcoded thresholds (line 20-41) |
+| Experiment tables | `experiment_registry`, `experiment_assignments`, `experiment_outcomes` | KEEP'd, empty, ready |
+| Optimization control plane tables | `routing_recommendations`, `query_value_scores`, `opportunity_clusters` | Exist, empty |
+| Funnel snapshots | `funnel_snapshots_daily` with capture/trends/backfill endpoints | Schema ready, needs re-backfill + scheduler activation |
+| Content Impact dashboard | `/content-impact` landing + detail pages | Working |
+| All 10 KEEP'd 035b tables | `term_intent_state`, `policy_decision_log`, etc. | Confirmed in production, empty |
 
 ---
 
 ## Table Stakes
 
-Features this milestone MUST deliver. Without these, v1.3c (Actionable Intelligence) and v1.4 (Closed-Loop Optimization) cannot be built.
+Features operators expect from a Shopping intelligence system. Missing = system feels incomplete or untrustworthy.
 
 | Feature | Why Expected | Complexity | Dependencies | Notes |
-|---------|-------------|------------|--------------|-------|
-| Content-performance feedback view/table | The ONLY missing link between "what content was published" and "how it performed." publish_events has prompt_hash, performance_snapshots has CTR/CVR, but nothing joins them. v1.4 cannot exist without this. | Medium | `publish_events`, `performance_snapshots`, `regeneration_history` | Materialized view joining publish_events.prompt_hash + performance_snapshots metrics by master_sku/platform/date_range. Include: content text, prompt hash, quality score at publish, baseline CTR/CVR, post-publish CTR/CVR, delta. |
-| Deferred migration triage (035b) | 32 TypeScript files reference tables that do not exist. Every intent-related dashboard page is dead. Must decide: apply, prune, or remove before building v1.3c on top of it. | Low (decision) / Medium (execution) | Migration file `035b_DEFERRED`, `dashboard/src/lib/intent/*.ts` | Strategic assessment Part 7 recommends applying 8 of 14 tables. Schema must be verified against TS code expectations before applying. |
-| Data flow audit document | No single document maps the complete flow: Google Ads API -> service.ts -> DB -> Dashboard -> Actions -> Google Ads. Dead ends exist (empty optimization tables, orphaned components). Without this map, new features risk building on broken foundations. | Low | All existing tables and code | Output: architecture diagram with every table, every data source, every consumer, marking dead ends. |
-| Historical persistence for service.ts tier data | service.ts queries 6 GAQL queries live with 2-minute cache. Zero historical data is persisted from these queries. Cannot build trend analysis, tier movement tracking, or funnel analytics without history. | Medium | `service.ts`, new `funnel_term_daily` table (or similar) | Daily snapshot of search term tier assignments, impressions, clicks, cost, conversions by custom_label_0 and tier. Cloud Scheduler cron job. |
-| API quota analysis and sustainability confirmation | service.ts makes 6 GAQL queries per page load. At current usage this works, but scaling to automated daily snapshots adds load. Must confirm quota budget before building persistence. | Low | Google Ads API documentation, current usage patterns | Analysis document confirming: current daily query count, quota limits, projected usage with daily snapshots, caching strategy recommendation. |
+|---------|--------------|------------|-------------|-------|
+| **Distribution-based tier boundaries** | Hardcoded ROAS 3.6/3.1/2.6 and CVR 5%/3% produce zero recommendations because they don't match actual performance distributions. Every serious optimization tool computes thresholds from real data. This is THE reason the Tier Movements Panel shows "0 recommendations." | Medium | `getLabelTierPerformance()`, `getExistingFunnelTerms()` from service.ts | Replace constants in `query-intelligence.ts` (line 138), `control-center.ts` (line 3-7), and `policy.ts` (lines 20-41). New file: `tier-scoring.ts` |
+| **Dollar-value impact estimates on every recommendation** | Abstract scores ("impact: 0.73") are meaningless to operators. Every recommendation must show "~$X/month" to be actionable. Industry standard for any optimization tool claiming to surface revenue. | Medium | Tier-level avg CVR, avg CPC, avg AOV from live data | Current `scoreNeedsDecisionTerm()` returns `expected_profit_proxy` but not dollar estimates for tier movements. Formula: `(target_tier_avg_cvr - current_tier_avg_cvr) * current_impressions * target_tier_avg_aov` |
+| **Multi-factor confidence scoring** | Low-volume terms (5 clicks) should not get same treatment as high-volume terms (500 clicks). Current confidence is simplistic (`clicks/50` or `clicks/500 * 0.5 + conversions/20 * 0.5`). Need data volume + consistency + statistical significance + NLP alignment. | Low | Click/conversion counts already available | Four-factor model: data volume (30%), consistency via CoV (30%), statistical significance (20%), NLP intent alignment (20%) |
+| **Misplaced term detection with z-scores** | Terms performing significantly above/below their tier average are the primary revenue leakage source. Z-score > 1.5 = promotion candidate, < -1.5 = demotion candidate. Standard statistical approach, transparent and auditable. | Medium | Distribution engine, term-level ROAS per tier | Core of the revenue leakage analysis. For each term: compute z-score of its ROAS relative to current tier's ROAS distribution. Term belongs in tier where z-score is closest to 0. |
+| **Wasted spend alerts** | Terms with spend but zero conversions over 30 days are obvious waste. Every Google Ads optimization tool surfaces these. Simple filter, high value. | Low | Existing funnel term data | Filter: cost > $5 AND conversions = 0 AND period >= 30 days. Suggest "block" or "demote." |
+| **One-click tier movement execution** | Recommendations without execution are just reports. Existing `executeTierMovementBatch()` pipeline already works -- just needs UI wiring. | Low | `POST /api/shopping-funnel/tier-movement` (exists), `routing_recommendations` table (exists) | Wire approve/reject buttons to existing API. Persist to `routing_recommendations` with accept/reject/expire workflow. Mostly UI plumbing. |
+| **Movement history with undo** | Operators need to see what changed and reverse mistakes. Both `negative_registry` and `policy_action_execution_log` tables exist and store criterion IDs. | Low | KEEP'd 035b tables (confirmed in production, empty) | Tables exist. Populate on movement execution. Undo = re-add/remove the negative keyword using stored criterion ID. |
+| **Dry-run mode for all automated actions** | Operators will not trust automation without previewing effects first. `executeTierMovementBatch(dryRun: true)` already supported in pipeline. | Low | Existing tier-movement pipeline | Already built. Table stakes for any automation system. Just surface in UI. |
+| **Recommendation persistence across page loads** | Computed recommendations must survive page refreshes. `routing_recommendations` table exists (migration 033) with `pending/accepted/rejected/expired` status workflow. | Low | Supabase `routing_recommendations` table | Write on computation, read on page load. Include expiry (recommendations older than 7 days should auto-expire if performance data changed). |
+| **Product group performance overview table** | Per-group ROAS/spend/revenue aggregation across tiers. Foundation for strategic decisions. `getLabelTierPerformance()` already returns this data. | Low | Existing service.ts function | Basic sortable table view for 59 product groups. Foundation for BCG matrix (differentiator). |
 
 ---
 
 ## Differentiators
 
-Features that elevate the milestone beyond basic plumbing. Not strictly required for v1.3c, but significantly increase the value of the feedback loop.
+Features that elevate this beyond a basic optimization tool. Not expected, but highly valued.
 
 | Feature | Value Proposition | Complexity | Dependencies | Notes |
-|---------|------------------|------------|--------------|-------|
-| Content A/B attribution | Track WHICH prompt changes drove CTR improvement. When prompt_hash changes between two publish_events for the same SKU, measure the performance delta. "Prompt X produced 12% higher CTR than Prompt Y for towel bar category." | High | Content-performance feedback view, multiple publish cycles per SKU | Requires at least 2 publish events per SKU with different prompt_hashes AND enough time between them for statistical significance. v1.4 Phase 2 needs this, but the table design belongs in v1.3b. |
-| Populate performance_impact_scores | The diff-in-diff scorecard table exists but is empty. Building a compute job that calculates treated vs control lift for published SKUs would make the Performance page actionable instead of placeholder. | Medium | `performance_snapshots` (populated), `performance_baselines`, `publish_events` | Compute job: for each publish_event, find treated pre/post windows, match control cohort by category, calculate lift. Write to performance_impact_scores. |
-| Populate search_query_snapshots after publish | The table exists with FK to publish_events and days_since_publish column, but nothing writes to it. Populating it enables "which search terms gained/lost impressions after we changed the description?" | Medium | `search_query_snapshots` schema, `publish_events`, search term sync pipeline | Cloud Scheduler job or post-publish hook: capture search query metrics at publish time and at 7/14/30-day intervals. |
-| Empty optimization table cleanup | `query_value_scores`, `routing_recommendations`, `opportunity_clusters`, `query_intent_features` are empty because hardcoded thresholds match nothing. Either populate with simple distribution-based scoring OR drop and redesign for v1.3c. | Low-Medium | Migration 033 tables, optimization TypeScript code | Recommendation: do NOT populate with hardcoded scoring. Mark tables as "v1.3c will populate with distribution-based scoring." Document the decision. Avoids wasted work. |
-| Orphaned component surfacing | GmcDisapprovalBadge and PromptLineagePanel exist but are not in any page. Either wire them into the dashboard or remove them. | Low | Component code, dashboard pages | Low effort, high tidiness value. PromptLineagePanel is particularly useful for content-performance feedback visibility. |
+|---------|-------------------|------------|-------------|-------|
+| **Revenue leakage hero number** | Single number at top of dashboard: "$X,XXX/month in detected revenue leakage." Quantifies the value of the optimization system itself. Powerful for executive buy-in. | Low | Sum of all misplaced-term `net_monthly_impact` estimates | Few tools do this. Requires distribution engine to be accurate. Update on every page load from cached recommendation data. |
+| **Adaptive tier boundaries that auto-update** | Boundaries recompute from live data on every API call, not set once and forgotten. After v1.3a content improvements, performance distributions will shift -- static thresholds become stale within weeks. | Medium | Distribution engine, `funnel_snapshots_daily` for trend comparison | Key differentiator: thresholds evolve with the business. Seasonal shifts, content quality changes, and market dynamics all reflected automatically. |
+| **Under-invested winner detection** | High-CVR terms with low impression share = money left on table. Cross-references `search_queries.impressions` with `keyword_metrics.avg_monthly_searches` to compute impression share gap. | Medium | `search_queries` + `keyword_metrics` tables (both populated) | Impression share = actual_impressions / avg_monthly_searches. Terms with CVR > tier median but impression share < 30% are under-invested. Unique because it leverages Keyword Planner data most tools ignore. |
+| **BCG product group matrix** | Quadrant chart (Stars/Cash Cows/Question Marks/Dogs) for 59 product groups. Standard portfolio analysis adapted for Shopping campaigns. | Medium | `getLabelTierPerformance()` aggregated across tiers | Bubble chart: X=ROAS, Y=Revenue, Size=Spend, Color=Trend (improving/declining). Click bubble to drill down to term-level. Quadrant boundaries at median ROAS and median revenue. |
+| **Seasonal demand forecasting** | Use `keyword_metrics.monthly_search_volumes` (JSONB array of {year, month, monthly_searches}) to predict demand spikes 1-2 months ahead. Proactive bidding. | Medium | `keyword_metrics` table (populated with monthly breakdown) | Month-over-month growth rate. Flag terms with >20% change in upcoming period. "Towel bar searches typically spike 40% in May -- increase bids proactively." |
+| **Competitor conquest tracking** | Group all competitor-mentioning search terms (16 competitor tokens in NLP) by competitor brand. Show per-competitor: term count, impressions, spend, revenue, ROAS. | Low | `decomposeSearchTerm().is_competitor` (exists) | "Moen-related queries: 45 terms, $230 spend, $890 revenue, 3.87 ROAS." Directly actionable for conquest bidding strategy. |
+| **Brand vs non-brand revenue split** | Quantify brand dependency. If 80% of revenue is branded, non-brand optimization has massive headroom. Strategic insight for growth planning. | Low | `decomposeSearchTerm().is_branded` (exists) | Simple aggregation. brand_revenue / total_revenue = brand_share. Track over time to measure non-brand growth. |
+| **Long-tail vs head term analysis** | Group terms by word count (1-2=head, 3-4=mid, 5+=long-tail). Long-tail typically converts 2-3x better. Quantify the actual difference for this catalog. | Low | Existing term data | Simple word count grouping. Per bucket: term count, spend, revenue, avg ROAS, avg CVR. Informs whether to invest more in long-tail targeting. |
+| **CPC opportunity scoring** | Terms where actual CPC is well below `keyword_metrics.high_top_of_page_bid_micros`. Headroom exists to bid more aggressively while remaining profitable. | Low | `search_queries` + `keyword_metrics` tables | Score = (high_top_of_page_bid - actual_cpc) / high_top_of_page_bid. High score = room to grow. Low complexity, high actionability. |
+| **Competitive benchmark overlay** | Our CPC vs market benchmark CPC (from Keyword Planner) per product category. Shows where Allied Brass has competitive advantage vs where it's overpaying. | Low | `keyword_metrics.high_top_of_page_bid_micros`, `keyword_metrics.competition_index` | Category-level comparison. "Towel Bars: our CPC $0.85 vs market $1.40 -- competitive advantage. Soap Dispensers: our CPC $1.10 vs market $0.70 -- overpaying." |
+| **Automated tier rebalancing rules** | Configurable rules engine: "If ROAS > X for Y+ days in tier Z, auto-promote." Dry-run first, then human-approved batch, then fully automated with guardrails. | High | `automation_rules` table (new), Cloud Scheduler, guardrail system in policy.ts | Three-stage rollout: (1) dry-run only, (2) human-approved batch, (3) auto with circuit breakers. Requires careful guardrail design. |
+| **A/B testing for tier assignments** | Split terms into treatment (move to new tier) and control (keep current). Measure impact with statistical significance after N days. | High | `experiment_registry`, `experiment_assignments`, `experiment_outcomes` (KEEP'd, empty) | Google recommends 50+ conversions per arm minimum. For Allied Brass volumes (~3K terms, moderate conversion rates), experiments need 4+ week runtimes and careful term selection for statistical power. |
+| **Optimization impact tracker** | Before/after measurement of every tier movement. "Tier optimization has generated $X,XXX in additional revenue this month." Proves ROI of the system. | Medium | `policy_action_execution_log`, `performance_snapshots` | Link movements to subsequent performance. Requires 7-14 day measurement lag. Cumulative timeline chart. |
+| **Executive weekly digest** | Auto-generated summary: top 5 performers, top 5 decliners, new terms discovered, actions taken, recommended actions for next week. | Medium | All scoring/recommendation APIs | Computation layer on existing APIs. Dashboard page, not email (avoid notification infrastructure overhead). |
 
 ---
 
 ## Anti-Features
 
-Features to explicitly NOT build in this milestone.
+Features to explicitly NOT build. Scope control is critical for this milestone.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Real-time streaming from Google Ads | Massive overengineering. Daily batch collection is sufficient for all analytics needs. Google Ads data only updates daily anyway. | Daily Cloud Scheduler snapshot job for funnel term data. |
-| Apply ALL 18 deferred tables blindly | 034b (GA4 attribution, 4 tables) has ZERO code references. 035b has 6 "nice-to-have" tables with no clear consumer. Applying unused tables adds maintenance burden and cognitive overhead. | Apply only the 8 tables from 035b that have TypeScript consumers AND are prerequisites for v1.3c. Explicitly defer 034b with documented reasoning. |
-| Distribution-based scoring for optimization tables | This is v1.3c Phase 1's entire scope. Doing it in v1.3b would be scope creep and would duplicate work. | Document that optimization tables will be populated in v1.3c. Keep tables empty but validated. |
-| Automated content regeneration based on performance | This is v1.4 Phase 1. The feedback loop data must exist before automated actions can use it. | Build the data layer (feedback view, historical persistence) in v1.3b. Let v1.4 build the automation. |
-| GA4 data pipeline | 034b tables exist for GA4 attribution forensics but no code references them, no pipeline exists to populate them, and Google Ads data already covers the primary use case (Shopping campaign performance). | Defer 034b. If GA4 attribution debugging is needed later, it can be a focused mini-milestone. |
-| Full experiment framework | experiment_registry/assignments/outcomes tables are designed for A/B testing infrastructure that requires significant UI and logic. Not needed until v1.3c Phase 3 at earliest. | Apply the 3 experiment tables (they are low-cost) but do NOT build UI or populate them. |
-| Multi-account Google Ads support | Single account (6253381786). No business need for multi-account. | Keep single-account architecture. |
+| **Real-time streaming dashboard** | Massive infrastructure overhead. Google Ads data has 3+ hour reporting delay anyway. service.ts 2-min cache is sufficient for decision-making. | Batch computation on page load with persistence to `routing_recommendations`. Manual refresh button. |
+| **Automated budget management** | Budget changes have immediate financial impact. Too risky without extensive guardrails. Google's Smart Bidding handles intra-campaign budget allocation better. | Surface budget allocation RECOMMENDATIONS only. "Consider shifting $X/day from Dogs to Cash Cows." Never auto-execute budget changes. |
+| **ML-based tier prediction models** | Over-engineering for ~3K terms. Z-score against distribution is statistically sound, interpretable, and auditable. ML adds opaque complexity, needs training data (tables are empty), and provides marginal accuracy gains at this data volume. | Percentile-based distribution scoring with z-scores. Transparent, correct, and automatically adaptive. |
+| **Automated negative keyword management without human review** | Adding wrong negatives can block profitable traffic permanently. Catastrophic failure mode. Even Google's own tools require review for negatives. | Always require human approval for negatives. Dry-run first. Batch approval only for high-confidence (>0.85) recommendations. |
+| **Email/Slack notifications** | Infrastructure overhead for notification delivery when the dashboard is the primary (and only) interface. Premature optimization of communication channel. | Weekly digest page on dashboard. Revisit notifications in v1.4 if operators explicitly request them. |
+| **Custom report builder / drag-and-drop dashboards** | Generic BI tool territory. Looker Studio, Google Sheets, or Tableau handle custom reporting better than a purpose-built optimization tool. | Fixed scorecard views optimized for the specific decisions operators need to make. Export to CSV for custom analysis. |
+| **Performance Max migration analysis** | PMax has fundamentally different optimization levers (audience signals, creative assets, no manual tier control). Allied Brass's manual Shopping structure provides more control for this catalog size. | Stay on Standard Shopping with priority bidding. Monitor PMax developments but don't migrate during this milestone. |
+| **Cross-account Google Ads management** | Single account (6253381786). Multi-account adds massive architecture complexity for zero current value. | Keep single-account assumption throughout. Architecture doesn't preclude future expansion if needed. |
+| **Native Google Ads campaign experiments** | Only works with Performance Max campaigns. Allied Brass uses Standard Shopping with manual tier structure. Campaign-level experiments can't test individual term-level tier assignments. | Build custom experiment framework using existing 035b tables. More granular than Google's native experiments for this use case. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Data Flow Audit Document
+Distribution-based scoring engine (Phase 1, core)
   |
-  v
-API Quota Analysis -----> Historical Persistence (funnel_term_daily)
-  |                              |
-  v                              v
-Deferred Migration Triage --> Apply 035b subset
-  |                              |
-  v                              v
-Content-Performance Feedback View <-- publish_events + performance_snapshots
+  +--> Misplaced term detection (Phase 1)
+  |      |
+  |      +--> Revenue leakage hero number (Phase 1)
+  |      +--> Dollar-value impact estimates (Phase 1)
   |
-  v
-[v1.3c] Distribution-based scoring populates optimization tables
+  +--> Wasted spend alerts (Phase 1)
   |
-  v
-[v1.4] Content A/B attribution, automated regeneration
+  +--> Under-invested winner detection (Phase 2, also needs keyword_metrics)
+  |
+  +--> Adaptive tier boundaries (Phase 1, also needs funnel_snapshots_daily)
+  |
+  +--> ROAS recommendations with dynamic baselines (Phase 1, replaces hardcoded in control-center.ts)
+
+One-click execution wiring (Phase 1)
+  |
+  +--> Movement history + undo (Phase 1)
+  +--> Recommendation persistence (Phase 1)
+
+Product group performance overview (Phase 2)
+  |
+  +--> BCG matrix visualization (Phase 2)
+  +--> Budget allocation recommendations (Phase 3)
+
+Competitor conquest tracking (Phase 2)
+  +--> Competitive benchmark overlay (Phase 4)
+
+Brand/non-brand split (Phase 2, standalone)
+Long-tail analysis (Phase 2, standalone)
+CPC opportunity scoring (Phase 2, standalone)
+Seasonal demand patterns (Phase 2, standalone)
+
+Distribution engine (Phase 1) + Movement history (Phase 1)
+  |
+  +--> Automated tier rebalancing rules (Phase 3)
+  +--> A/B testing framework (Phase 3)
+
+All Phase 1-3 APIs
+  |
+  +--> Executive weekly digest (Phase 4)
+  +--> Optimization impact tracker (Phase 4)
 ```
 
-**Critical path:** Data Flow Audit -> Migration Triage -> Feedback View -> Historical Persistence
+**Critical path:** Distribution engine --> Misplaced terms --> Dollar estimates --> Execution wiring --> Movement history
 
-The audit must come first because it reveals which tables actually have data, which are dead, and which connections are missing. Migration triage depends on the audit findings. The feedback view can be built in parallel with historical persistence since they use different data sources.
+Everything else branches from the distribution engine. It is the single most important feature to build first.
 
 ---
 
 ## MVP Recommendation
 
-**Phase 1 (Architecture Audit):**
-1. Data flow audit document (table stakes, Low complexity)
-2. API quota analysis (table stakes, Low complexity)
-3. Deferred migration triage decision (table stakes, Low complexity for decision)
+**Phase 1 -- Revenue Leakage Detection and Tier Optimization (highest value, lowest risk):**
+1. Distribution-based tier boundaries in new `tier-scoring.ts` -- unlocks everything else
+2. Misplaced term detection with z-score analysis -- the core value proposition
+3. Dollar-value impact estimates on every recommendation
+4. Wasted spend alerts -- easy wins, immediate value
+5. Revenue leakage hero number -- quantifies system value
+6. One-click execution wiring to existing pipeline
+7. Movement history + undo capability
+8. Recommendation persistence to `routing_recommendations`
 
-**Phase 2 (Critical Schema Updates):**
-1. Apply 035b subset -- 8 prerequisite tables (table stakes, Medium complexity)
-2. Content-performance feedback materialized view (table stakes, Medium complexity)
-3. Historical persistence table + daily snapshot job (table stakes, Medium complexity)
+**Phase 2 -- Market Intelligence and Demand Gap Analysis (medium complexity, strategic value):**
+9. Product group BCG matrix with drill-down
+10. Competitor conquest tracking + brand/non-brand split
+11. Under-invested winner detection + CPC opportunity scoring
+12. Seasonal demand pattern analysis
+13. Long-tail vs head term analysis
+14. Competitive benchmark overlay
 
-**Phase 3 (Validation and Cleanup):**
-1. Populate performance_impact_scores (differentiator, Medium)
-2. Populate search_query_snapshots (differentiator, Medium)
-3. Wire orphaned components or remove them (differentiator, Low)
-4. End-to-end data flow validation: verify no dead ends remain
+**Phase 3 -- Intelligent Automation (highest risk, requires Phase 1 operational data):**
+15. Automated tier rebalancing rules with three-stage rollout
+16. A/B testing framework with experiment lifecycle
 
-**Defer to v1.3c:**
-- Distribution-based scoring for optimization tables
-- Full experiment framework UI
+**Phase 4 -- Executive Reporting (depends on all above):**
+17. Optimization impact tracker -- proves ROI
+18. Executive weekly digest
+19. Competitive benchmarks scorecard
 
 **Defer to v1.4:**
-- Content A/B attribution analysis
-- Automated regeneration based on performance
-
-**Defer indefinitely:**
-- 034b GA4 attribution tables (no code references, no clear need)
+- Full automation without human review
+- Email/Slack notifications
+- ML-based prediction models
+- Content-informed regeneration based on tier performance
 
 ---
 
-## Detailed Feature Specifications
+## Scoring Approach Details
 
-### Content-Performance Feedback View
+### Distribution-Based Scoring (recommended approach)
 
-**Purpose:** The missing link. Joins content generation decisions to their measured outcomes.
+**Why percentile-based, not ML:** For approximately 3,000 search terms across 59 product groups, percentile-based scoring is the right tool. ML models need training data (which doesn't exist -- tables are empty), add interpretability problems, and provide marginal accuracy gains over statistical methods at this data volume. Z-scores against tier distributions are transparent, auditable, and automatically adaptive as performance shifts.
 
-**Data sources (all existing):**
-- `publish_events`: master_sku, platform, published_at, prompt_hash, evidence_hash, quality_score, published_title, published_description
-- `performance_baselines`: avg_ctr, avg_cvr, avg_impressions (pre-publish)
-- `performance_snapshots`: ctr, cvr, impressions, days_since_publish (post-publish)
-- `regeneration_history`: prompt_hash, feedback_text, quality_score_before/after
+**How it works:**
+1. Call `getLabelTierPerformance()` for tier-level aggregates (spend, revenue, conversions, clicks per tier per product group)
+2. Call `getExistingFunnelTerms()` for term-level metrics within each tier
+3. For each tier (HIGH/MEDIUM/LOW), compute ROAS distribution: p25, p50 (median), p75, mean, standard deviation
+4. Dynamic tier boundary computation:
+   - LOW tier floor = MEDIUM tier p75 ROAS (above 75th percentile of MEDIUM = belongs in LOW)
+   - HIGH tier ceiling = MEDIUM tier p25 ROAS (below 25th percentile of MEDIUM = belongs in HIGH)
+5. For each term, compute z-score = (term_ROAS - tier_mean_ROAS) / tier_stddev_ROAS
+6. Term belongs in the tier where its z-score is closest to 0 (best fit)
+7. z-score > 1.5 in current tier = strong promotion candidate
+8. z-score < -1.5 in current tier = strong demotion candidate
+9. Impact estimate = (target_tier_avg_cvr - current_tier_avg_cvr) x current_impressions x target_tier_avg_aov
 
-**Output schema (materialized view or computed table):**
-```
-content_performance_feedback:
-  master_sku text
-  platform text
-  publish_event_id bigint
-  published_at timestamptz
-  prompt_hash text
-  prompt_alias text (from prompt_version_aliases)
-  quality_score_at_publish real
-  published_title text
-  published_description text
-  baseline_ctr real
-  baseline_cvr real
-  baseline_impressions real
-  post_7d_ctr real
-  post_7d_cvr real
-  post_7d_impressions real
-  post_30d_ctr real
-  post_30d_cvr real
-  post_30d_impressions real
-  ctr_delta_7d real
-  cvr_delta_7d real
-  ctr_delta_30d real
-  cvr_delta_30d real
-```
+**Bayesian smoothing for low-volume terms:**
+- Add 0.5 pseudo-conversions and proportional pseudo-cost to prevent division by zero
+- Formula: smoothed_cvr = (conversions + 0.5) / (clicks + (0.5 / tier_avg_cvr))
+- Apply when term has < 20 clicks to stabilize estimates
+- Do NOT apply for terms with 50+ clicks (sufficient real data)
 
-**Complexity:** Medium -- the join logic is straightforward but requires careful handling of:
-- Multiple publish events per SKU (use most recent)
-- Missing baselines (SKUs published without baseline capture)
-- Insufficient post-publish data (< 7 days since publish)
-- Multi-SKU products sharing product_id in Google Ads
+### Confidence Thresholds (industry-aligned)
 
-### Historical Persistence (Funnel Term Daily)
+| Confidence Level | Criteria | Use |
+|-----------------|---------|-----|
+| HIGH (> 0.80) | 100+ clicks, 5+ conversions, daily ROAS CoV < 0.5 | Safe for batch auto-approval |
+| MEDIUM (0.50-0.80) | 30-100 clicks, 1-5 conversions | Require individual operator review |
+| LOW (< 0.50) | < 30 clicks, 0-1 conversions | Show as informational only, no action buttons |
+| Auto-execution minimum | 0.70 | Threshold for automated rule execution |
+| Batch auto-approve minimum | 0.85 | Threshold for "Approve All High-Confidence" button |
 
-**Purpose:** Persist the ephemeral service.ts GAQL data so trend analysis and tier movement tracking become possible.
+**Four-factor confidence model:**
+- Data volume: min(clicks / 100, 1) x 0.30
+- Consistency: (1 - coefficient_of_variation_of_daily_ROAS) x 0.30, clamped to [0, 1]
+- Statistical significance: chi-squared test p-value for conversion rate difference x 0.20
+- NLP intent alignment: does term's intent features match target tier semantics? x 0.20
 
-**What service.ts queries (6 parallel GAQL queries):**
-1. Enabled shopping campaigns (campaign.id, campaign.name)
-2. Enabled shopping ad groups (campaign.name, ad_group.id, ad_group.name)
-3. Negative shared sets (shared_set.id, shared_set.name)
-4. Campaign negative keywords (campaign.name, keyword.text, match_type)
-5. Ad group negative keywords (campaign.name, ad_group.name, keyword.text, match_type)
-6. Shopping search terms with metrics (campaign.name, ad_group.name, search_term, impressions, clicks, cost_micros, conversions, conversions_value)
+### Guardrail Patterns for Automation
 
-**What to persist (query 6 is the high-value target):**
-```
-funnel_term_daily:
-  id bigint
-  snapshot_date date
-  search_term text
-  custom_label_0 text
-  source_tier text (HIGH/MEDIUM/LOW, parsed from campaign name)
-  impressions integer
-  clicks integer
-  cost_micros bigint
-  conversions numeric
-  conversions_value numeric
-  ctr numeric
-  cvr numeric
-  fetched_at timestamptz
-```
+**Three-tier safety model (standard in automated campaign management):**
 
-**Collection method:** Cloud Scheduler daily cron -> Cloud Run endpoint or Vercel cron that calls a dedicated snapshot function. NOT from service.ts (which is a dashboard page handler), but from a dedicated data collection pipeline.
+**1. Hard guardrails (never overridable):**
+- Maximum daily spend change: 10% of current tier spend
+- Maximum terms moved per day: 5% of tier term count
+- No movements for terms with < 30 clicks (insufficient data)
+- No promotions to LOW tier (highest bid) without 3+ conversions
+- Mandatory 7-day cooldown after any movement before re-evaluation
+- Never auto-block branded terms
 
-**Complexity:** Medium -- requires new table, new collection endpoint, Cloud Scheduler setup. The GAQL query already exists in service.ts and can be extracted.
+**2. Soft guardrails (operator can override with confirmation):**
+- Confidence threshold for auto-execution: 0.85 (configurable)
+- Maximum dollar impact per single movement: $500/month estimated
+- Seasonal override: disable automation during known demand spikes (configurable dates)
+- Warn if moving competitor-mentioning terms between tiers
 
-### Migration Triage (035b)
+**3. Circuit breakers (automatic halt + alert):**
+- If overall ROAS drops > 15% across any tier in 3 consecutive days, halt all automated movements
+- If total conversions drop > 20% week-over-week, halt all automated movements
+- If > 10 automated movements in a day produce negative impact (measured after 7-day lag), halt and require manual review
+- Circuit breaker reset: manual operator action required, cannot auto-resume
 
-**8 tables to APPLY (prerequisites for v1.3c per strategic assessment Part 7):**
-1. `intent_taxonomy_versions` -- policy version management
-2. `term_intent_state` -- intent classification per term
-3. `policy_decision_log` -- policy evaluation audit trail
-4. `policy_action_execution_log` -- execution action audit trail
-5. `experiment_registry` -- experiment definitions
-6. `experiment_assignments` -- term-to-experiment cohort assignments
-7. `experiment_outcomes` -- experiment results
-8. `negative_registry` -- negative keyword governance with rollback
+### A/B Testing Sizing Guidance
 
-**6 tables to DEFER (nice-to-have, no clear consumer in v1.3c):**
-1. `policy_snapshots` -- point-in-time snapshots (no TS consumer identified)
-2. `sku_margin_daily` -- requires Shopify margin data pipeline that does not exist
-3. `order_line_returns_daily` -- requires Shopify returns data pipeline that does not exist
-4. `attribution_confidence_daily` -- complex attribution quality scoring, premature
-5. `search_buildout_recommendations` -- can be created when search governance is built
-6. `operator_review_audit` -- audit trail for human review, premature
+**Google's recommendation:** 50+ conversions per arm for statistical significance (from Demand Gen experiment documentation). Their experiments use Jackknife resampling with 20 buckets per arm.
 
-**Before applying:** Verify that the 8 table schemas match what the 32 TypeScript files in `dashboard/src/lib/intent/` expect. Look for column name mismatches, missing columns, type mismatches.
+**For Allied Brass:** With moderate conversion volumes across 3K terms, experiment sizing requires:
+- Select high-volume terms (50+ clicks/month) for experiments
+- Minimum 4-week runtime (Google's recommendation for Shopping campaigns)
+- 50/50 traffic split for maximum statistical power
+- Target 95% confidence level (p < 0.05) for declaring winners
+- Use cluster analysis to create balanced treatment/control groups based on historical performance
 
-**4 tables from 034b to DEFER indefinitely:**
-- `ga4_source_medium_daily`, `ga4_landing_page_quality_daily`, `ga4_attribution_root_cause_daily`, `ga4_shopify_reconciliation_daily`
-- Reason: No code references, no data pipeline, Google Ads data covers primary use case
+### Visualization Patterns for Revenue Leakage
+
+**Hero metric (top of page):** Large number "$4,200/month in revenue leakage" with trend arrow vs previous computation. Green if leakage is shrinking (movements are working), red if growing. This answers "why should I care?" in 2 seconds.
+
+**Tier ROAS distribution box plots:** Show ROAS distribution per tier as side-by-side box plots. Overlapping regions between tiers are visually the "leakage zones" where terms are misplaced. Intuitive visualization of the statistical problem.
+
+**Waterfall chart for cumulative impact:** Start with current revenue. Add each recommended movement's estimated impact as a step. End with projected revenue if all recommendations are executed. Classic financial visualization, familiar to executives.
+
+**Sortable recommendation table (primary interaction surface):** Columns: search term, current tier, recommended tier, dollar impact, confidence, action buttons (approve/reject/defer). Default sort by dollar impact descending. Batch approve/reject with "Select All High-Confidence" button.
+
+**BCG bubble chart for product groups:** X=ROAS, Y=Revenue, Bubble size=Spend, Color=Trend (green=improving, red=declining). Four labeled quadrants. Click any bubble for term-level drill-down. Toggle between chart and table view for operators who prefer tabular data.
+
+---
+
+## Complexity Estimates
+
+| Feature | New Code (est.) | Calendar Days | Risk Level |
+|---------|----------------|---------------|------------|
+| Distribution engine + scoring (`tier-scoring.ts`) | 300-400 lines | 2-3 | LOW -- math is well-understood, data sources exist |
+| Revenue leakage API route + response shape | 200-300 lines | 1-2 | LOW -- computation layer on existing data |
+| Revenue leakage UI (hero, table, box plots) | 400-500 lines | 2-3 | LOW -- shadcn/ui components, familiar patterns |
+| One-click execution + movement history UI | 100-150 lines of changes | 1 | LOW -- backend pipeline exists, just wiring |
+| Product group BCG matrix API + chart | 200 API + 300 UI | 2-3 | MEDIUM -- chart library selection, drill-down UX |
+| Competitive intel + demand gaps APIs | 300 lines across 3-4 route files | 2-3 | LOW -- data and NLP decomposition exist |
+| Competitive intel + demand gaps UI | 400-500 lines | 2-3 | LOW -- tables and simple visualizations |
+| Automation rules engine + table + UI | 400-500 new | 3-4 | HIGH -- guardrail design is critical, three-stage rollout |
+| A/B testing framework (lifecycle + UI) | 500-600 new | 4-5 | HIGH -- statistical rigor, experiment sizing, measurement lag |
+| Impact tracker + weekly digest APIs | 300 lines | 2-3 | MEDIUM -- delayed measurement requires careful date math |
+| Impact tracker + digest UI | 300 lines | 1-2 | LOW -- scorecard layout |
+
+**Total estimate:** 18-25 developer days across all 4 phases.
 
 ---
 
 ## Sources
 
-All findings based on local codebase review:
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/database/SCHEMA.md` -- complete schema reference
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/plans/2026-02-21-strategic-milestone-assessment.md` -- Part 7 migration analysis
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/.planning/PROJECT.md` -- current state and roadmap
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/035b_DEFERRED_unified_intent_execution_system.sql` -- 14 table definitions
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/034b_DEFERRED_ga4_attribution_forensics.sql` -- 4 GA4 table definitions
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/033_optimization_control_plane.sql` -- optimization tables
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard/src/lib/shopping-funnel/service.ts` -- 6 GAQL queries, 2-min cache
-- `/Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard/src/lib/data-collection/ensure-data.ts` -- auto data collection
+**Ecosystem research:**
+- [DataFeedWatch: Priority Bidding for Shopping ROAS](https://www.datafeedwatch.com/blog/how-to-increase-google-shopping-roas) -- tiered campaign structure patterns
+- [Channable: Shopping bidding strategies 2026](https://www.channable.com/blog/bidding-strategies) -- target ROAS best practices, exploration budgets
+- [Store Growers: Shopping Ads Benchmarks 2026](https://www.storegrowers.com/shopping-ads-benchmarks/) -- industry ROAS/CPC/CTR benchmarks
+- [Google Ads Help: Automated bidding for Shopping](https://support.google.com/google-ads/answer/6309029?hl=en) -- Google's own guardrail documentation
+- [Google Ads Help: Statistical methodology behind experiments](https://support.google.com/google-ads/answer/9232676?hl=en) -- Jackknife resampling, 20 buckets
+- [Google Ads Help: Demand Gen A/B experiments](https://support.google.com/google-ads/answer/13719071?hl=en) -- 50 conversion minimum per arm
+- [SearchEngineLand: When Google AI bidding breaks](https://searchengineland.com/google-ai-bidding-breaks-take-control-466251) -- guardrail failure modes
+- [Optmyzr: Budget automation guardrails](https://www.optmyzr.com/bfcm-google-ads-2025-budget-automation-guide/) -- circuit breaker patterns
+- [Practical Ecommerce: BCG Matrix for Ecommerce](https://www.practicalecommerce.com/Using-the-BCG-Matrix-for-Ecommerce-Marketing-Decisions) -- portfolio analysis methodology
+- [Scube Marketing: Google Shopping bidding 44-point guide](https://www.scubemarketing.com/blog/google-shopping-bid-strategy) -- bid management best practices
+
+**Codebase analysis:**
+- `dashboard/src/lib/optimization/query-intelligence.ts` -- current hardcoded scoring (lines 116-145, 196-265)
+- `dashboard/src/lib/optimization/control-center.ts` -- current ROAS recommendations (lines 3-7, 237-284)
+- `dashboard/src/lib/intent/policy.ts` -- current guardrail system (lines 20-41)
+- `dashboard/src/lib/intent/tier-movement.ts` -- execution pipeline
+- `dashboard/src/lib/shopping-funnel/service.ts` -- live Google Ads data
+- `dashboard/src/app/(dashboard)/shopping-funnel/TierMovementsPanel.tsx` -- current UI
+- `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md` -- existing spec (Phase 1-4 structure)

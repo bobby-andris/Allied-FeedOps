@@ -1,480 +1,587 @@
 # Architecture Patterns
 
-**Domain:** Content-performance feedback, historical data persistence, and migration evaluation for feed optimization platform
+**Domain:** Actionable Shopping Intelligence (v1.3c)
 **Researched:** 2026-02-25
-**Confidence:** HIGH (based on direct codebase inspection of existing tables, migrations, and data flows)
+**Confidence:** HIGH (based on full source code audit of existing pipeline)
 
----
+## Current Pipeline Architecture
 
-## Recommended Architecture
-
-### High-Level Data Flow (Current + Proposed v1.3b Additions)
+The existing data flow is a 4-stage pipeline that runs entirely server-side in Next.js API routes:
 
 ```
-                       EXISTING                                    NEW (v1.3b)
-                       --------                                    -----------
+Stage 1: DATA ACQUISITION
+  service.ts (6 parallel GAQL queries, 2-min memory cache)
+    getNeedsDecisionTerms() -> NeedsDecisionTerm[]
+    getExistingFunnelTerms() -> ExistingFunnelTerm[]
+    getLabelTierPerformance() -> LabelTierPerformance[]
 
-Google Ads API ─────> service.ts (2-min cache, ephemeral) ──> [NEW] funnel_snapshots_daily
-       │                                                              │
-       v                                                              v
-search_queries ──────────────────────────────────────────────> Historical trend queries
-keyword_metrics                                                       │
-       │                                                              │
-       v                                                              v
-prompt_builder.py ──> generated_content ──> publish_events ──> [NEW] content_performance_feedback (VIEW)
-       │                    │                     │                    │
-       v                    │                     v                    v
-regeneration_history        │            performance_snapshots ──> v1.4 closed-loop
-  (prompt_hash)             │              (publish_event_id)      optimization
-                            │                     │
-                            v                     v
-                     performance_baselines   performance_impact_scores
+Stage 2: INTELLIGENCE (scoring + classification)
+  query-intelligence.ts
+    decomposeSearchTerm() -> NLP features (product_object, modifiers, branded, competitor)
+    enrichNeedsDecisionTerm() -> adds intent_features, recommendation, value_score
+  intent/taxonomy.ts
+    classifyIntent() -> IntentClassification (8 intent classes)
+
+Stage 3: AGGREGATION + RECOMMENDATIONS
+  control-center.ts
+    buildOpportunityClusters() -> grouped by product_object
+    buildRecommendationQueue() -> sorted by impact_score
+    buildRoasRecommendations() -> ROAS target adjustments per label/tier
+
+Stage 4: EXECUTION
+  intent/policy.ts
+    routeIntentDecision() -> branded/competitor/funnel routing
+    evaluatePromotionDemotion() -> promote/demote/negative/hold
+    evaluateGuardrails() -> go/hold/blocked status
+    recommendBidPolicy() -> ROAS/CPA target adjustments
+  intent/tier-movement.ts
+    executeTierMovement() -> Supabase logging + negative keyword management
+    updateSupplementalFeedTiers() -> Google Sheets custom_label_0 column update
+```
+
+## Recommended Architecture: New Components in the Pipeline
+
+The new features insert into this pipeline at specific, well-defined points. No existing files need wholesale replacement -- only `enrichNeedsDecisionTerm()` in query-intelligence.ts gets its scoring logic delegated to the new tier-scoring.ts.
+
+### Integration Diagram
+
+```
+Google Ads API (live, 2-min cache)
+    |
+    v
+service.ts [UNCHANGED - DO NOT MODIFY]
+  getNeedsDecisionTerms()
+  getExistingFunnelTerms()
+  getLabelTierPerformance()
+    |
+    +---> tier-scoring.ts [NEW - Phase 1]
+    |       computeTierDistributions(labelTierPerf) -> TierDistributions
+    |       scoreTerm(term, distributions) -> AdaptiveScore
+    |       detectMisplacement(term, distributions) -> MisplacementResult
+    |       estimateImpact(misplacement, distributions) -> DollarImpact
+    |       |
+    |       +---> Persists to query_value_scores (existing table, migration 033)
+    |       +---> Persists to routing_recommendations (existing table, migration 033)
+    |
+    +---> query-intelligence.ts [MODIFIED - Phase 1]
+    |       decomposeSearchTerm() [KEEP as-is]
+    |       enrichNeedsDecisionTerm() [MODIFIED: delegates scoring to tier-scoring.ts]
+    |
+    +---> revenue-leakage.ts [NEW - Phase 1]
+    |       computeRevenueLeakage(existingTerms, distributions) -> LeakageReport
+    |       computeWastedSpend(existingTerms, distributions) -> WastedSpendAlert[]
+    |       computeUnderInvested(existingTerms, keywordMetrics) -> UnderInvestedWinner[]
+    |
+    +---> demand-gaps.ts [NEW - Phase 2]
+    |       computeImpressionShareGaps(searchQueries, keywordMetrics) -> ImpressionGap[]
+    |       computeCpcOpportunities(existingTerms, keywordMetrics) -> CpcOpportunity[]
+    |       computeSeasonalPatterns(keywordMetrics) -> SeasonalPattern[]
+    |
+    +---> competitive-intel.ts [NEW - Phase 2]
+    |       computeBrandNonBrandSplit(terms) -> BrandSplit
+    |       computeCompetitorMentions(terms) -> CompetitorAnalysis[]
+    |       computeLongTailAnalysis(terms) -> TailAnalysis
+    |
+    +---> product-matrix.ts [NEW - Phase 2]
+    |       computeBcgMatrix(labelTierPerf) -> BcgQuadrant[]
+    |
+    +---> automation-rules.ts [NEW - Phase 3]
+    |       evaluateRules(rules, existingTerms, distributions) -> RuleEvaluation[]
+    |       |
+    |       +---> calls policy.ts evaluatePromotionDemotion() [UNCHANGED]
+    |       +---> calls tier-movement.ts executeTierMovementBatch() [UNCHANGED]
+    |
+    +---> experiment-engine.ts [NEW - Phase 3]
+    |       registerExperiment(config) -> writes experiment_registry
+    |       assignTerms(experimentId, terms) -> writes experiment_assignments
+    |       measureOutcomes(experimentId) -> writes experiment_outcomes
+    |       |
+    |       +---> calls tier-movement.ts for treatment group [UNCHANGED]
+    |
+    +---> impact-tracker.ts [NEW - Phase 4]
+            computeImpact(executionLog, snapshots) -> ImpactReport
+            computeWeeklyDigest(allSources) -> WeeklyDigest
 ```
 
 ### Component Boundaries
 
-| Component | Responsibility | Communicates With | Change Type |
-|-----------|---------------|-------------------|-------------|
-| `content_performance_feedback` | Materialized view linking content to CTR/CVR outcomes | generated_content, publish_events, performance_snapshots, regeneration_history | **NEW** materialized view |
-| `funnel_snapshots_daily` | Daily persistence of service.ts ephemeral funnel data | service.ts (source), dashboard pages (consumer) | **NEW** table + capture endpoint + Cloud Scheduler |
-| Migration triage | Evaluate 035b (14 tables) and 034b (4 tables) | intent TS files, 035b/034b SQL files | **Decision process**, then DB DDL cleanup |
-| Data flow audit | Map every existing table to its writer(s) and reader(s) | All 36+ tables | **Analysis** producing a documented map |
-| Empty table resolution | Populate or remove query_value_scores, routing_recommendations, opportunity_clusters | migration 033, optimization TS files | **Cleanup** -- remove or repurpose |
+| Component | Responsibility | Reads From | Writes To | Dependencies |
+|-----------|---------------|------------|-----------|-------------|
+| `tier-scoring.ts` | Distribution computation, z-score placement, dollar impact estimation | service.ts exports (cached) | `query_value_scores`, `routing_recommendations` | None (pure computation + persistence) |
+| `revenue-leakage.ts` | Misplacement detection, wasted spend alerts, under-investment identification | tier-scoring.ts output, `keyword_metrics` table | None (returns data to API route) | tier-scoring.ts |
+| `demand-gaps.ts` | Impression share gaps, CPC opportunities, seasonal patterns | `search_queries` table, `keyword_metrics` table | None | None |
+| `competitive-intel.ts` | Brand/non-brand split, competitor mentions, long-tail analysis | service.ts exports | None | query-intelligence.ts `decomposeSearchTerm()` |
+| `product-matrix.ts` | BCG quadrant classification per product group | service.ts `getLabelTierPerformance()` | None | None |
+| `automation-rules.ts` | Rule evaluation, scheduled execution with dry-run | `automation_rules` table (new), service.ts | `policy_action_execution_log`, `routing_recommendations` | tier-scoring.ts, policy.ts, tier-movement.ts |
+| `experiment-engine.ts` | Experiment lifecycle (register, assign, measure, resolve) | `experiment_registry/assignments/outcomes` | Same tables | tier-movement.ts |
+| `impact-tracker.ts` | Before/after measurement, weekly digest | `policy_action_execution_log`, `performance_snapshots` | None | None |
 
-### Data Flow: Content-Performance Feedback
+### Data Flow: How tier-scoring.ts Sits in the Pipeline
 
-This is the critical missing link. The join keys exist across 4 tables but no single query connects them today.
+**Question 1 answered: Where does tier-scoring.ts sit?**
 
-**Current state (disconnected):**
-```
-generated_content.master_sku + .platform + .generation_prompt_hash
-       (no direct FK to)
-publish_events.master_sku + .platform + .prompt_hash + .published_at
-       (FK exists via publish_event_id)
-performance_snapshots.publish_event_id + .days_since_publish + .ctr + .cvr
-       (plus baseline comparison via)
-performance_baselines.master_sku + .platform + .avg_ctr + .avg_cvr
-```
+tier-scoring.ts is a **pure computation module** that sits between service.ts (data acquisition) and the API routes (data delivery). It does NOT intercept or modify the service.ts pipeline. Instead:
 
-**Proposed: `content_performance_feedback` materialized view:**
-
-```sql
-CREATE MATERIALIZED VIEW content_performance_feedback AS
-SELECT
-    pe.id AS publish_event_id,
-    pe.master_sku,
-    pe.platform,
-    pe.published_at,
-    pe.prompt_hash,
-    pe.evidence_hash,
-    pe.published_title,
-    pe.published_description,
-    pe.quality_score,
-    pe.content_version,
-    gc.generation_model,
-    gc.quality_breakdown,
-    pb.avg_ctr AS baseline_ctr,
-    pb.avg_cvr AS baseline_cvr,
-    pb.avg_impressions AS baseline_impressions,
-    ps_7d.avg_ctr AS ctr_7d,
-    ps_7d.total_impressions AS impressions_7d,
-    ps_14d.avg_ctr AS ctr_14d,
-    ps_30d.avg_ctr AS ctr_30d,
-    ps_30d.avg_cvr AS cvr_30d,
-    CASE
-        WHEN pb.avg_ctr > 0 AND ps_14d.avg_ctr IS NOT NULL
-        THEN ((ps_14d.avg_ctr - pb.avg_ctr) / pb.avg_ctr) * 100
-        ELSE NULL
-    END AS ctr_lift_pct_14d,
-    CASE
-        WHEN pb.avg_cvr > 0 AND ps_30d.avg_cvr IS NOT NULL
-        THEN ((ps_30d.avg_cvr - pb.avg_cvr) / pb.avg_cvr) * 100
-        ELSE NULL
-    END AS cvr_lift_pct_30d,
-    rh.feedback_text AS last_feedback,
-    rh.mode AS generation_mode
-FROM publish_events pe
-JOIN generated_content gc
-    ON gc.master_sku = pe.master_sku
-    AND gc.platform = pe.platform
-    AND gc.is_current = true
-LEFT JOIN performance_baselines pb
-    ON pb.master_sku = pe.master_sku
-    AND pb.platform = pe.platform
-LEFT JOIN LATERAL (
-    SELECT AVG(ctr) AS avg_ctr, SUM(impressions) AS total_impressions
-    FROM performance_snapshots
-    WHERE publish_event_id = pe.id
-      AND days_since_publish BETWEEN 1 AND 7
-) ps_7d ON true
-LEFT JOIN LATERAL (
-    SELECT AVG(ctr) AS avg_ctr
-    FROM performance_snapshots
-    WHERE publish_event_id = pe.id
-      AND days_since_publish BETWEEN 1 AND 14
-) ps_14d ON true
-LEFT JOIN LATERAL (
-    SELECT AVG(ctr) AS avg_ctr, AVG(cvr) AS avg_cvr
-    FROM performance_snapshots
-    WHERE publish_event_id = pe.id
-      AND days_since_publish BETWEEN 1 AND 30
-) ps_30d ON true
-LEFT JOIN LATERAL (
-    SELECT feedback_text, mode
-    FROM regeneration_history
-    WHERE master_sku = pe.master_sku
-      AND platform = pe.platform
-    ORDER BY created_at DESC
-    LIMIT 1
-) rh ON true
-WHERE pe.status = 'success'
-  AND pe.environment = 'production'
-ORDER BY pe.published_at DESC;
-
--- Required for CONCURRENTLY refresh:
-CREATE UNIQUE INDEX idx_cpf_publish_event
-    ON content_performance_feedback (publish_event_id);
-```
-
-**Why materialized view, not a new table with its own write path:**
-- No new write process to build or maintain -- data already exists across 4 tables
-- Refresh daily after performance snapshot capture: `REFRESH MATERIALIZED VIEW CONCURRENTLY content_performance_feedback`
-- Queryable like a table with proper indexes
-- Zero risk of stale data diverging from source tables (refresh reconstructs from source)
-- If LATERAL join performance becomes a concern at scale, convert to a table with trigger-based updates later
-
-**Why not a regular view:**
-- The 4 LATERAL subqueries with aggregation are expensive (~1-5s depending on data volume)
-- Dashboard will hit this for SKU review and reporting pages frequently
-- Materialized view caches the result; daily refresh is sufficient since performance data updates daily
-
-### Data Flow: Historical Funnel Snapshots
-
-**Problem:** `service.ts` runs 6 parallel GAQL queries with a 2-minute TTL cache. No history is persisted. Cannot compute trends, before/after impact, or seasonal patterns. The v1.3c milestone explicitly requires historical funnel data for trend analysis.
-
-**Proposed: `funnel_snapshots_daily` table:**
-
-```sql
-CREATE TABLE funnel_snapshots_daily (
-    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    snapshot_date date NOT NULL,
-    custom_label_0 text NOT NULL,
-    tier text NOT NULL,  -- 'HIGH', 'MEDIUM', 'LOW'
-    search_term text NOT NULL,
-    impressions integer NOT NULL DEFAULT 0,
-    clicks integer NOT NULL DEFAULT 0,
-    cost_micros bigint NOT NULL DEFAULT 0,
-    conversions numeric(12,4) NOT NULL DEFAULT 0,
-    conversions_value numeric(14,4) NOT NULL DEFAULT 0,
-    source_campaign text,
-    ad_group_name text,
-    created_at timestamptz NOT NULL DEFAULT now(),
-
-    CONSTRAINT uq_funnel_snapshot_daily
-        UNIQUE (snapshot_date, custom_label_0, tier, search_term)
-);
-
-CREATE INDEX idx_funnel_snapshots_date_label
-    ON funnel_snapshots_daily (snapshot_date DESC, custom_label_0);
-CREATE INDEX idx_funnel_snapshots_term
-    ON funnel_snapshots_daily (search_term, snapshot_date DESC);
-CREATE INDEX idx_funnel_snapshots_tier_date
-    ON funnel_snapshots_daily (tier, snapshot_date DESC);
-```
-
-**Collection strategy:**
-- New TypeScript API route: `POST /api/funnel/capture-snapshot` (on Vercel)
-- Calls existing `service.ts` exports: `getExistingFunnelTerms()` + `getNeedsDecisionTerms()`
-- Flattens into denormalized rows, upserts into `funnel_snapshots_daily`
-- Triggered daily by Cloud Scheduler (same pattern as planned for performance snapshots)
-- Estimated row growth: ~5,000-15,000 terms/day = ~150K-450K rows/month
-
-**Why a new table, not extending `search_queries`:**
-- `search_queries` stores variant-level data from the Python pipeline (keyed by gmc_offer_id)
-- Funnel data is campaign-tier-level (keyed by custom_label_0 + tier + search_term)
-- Different collection cadence, different source code (TS service.ts vs Python pipeline)
-- Clean separation avoids polluting the search term pipeline with a different data shape
-
-**Why not persist the full AdsContext:**
-- `AdsContext` includes negative keyword lists, shared sets, criterion IDs -- operational state, not analytics
-- Only performance metrics per search term per tier per label are needed for trend analysis
-- Flat denormalized schema makes trend queries simple aggregations with GROUP BY
-
-### Data Flow: Migration Evaluation Decision Framework
-
-The 035b migration contains 14 tables. Both 034b and 035b comments state "Tables created out-of-band" meaning they likely exist in live Supabase but are empty. Here is the triage based on actual need for v1.3c (Actionable Shopping Intelligence) and v1.4 (Closed-Loop Optimization):
-
-**035b -- 14 Intent Execution Tables:**
-
-| Table | Referenced By (TS) | Needed for v1.3c? | Recommendation |
-|-------|-------------------|--------------------|----------------|
-| `intent_taxonomy_versions` | taxonomy.ts | NO -- v1.3c replaces intent classes with distribution-based scoring | **PRUNE** |
-| `term_intent_state` | persistence.ts, policy.ts | MAYBE -- could store enriched term state, but v1.3c rewrites the scoring | **DEFER** to v1.3c |
-| `policy_decision_log` | policy.ts | YES -- audit trail for tier movement decisions in v1.3c | **KEEP** |
-| `policy_action_execution_log` | tier-movement.ts | YES -- tracks executed tier movements | **KEEP** |
-| `policy_snapshots` | policy.ts | NO -- policy versioning is premature, no writer exists | **PRUNE** |
-| `sku_margin_daily` | profit-forecast.ts | NO -- no margin data source exists (would need Shopify order API) | **PRUNE** |
-| `order_line_returns_daily` | profit-forecast.ts | NO -- no returns data source exists | **PRUNE** |
-| `attribution_confidence_daily` | value-signal.ts | NO -- GA4 attribution not in v1.3 scope | **PRUNE** |
-| `experiment_registry` | multi-cell-experiment.ts | MAYBE -- A/B testing useful for v1.4 | **DEFER** to v1.4 |
-| `experiment_assignments` | multi-cell-experiment.ts | MAYBE -- paired with registry | **DEFER** to v1.4 |
-| `experiment_outcomes` | multi-cell-experiment.ts | MAYBE -- paired with registry | **DEFER** to v1.4 |
-| `negative_registry` | policy.ts | YES -- tracks negative keywords added/removed by tier movements | **KEEP** |
-| `search_buildout_recommendations` | buildout-intelligence.ts | YES -- stores search campaign expansion recommendations | **KEEP** |
-| `operator_review_audit` | reviewer-calibration.ts | NO -- review queue calibration is v1.4+ at earliest | **PRUNE** |
-
-**Summary:** KEEP 4, DEFER 4, PRUNE 6.
-
-**034b -- 4 GA4 Attribution Tables:**
-
-| Table | Referenced By | Recommendation |
-|-------|--------------|----------------|
-| `ga4_source_medium_daily` | No API routes | **PRUNE** |
-| `ga4_landing_page_quality_daily` | No API routes | **PRUNE** |
-| `ga4_attribution_root_cause_daily` | No API routes | **PRUNE** |
-| `ga4_shopify_reconciliation_daily` | No API routes | **PRUNE** |
-
-All 4 have zero API route references and no immediate use case. **Prune all 4.**
-
-**Migration 033 -- Empty Optimization Tables:**
-
-| Table | Writer | Reader | Recommendation |
-|-------|--------|--------|----------------|
-| `query_value_scores` | None (would be query-intelligence.ts) | intent/route.ts, governance/route.ts | **REPURPOSE** in v1.3c with distribution-based scoring |
-| `routing_recommendations` | None (would be control-center.ts) | intent/route.ts | **REPURPOSE** in v1.3c |
-| `opportunity_clusters` | None (would be control-center.ts) | governance/route.ts | **REPURPOSE** in v1.3c |
-| `query_intent_features` | None (would be query-intelligence.ts) | governance/route.ts | **REPURPOSE** in v1.3c |
-
-These tables have the right shape for v1.3c. Keep them; v1.3c will write to them with distribution-based scoring instead of hardcoded thresholds.
-
-**Important implementation note:** "Pruning" means: (1) Confirm tables are empty via SQL, (2) DROP TABLE from live DB, (3) Remove from SCHEMA.md, (4) Mark referencing TypeScript files as deprecated or delete them. This is safe cleanup -- no data loss since tables are empty.
-
-## Patterns to Follow
-
-### Pattern 1: Materialized View for Cross-Table Analytics
-
-**What:** Use PostgreSQL materialized views when dashboard needs to join 3+ tables for read-heavy analytics.
-**When:** The underlying data changes at most daily (publish events + performance snapshots).
-
-```sql
--- Refresh strategy: daily, after performance snapshot capture completes
-REFRESH MATERIALIZED VIEW CONCURRENTLY content_performance_feedback;
-```
-
-**Implementation note:** The UNIQUE index on the materialized view is required for `CONCURRENTLY` to work (prevents table lock during refresh). Without `CONCURRENTLY`, the view is inaccessible during refresh.
-
-### Pattern 2: Snapshot-Then-Query for Ephemeral API Data
-
-**What:** Capture a daily snapshot of live API data into a denormalized table, then query the table for trends.
-**When:** Data source is an external API with rate limits and no built-in history (service.ts / Google Ads API).
+1. API routes (e.g., `/api/shopping-funnel/revenue-leakage`) call service.ts to get raw data
+2. API routes pass raw data to tier-scoring.ts for adaptive scoring
+3. tier-scoring.ts returns scored results to the API route
+4. API route persists scores and returns JSON to client
 
 ```typescript
-// Capture endpoint pattern (matches existing /api/performance/capture-snapshot)
-export async function POST(request: Request) {
-    const existingTerms = await getExistingFunnelTerms({ dateWindow: 'LAST_30_DAYS' })
-    const needsDecisionTerms = await getNeedsDecisionTerms({ dateWindow: 'LAST_30_DAYS' })
-    const today = new Date().toISOString().split('T')[0]
+// revenue-leakage/route.ts (pseudocode)
+export async function POST(req: Request) {
+  // 1. Get raw data from existing service.ts (uses 2-min cache)
+  const existingTerms = await getExistingFunnelTerms(options)
+  const labelTierPerf = await getLabelTierPerformance(options)
 
-    const rows = existingTerms.map(t => ({
-        snapshot_date: today,
-        custom_label_0: t.customLabel0,
-        tier: t.assignedTier,
-        search_term: t.searchTerm,
-        impressions: t.impressions,
-        clicks: t.clicks,
-        cost_micros: t.costMicros,
-        conversions: t.conversions,
-        conversions_value: t.conversionsValue,
-        source_campaign: t.sourceCampaign,
-    }))
+  // 2. Compute distributions (NEW)
+  const distributions = computeTierDistributions(labelTierPerf.rows)
 
-    const { error } = await supabase
-        .from('funnel_snapshots_daily')
-        .upsert(rows, { onConflict: 'snapshot_date,custom_label_0,tier,search_term' })
-    // ...
+  // 3. Score each term against distributions (NEW)
+  const scoredTerms = existingTerms.terms.map(term => ({
+    ...term,
+    adaptiveScore: scoreTerm(term, distributions),
+    misplacement: detectMisplacement(term, distributions),
+  }))
+
+  // 4. Persist computed scores (to existing empty tables)
+  await persistScores(scoredTerms)
+
+  // 5. Return revenue leakage report
+  return Response.json(computeRevenueLeakage(scoredTerms, distributions))
 }
 ```
 
-### Pattern 3: Publish Event as the Universal Linkage Key
+**Key design decision:** tier-scoring.ts is called on-demand by API routes, not as middleware in the service.ts pipeline. This avoids modifying the critical service.ts data path and allows the 2-min cache to work as-is for the existing shopping funnel UI.
 
-**What:** Use `publish_events.id` as the foreign key connecting content to performance outcomes.
-**When:** Building any content-to-outcome analysis.
-**Why:** `publish_events` already captures everything needed for the join:
-- `prompt_hash` -- links to regeneration_history
-- `evidence_hash` -- identifies the evidence bundle used
-- `published_title`, `published_description` -- exact content published
-- `quality_score`, `content_version` -- quality metadata at publish time
-- `published_at` -- timing reference for performance windows
+### Data Flow: Score Persistence to query_value_scores
 
-The FK chain already exists:
-```
-publish_events.id = performance_snapshots.publish_event_id  (existing FK)
-publish_events.master_sku + platform = generated_content.master_sku + platform  (natural key)
-publish_events.prompt_hash = regeneration_history.prompt_hash  (hash join)
-```
+**Question 2 answered: How do computed scores persist?**
 
-No new foreign keys needed. The materialized view simply makes this join explicit and cached.
+The `query_value_scores` table (migration 033) already exists but is empty. The new tier-scoring.ts module writes to it after computation:
 
-### Pattern 4: Cloud Scheduler for Daily Collection Jobs
-
-**What:** GCP Cloud Scheduler triggers HTTP POST to Vercel API routes on a daily schedule.
-**When:** Any data that needs daily persistence (performance snapshots, funnel snapshots).
-
-```
-Cloud Scheduler (daily, e.g., 6:00 AM UTC)
-  ├── POST /api/performance/capture-snapshot     (existing, planned)
-  ├── POST /api/funnel/capture-snapshot           [NEW]
-  └── (after both complete)
-      POST /api/refresh-materialized-views        [NEW, optional]
-```
-
-This follows the same pattern already planned for performance snapshot capture. One scheduler, multiple endpoints.
-
-### Pattern 5: Graceful Degradation for Optional Tables
-
-**What:** TypeScript code checks for table existence before querying, returns warnings instead of errors.
-**When:** Tables from deferred migrations may or may not exist in the live database.
-
-Already implemented in `dashboard/src/lib/intent/persistence.ts`:
 ```typescript
-import { insertRowsSafe, isMissingRelationError } from '@/lib/intent/persistence'
-
-// insertRowsSafe() catches PostgreSQL error 42P01 (undefined_table)
-// and returns { inserted: 0, warning: "Table missing..." } instead of throwing
+// tier-scoring.ts
+export async function persistAdaptiveScores(
+  supabase: SupabaseClient,
+  scores: AdaptiveScore[]
+): Promise<void> {
+  // Upsert to query_value_scores using (search_term, custom_label_0) as natural key
+  // Includes: impact_score, expected_cvr, expected_conversion_value,
+  //           expected_profit_proxy, uncertainty, tier_z_scores, recommended_tier
+  await supabase.from('query_value_scores').upsert(
+    scores.map(s => ({
+      search_term: s.searchTerm,
+      custom_label_0: s.customLabel0,
+      impact_score: s.impactScore,
+      expected_cvr: s.expectedCvr,
+      expected_conversion_value: s.expectedConversionValue,
+      expected_profit_proxy: s.expectedProfitProxy,
+      uncertainty: s.uncertainty,
+      // New fields for adaptive scoring
+      tier_fit_scores: s.tierFitScores, // JSONB: { high: z-score, medium: z-score, low: z-score }
+      recommended_tier: s.recommendedTier,
+      net_monthly_impact: s.netMonthlyImpact,
+      scored_at: new Date().toISOString(),
+    })),
+    { onConflict: 'search_term,custom_label_0' }
+  )
+}
 ```
 
-Reuse this pattern for all 035b table access during the transition period.
+**Persistence strategy:**
+- Scores are computed on-demand when the revenue leakage API is called
+- Persisted scores serve as a cache for subsequent page loads (avoid recomputation)
+- Scores are refreshed when the API is called again (upsert overwrites stale scores)
+- The `scored_at` timestamp lets the UI show data freshness
+- Recommendations are persisted to `routing_recommendations` with status 'pending' for operator review
+
+**Caching layers (3 tiers):**
+1. **service.ts memory cache** (2 min) -- raw Google Ads data
+2. **Supabase persistence** (query_value_scores) -- computed scores survive server restarts
+3. **Client-side SWR/React Query** -- avoid re-fetching on tab switches
+
+### Data Flow: Automation Rules Triggering Execution
+
+**Question 3 answered: How do automation rules trigger the existing execution pipeline?**
+
+The automation rules engine sits as a **scheduler-triggered evaluation layer** on top of the existing policy/execution stack:
+
+```
+Cloud Scheduler (daily cron)
+    |
+    v
+POST /api/shopping-funnel/evaluate-rules (CRON_SECRET auth)
+    |
+    v
+automation-rules.ts
+  1. loadActiveRules() from automation_rules table
+  2. For each rule:
+     a. getExistingFunnelTerms() from service.ts
+     b. computeTierDistributions() from tier-scoring.ts
+     c. Evaluate rule conditions against term data
+     d. Build TierMovementRequest[] for matching terms
+  3. For each batch of movements:
+     a. evaluateGuardrails() from policy.ts [EXISTING - unchanged]
+     b. executeTierMovementBatch(movements, guardrailInput) [EXISTING - unchanged]
+        - dryRun: true for first pass (log + persist recommendations)
+        - dryRun: false only for rules with auto_execute: true
+  4. Persist results to policy_action_execution_log [EXISTING table]
+  5. Persist pending recommendations to routing_recommendations [EXISTING table]
+```
+
+**The automation rules layer does NOT bypass the guardrail system.** Every automated movement goes through:
+1. `evaluateGuardrails()` -- can block/hold all movements
+2. `validateTierMovement()` -- confidence gates still apply
+3. `executeTierMovement()` -- full logging to `policy_action_execution_log`
+
+**Rule storage:**
+
+```sql
+-- New table: automation_rules
+CREATE TABLE automation_rules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  conditions JSONB NOT NULL,
+  -- Example conditions:
+  -- { "metric": "roas", "operator": ">", "value": 5.0, "duration_days": 14, "tier": "medium" }
+  -- { "metric": "conversions", "operator": "=", "value": 0, "spend_floor": 20.00, "duration_days": 30 }
+  action TEXT NOT NULL,       -- 'promote' | 'demote' | 'block'
+  auto_execute BOOLEAN DEFAULT false, -- false = dry-run only, creates recommendation
+  confidence_floor NUMERIC DEFAULT 0.75,
+  enabled BOOLEAN DEFAULT true,
+  created_by TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_evaluated_at TIMESTAMPTZ,
+  last_triggered_count INTEGER DEFAULT 0
+);
+```
+
+### Data Flow: Experiment Framework and Tier Movement
+
+**Question 4 answered: How does the experiment framework interact with tier movement?**
+
+The experiment framework uses the tier movement system for the treatment group only, while the control group remains untouched:
+
+```
+experiment-engine.ts
+  |
+  |-- registerExperiment(config)
+  |     Writes to experiment_registry (existing KEEP'd table)
+  |     Config includes: hypothesis, term_selection_criteria,
+  |                      treatment_tier, control_tier, duration_days, success_metric
+  |
+  |-- assignTerms(experimentId, candidateTerms)
+  |     1. Filter candidates by selection criteria
+  |     2. Random 50/50 split (or configurable ratio)
+  |     3. Write assignments to experiment_assignments (existing KEEP'd table)
+  |        Each row: experiment_id, search_term, custom_label_0, group ('treatment'|'control')
+  |     4. For treatment group ONLY:
+  |        executeTierMovementBatch() with movements to treatment_tier
+  |        This uses the EXISTING pipeline (guardrails, logging, negatives)
+  |     5. Control group: NO changes -- they stay in their current tier
+  |
+  |-- measureOutcomes(experimentId)
+  |     1. Read assignments from experiment_assignments
+  |     2. For each term in treatment and control:
+  |        Get current performance from getExistingFunnelTerms()
+  |     3. Compute treatment vs control deltas:
+  |        - ROAS delta, CVR delta, revenue delta
+  |        - Statistical significance (z-test on conversion rates)
+  |     4. Write results to experiment_outcomes (existing KEEP'd table)
+  |
+  |-- resolveExperiment(experimentId)
+  |     If treatment wins (p < 0.05):
+  |       Move control terms to treatment tier (via executeTierMovementBatch)
+  |     If control wins:
+  |       Revert treatment terms (via executeTierMovementBatch)
+  |     Update experiment_registry status to 'resolved'
+```
+
+**Critical constraint:** Only ONE experiment per (search_term, custom_label_0) at a time. The assignment process must check for conflicts against active experiments.
+
+### Caching Strategy for Distribution Computations
+
+**Question 5 answered: Caching strategy for expensive distribution computations**
+
+Distribution computation involves:
+1. Calling `getLabelTierPerformance()` -- returns ~177 rows (59 labels x 3 tiers)
+2. Calling `getExistingFunnelTerms()` -- returns potentially thousands of terms
+3. Computing percentiles, z-scores, and impact estimates
+
+**Strategy: 3-layer cache with progressive freshness**
+
+```
+Layer 1: service.ts memory cache (2 min TTL)
+  Already exists. Raw GAQL results cached in-process.
+  Shared across all API routes in the same server instance.
+
+Layer 2: Computed distributions cache (10 min TTL, in-memory)
+  NEW: tier-scoring.ts maintains a module-level cache:
+    let distributionCache: { data: TierDistributions; computedAt: number } | null = null
+    const DISTRIBUTION_CACHE_TTL_MS = 10 * 60 * 1000
+
+  Rationale: Distributions change slowly (daily at most).
+  Computing from ~177 LabelTierPerformance rows is fast (~5ms).
+  This prevents recomputation on every page load.
+
+Layer 3: Persisted scores in Supabase (query_value_scores)
+  Per-term scores persisted on computation.
+  API routes check: if scores exist and scored_at < 1 hour ago, return persisted.
+  If stale or missing, recompute from live data.
+
+  This handles server restarts and cold starts -- scores survive.
+```
+
+**Performance budget:**
+- Distribution computation: ~5ms (177 rows, percentile calc)
+- Per-term scoring: ~0.1ms x 1000 terms = ~100ms
+- Supabase upsert: ~200ms for 1000 rows (batched)
+- Total revenue-leakage API response: <3 seconds (target met)
+
+**What NOT to cache:** Revenue leakage dollar estimates should be recomputed from fresh distributions, not cached independently. The dollar estimates are derived values and stale estimates are worse than slightly stale scores.
+
+## Patterns to Follow
+
+### Pattern 1: Computation Module + API Route Separation
+
+**What:** All heavy computation lives in `/lib/optimization/` modules. API routes in `/app/api/` are thin wrappers that call computation modules, handle auth, and return JSON.
+
+**When:** Every new feature.
+
+**Example:**
+```typescript
+// lib/optimization/tier-scoring.ts -- COMPUTATION (testable, no HTTP concerns)
+export function computeTierDistributions(rows: LabelTierPerformance[]): TierDistributions {
+  // Pure function, no side effects, easily unit-testable
+}
+
+// app/api/shopping-funnel/revenue-leakage/route.ts -- THIN WRAPPER
+export async function POST(req: Request) {
+  const data = await getExistingFunnelTerms(options)
+  const distributions = computeTierDistributions(labelTierPerf.rows)
+  const leakage = computeRevenueLeakage(data, distributions)
+  return Response.json(leakage)
+}
+```
+
+**Why:** Matches existing pattern (query-intelligence.ts + control-center.ts are pure computation; API routes call them). Keeps heavy logic testable without HTTP mocking.
+
+### Pattern 2: Existing Persistence Helper for New Tables
+
+**What:** Use `insertRowsSafe()` from `intent/persistence.ts` for all new database writes. It handles missing table errors gracefully.
+
+**When:** Writing to any table that might not exist in a given environment.
+
+**Example:**
+```typescript
+import { insertRowsSafe } from '@/lib/intent/persistence'
+
+const result = await insertRowsSafe(supabase, 'automation_rules', [ruleRow])
+if (result.warning) {
+  console.warn(result.warning) // Table missing, but don't crash
+}
+```
+
+### Pattern 3: Guardrail-Gated Execution
+
+**What:** Every automated action goes through the guardrail evaluation before execution.
+
+**When:** Any code path that modifies Google Ads or Google Sheets data.
+
+**Example:**
+```typescript
+// ALWAYS evaluate guardrails before batch execution
+const guardrailDecision = evaluateGuardrails(guardrailInput)
+if (guardrailDecision.status === 'blocked') {
+  return { blocked: true, reason: guardrailDecision.incidents }
+}
+// Then proceed with executeTierMovementBatch()
+```
+
+### Pattern 4: service.ts as Read-Only Data Source
+
+**What:** Never modify service.ts. Call its exports and process the results downstream.
+
+**When:** Always.
+
+**Why:** service.ts is the most critical file in the dashboard -- it's the live Google Ads integration used daily. Any modification risks breaking the working shopping funnel management system. All new computation modules consume its exports.
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Building a Separate Feedback Table with Its Own Write Path
+### Anti-Pattern 1: Modifying service.ts Data Path
 
-**What:** Creating a `content_feedback_outcomes` table that requires a new background job to populate.
-**Why bad:** Introduces a new data pipeline to maintain. Risks going stale independently of source tables. Duplicates data already in publish_events + performance_snapshots.
-**Instead:** Materialized view computes the linkage from existing tables. Zero new write paths. Single REFRESH command keeps it current.
+**What:** Adding new computation logic inside service.ts functions.
+**Why bad:** service.ts is 1600+ lines, handles 6 parallel GAQL queries with retry logic and caching. Modifying it risks breaking the live shopping funnel management that operators use daily.
+**Instead:** Create new modules that consume service.ts exports.
 
-### Anti-Pattern 2: Persisting Full AdsContext Objects as JSON Blobs
+### Anti-Pattern 2: Client-Side Distribution Computation
 
-**What:** Storing the entire `AdsContext` from service.ts (~50KB+ including negative keyword lists, criterion IDs, campaign maps) as a JSONB column.
-**Why bad:** Most of it is operational state useless for analytics. Makes queries slow and storage expensive (~1.5GB/month at daily capture).
-**Instead:** Flatten to the specific metrics needed. Simple typed columns with proper indexes. ~50MB/month.
+**What:** Sending raw term data to the browser and computing distributions in React components.
+**Why bad:** ExistingFunnelTerms can contain thousands of terms. Distribution computation involves sorting, percentile calculation, and z-score math. This belongs server-side.
+**Instead:** Compute in API routes, return pre-computed scores and recommendations to the client.
 
-### Anti-Pattern 3: Applying All 18 Deferred Migration Tables at Once
+### Anti-Pattern 3: Bypassing Guardrails for Automation
 
-**What:** Running both 034b and 035b migrations wholesale to "clean up" the deferred state.
-**Why bad:** Creates/validates 18 tables, 10 of which have no writer and no immediate consumer. Bloats the schema. Makes SCHEMA.md harder to maintain. Empty tables create confusion about what is implemented vs aspirational.
-**Instead:** Triage each table individually. Keep the 4 needed for v1.3c. Prune the 10 that have no near-term use. Defer 4 to v1.4.
+**What:** Having automation rules call `postDecisions()` or `updateExistingAssignments()` directly, skipping the guardrail evaluation.
+**Why bad:** Automated execution without guardrails can cause runaway spend. The guardrail system exists specifically to prevent this.
+**Instead:** Always route through `evaluateGuardrails()` -> `executeTierMovementBatch()`.
 
-### Anti-Pattern 4: Live Google Ads Queries for Trend Analysis
+### Anti-Pattern 4: Separate Caching Infrastructure
 
-**What:** Computing 7-day and 30-day trends by calling service.ts multiple times with different date windows.
-**Why bad:** Each call runs 6 parallel GAQL queries. Multiple calls for trend windows multiplies API quota usage. Google Ads API has daily quota limits. Also, service.ts cache TTL is 2 minutes so rapid sequential calls still hit the API.
-**Instead:** Persist daily snapshots once. Query the snapshot table for any historical window with simple SQL aggregations.
+**What:** Building a Redis/separate caching layer for computed distribution scores.
+**Why bad:** Over-engineering. The existing 2-min memory cache in service.ts + Supabase persistence for computed scores is sufficient for this use case (single operator, internal dashboard).
+**Instead:** Use the 3-layer cache strategy described above (service.ts cache -> module-level distribution cache -> Supabase persisted scores).
 
-### Anti-Pattern 5: Creating New TS Libraries for Pruned 035b Tables
+### Anti-Pattern 5: Direct Google Ads Writes from New Modules
 
-**What:** Writing new code to populate/query 035b tables that will be pruned (sku_margin_daily, operator_review_audit, etc.).
-**Why bad:** The tables have no data, no data source, and no immediate consumer. Code for empty tables is pure maintenance burden.
-**Instead:** For KEEP tables, use them only when v1.3c actually needs them. For PRUNE tables, drop them and delete/deprecate the referencing TS files.
+**What:** New modules calling the Google Ads API directly to add negatives or modify campaigns.
+**Why bad:** The entire audit trail, negative registry, and sheet update logic is in tier-movement.ts. Bypassing it creates orphaned state.
+**Instead:** Always use `executeTierMovement()` or `executeTierMovementBatch()` for any Google Ads mutations.
+
+## Build Order (Minimizing Dependencies)
+
+**Question 6 answered: Build order that minimizes dependencies**
+
+```
+Phase 1: Revenue Leakage Detection & Tier Optimization
+  Step 1.1: tier-scoring.ts [NO dependencies on other new code]
+    - computeTierDistributions()
+    - scoreTerm()
+    - detectMisplacement()
+    - estimateImpact()
+    - persistAdaptiveScores()
+
+  Step 1.2: Modify enrichNeedsDecisionTerm() in query-intelligence.ts
+    [DEPENDS ON: 1.1 tier-scoring.ts]
+    - Replace hardcoded thresholds with calls to tier-scoring.ts
+    - Keep decomposeSearchTerm() unchanged
+
+  Step 1.3: revenue-leakage.ts + API route
+    [DEPENDS ON: 1.1 tier-scoring.ts]
+    - computeRevenueLeakage()
+    - POST /api/shopping-funnel/revenue-leakage
+
+  Step 1.4: Revenue Leakage UI + one-click execution wiring
+    [DEPENDS ON: 1.3 API route, existing tier-movement API]
+
+Phase 2: Market Intelligence (independent of Phase 1 execution pipeline)
+  Step 2.1: demand-gaps.ts + API route [NO dependencies on Phase 1]
+    - Reads from search_queries + keyword_metrics tables only
+
+  Step 2.2: competitive-intel.ts + API route [NO dependencies on Phase 1]
+    - Uses decomposeSearchTerm() from query-intelligence.ts (unchanged part)
+
+  Step 2.3: product-matrix.ts + API route [NO dependencies on Phase 1]
+    - Uses getLabelTierPerformance() from service.ts directly
+
+  Step 2.4: Market Intelligence UI
+    [DEPENDS ON: 2.1, 2.2, 2.3 API routes]
+
+Phase 3: Automation & Experiments
+  Step 3.1: automation_rules table migration [NO code dependencies]
+
+  Step 3.2: automation-rules.ts + API route
+    [DEPENDS ON: 1.1 tier-scoring.ts, existing policy.ts + tier-movement.ts]
+
+  Step 3.3: experiment-engine.ts + API routes
+    [DEPENDS ON: existing tier-movement.ts, experiment_* tables (already KEEP'd)]
+
+  Step 3.4: Automation + Experiment UI
+    [DEPENDS ON: 3.2, 3.3 API routes]
+
+Phase 4: Executive Reporting (pure read-only, depends on data from Phases 1-3)
+  Step 4.1: impact-tracker.ts + API route
+    [DEPENDS ON: policy_action_execution_log having data from Phase 1/3 executions]
+
+  Step 4.2: Weekly digest API route
+    [DEPENDS ON: All prior API routes for data aggregation]
+
+  Step 4.3: Executive scorecard UI
+    [DEPENDS ON: 4.1, 4.2 API routes]
+```
+
+**Phase 2 can run in parallel with Phase 1** (steps 2.1-2.3 have zero dependency on tier-scoring.ts). Phase 3 requires Phase 1 completion. Phase 4 requires Phases 1+3 to have generated data.
+
+## File Organization
+
+### New Files to Create
+
+```
+dashboard/src/lib/optimization/
+  tier-scoring.ts          # Phase 1 - core adaptive scoring engine
+  revenue-leakage.ts       # Phase 1 - leakage computation
+  demand-gaps.ts           # Phase 2 - impression share / CPC / seasonal
+  competitive-intel.ts     # Phase 2 - brand split, competitor mentions
+  product-matrix.ts        # Phase 2 - BCG quadrant classification
+
+dashboard/src/lib/automation/
+  automation-rules.ts      # Phase 3 - rule evaluation engine
+  experiment-engine.ts     # Phase 3 - experiment lifecycle
+
+dashboard/src/lib/reporting/
+  impact-tracker.ts        # Phase 4 - before/after measurement
+  weekly-digest.ts         # Phase 4 - weekly summary computation
+
+dashboard/src/app/api/shopping-funnel/
+  revenue-leakage/route.ts     # Phase 1
+  demand-gaps/route.ts         # Phase 2
+  competitive-intel/route.ts   # Phase 2
+  product-matrix/route.ts      # Phase 2
+  evaluate-rules/route.ts      # Phase 3
+  experiments/route.ts         # Phase 3
+  impact-tracker/route.ts      # Phase 4
+  weekly-digest/route.ts       # Phase 4
+```
+
+### Files to Modify (minimal changes)
+
+```
+dashboard/src/lib/optimization/query-intelligence.ts
+  - enrichNeedsDecisionTerm(): delegate scoring to tier-scoring.ts
+  - Keep: decomposeSearchTerm(), all token lists, all NLP logic
+
+dashboard/src/lib/optimization/control-center.ts
+  - buildRoasRecommendations(): replace BASELINE_TARGET_ROAS constant
+    with dynamically computed baselines from tier-scoring.ts
+  - buildRecommendationQueue(): extend to accept ExistingFunnelTerm[]
+    (currently only accepts NeedsDecisionTerm[])
+```
+
+### Files NOT to Modify
+
+```
+dashboard/src/lib/shopping-funnel/service.ts     # Critical live integration
+dashboard/src/lib/intent/policy.ts               # Working policy engine
+dashboard/src/lib/intent/tier-movement.ts        # Working execution pipeline
+dashboard/src/lib/intent/persistence.ts          # Shared utility
+dashboard/src/lib/intent/taxonomy.ts             # Working intent classifier
+All existing API routes under /api/search-terms/  # Used daily
+All existing API routes under /api/ga4/           # Working attribution
+```
 
 ## Scalability Considerations
 
-| Concern | At 100 SKUs published | At 500 SKUs published | At 2,784 SKUs (full catalog) |
-|---------|----------------------|----------------------|------------------------------|
-| `content_performance_feedback` matview refresh | <1s | ~5s (500 events x 30 days) | ~30s (acceptable for daily refresh) |
-| `funnel_snapshots_daily` row growth | ~5K rows/day | ~10K rows/day | ~15K rows/day (~5.5M/year) |
-| Google Ads API quota for snapshot capture | 1 call/day (6 GAQL queries) | Same (label-level, not SKU-level) | Same (funnel is by custom_label_0, not by SKU) |
-| Matview index size | Negligible | ~10MB | ~50MB (fine for Supabase Pro) |
-| Performance snapshot capture at scale | Fast (100 SKUs) | Batch chunking needed | Already implemented in pipeline (chunk size 25) |
-
-**Data retention strategy for `funnel_snapshots_daily`:**
-- Keep 90 days at full per-term granularity
-- After 90 days, aggregate into `funnel_snapshots_weekly` rollup (by custom_label_0 + tier, no per-term detail)
-- Implement as a monthly cleanup cron after 3+ months of data accumulation
-- Alternative: Supabase table partitioning by month if row growth exceeds 500K/month
-
-## Build Order (Dependency-Informed Phase Structure)
-
-### Phase 1: Architecture Audit and Migration Triage
-**No code changes. Pure analysis.**
-
-1. Verify which 035b/034b tables actually exist in live Supabase (`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`)
-2. Check which tables have any rows (`SELECT count(*) FROM table_name` for each)
-3. Map every table to its writer(s) and reader(s) -- produce documented data flow map
-4. Identify dead-end tables (writers but no readers, or readers but no writers)
-5. Formal triage decision on each of 18 deferred tables (keep/prune/defer) -- documented with rationale
-6. Decision on migration 033 empty tables (query_value_scores, routing_recommendations, opportunity_clusters)
-7. API quota analysis: measure current Google Ads API usage to confirm daily snapshot is sustainable
-
-**Output:** Data flow map document, migration triage decisions, quota assessment
-
-### Phase 2: Content-Performance Feedback Linkage
-**Uses only existing tables. No new data collection.**
-
-1. Create `content_performance_feedback` materialized view via Supabase migration
-2. Add unique index for `CONCURRENTLY` refresh support
-3. Create `/api/content-performance/summary` endpoint to query the view
-4. Wire into SKU review dashboard -- add "Content Impact" indicator showing CTR lift vs baseline
-5. Set up refresh mechanism (initially manual via API call, then daily via Cloud Scheduler)
-6. Validate with real data: pick 5 published SKUs, confirm the view correctly links content to outcomes
-
-**Output:** Working materialized view, dashboard integration, validated linkage
-
-### Phase 3: Historical Data Persistence
-**New table, new endpoint, new scheduler job.**
-
-1. Create `funnel_snapshots_daily` table via Supabase migration
-2. Create `POST /api/funnel/capture-snapshot` endpoint (TypeScript, Vercel)
-3. Test with manual invocation -- verify rows written correctly
-4. Wire to Cloud Scheduler for daily execution (alongside performance snapshot)
-5. Backfill initial 30-day window by calling service.ts once with LAST_30_DAYS
-6. Add basic trend query to Shopping Funnel page: 7d vs previous 7d comparison
-7. Add data freshness indicator to funnel pages showing last snapshot date
-
-**Output:** Daily funnel persistence, trend queries, backfilled history
-
-### Phase 4: Migration Cleanup and End-to-End Validation
-**Cleanup based on Phase 1 decisions.**
-
-1. Drop the PRUNE tables from live DB (after confirming empty): 6 from 035b + 4 from 034b
-2. Delete or deprecate TypeScript files that only reference pruned tables
-3. For KEEP tables: verify they have correct indexes and RLS policies
-4. Update SCHEMA.md to reflect current true state
-5. End-to-end data flow validation: trace a single SKU from generation through publish through performance through feedback view
-6. Document the validated data flow for v1.3c and v1.4 consumption
-
-**Output:** Clean schema, updated documentation, validated end-to-end flow
-
-### Phase ordering rationale:
-- **Phase 1 first** -- all subsequent phases depend on knowing which tables exist and which to keep
-- **Phase 2 before Phase 3** -- the feedback view uses only existing tables (zero new infrastructure), while funnel persistence requires new table + endpoint + scheduler
-- **Phase 3 before Phase 4** -- funnel persistence may inform which empty tables from 033 to repurpose vs remove
-- **Phase 4 last** -- cleanup depends on all prior phases completing to make informed prune/keep decisions
-
-## Integration Points Summary
-
-| Integration | Existing Component | New Component | Connection |
-|------------|-------------------|---------------|------------|
-| Content to outcomes | publish_events + performance_snapshots | content_performance_feedback matview | JOIN on publish_event_id (existing FK) |
-| Funnel history | service.ts (live API, 6 GAQL queries) | funnel_snapshots_daily table | Capture endpoint calls service.ts exports, writes to new table |
-| Daily automation | Cloud Scheduler (planned) | capture-snapshot endpoints | HTTP POST triggers (same pattern as performance snapshots) |
-| Dashboard display | SKU review pages | Content Impact column | Query matview by master_sku, show CTR lift |
-| Prompt learning | regeneration_history.prompt_hash | feedback matview | Join via prompt_hash through publish_events |
-| v1.3c prerequisite | Empty 033 optimization tables | Populated by distribution-based scoring | v1.3c writes to kept tables with new algorithms |
-| v1.4 prerequisite | content_performance_feedback matview | Closed-loop regeneration trigger | v1.4 reads matview to identify underperforming content for re-generation |
+| Concern | Current Scale | At Full Catalog | Mitigation |
+|---------|--------------|-----------------|------------|
+| Term volume per API call | ~500-2000 terms | ~5000+ terms | Pagination in service.ts (limit/offset already supported) |
+| Distribution computation | 177 rows (59 x 3) | Same (fixed by campaign structure) | Trivial at any scale |
+| Score persistence | ~2000 upserts | ~5000 upserts | Batch upsert in chunks of 500 |
+| Automation rule evaluation | 5-10 rules | 20-50 rules | Sequential is fine; each rule is O(n) on term count |
+| Experiment assignments | 50-100 terms | 200-500 terms | Manageable; limited by operator willingness |
+| Google Ads API rate limits | 6 queries per load | Same | 2-min cache prevents hammering |
 
 ## Sources
 
-- **Direct codebase inspection** (HIGH confidence):
-  - `docs/database/SCHEMA.md` -- all table definitions, columns, indexes, FKs
-  - `supabase/migrations/033_optimization_control_plane.sql` -- empty optimization tables
-  - `supabase/migrations/034b_DEFERRED_ga4_attribution_forensics.sql` -- 4 GA4 tables
-  - `supabase/migrations/035b_DEFERRED_unified_intent_execution_system.sql` -- 14 intent tables
-  - `dashboard/src/lib/shopping-funnel/service.ts` -- 6 GAQL queries, 2-min cache, AdsContext structure
-  - `dashboard/src/lib/intent/persistence.ts` -- graceful degradation pattern for missing tables
-  - `dashboard/src/lib/intent/*.ts` -- 18 TypeScript files referencing 035b tables
-- **Project documentation** (HIGH confidence):
-  - `.planning/PROJECT.md` -- v1.3b scope, known issues, tech debt
-  - `docs/plans/2026-02-21-strategic-milestone-assessment.md` -- Part 3 architecture gaps analysis
-  - `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md` -- v1.3c prerequisites
-- **PostgreSQL materialized views** (MEDIUM confidence): Standard PostgreSQL feature. Verify Supabase managed PostgreSQL supports `CREATE MATERIALIZED VIEW` and `REFRESH MATERIALIZED VIEW CONCURRENTLY` -- expected to work on Supabase Pro plan which runs full PostgreSQL 15+.
+- Source code audit: `dashboard/src/lib/shopping-funnel/service.ts` (1600+ lines)
+- Source code audit: `dashboard/src/lib/optimization/query-intelligence.ts` (267 lines)
+- Source code audit: `dashboard/src/lib/optimization/control-center.ts` (285 lines)
+- Source code audit: `dashboard/src/lib/intent/policy.ts` (631 lines)
+- Source code audit: `dashboard/src/lib/intent/tier-movement.ts` (312 lines)
+- Source code audit: `dashboard/src/lib/shopping-funnel/types.ts` (245 lines)
+- Source code audit: `dashboard/src/lib/intent/types.ts` (261 lines)
+- Milestone spec: `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md`
+- Project context: `.planning/PROJECT.md`
+- Migration 033 tables: `query_value_scores`, `routing_recommendations`, `opportunity_clusters` (confirmed in production, empty)
+- Migration 035b tables: 10 KEEP'd including `experiment_registry/assignments/outcomes`, `policy_action_execution_log`, `negative_registry` (confirmed in production, empty)
