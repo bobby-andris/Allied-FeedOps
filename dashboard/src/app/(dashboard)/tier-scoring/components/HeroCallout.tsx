@@ -33,9 +33,14 @@ export function HeroCallout({ heroText, totalMisplaced, totalImpact, totalTermsS
           <div className="space-y-3 flex-1">
             <p className="text-lg font-semibold leading-snug">
               {isAllGood
-                ? 'All terms are well-placed — no action needed'
+                ? 'All terms align with current tier assignments — no action needed'
                 : heroText}
             </p>
+            {totalMisplaced > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Tiers were assigned by business judgment. These are cases where performance data strongly disagrees.
+              </p>
+            )}
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-sm">
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -47,7 +52,7 @@ export function HeroCallout({ heroText, totalMisplaced, totalImpact, totalTermsS
               }`}>
                 <Target className="h-4 w-4" />
                 <span className="font-medium">{totalMisplaced.toLocaleString()}</span>
-                <span>misplaced</span>
+                <span>{totalMisplaced !== 1 ? 'opportunities' : 'opportunity'}</span>
               </div>
               {!isAllGood && (
                 <div className="flex items-center gap-1.5 rounded-md bg-blue-50 text-blue-800 px-3 py-1.5 text-sm">
