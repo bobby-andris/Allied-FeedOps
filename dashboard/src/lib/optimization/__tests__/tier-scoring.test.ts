@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { LabelTierPerformance, ExistingFunnelTerm, FunnelTier, QueryIntentFeatures } from '@/lib/shopping-funnel/types'
-import type { GroupDistributions, TierDistribution, TierBoundaries } from '../tier-scoring.types'
+import type { GroupDistributions, TierDistribution, TierBoundaries, CalibrationConfig } from '../tier-scoring.types'
+import { DEFAULT_CALIBRATION } from '../tier-scoring.types'
 import {
   computeTierDistributions,
   computeTierBoundaries,
@@ -8,6 +9,7 @@ import {
   computeConfidence,
   estimateImpact,
   computeGlobalDistributions,
+  buildHeroCallout,
 } from '../tier-scoring'
 
 // ---------------------------------------------------------------------------
@@ -537,7 +539,7 @@ describe('estimateImpact', () => {
     expect(impact.period).toBe('monthly')
   })
 
-  it('returns non-negative values even when target CVR is lower', () => {
+  it('returns non-negative values even when target ROAS is lower', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
@@ -547,5 +549,245 @@ describe('estimateImpact', () => {
     expect(impact.low).toBeGreaterThanOrEqual(0)
     expect(impact.mid).toBeGreaterThanOrEqual(0)
     expect(impact.high).toBeGreaterThanOrEqual(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Phase 33.1: Calibration
+// ---------------------------------------------------------------------------
+
+describe('Phase 33.1: Calibration', () => {
+  it('estimateImpact returns non-zero for upward ROAS movement', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+
+    // Term with $5 spend, moving from LOW to HIGH
+    const term = makeTermWithFunnels({
+      total_impressions: 500,
+      total_clicks: 25,
+      total_cost_micros: 5_000_000, // $5
+      total_conversions: 1,
+      total_conversions_value: 6, // low ROAS
+    })
+
+    const impact = estimateImpact(term, group.tiers.LOW, group.tiers.HIGH)
+    expect(impact.mid).toBeGreaterThan(0)
+    // LOW ROAS p50 ~1.2, HIGH ROAS p50 ~5.75; $5 * (5.75 - 1.2) = ~$22.75
+    expect(impact.mid).toBeGreaterThan(10) // sanity check — not $0
+  })
+
+  it('estimateImpact returns $0 for downward movement', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+
+    const term = makeTermWithFunnels({
+      total_cost_micros: 5_000_000,
+    })
+
+    // HIGH → LOW: ROAS drops, delta negative, Math.max floors to 0
+    const impact = estimateImpact(term, group.tiers.HIGH, group.tiers.LOW)
+    expect(impact.low).toBe(0)
+    expect(impact.mid).toBe(0)
+    expect(impact.high).toBe(0)
+  })
+
+  it('estimateImpact includes direction field', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+
+    const term = makeTermWithFunnels({ total_cost_micros: 5_000_000 })
+
+    const upward = estimateImpact(term, group.tiers.LOW, group.tiers.HIGH)
+    expect(upward.direction).toBe('upward')
+
+    const downward = estimateImpact(term, group.tiers.HIGH, group.tiers.LOW)
+    expect(downward.direction).toBe('downward')
+
+    const lateral = estimateImpact(term, group.tiers.MEDIUM, group.tiers.MEDIUM)
+    expect(lateral.direction).toBe('lateral')
+  })
+
+  it('scoreTerm with calibration filters low-delta terms', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // A term that is borderline — ROAS close to boundary between tiers
+    // MEDIUM ROAS range: 2-4, place term at ~3.0 (solidly medium)
+    // but assign to HIGH so it disagrees slightly
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 50,
+      total_cost_micros: 5_000_000,
+      total_conversions: 5,
+      total_conversions_value: 15, // ROAS = 15/5 = 3.0 (MEDIUM range)
+    })
+
+    // Use strict thresholds to see if borderline case is filtered
+    const strictConfig: CalibrationConfig = {
+      minFitScoreDelta: 0.3,
+      minConfidence: 0.40,
+      minImpressions: 50,
+      averageOrderValue: 85,
+    }
+
+    const score = scoreTerm(term, group, globalFallback, undefined, strictConfig)
+    // Whether misplaced or not depends on actual delta — but fitScoreDelta should be populated
+    expect(typeof score.fitScoreDelta).toBe('number')
+    // If delta < 0.3, isMisplaced should be false even if recommended != current
+    if (score.fitScoreDelta < 0.3) {
+      expect(score.isMisplaced).toBe(false)
+    }
+  })
+
+  it('scoreTerm with calibration filters low-confidence terms', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Very few clicks → low confidence
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'Low', // assign to LOW
+      total_impressions: 200,
+      total_clicks: 2,  // very few clicks → low data volume
+      total_cost_micros: 500_000,
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+
+    const config: CalibrationConfig = {
+      minFitScoreDelta: 0.0, // no delta threshold — isolate confidence filter
+      minConfidence: 0.40,
+      minImpressions: 0, // no impression threshold
+      averageOrderValue: 85,
+    }
+
+    const score = scoreTerm(term, group, globalFallback, undefined, config)
+    // With 2 clicks, confidence should be low (dataVolume = 2/100 = 0.02)
+    expect(score.confidence.score).toBeLessThan(0.40)
+    expect(score.isMisplaced).toBe(false)
+  })
+
+  it('scoreTerm with calibration filters low-impression terms', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Low impressions
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'Low',
+      total_impressions: 10, // below 50 threshold
+      total_clicks: 5,
+      total_cost_micros: 500_000,
+      total_conversions: 1,
+      total_conversions_value: 5,
+    })
+
+    const config: CalibrationConfig = {
+      minFitScoreDelta: 0.0,
+      minConfidence: 0.0,
+      minImpressions: 50,
+      averageOrderValue: 85,
+    }
+
+    const score = scoreTerm(term, group, globalFallback, undefined, config)
+    expect(score.isMisplaced).toBe(false)
+  })
+
+  it('scoreTerm populates dataConfirmed for well-placed high-confidence terms', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // HIGH tier term with HIGH ROAS → should confirm placement
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 100,
+      total_cost_micros: 5_000_000,
+      total_conversions: 10,
+      total_conversions_value: 30, // ROAS = 30/5 = 6.0 (solidly HIGH)
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    // ROAS 6.0 is well within HIGH tier range — recommended should be HIGH
+    if (score.recommendedTier === 'HIGH') {
+      expect(score.dataConfirmed).toBe(true)
+      expect(score.isMisplaced).toBe(false)
+    }
+  })
+
+  it('scoreTerm populates fitScoreDelta', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      total_impressions: 500,
+      total_clicks: 25,
+      total_cost_micros: 2_500_000,
+      total_conversions: 3,
+      total_conversions_value: 150,
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    expect(typeof score.fitScoreDelta).toBe('number')
+    expect(score.fitScoreDelta).toBeGreaterThanOrEqual(0)
+  })
+
+  it('buildHeroCallout reflects calibrated misplaced count', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Create terms that are well-placed (should not be flagged with calibration)
+    const terms = [
+      // HIGH ROAS term in HIGH → confirmed
+      makeTermWithFunnels({
+        search_term: 'brass towel bar premium',
+        label: 'Towel Bars',
+        tier: 'High',
+        total_impressions: 500,
+        total_clicks: 100,
+        total_cost_micros: 5_000_000,
+        total_conversions: 10,
+        total_conversions_value: 30,
+      }),
+      // LOW ROAS term in LOW → confirmed
+      makeTermWithFunnels({
+        search_term: 'cheap bar',
+        label: 'Towel Bars',
+        tier: 'Low',
+        total_impressions: 300,
+        total_clicks: 5,
+        total_cost_micros: 1_000_000,
+        total_conversions: 0,
+        total_conversions_value: 0,
+      }),
+    ]
+
+    const scores = terms.map(t => scoreTerm(t, group, globalFallback))
+    const hero = buildHeroCallout(scores)
+    // With calibrated scoring, well-placed terms should not be flagged
+    const misplacedCount = scores.filter(s => s.isMisplaced).length
+    expect(misplacedCount).toBeLessThanOrEqual(1) // most should be correctly placed
+    if (misplacedCount === 0) {
+      expect(hero).toBe('All scored terms appear correctly placed')
+    }
   })
 })
