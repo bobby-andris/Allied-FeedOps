@@ -183,7 +183,8 @@ export function scoreTerm(
   term: ExistingFunnelTerm,
   groupDist: GroupDistributions,
   globalFallback: Record<FunnelTier, TierDistribution>,
-  intentFeatures?: QueryIntentFeatures
+  intentFeatures?: QueryIntentFeatures,
+  config: CalibrationConfig = DEFAULT_CALIBRATION
 ): TermScore {
   const currentTier = mapTierLabel(term.funnels[0]?.tier ?? 'Unknown')
   const customLabel0 = term.funnels[0]?.custom_label_0 ?? ''
@@ -226,15 +227,25 @@ export function scoreTerm(
     'HIGH' as FunnelTier
   )
 
-  const isMisplaced = recommendedTier !== currentTier
-
-  // Confidence
+  // Confidence (computed before isMisplaced — needed for threshold gating)
   const confidence = computeConfidence(term, intentFeatures, currentTier)
+
+  // Calibrated isMisplaced gating
+  const fitScoreDelta = tierFitScores[recommendedTier] - tierFitScores[currentTier]
+  const meetsDeltaThreshold = fitScoreDelta >= config.minFitScoreDelta
+  const meetsConfidenceFloor = confidence.score >= config.minConfidence
+  const hasMinimumData = term.total_impressions >= config.minImpressions
+  const isMisplaced = recommendedTier !== currentTier
+    && meetsDeltaThreshold
+    && meetsConfidenceFloor
+    && hasMinimumData
+
+  const dataConfirmed = recommendedTier === currentTier && hasMinimumData && meetsConfidenceFloor
 
   // Impact (only if misplaced)
   let impact: ImpactRange | null = null
   if (isMisplaced) {
-    impact = estimateImpact(term, chooseDist(currentTier), chooseDist(recommendedTier))
+    impact = estimateImpact(term, chooseDist(currentTier), chooseDist(recommendedTier), config)
   }
 
   // Verdict
@@ -254,6 +265,8 @@ export function scoreTerm(
     recommendedTier,
     isMisplaced,
     tierFitScores,
+    fitScoreDelta,
+    dataConfirmed,
     confidence,
     impact,
     fallbackLevel,
