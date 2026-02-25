@@ -95,7 +95,11 @@
   3. Every one of the 18 deferred tables (035b + 034b) has a KEEP/DEFER/PRUNE decision with documented reasoning
   4. NULL rate percentages for publish_events.prompt_hash and performance_snapshots.content_version are known and documented, with a go/no-go decision for the feedback view
   5. API quota analysis confirms whether daily snapshot capture fits within Google Ads Standard Access limits
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 28-01-PLAN.md — Data flow mapping & circular loop validation
+- [ ] 28-02-PLAN.md — Migration triage (18 deferred tables)
+- [ ] 28-03-PLAN.md — NULL rate audit & API quota analysis
 
 ### Phase 29: Content-Performance Feedback Linkage
 **Goal**: Users can see how published content changes affected search performance for any SKU
