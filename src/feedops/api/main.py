@@ -1117,7 +1117,7 @@ async def regenerate_content(request: RegenerateRequest):
         session_feedback = "\n".join(feedback_parts) if feedback_parts else None
 
         finish_sentences: dict[str, str] | None = None
-        system_prompt = get_system_prompt()
+        system_prompt = ""
         user_prompt = ""
         _regen_latency_ms = 0
 
@@ -1153,7 +1153,7 @@ async def regenerate_content(request: RegenerateRequest):
             )
             system_prompt = str(
                 generated.get("system_prompts", {}).get(
-                    request.platform, get_system_prompt()
+                    request.platform, ""
                 )
             )
             user_prompt = str(
@@ -1167,6 +1167,7 @@ async def regenerate_content(request: RegenerateRequest):
                 if isinstance(raw_finish, dict):
                     finish_sentences = raw_finish
         else:
+            system_prompt = get_system_prompt()
             # Build user prompt via shared prompt_builder (FIX-01: parity with batch path)
             # FIX-02: Shopping intelligence gated by PROMPT_CONTRACT_V2.
             # Toggling flag produces structurally different prompt (with/without Shopping section).

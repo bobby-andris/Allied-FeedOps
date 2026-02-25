@@ -695,6 +695,11 @@ def _filter_evidence_for_copy_context(evidence: list[Evidence]) -> list[Evidence
     return [row for row in evidence if row.field not in _COPY_CONTEXT_EXCLUDED_FIELDS]
 
 
+def filter_evidence_for_copy_context(evidence: list[Evidence]) -> list[Evidence]:
+    """Public helper to keep customer-copy evidence filtering consistent across paths."""
+    return _filter_evidence_for_copy_context(evidence)
+
+
 def format_evidence_markdown(
     evidence: list[Evidence],
     *,

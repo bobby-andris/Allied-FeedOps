@@ -22,7 +22,9 @@ from feedops.providers.reliability import (
 logger = logging.getLogger(__name__)
 
 
-def _parse_json_payload(raw: str) -> dict[str, Any]:
+def _parse_json_payload(
+    raw: str, *, expected_keys: set[str] | None = None
+) -> dict[str, Any]:
     """Parse JSON payload with light normalization for provider edge cases."""
 
     def _unwrap_content_wrapper(value: Any) -> Any:
@@ -49,6 +51,7 @@ def _parse_json_payload(raw: str) -> dict[str, Any]:
     if not text:
         raise json.JSONDecodeError("empty response", raw, 0)
 
+    used_partial_recovery = False
     try:
         parsed = _unwrap_content_wrapper(json.loads(text))
     except json.JSONDecodeError:
@@ -67,10 +70,20 @@ def _parse_json_payload(raw: str) -> dict[str, Any]:
             end = text.rfind("}")
             if start == -1 or end == -1 or end <= start:
                 raise
+            used_partial_recovery = True
             parsed = _unwrap_content_wrapper(json.loads(text[start : end + 1]))
 
     if not isinstance(parsed, dict):
         raise json.JSONDecodeError("parsed payload is not an object", raw, 0)
+    if used_partial_recovery:
+        actual_keys = set(parsed.keys())
+        expected = set(expected_keys or [])
+        logger.warning(
+            "Recovered JSON via substring fallback: parsed_key_count=%s expected_key_count=%s missing_keys=%s",
+            len(actual_keys),
+            len(expected) if expected else "unknown",
+            sorted(expected - actual_keys) if expected else [],
+        )
     return parsed
 
 
@@ -316,7 +329,8 @@ class OpenAIProvider(LLMProvider):
                     )
                 else:
                     logger.debug(f"Token usage: {self._last_usage}")
-                result = _parse_json_payload(content)
+                expected_keys = set(schema.get("properties", {}).keys())
+                result = _parse_json_payload(content, expected_keys=expected_keys)
                 circuit_breakers.record_success(self.name)
                 metrics_registry.observe(
                     "provider_latency_seconds",

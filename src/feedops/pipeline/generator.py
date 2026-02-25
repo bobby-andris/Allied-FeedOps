@@ -22,7 +22,11 @@ from feedops.api.prompt_builder import (
     build_shopify_prompt,
 )
 from feedops.models import Candidate, Claim, ParentSKU, Score
-from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
+from feedops.pipeline.evidence import (
+    build_evidence_table,
+    filter_evidence_for_copy_context,
+    format_evidence_markdown,
+)
 from feedops.pipeline.finish_sentence_placeholder import build_fallback_finish_sentences
 from feedops.pipeline.finish_injection import get_finish_metadata
 from feedops.pipeline.images import fetch_image
@@ -63,10 +67,25 @@ def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> 
 
 
 def _platform_completion_cap(platform: str, base_cap: int) -> int:
-    """Finish sentence generation can require a higher completion cap."""
+    """Apply per-platform completion caps for v2 generation."""
     if platform == "finish":
-        return max(base_cap, 10000)
+        return max(base_cap, 8000)
+    if platform in {"google", "bing", "shopify"}:
+        return max(base_cap, 16000)
     return base_cap
+
+
+def _payload_value_lengths(payload: dict[str, object]) -> dict[str, int]:
+    """Return best-effort character lengths for payload values."""
+    lengths: dict[str, int] = {}
+    for key, value in payload.items():
+        if isinstance(value, str):
+            lengths[key] = len(value.strip())
+        elif value is None:
+            lengths[key] = 0
+        else:
+            lengths[key] = len(str(value))
+    return lengths
 
 
 def _trim_google_short_title(title: str, max_len: int = 70) -> str:
@@ -381,6 +400,7 @@ async def generate_per_platform(
         }
 
     evidence = build_evidence_table(parent_sku)
+    evidence_for_copy = filter_evidence_for_copy_context(evidence)
     category_guidance = get_category_guidance(parent_sku.category) or ""
     keyword_section = format_keyword_placement_section(
         build_keyword_placement_plan(parent_sku, evidence)
@@ -391,20 +411,20 @@ async def generate_per_platform(
     user_prompts: dict[str, str] = {
         "google": build_google_prompt(
             parent_sku,
-            evidence,
+            evidence_for_copy,
             keyword_section,
             category_guidance,
             gold_examples,
         ),
         "bing": build_bing_prompt(
             parent_sku,
-            evidence,
+            evidence_for_copy,
             keyword_section,
             category_guidance,
         ),
         "shopify": build_shopify_prompt(
             parent_sku,
-            evidence,
+            evidence_for_copy,
             category_guidance,
         ),
         "finish": build_finish_prompt(parent_sku, finish_metadata),
@@ -453,6 +473,36 @@ async def generate_per_platform(
             max_completion_tokens=platform_cap,
         )
         latency_by_platform[platform] = int((time.perf_counter() - started) * 1000)
+        payload_keys: list[str] = []
+        payload_lengths: dict[str, int] = {}
+        if isinstance(payload, dict):
+            payload_keys = sorted(payload.keys())
+            payload_lengths = _payload_value_lengths(payload)
+        logger.info(
+            "Per-platform payload keys: sku=%s platform=%s keys=%s",
+            parent_sku.master_sku,
+            platform,
+            payload_keys,
+        )
+
+        expected_content_key = {
+            "google": "google_description",
+            "bing": "bing_description",
+            "shopify": "shopify_description",
+        }.get(platform)
+        if expected_content_key:
+            expected_length = payload_lengths.get(expected_content_key, 0)
+            if expected_length < 100:
+                logger.warning(
+                    "Short v2 content payload detected: sku=%s platform=%s expected_key=%s expected_len=%s keys=%s value_lengths=%s",
+                    parent_sku.master_sku,
+                    platform,
+                    expected_content_key,
+                    expected_length,
+                    payload_keys,
+                    payload_lengths,
+                )
+
         raw_by_platform[platform] = payload
         usage_snapshot = getattr(provider, "last_usage", {})
         usage_by_platform[platform] = (
