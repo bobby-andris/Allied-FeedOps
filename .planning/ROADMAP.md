@@ -81,6 +81,7 @@
 - [x] **Phase 28: Architecture Audit & Migration Triage** - Map complete data flow, confirm API quota sustainability, triage all 18 deferred tables, audit join chain integrity (completed 2026-02-25)
 - [x] **Phase 29: Content-Performance Feedback Linkage** - Connect published content to CTR/CVR outcomes via feedback view, populate impact scores, enforce content versioning (completed 2026-02-25)
 - [x] **Phase 30: Historical Funnel Persistence** - Persist ephemeral service.ts Google Ads data into daily snapshots with trend indicators on dashboard (completed 2026-02-25)
+- [ ] **Phase 30.1: Funnel Snapshot Backfill** - Backfill funnel_snapshots_daily with historical data so trend cards are immediately useful without waiting 7+ days
 - [ ] **Phase 31: Schema Cleanup & End-to-End Validation** - Apply kept migrations, prune dead code, wire or remove orphaned components, validate full data loop
 
 ## Phase Details
@@ -126,9 +127,21 @@ Plans:
   3. The Shopping Funnel dashboard page displays 7-day vs previous-7-day trend indicators (up/down/flat) for key funnel metrics
 **Plans:** 3/3 plans complete
 Plans:
-- [ ] 30-00-PLAN.md — Test scaffolds for capture, trends, and FunnelTrendCards (Wave 0)
-- [ ] 30-01-PLAN.md — Schema creation + capture endpoint + Cloud Scheduler setup script
-- [ ] 30-02-PLAN.md — Trends API route + FunnelTrendCards UI component
+- [x] 30-00-PLAN.md — Test scaffolds for capture, trends, and FunnelTrendCards (Wave 0)
+- [x] 30-01-PLAN.md — Schema creation + capture endpoint + Cloud Scheduler setup script
+- [x] 30-02-PLAN.md — Trends API route + FunnelTrendCards UI component
+
+### Phase 30.1: Funnel Snapshot Backfill
+**Goal**: Backfill funnel_snapshots_daily with historical Google Ads data so trend cards show meaningful comparisons immediately, rather than waiting 7+ days for organic accumulation
+**Depends on**: Phase 30 (table schema and capture endpoint must exist)
+**Requirements**: BKFL-01
+**Success Criteria** (what must be TRUE):
+  1. funnel_snapshots_daily contains at least 14 days of historical data (enabling 7d vs prev-7d comparison)
+  2. FunnelTrendCards on Shopping Funnel page renders trend arrows with real data
+  3. Backfilled data is consistent with the schema/format produced by the daily capture endpoint
+**Plans**: 1 plan
+Plans:
+- [ ] 30.1-01-PLAN.md — Create backfill endpoint, run 30-day backfill, verify trend cards
 
 ### Phase 31: Schema Cleanup & End-to-End Validation
 **Goal**: Production schema reflects reality — no aspirational empty tables, no dead TypeScript files, no orphaned components — and the full data loop is validated end-to-end
@@ -157,6 +170,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
 | 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
 | 30. Funnel Persistence | 3/3 | Complete   | 2026-02-25 | - |
+| 30.1 Funnel Backfill | v1.3b | 0/1 | Planned | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 
 ---
