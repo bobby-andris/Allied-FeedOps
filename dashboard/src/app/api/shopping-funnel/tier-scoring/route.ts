@@ -143,6 +143,14 @@ export async function GET(request: NextRequest) {
       scores.push(scored)
     }
 
+    // Update scoredTerms on each group's distribution
+    for (const score of scores) {
+      const groupDist = distributions.get(score.customLabel0)
+      if (groupDist) {
+        groupDist.scoredTerms++
+      }
+    }
+
     // Build hero callout
     const heroCallout = buildHeroCallout(scores)
 
