@@ -140,7 +140,10 @@
   2. Misplaced term rate is 10-25% (not 95%), filtered by minimum confidence and impact thresholds
   3. Hero callout shows a credible dollar range that reflects actual optimization opportunity
   4. Scoring accounts for context that tiers were manually assigned by business owner intuition, not historical data
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 33.1-01-PLAN.md — Fix estimateImpact (ROAS-based), calibrate isMisplaced thresholds, add CalibrationConfig (Wave 1)
+- [ ] 33.1-02-PLAN.md — Reframe UX language from "misplaced" to "opportunity" across all components (Wave 2)
+
 **Context**: Tiers were manually assigned by Robert (business owner) based on gut feeling — not historical performance data. The scoring engine correctly identifies where data disagrees with intuition, but needs calibration to surface only high-confidence, high-impact disagreements.
 
 ### Phase 33.2: Tier Intelligence UI Redesign
@@ -219,7 +222,7 @@ Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 | 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
 | 32. Operational Prerequisites | 3/3 | Complete    | 2026-02-25 | - |
 | 33. Tier Scoring Engine | 4/4 | Complete    | 2026-02-25 | - |
-| 33.1 Scoring Calibration | v1.3c | 0/TBD | Not started | - |
+| 33.1 Scoring Calibration | 1/2 | In Progress|  | - |
 | 33.2 UI Redesign | v1.3c | 0/TBD | Not started | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |

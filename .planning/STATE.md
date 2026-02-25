@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 33.1 (next up in v1.3c) — NOT STARTED
-Plan: 0 of TBD
-Status: Awaiting planning (`/gsd:plan-phase 33.1`)
-Last activity: 2026-02-25 — Phase 33 complete, decimal phases 33.1 and 33.2 created
+Phase: 33.1 (v1.3c) — IN PROGRESS
+Plan: 1 of 2 complete
+Status: Executing plan 33.1-02 next
+Last activity: 2026-02-25 — Completed 33.1-01 (impact estimation fix + calibration thresholds)
 
 Progress: [███░░░░░░░] 28% (v1.3c)
 
@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - [Phase 33-03]: Used Target icon for sidebar (BarChart3 already used by Performance)
 - [Phase 33-03]: Attention-needed sorting: primary misplaced count, secondary dollar impact
 - [Phase 33-03]: DistributionChart 3-zone stacked bar: orange (below p25), tier-color (healthy), blue (above p75)
+- [Phase 33.1-01]: ROAS-based impact (spend * ROAS_delta) replaces broken CVR-based formula that produced $0
+- [Phase 33.1-01]: CalibrationConfig centralizes thresholds: minFitScoreDelta=0.3, minConfidence=0.40, minImpressions=50
+- [Phase 33.1-01]: Three-gate isMisplaced: all three thresholds must pass to flag a term
 
 ### Pending Todos
 
@@ -84,7 +87,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 33-04-PLAN.md (4-level drill-down completion)
+Stopped at: Completed 33.1-01-PLAN.md (impact estimation fix + calibration thresholds)
 Resume file: None
 
 **Phase 33 Completion Summary**:
