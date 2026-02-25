@@ -94,13 +94,29 @@ def test_schema_contract_keeps_hard_max_for_platform_enforced_fields() -> None:
 
 
 def test_finish_completion_cap_floor_for_runtime_generation() -> None:
-    assert _platform_completion_cap("finish", 4000) == 10000
-    assert _platform_completion_cap("google", 4000) == 4000
+    assert _platform_completion_cap("finish", 4000) == 8000
+    assert _platform_completion_cap("google", 4000) == 16000
+    assert _platform_completion_cap("bing", 9000) == 16000
+    assert _platform_completion_cap("shopify", 20000) == 20000
 
 
 def test_runtime_generation_default_completion_cap_is_quality_safe() -> None:
     signature = inspect.signature(generate_per_platform)
-    assert signature.parameters["max_completion_tokens"].default == 8000
+    default_cap = signature.parameters["max_completion_tokens"].default
+    assert default_cap == 8000
+    assert _platform_completion_cap("google", default_cap) == 16000
+    assert _platform_completion_cap("finish", default_cap) == 8000
+
+
+def test_platform_schemas_drop_self_score_for_v2_generation() -> None:
+    for schema in (GOOGLE_SCHEMA, BING_SCHEMA, SHOPIFY_SCHEMA):
+        assert "self_score" not in schema["properties"]
+        assert "self_score" not in schema["required"]
+
+
+def test_system_prompt_drops_scoring_rubric_and_keeps_design_anchor() -> None:
+    assert "<scoring_rubric>" not in SYSTEM_PROMPT
+    assert "Find the ONE design detail that makes THIS product worth noticing" in SYSTEM_PROMPT
 
 
 def test_prompt_contract_bans_promo_words_globally() -> None:
