@@ -30,10 +30,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Migration & Schema Cleanup
 
-- [ ] **MIGR-01**: Subset of 035b tables applied (4-8 tables that are prerequisites for v1.3c), with schema verified against TypeScript consumer expectations
+- [x] **MIGR-01**: Subset of 035b tables applied (4-8 tables that are prerequisites for v1.3c), with schema verified against TypeScript consumer expectations
 - [x] **MIGR-02**: Dead TypeScript files for pruned tables deleted or deprecated, build passes after cleanup
 - [x] **MIGR-03**: Orphaned dashboard components (GmcDisapprovalBadge, PromptLineagePanel) either wired into dashboard pages or removed
-- [ ] **MIGR-04**: SCHEMA.md updated to reflect true production state after all migration changes
+- [x] **MIGR-04**: SCHEMA.md updated to reflect true production state after all migration changes
 
 ## Future Requirements (v1.3c / v1.4)
 
@@ -80,10 +80,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 | HIST-01 | Phase 30 | Complete |
 | HIST-02 | Phase 30 | Complete |
 | HIST-03 | Phase 30 | Complete |
-| MIGR-01 | Phase 31 | Pending |
+| MIGR-01 | Phase 31 | Complete |
 | MIGR-02 | Phase 31 | Complete |
 | MIGR-03 | Phase 31 | Complete |
-| MIGR-04 | Phase 31 | Pending |
+| MIGR-04 | Phase 31 | Complete |
 
 **Coverage:**
 - v1.3b requirements: 16 total

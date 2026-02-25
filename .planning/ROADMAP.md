@@ -175,7 +175,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
 | 30. Funnel Persistence | 3/3 | Complete   | 2026-02-25 | - |
 | 30.1 Funnel Backfill | 1/1 | Complete    | 2026-02-25 | - |
-| 31. Schema Cleanup | 1/3 | In Progress|  | - |
+| 31. Schema Cleanup | 2/3 | In Progress|  | - |
 
 ---
 *Phase 0 completed: 2026-02-13*
