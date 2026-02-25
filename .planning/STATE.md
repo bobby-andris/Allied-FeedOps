@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Position
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
-**Phase:** 30 of 31 (Historical Funnel Persistence) — next
-**Plan:** Not started
+**Phase:** 30 of 31 (Historical Funnel Persistence) — active
+**Plan:** 1 of 3 complete (30-00 test scaffolds done)
 **Status:** In progress
-**Last activity:** 2026-02-25 — Completed Phase 29 (Content-Performance Feedback Linkage)
+**Last activity:** 2026-02-25 — Completed 30-00 (test scaffolds)
 
-Progress: [██████░░░░] 50%
+Progress: [██████░░░░] 55%
 
 ## What's Done
 
@@ -60,6 +60,8 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 28-03: performance_impact_scores table does not exist in production (schema drift from SCHEMA.md)
 - 28-03: Daily snapshot capture SUSTAINABLE -- ~187 req/day vs 15,000 limit (1.2% utilization)
 - 28-03: service.ts is most wasteful API consumer -- recommend write-behind caching in Phase 30
+- 30-00: vi.hoisted() + vi.mock() pattern for Supabase chain mocking (consistent with existing tests)
+- 30-00: Dynamic imports for route handler tests allow per-test mock reconfiguration
 
 ## Session Log
 
@@ -73,3 +75,4 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 2026-02-25: Completed 29-02 — Content Impact landing page with 4-table join API and 10-column table
 - 2026-02-25: Completed 29-03 — Content Impact detail page with search terms, control cohort, publish history
 - 2026-02-25: Phase 29 complete — all 3 plans executed, FEED-01/02/03/04 requirements addressed
+- 2026-02-25: Completed 30-00 — TDD test scaffolds: 21 failing tests across capture, trends, FunnelTrendCards

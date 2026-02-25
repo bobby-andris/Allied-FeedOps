@@ -24,9 +24,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Historical Persistence
 
-- [ ] **HIST-01**: funnel_snapshots_daily table persists daily search term tier data from service.ts GAQL queries with 90-day retention policy
-- [ ] **HIST-02**: Daily capture endpoint (write-behind, non-blocking to service.ts live queries) triggered by Cloud Scheduler
-- [ ] **HIST-03**: 7-day vs previous-7-day trend indicators displayed on Shopping Funnel dashboard page
+- [x] **HIST-01**: funnel_snapshots_daily table persists daily search term tier data from service.ts GAQL queries with 90-day retention policy
+- [x] **HIST-02**: Daily capture endpoint (write-behind, non-blocking to service.ts live queries) triggered by Cloud Scheduler
+- [x] **HIST-03**: 7-day vs previous-7-day trend indicators displayed on Shopping Funnel dashboard page
 
 ### Migration & Schema Cleanup
 
@@ -77,9 +77,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 | FEED-02 | Phase 29 | Complete |
 | FEED-03 | Phase 29 | Complete |
 | FEED-04 | Phase 29 | Complete |
-| HIST-01 | Phase 30 | Pending |
-| HIST-02 | Phase 30 | Pending |
-| HIST-03 | Phase 30 | Pending |
+| HIST-01 | Phase 30 | Complete |
+| HIST-02 | Phase 30 | Complete |
+| HIST-03 | Phase 30 | Complete |
 | MIGR-01 | Phase 31 | Pending |
 | MIGR-02 | Phase 31 | Pending |
 | MIGR-03 | Phase 31 | Pending |
