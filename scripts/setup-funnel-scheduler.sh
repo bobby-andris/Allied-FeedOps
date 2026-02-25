@@ -41,14 +41,13 @@ fi
 
 CRON_SECRET="$1"
 
-SCHEDULER_ARGS=(
+COMMON_ARGS=(
   --project="${PROJECT}"
   --location="${LOCATION}"
   --schedule="0 6 * * *"
   --time-zone="UTC"
   --uri="${URI}"
   --http-method=POST
-  --headers="Content-Type=application/json,Authorization=Bearer ${CRON_SECRET}"
   --message-body='{}'
   --attempt-deadline="120s"
   --max-retry-attempts=2
@@ -56,16 +55,20 @@ SCHEDULER_ARGS=(
   --max-backoff="300s"
 )
 
+HEADERS="Content-Type=application/json,Authorization=Bearer ${CRON_SECRET}"
+
 if gcloud scheduler jobs describe "${JOB_NAME}" --project="${PROJECT}" --location="${LOCATION}" --quiet 2>/dev/null; then
   echo "Job ${JOB_NAME} already exists. Updating..."
   echo "  Schedule: 6 AM UTC daily (fixed timezone, no DST shift)"
   echo "  Target:   ${URI}"
-  gcloud scheduler jobs update http "${JOB_NAME}" "${SCHEDULER_ARGS[@]}"
+  gcloud scheduler jobs update http "${JOB_NAME}" "${COMMON_ARGS[@]}" \
+    --update-headers="${HEADERS}"
 else
   echo "Creating Cloud Scheduler job: ${JOB_NAME}..."
   echo "  Schedule: 6 AM UTC daily (fixed timezone, no DST shift)"
   echo "  Target:   ${URI}"
-  gcloud scheduler jobs create http "${JOB_NAME}" "${SCHEDULER_ARGS[@]}" \
+  gcloud scheduler jobs create http "${JOB_NAME}" "${COMMON_ARGS[@]}" \
+    --headers="${HEADERS}" \
     --description="Daily funnel snapshot capture - persists Google Ads shopping tier data"
 fi
 
