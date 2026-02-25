@@ -4,16 +4,18 @@
 
 You are working on Allied-FeedOps, a Google Ads optimization dashboard for alliedbrass.com (luxury bathroom accessories — towel bars, soap dispensers, robe hooks, etc. in 28+ finishes). The site sells through a 3-tier Shopping campaign funnel managed via Google Sheets supplemental feed `custom_label_0` labels.
 
-### Prerequisites
+### Prerequisites — BOTH COMPLETE
 
-> **This milestone assumes two prior milestones have been completed:**
+> **Both prior milestones have been completed (shipped 2026-02-25):**
 >
-> 1. **v1.3a (Content Generation Excellence)** — Content quality must be addressed first. Optimizing tier placements for products with generic, keyword-stuffed descriptions yields limited returns. Better descriptions → higher CTR → more data → more meaningful optimization signals. See `docs/plans/2026-02-21-strategic-milestone-assessment.md` Part 3 for the full argument.
+> 1. **✅ v1.3a (Content Generation Excellence)** — Shipped. Per-platform v2 generation active on Cloud Run. 8 runtime skill configs wired. 15 gold standards loaded. Quality at 80.5/100 (target was 85). Title formula codified. Content guardrails active.
 >
-> 2. **v1.3b (Architecture Validation & Data Persistence)** — Data persistence gaps must be resolved before building intelligence on top. Specifically:
->    - `service.ts` funnel data is ephemeral (2-minute cache, no historical persistence) — trend analysis and before/after measurement require persisted snapshots
->    - Deferred migrations 034b/035b must be evaluated and resolved (apply, prune, or remove) — see "Deferred Migration Status" section below
->    - Content↔performance feedback linkage must be established
+> 2. **✅ v1.3b (Architecture Validation & Data Persistence)** — Shipped. All gaps resolved:
+>    - `funnel_snapshots_daily` table created with capture endpoint (`/api/funnel-snapshots/capture`), trends endpoint (`/api/funnel-snapshots/trends`), and backfill endpoint (`/api/funnel-snapshots/backfill`). Cloud Scheduler script ready but **not yet activated** — needs CRON_SECRET + `bash scripts/setup-funnel-scheduler.sh`.
+>    - Migration triage complete: **10 of 14 035b tables KEEP'd and applied** to production (term_intent_state, policy_decision_log, policy_action_execution_log, policy_snapshots, experiment_registry, experiment_assignments, experiment_outcomes, negative_registry, search_buildout_recommendations, operator_review_audit). **4 DEFER'd** (intent_taxonomy_versions, sku_margin_daily, order_line_returns_daily, attribution_confidence_daily). All 4 034b GA4 tables KEEP'd.
+>    - Content↔performance feedback linkage established: Content Impact dashboard at `/content-impact` with landing + detail pages, performance_impact_scores table, prompt_hash enforcement (FEED-04).
+>    - SCHEMA.md rebuilt to 56 tables with [KEEP]/[DEFER] tags. E2E loop validated with FT-16.
+>    - **Optimization Control Center and Intent Control Center are now Coming Soon server components** (not broken empty shells) — this milestone replaces them with real functionality.
 
 ### Campaign Architecture
 
@@ -25,15 +27,23 @@ You are working on Allied-FeedOps, a Google Ads optimization dashboard for allie
 - Tier assignment works by adding **negative keywords** to the tiers a term should NOT appear in
 - 3 shared negative lists: Global Block, Competitor Terms, Branded Search Terms
 
-### What Exists Today (the Problem)
+### What Exists Today (the Problem) — Updated 2026-02-25
 
-Milestone v1.2 built substantial **infrastructure** — a working Shopping Funnel management system, optimization libraries, GA4 attribution layer, intent policy engine, and 30+ database tables. Phase 22 (Fix Integration Bugs) resolved several integration issues: `prompt_builder.py` correction_text key fix, `GMC_MERCHANT_ID` environment variable set, `keyword_bank.json` included in Docker context, and documentation gaps closed. However, the **user-facing pages** built on this infrastructure are skeleton shells that render empty tables and zero-value cards because they don't actually compute insights from the available data:
+Milestones v1.2 through v1.3b built substantial **infrastructure** — a working Shopping Funnel management system, optimization libraries, GA4 attribution layer, intent policy engine, content-performance feedback linkage, historical funnel persistence, and 56 database tables (documented in `docs/database/SCHEMA.md`). However, the **intelligence pages** still don't compute insights from available data:
 
 1. **Tier Movements Panel** — shows "0 recommendations" because `query-intelligence.ts` uses hardcoded ROAS/CVR thresholds instead of computing from actual tier performance distributions
-2. **Intent Control Center** — shows "0 terms evaluated" because no pipeline connects the NLP decomposition in `query-intelligence.ts` to the existing funnel terms fetched by `service.ts`
-3. **Search Governance** — shows empty candidates table because no pipeline connects `search_queries` / `keyword_metrics` data to campaign draft generation
-4. **Experiment Lab** — registration form only, backed by empty `experiment_registry` table with no execution or measurement logic
-5. **Policy engine thresholds** (ROAS 3.6/3.1, CVR 5%/3%) in `control-center.ts` are arbitrary hardcoded values with no adaptive logic
+2. **Optimization Control Center** — now a Coming Soon card (v1.3b replaced broken empty shell). This milestone builds the real page.
+3. **Intent Control Center** — now a Coming Soon card (v1.3b replaced broken empty shell). This milestone builds the real page.
+4. **Search Governance** — shows empty candidates table because no pipeline connects `search_queries` / `keyword_metrics` data to campaign draft generation
+5. **Experiment Lab** — registration form only, backed by empty `experiment_registry` table (now KEEP'd and applied) with no execution or measurement logic
+6. **Policy engine thresholds** (ROAS 3.6/3.1, CVR 5%/3%) in `control-center.ts` are arbitrary hardcoded values with no adaptive logic
+
+**New from v1.3b that this milestone can leverage:**
+- `funnel_snapshots_daily` — historical funnel data for trend analysis (needs re-backfill, then Cloud Scheduler activation)
+- `performance_impact_scores` — DiD methodology table (schema exists, needs compute pipeline — this milestone could build it)
+- Content Impact dashboard (`/content-impact`) — shows baseline vs post-publish CTR/CVR deltas
+- FunnelTrendCards component — 7d vs prev-7d trend indicators on Shopping Funnel page
+- All 10 KEEP'd 035b tables confirmed in production — no more "verify in v1.3b" uncertainty
 
 ---
 
@@ -55,7 +65,7 @@ Key exports to USE:
 
 Important: All service.ts functions use a **2-minute cache** (`CACHE_TTL_MS = 120000`). Data is live from Google Ads API on first call, then cached. Each call runs **6 parallel GAQL queries** to build the full funnel state.
 
-> **⚠️ Data Persistence Gap (v1.3b prerequisite)**: All service.ts data is ephemeral — no historical funnel term data is persisted to the database. This means trend analysis (Phase 1 "compare last 7d vs previous 7d"), before/after impact measurement (Phase 4), and any time-series computation require daily snapshot persistence to be implemented in v1.3b first. Without it, this milestone's trend and impact features have no historical data to compute from.
+> **✅ Data Persistence Gap RESOLVED (v1.3b)**: `funnel_snapshots_daily` table now persists daily tier-level aggregates. Capture endpoint at `/api/funnel-snapshots/capture`, trends at `/api/funnel-snapshots/trends` (7d vs prev-7d). Backfill endpoint exists but **production table needs re-backfill** (data was populated but appears empty). Cloud Scheduler script at `scripts/setup-funnel-scheduler.sh` needs activation. Once backfilled + scheduler running, trend analysis has full historical data.
 
 ### Query Intelligence Library (`query-intelligence.ts`)
 **File**: `dashboard/src/lib/optimization/query-intelligence.ts` (~265 lines)
@@ -69,10 +79,7 @@ What to KEEP:
 - Modifier hints (chrome, nickel, bronze, etc.)
 
 What to REPLACE:
-- `estimateTierFromMetrics()` — currently uses hardcoded ROAS >= 3.6 → LOW, >= 3.1 → MEDIUM, else HIGH. Replace with distribution-based adaptive thresholds.
-- `recommendActionForTerm()` — currently returns a static confidence based on click count. Replace with multi-signal scoring.
-- `scoreNeedsDecisionTerm()` — the impact scoring is reasonable but doesn't use actual tier performance data for comparison. Enhance with tier-relative scoring.
-- `enrichNeedsDecisionTerm()` — the composition function. Update to use the new adaptive scoring.
+- `enrichNeedsDecisionTerm()` — the composition function that contains inline hardcoded scoring logic (ROAS thresholds, click-count confidence). This is the main function to refactor — the separate `estimateTierFromMetrics()`, `recommendActionForTerm()`, and `scoreNeedsDecisionTerm()` mentioned in the original spec do NOT exist as separate exports. The logic is all inline within `enrichNeedsDecisionTerm()`. Replace with calls to a new adaptive scoring engine.
 
 ### Control Center Library (`control-center.ts`)
 **File**: `dashboard/src/lib/optimization/control-center.ts` (~285 lines)
@@ -156,24 +163,27 @@ Key functions already built:
 - `ga4_attribution_root_cause_daily` — Root cause aggregation
 - `ga4_shopify_reconciliation_daily` — Cross-platform reconciliation
 
-**Intent Execution System** (migration 035 — applied; **035b — DEFERRED**):
+**Intent Execution System** (migration 035b — **✅ RESOLVED in v1.3b**):
 
-> **⚠️ Deferred Migration Status**: Migration 035 (measurement infrastructure) IS applied to live Supabase. Migration 035b (unified intent execution system — 14 tables below) is DEFERRED. The 035b migration note states tables "were applied out-of-band in a previous session" but this must be verified during v1.3b. 8 of 14 tables are prerequisites for this milestone's Phases 1-4. Migration 034b (GA4 attribution forensics — 4 tables) is also deferred and lower priority. **Resolution of 034b/035b status is a v1.3b deliverable that must complete before this milestone begins.**
+> **✅ Migration Status RESOLVED (v1.3b Phase 28)**: 10 of 14 035b tables are **KEEP'd and confirmed in production**. 4 tables DEFER'd to v1.4+. All KEEP'd tables are currently **empty** — awaiting data pipeline activation in this milestone. See `docs/database/SCHEMA.md` for full column definitions with [KEEP]/[DEFER] tags.
 
-- `intent_taxonomy_versions` — Policy version management
-- `term_intent_state` — Current intent classification per term
-- `policy_decision_log` — Every policy evaluation logged
-- `policy_action_execution_log` — Every execution action logged
-- `policy_snapshots` — Point-in-time snapshots
-- `sku_margin_daily` — Margin data for ROAS calculations
-- `order_line_returns_daily` — Return data for true profitability
-- `attribution_confidence_daily` — Attribution confidence tracking
-- `experiment_registry` — Experiment definitions
-- `experiment_assignments` — Term-to-experiment assignments
-- `experiment_outcomes` — Experiment results
-- `negative_registry` — All negative keywords with audit trail
-- `search_buildout_recommendations` — Campaign expansion suggestions
-- `operator_review_audit` — Operator action audit trail
+**KEEP'd (10 — in production, empty, ready for this milestone):**
+- `term_intent_state` — Current intent classification per term [KEEP]
+- `policy_decision_log` — Every policy evaluation logged [KEEP]
+- `policy_action_execution_log` — Every execution action logged [KEEP]
+- `policy_snapshots` — Point-in-time snapshots [KEEP]
+- `experiment_registry` — Experiment definitions [KEEP]
+- `experiment_assignments` — Term-to-experiment assignments [KEEP]
+- `experiment_outcomes` — Experiment results [KEEP]
+- `negative_registry` — All negative keywords with audit trail [KEEP]
+- `search_buildout_recommendations` — Campaign expansion suggestions [KEEP]
+- `operator_review_audit` — Operator action audit trail [KEEP]
+
+**DEFER'd (4 — NOT in production, do NOT reference):**
+- `intent_taxonomy_versions` — [DEFER] No code references
+- `sku_margin_daily` — [DEFER] No data pipeline
+- `order_line_returns_daily` — [DEFER] No data pipeline
+- `attribution_confidence_daily` — [DEFER] No data pipeline
 
 **Pre-existing tables** (from earlier milestones):
 - `search_queries` — Variant-level search term data enriched with Keyword Planner (avg_monthly_searches, competition_index, CPC estimates)
