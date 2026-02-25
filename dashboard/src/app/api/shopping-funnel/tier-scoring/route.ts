@@ -16,6 +16,7 @@ import {
   buildHeroCallout,
 } from '@/lib/optimization/tier-scoring'
 import type { TermScore, ImpactRange, FunnelTier } from '@/lib/optimization/tier-scoring.types'
+import { DEFAULT_CALIBRATION } from '@/lib/optimization/tier-scoring.types'
 
 export const maxDuration = 60
 
@@ -139,8 +140,8 @@ export async function GET(request: NextRequest) {
       // Get intent features for NLP alignment
       const intentFeatures = decomposeSearchTerm(term.search_term)
 
-      // Score the term
-      const scored = scoreTerm(term, groupDist, globalFallbackDists, intentFeatures)
+      // Score the term with calibration config
+      const scored = scoreTerm(term, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION)
       scores.push(scored)
     }
 
@@ -179,6 +180,9 @@ export async function GET(request: NextRequest) {
             confidence: s.confidence,
             fallbackLevel: s.fallbackLevel,
             currentTier: s.currentTier,
+            fitScoreDelta: s.fitScoreDelta,
+            dataConfirmed: s.dataConfirmed,
+            isMisplaced: s.isMisplaced,
           },
         })),
         { onConflict: 'search_term,custom_label_0' }
