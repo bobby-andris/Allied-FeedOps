@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 def _parse_json_payload(
-    raw: str, *, expected_keys: set[str] | None = None
+    raw: str,
+    *,
+    expected_keys: set[str] | None = None,
+    parse_details: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Parse JSON payload with light normalization for provider edge cases."""
 
@@ -52,6 +55,7 @@ def _parse_json_payload(
         raise json.JSONDecodeError("empty response", raw, 0)
 
     used_partial_recovery = False
+    parse_mode = "strict_json"
     try:
         parsed = _unwrap_content_wrapper(json.loads(text))
     except json.JSONDecodeError:
@@ -62,6 +66,7 @@ def _parse_json_payload(
                 fenced_body = text[fenced_start + 3 : fenced_end].strip()
                 if fenced_body.startswith("json"):
                     fenced_body = fenced_body[4:].strip()
+                parse_mode = "markdown_fence"
                 parsed = _unwrap_content_wrapper(json.loads(fenced_body))
             else:
                 raise
@@ -71,18 +76,29 @@ def _parse_json_payload(
             if start == -1 or end == -1 or end <= start:
                 raise
             used_partial_recovery = True
+            parse_mode = "substring_fallback"
             parsed = _unwrap_content_wrapper(json.loads(text[start : end + 1]))
 
     if not isinstance(parsed, dict):
         raise json.JSONDecodeError("parsed payload is not an object", raw, 0)
+    actual_keys = set(parsed.keys())
+    expected = set(expected_keys or [])
+    missing_keys = sorted(expected - actual_keys) if expected else []
+    if parse_details is not None:
+        parse_details.update(
+            {
+                "parse_mode": parse_mode,
+                "parsed_key_count": len(actual_keys),
+                "expected_key_count": len(expected) if expected else 0,
+                "missing_keys": missing_keys,
+            }
+        )
     if used_partial_recovery:
-        actual_keys = set(parsed.keys())
-        expected = set(expected_keys or [])
         logger.warning(
             "Recovered JSON via substring fallback: parsed_key_count=%s expected_key_count=%s missing_keys=%s",
             len(actual_keys),
             len(expected) if expected else "unknown",
-            sorted(expected - actual_keys) if expected else [],
+            missing_keys,
         )
     return parsed
 
@@ -151,6 +167,12 @@ class OpenAIProvider(LLMProvider):
         self.model = model
         self.max_retries = max_retries
         self._last_usage = {"prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0}
+        self._last_parse_details = {
+            "parse_mode": "none",
+            "parsed_key_count": 0,
+            "expected_key_count": 0,
+            "missing_keys": [],
+        }
 
     def _use_max_completion_tokens(self) -> bool:
         """Return True when model requires max_completion_tokens."""
@@ -330,7 +352,13 @@ class OpenAIProvider(LLMProvider):
                 else:
                     logger.debug(f"Token usage: {self._last_usage}")
                 expected_keys = set(schema.get("properties", {}).keys())
-                result = _parse_json_payload(content, expected_keys=expected_keys)
+                parse_details: dict[str, Any] = {}
+                result = _parse_json_payload(
+                    content,
+                    expected_keys=expected_keys,
+                    parse_details=parse_details,
+                )
+                self._last_parse_details = parse_details
                 circuit_breakers.record_success(self.name)
                 metrics_registry.observe(
                     "provider_latency_seconds",
@@ -348,6 +376,12 @@ class OpenAIProvider(LLMProvider):
 
             except json.JSONDecodeError as e:
                 last_error = str(e)
+                self._last_parse_details = {
+                    "parse_mode": "json_decode_error",
+                    "parsed_key_count": 0,
+                    "expected_key_count": len(schema.get("properties", {})),
+                    "missing_keys": sorted(schema.get("properties", {}).keys()),
+                }
                 finish_reason = None
                 raw_chars = len(content or "")
                 if response is not None and getattr(response, "choices", None):
@@ -466,6 +500,11 @@ class OpenAIProvider(LLMProvider):
     def last_usage(self) -> dict[str, int]:
         """Return token usage from last generation."""
         return self._last_usage.copy()
+
+    @property
+    def last_parse_details(self) -> dict[str, Any]:
+        """Return parse diagnostics from last generation."""
+        return self._last_parse_details.copy()
 
 
 def _extract_cached_tokens(usage: Any) -> int:

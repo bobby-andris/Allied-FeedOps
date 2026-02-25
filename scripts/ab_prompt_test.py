@@ -29,6 +29,7 @@ from openai import (
 from feedops.api.prompt_builder import (
     build_bing_prompt,
     build_google_prompt,
+    get_prompt_experiment_variant,
     build_shopify_prompt,
 )
 from feedops.api.prompt_loader import (
@@ -572,6 +573,7 @@ async def generate_per_platform(
 
     return {
         "platform": platform,
+        "experiment_variant": get_prompt_experiment_variant(),
         "system_prompt": system_prompt,
         "user_prompt": user_prompt,
         "system_prompt_chars": len(system_prompt),
@@ -744,6 +746,7 @@ def render_results_markdown(
         f"- **SKU:** {sku}",
         f"- **Model:** {model}",
         f"- **Reasoning effort:** {reasoning_effort}",
+        f"- **Prompt experiment variant:** {next(iter(results.values())).get('experiment_variant', 'control') if results else 'control'}",
         "",
         "## System Prompt Sizes",
         "",
@@ -957,6 +960,11 @@ def main() -> None:
         help="Hard timeout per platform generation call in seconds.",
     )
     parser.add_argument(
+        "--experiment-variant",
+        default="",
+        help="Optional FEEDOPS_PROMPT_EXPERIMENT_VARIANT override for this run",
+    )
+    parser.add_argument(
         "--results-path",
         default=str(DEFAULT_RESULTS_PATH),
         help="Markdown output path",
@@ -974,6 +982,10 @@ def main() -> None:
     args = parser.parse_args()
 
     platforms = parse_platforms(args.platform)
+    if args.experiment_variant.strip():
+        os.environ["FEEDOPS_PROMPT_EXPERIMENT_VARIANT"] = (
+            args.experiment_variant.strip().lower()
+        )
     run_timestamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
     print(
         "Running per-platform test:\n"
@@ -982,7 +994,8 @@ def main() -> None:
         f"  model={args.model}\n"
         f"  reasoning_effort={args.reasoning_effort}\n"
         f"  max_completion_tokens={args.max_completion_tokens}\n"
-        f"  platform_timeout_sec={args.platform_timeout_sec}"
+        f"  platform_timeout_sec={args.platform_timeout_sec}\n"
+        f"  experiment_variant={get_prompt_experiment_variant()}"
     )
 
     if args.dry_run:

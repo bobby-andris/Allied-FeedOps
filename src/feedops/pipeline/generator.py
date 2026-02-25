@@ -1,6 +1,7 @@
 """Candidate generator using LLM providers."""
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -11,7 +12,6 @@ from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_category_guidance,
     get_finish_list,
-    get_platform_system_prompt_hash,
     get_system_prompt_hash,
     get_system_prompt,
 )
@@ -19,6 +19,7 @@ from feedops.api.prompt_builder import (
     build_bing_prompt,
     build_finish_prompt,
     build_google_prompt,
+    get_prompt_experiment_variant,
     build_shopify_prompt,
 )
 from feedops.models import Candidate, Claim, ParentSKU, Score
@@ -86,6 +87,34 @@ def _payload_value_lengths(payload: dict[str, object]) -> dict[str, int]:
         else:
             lengths[key] = len(str(value))
     return lengths
+
+
+def _schema_hash(schema: dict[str, object]) -> str:
+    """Return stable hash for schema diagnostics."""
+    canonical = json.dumps(schema, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _prompt_hash(system_prompt: str, user_prompt: str) -> str:
+    """Return stable hash for per-platform prompt provenance."""
+    combined = f"{system_prompt}\n\n{user_prompt}"
+    return hashlib.sha256(combined.encode("utf-8")).hexdigest()
+
+
+def _resolve_requested_platforms(
+    selected_platforms: tuple[str, ...] | list[str] | None,
+) -> tuple[str, ...]:
+    """Resolve requested platforms while preserving canonical execution order."""
+    ordered = ("google", "bing", "shopify", "finish")
+    if not selected_platforms:
+        return ordered
+    normalized = {
+        str(platform).strip().lower()
+        for platform in selected_platforms
+        if str(platform).strip()
+    }
+    resolved = tuple(platform for platform in ordered if platform in normalized)
+    return resolved or ordered
 
 
 def _trim_google_short_title(title: str, max_len: int = 70) -> str:
@@ -354,8 +383,10 @@ async def generate_per_platform(
     feedback_by_platform: dict[str, str] | None = None,
     reasoning_effort: str = "high",
     max_completion_tokens: int = 8000,
+    selected_platforms: tuple[str, ...] | list[str] | None = None,
 ) -> dict[str, object]:
     """Generate content via per-platform prompts/schemas (v2) or legacy (v1)."""
+    experiment_variant = get_prompt_experiment_variant()
     if (prompt_version or "v2").lower() == "v1":
         system_prompt, user_prompt = build_split_prompt(parent_sku)
         response = await provider.generate(
@@ -397,6 +428,9 @@ async def generate_per_platform(
             "usage_by_platform": {},
             "latency_by_platform": {},
             "raw_by_platform": {"legacy": response},
+            "schema_hashes": {},
+            "parse_by_platform": {},
+            "prompt_experiment_variant": experiment_variant,
         }
 
     evidence = build_evidence_table(parent_sku)
@@ -447,7 +481,7 @@ async def generate_per_platform(
         for platform in ("google", "bing", "shopify", "finish")
     }
     prompt_hashes: dict[str, str] = {
-        platform: get_platform_system_prompt_hash(platform)
+        platform: _prompt_hash(system_prompts[platform], user_prompts[platform])
         for platform in ("google", "bing", "shopify", "finish")
     }
     platform_schemas = {
@@ -456,12 +490,17 @@ async def generate_per_platform(
         "shopify": SHOPIFY_SCHEMA,
         "finish": FINISH_SENTENCES_SCHEMA,
     }
+    schema_hashes = {
+        platform: _schema_hash(schema)
+        for platform, schema in platform_schemas.items()
+    }
 
     raw_by_platform: dict[str, dict[str, object]] = {}
     usage_by_platform: dict[str, dict[str, int]] = {}
     latency_by_platform: dict[str, int] = {}
-
-    for platform in ("google", "bing", "shopify", "finish"):
+    parse_by_platform: dict[str, dict[str, object]] = {}
+    requested_platforms = _resolve_requested_platforms(selected_platforms)
+    for platform in requested_platforms:
         platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
         platform_cap = _platform_completion_cap(platform, max_completion_tokens)
         started = time.perf_counter()
@@ -508,6 +547,10 @@ async def generate_per_platform(
         usage_by_platform[platform] = (
             usage_snapshot if isinstance(usage_snapshot, dict) else {}
         )
+        parse_snapshot = getattr(provider, "last_parse_details", {})
+        parse_by_platform[platform] = (
+            parse_snapshot if isinstance(parse_snapshot, dict) else {}
+        )
         logger.info(
             "Per-platform generation usage: sku=%s platform=%s usage=%s latency_ms=%s cap=%s reasoning=%s",
             parent_sku.master_sku,
@@ -516,6 +559,13 @@ async def generate_per_platform(
             latency_by_platform[platform],
             platform_cap,
             platform_reasoning,
+        )
+        logger.info(
+            "Per-platform parse diagnostics: sku=%s platform=%s parse_mode=%s missing_keys=%s",
+            parent_sku.master_sku,
+            platform,
+            parse_by_platform[platform].get("parse_mode", "unknown"),
+            parse_by_platform[platform].get("missing_keys", []),
         )
 
     finish_sentences = _normalize_finish_sentence_payload(
@@ -546,6 +596,9 @@ async def generate_per_platform(
         "usage_by_platform": usage_by_platform,
         "latency_by_platform": latency_by_platform,
         "raw_by_platform": raw_by_platform,
+        "schema_hashes": schema_hashes,
+        "parse_by_platform": parse_by_platform,
+        "prompt_experiment_variant": experiment_variant,
     }
 
 

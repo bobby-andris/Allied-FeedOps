@@ -16,7 +16,14 @@ from feedops.quality.eval_framework import (
     evaluate_regression,
     render_report,
 )
-from feedops.quality.evaluator import evaluate_exports_dir
+from feedops.quality.evaluator import (
+    PromptEvalRecord,
+    build_prompt_eval_record,
+    evaluate_exports_dir,
+    summarize_prompt_eval_records,
+    write_prompt_eval_records,
+    write_prompt_eval_summary_csv,
+)
 from feedops.quality.quality_gates import (
     AUTO_APPROVE_THRESHOLD,
     MIN_COMPOSITE_SCORE,
@@ -29,11 +36,23 @@ from feedops.quality.quality_gates import (
     should_auto_approve,
     should_block_publishing,
 )
-from feedops.quality.scoring import score_brand_voice, score_description, score_title
+from feedops.quality.scoring import (
+    compute_description_quality_index,
+    compute_platform_quality_indices,
+    compute_title_quality_index,
+    score_brand_voice,
+    score_description,
+    score_title,
+)
 
 __all__ = [
     # Evaluator
     "evaluate_exports_dir",
+    "PromptEvalRecord",
+    "build_prompt_eval_record",
+    "write_prompt_eval_records",
+    "summarize_prompt_eval_records",
+    "write_prompt_eval_summary_csv",
     # Eval framework (regression testing)
     "evaluate_regression",
     "render_report",
@@ -43,6 +62,9 @@ __all__ = [
     "score_title",
     "score_description",
     "score_brand_voice",
+    "compute_title_quality_index",
+    "compute_description_quality_index",
+    "compute_platform_quality_indices",
     # Data loader
     "load_all_sku_data",
     "load_catalog_originals",

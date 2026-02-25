@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 from feedops.models import Candidate
 from feedops.pipeline.keyword_placement import (
@@ -347,6 +347,10 @@ class SoftGateAssessment:
 
 def _clamp_0_10(value: int) -> int:
     return max(0, min(10, value))
+
+
+def _clamp_0_100(value: int | float) -> int:
+    return max(0, min(100, int(round(value))))
 
 
 def _contains_any(text: str, phrases: list[str]) -> bool:
@@ -1015,6 +1019,210 @@ def score_bundle(
         notes=notes,
         title_zone_analysis=zone_analysis,
     )
+
+
+def _policy_component_score(
+    text: str,
+    policy_violations: list[str] | None = None,
+) -> int:
+    violations = [v for v in (policy_violations or []) if isinstance(v, str) and v.strip()]
+    score = 100
+    if _CITATION_RE.search(text):
+        score -= 35
+    if _URL_RE.search(text):
+        score -= 35
+    if _ALL_CAPS_WORD_RE.search(text):
+        score -= 10
+    score -= min(60, len(violations) * 12)
+    return _clamp_0_100(score)
+
+
+def _uniqueness_score(text: str) -> int:
+    tokens = re.findall(r"[a-z0-9]+", (text or "").lower())
+    if not tokens:
+        return 0
+    unique_ratio = len(set(tokens)) / len(tokens)
+    repeated_token_penalty = sum(1 for token in set(tokens) if tokens.count(token) >= 4)
+    score = int(unique_ratio * 100) - (repeated_token_penalty * 8)
+    return _clamp_0_100(score)
+
+
+def compute_title_quality_index(
+    title: str,
+    *,
+    platform: str = "google",
+    policy_violations: list[str] | None = None,
+) -> dict[str, Any]:
+    """Compute Phase 28 title quality index (0-100) with weighted components."""
+    title = str(title or "").strip()
+    zone = analyze_title_zones(title)
+    title_score, title_notes, _ = score_title(
+        title,
+        platform=platform,
+        include_zone_analysis=True,
+    )
+
+    query_match_coverage = 0
+    if zone.has_product_type_in_mobile:
+        query_match_coverage += 35
+    elif zone.has_product_type_in_desktop:
+        query_match_coverage += 25
+    if zone.has_dimension_in_mobile:
+        query_match_coverage += 35
+    elif zone.has_dimension_in_desktop:
+        query_match_coverage += 25
+    if zone.has_material_in_desktop:
+        query_match_coverage += 15
+    if len(title) >= 50:
+        query_match_coverage += 15
+    query_match_coverage = _clamp_0_100(query_match_coverage)
+
+    readability_fluency = 100
+    if len(title) > MAX_TITLE_LENGTH:
+        readability_fluency -= 25
+    if len(title) < 40:
+        readability_fluency -= 20
+    if _ALL_CAPS_WORD_RE.search(title):
+        readability_fluency -= 20
+    if re.search(r"[|]{2,}|[-]{3,}|[,]{3,}", title):
+        readability_fluency -= 15
+    readability_fluency = _clamp_0_100(readability_fluency)
+
+    policy_compliance = _policy_component_score(title, policy_violations)
+
+    specificity = 0
+    if _contains_any(title, _PRODUCT_TYPE_PHRASES):
+        specificity += 35
+    if _INCH_RE.search(title):
+        specificity += 30
+    if _contains_any(title, _MATERIAL_WORDS):
+        specificity += 20
+    if _contains_any(title, _FUNCTIONAL_MODIFIERS):
+        specificity += 15
+    specificity = _clamp_0_100(specificity)
+
+    uniqueness = _uniqueness_score(title)
+
+    overall = _clamp_0_100(
+        query_match_coverage * 0.30
+        + readability_fluency * 0.25
+        + policy_compliance * 0.20
+        + specificity * 0.15
+        + uniqueness * 0.10
+    )
+
+    return {
+        "overall": overall,
+        "components": {
+            "query_match_coverage": query_match_coverage,
+            "readability_fluency": readability_fluency,
+            "policy_compliance": policy_compliance,
+            "specificity": specificity,
+            "uniqueness": uniqueness,
+        },
+        "notes": list(dict.fromkeys(title_notes + list(zone.zone_notes))),
+        "base_score_0_10": title_score,
+    }
+
+
+def compute_description_quality_index(
+    description: str,
+    *,
+    platform: str = "google",
+    html: bool = False,
+    policy_violations: list[str] | None = None,
+) -> dict[str, Any]:
+    """Compute Phase 28 description quality index (0-100) with weighted components."""
+    description = str(description or "").strip()
+    opening = description[:160].lower()
+    first_150 = description[:150].lower()
+
+    benefit_cues = sum(1 for cue in _OPENING_ENGAGEMENT_CUES if cue in opening)
+    benefit_first_opening = 35
+    if benefit_cues >= 2:
+        benefit_first_opening = 95
+    elif benefit_cues == 1:
+        benefit_first_opening = 75
+    if platform in {"google", "bing"} and _INCH_RE.search(first_150):
+        benefit_first_opening = min(100, benefit_first_opening + 10)
+    benefit_first_opening = _clamp_0_100(benefit_first_opening)
+
+    readability_score, readability_notes = score_readability(description, platform=platform)
+    flow_readability = _clamp_0_100(readability_score * 10)
+    sentence_chunks = [s.strip() for s in re.split(r"(?<!\d)\.(?!\d)\s*", description) if s.strip()]
+    if sentence_chunks:
+        avg_sentence_len = sum(len(s.split()) for s in sentence_chunks) / len(sentence_chunks)
+        if avg_sentence_len > 26:
+            flow_readability = _clamp_0_100(flow_readability - 12)
+        elif avg_sentence_len < 7:
+            flow_readability = _clamp_0_100(flow_readability - 8)
+
+    factual_grounding = 0
+    measurement_hits = len(_INCH_RE.findall(description))
+    weight_hits = len(
+        re.findall(r"\b\d+(?:\.\d+)?\s*(?:lb|lbs|pound|pounds)\b", description, re.I)
+    )
+    material_hits = sum(1 for cue in _MATERIAL_WORDS if cue in description.lower())
+    factual_grounding += min(45, (measurement_hits + weight_hits) * 12)
+    factual_grounding += min(35, material_hits * 12)
+    if "solid brass" in description.lower():
+        factual_grounding += 20
+    factual_grounding = _clamp_0_100(factual_grounding)
+
+    cvr_score, cvr_notes = score_description(description, html=html, platform=platform)
+    conversion_utility = _clamp_0_100(cvr_score * 10)
+    if platform == "shopify" and "<li" in description.lower():
+        conversion_utility = _clamp_0_100(conversion_utility + 8)
+
+    policy_compliance = _policy_component_score(description, policy_violations)
+
+    overall = _clamp_0_100(
+        benefit_first_opening * 0.20
+        + flow_readability * 0.20
+        + factual_grounding * 0.25
+        + conversion_utility * 0.20
+        + policy_compliance * 0.15
+    )
+
+    notes = list(dict.fromkeys(readability_notes + cvr_notes))
+    return {
+        "overall": overall,
+        "components": {
+            "benefit_first_opening": benefit_first_opening,
+            "flow_readability": flow_readability,
+            "factual_grounding": factual_grounding,
+            "conversion_utility": conversion_utility,
+            "policy_compliance": policy_compliance,
+        },
+        "notes": notes,
+        "base_score_0_10": cvr_score,
+    }
+
+
+def compute_platform_quality_indices(
+    *,
+    platform: str,
+    title: str,
+    description: str,
+    html_description: bool = False,
+    policy_violations: list[str] | None = None,
+) -> dict[str, Any]:
+    """Return title/description Phase 28 quality indices for one platform."""
+    title_index = compute_title_quality_index(
+        title,
+        platform=platform,
+        policy_violations=policy_violations,
+    )
+    description_index = compute_description_quality_index(
+        description,
+        platform=platform,
+        html=html_description,
+        policy_violations=policy_violations,
+    )
+    return {
+        "title_quality_index": title_index,
+        "description_quality_index": description_index,
+    }
 
 
 @dataclass(frozen=True)

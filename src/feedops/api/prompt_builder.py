@@ -25,6 +25,7 @@ Feature flags:
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import Any
 
@@ -58,11 +59,74 @@ from feedops.pipeline.shopping_intelligence import get_shopping_intelligence_sec
 
 logger = logging.getLogger(__name__)
 
+_PHASE28_EXPERIMENT_ENV = "FEEDOPS_PROMPT_EXPERIMENT_VARIANT"
+_PHASE28_ALLOWED_VARIANTS = {
+    "control",
+    "a1_placeholder_burden_relaxed",
+    "a2_title_constraint_relaxed",
+    "a3_keyword_pressure_reduced",
+    "a4_evidence_context_trimmed",
+    "a5_shopify_style_transfer",
+}
+
 _SEGMENT_TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def _normalize_segment_token(value: str) -> str:
     return " ".join(_SEGMENT_TOKEN_RE.findall((value or "").lower()))
+
+
+def get_prompt_experiment_variant() -> str:
+    """Return the active prompt experiment variant for Phase 28 analysis."""
+    raw_value = os.environ.get(_PHASE28_EXPERIMENT_ENV, "control") or "control"
+    normalized = raw_value.strip().lower()
+    if normalized in _PHASE28_ALLOWED_VARIANTS:
+        return normalized
+    logger.warning(
+        "Unknown prompt experiment variant '%s'; falling back to control",
+        raw_value,
+    )
+    return "control"
+
+
+def _phase28_variant_overlay(platform: str, variant: str) -> str:
+    """Return experiment-specific instruction overlay text."""
+    if variant == "a1_placeholder_burden_relaxed" and platform in {"google", "bing"}:
+        return (
+            "Placeholder handling simplification:\n"
+            "- Keep placeholder instructions minimal: exactly one {FINISH_SENTENCE} sentence.\n"
+            "- Avoid choreography language in the prose itself.\n"
+            "- Write naturally around the placeholder with one sentence before and one sentence after."
+        )
+    if variant == "a2_title_constraint_relaxed" and platform in {"google", "bing"}:
+        return (
+            "Title constraint relaxation:\n"
+            "- Keep only mandatory structure and platform limits.\n"
+            "- Prefer natural, shopper-readable phrasing over rigid slot-filling.\n"
+            "- Avoid stacking multiple optional modifiers in a single title."
+        )
+    if variant == "a3_keyword_pressure_reduced" and platform in {"google", "bing"}:
+        return (
+            "Keyword pressure reduction:\n"
+            "- Use at most one synonym cluster in description copy.\n"
+            "- Prefer clarity and conversion language over keyword volume.\n"
+            "- Do not force exact query fragments if they reduce fluency."
+        )
+    if variant == "a4_evidence_context_trimmed":
+        return (
+            "Evidence prioritization trim:\n"
+            "- Prioritize only high-signal fields (product type, primary dimension, material, mounting, collection).\n"
+            "- Ignore low-signal diagnostics and metadata-like context.\n"
+            "- When evidence conflicts, favor concrete catalog facts."
+        )
+    if variant == "a5_shopify_style_transfer" and platform in {"google", "bing"}:
+        return (
+            "Shopify-style flow transfer:\n"
+            "- Lead with a benefit-oriented opening sentence, then support with product truth.\n"
+            "- Keep sentence cadence varied (roughly 10-22 words).\n"
+            "- Use smooth transitions between opening, finish sentence, and trust close."
+        )
+    return ""
 
 
 def _ev_value(ev: Any, field_name: str) -> str:
@@ -225,6 +289,7 @@ def build_google_prompt(
     gold_examples: str | None,
 ) -> str:
     """Build Google-specific user prompt for variant-level generation."""
+    variant = get_prompt_experiment_variant()
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
     evidence_markdown = format_evidence_markdown(
         evidence_rows,
@@ -289,6 +354,11 @@ def build_google_prompt(
         )
     if cleaned_gold_examples:
         sections.append(f"<gold_examples>\n{cleaned_gold_examples}\n</gold_examples>")
+    if variant != "control":
+        overlay = _phase28_variant_overlay("google", variant)
+        sections.append(f"<experiment_variant>{variant}</experiment_variant>")
+        if overlay:
+            sections.append(f"<experiment_overlay>\n{overlay}\n</experiment_overlay>")
     sections.append(
         "<output>Return JSON with keys: google_title, google_short_title, "
         "google_description, claims.</output>"
@@ -303,6 +373,7 @@ def build_bing_prompt(
     category_guidance: str | None,
 ) -> str:
     """Build Bing-specific user prompt with literal-match emphasis."""
+    variant = get_prompt_experiment_variant()
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
     evidence_markdown = format_evidence_markdown(
         evidence_rows,
@@ -360,6 +431,11 @@ def build_bing_prompt(
         sections.append(
             f"<category_guidance>\n{cleaned_category_guidance}\n</category_guidance>"
         )
+    if variant != "control":
+        overlay = _phase28_variant_overlay("bing", variant)
+        sections.append(f"<experiment_variant>{variant}</experiment_variant>")
+        if overlay:
+            sections.append(f"<experiment_overlay>\n{overlay}\n</experiment_overlay>")
     sections.append(
         "<output>Return JSON with keys: bing_title, bing_description, claims.</output>"
     )
@@ -372,6 +448,7 @@ def build_shopify_prompt(
     category_guidance: str | None,
 ) -> str:
     """Build Shopify master-SKU prompt (finish agnostic, HTML output)."""
+    variant = get_prompt_experiment_variant()
     evidence_rows = _coerce_evidence_rows(sku_data, evidence)
     evidence_markdown = format_evidence_markdown(evidence_rows)
     product_story = _build_product_design_story(sku_data, evidence_rows)
@@ -405,6 +482,11 @@ def build_shopify_prompt(
         sections.append(
             f"<category_guidance>\n{cleaned_category_guidance}\n</category_guidance>"
         )
+    if variant != "control":
+        overlay = _phase28_variant_overlay("shopify", variant)
+        sections.append(f"<experiment_variant>{variant}</experiment_variant>")
+        if overlay:
+            sections.append(f"<experiment_overlay>\n{overlay}\n</experiment_overlay>")
     sections.append(
         "<output>Return JSON with keys: shopify_title, shopify_description, "
         "shopify_meta_description, claims.</output>"
