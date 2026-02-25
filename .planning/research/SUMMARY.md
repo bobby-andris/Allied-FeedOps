@@ -1,204 +1,188 @@
 # Project Research Summary
 
-**Project:** Allied FeedOps — v1.2 Impact Debug & Diagnostics
-**Domain:** Google Shopping feed optimization — diagnostic and measurement layer for existing AI content pipeline
-**Researched:** 2026-02-20
+**Project:** Allied FeedOps v1.3b — Architecture Validation & Data Persistence
+**Domain:** Feed optimization platform — content-performance feedback loops, historical data persistence, deferred migration triage
+**Researched:** 2026-02-25
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This is a diagnostic and observability milestone for a running system, not a greenfield build. The v1.1 system has a complete content generation pipeline (Cloud Run Python), approval workflow, multi-platform publishing, and performance monitoring — but the system cannot explain why optimized content is not producing measurable Google Shopping impact. Research confirms the problem is a visibility gap, not a capability gap. Before any fix can be applied, the team must answer four sequential questions: Is content actually reaching GMC? Which code path runs in production? Are feature flags wired to the active execution path? Is performance being measured after propagation, not before?
+Allied FeedOps v1.3b is a focused infrastructure milestone whose singular purpose is to close the gap between content generation and measurable performance outcomes. The platform already has all the raw data it needs — publish events, performance baselines, performance snapshots, regeneration history — but none of it is connected. The recommended approach treats this milestone as plumbing, not features: create a materialized view that joins existing tables into a single content-performance feedback record, persist the ephemeral service.ts funnel data into a daily snapshot table, and surgically triage 18 deferred migration tables so the schema reflects reality rather than aspiration.
 
-The most critical architectural finding from direct code inspection is that two separate generation paths exist with divergent capabilities. The primary path (single-SKU regeneration from the UI) does not invoke feature flags, segment strategy, or the batch generator — it uses a separate prompt-building function in `main.py`. The batch path uses `generator.py` where SEGMENT_STRATEGY_V1 is called. Two flags (PROMPT_CONTRACT_V2, INTENT_CURATOR_V1) appear to have no active call sites in any live path. This means capabilities the team believes are active may not be running during normal UI-driven regeneration. This must be verified with a static grep audit before drawing any conclusions.
+The most important architectural decision for this milestone is to resist the temptation to build a new "feedback" table with its own write path. All the performance data already exists across five tables; the gap is a convenient JOIN and a reliable linkage chain (prompt_hash -> publish_event_id -> performance snapshots). A materialized view that refreshes daily costs nothing to maintain and puts zero new data in motion. This is the right tool. Similarly, the service.ts persistence problem is best solved by adding a write-behind snapshot endpoint — leaving the live query path completely unchanged — rather than rearchitecting the 1,600-line Google Ads integration.
 
-The recommended approach is strictly sequential: diagnose before fixing. All diagnostic data already exists in Supabase — coverage funnel counts can be answered with SQL queries in under an hour, with no new code. The highest-probability silent impact killer is GMC disapproval: products can be silently blocked from serving regardless of content quality. The Merchant API integration to surface disapproval status is the only net-new infrastructure needed. Everything else is queries, lightweight endpoints, and one-time verification scripts against existing data.
+The key risk is scope creep in two directions: applying all 18 deferred migration tables wholesale (which creates a schema full of empty aspirational tables), and building new write paths for data that already exists (which creates a maintenance fork). Research strongly recommends triage-first — audit actual production schema state before touching any migration file — and a strict rule that no new performance metric column (impressions, clicks, ctr) appears in any new table. This milestone lays the data foundation that v1.3c (distribution-based scoring) and v1.4 (closed-loop optimization) depend on. Getting the linkage chain right here is more important than delivering any user-visible feature.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing stack (google-ads>=28.4.1, gspread>=6.0, supabase>=2.0, FastAPI, Next.js) covers all diagnostic needs except GMC product status. Three new Python packages are needed: `google-shopping-merchant-products`, `google-shopping-merchant-reports`, and `google-shopping-merchant-issueresolution`. These use the same OAuth2 credentials already bound to the Cloud Run runtime service account — no new secrets needed. No dashboard changes and no new infrastructure are required for diagnostic scripts. The Content API for Shopping v2.1 should be avoided (deprecated, August 2026 shutdown).
+v1.3b adds no new frameworks or services. Every addition is a native Supabase/PostgreSQL capability already available in the hosted environment. The stack research confirmed that the perceived "caching problem" with service.ts is actually a persistence problem — Redis or Upstash would solve the wrong problem and add a paid service to operate. Similarly, dbt and Airflow are overkill for a 3-table computation job that pg_cron handles in a SQL function. The only new developer dependency is Knip (dead code detection), installed as a dev tool only.
 
 **Core technologies:**
-- `google-shopping-merchant-products` (new): Per-product GMC status and item-level issue detail — the only supported path post-Content API deprecation
-- `google-shopping-merchant-reports` (new): Fast-path disapproval detection via `product_view` query filtering on `aggregated_reporting_context_status` — avoids paginating all 2,784 products
-- `google-ads` (existing, v28.4.1+): GAQL `shopping_product` resource for campaign eligibility status; `shopping_performance_view` for zero-impression published SKU gap analysis
-- Custom label cohort split via `custom_label_3`: Manual A/B testing approach using existing supplemental feed infrastructure — no third-party tools needed (Feedonomics-verified pattern)
-- Four-layer propagation verification: Sheets write confirmation → GMC fetch status via `datasources.list` → GMC product status update → Ads serving impression confirmation
+- **PostgreSQL materialized view** (Supabase Postgres 15, existing): `content_performance_feedback` — joins publish_events + performance_snapshots into a single queryable artifact; daily REFRESH CONCURRENTLY keeps it fresh without blocking reads
+- **Regular PostgreSQL table** (Supabase Postgres 15, existing): `funnel_snapshots_daily` — persists the 6 live GAQL query results from service.ts into daily rows; replaces 2-minute in-memory cache with queryable history
+- **pg_cron** (built into all Supabase plans, zero setup cost): scheduled computation of feedback aggregates and stale data cleanup; eliminates need for Cloud Scheduler on DB-internal jobs; max 8 concurrent jobs, 10-min runtime — sufficient for 2,784 SKU workloads
+- **Knip v5.x** (dev dependency only): Next.js-aware dead code detection; identifies which of the 32 intent TypeScript files are orphaned vs referenced by live routes; directly informs migration triage decisions
+
+**What NOT to add:** Redis, Prisma/Drizzle, dbt, Apache Airflow, BigQuery, Supabase Branching, pg_ivm (not available on hosted Supabase). Scale (2,784 SKUs, ~1M rows/year) does not justify any of these.
 
 ### Expected Features
 
-Research confirms this milestone is primarily closing visibility gaps, not adding new features. Most diagnostic data exists today in Supabase with no new collection needed. The build list is queries, lightweight endpoints, and one new Merchant API integration.
+The milestone has a clear three-phase feature structure. Phase 1 is pure analysis with no code changes; Phase 2 creates the critical feedback linkage using only existing tables; Phase 3 adds persistence infrastructure for historical funnel data.
 
-**Must have (table stakes — needed to answer "is the system working?"):**
-- SKU coverage funnel — count SKUs at each stage: generated, approved, published, in-feed (single SQL query against existing tables, no code change)
-- Feature flag active-state API — `/runtime-state` endpoint returning which flags are live in the running Cloud Run instance (reads env vars already loaded by `runtime_controls.py`)
-- Prompt hash lineage — for each published SKU, show which `generation_prompt_hash` is live (join already available across `generated_content` and `publish_events`, no new data needed)
-- Search query coverage health — count of SKUs by data quality tier (0 queries vs 1-5 vs 5+ with volume data); 1,960/2,784 SKUs currently have no search data
+**Must have (table stakes — prerequisites for v1.3c and v1.4):**
+- **Data flow audit document** — no single document maps the complete flow from Google Ads API through every table to the dashboard; dead ends (empty optimization tables, orphaned components) are invisible without it; must come first
+- **API quota sustainability confirmation** — service.ts makes 6 GAQL queries per page load; Standard Access provides unlimited daily ops but adding daily snapshot capture must be confirmed within rate limits before building persistence
+- **Deferred migration triage** — 32 TypeScript files reference tables that don't exist in production; decision on each of 18 tables (KEEP 4, DEFER 4 to v1.4, PRUNE 10) must precede any schema work
+- **Content-performance feedback view** — the only missing link between "what content was published" and "how it performed"; keyed on (master_sku, platform); scoped to Google only for v1.3b; joins regeneration_history -> publish_events -> performance_snapshots via existing FK chain
+- **Historical funnel persistence** — `funnel_snapshots_daily` table with daily capture endpoint; Cloud Scheduler daily trigger; backfill initial 30-day window
 
-**Should have (needed to confirm fixes are working):**
-- Content propagation timestamp chain — `approved_at` → `published_at` → estimated GMC processing window → first performance snapshot date
-- GMC feed row spot checker — compare live Google Sheets rows vs `approved_content` in Supabase for 10-20 recently-published SKUs (Sheets API already integrated for writes; read path is the addition)
-- Feed quality score on `/regenerate` path — currently only `/optimize-sku` produces self-scores; adding to `/regenerate` enables quality distribution analysis
-- GMC disapproval visibility — Merchant API `product_view` integration to surface disapproved products and `item_issues`; highest-priority unknown and most likely silent impression killer
-- Bottleneck classifier — synthesizes funnel + propagation + GMC status into a per-SKU diagnosis label
+**Should have (differentiators that increase feedback loop value):**
+- **Populate performance_impact_scores** — diff-in-diff scorecard table exists but is empty; compute job calculates treated vs control lift for published SKUs
+- **Populate search_query_snapshots after publish** — table exists with FK to publish_events but nothing writes to it; enables "which search terms changed after content update" analysis
+- **Wire or remove orphaned components** — GmcDisapprovalBadge and PromptLineagePanel exist but appear on no page; PromptLineagePanel is particularly valuable for feedback visibility
 
-**Defer (v2+ or blocked until prerequisites exist):**
-- Feature flag impact segmentation — requires per-generation flag-state logging which does not exist; unbuildable until `feature_flags_active` column is added to `regeneration_history`
-- Content quality regression detector — requires self-score on `/regenerate` path first (prerequisite not yet met)
-- GMC price competitiveness dashboard — useful for pricing strategy, not content optimization; premature until content impact is confirmed
-- Real-time GMC status polling — rate limits and batch-processing nature of supplemental feeds make this architecturally inappropriate; use scheduled daily capture instead
+**Defer to v1.3c:**
+- Distribution-based scoring for optimization tables (this is v1.3c Phase 1's entire scope — do not pre-build)
+- Full experiment framework UI
+
+**Defer to v1.4:**
+- Content A/B attribution analysis (requires multiple publish cycles per SKU with different prompt_hashes)
+- Automated regeneration based on performance outcomes
+
+**Defer indefinitely:**
+- 034b GA4 attribution tables (4 tables, zero code references, no data pipeline)
+
+**Migration triage recommendation (035b — 14 intent execution tables):**
+- KEEP 4: policy_decision_log, policy_action_execution_log, negative_registry, search_buildout_recommendations
+- DEFER 4 to v1.4: experiment_registry, experiment_assignments, experiment_outcomes, term_intent_state
+- PRUNE 6: intent_taxonomy_versions, policy_snapshots, sku_margin_daily, order_line_returns_daily, attribution_confidence_daily, operator_review_audit
 
 ### Architecture Approach
 
-The diagnostic layer is purely additive. No changes to existing generation paths until root cause is confirmed by evidence. The build sequence is: coverage SQL queries (zero code) → static flag call-site audit (grep) → single-SKU path trace (one `log_event()` addition) → propagation verification (existing Sheets API read path) → GMC disapproval integration (new). New files go in `src/feedops/diagnostics/` and `dashboard/src/app/api/diagnostics/`. `main.py` gets a minor addition: `generation_path` field in existing `log_event()` calls, non-breaking.
+The architecture is materialized-view-first for read-heavy cross-table analytics, snapshot-table-first for external API data that needs history. No new write paths should be introduced for data that already exists in source tables. The publish event (`publish_events.id`) is the universal linkage key — it already has prompt_hash, evidence_hash, quality_score, published content, and a direct FK to performance_snapshots. The materialized view makes this join explicit and cached; no new write pipeline needed.
 
 **Major components:**
-1. `src/feedops/diagnostics/coverage_queries.py` (NEW) — read-only SQL queries for funnel counts; zero risk, immediate answers without deployment
-2. `src/feedops/api/diagnostics.py` (NEW) — FastAPI router for `/diagnostics/flags` and `/diagnostics/feed-audit` endpoints
-3. `src/feedops/integrations/gmc_product_audit.py` (NEW) — Merchant API integration for disapproval detection and item-level issue surfacing
-4. `dashboard/src/app/api/diagnostics/` (NEW) — Next.js routes proxying diagnostic data to dashboard UI
-5. Supabase migrations (NEW, deferred) — `flag_snapshot JSONB` and `generation_path TEXT` columns on `regeneration_history`, added only after root cause is confirmed
+1. **`content_performance_feedback` materialized view** — joins publish_events + generated_content + performance_baselines + performance_snapshots (via 4 LATERAL subqueries for 7/14/30-day windows); refreshed daily after snapshot capture; unique index on publish_event_id required for CONCURRENTLY refresh; surfaces CTR lift % in SKU review dashboard via new `/api/content-performance/summary` endpoint
+2. **`funnel_snapshots_daily` table + capture endpoint** — denormalized daily rows (snapshot_date, custom_label_0, tier, search_term, impressions, clicks, cost_micros, conversions); unique constraint on (snapshot_date, custom_label_0, tier, search_term) prevents duplicates; new `POST /api/funnel/capture-snapshot` Vercel route calls existing service.ts exports write-behind; Cloud Scheduler triggers daily alongside performance snapshot capture; 90-day retention at full granularity, weekly rollup beyond
+3. **Migration triage and cleanup** — verify production schema state first; KEEP 4 intent tables; DEFER 4 to v1.4; PRUNE 6 from 035b + all 4 from 034b; move deferred migration files to archive directory; delete or deprecate TypeScript files for pruned tables; update SCHEMA.md to reflect true state
 
 ### Critical Pitfalls
 
-Research identified 12 pitfalls grounded in documented investigation history within this codebase, not generic best practices.
+Research identified 13 pitfalls grounded in actual codebase inspection. The top 5 most likely to cause rewrites or milestone failure:
 
-1. **Coverage vs. quality confusion** — Optimizing prompt quality when <10% of catalog is published moves total CTR by fractions of a percent. Establish published SKU count before any quality work. If under 10% of 2,784 SKUs are live with optimized content, fix coverage first, not prompts.
+1. **Duplicating existing performance infrastructure** — the gap is JOIN quality and a convenient aggregation layer, not missing data. If any new migration contains columns named `impressions`, `clicks`, `ctr`, or `conversions`, it is duplicating data that already lives in `performance_snapshots`. Write the JOIN first; only create a new table if the JOIN reveals genuinely new data to store.
 
-2. **Assuming feature flags are active when they default to True** — PROMPT_CONTRACT_V2 and INTENT_CURATOR_V1 likely have no active call sites despite being defined with `default=True` in `feature_flags.py`. The absence of an env var uses the default (often True), which is the opposite of the expected opt-in convention. Verify with static grep before assuming any flag affects production behavior.
+2. **Applying deferred migrations without pruning dead code first** — the 032/033/034b/035b migration chain was written speculatively with thresholds (ROAS 3.6/3.1/2.6) that produce zero results for Allied Brass's actual data. Correct order: categorize KEEP/DEFER/PRUNE, delete TypeScript for PRUNE tables, verify build passes, then clean migration files. Never apply a migration without a consumer that will populate it within the same milestone.
 
-3. **Treating `core.ts` as the active single-SKU generation path** — `dashboard/src/lib/regeneration/core.ts` has zero imports in the entire codebase. Reading it to understand generation behavior is wasted effort. The active single-SKU path is Python `main.py /regenerate`, confirmed by tracing from `RegenerateButton.tsx` → `route.ts` → Cloud Run.
+3. **Breaking the live Google Ads query path in service.ts** — persistence must be write-behind only. The live query path stays completely unchanged. Daily snapshot triggered by a separate scheduled job, not the dashboard page load. Monitor service.ts P95 latency; if it increases >20% after any change, the persistence layer is blocking the response path.
 
-4. **Measuring impact before verifying GMC propagation** — The supplemental feed chain has four independently-failable steps. Checking that Google Sheets was updated is only step one. GMC must fetch the sheet (on its own schedule, typically daily), process the product, and approve it before impressions can reflect new content. This takes 24-72 hours typically, up to 9 days observed. Never conclude a fix failed without confirming GMC shows the new title.
+4. **Feedback loop without content versioning linkage** — audit NULL rates in `publish_events.prompt_hash` and `performance_snapshots.content_version` before building any feedback UI. If >10% of recent records have NULL in the join chain, the feedback loop will produce incomplete results. This is a hard prerequisite for v1.4 closed-loop optimization.
 
-5. **Applying multiple fixes simultaneously** — Deploying several changes at once makes improvement unattributable and regressions impossible to isolate. One fix per 14-28 day measurement window. Use `performance_snapshots` to capture pre-fix baseline before each deployment, not just the first one.
+5. **Out-of-band tables already exist in production** — the 034b/035b migration headers state "Tables created out-of-band." Query production schema first (`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`) before evaluating any migration. The decision may be "tables exist with schema drift, compare and reconcile" rather than "apply or skip."
+
+---
 
 ## Implications for Roadmap
 
-All four research files converge on the same message: root cause is unknown and must be verified before any fix is applied. Fixing before diagnosing is the highest-risk anti-pattern identified.
+Based on combined research, the milestone decomposes into 4 sequential phases. Phase ordering is driven by a hard dependency chain: you cannot safely build the feedback view or persistence layer until you know which tables actually exist in production and which join keys have NULL gaps.
 
-### Phase 1: Diagnose — Establish Ground Truth
+### Phase 1: Architecture Audit and Migration Triage
+**Rationale:** All subsequent phases depend on knowing actual production schema state. The deferred migration files note "created out-of-band" — tables may already exist with stale schemas. Empty optimization tables from migration 033 will corrupt any analytics built on top of them. This phase has zero risk of breaking anything because it produces only documentation and decisions, no code changes.
+**Delivers:** Data flow map (every table with writer, reader, row count), migration triage decisions (KEEP/DEFER/PRUNE for all 18 tables with rationale), NULL rate audit of join chain keys, API quota analysis confirming daily snapshot is sustainable, Knip report on which intent TypeScript files are orphaned
+**Addresses:** Table stakes features — data flow audit, API quota analysis, migration triage decision
+**Avoids:** Pitfall 2 (applying migrations without pruning), Pitfall 6 (building on empty tables), Pitfall 13 (out-of-band tables with schema drift)
+**Research flag:** None — pure codebase analysis and production schema queries; no external research needed
 
-**Rationale:** Coverage, flag wiring, path execution, and propagation can all be checked with zero or minimal code changes. This phase has the highest ROI of any work in the milestone. All data exists in Supabase today. Operational basics (GMC UI checks) must precede any engineering work.
+### Phase 2: Content-Performance Feedback Linkage
+**Rationale:** Uses only existing tables; no new infrastructure required. This is the highest-value deliverable of the milestone and the direct prerequisite for v1.4 closed-loop optimization. Doing this before the persistence work (Phase 3) validates the linkage chain on real data before more infrastructure is added.
+**Delivers:** `content_performance_feedback` materialized view, `/api/content-performance/summary` endpoint, CTR lift indicator in SKU review dashboard, validated end-to-end content-to-outcome linkage for 5+ published SKUs, prompt_hash NOT NULL constraint enforced for new publishes
+**Uses:** pg_cron for daily refresh scheduling; PostgreSQL LATERAL joins (full SQL provided in ARCHITECTURE.md); existing Supabase Postgres 15
+**Implements:** content_performance_feedback component (Pattern 1 — Materialized View for Cross-Table Analytics)
+**Avoids:** Pitfall 1 (duplicating performance infrastructure), Pitfall 4 (broken version chain — audit NULLs first), Pitfall 7 (per-platform complexity — key on master_sku + platform, scope to Google only for v1.3b)
+**Research flag:** None — LATERAL join pattern is standard PostgreSQL; complete SQL already documented in ARCHITECTURE.md; Supabase materialized view behavior documented in STACK.md
 
-**Delivers:**
-- SKU coverage funnel: exact count of how many of 2,784 SKUs have content at each funnel stage
-- Confirmed feature flag call-site inventory: which flags actually run in which generation paths
-- Confirmed active generation path for single-SKU UI regeneration (Path A vs B vs C)
-- Feed propagation verification for 10-20 recently-published SKUs via live Sheets read
-- Evidence completeness check: which SKUs were generated without search query data
+### Phase 3: Historical Data Persistence
+**Rationale:** Depends on Phase 1 (quota analysis confirms safety) and benefits from Phase 2 insights (understanding what data shape is actually needed for trend analysis). Introduces new infrastructure (table, endpoint, scheduler) — more risk than Phase 2, so comes after the simpler feedback view is validated against real data.
+**Delivers:** `funnel_snapshots_daily` table with 90-day retention policy and weekly rollup job in same PR, `POST /api/funnel/capture-snapshot` Vercel endpoint (write-behind, feature-flagged), Cloud Scheduler daily trigger, backfilled 30-day history, 7d vs previous-7d trend query on Shopping Funnel page, data freshness indicator
+**Uses:** Cloud Scheduler (existing), Supabase Postgres 15, pg_cron for weekly rollup cleanup
+**Implements:** funnel_snapshots_daily component (Pattern 2 — Snapshot-Then-Query for Ephemeral API Data)
+**Avoids:** Pitfall 3 (breaking live service.ts queries — write-behind only with feature flag), Pitfall 9 (unbounded storage growth — retention policy in same PR as table creation), Pitfall 5 (multi-SKU attribution — funnel data is label-level not SKU-level, unaffected)
+**Research flag:** None — snapshot table pattern already validated by existing search_query_snapshots and performance_snapshots tables in the same codebase
 
-**Addresses (from FEATURES.md):** SKU Coverage Funnel (P1), Feature Flag Active-State API (P1), Prompt Hash Lineage (P1), Search Query Coverage Health (P1)
-
-**Avoids (from PITFALLS.md):** Coverage vs. quality confusion (Pitfall 1), dead code path confusion (Pitfall 3), over-engineered diagnostics before basics (Pitfall 9), query logic vs. pipeline failure confusion (Pitfall 6)
-
-**Build sequence within Phase 1:**
-1. Coverage SQL query (30 min, zero code, run via Supabase MCP)
-2. Static flag grep audit (30 min, zero code — `grep -rn "is_prompt_contract_v2_enabled\|is_intent_curator_v1_enabled" src/feedops/`)
-3. Operational basics checklist: GMC UI feed fetch schedule, product approval status, sheet accessibility (30 min, no code)
-4. `/runtime-state` endpoint in Python (1-2 hours, reads existing env vars from `runtime_controls.py`)
-5. Propagation spot-check: read live Sheets rows and compare to `approved_content` in DB (2-3 hours, existing Sheets API)
-
-### Phase 2: Measure — Confirm What's Broken
-
-**Rationale:** Once coverage and propagation are confirmed, the measurement infrastructure must be validated before fixes are applied. Baseline contamination (re-publish events shifting baseline anchor) and too-early measurement are documented pitfalls that produce false negatives — conclusions that fixes did not work when they actually did.
-
-**Delivers:**
-- Propagation timestamp chain for published SKUs (elapsed time per pipeline stage)
-- Baseline integrity audit: identify SKUs with multiple publish events that contaminate the baseline anchor
-- GMC disapproval visibility: Merchant API integration showing which published SKUs are blocked from serving
-- Feed quality score added to `/regenerate` path (prerequisite for quality distribution analysis)
-- Bottleneck classifier: per-SKU root cause label synthesizing all Phase 1 and 2 data
-
-**Addresses (from FEATURES.md):** Content Propagation Timestamp Chain (P1), GMC Disapproval Visibility (P2), GMC Feed Row Spot Checker (P2), Feed Quality Score on /regenerate (P2), Bottleneck Classifier (P2)
-
-**Uses (from STACK.md):** `google-shopping-merchant-reports` (fast-path disapproval filter), `google-shopping-merchant-products` (per-product issue detail), GAQL `shopping_product` resource (campaign eligibility status)
-
-**Avoids (from PITFALLS.md):** Measuring too early (Pitfall 5), contaminated baselines (Pitfall 12), feed propagation not verified before measurement (Pitfall 4), runtime prompt vs. source code confusion (Pitfall 8)
-
-### Phase 3: Fix — Apply Targeted Interventions
-
-**Rationale:** Fixes are selected based on what Phases 1 and 2 reveal. Fix candidates are conditional — only apply the ones that match confirmed findings. Each fix deploys independently with its own pre-fix baseline capture and 14-28 day measurement window.
-
-**Conditional fix candidates (apply only if evidence confirms the finding):**
-
-| Finding | Fix |
-|---------|-----|
-| Coverage <10% published | Run batch generation + approval workflow for top N SKUs by impression volume |
-| PROMPT_CONTRACT_V2 has no call sites | Wire it to Path A (`_build_generation_user_prompt()`) or remove the dead flag |
-| Path A missing segment_strategy | Add `_resolve_segment_strategy()` call to `main.py /regenerate` |
-| Propagation gap (Sheets content stale) | Fix case normalization (shopify_us_ → shopify_US_) or row-matching in `google-sheets.ts` |
-| Evidence thin for low-volume SKUs | Run search term backfill first; confirm keyword bank in Cloud Run; re-generate after data is populated |
-| GMC disapproval found | Surface `item_issues` in SKU review UI; address specific disapproval categories |
-
-**Avoids (from PITFALLS.md):** Regression from simultaneous fixes (Pitfall 10), breaking existing workflows during fix application (Pitfall 7), fix-before-diagnosis anti-pattern (Pitfall 9)
-
-**Delivers:** One independently measurable fix per measurement window; feature flag state logging added to `regeneration_history` as low-cost addition enabling future experiment analysis
+### Phase 4: Migration Cleanup and End-to-End Validation
+**Rationale:** Cleanup requires all prior phases to complete so informed prune/keep decisions can be made. Dropping tables that turn out to be needed by Phase 2 or 3 would require recovery. Comes last to avoid premature deletions.
+**Delivers:** Pruned schema (10 tables dropped from 035b/034b after confirming empty), deprecated or deleted TypeScript files for pruned tables, SCHEMA.md updated to true state, end-to-end data flow validated for a single SKU (generation -> publish -> performance -> feedback view), documented data flow for v1.3c and v1.4 consumption
+**Uses:** Knip (identifies which intent TypeScript files are safe to delete), TypeScript compiler (verify build passes after deletions), Supabase SQL Editor (DROP TABLE after row count confirmation)
+**Avoids:** Pitfall 8 (migration numbering conflicts — move deferred files to archive directory, use sequential numbers from 037+), Pitfall 12 (migrations during active batch jobs — confirm no running jobs before any DDL)
+**Research flag:** None — deterministic cleanup based on Phase 1 audit output; standard PostgreSQL operations
 
 ### Phase Ordering Rationale
 
-- Phase 1 is all zero-code or minimal-code work. It runs before Phase 2 because baseline integrity depends on knowing which SKUs are actually published and which path generated their content.
-- GMC disapproval integration (Phase 2) is the only net-new infrastructure in the milestone. It belongs in Phase 2, not Phase 1, because it requires code and deployment while Phase 1 is zero-code verification.
-- Fix application (Phase 3) is deliberately last. Applying fixes before diagnosis confirmed is the primary anti-pattern identified across all research files.
-- Feature flag impact segmentation is excluded entirely from this milestone. It requires `feature_flags_active` logging to exist first (a Phase 3 addition). Segmentation analysis is a v1.3 item.
+- **Audit first** because the 034b/035b "created out-of-band" note means production schema state is genuinely unknown; building on unknown foundations risks immediate rework when the real state is discovered
+- **Feedback view second** because it uses only existing tables (zero new infrastructure risk) and delivers the milestone's highest business value — v1.4 cannot exist without this linkage
+- **Persistence third** because it introduces new infrastructure (table, endpoint, scheduler) and the quota analysis from Phase 1 is required to confirm the daily capture is within Google Ads API limits
+- **Cleanup last** because dropping tables before all phases complete risks deleting something a later phase needs; also, PRUNE decisions are more informed once Phase 2 and 3 reveal which tables are actually touched during the work
+- **Google-only scope for feedback in v1.3b**: Bing and Shopify feedback require different metric sources not currently captured; defer to v1.4 with explicit documentation
 
 ### Research Flags
 
-**Phase 1 — No additional research needed.** All data and APIs are known quantities. Coverage queries use existing Supabase tables. Flag audit is a grep. Path trace adds one log line. Standard patterns with existing tooling.
+All phases use standard patterns already validated in this codebase. No phases require `/gsd:research-phase` during planning:
 
-**Phase 2 — GMC disapproval integration may need research during planning.** The Merchant API Python client libraries are new to this codebase. The `product_view` query pattern is documented in STACK.md, but the specific `item_level_issues` field structure and severity enum behavior should be validated against a live Allied Brass account before the schema for storing GMC status is finalized.
+- **Phase 1:** Pure codebase analysis and production SQL queries — no external research needed
+- **Phase 2:** Materialized view pattern is standard PostgreSQL; complete LATERAL join SQL provided in ARCHITECTURE.md; Supabase limitations documented in STACK.md
+- **Phase 3:** Snapshot table pattern matches existing `search_query_snapshots` and `performance_snapshots` tables; capture endpoint follows identical structure to existing `/api/performance/capture-snapshot`
+- **Phase 4:** Deterministic cleanup based on Phase 1 output; Knip configuration documented in STACK.md with exact commands
 
-**Phase 3 — No additional research needed.** Fix candidates are fully scoped from Phase 1+2 findings. Code paths for each conditional fix are already understood from ARCHITECTURE.md direct code inspection.
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Existing packages verified in production. Three new Merchant API packages confirmed on PyPI with official Python client library docs. Same OAuth2 credentials reuse confirmed. One uncertainty: Merchant API beta package API stability — use latest pinned version. |
-| Features | HIGH | Based on direct codebase inspection of 32 Supabase tables, audit docs, and confirmed execution paths. Feature flag call-site finding needs static grep verification to be fully confirmed — classified HIGH-probability but not yet ground truth. |
-| Architecture | HIGH | Based on direct code inspection of `main.py`, `generator.py`, `feature_flags.py`, `runtime_controls.py`, `route.ts`, and `core.ts`. Three-path generation architecture confirmed, not inferred. Observability layer (in-memory only) confirmed. |
-| Pitfalls | HIGH | 12 pitfalls documented, all grounded in either direct code inspection or documented investigation history within this codebase (audit docs from 2026-02-08 and 2026-02-11). Not inferred from generic patterns. |
+| Stack | HIGH | No new frameworks; all additions are Supabase-native features verified in official documentation; Knip confirmed active at v5.x with Next.js plugin; pg_cron availability on all plans confirmed in Supabase docs |
+| Features | HIGH | Based on exhaustive codebase review of schema, migrations, service.ts, strategic assessment, and PROJECT.md; feature list derived from actual schema gaps, not speculation |
+| Architecture | HIGH | Materialized view SQL provided in full in ARCHITECTURE.md; funnel_snapshots_daily DDL provided in full; both patterns follow existing validated tables (performance_snapshots, search_query_snapshots) in the same codebase |
+| Pitfalls | HIGH | All 13 pitfalls sourced from actual code inspection: hardcoded ROAS thresholds in control-center.ts, NULL rates in join keys documented, out-of-band migration comments read directly, service.ts cache architecture inspected |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Feature flag call-site verification:** ARCHITECTURE.md found no call sites for PROMPT_CONTRACT_V2 and INTENT_CURATOR_V1 from code inspection, but static grep must confirm before the "flag-is-dead" conclusion drives any fix decisions. This is the first action in Phase 1.
+- **Production schema true state is unknown until Phase 1 executes:** The "created out-of-band" note in 034b/035b means tables may already exist with schema drift from the migration files. This cannot be resolved by research alone — Phase 1 must query the live DB before any migration decisions.
 
-- **Coverage funnel actual numbers:** The funnel structure and required tables are documented, but the actual counts (how many of 2,784 SKUs are at each stage) are unknown until the SQL query runs. These numbers determine which phase of work gets prioritized in Phase 3.
+- **NULL rate in prompt_hash join chain:** Research identifies this as a critical prerequisite for the feedback view but cannot determine actual NULL rates without a live DB query. Phase 2 must audit `SELECT COUNT(*) FROM publish_events WHERE prompt_hash IS NULL AND published_at > '2026-02-01'` before building feedback UI. If >10% NULL, prompt_hash enforcement must be addressed before the view delivers meaningful results.
 
-- **GMC merchant ID for Merchant API:** The Merchant API integration requires a GMC merchant account ID. Verify this is stored in GCP secrets or accessible before Phase 2 coding begins. The existing Google Ads customer ID (`6253381786`) is not the same as the merchant ID.
+- **Quality score coverage in v2 content:** The v1.3a per-platform v2 architecture may not populate `quality_score` in `generated_content`. Phase 1 should verify with `SELECT COUNT(*) FROM generated_content WHERE quality_score IS NOT NULL AND generation_timestamp > '2026-02-20'`. If not populated, exclude quality_score from feedback correlations in v1.3b scope.
 
-- **Campaign type for A/B experiments:** STACK.md notes that Google Ads Shopping experiments may require Performance Max campaigns (not standard Shopping). Verify which campaign type Allied Brass uses before investing in cohort-split A/B infrastructure in Phase 3.
+- **Which 035b/034b tables already exist in production:** The "created out-of-band" note changes the triage question from "should we apply this migration?" to "do these tables exist, and if so do their schemas match the migration files?" Only resolvable via Phase 1 production query.
 
-- **Keyword bank deployment:** PITFALLS.md flags that `data/keyword-bank.json` may be gitignored and absent from Cloud Run. Verify presence in deployed container before concluding that cold-start evidence is missing for low-volume SKUs.
-
-- **Measurement window calibration:** The 14-28 day measurement window assumes Allied Brass impression volumes are sufficient for statistical significance. If published SKU coverage is low (finding from Phase 1), this window may need to be longer. Validate against actual impression counts before setting the measurement protocol.
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct code inspection: `src/feedops/api/main.py`, `generator.py`, `feature_flags.py`, `runtime_controls.py` — generation path architecture confirmed, three paths identified
-- Direct code inspection: `dashboard/src/app/api/regenerate/route.ts`, `dashboard/src/lib/regeneration/core.ts` — proxy pattern and dead code confirmed
-- `docs/database/SCHEMA.md` — 32 tables, all column names and constraints verified
-- `docs/audit/signal-audit-2026-02-11/prompt-wiring-map.md` — dead code identification, runtime path verification, search data coverage (824/2,784 SKUs)
-- `docs/audit/signal-audit-2026-02-11/external-signals-assessment.md` — evidence completeness for low-volume SKUs
-- `docs/audit/SUMMARY-2026-02-08.md` — query logic vs. pipeline failure root cause (match rate 0.3% bug)
-- `docs/audit/gmc-feed-investigation-2026-02-08.md` — GMC feed propagation verification pattern
-- Google Ads API official docs: `shopping_product` resource, `shopping_performance_view`, impression share fields (verified Feb 2026)
-- Google Merchant API official docs: `product_view` table, `item_level_issues`, Python client library (verified Feb 2026)
+- `docs/database/SCHEMA.md` — complete 36+ table schema reference with column definitions, indexes, FK relationships
+- `docs/plans/2026-02-21-strategic-milestone-assessment.md` — Part 3 architecture gaps analysis, Part 7 migration analysis with specific table recommendations
+- `.planning/PROJECT.md` — v1.3b scope, known issues, tech debt inventory, deferred migration status
+- `supabase/migrations/035b_DEFERRED_unified_intent_execution_system.sql` — 14 deferred intent table definitions with "created out-of-band" note
+- `supabase/migrations/034b_DEFERRED_ga4_attribution_forensics.sql` — 4 deferred GA4 table definitions with "created out-of-band" note
+- `supabase/migrations/033_optimization_control_plane.sql` — empty optimization tables (empty due to hardcoded ROAS thresholds)
+- `dashboard/src/lib/shopping-funnel/service.ts` — 1,600-line live GAQL query layer, 2-min cache, AdsContext structure
+- `dashboard/src/lib/intent/persistence.ts` — graceful degradation pattern (insertRowsSafe, isMissingRelationError) for missing tables
+- `dashboard/src/lib/optimization/control-center.ts` — hardcoded ROAS thresholds (3.6/3.1/2.6) confirmed as reason optimization tables are empty
+- [Supabase pg_cron Documentation](https://supabase.com/docs/guides/database/extensions/pg_cron) — availability on all plans, max 8 concurrent jobs, 10-min runtime limit
+- [Supabase Materialized View Limitations — GitHub Discussion #16389](https://github.com/orgs/supabase/discussions/16389) — no RLS, no Realtime, no Dashboard visibility (rationale for regular table in some cases)
+- [Google Ads API Quotas and Access Levels](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — Standard Access = unlimited daily operations; 1 QPS Keyword Planner limit
+- [Knip v5.x](https://knip.dev/) — Next.js plugin confirmed, active maintenance, used by Vercel/Shopify/Microsoft
 
 ### Secondary (MEDIUM confidence)
-- GMC supplemental feed propagation timing (24-72h typical, 9-day observed) — ppc.land incident report
-- Feed optimization impact measurement (title optimization highest CTR lever) — Store Growers guide
-- A/B testing via custom labels — Feedonomics blog (verified industry source)
-- Google Ads Shopping experiments require Performance Max — Search Engine Land 2024 (verify campaign type before implementing)
-
-### Tertiary (LOW confidence — verify before relying on)
-- GMC feed fetch schedule behavior (daily vs. weekly vs. monthly defaults) — Jumpfly blog; verify in GMC UI before assuming the fetch is running at expected frequency
-- Impression share measurement window for statistical significance — industry consensus; validate against actual Allied Brass impression volume before setting hard window cutoff
+- `docs/plans/2026-02-11-schema-scalability-and-backfill.md` — pg_cron discussed in Phase 4; this milestone follows through on that existing recommendation
+- `CLAUDE.md` — offer ID case sensitivity pattern (shopify_us_ vs shopify_US_), multi-SKU product pattern (product_id aggregation in Google Ads), established code conventions
 
 ---
-*Research completed: 2026-02-20*
+*Research completed: 2026-02-25*
 *Ready for roadmap: yes*

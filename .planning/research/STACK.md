@@ -1,323 +1,302 @@
-# Technology Stack — v1.2 Impact Debug & Diagnostics
+# Technology Stack — v1.3b Architecture Validation & Data Persistence
 
-**Project:** Allied FeedOps — Google Shopping Feed Impact Diagnostics
-**Researched:** 2026-02-20
-**Milestone:** v1.2 (Impact Debug & Fix)
-**Confidence:** MEDIUM-HIGH (core APIs verified via official docs; propagation timing from community sources)
+**Project:** Allied FeedOps v1.3b
+**Researched:** 2026-02-25
+**Milestone:** v1.3b (Architecture Validation & Data Persistence)
+**Confidence:** HIGH (Supabase-native features verified via official docs; no new frameworks)
 
-> **Scope note:** This document covers only NET NEW tooling needed for v1.2 diagnosing.
-> Existing stack (google-ads>=28.4.1, gspread>=6.0, supabase>=2.0, FastAPI, Next.js) is already
-> installed. Do not re-install or alter those packages.
+> **Scope note:** This document covers only NET NEW tooling needed for v1.3b.
+> Existing stack (Next.js 14, Python/FastAPI, Supabase Postgres 15, Cloud Run, GPT-5.2,
+> Google Ads API with Standard Access) is already installed and validated through v1.3a.
+> Do not re-install or alter those packages.
+
+---
+
+## Guiding Principle
+
+v1.3b adds NO new frameworks or services. Every addition is a Supabase-native feature, a standard npm package, or a PostgreSQL capability already available on the hosted platform. The goal is to use what Supabase and PostgreSQL already provide, not to add moving parts.
 
 ---
 
 ## Recommended Stack Additions
 
-### Core Technologies — Feed Quality Diagnostics
+### 1. Content-Performance Feedback: Regular Table (NOT Materialized View)
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| **google-shopping-merchant-products** | Latest (PyPI) | Per-product GMC status + issue audit via Merchant API v1 | Only official Python SDK for the new Merchant API (replaces Content API). Provides `productStatus.itemLevelIssues[]` with `severity`, `code`, `attribute`, `documentation` per product. Content API shuts down August 2026. |
-| **google-shopping-merchant-reports** | Latest (PyPI) | Merchant-side impression data, `product_view` queries | `reports.search` with `ProductView` table returns `aggregated_reporting_context_status` — the fastest way to find "NOT_ELIGIBLE_OR_DISAPPROVED" products at scale without paginating every product status. |
-| **google-shopping-merchant-issueresolution** | Latest (PyPI) | Programmatic access to GMC diagnostics UI actions | Provides `renderproductissue` with human-readable descriptions; useful for surfacing actionable messages in the Allied Brass dashboard. |
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| PostgreSQL table + SQL view | Supabase Postgres 15 (existing) | `content_performance_feedback` table linking generated content to CTR/CVR outcomes | Regular table beats materialized view for this use case |
 
-**Why Merchant API not Content API:** Content API v2.1 `productstatuses.list` still works but is deprecated. The new Merchant API packages are the supported path forward. Both use the same OAuth credentials already in GCP secrets.
+**Decision: Regular table populated by scheduled computation, NOT a materialized view.**
 
-**Integration point:** Add to `pyproject.toml` dependencies. Auth reuses existing `google-auth>=2.48.0` service account credentials.
+Rationale:
+- Materialized views in Supabase lack Realtime support, have no Dashboard table visibility, and cannot have RLS policies applied directly (only via wrapping functions). [Source: Supabase GitHub Discussion #16389](https://github.com/orgs/supabase/discussions/16389)
+- The feedback data is computed at specific moments (after performance snapshot capture), not derived from a continuously-changing live join. A regular table with a `computed_at` timestamp is simpler and fully supported by all Supabase features (RLS, Realtime, Dashboard, supabase-js client).
+- The existing `performance_impact_scores` table already follows this exact pattern: it stores computed diff-in-diff results in a regular table, not a live view. Follow the established pattern.
+- A lightweight SQL VIEW (not materialized) can be layered on top for convenience queries that join `publish_events`, `regeneration_history`, and `performance_snapshots` without data duplication concerns.
 
-```toml
-# Add to pyproject.toml [project.dependencies]
-"google-shopping-merchant-products>=0.1.0",
-"google-shopping-merchant-reports>=0.1.0",
-"google-shopping-merchant-issueresolution>=0.1.0",
-```
+**What the table stores:** For each published SKU: `publish_event_id`, `prompt_hash` (from `publish_events.prompt_hash`), `content_version`, pre-publish baseline metrics (from `performance_baselines`), post-publish metrics at 7/14/30 day windows (from `performance_snapshots`), and computed deltas (CTR lift, CVR lift, ROAS change). The linkage chain is: `regeneration_history.prompt_hash` -> `publish_events.prompt_hash` -> `performance_snapshots.publish_event_id`.
 
----
-
-### Supporting Libraries — Diagnostics-Specific
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| **google-ads** (existing) | >=28.4.1 | `shopping_product` resource for per-product eligibility status linked to Google Ads campaigns | Use GAQL `SELECT shopping_product.status, shopping_product.issues FROM shopping_product WHERE shopping_product.status != 'ELIGIBLE'` — returns products that are IN a shopping campaign but disapproved/limited. Complements GMC-side audit. |
-| **pandas** (existing) | >=2.0 | Join GMC issue data with Supabase `variant_index` and `generated_content` tables | Already installed. Use for pivot tables: issue_code → SKU count, severity heatmaps, coverage gap analysis. |
-| **rich** (existing) | >=13.0 | CLI diagnostic report rendering | Already installed. Use `rich.table.Table` and `rich.progress` for script output. No new dependency. |
-| **httpx** (existing) | >=0.25 | Direct Google Sheets API verification calls | Already installed. Use to fetch and parse live sheet rows to verify content actually made it to the supplemental feed. |
+**Confidence:** HIGH — follows existing `performance_impact_scores` pattern already validated in production.
 
 ---
 
-### Development Tools — Diagnostic Validation
+### 2. Historical Data Persistence: `funnel_snapshots` Table
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| **Google Ads Query Builder** (web) | Construct and validate GAQL queries before coding | https://developers.google.com/google-ads/api/docs/developer-toolkit/gaa-query-builder — free, no install. Use to prototype `shopping_product` and `shopping_performance_view` queries. |
-| **Google Ads Query Validator** (web) | Validate GAQL syntax against API schema | https://developers.google.com/google-ads/api/docs/developer-toolkit/gaa-query-validator — validates field selectability before writing Python. |
-| **Rich Results Test** (web) | Validate product JSON-LD structured data on Shopify storefront | https://search.google.com/test/rich-results — checks schema.org Product markup for name, image, offers, price. Run against `alliedbrass.com/products/[slug]` to verify Shopify structured data is valid. |
-| **GMC Diagnostics UI** (web) | Source of truth for account-level issues before scripting | Check Merchant Center > Products > Diagnostics before building scripts. Confirm issue categories exist. The API mirrors this data. |
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| PostgreSQL table | Supabase Postgres 15 (existing) | `funnel_snapshots` table persisting service.ts GAQL query results | Replace 2-min in-memory cache with daily persistence |
 
----
+**Decision: Daily snapshot table, populated by existing Cloud Scheduler infrastructure.**
 
-## GAQL Queries for Impact Diagnostics
+Rationale:
+- `dashboard/src/lib/shopping-funnel/service.ts` runs 6 GAQL queries with a 2-minute in-memory cache (`CACHE_TTL_MS = 2 * 60 * 1000`). This data is lost on every Vercel cold start, has zero historical record, and cannot be used for trend analysis.
+- The project already has Cloud Scheduler calling performance capture endpoints daily. Add a companion endpoint or extend the existing one to also persist funnel data.
+- The 6 GAQL queries return: search term performance by campaign tier, label-tier aggregates, and campaign structure. Store as daily aggregated rows, NOT raw GAQL responses (which would balloon storage).
+- Estimated storage: ~100 labels x 3 tiers x 1 row/day = 300 rows/day = 110K rows/year. Trivial for Supabase free/pro tier.
+- Service.ts can then read from the persisted table (with a freshness check) instead of always hitting Google Ads API live, reducing API calls and eliminating cold-start data loss.
 
-These are the specific GAQL patterns to implement in the Python pipeline. All use the existing `google-ads` client.
-
-### 1. Product Eligibility Status Audit
-
-Finds products IN campaigns that are not serving ads. The most direct "why isn't this showing up?" diagnostic.
-
-```sql
-SELECT
-  shopping_product.resource_name,
-  shopping_product.merchant_center_id,
-  shopping_product.feed_label,
-  shopping_product.item_id,
-  shopping_product.status,
-  shopping_product.issues
-FROM shopping_product
-WHERE shopping_product.status != 'ELIGIBLE'
-```
-
-**Integration point:** New file `src/feedops/integrations/gmc_product_audit.py`. Call from a new
-Cloud Run endpoint `GET /diagnostics/feed-audit` or as a standalone script.
-
-### 2. Impression Share — Where Traffic Is Lost
-
-Answers "are we losing impressions to budget or to rank?" at campaign level.
-
-```sql
-SELECT
-  campaign.name,
-  campaign.id,
-  metrics.search_impression_share,
-  metrics.search_budget_lost_impression_share,
-  metrics.search_rank_lost_impression_share,
-  segments.date
-FROM campaign
-WHERE campaign.advertising_channel_type = 'SHOPPING'
-  AND segments.date DURING LAST_30_DAYS
-```
-
-**Note:** Impression share is only available at campaign and ad group level (HIGH confidence — confirmed in Google Ads API docs). Not available at product-item level. Join with `shopping_performance_view` by campaign to identify which products are in budget-constrained vs. rank-constrained campaigns.
-
-### 3. Product-Level Performance — Which SKUs Are Actually Serving
-
-```sql
-SELECT
-  segments.product_item_id,
-  segments.product_title,
-  segments.product_feed_label,
-  metrics.impressions,
-  metrics.clicks,
-  metrics.cost_micros,
-  metrics.conversions,
-  metrics.conversions_value
-FROM shopping_performance_view
-WHERE segments.date DURING LAST_30_DAYS
-  AND metrics.impressions > 0
-ORDER BY metrics.impressions DESC
-LIMIT 500
-```
-
-**Integration point:** Compare this list against `generated_content` in Supabase to find the "published but not serving" gap. Join on `segments.product_item_id` = lowercase GMC offer ID.
-
-### 4. Zero-Impression Published SKUs (the core impact gap diagnostic)
-
-No direct GAQL for this — it requires a JOIN at the Python layer:
-
-```python
-# Pseudo-code for the diagnostic join
-published_skus = supabase.query("SELECT gmc_offer_id FROM batch_sku_assignments WHERE status = 'published'")
-serving_skus = google_ads.query(shopping_performance_view_query)  # impressions > 0
-zero_impression_published = published_skus - serving_skus
-# These are SKUs where content was published but Google isn't showing them
-```
+**Confidence:** HIGH — straightforward table design following existing `performance_snapshots` and `search_query_snapshots` patterns.
 
 ---
 
-## GMC Product Status Audit — Merchant API Pattern
+### 3. Supabase pg_cron for Scheduled DB Computation
 
-Uses `google-shopping-merchant-products` and `google-shopping-merchant-reports`.
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| pg_cron | Built into Supabase (all plans) | Schedule feedback table computation and stale data cleanup | Eliminates need for external scheduler for DB-internal jobs |
 
-### Fast Path: Filter Disapproved via Reports API
+**Decision: Use pg_cron for DB-internal scheduled work; keep Cloud Scheduler for API calls that need network access.**
 
-Faster than paginating all product statuses. Returns only problem products.
+Rationale:
+- pg_cron is available on all Supabase plans and runs SQL snippets or database functions on cron schedules. [Source: Supabase Cron Docs](https://supabase.com/docs/guides/cron)
+- Constraints: max 8 concurrent jobs, each max 10 minutes runtime. This is sufficient for computing feedback aggregates (~2,784 SKUs, simple joins).
+- Use pg_cron for: (1) computing `content_performance_feedback` rows from snapshots after daily capture, (2) cleaning up stale `funnel_snapshots` older than 180 days, (3) refreshing any convenience SQL views.
+- Keep Cloud Scheduler for: API endpoint calls that need network access (Google Ads GAQL queries, snapshot capture, Shopify polling).
+- The project already discussed using pg_cron in `docs/plans/2026-02-11-schema-scalability-and-backfill.md` Phase 4 — this follows through on that plan.
 
-```python
-from google.shopping.merchant_reports_v1beta import ReportServiceClient
-from google.shopping.merchant_reports_v1beta.types import SearchRequest
+**Confidence:** HIGH — Supabase documentation confirms availability, syntax, and limitations.
 
-client = ReportServiceClient(credentials=credentials)
-request = SearchRequest(
-    parent=f"accounts/{merchant_id}",
-    query="""
-        SELECT offer_id, id, title, item_issues
-        FROM product_view
-        WHERE aggregated_reporting_context_status = 'NOT_ELIGIBLE_OR_DISAPPROVED'
-    """,
-    page_size=1000,
-)
-for row in client.search(request=request):
-    # row.product_view.offer_id, row.product_view.item_issues
+---
+
+### 4. Dead Code Detection: Knip
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| knip | latest (5.x) | Detect dead TypeScript files, unused exports, unused dependencies in dashboard | De facto standard, replaces unmaintained ts-prune |
+
+**Decision: Use Knip for migration evaluation dead code analysis.**
+
+Rationale:
+- ts-prune is unmaintained as of 2024. Knip is its successor and is used by Vercel, Shopify, Microsoft, and Google. [Source: Knip.dev](https://knip.dev/)
+- Knip has a built-in Next.js plugin, which is critical since the dashboard is Next.js 14. It understands page routes, API routes, and Next.js-specific entry points automatically.
+- Key capability for v1.3b: identify which of the 32 intent TypeScript files (`lib/intent/*.ts`) and 11 shopping-funnel files (`lib/shopping-funnel/*.ts`) are actually imported by live page/API routes vs completely orphaned. This directly informs whether to apply, prune, or remove the 18 deferred migration tables.
+- Install as dev dependency only. Run on-demand during migration evaluation, not in CI (yet).
+
+```bash
+cd dashboard && npm install -D knip
 ```
 
-### Per-Product Issue Detail (after fast path identifies problem SKUs)
-
-```python
-from google.shopping.merchant_products_v1beta import ProductsServiceClient
-
-products_client = ProductsServiceClient(credentials=credentials)
-# product_name format: "accounts/{merchant_id}/products/{product_id}"
-product = products_client.get_product(name=product_name)
-for issue in product.product_status.item_level_issues:
-    print(issue.code, issue.severity, issue.attribute, issue.documentation)
-```
-
-**Severity values:** `critical` (account suspension risk), `error` (warning, may cause disapproval),
-`suggestion` (optimization opportunity). Focus v1.2 fixes on `critical` and `error` first.
+**Confidence:** HIGH — well-documented, active maintenance, Next.js plugin confirmed on knip.dev.
 
 ---
 
-## Feed Content A/B Testing Approach
+### 5. Google Ads API Quota Management: No New Library Needed
 
-**Recommendation:** Manual cohort split using custom labels, not a third-party tool. Reason: Allied Brass has 2,784 SKUs — enough statistical power — and the existing supplemental feed infrastructure supports this without new tooling.
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Existing rate limiting | N/A | Validate current approach is sustainable | Document, don't add |
 
-**Pattern (verified by Feedonomics, DataFeedWatch, industry sources):**
+**Decision: No new rate-limiting library. Current patterns are sufficient; add quota monitoring.**
 
-1. Split SKUs into two cohorts by modulo of product_id: even = control, odd = test
-2. Write different content variants to `custom_label_3` (currently unused) to track cohort
-3. Publish test cohort with new content; keep control cohort on old content
-4. After 30 days, compare `shopping_performance_view` impressions/CTR/CVR between cohorts
-5. Statistical significance: minimum 100 clicks per cohort before drawing conclusions
+Rationale:
+- The project has **Standard Access** developer token = **unlimited daily operations** for GET/mutate. [Source: Google Ads API Quotas](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
+- Rate limiting is per-QPS per customer ID, using a token bucket algorithm. The existing `ThreadPoolExecutor(5)` with batch size 10 and GAQL chunk size 25 is well within limits. [Source: Google Ads API Rate Limits](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
+- Planning Service (Keyword Planner) is limited to **1 QPS** per customer ID — this is the only real constraint and is already handled by sequential calls in `google_ads_search_terms.py`.
+- GAQL `IN` clause maximum is **20,000 items** — current chunk size of 25 is far below this.
+- The real question for v1.3b is not "are we hitting limits?" but "should we cache more aggressively to reduce unnecessary API calls?" Answer: yes, via the `funnel_snapshots` persistence table (item 2 above), which eliminates the 6 live GAQL queries on every dashboard page load.
+- Optional: add a `api_quota_log` table to track daily API operations for long-term monitoring. LOW priority — implement only if quota concerns emerge.
 
-**No new tool needed.** Implement as a filter in the existing batch publishing flow: `batch_sku_assignments.cohort = 'control' | 'test'`. Add `cohort` column to `batch_sku_assignments` or use `custom_label_3` in the supplemental feed.
-
-**Why not Google's native A/B experiment tool:** Google Ads launched Shopping experiment support (confirmed, searchengineland.com 2024) but it requires Performance Max or Smart Shopping campaigns, not standard Shopping. Allied Brass likely uses standard Shopping — verify before investing in this path.
-
----
-
-## Content Propagation Verification Stack
-
-**Problem:** After publishing to Google Sheets supplemental feed, how do we know Google ingested it?
-
-### Verification Layers (in order of reliability)
-
-| Layer | Tool | How to Check | Latency |
-|-------|------|-------------|---------|
-| 1. Google Sheets write confirmation | `gspread` (existing) | Verify row exists with correct content in sheet | Immediate |
-| 2. GMC feed fetch status | Merchant API `datasources.list` | Check `lastFetchTime` and `fetchSchedule` on data source | ~1-24 hours |
-| 3. GMC product status update | `productstatuses.get` | `googleExpirationDate` advances, `destinationStatuses` changes | 1-3 days |
-| 4. Google Ads serving confirmation | `shopping_performance_view` | Impressions appear for product_item_id | 3-7 days |
-
-**Implementation:** Add a `propagation_check` field to `publish_events` table tracking which verification layer has been confirmed. Run as a Cloud Scheduler daily job calling the existing `/api/performance/capture-snapshot` endpoint, extended with GMC status polling.
-
-### Concrete Verification Script Pattern
-
-```python
-# src/feedops/integrations/propagation_verifier.py
-async def verify_propagation(gmc_offer_ids: list[str]) -> dict:
-    """
-    Check propagation status for a batch of published SKUs.
-    Returns dict of offer_id -> PropagationStatus.
-    """
-    # Layer 1: sheets check (fast, use existing gspread client)
-    sheet_confirmed = await check_google_sheets(gmc_offer_ids)
-
-    # Layer 2: GMC status (use Merchant API products client)
-    gmc_confirmed = await check_merchant_center_status(gmc_offer_ids)
-
-    # Layer 3: Ads serving (use existing GAQL shopping_performance_view)
-    ads_serving = await check_ads_serving(gmc_offer_ids)
-
-    return {id: PropagationStatus(sheet=s, gmc=g, ads=a)
-            for id, s, g, a in zip(gmc_offer_ids, sheet_confirmed, gmc_confirmed, ads_serving)}
-```
+**Confidence:** HIGH — Standard Access confirmed in PROJECT.md, quota docs are authoritative.
 
 ---
 
-## Structured Data Validation
+## What NOT to Add
 
-**For Shopify storefront** (alliedbrass.com): Product schema.org markup affects organic search rich results, not Shopping ads directly. Low priority for impact debugging unless organic traffic is a goal.
-
-**For GMC feed fields:** The relevant "structured" validation is already in the supplemental feed:
-- `structured_title` (column M in Google Sheets)
-- `structured_description` (column N)
-
-Validate these fields by checking they're non-empty after publish via the existing sheet-read pattern in `google-sheets.ts`.
-
-**If Shopify structured data validation is needed:**
-- Tool: Google Rich Results Test (https://search.google.com/test/rich-results) — free, no install
-- Check `Product` type, verify `offers.price`, `offers.availability`, `image`, `name` fields
-- Run against 5-10 sample product URLs to spot systematic gaps
+| Temptation | Why Avoid | What to Do Instead |
+|------------|-----------|-------------------|
+| **Redis / Upstash for caching** | The 2-min cache problem is a persistence problem, not a speed problem. Adding Redis adds a service to monitor and pay for. | Persist to Supabase table; read from table with freshness check |
+| **Prisma or Drizzle ORM** | 36+ tables already work with raw SQL via `supabase-js` and Python `supabase` client. Adding an ORM mid-project creates two data access patterns and migration confusion. | Continue raw SQL; document query patterns in SCHEMA.md |
+| **dbt for data transformations** | Overkill for 3-4 computed tables. Adds a build pipeline, dbt profiles, and a new deployment concern. | pg_cron + SQL functions handle scheduled computation |
+| **Apache Airflow / Prefect / Temporal** | Cloud Scheduler + pg_cron + Cloud Run background tasks cover all scheduling needs. A workflow orchestrator adds significant operational complexity. | Keep existing Cloud Scheduler for API calls, pg_cron for DB jobs |
+| **Separate analytics database (BigQuery, ClickHouse)** | 2,784 SKUs with daily snapshots = ~1M rows/year. Supabase handles this trivially. No OLAP workload justifies a second database. | PostgreSQL indexes and partitioning if needed (won't be) |
+| **pg_ivm (incremental materialized views)** | Not available on Supabase hosted platform per community discussions. | Regular tables with scheduled computation achieve the same result |
+| **New Python packages for dead code** | Python codebase is small (~20 files in `src/feedops/`) and well-structured. | Manual audit + grep sufficient for Python; Knip for TypeScript |
+| **Database branching / Supabase Branching** | Preview branches add complexity. Single production DB with careful migrations is sufficient at this scale. | Test migrations locally, apply via Supabase SQL Editor |
 
 ---
 
-## What NOT to Use
+## Existing Stack (Validated, No Changes Needed)
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| **Content API for Shopping v2.1 `productstatuses`** | Deprecated, August 2026 shutdown; same auth overhead as Merchant API | `google-shopping-merchant-products` (Merchant API v1) |
-| **Third-party feed auditing SaaS** (DataFeedWatch, Feedonomics, Channable) | Expensive, external, can't join against Supabase data, no programmatic output | Build thin audit script using Merchant API + existing GAQL |
-| **Google Optimize / Optimize 360** | Discontinued September 2023 | Custom cohort split via `custom_label_3` in supplemental feed |
-| **schema.org validators for impact debugging** | JSON-LD validates HTML page structure; Shopping ads use feed data, not page schema | GMC `productstatuses` API for feed-level validation |
-| **BigQuery / Looker Studio** | Overkill for 2,784 SKU dataset; adds infrastructure to maintain | pandas + existing Supabase tables for diagnostic joins |
-| **Separate A/B testing infrastructure** | Unnecessary complexity for feed testing | Custom label cohort split in existing supplemental feed |
+### Core Framework
+| Technology | Version | Purpose | Status |
+|------------|---------|---------|--------|
+| Next.js | 14.x | Dashboard | Stable, auto-deploys on Vercel |
+| Python / FastAPI | 3.11+ | Cloud Run pipeline | Stable, auto-deploys via Cloud Build |
+| Supabase | Postgres 15 | Database (36+ tables, 36+ migrations) | Stable |
+| Vercel | N/A | Dashboard hosting | Auto-deploy on push |
+| Cloud Run | N/A | Python pipeline hosting | Auto-deploy via Cloud Build |
+| Cloud Scheduler | N/A | Daily data collection jobs | Running |
+
+### Integrations (No Changes)
+| Technology | Purpose | Status |
+|------------|---------|--------|
+| Google Ads API (Standard Access) | Search terms, performance, Keyword Planner | Working, unlimited daily ops |
+| Google Sheets API | Supplemental feed publishing | Working |
+| Shopify Admin API | Product publishing | Working |
+| OpenAI API (GPT-5.2) | Content generation | Working |
+
+### Key Existing Tables for v1.3b (Join Targets)
+| Table | Role in v1.3b |
+|-------|--------------|
+| `performance_baselines` | Pre-publish metrics (join target for feedback computation) |
+| `performance_snapshots` | Post-publish daily metrics (primary data source for feedback) |
+| `performance_impact_scores` | Existing diff-in-diff pattern to follow |
+| `publish_events` | Links content to publish timestamp + `prompt_hash` |
+| `regeneration_history` | Links prompt_hash to content generation details |
+| `generated_content` | Content versions with quality scores |
+| `search_queries` | Persisted search term data (model for funnel persistence) |
 
 ---
 
 ## Installation
 
-Only three new Python packages need to be added for the full diagnostic capability:
-
 ```bash
-# Add to pyproject.toml then run:
-uv pip install google-shopping-merchant-products google-shopping-merchant-reports google-shopping-merchant-issueresolution
+# Only new dependency: dashboard dev dependency for dead code analysis
+cd dashboard && npm install -D knip
 
-# Verify existing packages cover remaining needs:
-uv pip show google-ads        # should show >=28.4.1
-uv pip show google-api-python-client  # covers Sheets verification
-uv pip show supabase          # covers DB joins
+# No new Python dependencies needed
+# No new Supabase extensions needed (pg_cron already available on all plans)
 ```
 
-**No dashboard changes needed** for diagnostic scripts — run as standalone Python scripts in
-`src/feedops/scripts/` or as new Cloud Run endpoints.
+### pg_cron Setup (via Supabase SQL Editor or Dashboard > Integrations > Cron)
+
+```sql
+-- Jobs are created in the cron schema
+-- Supabase Cron can also be managed via Dashboard UI
+
+-- Example: Compute content-performance feedback daily at 6 AM UTC
+-- (runs after Cloud Scheduler captures performance snapshots at 5 AM)
+SELECT cron.schedule(
+  'compute-content-feedback',
+  '0 6 * * *',
+  $$SELECT compute_content_performance_feedback()$$
+);
+
+-- Example: Clean up stale funnel snapshots (>180 days) weekly on Sunday 3 AM
+SELECT cron.schedule(
+  'cleanup-stale-funnel-data',
+  '0 3 * * 0',
+  $$DELETE FROM funnel_snapshots WHERE snapshot_date < CURRENT_DATE - INTERVAL '180 days'$$
+);
+
+-- Monitor job execution
+SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 20;
+```
+
+### Knip Configuration
+
+```jsonc
+// dashboard/knip.json
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/app/**/*.{ts,tsx}"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": ["src/**/*.test.{ts,tsx}"],
+  "next": true
+}
+```
+
+```bash
+# Run full dead code analysis
+cd dashboard && npx knip
+
+# Report unused exports only (most useful for migration evaluation)
+cd dashboard && npx knip --include exports
+
+# Report unused files only (identifies completely orphaned modules)
+cd dashboard && npx knip --include files
+```
 
 ---
 
-## Alternatives Considered
+## Migration Evaluation Tooling Summary
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Merchant API `product_view` query (fast path) | Paginate all `productstatuses.list` | When you need complete issue detail for every SKU, not just disapproved ones |
-| Custom cohort split via `custom_label_3` | Google Ads Shopping experiments | If Allied Brass migrates to Performance Max campaigns — native experiments work there |
-| GAQL `shopping_product` for eligibility | GMC UI manual review | Only for spot-checking 1-2 SKUs; doesn't scale to 2,784 |
-| Python scripts in `src/feedops/scripts/` | New Cloud Run endpoints | When diagnostics need to be triggered from the dashboard UI or on a schedule |
+For evaluating the 18 deferred tables (034b: 4 GA4 tables, 035b: 14 intent tables):
+
+| Tool | What It Tells Us | How to Run |
+|------|-----------------|------------|
+| **Knip** | Which TS files in `lib/intent/` and `lib/shopping-funnel/` are imported by live page/API routes vs orphaned | `cd dashboard && npx knip --include files` |
+| **TypeScript compiler** | Which files have type errors from missing table types (32 files reference 035b tables) | `cd dashboard && npx tsc --noEmit 2>&1 \| grep -c error` |
+| **grep** | Which API routes reference specific table names — determines code cleanup scope | `grep -r "intent_taxonomy\|term_intent_state\|experiment_registry" dashboard/src/app/` |
+| **Supabase SQL** | Confirm which tables actually exist in production vs only in migration files | `SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename` |
+
+No additional tooling needed beyond Knip. The TypeScript compiler and grep are already available.
 
 ---
 
-## Version Compatibility
+## Schema Design Patterns for New Tables
 
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| `google-shopping-merchant-products` | `google-auth>=2.48.0` | Uses same OAuth2 credentials as existing Google Ads client |
-| `google-shopping-merchant-reports` | `google-auth>=2.48.0` | Same credential chain |
-| `google-ads>=28.4.1` (existing) | API v19-v22 | `shopping_product` resource available since v18; use latest API version |
-| Merchant API client libraries | Python 3.11+ (project requirement) | Min supported is Python 3.8; project uses 3.11, no conflict |
+### Pattern: Follow `performance_impact_scores`
+
+The `performance_impact_scores` table is the model for `content_performance_feedback`:
+- Regular table (not view)
+- Populated by a computation function
+- Foreign key to `publish_events`
+- Indexed by `master_sku`, `publish_event_id`, computation date
+- RLS enabled with permissive policy
+- `computed_at` timestamp for freshness tracking
+
+### Pattern: Follow `search_query_snapshots` for `funnel_snapshots`
+
+- Daily fact table with `snapshot_date` column
+- Unique constraint on `(label, tier, snapshot_date)` to prevent duplicates
+- Index on `snapshot_date DESC` for recent-first queries
+- `fetched_at` timestamp for data lineage
+
+### RLS Policy Pattern (Existing)
+
+All existing tables use permissive RLS:
+```sql
+ALTER TABLE new_table ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all access" ON new_table FOR ALL USING (true);
+```
+
+This is appropriate for a single-tenant application where authentication is handled at the application layer (Supabase Auth), not per-row.
+
+---
+
+## Confidence Assessment
+
+| Component | Confidence | Rationale |
+|-----------|------------|-----------|
+| Regular table over materialized view | HIGH | Follows existing `performance_impact_scores` pattern; Supabase materialized view limitations well-documented in official discussions |
+| pg_cron for scheduled computation | HIGH | Official Supabase docs confirm availability on all plans; max 8 concurrent / 10 min runtime is sufficient |
+| Knip for dead code detection | HIGH | Active project (5.x), Next.js plugin confirmed, used by Vercel/Shopify/Microsoft |
+| No new rate-limiting library | HIGH | Standard Access = unlimited daily ops confirmed in Google Ads API docs |
+| funnel_snapshots persistence | HIGH | Straightforward table design; 110K rows/year is trivial; follows existing snapshot patterns |
+| No Redis/dbt/Airflow/ORM | HIGH | Scale (2,784 SKUs, ~1M rows/year) does not justify additional infrastructure complexity |
 
 ---
 
 ## Sources
 
-- [Google Merchant API — List products data and product issues](https://developers.google.com/merchant/api/guides/products/list-products-data-issues) — MEDIUM confidence (official docs, verified Feb 2026)
-- [Issue severity and Merchant Center Diagnostics](https://developers.google.com/shopping-content/guides/how-tos/severity-mapping) — HIGH confidence (official)
-- [Google Ads API — Shopping Ads Reporting](https://developers.google.com/google-ads/api/docs/shopping-ads/reporting) — HIGH confidence (official)
-- [shopping_product resource fields (v19)](https://developers.google.com/google-ads/api/fields/v19/shopping_product) — HIGH confidence (official)
-- [Merchant API Python client libraries](https://developers.google.com/merchant/api/client-libraries/python) — HIGH confidence (official)
-- [A/B Testing Product Titles for Google Shopping — Feedonomics](https://feedonomics.com/blog/how-to-ab-test-different-titles-for-google-shopping/) — MEDIUM confidence (verified industry source)
-- [Google Ads tests A/B experiments for Shopping product data — Search Engine Land](https://searchengineland.com/google-ads-tests-a-b-experiments-for-shopping-ad-product-data-467644) — MEDIUM confidence (industry news, verify campaign type requirement)
-- [PyPI — google-shopping-merchant-products](https://pypi.org/project/google-shopping-merchant-accounts/) — HIGH confidence (official package registry)
-- [productstatuses.list — Content API for Shopping](https://developers.google.com/shopping-content/reference/rest/v2.1/productstatuses/list) — HIGH confidence (official, deprecated path for reference)
-
----
-
-*Stack research for: Google Shopping feed impact diagnostics*
-*Researched: 2026-02-20*
-*Milestone: v1.2 Impact Debug & Fix*
+- [Supabase pg_cron Documentation](https://supabase.com/docs/guides/database/extensions/pg_cron) — HIGH confidence (official docs)
+- [Supabase Cron Documentation](https://supabase.com/docs/guides/cron) — HIGH confidence (official docs)
+- [Supabase Materialized View Limitations — GitHub Discussion #16389](https://github.com/orgs/supabase/discussions/16389) — HIGH confidence (official GitHub)
+- [Google Ads API Quotas and Access Levels](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — HIGH confidence (official docs)
+- [Google Ads API Rate Limits](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — HIGH confidence (official docs)
+- [Knip — Dead Code Detector for JavaScript/TypeScript](https://knip.dev/) — HIGH confidence (official project site)
+- [PostgreSQL REFRESH MATERIALIZED VIEW Documentation](https://www.postgresql.org/docs/current/sql-refreshmaterializedview.html) — HIGH confidence (official Postgres docs)
+- [Supabase Views Documentation](https://supabase.com/docs/guides/graphql/views) — HIGH confidence (official docs)
+- Existing project: `docs/plans/2026-02-11-schema-scalability-and-backfill.md` — pg_cron discussion (Phase 4)
+- Existing project: `docs/plans/2026-02-21-strategic-milestone-assessment.md` — content-performance feedback gap identified (Part 5)

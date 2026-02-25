@@ -1,203 +1,251 @@
-# Feature Research
+# Feature Landscape: v1.3b Architecture Validation & Data Persistence
 
-**Domain:** Feed optimization diagnostic and measurement system (AI content generation for Google Shopping)
-**Researched:** 2026-02-20
-**Confidence:** HIGH — based on verified codebase review, architecture docs, audit traces, and current-state documentation
-
----
-
-## Context: What Already Exists
-
-This is a subsequent milestone for a running system. The v1.1 system has:
-- AI content generation pipeline (Cloud Run Python) wired end-to-end
-- Dashboard review/approval workflow with per-platform badges
-- Publishing to Google Sheets supplemental feed, Shopify, Bing
-- Performance baselines and snapshots with delta comparison UI
-- Search query insights from Google Ads (10,000+ queries, 824/2,784 SKUs covered)
-- Feature flags: `PROMPT_CONTRACT_V2`, `INTENT_CURATOR_V1`, `SEGMENT_STRATEGY_V1`
-- Monitoring page with CTR/impressions deltas and search query deltas
-- Attribution forensics page for GA4 revenue attribution
-
-**The problem is not missing features — it is missing visibility into whether existing features are working.** The diagnostic gap is: we cannot determine WHY impact is weak without observing what actually runs in production.
+**Domain:** Feed optimization platform -- architecture validation, data persistence, content-performance feedback loops
+**Researched:** 2026-02-25
+**Confidence:** HIGH -- based on exhaustive codebase review of schema, migrations, service.ts, strategic assessment, and PROJECT.md
 
 ---
 
-## Feature Landscape
+## Context: What Already Exists (DO NOT REBUILD)
 
-### Table Stakes (Required to Diagnose Impact)
+Before categorizing new features, here is the infrastructure this milestone builds on:
 
-Features that any team would expect in order to answer "why isn't this working?" Missing these makes the impact question unanswerable by inspection alone.
+| Existing Asset | Location | Status |
+|---|---|---|
+| Performance baselines (30-day pre-publish) | `performance_baselines` table | Working, auto-captured |
+| Performance snapshots (post-publish daily) | `performance_snapshots` table with `days_since_publish`, `cohort_type` | Working, captured via API |
+| Diff-in-diff impact scores | `performance_impact_scores` table with treated/control, lift %, confidence | Schema exists, needs population |
+| Publish events with content snapshots | `publish_events` with `prompt_hash`, `evidence_hash`, `final_payload_hash` | Working, populated on publish |
+| Regeneration history with prompt tracking | `regeneration_history` with `prompt_hash`, quality before/after, feature flags | Working |
+| Prompt version aliases | `prompt_version_aliases` mapping hash to human name | Schema exists |
+| Search query snapshots (post-publish delta) | `search_query_snapshots` with `publish_event_id`, `days_since_publish` | Schema exists, FK to publish_events |
+| SKU bottleneck classifications | `sku_bottleneck_classifications` | Schema exists |
+| service.ts live Google Ads queries | 6 parallel GAQL queries, 2-min cache | Working but ephemeral |
+| Optimization control plane (033) | `query_value_scores`, `routing_recommendations`, `opportunity_clusters`, `query_intent_features` | Tables exist, EMPTY (hardcoded thresholds produce zero matches) |
+| Intent execution system (035b DEFERRED) | 14 tables for policy, experiments, negatives, margins | Migration file exists, NOT applied to production |
+| GA4 attribution forensics (034b DEFERRED) | 4 GA4 tables for source/medium, landing pages, attribution | Migration file exists, NOT applied, NO code references |
+| Intent TypeScript code | 32 files in `dashboard/src/lib/intent/` | Code exists, dead (no backing tables) |
+| Auto data collection | `ensureBaselineData()`, `ensureSkuData()` in ensure-data.ts | Working, triggers on SKU selection/regen |
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Runtime path verification — end-to-end trace from UI click to live feed | Cannot trust that generation → approval → publish → Google feed is wired without verifying in production. Supplemental feed update lag can be 24-72h, observed up to 9 days per GMC incident reports. | MEDIUM | Codebase confirms Python is SOT and dashboard is thin proxy. Feed propagation (Google Sheets → GMC → Google Ads indexing) has never been verified with timestamps. |
-| Feature flag active-state confirmation | Three flags exist in env vars but there is no dashboard surface showing which are active in the live Cloud Run instance at any given time | LOW | `PROMPT_CONTRACT_V2`, `INTENT_CURATOR_V1`, `SEGMENT_STRATEGY_V1` exist in `runtime_controls.py` but have no observability. Flag state is invisible at runtime. |
-| SKU coverage funnel — generated vs approved vs published vs in-feed counts | Without this, "we optimized content" is unmeasurable. The bottleneck could be at any of four stages: generation, approval, publish, or GMC indexing | MEDIUM | All four stages have data: `generated_content`, `sku_approvals`, `publish_events`, `batch_sku_assignments`. No single view aggregates these. |
-| Content propagation timestamp chain | Shows how long each SKU takes from approval to live in GMC. Identifies where delays accumulate. | MEDIUM | `publish_events.published_at` exists. GMC indexing timestamp is not tracked. Supplemental feed is Google Sheets — GMC processes on its own schedule. |
-| Feed quality score surface per SKU | Google Shopping rewards completeness. Short or non-compliant titles reduce impression share silently. Users cannot tell whether generated content is high-quality or borderline. | MEDIUM | `quality_score` field exists in `generated_content` but only populated by `/optimize-sku` path. The `/regenerate` path used in the dashboard does NOT produce self-scores. Documented gap in signal audit. |
-| Per-SKU impact attribution — before/after content change impressions and CTR | Without pre/post comparison, cannot confirm content changes moved metrics | MEDIUM | `performance_baselines` and `performance_snapshots` exist. Monitoring page shows deltas. Gap: only 824/2,784 SKUs have search query data, and baseline capture requires published SKUs. |
-| GMC disapproval and warning visibility | Google silently disapproves products for policy violations. Disapproved products show zero impressions regardless of content quality. This is the highest-probability silent impact killer. | HIGH | Not currently tracked. Requires Merchant API `product_view` with `aggregated_reporting_context_status` and `item_issues`. |
+---
 
-### Differentiators (High Diagnostic Value, Not Universally Built)
+## Table Stakes
 
-Features that go beyond "what broke" to "why it broke" and "how to fix it efficiently." These distinguish a diagnostic system that guides decisions from one that only surfaces raw data.
+Features this milestone MUST deliver. Without these, v1.3c (Actionable Intelligence) and v1.4 (Closed-Loop Optimization) cannot be built.
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Bottleneck classifier — code-path vs auction vs coverage vs propagation | Pinpoints root cause category without manual investigation. The four failure modes are: (1) content not approved; (2) approved but not published; (3) published but not indexed in GMC; (4) indexed but auction dynamics prevent impressions | MEDIUM | Requires combining: coverage funnel counts + propagation timestamps + GMC status + performance delta. No single system does all four today. |
-| Prompt hash lineage — which prompt version produced which live content | If content quality is the issue, knowing whether current live content was generated with old or new prompt is critical for attribution. The answer to "did we ship the fix?" is currently a manual investigation. | LOW | `generated_content.generation_prompt_hash` exists. `publish_events` stores content snapshots. A join between them shows which prompt version is live for each SKU. Already 90% of the data exists. |
-| Search query coverage health per SKU — count, recency, volume quality | Signal audit confirmed: SKUs without search query data get weaker content. 1,960/2,784 SKUs have no search data today. Shows which SKUs will generate weak content before generation happens. | LOW | `search_query_sync_jobs` tracks recency. `search_queries_by_master_sku` has counts. A simple aggregation query surfaces this. Exists in data; missing from UI. |
-| GMC feed row verification — confirm supplemental feed row matches approved content | The pipeline (generate → approve → publish → Google Sheets row) can silently diverge. Column mapping bugs are a documented historical failure mode (2026-02-06 bug corrupted production data by writing to wrong columns). | MEDIUM | Google Sheets API is already integrated in `google-sheets.ts`. `publish_events` stores `final_payload_snapshot`. A spot-check reads the live sheet and compares to `approved_content` in DB. |
-| Feature flag impact segmentation — delta metrics for flag-on vs flag-off SKUs | The three feature flags have no experiment tracking. Cannot measure whether `INTENT_CURATOR_V1` actually improves CTR without knowing which SKUs had content generated under each flag state. | HIGH | Requires: (a) flag-state logging at generation time — not currently done; (b) performance deltas for those SKUs. Flags are env vars, not tracked per generation run. Unbuildable until logging exists. |
-| Content quality regression detector — compares self-score across prompt versions | Catches prompt changes that degrade quality before they propagate widely | MEDIUM | Self-scores only exist for `/optimize-sku` path (not `/regenerate`). Adding self-score to `/regenerate` response is the prerequisite. |
+| Feature | Why Expected | Complexity | Dependencies | Notes |
+|---------|-------------|------------|--------------|-------|
+| Content-performance feedback view/table | The ONLY missing link between "what content was published" and "how it performed." publish_events has prompt_hash, performance_snapshots has CTR/CVR, but nothing joins them. v1.4 cannot exist without this. | Medium | `publish_events`, `performance_snapshots`, `regeneration_history` | Materialized view joining publish_events.prompt_hash + performance_snapshots metrics by master_sku/platform/date_range. Include: content text, prompt hash, quality score at publish, baseline CTR/CVR, post-publish CTR/CVR, delta. |
+| Deferred migration triage (035b) | 32 TypeScript files reference tables that do not exist. Every intent-related dashboard page is dead. Must decide: apply, prune, or remove before building v1.3c on top of it. | Low (decision) / Medium (execution) | Migration file `035b_DEFERRED`, `dashboard/src/lib/intent/*.ts` | Strategic assessment Part 7 recommends applying 8 of 14 tables. Schema must be verified against TS code expectations before applying. |
+| Data flow audit document | No single document maps the complete flow: Google Ads API -> service.ts -> DB -> Dashboard -> Actions -> Google Ads. Dead ends exist (empty optimization tables, orphaned components). Without this map, new features risk building on broken foundations. | Low | All existing tables and code | Output: architecture diagram with every table, every data source, every consumer, marking dead ends. |
+| Historical persistence for service.ts tier data | service.ts queries 6 GAQL queries live with 2-minute cache. Zero historical data is persisted from these queries. Cannot build trend analysis, tier movement tracking, or funnel analytics without history. | Medium | `service.ts`, new `funnel_term_daily` table (or similar) | Daily snapshot of search term tier assignments, impressions, clicks, cost, conversions by custom_label_0 and tier. Cloud Scheduler cron job. |
+| API quota analysis and sustainability confirmation | service.ts makes 6 GAQL queries per page load. At current usage this works, but scaling to automated daily snapshots adds load. Must confirm quota budget before building persistence. | Low | Google Ads API documentation, current usage patterns | Analysis document confirming: current daily query count, quota limits, projected usage with daily snapshots, caching strategy recommendation. |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+---
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Real-time GMC status polling | "Is my content live?" is the obvious question | GMC API rate limits and supplemental feed processing is batch, not real-time. Polling 2,784 SKUs repeatedly would exhaust quota. Polling does not change when GMC processes the feed — that is external. | Scheduled daily status capture to a `gmc_status` table. Alert when disapproval rate crosses a threshold. |
-| Automatic content re-generation when metrics drop | Seems like a logical feedback loop | CTR can drop for auction reasons (bid changes, competitor entry, seasonality) completely unrelated to content. Auto-regeneration would waste Cloud Run budget and generate noise without confirming content is actually the issue. | Manual trigger with an evidence panel showing WHY a SKU's metrics dropped before regeneration |
-| A/B testing framework at SKU level | Standard CRO instinct | Google Shopping does not support controlled A/B experiments at the SKU level within the same campaign. Controlled tests require separate campaigns with the same products at different bid levels — complex to set up and control for. | Segment-level holdout rollout: optimize one `custom_label_0` category, keep another as control for 2-week windows. Already planned in post-optimization plan. |
-| Full new audit log UI for content changes | Compliance instinct | `regeneration_history` and `publish_events` already store this. Building a new audit log UI before fixing the actual diagnostic gap is scope creep. | Use `publish_events.payload_snapshot` for rollback and `regeneration_history` for history. Surface in existing review UI where needed. |
-| GMC price competitiveness dashboard | Merchant API provides benchmark prices | Price competitiveness is useful for pricing strategy, not content optimization. Titles and descriptions cannot contain price claims. Adding this before content impact is proven is a distraction from diagnosing the current gap. | Defer until content impact is confirmed and the next growth lever needs identification. |
+## Differentiators
+
+Features that elevate the milestone beyond basic plumbing. Not strictly required for v1.3c, but significantly increase the value of the feedback loop.
+
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|------------------|------------|--------------|-------|
+| Content A/B attribution | Track WHICH prompt changes drove CTR improvement. When prompt_hash changes between two publish_events for the same SKU, measure the performance delta. "Prompt X produced 12% higher CTR than Prompt Y for towel bar category." | High | Content-performance feedback view, multiple publish cycles per SKU | Requires at least 2 publish events per SKU with different prompt_hashes AND enough time between them for statistical significance. v1.4 Phase 2 needs this, but the table design belongs in v1.3b. |
+| Populate performance_impact_scores | The diff-in-diff scorecard table exists but is empty. Building a compute job that calculates treated vs control lift for published SKUs would make the Performance page actionable instead of placeholder. | Medium | `performance_snapshots` (populated), `performance_baselines`, `publish_events` | Compute job: for each publish_event, find treated pre/post windows, match control cohort by category, calculate lift. Write to performance_impact_scores. |
+| Populate search_query_snapshots after publish | The table exists with FK to publish_events and days_since_publish column, but nothing writes to it. Populating it enables "which search terms gained/lost impressions after we changed the description?" | Medium | `search_query_snapshots` schema, `publish_events`, search term sync pipeline | Cloud Scheduler job or post-publish hook: capture search query metrics at publish time and at 7/14/30-day intervals. |
+| Empty optimization table cleanup | `query_value_scores`, `routing_recommendations`, `opportunity_clusters`, `query_intent_features` are empty because hardcoded thresholds match nothing. Either populate with simple distribution-based scoring OR drop and redesign for v1.3c. | Low-Medium | Migration 033 tables, optimization TypeScript code | Recommendation: do NOT populate with hardcoded scoring. Mark tables as "v1.3c will populate with distribution-based scoring." Document the decision. Avoids wasted work. |
+| Orphaned component surfacing | GmcDisapprovalBadge and PromptLineagePanel exist but are not in any page. Either wire them into the dashboard or remove them. | Low | Component code, dashboard pages | Low effort, high tidiness value. PromptLineagePanel is particularly useful for content-performance feedback visibility. |
+
+---
+
+## Anti-Features
+
+Features to explicitly NOT build in this milestone.
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| Real-time streaming from Google Ads | Massive overengineering. Daily batch collection is sufficient for all analytics needs. Google Ads data only updates daily anyway. | Daily Cloud Scheduler snapshot job for funnel term data. |
+| Apply ALL 18 deferred tables blindly | 034b (GA4 attribution, 4 tables) has ZERO code references. 035b has 6 "nice-to-have" tables with no clear consumer. Applying unused tables adds maintenance burden and cognitive overhead. | Apply only the 8 tables from 035b that have TypeScript consumers AND are prerequisites for v1.3c. Explicitly defer 034b with documented reasoning. |
+| Distribution-based scoring for optimization tables | This is v1.3c Phase 1's entire scope. Doing it in v1.3b would be scope creep and would duplicate work. | Document that optimization tables will be populated in v1.3c. Keep tables empty but validated. |
+| Automated content regeneration based on performance | This is v1.4 Phase 1. The feedback loop data must exist before automated actions can use it. | Build the data layer (feedback view, historical persistence) in v1.3b. Let v1.4 build the automation. |
+| GA4 data pipeline | 034b tables exist for GA4 attribution forensics but no code references them, no pipeline exists to populate them, and Google Ads data already covers the primary use case (Shopping campaign performance). | Defer 034b. If GA4 attribution debugging is needed later, it can be a focused mini-milestone. |
+| Full experiment framework | experiment_registry/assignments/outcomes tables are designed for A/B testing infrastructure that requires significant UI and logic. Not needed until v1.3c Phase 3 at earliest. | Apply the 3 experiment tables (they are low-cost) but do NOT build UI or populate them. |
+| Multi-account Google Ads support | Single account (6253381786). No business need for multi-account. | Keep single-account architecture. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[SKU Coverage Funnel]
-    └──requires──> [generated_content + sku_approvals + publish_events joined]
-                       └──requires──> [consistent publish_event writes for all paths]
-
-[Bottleneck Classifier]
-    └──requires──> [SKU Coverage Funnel]
-    └──requires──> [Content Propagation Timestamp Chain]
-    └──requires──> [GMC Disapproval Visibility]
-
-[Feature Flag Impact Segmentation]
-    └──requires──> [Feature Flag State Logging at Generation Time]
-                       └──blocks──> [any flag experiment measurement until logging exists]
-
-[Prompt Hash Lineage View]
-    └──enhances──> [Bottleneck Classifier] (identifies content-quality bottleneck vs other bottlenecks)
-    └──requires──> [generation_prompt_hash in publish_events or joinable via generated_content]
-
-[Content Quality Regression Detector]
-    └──requires──> [self_score added to /regenerate path] (currently missing — only /optimize-sku has it)
-
-[GMC Feed Row Verification]
-    └──requires──> [Google Sheets API read access] (already exists in codebase)
-    └──requires──> [publish_events.final_payload_snapshot] (migration 033 planned)
-
-[Search Query Coverage Health]
-    └──enhances──> [SKU Coverage Funnel] (adds signal-quality dimension to coverage)
-    └──requires──> [search_query_sync_jobs + search_queries_by_master_sku] (already populated)
+Data Flow Audit Document
+  |
+  v
+API Quota Analysis -----> Historical Persistence (funnel_term_daily)
+  |                              |
+  v                              v
+Deferred Migration Triage --> Apply 035b subset
+  |                              |
+  v                              v
+Content-Performance Feedback View <-- publish_events + performance_snapshots
+  |
+  v
+[v1.3c] Distribution-based scoring populates optimization tables
+  |
+  v
+[v1.4] Content A/B attribution, automated regeneration
 ```
 
-### Dependency Notes
+**Critical path:** Data Flow Audit -> Migration Triage -> Feedback View -> Historical Persistence
 
-- **Feature flag impact segmentation is currently unbuildable.** Flags are env vars, not tracked per generation run. The flags have no logging at the `regeneration_history` write step. Building measurement requires adding `feature_flags_active` to `regeneration_history` first.
-- **GMC disapproval visibility is the hardest item and the highest priority unknown.** It requires a new Merchant API integration. This is the most likely silent killer of impressions — disapproved products show zero impressions regardless of content quality.
-- **SKU Coverage Funnel is the prerequisite for everything else.** Once the funnel is visible, all other diagnostics have a baseline to work against. It is also the fastest to build.
-- **Content propagation timestamps** depend on the supplemental feed processing being a Google Sheets fetch-on-schedule process. GMC processes the sheet on its own schedule. The timestamp chain must account for this external latency (24-72h typical, up to 9 days observed).
-- **Prompt hash lineage is 90% built** from existing data. The join is: `publish_events` → `batch_sku_assignments` → `generated_content.generation_prompt_hash`. No new data needed, just a query and a UI surface.
+The audit must come first because it reveals which tables actually have data, which are dead, and which connections are missing. Migration triage depends on the audit findings. The feedback view can be built in parallel with historical persistence since they use different data sources.
 
 ---
 
-## Prioritized Diagnostic Build List
+## MVP Recommendation
 
-This milestone is primarily about closing visibility gaps, not building new features. The priority ordering answers: "what must we verify first to diagnose weak impact?"
+**Phase 1 (Architecture Audit):**
+1. Data flow audit document (table stakes, Low complexity)
+2. API quota analysis (table stakes, Low complexity)
+3. Deferred migration triage decision (table stakes, Low complexity for decision)
 
-### Phase 1: Verify the Path (Answer: Is the system actually working end-to-end?)
+**Phase 2 (Critical Schema Updates):**
+1. Apply 035b subset -- 8 prerequisite tables (table stakes, Medium complexity)
+2. Content-performance feedback materialized view (table stakes, Medium complexity)
+3. Historical persistence table + daily snapshot job (table stakes, Medium complexity)
 
-All data exists. These are query + lightweight UI additions, not new infrastructure.
+**Phase 3 (Validation and Cleanup):**
+1. Populate performance_impact_scores (differentiator, Medium)
+2. Populate search_query_snapshots (differentiator, Medium)
+3. Wire orphaned components or remove them (differentiator, Low)
+4. End-to-end data flow validation: verify no dead ends remain
 
-- [ ] **SKU Coverage Funnel** — query joining `generated_content`, `sku_approvals`, `batch_sku_assignments`, `publish_events` → show counts at each stage. Answers: how many SKUs are actually live with optimized content? Estimated complexity: LOW (single SQL query + summary card on existing dashboard page).
-- [ ] **Feature Flag Active-State API** — add a `/runtime-state` endpoint to `main.py` that returns which feature flags are active in the live Cloud Run instance. Answers: are the flags we think are on actually on? Estimated complexity: LOW (one new endpoint, reads env vars already loaded by `runtime_controls.py`).
-- [ ] **Prompt Hash Lineage** — for published SKUs, show which `generation_prompt_hash` is in the live `publish_events`. Answers: was live content generated with current or old prompt? Estimated complexity: LOW (join query, add column to existing monitoring page).
-- [ ] **Search Query Coverage Health summary** — count SKUs by search data quality tier (0 queries, 1-5 queries, 5+ queries with volume data). Answers: how many SKUs will get weak content because search data is missing? Estimated complexity: LOW (aggregation query, summary card).
+**Defer to v1.3c:**
+- Distribution-based scoring for optimization tables
+- Full experiment framework UI
 
-### Phase 2: Measure the Bottleneck (Answer: Where exactly is impact blocked?)
+**Defer to v1.4:**
+- Content A/B attribution analysis
+- Automated regeneration based on performance
 
-Requires Phase 1 data to be meaningful.
-
-- [ ] **Content Propagation Timestamp Chain** — for published SKUs, show: `approved_at` → `published_at` → estimated GMC processing window → first performance snapshot date. Answers: how long is the lag between publishing and measuring impact? Estimated complexity: MEDIUM (join across tables + estimated GMC window column).
-- [ ] **Feed Quality Score added to /regenerate path** — add `quality_score` and self-score dimensions to `/regenerate` path response (matches what `/optimize-sku` produces), surface aggregate quality distribution in review UI. Answers: are we generating high-quality content or borderline content? Estimated complexity: MEDIUM (modify Python `/regenerate` to include self-score; the schema and scoring rubric already exist in the codebase for the other path).
-- [ ] **GMC Feed Row Spot Checker** — read N rows from the live Google Sheet and compare `id` + `title` + `description` to `approved_content` in DB. Answers: does the live feed actually contain our optimized content? Estimated complexity: MEDIUM (Google Sheets API read already integrated, add diff logic).
-
-### Phase 3: Attribute Impact (Answer: Did content changes actually move metrics?)
-
-Requires Phases 1 and 2 data to contextualize.
-
-- [ ] **GMC Disapproval Visibility** — fetch `product_view` from Merchant API for published SKUs, flag disapproved products and surface `item_issues`. Answers: are products being blocked from serving silently? Estimated complexity: HIGH (new Merchant API integration, schema for status tracking, sync job).
-- [ ] **Bottleneck Classifier summary** — synthesize Phase 1+2 data into a single diagnostic view: for each published SKU, classify the bottleneck as (generation missing | approval missing | publish missing | not in feed | in feed but no data yet | in feed with data and metrics). Estimated complexity: MEDIUM (classification logic over existing data, new view in dashboard).
-- [ ] **Feature Flag State Logging** — add `feature_flags_active` JSON field to `regeneration_history` at write time. Enables future flag-impact segmentation. Estimated complexity: LOW to add logging, HIGH to build experiment analysis (defer analysis to future milestone).
-
----
-
-## Feature Prioritization Matrix
-
-| Feature | Diagnostic Value | Implementation Cost | Priority |
-|---------|-----------------|---------------------|----------|
-| SKU Coverage Funnel | HIGH — baseline for all other diagnostics | LOW | P1 |
-| Feature Flag Active-State API | HIGH — confirms flags are actually running | LOW | P1 |
-| Prompt Hash Lineage | HIGH — confirms live content version | LOW | P1 |
-| Search Query Coverage Health | HIGH — explains content quality variance | LOW | P1 |
-| Content Propagation Timestamp Chain | HIGH — reveals attribution lag | MEDIUM | P1 |
-| GMC Feed Row Spot Checker | HIGH — verifies end-to-end wiring | MEDIUM | P2 |
-| Feed Quality Score (add to /regenerate) | MEDIUM — improves signal quality | MEDIUM | P2 |
-| GMC Disapproval Visibility | HIGH — most likely silent impression killer | HIGH | P2 |
-| Bottleneck Classifier | HIGH — synthesizes all diagnostic data | MEDIUM | P2 |
-| Feature Flag State Logging | MEDIUM — enables future experiments | LOW | P2 |
-| Feature Flag Impact Segmentation | HIGH — proves flag value | HIGH | P3 (blocked until flag logging exists) |
-| Content Quality Regression Detector | MEDIUM — prevents regressions | MEDIUM | P3 |
-| Impression Share Gap by Category | LOW — secondary signal | MEDIUM | P3 |
-
-**Priority key:**
-- P1: Must have to diagnose current impact gap — answers whether the system is working
-- P2: Should have to confirm fixes are working — answers whether fixes moved metrics
-- P3: Nice to have for ongoing optimization — not needed to diagnose the current gap
+**Defer indefinitely:**
+- 034b GA4 attribution tables (no code references, no clear need)
 
 ---
 
-## What Existing Infrastructure Already Supports (No New Build Needed)
+## Detailed Feature Specifications
 
-The instinct to "build more features" is often the wrong response when diagnostic gaps can be closed with queries and small additions.
+### Content-Performance Feedback View
 
-| Diagnostic Need | Already Available | Where |
-|----------------|-------------------|-------|
-| How many SKUs generated content | YES | `generated_content` table count |
-| How many SKUs approved | YES | `sku_approvals` with `approval_status` |
-| How many SKUs published | YES | `publish_events` count |
-| What prompt version produced content | YES | `generated_content.generation_prompt_hash` |
-| When was each SKU published | YES | `publish_events.published_at` |
-| Performance delta since publish | YES | Monitoring page already exists with delta view |
-| Search query count per SKU | YES | `search_queries_by_master_sku` |
-| Search query data freshness | YES | `search_query_sync_jobs` |
-| Content quality score (optimize path only) | PARTIAL | `generated_content.quality_score` — null for regenerate path |
-| Live feed content verification | PARTIAL | Google Sheets API integrated for writes; read-path for verification not built |
-| GMC approval status | NO | Requires new Merchant API integration |
-| Feature flag state in Cloud Run | NO | Flags are env vars with no observability surface |
-| Prompt hash in published content | YES (joinable) | `generated_content.generation_prompt_hash` + `publish_events` |
+**Purpose:** The missing link. Joins content generation decisions to their measured outcomes.
+
+**Data sources (all existing):**
+- `publish_events`: master_sku, platform, published_at, prompt_hash, evidence_hash, quality_score, published_title, published_description
+- `performance_baselines`: avg_ctr, avg_cvr, avg_impressions (pre-publish)
+- `performance_snapshots`: ctr, cvr, impressions, days_since_publish (post-publish)
+- `regeneration_history`: prompt_hash, feedback_text, quality_score_before/after
+
+**Output schema (materialized view or computed table):**
+```
+content_performance_feedback:
+  master_sku text
+  platform text
+  publish_event_id bigint
+  published_at timestamptz
+  prompt_hash text
+  prompt_alias text (from prompt_version_aliases)
+  quality_score_at_publish real
+  published_title text
+  published_description text
+  baseline_ctr real
+  baseline_cvr real
+  baseline_impressions real
+  post_7d_ctr real
+  post_7d_cvr real
+  post_7d_impressions real
+  post_30d_ctr real
+  post_30d_cvr real
+  post_30d_impressions real
+  ctr_delta_7d real
+  cvr_delta_7d real
+  ctr_delta_30d real
+  cvr_delta_30d real
+```
+
+**Complexity:** Medium -- the join logic is straightforward but requires careful handling of:
+- Multiple publish events per SKU (use most recent)
+- Missing baselines (SKUs published without baseline capture)
+- Insufficient post-publish data (< 7 days since publish)
+- Multi-SKU products sharing product_id in Google Ads
+
+### Historical Persistence (Funnel Term Daily)
+
+**Purpose:** Persist the ephemeral service.ts GAQL data so trend analysis and tier movement tracking become possible.
+
+**What service.ts queries (6 parallel GAQL queries):**
+1. Enabled shopping campaigns (campaign.id, campaign.name)
+2. Enabled shopping ad groups (campaign.name, ad_group.id, ad_group.name)
+3. Negative shared sets (shared_set.id, shared_set.name)
+4. Campaign negative keywords (campaign.name, keyword.text, match_type)
+5. Ad group negative keywords (campaign.name, ad_group.name, keyword.text, match_type)
+6. Shopping search terms with metrics (campaign.name, ad_group.name, search_term, impressions, clicks, cost_micros, conversions, conversions_value)
+
+**What to persist (query 6 is the high-value target):**
+```
+funnel_term_daily:
+  id bigint
+  snapshot_date date
+  search_term text
+  custom_label_0 text
+  source_tier text (HIGH/MEDIUM/LOW, parsed from campaign name)
+  impressions integer
+  clicks integer
+  cost_micros bigint
+  conversions numeric
+  conversions_value numeric
+  ctr numeric
+  cvr numeric
+  fetched_at timestamptz
+```
+
+**Collection method:** Cloud Scheduler daily cron -> Cloud Run endpoint or Vercel cron that calls a dedicated snapshot function. NOT from service.ts (which is a dashboard page handler), but from a dedicated data collection pipeline.
+
+**Complexity:** Medium -- requires new table, new collection endpoint, Cloud Scheduler setup. The GAQL query already exists in service.ts and can be extracted.
+
+### Migration Triage (035b)
+
+**8 tables to APPLY (prerequisites for v1.3c per strategic assessment Part 7):**
+1. `intent_taxonomy_versions` -- policy version management
+2. `term_intent_state` -- intent classification per term
+3. `policy_decision_log` -- policy evaluation audit trail
+4. `policy_action_execution_log` -- execution action audit trail
+5. `experiment_registry` -- experiment definitions
+6. `experiment_assignments` -- term-to-experiment cohort assignments
+7. `experiment_outcomes` -- experiment results
+8. `negative_registry` -- negative keyword governance with rollback
+
+**6 tables to DEFER (nice-to-have, no clear consumer in v1.3c):**
+1. `policy_snapshots` -- point-in-time snapshots (no TS consumer identified)
+2. `sku_margin_daily` -- requires Shopify margin data pipeline that does not exist
+3. `order_line_returns_daily` -- requires Shopify returns data pipeline that does not exist
+4. `attribution_confidence_daily` -- complex attribution quality scoring, premature
+5. `search_buildout_recommendations` -- can be created when search governance is built
+6. `operator_review_audit` -- audit trail for human review, premature
+
+**Before applying:** Verify that the 8 table schemas match what the 32 TypeScript files in `dashboard/src/lib/intent/` expect. Look for column name mismatches, missing columns, type mismatches.
+
+**4 tables from 034b to DEFER indefinitely:**
+- `ga4_source_medium_daily`, `ga4_landing_page_quality_daily`, `ga4_attribution_root_cause_daily`, `ga4_shopify_reconciliation_daily`
+- Reason: No code references, no data pipeline, Google Ads data covers primary use case
 
 ---
 
 ## Sources
 
-- Codebase verified (HIGH confidence): `docs/audit/signal-audit-2026-02-11/prompt-wiring-map.md` — prompt traceability confirmed, regenerate vs optimize-sku schema difference confirmed
-- Codebase verified (HIGH confidence): `docs/audit/signal-audit-2026-02-11/external-signals-assessment.md` — keyword planner wiring confirmed, cold-start gap documented
-- Codebase verified (HIGH confidence): `docs/architecture/2026-02-11-content-generation-pipeline-current-state.md` — `/regenerate` path lacks self-score confirmed as known gap
-- Codebase verified (HIGH confidence): `docs/architecture/prompt-contract.md` — prompt hash persistence contract confirmed
-- Codebase verified (HIGH confidence): `docs/plans/2026-02-20-feedops-post-custom-label0-optimization.md` — segment rollout strategy and final-payload observability planned
-- Codebase verified (HIGH confidence): `docs/database/SCHEMA.md` — table structure and column names confirmed
-- Codebase verified (HIGH confidence): `.planning/PROJECT.md` — v1.2 milestone goals, feature flag names, known issues
-- External (MEDIUM confidence): GMC supplemental feed propagation timing — 24-72h typical, up to 9-day delay observed per [ppc.land incident report](https://ppc.land/google-merchant-centers-24-hour-update-promise-fails-by-nine-days/)
-- External (MEDIUM confidence): Feed optimization impact measurement — title optimization highest CTR impact per [Store Growers guide](https://www.storegrowers.com/product-feed-optimization/)
-- External (MEDIUM confidence): GMC product view for disapproval tracking — available via [Merchant API ReportService](https://developers.google.com/shopping-content/reference/rest/v2.1/reports/search)
-
----
-
-*Feature research for: Feed optimization diagnostics and impact measurement*
-*Researched: 2026-02-20*
-*Context: v1.2 milestone — diagnose why existing generation and publishing is not producing measurable Google Shopping impact*
+All findings based on local codebase review:
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/database/SCHEMA.md` -- complete schema reference
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/plans/2026-02-21-strategic-milestone-assessment.md` -- Part 7 migration analysis
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/.planning/PROJECT.md` -- current state and roadmap
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/035b_DEFERRED_unified_intent_execution_system.sql` -- 14 table definitions
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/034b_DEFERRED_ga4_attribution_forensics.sql` -- 4 GA4 table definitions
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/supabase/migrations/033_optimization_control_plane.sql` -- optimization tables
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard/src/lib/shopping-funnel/service.ts` -- 6 GAQL queries, 2-min cache
+- `/Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard/src/lib/data-collection/ensure-data.ts` -- auto data collection
