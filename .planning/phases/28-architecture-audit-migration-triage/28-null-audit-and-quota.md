@@ -178,3 +178,196 @@ The feedback view should use:
 - **Optional enrichment:** `publish_events.prompt_hash` (2.7% now, 100% after backfill)
 
 The view does NOT need `performance_impact_scores` for its initial version. Simple before/after comparison using `performance_baselines` vs `performance_snapshots` is sufficient.
+
+---
+
+## Part 4: API Quota Analysis
+
+### 4.1 Google Ads Standard Access Limits
+
+| Limit | Value | Notes |
+|-------|-------|-------|
+| Requests per day | 15,000 | Per developer token |
+| Operations per request | 1,000 | Mutate operations (not relevant for read-only GAQL) |
+| GAQL query limit | None specific | Limited by request count, not query complexity |
+| Rate limiting | Token bucket | Soft limit; brief bursts allowed |
+
+Standard Access is the current access tier for developer token `GOOGLE_ADS_DEVELOPER_TOKEN`. No rate limit issues have been observed in production.
+
+### 4.2 Complete Google Ads API Call Site Catalog
+
+#### 4.2.1 TypeScript Layer: `dashboard/src/lib/google-ads.ts`
+
+| # | GAQL View | Purpose | Trigger | Persists To |
+|---|-----------|---------|---------|-------------|
+| 1 | `shopping_performance_view` | Fetch product performance by Shopify product IDs | Dashboard baseline capture (`/api/performance/capture-baseline`), SKU selection page | `performance_baselines` table |
+
+**1 GAQL query per invocation.** Fetches ALL shopify products for date range, filters in-memory. Triggered sporadically by user actions (baseline capture, SKU selection).
+
+#### 4.2.2 TypeScript Layer: `dashboard/src/lib/shopping-funnel/service.ts`
+
+| # | GAQL View/Resource | Purpose | Trigger |
+|---|-------------------|---------|---------|
+| 1 | `campaign` | List enabled Shopping campaigns | `buildAdsContext()` |
+| 2 | `ad_group` | List enabled Shopping ad groups | `buildAdsContext()` |
+| 3 | `shared_set` | List negative keyword shared sets | `buildAdsContext()` |
+| 4 | `campaign_criterion` | Campaign-level negative keywords | `buildAdsContext()` |
+| 5 | `ad_group_criterion` | Ad group-level negative keywords | `buildAdsContext()` |
+| 6 | `search_term_view` | Shopping search terms with metrics | `buildAdsContext()` |
+| 7 | `shared_criterion` | Shared set criteria (conditional) | `buildAdsContext()` |
+
+**7 GAQL queries per context build.** All fired in parallel via `Promise.all()`. Context is cached in memory for 2 minutes (`CACHE_TTL_MS = 2 * 60 * 1000`).
+
+**Persists to:** NOTHING. All data is held in a 2-minute in-memory cache. When the cache expires or the serverless function cold-starts, all 7 queries re-fire. No database writes.
+
+**Trigger:** Any visit to the Shopping Funnel dashboard page, or any API call to `/api/search-terms/*` endpoints. Each uncached page load = 7 API requests.
+
+#### 4.2.3 Python Layer: `src/feedops/integrations/google_ads_performance.py`
+
+| # | GAQL View | Purpose | Trigger | Persists To |
+|---|-----------|---------|---------|-------------|
+| 1 | `shopping_performance_view` | Single product performance | `fetch_product_performance()` | `performance_snapshots` |
+| 2 | `shopping_performance_view` | Batch product performance (chunked, 25 IDs/chunk) | `fetch_batch_product_performance()` | `performance_snapshots` |
+
+**1-N GAQL queries per invocation** (N = ceil(offer_ids / 25) for batch mode, capped at 5 parallel). Triggered by Cloud Run `/performance/capture-baseline` and `/optimize-sku` endpoints.
+
+#### 4.2.4 Python Layer: `src/feedops/integrations/google_ads_search_terms.py`
+
+| # | GAQL View | Purpose | Trigger | Persists To |
+|---|-----------|---------|---------|-------------|
+| 1 | `campaign` | List Shopping campaigns | `SearchTermsClient._fetch_shopping_campaigns()` | (intermediate) |
+| 2 | `shopping_performance_view` | Products by campaign | `SearchTermsClient._fetch_campaign_products()` | (intermediate) |
+| 3 | `search_term_view` | Search terms with campaign context | `SearchTermsClient.fetch_search_terms()` | `search_queries`, `search_queries_by_master_sku` |
+| 4 | `search_term_view` | Deprecated per-SKU terms | `get_terms_for_master_sku()` (dead code -- returns early) | N/A |
+| 5 | `search_term_view` | Per-variant search terms | `get_search_terms_for_variant()` | (caller decides) |
+
+**3-5 GAQL queries per sync invocation.** Triggered by Cloud Run `/search-insights/sync` endpoint. Query 4 is dead code (returns before executing).
+
+#### 4.2.5 Python Layer: `src/feedops/integrations/google_ads_search_terms.py` (Keyword Planner)
+
+| # | API | Purpose | Trigger | Persists To |
+|---|-----|---------|---------|-------------|
+| 1 | `KeywordPlanIdeaService.GenerateKeywordHistoricalMetrics` | Search volume, competition data | `KeywordPlannerClient.get_historical_metrics()` | `keyword_metrics` table (30-day cache) |
+
+**1 API call per batch of 100 keywords.** Uses DB-level caching with 30-day TTL. Triggered by `ensureSkuData()` during SKU selection/regeneration.
+
+### 4.3 Daily API Usage Estimate
+
+#### Current Usage (Dashboard-Triggered, Sporadic)
+
+| Source | Queries/Invocation | Estimated Daily Invocations | Daily Total |
+|--------|--------------------|-----------------------------|-------------|
+| `google-ads.ts` (baseline capture) | 1 | 0-5 (manual, sporadic) | 0-5 |
+| `service.ts` (funnel context) | 7 | 0-20 (page visits, 2-min cache) | 0-140 |
+| Python performance (snapshot capture) | 1-5 | 0-3 (manual) | 0-15 |
+| Python search terms (sync) | 3-5 | 0-2 (manual) | 0-10 |
+| Keyword Planner | 1 per 100 keywords | 0-5 | 0-5 |
+| **Current daily total** | | | **0-175** |
+
+#### Proposed Additions (Phase 29-30)
+
+| New Job | Queries/Run | Frequency | Daily Total |
+|---------|-------------|-----------|-------------|
+| Daily performance snapshot (Cloud Scheduler) | 3-5 (batch, ~100 product_ids in ~4 chunks) | 1x/day | 3-5 |
+| Daily funnel snapshot (Phase 30 HIST-01) | 7 (mirrors service.ts pattern) | 1x/day | 7 |
+| **Proposed daily addition** | | | **10-12** |
+
+#### Total Projected Daily Usage
+
+| Component | Daily Requests |
+|-----------|----------------|
+| Current sporadic usage (worst case) | 175 |
+| Proposed daily jobs | 12 |
+| **Total projected** | **~187** |
+| **Standard Access limit** | **15,000** |
+| **Utilization** | **~1.2%** |
+| **Remaining headroom** | **~14,813 requests** |
+
+### 4.4 Redundant API Call Analysis
+
+#### Redundancy 1: `shopping_performance_view` (TS + Python)
+
+| Layer | File | When Called | Data Window |
+|-------|------|------------|-------------|
+| TypeScript | `google-ads.ts` | Baseline capture (user-triggered) | 7d/30d/90d |
+| Python | `google_ads_performance.py` | Snapshot capture (Cloud Run) | 30d typically |
+
+**Overlap:** Both query the same view for the same products. The TS layer fetches for baseline calculation, the Python layer for ongoing snapshots.
+
+**Recommendation:** Not a problem today (different purposes, both persist results). If daily snapshots are added via Cloud Scheduler (Python), the TS baseline capture becomes redundant for most use cases. Consider deprecating `google-ads.ts` baseline capture and using Python pipeline results stored in `performance_baselines` instead.
+
+#### Redundancy 2: `search_term_view` (service.ts + Python)
+
+| Layer | File | When Called | Persists? |
+|-------|------|------------|-----------|
+| TypeScript | `service.ts` | Every Shopping Funnel page visit (7 queries, 2-min cache) | NO |
+| Python | `google_ads_search_terms.py` | Manual sync trigger | YES (`search_queries` table) |
+
+**Overlap:** Both query `search_term_view` for the same Shopping campaigns. The Python layer persists results; the TS layer discards after 2 minutes.
+
+**This is the most wasteful redundancy.** On an active dashboard session, service.ts can fire 7 queries every 2 minutes. Over 30 minutes of active use, that is 105 API requests -- all discarded.
+
+**Recommendation:** Implement write-behind caching for service.ts:
+1. On first call, query Google Ads API and persist results to a `funnel_context_cache` table
+2. On subsequent calls within the same day, serve from DB cache
+3. Add a "refresh" button for manual cache invalidation
+4. Phase 30 (HIST-01) should create `funnel_snapshots_daily` table for this purpose
+
+#### Redundancy 3: `campaign` resource (service.ts + Python search_terms)
+
+| Layer | File | Purpose |
+|-------|------|---------|
+| TypeScript | `service.ts` | List Shopping campaigns for context |
+| Python | `google_ads_search_terms.py` | List Shopping campaigns for search term association |
+
+**Overlap:** Same query, different runtimes.
+
+**Recommendation:** Low priority. Campaign list is a lightweight query and only fires 1x per context build. Not worth optimizing.
+
+### 4.5 Caching Strategy Recommendations
+
+#### Strategy 1: Write-Behind for service.ts (Priority: HIGH)
+
+**Problem:** service.ts issues 7 GAQL queries per context build with only 2-minute in-memory caching. Active dashboard use generates significant API traffic with zero persistence.
+
+**Solution:**
+1. Create `funnel_snapshots_daily` table (Phase 30 HIST-01 already plans this)
+2. First context build of the day: query Google Ads API, persist to DB
+3. Subsequent builds: serve from DB, skip API calls
+4. Add daily Cloud Scheduler job to pre-warm the cache before business hours
+5. Keep manual "refresh" capability for ad-hoc needs
+
+**Impact:** Reduces service.ts API calls from ~140/day (worst case) to 7/day (one context build + daily scheduler).
+
+#### Strategy 2: Time-Based Cache for Daily Snapshots (Priority: MEDIUM)
+
+**Problem:** Performance snapshot capture queries Google Ads for the same date range data that doesn't change intra-day (Google Ads data updates once per day).
+
+**Solution:**
+1. Cloud Scheduler triggers snapshot capture once daily (early morning, after Google Ads data refreshes)
+2. If called again same day, skip API call and return cached DB results
+3. Use `fetched_at` timestamp to determine staleness
+
+**Impact:** Prevents accidental duplicate snapshot runs. Ensures data freshness without wasted calls.
+
+#### Strategy 3: Consolidate TS/Python Performance Queries (Priority: LOW)
+
+**Problem:** Both `google-ads.ts` and `google_ads_performance.py` query `shopping_performance_view`.
+
+**Solution:**
+1. Make Python pipeline the single authoritative source for performance data
+2. Have TS baseline capture read from `performance_baselines` table instead of calling Google Ads directly
+3. Python pipeline runs daily via Cloud Scheduler, populating both baselines and snapshots
+
+**Impact:** Eliminates one API integration point entirely. Simplifies the codebase. Low priority because current overlap is minimal.
+
+### 4.6 Verdict
+
+**Daily snapshot capture is SUSTAINABLE within Google Ads Standard Access limits.**
+
+- Projected usage: ~187 requests/day (1.2% of 15,000 limit)
+- Even with 10x growth in dashboard usage: ~1,870 requests/day (12.5% of limit)
+- Even with aggressive automated jobs (hourly instead of daily): ~1,000 requests/day (6.7% of limit)
+- Standard Access is effectively unlimited for Allied FeedOps' scale (2,784 SKUs, single account)
+
+**No quota concerns whatsoever.** The only reason to implement caching is to reduce latency and avoid wasted API calls, not to stay within quota limits.
