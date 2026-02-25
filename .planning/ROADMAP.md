@@ -80,7 +80,7 @@
 
 - [x] **Phase 28: Architecture Audit & Migration Triage** - Map complete data flow, confirm API quota sustainability, triage all 18 deferred tables, audit join chain integrity (completed 2026-02-25)
 - [x] **Phase 29: Content-Performance Feedback Linkage** - Connect published content to CTR/CVR outcomes via feedback view, populate impact scores, enforce content versioning (completed 2026-02-25)
-- [ ] **Phase 30: Historical Funnel Persistence** - Persist ephemeral service.ts Google Ads data into daily snapshots with trend indicators on dashboard
+- [x] **Phase 30: Historical Funnel Persistence** - Persist ephemeral service.ts Google Ads data into daily snapshots with trend indicators on dashboard (completed 2026-02-25)
 - [ ] **Phase 31: Schema Cleanup & End-to-End Validation** - Apply kept migrations, prune dead code, wire or remove orphaned components, validate full data loop
 
 ## Phase Details
@@ -124,7 +124,7 @@ Plans:
   1. The funnel_snapshots_daily table contains at least 7 days of historical search term tier data, persisted from the same GAQL queries service.ts runs live
   2. A Cloud Scheduler job triggers daily capture without any user intervention, and the live service.ts query path has zero latency increase
   3. The Shopping Funnel dashboard page displays 7-day vs previous-7-day trend indicators (up/down/flat) for key funnel metrics
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 30-00-PLAN.md — Test scaffolds for capture, trends, and FunnelTrendCards (Wave 0)
 - [ ] 30-01-PLAN.md — Schema creation + capture endpoint + Cloud Scheduler setup script
@@ -156,7 +156,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
 | 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
-| 30. Funnel Persistence | 2/3 | In Progress|  | - |
+| 30. Funnel Persistence | 3/3 | Complete   | 2026-02-25 | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 
 ---

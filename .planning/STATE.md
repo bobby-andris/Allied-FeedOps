@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 30 of 31 (Historical Funnel Persistence) — active
-**Plan:** 2 of 3 complete (30-01 capture endpoint done)
+**Plan:** 3 of 3 complete (30-02 trend cards done)
 **Status:** In progress
-**Last activity:** 2026-02-25 — Completed 30-01 (capture endpoint + scheduler)
+**Last activity:** 2026-02-25 — Completed 30-02 (trend cards + trends API)
 
-Progress: [███████░░░] 65%
+Progress: [████████░░] 75%
 
 ## What's Done
 
@@ -64,6 +64,9 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 30-00: Dynamic imports for route handler tests allow per-test mock reconfiguration
 - 30-01: Renamed 5 duplicate migration files to DEFERRED pattern to unblock supabase db push
 - 30-01: Used createAdminClient() (service role) for capture endpoint Supabase writes
+- 30-02: Flat indicator shows "Flat" text (no percentage) to distinguish from directional trends
+- 30-02: ROAS format trims trailing zeros (75.5x not 75.50x) for cleaner display
+- 30-02: Ad Spend card uses inverted color logic (up=red, down=green)
 
 ## Session Log
 
@@ -79,3 +82,4 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 2026-02-25: Phase 29 complete — all 3 plans executed, FEED-01/02/03/04 requirements addressed
 - 2026-02-25: Completed 30-00 — TDD test scaffolds: 21 failing tests across capture, trends, FunnelTrendCards
 - 2026-02-25: Completed 30-01 — funnel_snapshots_daily table + capture endpoint + Cloud Scheduler script
+- 2026-02-25: Completed 30-02 — Trend cards + trends API (6 cards with TrendArrow, 14 tests pass)
