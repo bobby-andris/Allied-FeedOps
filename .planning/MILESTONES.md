@@ -43,3 +43,27 @@
 
 ---
 
+
+### v1.3a Content Generation Excellence
+**Shipped:** 2026-02-25
+**Goal:** Fix content quality at its source — repair GPT-5.2 integration bugs, establish gold standards, rewrite prompts as creative briefs, wire all 8 runtime configs, and validate with human evaluation
+**Phases:** 23–27 (10 phase directories, ~20 plans, 153 commits, 279 files changed, +43,745/-1,376 lines)
+**Outcome:** 21/25 requirements satisfied. All infrastructure and architecture goals complete. v2 per-platform generation pipeline deployed to production. 3 EVAL requirements accepted as known gaps (human eval threshold, quality score target, test batch publish).
+
+**Key accomplishments:**
+1. Fixed 5 GPT-5.2 integration bugs (temperature/reasoning mutual exclusion, json_schema strict mode, prompt cache retention, reasoning defaults, XML tags)
+2. Built per-platform v2 generation architecture — separate Google/Bing/Shopify/finish sentence calls with strict JSON schemas and FEEDOPS_PROMPT_VERSION feature flag
+3. Loaded 15 gold standards across 15 product categories, rewrote quality rubric from 6-criterion compliance model to 10-criterion differentiation-first model
+4. Wired all 8 runtime skill configs via skill_loader.py with lru_cache, expanded category guidance to 24 categories
+5. Deployed v2 pipeline to Cloud Run — titles follow Robert's formula ({FINISH_NAME} first), zero constraint violations (120/120), 80.5/100 avg self-score
+6. Ran 3 rounds of human evaluation iterating from 0/10 title wins (R1) to structurally correct titles (R3), revealing specific content patterns for future improvement
+
+### Known Gaps (accepted as tech debt)
+- **EVAL-03:** Human eval 8/10 "significantly better" — blind comparison built but Round 3 not formally evaluated
+- **EVAL-05:** Quality scores >85% average — self-scores average 80.5/100 (below 85 target)
+- **EVAL-06:** Test batch published for CTR/CVR delta — not published; deferred to v1.3b
+
+**Tech debt accepted:** Score model not consumed by v2 path (no runtime quality gating), self-score schema mismatch (3-criterion vs 10-criterion), 6 phases lack VERIFICATION.md
+
+---
+

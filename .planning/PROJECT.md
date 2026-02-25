@@ -8,7 +8,7 @@ A Google Ads feed optimization platform that automatically collects search perfo
 
 Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation informed by Google Shopping ranking intelligence, enabling data-driven optimization at scale for the entire catalog.
 
-## Current State (after v1.2)
+## Current State (after v1.3a)
 
 **What's shipped:**
 - Full Google Ads data pipeline: search terms, performance metrics, Keyword Planner for all 2,784 SKUs
@@ -18,13 +18,14 @@ Transform low-performing product feeds into high-converting assets by combining 
 - Performance page with baseline vs. snapshot delta comparison and trend indicators
 - Content generation via Cloud Run Python pipeline (single SKU, batch, and hybrid multi-SKU)
 - Publishing to Google Sheets supplemental feed, Shopify, and Bing
-- **v1.2: Google Shopping intelligence** — ranked ranking factor research, competitive gap analysis, 15-category YAML config wired into all generation prompts
-- **v1.2: GPT-5.2 upgrade** — model switch with accuracy guardrail in SYSTEM_PROMPT
-- **v1.2: Unified prompt builder** — `build_core_prompt()` used by all 4 generation paths (eliminated path divergence)
-- **v1.2: Measurement infrastructure** — bottleneck classifier (5 categories), prompt lineage tracking, GMC disapproval sync, feature flag capture at generation time
-- **v1.2: SKU coverage funnel** — live on overview page showing catalog → generated → approved → published → confirmed
-- **v1.2: Structured feedback** — tone/emphasis/length controls with persistent corrections per SKU
-- **v1.2: Three-dimensional image guidance** — 28-finish lighting, 30-category scenes, collection DNA in lifestyle image prompts
+- v1.2: Google Shopping intelligence, GPT-5.2 upgrade, unified prompt builder, measurement infrastructure
+- **v1.3a: GPT-5.2 bug fixes** — temperature/reasoning mutual exclusion, json_schema strict mode, prompt cache retention, XML tags
+- **v1.3a: Per-platform v2 generation** — separate Google/Bing/Shopify/finish sentence calls with strict JSON schemas, FEEDOPS_PROMPT_VERSION=v2 active on Cloud Run
+- **v1.3a: Skill-driven prompts** — 8 runtime skill configs loaded via skill_loader.py, SYSTEM_PROMPT rewritten as creative brief, 24 categories
+- **v1.3a: 15 gold standards** — across 15 product categories, wired into prompts via prompt_templates table
+- **v1.3a: Quality rubric** — 10-criterion differentiation-first model replacing old 6-criterion compliance model
+- **v1.3a: Title formula** — Robert's formula codified: {FINISH_NAME} first, product function, Collection, dims when varies, Allied Brass last
+- **v1.3a: Content guardrails** — competitor brand prohibition, no "28 finishes" on variants, evidence exclusion rules, 120/120 constraint checks pass
 
 ## Requirements
 
@@ -94,28 +95,20 @@ that fail to differentiate Allied Brass from mass-market competitors.
 - Cross-system learning (what prompt changes drove CTR improvement?)
 - Automated optimization cycles (daily/weekly/monthly)
 
+### Validated (v1.3a)
+
+- ✓ GPT52-01 through GPT52-05: GPT-5.2 integration bugs fixed (temperature, reasoning, json_schema, cache, XML tags)
+- ✓ PRMT-01 through PRMT-05: Prompt architecture rewritten (creative brief, 8 configs wired, 24 categories, customer framing, competitive positioning)
+- ✓ GOLD-01 through GOLD-04: Gold standards loaded (15 examples, 15 categories, 10-criterion rubric, batch evaluation)
+- ✓ EVAL-01, EVAL-02, EVAL-04: Content regenerated, compared, passes differentiation test
+- ✓ AUDIT-01 through AUDIT-05: Score model aligned, tests pass, audit report complete
+- ⚠ EVAL-03: Human eval 8/10 threshold — not formally evaluated (accepted as tech debt)
+- ⚠ EVAL-05: Quality scores >85% — actual 80.5/100 (accepted as tech debt)
+- ⚠ EVAL-06: Test batch published — deferred to v1.3b
+
 ### Active
 
-## Current Milestone: v1.3a Content Generation Excellence
-
-**Goal:** Fix content quality at its source — repair GPT-5.2 integration bugs, rewrite prompts from compliance documents to creative briefs, wire 8 runtime configs into the generation pipeline, create gold standard examples, and validate with human evaluation.
-
-**Target features:**
-- Fix critical GPT-5.2 bugs (temperature/reasoning conflict, missing cache retention, legacy JSON mode)
-- Wire all 8 runtime YAML configs into prompt_builder.py
-- Rewrite SYSTEM_PROMPT from compliance document → creative brief with XML tags
-- ~~Create 10-15 gold standard examples across major product categories~~ **DONE** — 30 examples across 3 platforms (10 Google, 10 Bing, 10 Shopify), 10 product categories, avg 88.6/100
-- Expand category guidance beyond current 3 groups
-- ~~Rewrite quality rubric to reward differentiation and emotional resonance over compliance~~ **DONE** — 10-criterion weighted rubric in `quality-evaluation` skill + `quality_rubric.yaml`
-- Generate, evaluate, and iterate on 10 representative test SKUs
-- Success: human-rated "significantly better" for 8/10 test SKUs
-
-**Pre-work complete (skills & configs):**
-- 8/8 Claude Code skills created with comprehensive guidance
-- 8/8 runtime YAML configs created and ready for pipeline wiring
-- 30 gold standard examples written and scored
-- Quality rubric fully redesigned (10 criteria vs old 6)
-- Remaining: GPT-5.2 bug fixes, pipeline wiring, DB loading, prompt rewrite, evaluation
+(No active milestone — run `/gsd:new-milestone` to start v1.3b)
 
 ### Out of Scope
 
@@ -138,7 +131,8 @@ that fail to differentiate Allied Brass from mass-market competitors.
 
 ### Known Issues / Tech Debt
 
-- **Content quality crisis** — generated descriptions are generic keyword dumps (see strategic assessment Part 2). Root cause: system prompt is 237 lines of compliance rules with no creative direction; shopping_intelligence.yaml provides templates not guidance; self-scoring rewards compliance not quality
+- **Content quality improving but not yet at target** — v1.3a raised quality from 0/10 title wins to structurally correct titles; self-scores at 80.5/100 (target 85). Engagement criterion weakest at 6.9/10. v2 pipeline active but no test batch published yet for CTR/CVR measurement.
+- **Score model dead in v2 path** — 10-criterion Score model only consumed by v1 code path; v2 generate_per_platform() returns raw dicts with no quality gating
 - **Deferred migrations** — 034b (GA4 attribution, 4 tables) and 035b (intent execution, 14 tables) exist as files but NOT applied to live Supabase. TypeScript intent code (32 files) references 035b tables that don't exist in production
 - **Ephemeral Google Ads data** — service.ts queries 6 GAQL queries with 2-minute cache, no historical persistence
 - **Empty dashboard pages** — Shopping Funnel recommendations, Optimization Control, Intent Control, Search Governance, Experiment Lab all show zero results (hardcoded thresholds produce no matches)
@@ -180,7 +174,10 @@ Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 
 | Persistent corrections via sku_corrections table | Per-SKU feedback accumulates, not lost between sessions | ✓ Good — corrections survive regeneration |
 | Content quality before optimization intelligence | Fix input data before optimizing what we do with it (garbage in, garbage out) | Pending — strategic assessment recommends 1.3a before 1.3c |
 | Dual-use skills (Claude Code + runtime configs) | Skills guide Claude when coding AND inject into GPT-5.2 prompts at runtime | ✓ Complete — 8/8 skills + 8/8 runtime configs created, wiring into prompt_builder.py is v1.3a Phase 24 |
-| Skills before agents for content quality | Better instructions to one model (skills) give better ROI than multiple agents arguing | In progress — 30 gold standards written (avg 88.6/100), pipeline wiring in Phase 23-24 |
+| Skills before agents for content quality | Better instructions to one model (skills) give better ROI than multiple agents arguing | ✓ Good — v2 per-platform with skills produces structurally correct content |
+| Per-platform v2 generation | Separate GPT-5.2 calls for Google/Bing/Shopify/finish sentences | ✓ Good — eliminates cross-platform interference, strict JSON schemas |
+| Feature flag for prompt versions | FEEDOPS_PROMPT_VERSION routes v1 vs v2 code paths | ✓ Good — safe rollback, v2 active in production |
+| 3 rounds of human evaluation | Iterate prompts based on Bobby/Robert feedback | ⚠️ Revisit — R1 (0/10), R2 (4/10), R3 structurally correct but not formally scored |
 
 ## Constraints
 
@@ -191,4 +188,4 @@ Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 
 - **Content API:** Works until Aug 2026 — Merchant API used only for diagnostic queries
 
 ---
-*Last updated: 2026-02-21 after milestone v1.3a started*
+*Last updated: 2026-02-25 after v1.3a milestone completed*
