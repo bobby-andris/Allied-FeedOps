@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 29 of 31 (Content-Performance Feedback Linkage)
-**Plan:** 1 of 3 in Phase 29 complete
-**Status:** Phase 29 in progress — Plan 01 complete
-**Last activity:** 2026-02-25 — Completed 29-01 (Schema + Publish Enforcement)
+**Plan:** 2 of 3 in Phase 29 complete
+**Status:** Phase 29 in progress — Plan 02 complete
+**Last activity:** 2026-02-25 — Completed 29-02 (Content Impact Landing Page)
 
-Progress: [████░░░░░░] 38%
+Progress: [█████░░░░░] 44%
 
 ## What's Done
 
@@ -40,6 +40,10 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 29-01: prompt_hash enforcement only for status=success events — failed events don't need version tracking
 - 29-01: Legacy fallback preserves prompt_hash when possible, only strips if DB error mentions it
 - 29-01: performance_impact_scores schema drift resolved — table now exists in production
+- 29-02: Impact classification uses CTR as primary score; CVR included but CTR drives tier label
+- 29-02: Window aggregation excludes day 0 per research pitfall #4
+- 29-02: Minimum 50-impression threshold per window prevents misleading CTR from low-traffic SKUs
+- 29-02: Best available window for delta column (30d > 14d > 7d)
 - 28-01: Circular flow validation included as section within data flow map (not separate doc)
 - 28-01: 3 redundant shopping_performance_view query paths identified -- recommend Python consolidation
 - 28-01: service.ts ephemeral cache is highest-severity gap for funnel analysis (7 GAQL, 2-min TTL, zero persist)
@@ -63,3 +67,4 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 2026-02-25: Completed 28-03 — NULL audit (GO for feedback view) + API quota (SUSTAINABLE at 1.2%)
 - 2026-02-25: Phase 28 complete — all 3 plans executed, all 5 AUDIT requirements addressed
 - 2026-02-25: Completed 29-01 — Schema creation + prompt_hash enforcement + snapshot capture wiring
+- 2026-02-25: Completed 29-02 — Content Impact landing page with 4-table join API and 10-column table
