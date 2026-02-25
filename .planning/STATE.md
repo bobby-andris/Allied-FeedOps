@@ -40,9 +40,15 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 28-01: 3 redundant shopping_performance_view query paths identified -- recommend Python consolidation
 - 28-01: service.ts ephemeral cache is highest-severity gap for funnel analysis (7 GAQL, 2-min TTL, zero persist)
 - 28-01: 034b GA4 tables missing from SCHEMA.md -- need production verification
+- 28-02: All 4 034b GA4 tables KEEP -- active code consumer (snapshot-capture route), infrastructure-forward
+- 28-02: 10 of 14 035b tables KEEP -- have 1-9 active production code consumers each
+- 28-02: 4 035b tables DEFER -- intent_taxonomy_versions, sku_margin_daily, order_line_returns_daily, attribution_confidence_daily (no data pipeline)
+- 28-02: Zero PRUNE -- empty tables cost nothing, infrastructure-forward bias
+- 28-02: Dashboard wiring: Shopping Funnel (medium), Search Governance (low), Experiment Lab (low) in Phase 31; Intent Control and Optimization Control deferred to v1.3c
 
 ## Session Log
 
 - 2026-02-25: v1.3b milestone started — Architecture Validation & Data Persistence
 - 2026-02-25: Roadmap created — 4 phases (28-31), 16 requirements, 100% coverage
 - 2026-02-25: Completed 28-01 — Data flow map with 10 Mermaid diagrams, circular loop validated
+- 2026-02-25: Completed 28-02 — Migration triage: 18 tables, 14 KEEP, 4 DEFER, 0 PRUNE
