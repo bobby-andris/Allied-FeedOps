@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets with AI content generation informed by Google Shopping ranking intelligence
-**Current focus:** v1.3b Phase 28 — Architecture Audit & Migration Triage
+**Current focus:** v1.3b Phase 29 — Content-Performance Feedback Linkage
 
 ## Position
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
-**Phase:** 28 of 31 (Architecture Audit & Migration Triage)
-**Plan:** 3 of 3 in current phase
-**Status:** Milestone complete
-**Last activity:** 2026-02-25 — Completed 28-03 (NULL Audit & Quota Analysis)
+**Phase:** 29 of 31 (Content-Performance Feedback Linkage)
+**Plan:** Not yet planned
+**Status:** Phase 28 complete, Phase 29 next
+**Last activity:** 2026-02-25 — Completed Phase 28 (Architecture Audit & Migration Triage)
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 25%
 
 ## What's Done
 
