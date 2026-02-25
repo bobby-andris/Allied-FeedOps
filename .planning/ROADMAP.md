@@ -81,7 +81,7 @@
 - [x] **Phase 28: Architecture Audit & Migration Triage** - Map complete data flow, confirm API quota sustainability, triage all 18 deferred tables, audit join chain integrity (completed 2026-02-25)
 - [x] **Phase 29: Content-Performance Feedback Linkage** - Connect published content to CTR/CVR outcomes via feedback view, populate impact scores, enforce content versioning (completed 2026-02-25)
 - [x] **Phase 30: Historical Funnel Persistence** - Persist ephemeral service.ts Google Ads data into daily snapshots with trend indicators on dashboard (completed 2026-02-25)
-- [ ] **Phase 30.1: Funnel Snapshot Backfill** - Backfill funnel_snapshots_daily with historical data so trend cards are immediately useful without waiting 7+ days
+- [x] **Phase 30.1: Funnel Snapshot Backfill** - Backfill funnel_snapshots_daily with historical data so trend cards are immediately useful without waiting 7+ days (completed 2026-02-25)
 - [ ] **Phase 31: Schema Cleanup & End-to-End Validation** - Apply kept migrations, prune dead code, wire or remove orphaned components, validate full data loop
 
 ## Phase Details
@@ -170,7 +170,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
 | 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
 | 30. Funnel Persistence | 3/3 | Complete   | 2026-02-25 | - |
-| 30.1 Funnel Backfill | v1.3b | 0/1 | Planned | - |
+| 30.1 Funnel Backfill | 1/1 | Complete   | 2026-02-25 | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 
 ---
