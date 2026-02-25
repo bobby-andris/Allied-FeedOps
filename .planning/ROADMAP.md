@@ -92,7 +92,7 @@
 
 **Milestone Goal:** Transform the shopping funnel from passive reporting into an active revenue optimization engine with distribution-based scoring, dollar-value leakage detection, market intelligence, and semi-automated tier optimization with measurement.
 
-- [ ] **Phase 32: Operational Prerequisites** - Activate Cloud Scheduler, backfill funnel data, extend schemas for adaptive scoring and experiments
+- [x] **Phase 32: Operational Prerequisites** - Activate Cloud Scheduler, backfill funnel data, extend schemas for adaptive scoring and experiments (completed 2026-02-25)
 - [ ] **Phase 33: Tier Scoring Engine** - Distribution-based scoring with hierarchical fallback replacing hardcoded ROAS thresholds
 - [ ] **Phase 34: Revenue Leakage and Execution** - Dollar-value leakage dashboard with one-click tier movement execution and undo
 - [ ] **Phase 35: Market Intelligence** - Demand gap analysis, competitive intel, product group BCG matrix, seasonal patterns
@@ -183,7 +183,7 @@ Note: Phase 35 depends only on Phase 33 (not Phase 34), so it can begin after Ph
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
-| 32. Operational Prerequisites | v1.3c | 0/TBD | Not started | - |
+| 32. Operational Prerequisites | 3/3 | Complete   | 2026-02-25 | - |
 | 33. Tier Scoring Engine | v1.3c | 0/TBD | Not started | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |
