@@ -243,3 +243,21 @@ async def test_adapt_variant_content_google_description_falls_back_when_json_fin
     assert len(finish_rows[0]["payload"]["finish_sentences"]) == len(
         hybrid_generation.get_finish_list()
     )
+
+
+def test_variant_completion_tokens_policy_prevents_low_description_caps() -> None:
+    assert hybrid_generation._variant_completion_tokens(
+        platform="google", content_type="description", requires_json=True
+    ) == 16000
+    assert hybrid_generation._variant_completion_tokens(
+        platform="bing", content_type="description", requires_json=True
+    ) == 16000
+    assert hybrid_generation._variant_completion_tokens(
+        platform="shopify", content_type="description", requires_json=False
+    ) == 8000
+    assert hybrid_generation._variant_completion_tokens(
+        platform="google", content_type="title", requires_json=False
+    ) == 200
+    assert hybrid_generation._variant_completion_tokens(
+        platform="google", content_type="unknown_type", requires_json=True
+    ) == 16000

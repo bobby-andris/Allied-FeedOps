@@ -41,6 +41,23 @@ from feedops.providers import get_provider
 logger = logging.getLogger(__name__)
 
 
+def _variant_completion_tokens(platform: str, content_type: str, requires_json: bool) -> int:
+    """
+    Completion token policy for hybrid variant adaptation.
+
+    Keep description generation budgets high enough to avoid placeholder-only or
+    truncated responses. Titles stay intentionally small.
+    """
+    if content_type == "title":
+        return 200
+    if content_type == "description":
+        if requires_json:
+            return 16000
+        return 8000
+    # Keep non-title fallbacks generous to avoid reintroducing low-cap truncation.
+    return 16000 if requires_json else 8000
+
+
 def validate_adapted_variant_content(
     content_type: str,
     platform: str,
@@ -485,10 +502,8 @@ async def adapt_variant_content(
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.6,  # Lower than full generation (0.7)
-            max_completion_tokens=(
-                4000
-                if requires_json
-                else (200 if content_type == "title" else 1000)
+            max_completion_tokens=_variant_completion_tokens(
+                platform=platform, content_type=content_type, requires_json=requires_json
             ),
             **({"response_format": {"type": "json_object"}} if requires_json else {}),
         )
