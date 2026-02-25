@@ -8,6 +8,8 @@ import { AlertCircle, RefreshCw } from 'lucide-react'
 import { HeroCallout } from './components/HeroCallout'
 import { GroupOverview } from './components/GroupOverview'
 import { GroupDetail } from './components/GroupDetail'
+import { TierDetail } from './components/TierDetail'
+import { TermScorecard } from './components/TermScorecard'
 import type { GroupDistributions, TermScore, ImpactRange, TierDistribution, FallbackLevel } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 
@@ -29,6 +31,7 @@ export default function TierScoringPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [selectedTier, setSelectedTier] = useState<FunnelTier | null>(null)
+  const [selectedTerm, setSelectedTerm] = useState<TermScore | null>(null)
 
   const fetchScores = useCallback(async (forceRefresh = false) => {
     setLoading(true)
@@ -131,13 +134,30 @@ export default function TierScoringPage() {
         totalTermsScored={data.totalTermsScored}
       />
 
-      {selectedGroup ? (
+      {selectedTerm ? (
+        <TermScorecard
+          term={selectedTerm}
+          onBack={() => setSelectedTerm(null)}
+        />
+      ) : selectedTier && selectedGroup ? (
+        <TierDetail
+          tier={selectedTier}
+          distribution={data.distributions[selectedGroup].tiers[selectedTier]}
+          scores={data.scores.filter(s =>
+            s.customLabel0 === selectedGroup && s.currentTier === selectedTier
+          )}
+          groupName={selectedGroup}
+          onBack={() => setSelectedTier(null)}
+          onSelectTerm={(term) => setSelectedTerm(term)}
+        />
+      ) : selectedGroup ? (
         <GroupDetail
           group={data.distributions[selectedGroup]}
           scores={data.scores.filter(s => s.customLabel0 === selectedGroup)}
           onBack={() => {
             setSelectedGroup(null)
             setSelectedTier(null)
+            setSelectedTerm(null)
           }}
           onSelectTier={(tier) => setSelectedTier(tier)}
         />
