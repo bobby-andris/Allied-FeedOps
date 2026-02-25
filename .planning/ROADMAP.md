@@ -110,7 +110,11 @@ Plans:
   2. Performance impact scores exist for published SKUs using diff-in-diff methodology (treated vs control cohort lift)
   3. After a publish event, search query snapshots capture which terms gained or lost impressions compared to pre-publish state
   4. New publish events cannot be created with a NULL prompt_hash — the content versioning chain is enforced
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 29-01-PLAN.md — Schema migrations (impact scores table, snapshot columns) + prompt_hash enforcement
+- [ ] 29-02-PLAN.md — Content Impact landing page + API route with 4-table join and window aggregation
+- [ ] 29-03-PLAN.md — Drill-down detail page with search term deltas, control cohort, publish history
 
 ### Phase 30: Historical Funnel Persistence
 **Goal**: Shopping Funnel dashboard shows historical trends instead of only live ephemeral data
