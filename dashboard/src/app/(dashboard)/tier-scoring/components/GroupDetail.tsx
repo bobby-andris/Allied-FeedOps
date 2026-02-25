@@ -55,7 +55,7 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
   // Generate inline callout
   const callout = useMemo(() => {
     if (misplacedTerms.length === 0) {
-      return { type: 'success' as const, text: `All terms in ${group.customLabel0} are well-placed` }
+      return { type: 'success' as const, text: `All terms in ${group.customLabel0} align with current tiers — no action needed` }
     }
 
     // Find tier with most misplaced terms
@@ -70,7 +70,7 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
 
     return {
       type: 'warning' as const,
-      text: `${topTier[0]} tier has ${topTier[1]} term${topTier[1] !== 1 ? 's' : ''} that may belong elsewhere — look at terms with ROAS ${topTier[0] === 'HIGH' ? 'below' : 'above'} ${boundary.toFixed(1)}x`,
+      text: `${topTier[0]} tier has ${topTier[1]} term${topTier[1] !== 1 ? 's' : ''} where data suggests a different tier could improve performance — look at terms with ROAS ${topTier[0] === 'HIGH' ? 'below' : 'above'} ${boundary.toFixed(1)}x`,
     }
   }, [misplacedTerms, group])
 
@@ -222,14 +222,14 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">
-            Misplaced Terms ({misplacedTerms.length})
+            Optimization Opportunities ({misplacedTerms.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {misplacedTerms.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-lg px-4 py-3">
               <CheckCircle2 className="h-4 w-4" />
-              No misplaced terms in this group
+              No optimization opportunities in this group — all terms align with current tiers
             </div>
           ) : (
             <Table>
