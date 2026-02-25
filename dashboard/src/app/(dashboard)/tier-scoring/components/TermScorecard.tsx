@@ -14,17 +14,11 @@ import { ConfidenceBadge } from './ConfidenceBadge'
 import { FallbackIndicator } from './FallbackIndicator'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
+import { formatDollars } from '@/lib/formatting'
 
 interface TermScorecardProps {
   term: TermScore
   onBack: () => void
-}
-
-function formatDollars(amount: number): string {
-  if (Math.abs(amount) >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`
-  }
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 function scoreColor(score: number): string {

@@ -17,6 +17,7 @@ import { ConfidenceBadge } from './ConfidenceBadge'
 import { DistributionChart } from './DistributionChart'
 import type { GroupDistributions, TermScore, FallbackLevel } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
+import { formatDollars } from '@/lib/formatting'
 
 interface GroupDetailProps {
   group: GroupDistributions
@@ -31,13 +32,6 @@ const tierColors: Record<FunnelTier, { fill: string; bg: string; text: string }>
   HIGH: { fill: '#10b981', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800' },
   MEDIUM: { fill: '#3b82f6', bg: 'bg-blue-50 border-blue-200', text: 'text-blue-800' },
   LOW: { fill: '#f59e0b', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-800' },
-}
-
-function formatDollars(amount: number): string {
-  if (Math.abs(amount) >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`
-  }
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 function formatMetricCompact(value: number, metric: string): string {

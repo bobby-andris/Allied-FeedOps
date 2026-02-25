@@ -17,6 +17,7 @@ import { FallbackIndicator } from './FallbackIndicator'
 import { MisplacedTermRow } from './MisplacedTermRow'
 import type { TermScore, TierDistribution } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
+import { formatDollars } from '@/lib/formatting'
 
 interface TierDetailProps {
   tier: FunnelTier
@@ -29,13 +30,6 @@ interface TierDetailProps {
 
 type SortKey = 'term' | 'roas' | 'cvr' | 'cpc' | 'confidence' | 'status'
 type SortDir = 'asc' | 'desc'
-
-function formatDollars(amount: number): string {
-  if (Math.abs(amount) >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`
-  }
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
-}
 
 const tierColors: Record<FunnelTier, string> = {
   HIGH: 'text-emerald-800',

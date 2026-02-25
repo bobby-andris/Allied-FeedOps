@@ -3,19 +3,13 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle2, AlertTriangle, BarChart3, Target, DollarSign } from 'lucide-react'
 import type { ImpactRange } from '@/lib/optimization/tier-scoring.types'
+import { formatDollars } from '@/lib/formatting'
 
 interface HeroCalloutProps {
   heroText: string
   totalMisplaced: number
   totalImpact: ImpactRange
   totalTermsScored: number
-}
-
-function formatDollars(amount: number): string {
-  if (amount >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`
-  }
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 export function HeroCallout({ heroText, totalMisplaced, totalImpact, totalTermsScored }: HeroCalloutProps) {

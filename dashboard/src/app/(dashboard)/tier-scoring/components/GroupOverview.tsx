@@ -6,6 +6,7 @@ import { AlertCircle, ArrowRight } from 'lucide-react'
 import { FallbackIndicator } from './FallbackIndicator'
 import type { GroupDistributions, TermScore, ImpactRange } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
+import { formatDollars } from '@/lib/formatting'
 
 interface GroupOverviewProps {
   distributions: Record<string, GroupDistributions>
@@ -19,13 +20,6 @@ const tierColors: Record<FunnelTier, string> = {
   HIGH: 'bg-emerald-500',
   MEDIUM: 'bg-blue-500',
   LOW: 'bg-amber-500',
-}
-
-function formatDollars(amount: number): string {
-  if (amount >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`
-  }
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 interface GroupSummary {

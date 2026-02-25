@@ -8,6 +8,7 @@ import { ArrowUp, ArrowDown } from 'lucide-react'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
+import { formatDollars } from '@/lib/formatting'
 
 interface MisplacedTermRowProps {
   term: TermScore
@@ -26,13 +27,6 @@ function getArrowProps(current: FunnelTier, recommended: FunnelTier) {
   // Moving to lower tier
   if (recommended === 'LOW') return { Icon: ArrowDown, color: 'text-red-600' }
   return { Icon: ArrowDown, color: 'text-orange-600' }
-}
-
-function formatDollars(amount: number): string {
-  if (Math.abs(amount) >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`
-  }
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 const tierTextColor: Record<FunnelTier, string> = {
