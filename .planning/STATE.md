@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 33.1 (v1.3c) — IN PROGRESS
-Plan: 1 of 2 complete
-Status: Executing plan 33.1-02 next
-Last activity: 2026-02-25 — Completed 33.1-01 (impact estimation fix + calibration thresholds)
+Phase: 33.1 (v1.3c) — COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 33.1 complete; ready for 33.2
+Last activity: 2026-02-25 — Completed 33.1-02 (UX language reframe from misplaced to opportunity)
 
 Progress: [███░░░░░░░] 28% (v1.3c)
 
@@ -70,6 +70,8 @@ Recent decisions affecting current work:
 - [Phase 33.1-01]: ROAS-based impact (spend * ROAS_delta) replaces broken CVR-based formula that produced $0
 - [Phase 33.1-01]: CalibrationConfig centralizes thresholds: minFitScoreDelta=0.3, minConfidence=0.40, minImpressions=50
 - [Phase 33.1-01]: Three-gate isMisplaced: all three thresholds must pass to flag a term
+- [Phase 33.1-02]: Keep isMisplaced boolean and variable names unchanged; only change user-facing text to "opportunity"
+- [Phase 33.1-02]: Show "Data-confirmed" vs "Aligned" based on dataConfirmed flag for well-placed terms
 
 ### Pending Todos
 
@@ -87,7 +89,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 33.1-01-PLAN.md (impact estimation fix + calibration thresholds)
+Stopped at: Completed 33.1-02-PLAN.md (UX language reframe — phase 33.1 complete)
 Resume file: None
 
 **Phase 33 Completion Summary**:

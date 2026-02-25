@@ -94,7 +94,7 @@
 
 - [x] **Phase 32: Operational Prerequisites** - Activate Cloud Scheduler, backfill funnel data, extend schemas for adaptive scoring and experiments (completed 2026-02-25)
 - [x] **Phase 33: Tier Scoring Engine** - Distribution-based scoring with hierarchical fallback replacing hardcoded ROAS thresholds (completed 2026-02-25)
-- [ ] **Phase 33.1: Scoring Calibration** - Fix $0 impact bug, calibrate 95% misplaced rate down to actionable 10-20%
+- [x] **Phase 33.1: Scoring Calibration** - Fix $0 impact bug, calibrate 95% misplaced rate down to actionable 10-20% (completed 2026-02-25)
 - [ ] **Phase 33.2: UI Redesign** - Redesign Tier Intelligence from statistical exploration to action-oriented decision-making
 - [ ] **Phase 34: Revenue Leakage and Execution** - Dollar-value leakage dashboard with one-click tier movement execution and undo
 - [ ] **Phase 35: Market Intelligence** - Demand gap analysis, competitive intel, product group BCG matrix, seasonal patterns
@@ -222,7 +222,7 @@ Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 | 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
 | 32. Operational Prerequisites | 3/3 | Complete    | 2026-02-25 | - |
 | 33. Tier Scoring Engine | 4/4 | Complete    | 2026-02-25 | - |
-| 33.1 Scoring Calibration | 1/2 | In Progress|  | - |
+| 33.1 Scoring Calibration | 2/2 | Complete   | 2026-02-25 | - |
 | 33.2 UI Redesign | v1.3c | 0/TBD | Not started | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |
