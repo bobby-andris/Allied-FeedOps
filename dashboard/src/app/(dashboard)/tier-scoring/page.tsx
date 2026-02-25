@@ -111,7 +111,7 @@ export default function TierScoringPage() {
         <div>
           <h1 className="text-2xl font-bold">Tier Intelligence</h1>
           <p className="text-muted-foreground">
-            Distribution-based scoring replacing static thresholds
+            Data-driven tier analysis — surfaces high-confidence opportunities where performance disagrees with current placement
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
