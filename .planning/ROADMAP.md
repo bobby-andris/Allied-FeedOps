@@ -223,7 +223,7 @@ Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 | 32. Operational Prerequisites | 3/3 | Complete    | 2026-02-25 | - |
 | 33. Tier Scoring Engine | 4/4 | Complete    | 2026-02-25 | - |
 | 33.1 Scoring Calibration | 2/2 | Complete    | 2026-02-25 | - |
-| 33.2 UI Redesign | 1/3 | In Progress|  | - |
+| 33.2 UI Redesign | 2/3 | In Progress|  | - |
 | 34. Revenue Leakage and Execution | v1.3c | 0/TBD | Not started | - |
 | 35. Market Intelligence | v1.3c | 0/TBD | Not started | - |
 | 36. Automation and Experiments | v1.3c | 0/TBD | Not started | - |
