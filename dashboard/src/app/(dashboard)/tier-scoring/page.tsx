@@ -1,21 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AlertCircle, RefreshCw, LayoutList, Search } from 'lucide-react'
+import { useTierScoring } from './hooks/useTierScoring'
+
+// Action Queue components
+import { HeroSummary } from './components/HeroSummary'
+import { ActionQueueTable } from './components/ActionQueueTable'
+
+// Explorer view components (preserved from Phase 33)
 import { HeroCallout } from './components/HeroCallout'
 import { GroupOverview } from './components/GroupOverview'
 import { GroupDetail } from './components/GroupDetail'
 import { TierDetail } from './components/TierDetail'
 import { TermScorecard } from './components/TermScorecard'
-import { useTierScoring } from './hooks/useTierScoring'
+
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 
 export default function TierScoringPage() {
   const { data, loading, error, refresh } = useTierScoring()
+
+  // Action Queue view state
+  const [actionSelectedTerm, setActionSelectedTerm] = useState<TermScore | null>(null)
+
+  // Explorer view state (preserved from Phase 33)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [selectedTier, setSelectedTier] = useState<FunnelTier | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<TermScore | null>(null)
@@ -59,16 +72,9 @@ export default function TierScoringPage() {
 
   if (!data) return null
 
-  const computedDate = new Date(data.computedAt)
-  const formattedDate = computedDate.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-
   return (
     <div className="space-y-6 p-6">
+      {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Tier Intelligence</h1>
@@ -76,60 +82,97 @@ export default function TierScoringPage() {
             Data-driven tier analysis — surfaces high-confidence opportunities where performance disagrees with current placement
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Last computed: {formattedDate}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refresh(true)}
-          >
-            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-            Refresh
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refresh(true)}
+        >
+          <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+          Refresh
+        </Button>
       </div>
 
-      <HeroCallout
-        heroText={data.heroCallout}
-        totalMisplaced={data.totalMisplaced}
-        totalImpact={data.totalImpact}
-        totalTermsScored={data.totalTermsScored}
-      />
+      {/* Two-view Tabs */}
+      <Tabs defaultValue="actions">
+        <TabsList>
+          <TabsTrigger value="actions" className="gap-1.5">
+            <LayoutList className="h-3.5 w-3.5" />
+            Action Queue
+          </TabsTrigger>
+          <TabsTrigger value="explorer" className="gap-1.5">
+            <Search className="h-3.5 w-3.5" />
+            Explorer
+          </TabsTrigger>
+        </TabsList>
 
-      {selectedTerm ? (
-        <TermScorecard
-          term={selectedTerm}
-          onBack={() => setSelectedTerm(null)}
-        />
-      ) : selectedTier && selectedGroup ? (
-        <TierDetail
-          tier={selectedTier}
-          distribution={data.distributions[selectedGroup].tiers[selectedTier]}
-          scores={data.scores.filter(s =>
-            s.customLabel0 === selectedGroup && s.currentTier === selectedTier
+        {/* ACTION QUEUE TAB */}
+        <TabsContent value="actions" className="space-y-6 mt-4">
+          {actionSelectedTerm ? (
+            <TermScorecard
+              term={actionSelectedTerm}
+              onBack={() => setActionSelectedTerm(null)}
+            />
+          ) : (
+            <>
+              <HeroSummary
+                totalMisplaced={data.totalMisplaced}
+                totalImpact={data.totalImpact}
+                totalTermsScored={data.totalTermsScored}
+                computedAt={data.computedAt}
+              />
+              <ActionQueueTable
+                scores={data.scores}
+                onSelectTerm={(term) => setActionSelectedTerm(term)}
+              />
+            </>
           )}
-          groupName={selectedGroup}
-          onBack={() => setSelectedTier(null)}
-          onSelectTerm={(term) => setSelectedTerm(term)}
-        />
-      ) : selectedGroup ? (
-        <GroupDetail
-          group={data.distributions[selectedGroup]}
-          scores={data.scores.filter(s => s.customLabel0 === selectedGroup)}
-          onBack={() => {
-            setSelectedGroup(null)
-            setSelectedTier(null)
-            setSelectedTerm(null)
-          }}
-          onSelectTier={(tier) => setSelectedTier(tier)}
-        />
-      ) : (
-        <GroupOverview
-          distributions={data.distributions}
-          scores={data.scores}
-          onSelectGroup={(group) => setSelectedGroup(group)}
-        />
-      )}
+        </TabsContent>
+
+        {/* EXPLORER TAB */}
+        <TabsContent value="explorer" className="space-y-6 mt-4">
+          <HeroCallout
+            heroText={data.heroCallout}
+            totalMisplaced={data.totalMisplaced}
+            totalImpact={data.totalImpact}
+            totalTermsScored={data.totalTermsScored}
+          />
+
+          {selectedTerm ? (
+            <TermScorecard
+              term={selectedTerm}
+              onBack={() => setSelectedTerm(null)}
+            />
+          ) : selectedTier && selectedGroup ? (
+            <TierDetail
+              tier={selectedTier}
+              distribution={data.distributions[selectedGroup].tiers[selectedTier]}
+              scores={data.scores.filter(s =>
+                s.customLabel0 === selectedGroup && s.currentTier === selectedTier
+              )}
+              groupName={selectedGroup}
+              onBack={() => setSelectedTier(null)}
+              onSelectTerm={(term) => setSelectedTerm(term)}
+            />
+          ) : selectedGroup ? (
+            <GroupDetail
+              group={data.distributions[selectedGroup]}
+              scores={data.scores.filter(s => s.customLabel0 === selectedGroup)}
+              onBack={() => {
+                setSelectedGroup(null)
+                setSelectedTier(null)
+                setSelectedTerm(null)
+              }}
+              onSelectTier={(tier) => setSelectedTier(tier)}
+            />
+          ) : (
+            <GroupOverview
+              distributions={data.distributions}
+              scores={data.scores}
+              onSelectGroup={(group) => setSelectedGroup(group)}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
