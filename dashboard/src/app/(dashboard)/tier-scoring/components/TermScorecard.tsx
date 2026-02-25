@@ -138,7 +138,7 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
         {term.isMisplaced && (
           <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
             <AlertCircle className="h-3 w-3" />
-            Misplaced
+            Opportunity
           </span>
         )}
       </div>

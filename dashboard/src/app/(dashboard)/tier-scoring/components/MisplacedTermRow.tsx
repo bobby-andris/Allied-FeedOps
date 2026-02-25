@@ -1,3 +1,7 @@
+/**
+ * OpportunityTermRow — displays a term flagged as an optimization opportunity.
+ * (File originally named MisplacedTermRow; keeping name for import stability.)
+ */
 'use client'
 
 import { ArrowUp, ArrowDown } from 'lucide-react'
