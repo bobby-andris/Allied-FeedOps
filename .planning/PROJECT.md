@@ -115,12 +115,20 @@ that fail to differentiate Allied Brass from mass-market competitors.
 
 ### Active
 
-## Next Milestone: v1.3c Actionable Shopping Intelligence
+## Current Milestone: v1.3c Actionable Shopping Intelligence
 
-**Goal:** Replace hardcoded thresholds with distribution-based scoring, surface revenue leakage with dollar estimates, enable tier movement tracking and market intelligence.
+**Goal:** Transform skeleton intelligence pages into a revenue-generating system by replacing hardcoded thresholds with distribution-based scoring, surfacing revenue leakage with dollar estimates, enabling market intelligence, and building semi-automated optimization with measurement.
 
-**Prerequisites met:** v1.3a (good content) + v1.3b (validated architecture) both complete.
-**Existing spec:** `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md`
+**Target features:**
+- Adaptive tier scoring engine (distribution-based, replaces hardcoded ROAS/CVR thresholds)
+- Revenue leakage dashboard with dollar-value impact estimates and one-click execution
+- Market intelligence: demand gaps, competitive intel, product group BCG matrix
+- Automated tier rebalancing rules with dry-run mode and guardrails
+- A/B testing framework for tier assignments using existing experiment tables
+- Executive scorecard: impact tracker, weekly digest, competitive benchmarks
+
+**Prerequisites met:** v1.3a (content quality) + v1.3b (validated architecture) both complete.
+**Spec:** `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md`
 
 ### Out of Scope
 
@@ -206,4 +214,4 @@ Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 
 - **Content API:** Works until Aug 2026 — Merchant API used only for diagnostic queries
 
 ---
-*Last updated: 2026-02-25 after v1.3b milestone completed*
+*Last updated: 2026-02-25 after v1.3c milestone started*
