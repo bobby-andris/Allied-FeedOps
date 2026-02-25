@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 28 of 31 (Architecture Audit & Migration Triage)
-**Plan:** 2 of 3 in current phase
-**Status:** Executing
-**Last activity:** 2026-02-25 — Completed 28-02 (Migration Triage)
+**Plan:** 3 of 3 in current phase
+**Status:** Phase complete
+**Last activity:** 2026-02-25 — Completed 28-03 (NULL Audit & Quota Analysis)
 
-Progress: [██████░░░░] 66%
+Progress: [██████████] 100%
 
 ## What's Done
 
@@ -45,6 +45,10 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 28-02: 4 035b tables DEFER -- intent_taxonomy_versions, sku_margin_daily, order_line_returns_daily, attribution_confidence_daily (no data pipeline)
 - 28-02: Zero PRUNE -- empty tables cost nothing, infrastructure-forward bias
 - 28-02: Dashboard wiring: Shopping Funnel (medium), Search Governance (low), Experiment Lab (low) in Phase 31; Intent Control and Optimization Control deferred to v1.3c
+- 28-03: Feedback view GO -- 99.4% snapshot-to-publish_event linkage, prompt_hash backfillable from generated_content (82.9%)
+- 28-03: performance_impact_scores table does not exist in production (schema drift from SCHEMA.md)
+- 28-03: Daily snapshot capture SUSTAINABLE -- ~187 req/day vs 15,000 limit (1.2% utilization)
+- 28-03: service.ts is most wasteful API consumer -- recommend write-behind caching in Phase 30
 
 ## Session Log
 
@@ -52,3 +56,5 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 2026-02-25: Roadmap created — 4 phases (28-31), 16 requirements, 100% coverage
 - 2026-02-25: Completed 28-01 — Data flow map with 10 Mermaid diagrams, circular loop validated
 - 2026-02-25: Completed 28-02 — Migration triage: 18 tables, 14 KEEP, 4 DEFER, 0 PRUNE
+- 2026-02-25: Completed 28-03 — NULL audit (GO for feedback view) + API quota (SUSTAINABLE at 1.2%)
+- 2026-02-25: Phase 28 complete — all 3 plans executed, all 5 AUDIT requirements addressed
