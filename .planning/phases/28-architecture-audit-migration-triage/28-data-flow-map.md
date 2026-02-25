@@ -521,19 +521,42 @@ The Shopping Funnel page partially depends on live `service.ts` data (search ter
 | `ga4_attribution_root_cause_daily` | 034b migration | GA4 attribution |
 | `ga4_shopify_reconciliation_daily` | 034b migration | GA4 attribution |
 
-**Note:** The 034b GA4 tables are documented in the migration file but NOT in SCHEMA.md. They should be verified via production `pg_tables` query and added to SCHEMA.md if they exist.
+**Confirmed:** All 4 GA4 tables exist in production (verified 2026-02-25). They are NOT in SCHEMA.md — should be added.
 
-### Verification Query
+### Production Verification (2026-02-25)
 
-To confirm production matches documentation:
-```sql
-SELECT tablename
-FROM pg_tables
-WHERE schemaname = 'public'
-ORDER BY tablename;
-```
+**Query executed:** `SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;`
+**Result:** 71 tables in production.
 
-Any tables found in production but NOT in SCHEMA.md or the lists above represent undocumented schema drift.
+**Tables in production but NOT in SCHEMA.md (undocumented):**
+
+| Table | Category | Notes |
+|-------|----------|-------|
+| `ga4_source_medium_daily` | 034b GA4 | Exists in production, not in SCHEMA.md |
+| `ga4_landing_page_quality_daily` | 034b GA4 | Exists in production, not in SCHEMA.md |
+| `ga4_attribution_root_cause_daily` | 034b GA4 | Exists in production, not in SCHEMA.md |
+| `ga4_shopify_reconciliation_daily` | 034b GA4 | Exists in production, not in SCHEMA.md |
+| `ga4_attribution_quality_daily` | 034b GA4 | **SURPRISE** — not in any migration file |
+| `ga4_campaign_daily` | 034b GA4 | **SURPRISE** — not in any migration file |
+| `audience_watchlist_snapshots` | Unknown | **SURPRISE** — not documented anywhere |
+| `generated_images_backup_20260208` | Backup | One-time backup artifact |
+| `google_ads_api_errors` | Operations | Error logging table |
+| `guardrail_incidents` | Operations | GMC guardrail tracking |
+| `opportunity_clusters` | Analytics | Opportunity grouping |
+| `optimization_experiment_snapshots` | Analytics | Experiment data |
+| `query_intent_features` | Search | Intent classification |
+| `query_value_scores` | Search | Value scoring |
+| `roas_target_recommendations` | Analytics | ROAS optimization |
+| `routing_recommendations` | Analytics | Traffic routing |
+| `search_term_decisions` | Search | Term management |
+| `shopify_customer_value_snapshots` | Shopify | Customer LTV data |
+| `shopify_order_facts` | Shopify | Order analytics |
+| `shopify_order_line_facts` | Shopify | Line-item analytics |
+| `sku_corrections` | Content | SKU fix tracking |
+
+**Summary:** 71 production tables. ~50 documented in SCHEMA.md. ~21 undocumented (4 known 034b GA4, 2 surprise GA4, 15 other undocumented tables). No tables are MISSING from production that are listed in SCHEMA.md.
+
+**Action items for Phase 31:** Add all undocumented tables to SCHEMA.md. Investigate surprise tables (`ga4_attribution_quality_daily`, `ga4_campaign_daily`, `audience_watchlist_snapshots`) for ownership and purpose.
 
 ---
 
