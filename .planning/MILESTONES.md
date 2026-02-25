@@ -38,11 +38,30 @@
 
 ---
 
-## Current
-
 ### v1.3b Architecture Validation & Data Persistence
-**Started:** 2026-02-25
+**Shipped:** 2026-02-25
 **Goal:** Validate and prepare the data architecture so the circular feedback loop (capture, monitor, analyze, learn, optimize, repeat) can be built on a solid foundation for v1.3c and v1.4
-**Phases:** 28-31 (4 phases, 16 requirements)
+**Phases:** 28-31 (5 phases incl. 30.1, 13 plans, 27 tasks)
+**Stats:** 106 commits, 243 files changed, +30,061/-5,621 lines, 1 day (2026-02-24 → 2026-02-25)
+**Git range:** 97277291..f2a4d20f
+**Requirements:** 16/16 satisfied (AUDIT-01–05, FEED-01–04, HIST-01–03, MIGR-01–04)
+**Outcome:** All architecture goals achieved. Complete data flow map with 11 Mermaid diagrams. 18 deferred tables triaged (14 KEEP, 4 DEFER). Content Impact dashboard built with landing + detail pages. Funnel trend persistence with daily capture. SCHEMA.md rebuilt to 56 tables. E2E loop validated with FT-16.
+
+**Key accomplishments:**
+1. Complete data flow audit mapping Google Ads API through all layers to dashboard actions, with 5 dead ends marked and circular feedback loop validated
+2. Migration triage for all 18 deferred tables with per-table KEEP/DEFER decisions and Phase 31 action items
+3. Content Impact dashboard — landing page with 10-column table (baseline vs post-publish CTR/CVR at 7/14/30-day windows) and drill-down detail page with search term gained/lost split view
+4. prompt_hash NOT NULL enforcement for new publish events (FEED-04) ensuring content versioning integrity forward
+5. Historical funnel persistence — daily snapshot capture with Cloud Scheduler, 7d vs prev-7d trend cards on Shopping Funnel page
+6. SCHEMA.md complete rebuild (56 tables, 1,589 lines) with [KEEP]/[DEFER] tags, orphaned components wired, Coming Soon states for DEFER'd pages
+
+**Tech debt accepted:** 12 items — Cloud Scheduler activation pending, funnel data needs re-backfill, performance_impact_scores empty (DiD compute is v1.3c/v1.4 scope), prompt_hash NULL on existing publish events, search_query_snapshots missing migration file
 
 ---
+
+## Current
+
+(No active milestone — next: v1.3c Actionable Shopping Intelligence)
+
+---
+

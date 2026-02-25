@@ -8,7 +8,7 @@ A Google Ads feed optimization platform that automatically collects search perfo
 
 Transform low-performing product feeds into high-converting assets by combining real search query data with AI content generation informed by Google Shopping ranking intelligence, enabling data-driven optimization at scale for the entire catalog.
 
-## Current State (after v1.3a)
+## Current State (after v1.3b)
 
 **What's shipped:**
 - Full Google Ads data pipeline: search terms, performance metrics, Keyword Planner for all 2,784 SKUs
@@ -19,13 +19,12 @@ Transform low-performing product feeds into high-converting assets by combining 
 - Content generation via Cloud Run Python pipeline (single SKU, batch, and hybrid multi-SKU)
 - Publishing to Google Sheets supplemental feed, Shopify, and Bing
 - v1.2: Google Shopping intelligence, GPT-5.2 upgrade, unified prompt builder, measurement infrastructure
-- **v1.3a: GPT-5.2 bug fixes** — temperature/reasoning mutual exclusion, json_schema strict mode, prompt cache retention, XML tags
-- **v1.3a: Per-platform v2 generation** — separate Google/Bing/Shopify/finish sentence calls with strict JSON schemas, FEEDOPS_PROMPT_VERSION=v2 active on Cloud Run
-- **v1.3a: Skill-driven prompts** — 8 runtime skill configs loaded via skill_loader.py, SYSTEM_PROMPT rewritten as creative brief, 24 categories
-- **v1.3a: 15 gold standards** — across 15 product categories, wired into prompts via prompt_templates table
-- **v1.3a: Quality rubric** — 10-criterion differentiation-first model replacing old 6-criterion compliance model
-- **v1.3a: Title formula** — Robert's formula codified: {FINISH_NAME} first, product function, Collection, dims when varies, Allied Brass last
-- **v1.3a: Content guardrails** — competitor brand prohibition, no "28 finishes" on variants, evidence exclusion rules, 120/120 constraint checks pass
+- v1.3a: Per-platform v2 generation, skill-driven prompts, 15 gold standards, quality rubric, title formula, content guardrails
+- **v1.3b: Data flow audit** — complete map with 11 Mermaid diagrams, 5 dead ends marked, circular feedback loop validated
+- **v1.3b: Migration triage** — 18 deferred tables evaluated (14 KEEP, 4 DEFER), SCHEMA.md rebuilt to 56 tables
+- **v1.3b: Content Impact dashboard** — landing + detail pages showing baseline vs post-publish CTR/CVR at 7/14/30-day windows, search term gained/lost split view
+- **v1.3b: Funnel persistence** — daily snapshot capture endpoint, 7d vs prev-7d trend cards, backfill endpoint
+- **v1.3b: Schema cleanup** — GmcDisapprovalBadge + PromptLineagePanel wired into SKU Review, Coming Soon states for DEFER'd pages, prompt_hash enforcement
 
 ## Requirements
 
@@ -106,19 +105,22 @@ that fail to differentiate Allied Brass from mass-market competitors.
 - ⚠ EVAL-05: Quality scores >85% — actual 80.5/100 (accepted as tech debt)
 - ⚠ EVAL-06: Test batch published — deferred to v1.3b
 
+### Validated (v1.3b)
+
+- ✓ AUDIT-01 through AUDIT-05: Architecture audit complete — data flow map, migration triage (14 KEEP, 4 DEFER), NULL audit, API quota analysis (1.2% utilization), circular loop validated
+- ✓ FEED-01 through FEED-04: Content-performance feedback linkage — Content Impact landing + detail pages, performance_impact_scores table, search query snapshot capture on publish, prompt_hash NOT NULL enforcement
+- ✓ HIST-01 through HIST-03: Historical funnel persistence — funnel_snapshots_daily table, daily capture endpoint with Cloud Scheduler, 7d vs prev-7d trend indicators
+- ✓ MIGR-01 through MIGR-04: Schema cleanup — 14 KEEP'd tables verified, dead code removed, orphaned components wired, SCHEMA.md rebuilt (56 tables, 1,589 lines)
+- ⚠ Tech debt: Cloud Scheduler not yet activated, funnel data needs re-backfill, DiD compute pipeline pending (v1.3c/v1.4), prompt_hash NULL on existing publish events
+
 ### Active
 
-## Current Milestone: v1.3b Architecture Validation & Data Persistence
+## Next Milestone: v1.3c Actionable Shopping Intelligence
 
-**Goal:** Validate and prepare the data architecture so that v1.3c (Actionable Intelligence) and v1.4 (Closed-Loop Optimization) can be built on a solid foundation.
+**Goal:** Replace hardcoded thresholds with distribution-based scoring, surface revenue leakage with dollar estimates, enable tier movement tracking and market intelligence.
 
-**Target features:**
-- Architecture audit: complete data flow map from Google Ads → DB → Dashboard → Actions with no dead ends
-- Deferred migration evaluation: apply, prune, or remove the 18 deferred tables (034b + 035b)
-- Content↔performance feedback linkage: table/view connecting generated content to CTR/CVR outcomes
-- Historical data persistence: daily snapshots of ephemeral service.ts Google Ads queries
-- Data pipeline validation: end-to-end flow verified, empty optimization tables populated or removed
-- API quota analysis: confirm live query approach is sustainable vs caching strategy
+**Prerequisites met:** v1.3a (good content) + v1.3b (validated architecture) both complete.
+**Existing spec:** `docs/plans/2026-02-21-gsd-milestone-v1.3-actionable-intelligence.md`
 
 ### Out of Scope
 
@@ -132,7 +134,7 @@ that fail to differentiate Allied Brass from mass-market competitors.
 
 ### Technical Environment
 
-- **Supabase Project:** qezuszwufortkiutlhym (36 tables, 36+ migrations)
+- **Supabase Project:** qezuszwufortkiutlhym (56 tables documented in SCHEMA.md, 14 KEEP + 4 DEFER from 035b/034b)
 - **Google Ads Customer ID:** 6253381786
 - **GMC Merchant ID:** 136699027
 - **Python Pipeline:** Cloud Run (auto-deploys on push to master, GPT-5.2 default model)
@@ -141,12 +143,13 @@ that fail to differentiate Allied Brass from mass-market competitors.
 
 ### Known Issues / Tech Debt
 
-- **Content quality improving but not yet at target** — v1.3a raised quality from 0/10 title wins to structurally correct titles; self-scores at 80.5/100 (target 85). Engagement criterion weakest at 6.9/10. v2 pipeline active but no test batch published yet for CTR/CVR measurement.
+- **Content quality improving but not yet at target** — v1.3a raised quality from 0/10 title wins to structurally correct titles; self-scores at 80.5/100 (target 85). v2 pipeline active but no test batch published for CTR/CVR measurement.
 - **Score model dead in v2 path** — 10-criterion Score model only consumed by v1 code path; v2 generate_per_platform() returns raw dicts with no quality gating
-- **Deferred migrations** — 034b (GA4 attribution, 4 tables) and 035b (intent execution, 14 tables) exist as files but NOT applied to live Supabase. TypeScript intent code (32 files) references 035b tables that don't exist in production
-- **Ephemeral Google Ads data** — service.ts queries 6 GAQL queries with 2-minute cache, no historical persistence
-- **Empty dashboard pages** — Shopping Funnel recommendations, Optimization Control, Intent Control, Search Governance, Experiment Lab all show zero results (hardcoded thresholds produce no matches)
-- 2 orphaned dashboard components (GmcDisapprovalBadge, PromptLineagePanel) — built but not yet surfaced in UI pages
+- **Cloud Scheduler activation pending** — funnel_snapshots_daily capture endpoint built but scheduler needs CRON_SECRET + `bash scripts/setup-funnel-scheduler.sh`
+- **Funnel data needs re-backfill** — backfill endpoint exists at `/api/funnel-snapshots/backfill`, data was populated (4,093 rows) but production table is empty
+- **DiD compute pipeline missing** — performance_impact_scores table and Content Impact API exist but no process computes diff-in-diff scores (v1.3c/v1.4 scope)
+- **prompt_hash NULL on existing publish_events** — forward enforcement active (FEED-04) but all historical rows lack prompt_hash
+- **Optimization Control + Intent Control** — replaced with Coming Soon cards (DEFER'd to v1.3c)
 - Pre-existing duplicate migration file numbers (026, 032, 033)
 - Monitoring freshness endpoint slow (~51s) — has 10s timeout workaround
 
@@ -188,6 +191,11 @@ Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 
 | Per-platform v2 generation | Separate GPT-5.2 calls for Google/Bing/Shopify/finish sentences | ✓ Good — eliminates cross-platform interference, strict JSON schemas |
 | Feature flag for prompt versions | FEEDOPS_PROMPT_VERSION routes v1 vs v2 code paths | ✓ Good — safe rollback, v2 active in production |
 | 3 rounds of human evaluation | Iterate prompts based on Bobby/Robert feedback | ⚠️ Revisit — R1 (0/10), R2 (4/10), R3 structurally correct but not formally scored |
+| 14 KEEP / 4 DEFER for 18 deferred tables | Keep tables with active TypeScript consumers; defer tables with zero code references | ✓ Good — eliminated 034b GA4 tables (no code), kept all intent execution tables |
+| Forward-only prompt_hash enforcement | Application-layer throw, no DB constraint; preserves legacy rows | ✓ Good — zero disruption to existing data |
+| Write-behind funnel persistence | Capture endpoint called by Cloud Scheduler, not blocking live service.ts | ✓ Good — zero latency impact on dashboard |
+| Coming Soon cards for DEFER'd pages | Server components replacing broken client pages that query empty tables | ✓ Good — eliminates user confusion |
+| SCHEMA.md full rebuild from migration SQL | Trust migrations as source of truth over incremental documentation updates | ✓ Good — caught 3 schema drift items |
 
 ## Constraints
 
@@ -198,4 +206,4 @@ Gold standard examples: 30 total (10 Google avg 89.3/100, 10 Bing avg 87.8/100, 
 - **Content API:** Works until Aug 2026 — Merchant API used only for diagnostic queries
 
 ---
-*Last updated: 2026-02-25 after v1.3b milestone started*
+*Last updated: 2026-02-25 after v1.3b milestone completed*

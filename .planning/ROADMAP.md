@@ -7,7 +7,7 @@
 - ✅ **v1.1 Dashboard UX & Quality** — Phases 9-16 (shipped 2026-02-21)
 - ✅ **v1.2 Impact Debug & Fix** — Phases 17-22 (shipped 2026-02-21)
 - ✅ **v1.3a Content Generation Excellence** — Phases 23-27 (shipped 2026-02-25)
-- **v1.3b Architecture Validation & Data Persistence** — Phases 28-31 (in progress)
+- ✅ **v1.3b Architecture Validation & Data Persistence** — Phases 28-31 (shipped 2026-02-25)
 
 ## Phases
 
@@ -74,95 +74,20 @@
 
 </details>
 
-### v1.3b Architecture Validation & Data Persistence (In Progress)
+<details>
+<summary>v1.3b Architecture Validation & Data Persistence — SHIPPED 2026-02-25</summary>
 
-**Milestone Goal:** Validate and prepare the data architecture so the circular feedback loop (capture, monitor, analyze, learn, optimize, repeat) can be built on a solid foundation for v1.3c and v1.4.
+- [x] Phase 28: Architecture Audit & Migration Triage (3/3 plans) — 2026-02-25
+- [x] Phase 29: Content-Performance Feedback Linkage (3/3 plans) — 2026-02-25
+- [x] Phase 30: Historical Funnel Persistence (3/3 plans) — 2026-02-25
+- [x] Phase 30.1: Funnel Snapshot Backfill (1/1 plan) — 2026-02-25
+- [x] Phase 31: Schema Cleanup & End-to-End Validation (3/3 plans) — 2026-02-25
 
-- [x] **Phase 28: Architecture Audit & Migration Triage** - Map complete data flow, confirm API quota sustainability, triage all 18 deferred tables, audit join chain integrity (completed 2026-02-25)
-- [x] **Phase 29: Content-Performance Feedback Linkage** - Connect published content to CTR/CVR outcomes via feedback view, populate impact scores, enforce content versioning (completed 2026-02-25)
-- [x] **Phase 30: Historical Funnel Persistence** - Persist ephemeral service.ts Google Ads data into daily snapshots with trend indicators on dashboard (completed 2026-02-25)
-- [x] **Phase 30.1: Funnel Snapshot Backfill** - Backfill funnel_snapshots_daily with historical data so trend cards are immediately useful without waiting 7+ days (completed 2026-02-25)
-- [x] **Phase 31: Schema Cleanup & End-to-End Validation** - Apply kept migrations, prune dead code, wire or remove orphaned components, validate full data loop (completed 2026-02-25)
+**Tech debt:** 12 items (Cloud Scheduler activation, funnel re-backfill, DiD compute pipeline, prompt_hash backfill)
 
-## Phase Details
-
-### Phase 28: Architecture Audit & Migration Triage
-**Goal**: Complete understanding of production schema state and data flow so all subsequent phases build on verified foundations
-**Depends on**: Nothing (first phase of v1.3b)
-**Requirements**: AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04, AUDIT-05
-**Success Criteria** (what must be TRUE):
-  1. A data flow document exists mapping every table from Google Ads API through to dashboard actions, with dead ends explicitly marked
-  2. Running `SELECT tablename FROM pg_tables WHERE schemaname = 'public'` matches the documented schema — no surprise tables, no missing tables
-  3. Every one of the 18 deferred tables (035b + 034b) has a KEEP/DEFER/PRUNE decision with documented reasoning
-  4. NULL rate percentages for publish_events.prompt_hash and performance_snapshots.content_version are known and documented, with a go/no-go decision for the feedback view
-  5. API quota analysis confirms whether daily snapshot capture fits within Google Ads Standard Access limits
-**Plans:** 3/3 plans complete
-Plans:
-- [ ] 28-01-PLAN.md — Data flow mapping & circular loop validation
-- [ ] 28-02-PLAN.md — Migration triage (18 deferred tables)
-- [ ] 28-03-PLAN.md — NULL rate audit & API quota analysis
-
-### Phase 29: Content-Performance Feedback Linkage
-**Goal**: Users can see how published content changes affected search performance for any SKU
-**Depends on**: Phase 28 (schema state and NULL audit inform feedback view design)
-**Requirements**: FEED-01, FEED-02, FEED-03, FEED-04
-**Success Criteria** (what must be TRUE):
-  1. Querying a published SKU returns baseline CTR, post-publish CTR at 7/14/30-day windows, and the computed delta — all from a single view or table
-  2. Performance impact scores exist for published SKUs using diff-in-diff methodology (treated vs control cohort lift)
-  3. After a publish event, search query snapshots capture which terms gained or lost impressions compared to pre-publish state
-  4. New publish events cannot be created with a NULL prompt_hash — the content versioning chain is enforced
-**Plans:** 3/3 plans complete
-Plans:
-- [ ] 29-01-PLAN.md — Schema migrations (impact scores table, snapshot columns) + prompt_hash enforcement
-- [ ] 29-02-PLAN.md — Content Impact landing page + API route with 4-table join and window aggregation
-- [ ] 29-03-PLAN.md — Drill-down detail page with search term deltas, control cohort, publish history
-
-### Phase 30: Historical Funnel Persistence
-**Goal**: Shopping Funnel dashboard shows historical trends instead of only live ephemeral data
-**Depends on**: Phase 28 (API quota analysis confirms daily capture is safe)
-**Requirements**: HIST-01, HIST-02, HIST-03
-**Success Criteria** (what must be TRUE):
-  1. The funnel_snapshots_daily table contains at least 7 days of historical search term tier data, persisted from the same GAQL queries service.ts runs live
-  2. A Cloud Scheduler job triggers daily capture without any user intervention, and the live service.ts query path has zero latency increase
-  3. The Shopping Funnel dashboard page displays 7-day vs previous-7-day trend indicators (up/down/flat) for key funnel metrics
-**Plans:** 3/3 plans complete
-Plans:
-- [x] 30-00-PLAN.md — Test scaffolds for capture, trends, and FunnelTrendCards (Wave 0)
-- [x] 30-01-PLAN.md — Schema creation + capture endpoint + Cloud Scheduler setup script
-- [x] 30-02-PLAN.md — Trends API route + FunnelTrendCards UI component
-
-### Phase 30.1: Funnel Snapshot Backfill
-**Goal**: Backfill funnel_snapshots_daily with historical Google Ads data so trend cards show meaningful comparisons immediately, rather than waiting 7+ days for organic accumulation
-**Depends on**: Phase 30 (table schema and capture endpoint must exist)
-**Requirements**: BKFL-01
-**Success Criteria** (what must be TRUE):
-  1. funnel_snapshots_daily contains at least 14 days of historical data (enabling 7d vs prev-7d comparison)
-  2. FunnelTrendCards on Shopping Funnel page renders trend arrows with real data
-  3. Backfilled data is consistent with the schema/format produced by the daily capture endpoint
-**Plans**: 1 plan
-Plans:
-- [ ] 30.1-01-PLAN.md — Create backfill endpoint, run 30-day backfill, verify trend cards
-
-### Phase 31: Schema Cleanup & End-to-End Validation
-**Goal**: Production schema reflects reality — no aspirational empty tables, no dead TypeScript files, no orphaned components — and the full data loop is validated end-to-end
-**Depends on**: Phase 28 (triage decisions), Phase 29 (feedback tables), Phase 30 (persistence tables)
-**Requirements**: MIGR-01, MIGR-02, MIGR-03, MIGR-04
-**Success Criteria** (what must be TRUE):
-  1. The subset of 035b tables marked KEEP are applied to production with schemas verified against their TypeScript consumers — no column mismatches
-  2. TypeScript files referencing pruned tables are deleted and `npm run build` passes cleanly
-  3. GmcDisapprovalBadge and PromptLineagePanel are either visible on a dashboard page or removed from the codebase
-  4. SCHEMA.md accurately reflects the true production database state — every table listed exists, every existing table is listed
-  5. A single SKU can be traced through the complete loop: generate content, publish, capture performance snapshot, see feedback in the content-performance view
-**Plans**: 3 plans
-Plans:
-- [ ] 31-01-PLAN.md — Schema verification (18 deferred tables) + SCHEMA.md full rebuild from production
-- [ ] 31-02-PLAN.md — Wire orphaned components (GmcDisapprovalBadge, PromptLineagePanel) + Coming Soon gates + sidebar badges
-- [ ] 31-03-PLAN.md — Seed data validation for KEEP'd pages + E2E loop walkthrough with real production SKU
+</details>
 
 ## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -171,11 +96,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 09-16 | v1.1 | 24/24 | Complete | 2026-02-21 |
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
-| 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
-| 29. Feedback Linkage | 3/3 | Complete    | 2026-02-25 | - |
-| 30. Funnel Persistence | 3/3 | Complete   | 2026-02-25 | - |
-| 30.1 Funnel Backfill | 1/1 | Complete    | 2026-02-25 | - |
-| 31. Schema Cleanup | 3/3 | Complete    | 2026-02-25 | - |
+| 28-31 | v1.3b | 13/13 | Complete | 2026-02-25 |
 
 ---
 *Phase 0 completed: 2026-02-13*
@@ -183,3 +104,4 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 *v1.1 milestone completed: 2026-02-21*
 *v1.2 milestone completed: 2026-02-21*
 *v1.3a milestone completed: 2026-02-25*
+*v1.3b milestone completed: 2026-02-25*
