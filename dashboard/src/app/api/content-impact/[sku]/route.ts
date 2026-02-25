@@ -347,7 +347,7 @@ export async function GET(
 
     // Fetch product_category for control SKUs from publish_events or baselines
     const controlSkuNames = [...controlSkuMap.keys()]
-    let controlCategories = new Map<string, string | null>()
+    const controlCategories = new Map<string, string | null>()
     if (controlSkuNames.length > 0) {
       const { data: catData } = await supabase
         .from('performance_baselines')
