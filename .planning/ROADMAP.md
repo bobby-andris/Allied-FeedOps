@@ -110,7 +110,7 @@ Plans:
   2. Performance impact scores exist for published SKUs using diff-in-diff methodology (treated vs control cohort lift)
   3. After a publish event, search query snapshots capture which terms gained or lost impressions compared to pre-publish state
   4. New publish events cannot be created with a NULL prompt_hash — the content versioning chain is enforced
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 29-01-PLAN.md — Schema migrations (impact scores table, snapshot columns) + prompt_hash enforcement
 - [ ] 29-02-PLAN.md — Content Impact landing page + API route with 4-table join and window aggregation
@@ -151,7 +151,7 @@ Phases execute in numeric order: 28 -> 29 -> 30 -> 31
 | 17-22 | v1.2 | 17/17 | Complete | 2026-02-21 |
 | 23-27 | v1.3a | ~20/21 | Complete | 2026-02-25 |
 | 28. Audit & Triage | 3/3 | Complete    | 2026-02-25 | - |
-| 29. Feedback Linkage | v1.3b | 0/TBD | Not started | - |
+| 29. Feedback Linkage | 1/3 | In Progress|  | - |
 | 30. Funnel Persistence | v1.3b | 0/TBD | Not started | - |
 | 31. Schema Cleanup | v1.3b | 0/TBD | Not started | - |
 

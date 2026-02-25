@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Milestone:** v1.3b Architecture Validation & Data Persistence
 **Phase:** 29 of 31 (Content-Performance Feedback Linkage)
-**Plan:** Not yet planned
-**Status:** Phase 28 complete, Phase 29 next
-**Last activity:** 2026-02-25 — Completed Phase 28 (Architecture Audit & Migration Triage)
+**Plan:** 1 of 3 in Phase 29 complete
+**Status:** Phase 29 in progress — Plan 01 complete
+**Last activity:** 2026-02-25 — Completed 29-01 (Schema + Publish Enforcement)
 
-Progress: [██░░░░░░░░] 25%
+Progress: [████░░░░░░] 38%
 
 ## What's Done
 
@@ -36,6 +36,10 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 
 ## Decisions
 
+- 29-01: FEED-04 enforcement placed in logPublishEvent() — single point covers all publish code paths
+- 29-01: prompt_hash enforcement only for status=success events — failed events don't need version tracking
+- 29-01: Legacy fallback preserves prompt_hash when possible, only strips if DB error mentions it
+- 29-01: performance_impact_scores schema drift resolved — table now exists in production
 - 28-01: Circular flow validation included as section within data flow map (not separate doc)
 - 28-01: 3 redundant shopping_performance_view query paths identified -- recommend Python consolidation
 - 28-01: service.ts ephemeral cache is highest-severity gap for funnel analysis (7 GAQL, 2-min TTL, zero persist)
@@ -58,3 +62,4 @@ v1.3a Content Generation Excellence shipped 2026-02-25 (21/25 requirements, 3 EV
 - 2026-02-25: Completed 28-02 — Migration triage: 18 tables, 14 KEEP, 4 DEFER, 0 PRUNE
 - 2026-02-25: Completed 28-03 — NULL audit (GO for feedback view) + API quota (SUSTAINABLE at 1.2%)
 - 2026-02-25: Phase 28 complete — all 3 plans executed, all 5 AUDIT requirements addressed
+- 2026-02-25: Completed 29-01 — Schema creation + prompt_hash enforcement + snapshot capture wiring

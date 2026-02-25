@@ -18,9 +18,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Content-Performance Feedback
 
 - [ ] **FEED-01**: Content-performance feedback view/table joins publish_events + performance_snapshots + generated_content, keyed on (master_sku, platform), showing baseline vs post-publish CTR/CVR deltas at 7/14/30-day windows
-- [ ] **FEED-02**: Performance impact scores computed and written to existing performance_impact_scores table using diff-in-diff methodology (treated vs control cohort lift)
-- [ ] **FEED-03**: Search query snapshots populated after publish events, capturing which search terms gained/lost impressions after content changes
-- [ ] **FEED-04**: prompt_hash NOT NULL constraint enforced for new publish events to ensure content versioning linkage integrity
+- [x] **FEED-02**: Performance impact scores computed and written to existing performance_impact_scores table using diff-in-diff methodology (treated vs control cohort lift)
+- [x] **FEED-03**: Search query snapshots populated after publish events, capturing which search terms gained/lost impressions after content changes
+- [x] **FEED-04**: prompt_hash NOT NULL constraint enforced for new publish events to ensure content versioning linkage integrity
 
 ### Historical Persistence
 
@@ -74,9 +74,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 | AUDIT-04 | Phase 28 | Complete |
 | AUDIT-05 | Phase 28 | Complete |
 | FEED-01 | Phase 29 | Pending |
-| FEED-02 | Phase 29 | Pending |
-| FEED-03 | Phase 29 | Pending |
-| FEED-04 | Phase 29 | Pending |
+| FEED-02 | Phase 29 | Complete |
+| FEED-03 | Phase 29 | Complete |
+| FEED-04 | Phase 29 | Complete |
 | HIST-01 | Phase 30 | Pending |
 | HIST-02 | Phase 30 | Pending |
 | HIST-03 | Phase 30 | Pending |
