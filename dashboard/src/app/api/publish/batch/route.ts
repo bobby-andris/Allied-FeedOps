@@ -1083,6 +1083,16 @@ async function logPublishEvent(
   supabase: Awaited<ReturnType<typeof createClient>>,
   event: PublishEventInsert
 ): Promise<void> {
+  // FEED-04: Enforce prompt_hash for new successful publish events (forward-only).
+  // Content versioning linkage requires prompt_hash to connect publish -> generated_content -> prompt version.
+  // Legacy events with NULL prompt_hash are unaffected. Failed events don't require prompt_hash.
+  if (event.status === 'success' && (!event.prompt_hash || !event.prompt_hash.trim())) {
+    throw new Error(
+      `[FEED-04] Cannot publish without prompt_hash for ${event.master_sku}/${event.platform}. ` +
+      `Content versioning linkage required. Ensure generated_content.generation_prompt_hash is populated.`
+    )
+  }
+
   try {
     const payload = {
       ...event,
@@ -1100,16 +1110,24 @@ async function logPublishEvent(
       )
       && /final_payload_snapshot|final_payload_hash|prompt_hash|evidence_hash|segment_key/i.test(error.message)
     ) {
+      // Legacy fallback: strip new columns but PRESERVE prompt_hash if available
       const legacyPayload: Record<string, unknown> = { ...payload }
       delete legacyPayload.final_payload_snapshot
       delete legacyPayload.final_payload_hash
-      delete legacyPayload.prompt_hash
       delete legacyPayload.evidence_hash
       delete legacyPayload.segment_key
+      // Keep prompt_hash in the retry — only strip if it was part of the error
+      if (/prompt_hash/i.test(error.message)) {
+        delete legacyPayload.prompt_hash
+      }
       await supabase.from('publish_events').insert(legacyPayload)
     }
   } catch (error) {
     console.error('Failed to log publish event:', error)
+    // Re-throw FEED-04 errors so publish is properly rejected
+    if (error instanceof Error && error.message.includes('[FEED-04]')) {
+      throw error
+    }
   }
 }
 
