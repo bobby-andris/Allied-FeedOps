@@ -78,7 +78,8 @@ export function ProductGroupSlideOut({
       <SheetContent side="right" className="w-[500px] sm:max-w-[500px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{groupName || 'Product Group'}</SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="sr-only">Product group details</SheetDescription>
+          <div className="text-muted-foreground text-sm">
             {loading ? (
               <Skeleton className="h-5 w-24" />
             ) : quadrantInfo ? (
@@ -89,7 +90,7 @@ export function ProductGroupSlideOut({
                 {quadrantInfo.label} — {quadrantInfo.description}
               </Badge>
             ) : null}
-          </SheetDescription>
+          </div>
         </SheetHeader>
 
         <div className="px-4 pb-4 space-y-6">
