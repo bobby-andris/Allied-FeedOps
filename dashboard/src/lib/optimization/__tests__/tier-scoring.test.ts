@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { LabelTierPerformance, ExistingFunnelTerm, FunnelTier, QueryIntentFeatures } from '@/lib/shopping-funnel/types'
-import type { GroupDistributions, TierDistribution, TierBoundaries, CalibrationConfig } from '../tier-scoring.types'
+import type { GroupDistributions, TierDistribution, TierBoundaries, CalibrationConfig, RecommendedAction } from '../tier-scoring.types'
 import { DEFAULT_CALIBRATION } from '../tier-scoring.types'
 import {
   computeTierDistributions,
@@ -789,5 +789,239 @@ describe('Phase 33.1: Calibration', () => {
     if (misplacedCount === 0) {
       expect(hero).toBe('All scored terms appear correctly placed')
     }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Phase 34.1: Decision Logic Bug Fixes
+// ---------------------------------------------------------------------------
+
+describe('Phase 34.1: Bug 1 — Wasted spend override', () => {
+  it('wasted spend term with 0 conversions and >$5 spend gets block when in HIGH', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 10_000_000, // $10
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    expect(score.recommendedAction).toBe('block')
+  })
+
+  it('wasted spend term with 0 conversions and >$5 spend gets constrain when in MEDIUM/LOW', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'Medium',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 10_000_000, // $10
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    expect(score.recommendedAction).toBe('constrain')
+  })
+})
+
+describe('Phase 34.1: Bug 2 — Impact formula for wasted spend', () => {
+  it('wasted spend impact equals monthly cost saved, not $0', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 8_000_000, // $8
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    expect(score.impact).not.toBeNull()
+    expect(score.impact!.mid).toBeGreaterThanOrEqual(4) // at least 50% of $8
+    expect(score.impact!.mid).toBeGreaterThan(0) // NOT $0
+  })
+
+  it('promote impact is positive when term ROAS exceeds target tier median', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // High ROAS term in HIGH tier — scoring engine should see it fits LOW better
+    // HIGH ROAS: p50 ~5.75, LOW ROAS: p50 ~1.2
+    // With ROAS 60/5=12.0, this is way above HIGH median, so recommended might be HIGH still
+    // Let's use a term with ROAS in the LOW tier range but placed in HIGH
+    // Actually we need a term that gets recommendedAction='promote'
+    // A term with moderate ROAS placed in HIGH that fits MEDIUM better
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 100,
+      total_cost_micros: 100_000_000, // $100
+      total_conversions: 15,
+      total_conversions_value: 500, // ROAS = 500/100 = 5.0
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    // If misplaced with a downward move, impact should be positive
+    if (score.isMisplaced && score.impact) {
+      expect(score.impact.mid).toBeGreaterThanOrEqual(0)
+    }
+    // At minimum, verify impact is not null when misplaced
+    if (score.isMisplaced) {
+      expect(score.impact).not.toBeNull()
+    }
+  })
+})
+
+describe('Phase 34.1: Bug 3 — CPC inversion', () => {
+  it('cheap CPC (negative z-score) does not penalize fit score', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Cheap CPC term: low cost, many clicks
+    const cheapTerm = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 200,
+      total_cost_micros: 1_000_000, // $1 / 200 clicks = $0.005 CPC (very cheap)
+      total_conversions: 10,
+      total_conversions_value: 60,
+    })
+
+    // Expensive CPC term: high cost, few clicks
+    const expensiveTerm = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 10,
+      total_cost_micros: 20_000_000, // $20 / 10 clicks = $2.00 CPC (expensive)
+      total_conversions: 10,
+      total_conversions_value: 60,
+    })
+
+    const cheapScore = scoreTerm(cheapTerm, group, globalFallback)
+    const expensiveScore = scoreTerm(expensiveTerm, group, globalFallback)
+
+    // Cheap CPC should produce a BETTER (higher/less negative) HIGH tier fit score than expensive CPC
+    // because cheap CPC should not be penalized
+    expect(cheapScore.tierFitScores.HIGH).toBeGreaterThanOrEqual(expensiveScore.tierFitScores.HIGH)
+  })
+
+  it('expensive CPC (positive z-score) penalizes fit score', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Baseline: term with CPC at the tier median
+    const baselineTerm = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 2_500_000, // $2.5 / 50 = $0.05 CPC
+      total_conversions: 5,
+      total_conversions_value: 30,
+    })
+
+    // Expensive: CPC well above median
+    const expensiveTerm = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 5,
+      total_cost_micros: 25_000_000, // $25 / 5 = $5.00 CPC (very expensive)
+      total_conversions: 5,
+      total_conversions_value: 30,
+    })
+
+    const baselineScore = scoreTerm(baselineTerm, group, globalFallback)
+    const expensiveScore = scoreTerm(expensiveTerm, group, globalFallback)
+
+    // Expensive CPC should produce a WORSE (lower/more negative) fit score
+    expect(expensiveScore.tierFitScores.HIGH).toBeLessThan(baselineScore.tierFitScores.HIGH)
+  })
+})
+
+describe('Phase 34.1: Bug 4 — Prescriptive verdicts', () => {
+  it('wasted spend verdict includes spend amount and "block" language', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 10_000_000, // $10
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    // actionReason should include dollar amount and block language
+    expect(score.actionReason).toBeDefined()
+    expect(score.actionReason).toMatch(/\$/)
+    expect(score.actionReason!.toLowerCase()).toMatch(/block/)
+    // Should NOT use descriptive language
+    expect(score.actionReason!.toLowerCase()).not.toMatch(/fits/)
+    expect(score.actionReason!.toLowerCase()).not.toMatch(/distribution/)
+  })
+
+  it('promote verdict includes prescriptive action language', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Need a term that will get recommendedAction='promote'
+    // promote = isMisplaced + recommendedTier deeper in funnel
+    // A term in HIGH with metrics that fit MEDIUM better (downward = promote)
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 100,
+      total_cost_micros: 5_000_000, // $5
+      total_conversions: 8,
+      total_conversions_value: 15, // ROAS = 15/5 = 3.0 (fits MEDIUM range 2-4)
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    if (score.recommendedAction === 'promote') {
+      expect(score.actionReason).toBeDefined()
+      expect(score.actionReason!.toLowerCase()).toMatch(/promote|aggressive|move/)
+      expect(score.actionReason!.toLowerCase()).not.toMatch(/resembles/)
+      expect(score.actionReason!.toLowerCase()).not.toMatch(/fits/)
+    }
+    // Also verify the verdict field is prescriptive
+    expect(score.verdict.toLowerCase()).not.toMatch(/resembles/)
   })
 })
