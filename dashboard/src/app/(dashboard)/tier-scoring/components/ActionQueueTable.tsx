@@ -6,13 +6,17 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2 } from 'lucide-react'
 import { ActionQueueRow } from './ActionQueueRow'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
+import type { ClassifiedTerm } from '../lib/reason-codes'
 import type { RecommendationStatus } from '../hooks/useRecommendations'
+import type { ApproveOptions } from './LeakageTermRow'
 
 interface ActionQueueTableProps {
-  scores: TermScore[]
+  terms: ClassifiedTerm[]
   onSelectTerm: (term: TermScore) => void
   recommendationStatuses?: Record<string, RecommendationStatus>
   onUndo?: (searchTerm: string, customLabel0: string) => void
+  onApprove?: (term: TermScore, options?: ApproveOptions) => void
+  onReject?: (term: TermScore) => void
 }
 
 const PAGE_SIZE = 20
@@ -21,20 +25,16 @@ function makeKey(searchTerm: string, customLabel0: string): string {
   return `${searchTerm}::${customLabel0}`
 }
 
-export function ActionQueueTable({ scores, onSelectTerm, recommendationStatuses, onUndo }: ActionQueueTableProps) {
+export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, onUndo, onApprove, onReject }: ActionQueueTableProps) {
   const [showCount, setShowCount] = useState(PAGE_SIZE)
 
   const actionQueue = useMemo(() => {
-    const misplaced = scores
-      .filter(s => s.isMisplaced)
-      .sort((a, b) => (b.impact?.mid ?? 0) - (a.impact?.mid ?? 0))
-
-    if (!recommendationStatuses) return misplaced
+    if (!recommendationStatuses) return terms
 
     // Partition: accepted items first, then other misplaced items
-    const accepted: TermScore[] = []
-    const others: TermScore[] = []
-    for (const term of misplaced) {
+    const accepted: ClassifiedTerm[] = []
+    const others: ClassifiedTerm[] = []
+    for (const term of terms) {
       const key = makeKey(term.searchTerm, term.customLabel0)
       const s = recommendationStatuses[key]
       if (s?.status === 'accepted') {
@@ -44,7 +44,7 @@ export function ActionQueueTable({ scores, onSelectTerm, recommendationStatuses,
       }
     }
     return [...accepted, ...others]
-  }, [scores, recommendationStatuses])
+  }, [terms, recommendationStatuses])
 
   const visibleTerms = actionQueue.slice(0, showCount)
   const hasMore = showCount < actionQueue.length
@@ -77,15 +77,17 @@ export function ActionQueueTable({ scores, onSelectTerm, recommendationStatuses,
       <CardContent className="space-y-2">
         {visibleTerms.map((term, i) => {
           const key = makeKey(term.searchTerm, term.customLabel0)
-          const isAccepted = recommendationStatuses?.[key]?.status === 'accepted'
+          const status = recommendationStatuses?.[key]
           return (
             <ActionQueueRow
               key={term.searchTerm}
               term={term}
               rank={i + 1}
               onViewDetails={onSelectTerm}
-              showUndo={isAccepted}
               onUndo={onUndo}
+              onApprove={onApprove}
+              onReject={onReject}
+              reviewStatus={status?.status ?? 'pending'}
             />
           )
         })}

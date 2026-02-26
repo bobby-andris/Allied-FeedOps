@@ -173,10 +173,12 @@ export default function TierScoringPage() {
                 onApplyClick={() => setActiveTab('leakage')}
               />
               <ActionQueueTable
-                scores={data.scores}
+                terms={classifiedTerms}
                 onSelectTerm={(term) => setActionSelectedTerm(term)}
                 recommendationStatuses={recommendations.statuses}
                 onUndo={recommendations.undo}
+                onApprove={recommendations.approve}
+                onReject={recommendations.reject}
               />
             </>
           )}

@@ -58,10 +58,10 @@ export function HeroSummary({
             <TrendingUp className="h-6 w-6 text-blue-500 mt-0.5 shrink-0" />
             <div className="space-y-1">
               <h2 className="text-lg font-semibold">
-                {totalMisplaced} search {totalMisplaced === 1 ? 'term' : 'terms'} could perform better in a different tier
+                {totalMisplaced} search {totalMisplaced === 1 ? 'term needs' : 'terms need'} action
               </h2>
               <p className="text-sm text-muted-foreground">
-                Moving these terms to their recommended tiers could improve returns by{' '}
+                Blocking wasted spend and optimizing tier placement could save{' '}
                 <span className="font-semibold text-foreground">
                   {formatDollars(totalImpact.low)}&ndash;{formatDollars(totalImpact.high)}/mo
                 </span>
@@ -73,7 +73,7 @@ export function HeroSummary({
           <div className="flex items-center gap-3">
             <Button className="gap-1.5" onClick={onApplyClick}>
               <Zap className="h-4 w-4" />
-              Apply Recommendations
+              Review in Revenue Leakage
             </Button>
             <span className="text-xs text-muted-foreground">
               Last analyzed {formattedDate}
