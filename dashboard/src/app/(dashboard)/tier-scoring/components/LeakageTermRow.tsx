@@ -81,9 +81,10 @@ export function LeakageTermRow({
 
   const handleDemote = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // Wasted spend "Demote" pushes UP the funnel to HIGH — where restrictive tROAS/CPC caps constrain spending.
+    // Wasted spend "Demote" pushes UP the funnel to HIGH — where restrictive tROAS/CPC caps restrict spending.
     // NOT to LOW, which would unleash aggressive bidding on a non-converting term.
-    onApprove(term, { recommendedAction: 'funnel', recommendedTier: 'high' })
+    const target = term.targetTier ?? 'HIGH'
+    onApprove(term, { recommendedAction: 'funnel', recommendedTier: target.toLowerCase() })
   }
 
   const handleReject = (e: React.MouseEvent) => {
@@ -143,7 +144,7 @@ export function LeakageTermRow({
 
         {/* Tier movement */}
         <div className="shrink-0 hidden sm:block">
-          <TierMovementArrow current={term.currentTier} recommended={term.recommendedTier} />
+          <TierMovementArrow current={term.currentTier} recommended={term.recommendedTier} targetTier={term.targetTier} />
         </div>
 
         {/* Impact */}
@@ -172,10 +173,10 @@ export function LeakageTermRow({
                       size="sm"
                       onClick={handleDemote}
                       className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
-                      title="Push to HIGH tier where restrictive settings constrain spending"
+                      title={`Demote to ${term.targetTier ?? 'HIGH'} tier to restrict spending`}
                     >
                       <ArrowDown className="h-3.5 w-3.5" />
-                      Constrain
+                      Demote to {term.targetTier ?? 'HIGH'}
                     </Button>
                   )}
                 </>

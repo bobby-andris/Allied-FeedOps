@@ -46,7 +46,7 @@ const DEFAULT_METRIC_DIST: MetricDistribution = {
   p25: 0, p50: 0, p75: 0, mean: 0, mad: 0, min: 0, max: 0,
 }
 
-// Waterfall Shopping defaults: HIGH priority = top-of-funnel (broad, constrained bidding, lowest ROAS),
+// Waterfall Shopping defaults: HIGH priority = top-of-funnel (broad, restricted bidding, lowest ROAS),
 // LOW priority = bottom-of-funnel (high-intent, aggressive bidding, highest ROAS).
 // See docs/domain/waterfall-shopping-structure.md for full explanation.
 const DEFAULT_DISTRIBUTIONS: Record<FunnelTier, TierDistribution> = {
@@ -335,7 +335,7 @@ export function computeConfidence(
   const significance = Math.min(term.total_conversions / 10, 1)
 
   // NLP alignment (20%): query specificity → tier alignment
-  // Waterfall model: specific/transactional → LOW (aggressive bidding), broad/generic → HIGH (constrained)
+  // Waterfall model: specific/transactional → LOW (aggressive bidding), broad/generic → HIGH (restricted)
   // Branded terms have separate campaigns and should NOT appear in the waterfall structure.
   // If they do appear, treat as anomaly (low alignment in any tier).
   let intentAlignment = 0.5 // neutral default
@@ -345,7 +345,7 @@ export function computeConfidence(
       // Low alignment regardless of tier signals a routing anomaly.
       intentAlignment = 0.2
     } else if (intentFeatures.is_competitor) {
-      // Competitor terms are defensive — keep constrained in HIGH/MEDIUM to limit spend
+      // Competitor terms are defensive — keep restricted in HIGH/MEDIUM to limit spend
       if (currentTier === 'HIGH') intentAlignment = 0.7
       else if (currentTier === 'MEDIUM') intentAlignment = 0.5
       else intentAlignment = 0.3 // competitor in LOW = risky aggressive spend
@@ -355,7 +355,7 @@ export function computeConfidence(
       else if (currentTier === 'MEDIUM') intentAlignment = 0.7
       else intentAlignment = 0.4 // product-specific stuck in broad tier
     } else {
-      // Generic/broad terms belong in HIGH (constrained)
+      // Generic/broad terms belong in HIGH (restricted)
       if (currentTier === 'HIGH') intentAlignment = 0.7
       else if (currentTier === 'MEDIUM') intentAlignment = 0.5
       else intentAlignment = 0.3 // generic in LOW = wasting aggressive bids
@@ -414,7 +414,7 @@ export function estimateImpact(
 
   // Determine movement direction in the waterfall funnel
   // "promote" (downward in funnel) = moving toward LOW (more aggressive bidding, higher intent)
-  // "demote" (upward in funnel) = moving toward HIGH (more constrained bidding)
+  // "demote" (upward in funnel) = moving toward HIGH (more restricted bidding)
   // funnelDepth: HIGH=1 (top/broad), MEDIUM=2, LOW=3 (bottom/high-intent)
   const funnelDepth: Record<FunnelTier, number> = { HIGH: 1, MEDIUM: 2, LOW: 3 }
   const direction: 'upward' | 'downward' | 'lateral' =

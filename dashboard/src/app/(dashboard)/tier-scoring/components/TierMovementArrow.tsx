@@ -6,6 +6,8 @@ import type { FunnelTier } from '@/lib/shopping-funnel/types'
 interface TierMovementArrowProps {
   current: FunnelTier
   recommended: FunnelTier
+  /** If provided, overrides recommended for arrow direction and destination label */
+  targetTier?: FunnelTier
 }
 
 const tierRank: Record<FunnelTier, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 }
@@ -22,9 +24,10 @@ const tierBg: Record<FunnelTier, string> = {
   LOW: 'bg-amber-50',
 }
 
-export function TierMovementArrow({ current, recommended }: TierMovementArrowProps) {
-  const goingUp = tierRank[recommended] > tierRank[current]
-  const same = current === recommended
+export function TierMovementArrow({ current, recommended, targetTier }: TierMovementArrowProps) {
+  const destination = targetTier ?? recommended
+  const goingUp = tierRank[destination] > tierRank[current]
+  const same = current === destination
 
   if (same) {
     return (
@@ -45,8 +48,8 @@ export function TierMovementArrow({ current, recommended }: TierMovementArrowPro
       ) : (
         <ArrowDown className="h-3.5 w-3.5 text-orange-600" />
       )}
-      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${tierBg[recommended]} ${tierColor[recommended]}`}>
-        {recommended}
+      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${tierBg[destination]} ${tierColor[destination]}`}>
+        {destination}
       </span>
     </span>
   )

@@ -30,9 +30,10 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
     onApprove?.(term, { recommendedAction: 'global_block' })
   }
 
-  const handleConstrain = (e: React.MouseEvent) => {
+  const handleDemote = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onApprove?.(term, { recommendedAction: 'funnel', recommendedTier: 'high' })
+    const target = term.targetTier ?? 'HIGH'
+    onApprove?.(term, { recommendedAction: 'funnel', recommendedTier: target.toLowerCase() })
   }
 
   const handleApprove = (e: React.MouseEvent) => {
@@ -78,7 +79,7 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
 
       {/* Tier movement arrow */}
       <div className="shrink-0 hidden sm:block">
-        <TierMovementArrow current={term.currentTier} recommended={term.recommendedTier} />
+        <TierMovementArrow current={term.currentTier} recommended={term.recommendedTier} targetTier={term.targetTier} />
       </div>
 
       {/* Impact */}
@@ -100,12 +101,12 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleConstrain}
+                    onClick={handleDemote}
                     className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
-                    title="Push to HIGH tier where restrictive settings constrain spending"
+                    title={`Demote to ${term.targetTier ?? 'HIGH'} tier to restrict spending`}
                   >
                     <ArrowDown className="h-3.5 w-3.5" />
-                    Constrain
+                    Demote to {term.targetTier ?? 'HIGH'}
                   </Button>
                 )}
               </>
