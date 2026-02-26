@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-26T00:54:00Z"
+last_updated: "2026-02-26T01:02:00Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 16
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 34 (v1.3c) — IN PROGRESS
-Plan: 3 of 4 complete
-Status: Completed 34-03 (Revenue Leakage tab UI components)
-Last activity: 2026-02-26 — Completed 34-03-PLAN.md (6 UI components + 14 unit tests)
+Phase: 34 (v1.3c) — COMPLETE
+Plan: 4 of 4 complete
+Status: Completed 34-04 (History tab, page integration, Action Queue undo)
+Last activity: 2026-02-26 — Completed 34-04-PLAN.md (4 tabs, history grouping, undo, 10 tests)
 
-Progress: [███████░░░] 75% (Phase 34)
+Progress: [██████████] 100% (Phase 34)
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [███████░░░] 75% (Phase 34)
 | Phase 34 P01 | 3min | 3 tasks | 3 files |
 | Phase 34 P02 | 4min | 3 tasks | 6 files |
 | Phase 34 P03 | 5min | 3 tasks | 8 files |
+| Phase 34 P04 | 5min | 4 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 34-03]: Pure CSS box plot over Recharts custom shapes for ROAS distributions
 - [Phase 34-03]: Export helper functions from components for direct unit testing
 - [Phase 34-03]: ApproveOptions type extends approve callback for wasted_spend Block/Demote actions
+- [Phase 34-04]: Controlled Tabs state for programmatic tab switching from HeroSummary button
+- [Phase 34-04]: Extracted groupHistoryByDay as pure function for independent unit testing
+- [Phase 34-04]: Undo in History tab only for accepted entries (rejected don't need undo)
 
 ### Pending Todos
 
@@ -108,7 +112,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34-03-PLAN.md (Revenue Leakage tab UI components)
+Stopped at: Completed 34-04-PLAN.md (Phase 34 complete — all 4 plans delivered)
 Resume file: None
 
 **Phase 33 Completion Summary**:
