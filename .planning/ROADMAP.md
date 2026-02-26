@@ -171,12 +171,12 @@
   5. User can undo a previously executed tier movement and see the reversal logged in policy_action_execution_log with criterion IDs
 **Plans**: TBD
 
-### Phase 34.1: Fix Decision Logic (INSERTED)
+### Phase 34.1: Fix Decision Logic (INSERTED) — COMPLETE 2026-02-26
 
 **Goal:** Fix the scoring engine's broken decision logic so recommendations are prescriptive (what action to take) rather than descriptive (which tier's distribution you resemble), and add custom_label_0 level blocking, search promotion candidates, and label profitability summaries
 **Requirements**: FIX-01, FIX-02, FIX-03, FIX-04, FIX-05, FIX-06, FIX-07, FIX-08, FIX-09, FEAT-01, FEAT-02, FEAT-03, DOC-01
 **Depends on:** Phase 34
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed
 **Success Criteria** (what must be TRUE):
   1. Wasted spend terms (0 conversions, >$5 spend) NEVER get recommended to LOW tier — always block or constrain
   2. Impact estimates for wasted spend equal cost saved (not $0)
