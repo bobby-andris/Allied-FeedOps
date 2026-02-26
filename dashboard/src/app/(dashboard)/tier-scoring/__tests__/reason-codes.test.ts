@@ -34,6 +34,9 @@ function makeTermScore(overrides: Partial<TermScore> = {}): TermScore {
     actualRoas: 3.5,
     verdict: 'test verdict',
     peerContext: 'ranks in top 15% of Towel Bar terms',
+    totalImpressions: 500,
+    recommendedAction: 'observe',
+    actionReason: 'Aligned',
     ...overrides,
   }
 }
@@ -93,6 +96,27 @@ describe('classifyLeakageReason', () => {
       totalCostMicros: 4_000_000, // $4 < $5 threshold
     })
     expect(classifyLeakageReason(term)).toBe('misplaced')
+  })
+
+  it('under_invested requires avgMonthlySearches > multiplier * actual impressions', () => {
+    // Term with 100 impressions and 5000 avgMonthlySearches -> under_invested (5000 > 2 * 100)
+    const underInvestedTerm = makeTermScore({
+      totalConversions: 5,
+      totalCostMicros: 3_000_000,
+      totalImpressions: 100,
+      impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'downward' },
+    })
+    const kwData: KeywordData = { avgMonthlySearches: 5000 }
+    expect(classifyLeakageReason(underInvestedTerm, kwData)).toBe('under_invested')
+
+    // Term with 4000 impressions and 5000 avgMonthlySearches -> NOT under_invested (5000 < 2 * 4000)
+    const adequateTerm = makeTermScore({
+      totalConversions: 5,
+      totalCostMicros: 3_000_000,
+      totalImpressions: 4000,
+      impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'downward' },
+    })
+    expect(classifyLeakageReason(adequateTerm, kwData)).toBe('misplaced')
   })
 
   it('returns misplaced when keyword data exists but direction is upward (toward HIGH)', () => {

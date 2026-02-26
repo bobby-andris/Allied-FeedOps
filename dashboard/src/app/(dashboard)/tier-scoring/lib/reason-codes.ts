@@ -47,7 +47,7 @@ export function classifyLeakageReason(
   if (keywordData?.avgMonthlySearches && term.impact) {
     if (
       term.impact.direction === 'downward' &&
-      keywordData.avgMonthlySearches > UNDER_INVESTED_MULTIPLIER * (term.totalCostMicros > 0 ? 1 : 0)
+      keywordData.avgMonthlySearches > UNDER_INVESTED_MULTIPLIER * (term.totalImpressions ?? 0)
     ) {
       return 'under_invested'
     }
