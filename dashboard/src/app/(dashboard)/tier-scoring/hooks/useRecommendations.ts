@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { TermScore, ImpactRange } from '@/lib/optimization/tier-scoring.types'
+import type { ApproveOptions } from '../components/LeakageTermRow'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -37,7 +38,7 @@ interface UseRecommendationsReturn {
   history: HistoryEntry[]
   historyLoading: boolean
   loading: boolean
-  approve: (term: TermScore) => Promise<void>
+  approve: (term: TermScore, options?: ApproveOptions) => Promise<void>
   reject: (term: TermScore, reason?: string) => Promise<void>
   undo: (searchTerm: string, customLabel0: string) => Promise<void>
   batchApprove: (terms: TermScore[]) => Promise<void>
@@ -108,7 +109,7 @@ export function useRecommendations(): UseRecommendationsReturn {
   }, [])
 
   // ----- approve -----
-  const approve = useCallback(async (term: TermScore) => {
+  const approve = useCallback(async (term: TermScore, options?: ApproveOptions) => {
     const key = makeKey(term.searchTerm, term.customLabel0)
     const previous = statuses[key]
 
@@ -126,10 +127,11 @@ export function useRecommendations(): UseRecommendationsReturn {
           action: 'approve',
           searchTerm: term.searchTerm,
           customLabel0: term.customLabel0,
-          recommendedTier: term.recommendedTier,
+          recommendedTier: options?.recommendedTier ?? term.recommendedTier,
           currentTier: term.currentTier,
           confidence: term.confidence.score,
           impact: term.impact,
+          ...(options?.recommendedAction ? { recommendedAction: options.recommendedAction } : {}),
         }),
       })
       if (!res.ok) throw new Error(`API error: ${res.status}`)
