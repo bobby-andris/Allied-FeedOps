@@ -70,7 +70,7 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 - [ ] **INTENT-04**: Implement unified intent score (0.55 * feed_alignment + 0.45 * behavioral_intent) and new determineAction() decision matrix with Trigger E (zero-conversion promotion when intentScore >= 0.65 AND rCTR >= 1.5 OR wordCount >= 3)
 - [x] **INTENT-05**: Fix tier-scoring UI — add targetTier to TermScore type, fix TierMovementArrow direction, show Promote/Demote buttons with target tier labels, display intent score breakdown (attribute + behavioral + composite)
 - [ ] **INTENT-06**: Wire action queue execution to Shopping Funnel pipeline (applyTierAssignment → blockedTiersForAssignment → Google Ads API negative keyword management)
-- [ ] **INTENT-07**: Audit Google Ads account — catalog all 19 conversion actions (identify micro-conversions vs purchases), compute average CPA, document HIGH tier CPC caps per product group, validate historical behavioral data availability
+- [x] **INTENT-07**: Audit Google Ads account — catalog all 19 conversion actions (identify micro-conversions vs purchases), compute average CPA, document HIGH tier CPC caps per product group, validate historical behavioral data availability
 - [ ] **INTENT-08**: Calibrate intent score thresholds — score 1000+ historical search terms, correlate with actual ROAS outcomes, adjust tier boundary thresholds (0.25/0.50/0.65) based on real data
 
 ### Demand Intelligence
