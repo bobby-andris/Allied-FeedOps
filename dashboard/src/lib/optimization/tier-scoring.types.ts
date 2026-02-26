@@ -17,6 +17,22 @@ export interface CalibrationConfig {
   minImpressions: number
   /** AOV for impact estimation */
   averageOrderValue: number
+  /** Average CPA from Google Ads account audit (90-day). Wasted spend threshold = 1.5x this value.
+   *  Source: docs/analysis/google-ads-account-audit.md */
+  avgCPA: number
+  /** Minimum unified intent score for Trigger D (zero-conversion promotion).
+   *  Requires evidence from both Domain A (feed alignment) and Domain B (behavioral).
+   *  Calibrated: 0.65 requires both domains to contribute significantly. */
+  minIntentScore: number
+  /** Weight for feed alignment in unified score (behavioral = 1 - this).
+   *  Feed gets slight priority (0.55) because it's deterministic; behavioral is noisy. */
+  feedAlignmentWeight: number
+  /** Minimum relative CTR for Trigger D gate. rCTR = term CTR / tier median CTR.
+   *  1.5 = 50% above tier median, validated against account CTR ranges. */
+  minRCTR: number
+  /** Minimum query word count for Trigger D gate (alternative to rCTR).
+   *  3+ words inherently specific for bathroom fixture queries. */
+  minQueryWords: number
 }
 
 export const DEFAULT_CALIBRATION: CalibrationConfig = {
@@ -24,6 +40,11 @@ export const DEFAULT_CALIBRATION: CalibrationConfig = {
   minConfidence: 0.40,
   minImpressions: 50,
   averageOrderValue: 85,
+  avgCPA: 64.22,           // From 90-day account audit (docs/analysis/google-ads-account-audit.md)
+  minIntentScore: 0.65,    // Calibrated: requires both feed alignment + behavioral (docs/analysis/intent-score-calibration.md)
+  feedAlignmentWeight: 0.55, // Feed/behavioral split: 0.55/0.45 (feed is deterministic, behavioral noisy)
+  minRCTR: 1.5,            // 50% above tier median CTR — meaningful engagement signal
+  minQueryWords: 3,        // 3+ words = specific query (e.g., "polished nickel grab bar")
 }
 
 export interface MetricDistribution {

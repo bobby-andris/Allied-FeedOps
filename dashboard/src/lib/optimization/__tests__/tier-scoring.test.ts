@@ -799,18 +799,19 @@ describe('Phase 33.1: Calibration', () => {
 // ---------------------------------------------------------------------------
 
 describe('Phase 34.1: Bug 1 — Wasted spend override', () => {
-  it('wasted spend term with 0 conversions and >$5 spend gets block when in HIGH', () => {
+  it('wasted spend term with 0 conversions exceeding threshold gets block when in HIGH', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
+    // Wasted spend threshold = 1.5 * avgCPA ($64.22) = $96.33
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000, // $10
+      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -819,18 +820,19 @@ describe('Phase 34.1: Bug 1 — Wasted spend override', () => {
     expect(score.recommendedAction).toBe('block')
   })
 
-  it('wasted spend term with 0 conversions and >$5 spend gets demote when in MEDIUM/LOW', () => {
+  it('wasted spend term with 0 conversions exceeding threshold gets demote when in MEDIUM/LOW', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
+    // Wasted spend threshold = 1.5 * avgCPA ($64.22) = $96.33
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Medium',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000, // $10
+      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1127,13 +1129,15 @@ describe('ROAS-based determineAction logic', () => {
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
+    // Wasted spend threshold = 1.5 * avgCPA ($64.22) = $96.33
+    // Use $100 spend (100_000_000 micros) to exceed threshold
     // HIGH tier wasted spend -> block
     const highTerm = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000,
+      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1146,7 +1150,7 @@ describe('ROAS-based determineAction logic', () => {
       tier: 'Medium',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000,
+      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1159,7 +1163,7 @@ describe('ROAS-based determineAction logic', () => {
       tier: 'Low',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000,
+      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1175,12 +1179,14 @@ describe('Phase 34.1: Bug 4 — Prescriptive verdicts', () => {
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
+    // Wasted spend threshold = 1.5 * avgCPA ($64.22) = $96.33
+    // Use $100 spend to exceed threshold
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000, // $10
+      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1568,25 +1574,38 @@ describe('Unified intent scoring in scoreTerm', () => {
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // $10 spend, 0 conversions, avgCPA=$64.22 → threshold=$96.33
-    // $10 < $96.33 → NOT wasted spend
-    const term = makeTermWithFunnels({
+    // Default avgCPA=$64.22 from CalibrationConfig → threshold=$96.33
+    // $80 spend < $96.33 → NOT wasted spend with default config
+    const term80 = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 10_000_000, // $10
+      total_cost_micros: 80_000_000, // $80
       total_conversions: 0,
       total_conversions_value: 0,
     })
 
-    const scoreWithAvgCPA = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, undefined, 64.22)
-    // $10 < $96.33 threshold → should NOT be block/wasted_spend
-    expect(scoreWithAvgCPA.trigger).not.toBe('wasted_spend')
+    const scoreDefault = scoreTerm(term80, group, globalFallback)
+    // $80 < $96.33 threshold (1.5 * $64.22) → should NOT be wasted_spend
+    expect(scoreDefault.trigger).not.toBe('wasted_spend')
 
-    // Without avgCPA (defaults to $5) → threshold=$7.50 → $10 > $7.50 → wasted_spend
-    const scoreWithoutAvgCPA = scoreTerm(term, group, globalFallback)
-    expect(scoreWithoutAvgCPA.trigger).toBe('wasted_spend')
+    // With explicit low avgCPA=$20 → threshold=$30 → $80 > $30 → wasted_spend
+    const scoreWithLowCPA = scoreTerm(term80, group, globalFallback, undefined, DEFAULT_CALIBRATION, undefined, 20)
+    expect(scoreWithLowCPA.trigger).toBe('wasted_spend')
+
+    // $100 spend with default config → $100 > $96.33 → wasted_spend
+    const term100 = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 100_000_000, // $100
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+    const scoreAboveThreshold = scoreTerm(term100, group, globalFallback)
+    expect(scoreAboveThreshold.trigger).toBe('wasted_spend')
   })
 
   it('intent-proven promotion fires for zero-conv term with high intent and rCTR', () => {

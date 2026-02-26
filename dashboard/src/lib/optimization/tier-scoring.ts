@@ -282,14 +282,16 @@ export function scoreTerm(
     )
   }
 
-  // Compute unified intent score
+  // Compute unified intent score using calibrated weights
+  const feedWeight = config.feedAlignmentWeight
+  const behavioralWeight = 1 - feedWeight
   if (feedAlignmentScore !== undefined || behavioralSignals) {
     const feed = feedAlignmentScore ?? 0
     const behavioral = behavioralSignals?.composite ?? 0
     intentScoreBreakdown = {
       feedAlignmentScore: feed,
       behavioralScore: behavioral,
-      unifiedScore: 0.55 * feed + 0.45 * behavioral,
+      unifiedScore: feedWeight * feed + behavioralWeight * behavioral,
     }
   }
 
@@ -303,11 +305,12 @@ export function scoreTerm(
     intentScoreBreakdown?.unifiedScore,
     behavioralSignals?.rCTR,
     queryWordCount,
-    avgCPA,
+    avgCPA ?? config.avgCPA,
+    config,
   )
 
   // Impact: compute for misplaced OR wasted spend terms
-  const wastedSpendThreshold = (avgCPA ?? 5) * 1.5
+  const wastedSpendThreshold = (avgCPA ?? config.avgCPA) * 1.5
   const isWastedSpend = term.total_conversions === 0 && costDollars > wastedSpendThreshold
   let impact: ImpactRange | null = null
   if (isMisplaced || isWastedSpend) {
@@ -655,12 +658,14 @@ export function determineAction(
   rCTR?: number,             // raw rCTR for Trigger D gate
   queryWordCount?: number,   // word count for Trigger D gate
   avgCPA?: number,           // from account audit, replaces hardcoded $5
+  config: CalibrationConfig = DEFAULT_CALIBRATION,
 ): { action: RecommendedAction; targetTier: FunnelTier; trigger: string } {
   const costDollars = totalCostMicros / 1_000_000
   const TIER_UP: Record<FunnelTier, FunnelTier> = { HIGH: 'HIGH', MEDIUM: 'HIGH', LOW: 'MEDIUM' }
   const TIER_DOWN: Record<FunnelTier, FunnelTier> = { HIGH: 'MEDIUM', MEDIUM: 'LOW', LOW: 'LOW' }
 
-  const wastedSpendThreshold = 1.5 * (avgCPA || 5)
+  const effectiveAvgCPA = avgCPA ?? config.avgCPA
+  const wastedSpendThreshold = 1.5 * effectiveAvgCPA
 
   // --- Trigger A: Wasted Spend Override ---
   // Zero conversions + spent more than 1.5x avg CPA = wasted spend
@@ -692,11 +697,12 @@ export function determineAction(
 
   // --- Trigger D: Promote (Intent-Proven, Zero Conversions) ---
   // Zero conversions BUT high unified intent score AND supporting evidence
+  // Thresholds calibrated via docs/analysis/intent-score-calibration.md
   if (
     totalConversions === 0 &&
     intentScore !== undefined &&
-    intentScore >= 0.65 &&
-    ((rCTR !== undefined && rCTR >= 1.5) || (queryWordCount !== undefined && queryWordCount >= 3)) &&
+    intentScore >= config.minIntentScore &&
+    ((rCTR !== undefined && rCTR >= config.minRCTR) || (queryWordCount !== undefined && queryWordCount >= config.minQueryWords)) &&
     currentTier !== 'LOW'
   ) {
     return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_intent' }
