@@ -49,11 +49,16 @@ export default function TierScoringPage() {
   const [selectedTier, setSelectedTier] = useState<FunnelTier | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<TermScore | null>(null)
 
-  // Revenue Leakage computed data
+  // Revenue Leakage computed data (all misplaced + trigger-based terms)
   const classifiedTerms = useMemo(() => {
     if (!data) return []
     return classifyAllTerms(data.scores)
   }, [data])
+
+  // Action Queue: only terms with actionable triggers (not 'observe')
+  const actionableTerms = useMemo(() => {
+    return classifiedTerms.filter(t => t.trigger && t.trigger !== 'observe')
+  }, [classifiedTerms])
 
   const pendingTerms = useMemo(() => {
     return classifiedTerms.filter(t => {
@@ -166,14 +171,14 @@ export default function TierScoringPage() {
           ) : (
             <>
               <HeroSummary
-                totalMisplaced={data.totalMisplaced}
+                totalMisplaced={actionableTerms.length}
                 totalImpact={data.totalImpact}
                 totalTermsScored={data.totalTermsScored}
                 computedAt={data.computedAt}
                 onApplyClick={() => setActiveTab('leakage')}
               />
               <ActionQueueTable
-                terms={classifiedTerms}
+                terms={actionableTerms}
                 onSelectTerm={(term) => setActionSelectedTerm(term)}
                 recommendationStatuses={recommendations.statuses}
                 onUndo={recommendations.undo}

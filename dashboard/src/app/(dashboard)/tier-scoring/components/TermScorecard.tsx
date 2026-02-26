@@ -129,7 +129,17 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="text-xl font-bold">{term.searchTerm}</h2>
         <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
-        {term.isMisplaced && (
+        {(term.trigger && term.trigger !== 'observe') && (
+          <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
+            <AlertCircle className="h-3 w-3" />
+            {term.trigger === 'wasted_spend' ? 'Wasted Spend' :
+             term.trigger === 'promote_intent' ? 'Intent-Proven' :
+             term.trigger === 'promote_conversion' ? 'Conversion-Proven' :
+             term.trigger === 'demote_underperform' ? 'Underperforming' :
+             term.trigger === 'under_invested' ? 'Under-Invested' : 'Opportunity'}
+          </span>
+        )}
+        {!term.trigger && term.isMisplaced && (
           <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
             <AlertCircle className="h-3 w-3" />
             Opportunity
@@ -145,22 +155,29 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
         <CardContent className="space-y-3">
           <p className="text-sm leading-relaxed">{term.verdict}</p>
 
-          {term.isMisplaced && (
-            <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              <span className={`font-medium ${tierTextColor[term.currentTier]}`}>
-                {term.currentTier}
-              </span>
-              <span className="text-muted-foreground">&rarr;</span>
-              <span className={`font-medium ${tierTextColor[term.recommendedTier]}`}>
-                {term.recommendedTier}
-              </span>
-              {term.impact && (
-                <span className="ml-auto text-xs">
-                  Moving this term could add {formatDollars(term.impact.low)}&ndash;{formatDollars(term.impact.high)}/mo
+          {(() => {
+            // Use targetTier from trigger system when available, fall back to recommendedTier
+            const destination = term.targetTier ?? term.recommendedTier
+            const hasMovement = (term.trigger && term.trigger !== 'observe') || term.isMisplaced
+            const showArrow = hasMovement && destination !== term.currentTier
+            if (!showArrow) return null
+            return (
+              <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <span className={`font-medium ${tierTextColor[term.currentTier]}`}>
+                  {term.currentTier}
                 </span>
-              )}
-            </div>
-          )}
+                <span className="text-muted-foreground">&rarr;</span>
+                <span className={`font-medium ${tierTextColor[destination]}`}>
+                  {destination}
+                </span>
+                {term.impact && (
+                  <span className="ml-auto text-xs">
+                    Moving this term could add {formatDollars(term.impact.low)}&ndash;{formatDollars(term.impact.high)}/mo
+                  </span>
+                )}
+              </div>
+            )
+          })()}
         </CardContent>
       </Card>
 
