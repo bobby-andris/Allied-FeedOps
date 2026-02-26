@@ -817,7 +817,7 @@ describe('Phase 34.1: Bug 1 — Wasted spend override', () => {
     expect(score.recommendedAction).toBe('block')
   })
 
-  it('wasted spend term with 0 conversions and >$5 spend gets constrain when in MEDIUM/LOW', () => {
+  it('wasted spend term with 0 conversions and >$5 spend gets demote when in MEDIUM/LOW', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
@@ -834,7 +834,7 @@ describe('Phase 34.1: Bug 1 — Wasted spend override', () => {
     })
 
     const score = scoreTerm(term, group, globalFallback)
-    expect(score.recommendedAction).toBe('constrain')
+    expect(score.recommendedAction).toBe('demote')
   })
 })
 
@@ -973,13 +973,13 @@ describe('Phase 34.1: Bug 3 — CPC inversion', () => {
 // ---------------------------------------------------------------------------
 
 describe('ROAS-based determineAction logic', () => {
-  it('underperformer in MEDIUM gets constrain, not promote', () => {
+  it('underperformer in MEDIUM gets demote, not promote', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // ROAS 0.5 is well below MEDIUM p25 (~2.575) — should get constrain
+    // ROAS 0.5 is well below MEDIUM p25 (~2.575) — should get demote
     // Statistical fit will say LOW (best fit for 0.5 ROAS), triggering isMisplaced
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
@@ -992,8 +992,8 @@ describe('ROAS-based determineAction logic', () => {
     })
 
     const score = scoreTerm(term, group, globalFallback)
-    expect(score.recommendedAction).toBe('constrain')
-    expect(score.verdict.toLowerCase()).toMatch(/constrain/)
+    expect(score.recommendedAction).toBe('demote')
+    expect(score.verdict.toLowerCase()).toMatch(/demote/)
     expect(score.verdict.toLowerCase()).not.toMatch(/promote/)
   })
 
@@ -1019,9 +1019,9 @@ describe('ROAS-based determineAction logic', () => {
 
     const score = scoreTerm(term, group, globalFallback)
     // ROAS 3.0 in HIGH tier: if isMisplaced triggers (recommendedTier=MEDIUM, delta meets threshold),
-    // then ROAS-based logic checks: 3.0 < HIGH p25 (~4.625)? Yes, but currentTier is HIGH so constrain is blocked.
+    // then ROAS-based logic checks: 3.0 < HIGH p25 (~4.625)? Yes, but currentTier is HIGH so demote is blocked.
     // 3.0 > HIGH p75 (~6.625)? No.
-    // So for HIGH tier with below-IQR ROAS but can't constrain (already at HIGH), it observes.
+    // So for HIGH tier with below-IQR ROAS but can't demote (already at HIGH), it observes.
     // Let's instead test a term in HIGH with ROAS above p75
     // Actually, the plan asks for "high performer in HIGH gets promote" — ROAS > HIGH p75 (~6.625)
     // and NOT at LOW tier boundary. Let's use ROAS 8.0 which is above p75.
@@ -1035,12 +1035,12 @@ describe('ROAS-based determineAction logic', () => {
     }
     // The term with ROAS 3.0 in HIGH: statistical fit says MEDIUM (best fit),
     // isMisplaced gates trigger, ROAS 3.0 < HIGH p25 (~4.625) AND currentTier=HIGH
-    // => can't constrain from HIGH, falls through to observe
+    // => can't demote from HIGH, falls through to observe
     // This demonstrates the boundary correctly — HIGH tier underperformers observe (can't go higher)
     expect(['promote', 'observe']).toContain(score.recommendedAction)
   })
 
-  it('underperformer in LOW gets constrain toward MEDIUM', () => {
+  it('underperformer in LOW gets demote toward MEDIUM', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
@@ -1062,10 +1062,10 @@ describe('ROAS-based determineAction logic', () => {
     })
 
     const score = scoreTerm(term, group, globalFallback)
-    // If isMisplaced triggers and ROAS < LOW p25, constrain toward MEDIUM
+    // If isMisplaced triggers and ROAS < LOW p25, demote toward MEDIUM
     if (score.isMisplaced) {
-      expect(score.recommendedAction).toBe('constrain')
-      if (score.recommendedAction === 'constrain') {
+      expect(score.recommendedAction).toBe('demote')
+      if (score.recommendedAction === 'demote') {
         expect(score.verdict).toMatch(/MEDIUM|HIGH/)
       }
     }
@@ -1095,13 +1095,13 @@ describe('ROAS-based determineAction logic', () => {
     expect(score.recommendedAction).toBe('observe')
   })
 
-  it('impact uses correct target tier for constrain action', () => {
+  it('impact uses correct target tier for demote action', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // Underperforming MEDIUM term that gets constrain — target should be HIGH
+    // Underperforming MEDIUM term that gets demote — target should be HIGH
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Medium',
@@ -1113,8 +1113,8 @@ describe('ROAS-based determineAction logic', () => {
     })
 
     const score = scoreTerm(term, group, globalFallback)
-    if (score.recommendedAction === 'constrain' && score.impact) {
-      // Impact direction should be upward (moving toward HIGH = constrained tier)
+    if (score.recommendedAction === 'demote' && score.impact) {
+      // Impact direction should be upward (moving toward HIGH = restricted tier)
       expect(score.impact.direction).toBe('upward')
     }
   })
@@ -1138,7 +1138,7 @@ describe('ROAS-based determineAction logic', () => {
     const highScore = scoreTerm(highTerm, group, globalFallback)
     expect(highScore.recommendedAction).toBe('block')
 
-    // MEDIUM tier wasted spend -> constrain
+    // MEDIUM tier wasted spend -> demote
     const medTerm = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Medium',
@@ -1149,9 +1149,9 @@ describe('ROAS-based determineAction logic', () => {
       total_conversions_value: 0,
     })
     const medScore = scoreTerm(medTerm, group, globalFallback)
-    expect(medScore.recommendedAction).toBe('constrain')
+    expect(medScore.recommendedAction).toBe('demote')
 
-    // LOW tier wasted spend -> constrain
+    // LOW tier wasted spend -> demote
     const lowTerm = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Low',
@@ -1162,7 +1162,7 @@ describe('ROAS-based determineAction logic', () => {
       total_conversions_value: 0,
     })
     const lowScore = scoreTerm(lowTerm, group, globalFallback)
-    expect(lowScore.recommendedAction).toBe('constrain')
+    expect(lowScore.recommendedAction).toBe('demote')
   })
 })
 

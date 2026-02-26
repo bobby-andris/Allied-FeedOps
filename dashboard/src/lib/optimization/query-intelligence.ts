@@ -134,7 +134,7 @@ function estimateTierFromMetrics({
 }): AssignmentTier {
   // Wasted spend guard: zero-conversion terms should never be promoted to LOW (aggressive bidding)
   if (conversions === 0 && costMicros > 5_000_000) {
-    return 'high' // Constrain zero-conversion terms, never promote to LOW
+    return 'high' // Demote zero-conversion terms to HIGH, never promote to LOW
   }
 
   const safeClicks = Math.max(clicks, 1)

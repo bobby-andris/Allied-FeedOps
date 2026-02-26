@@ -6,7 +6,7 @@ export type FallbackLevel = 'per_group' | 'global' | 'defaults'
 export type ConfidenceLevel = 'High' | 'Medium' | 'Low'
 
 /** Prescriptive action: what bidding treatment does this term need? */
-export type RecommendedAction = 'promote' | 'constrain' | 'block' | 'observe'
+export type RecommendedAction = 'promote' | 'demote' | 'block' | 'observe'
 
 export interface CalibrationConfig {
   /** Minimum fit score delta between current and recommended tier to flag as opportunity */
@@ -89,6 +89,7 @@ export interface TermScore {
   peerContext: string // e.g., "ranks in top 15% of Towel Bar terms"
   recommendedAction?: RecommendedAction // what to do (replaces isMisplaced/recommendedTier as primary output)
   actionReason?: string // why (prescriptive explanation)
+  targetTier?: FunnelTier // the tier determineAction wants to move to
   totalImpressions?: number // needed for under_invested fix in Plan 02
 }
 

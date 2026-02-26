@@ -256,7 +256,7 @@ export function buildRoasRecommendations(
       const confidence = normalizeConfidence(row.clicks, row.conversions)
 
       // Wasted spend override: zero conversions with meaningful spend should raise target ROAS
-      // to constrain bidding, regardless of other heuristics
+      // to restrict bidding, regardless of other heuristics
       if (row.conversions === 0 && row.spend > 5) {
         return {
           customLabel0: row.customLabel0,
@@ -266,7 +266,7 @@ export function buildRoasRecommendations(
           recommendedTargetRoas: Number(boundChange(currentTargetRoas * 1.1, currentTargetRoas).toFixed(4)),
           direction: 'increase' as const,
           confidence,
-          rationale: `Spent $${row.spend.toFixed(0)} with zero conversions — raise target to constrain bidding`,
+          rationale: `Spent $${row.spend.toFixed(0)} with zero conversions — raise target to restrict bidding`,
         }
       }
 

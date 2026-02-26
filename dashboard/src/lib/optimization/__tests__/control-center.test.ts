@@ -114,7 +114,7 @@ describe('buildRoasRecommendations', () => {
     expect(recommendations[0].direction).toBe('decrease')
   })
 
-  it('zero-conversion rows always recommend increase (constrain bidding)', () => {
+  it('zero-conversion rows always recommend increase (restrict bidding)', () => {
     const rows: LabelTierPerformanceRow[] = [
       {
         customLabel0: 'Grab Bars',

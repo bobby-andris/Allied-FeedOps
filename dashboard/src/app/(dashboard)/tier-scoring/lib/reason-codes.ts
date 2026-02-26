@@ -41,7 +41,7 @@ export function classifyLeakageReason(
     return 'wasted_spend'
   }
 
-  // Under-invested: high-converting term stuck in a constrained tier
+  // Under-invested: high-converting term stuck in a restricted tier
   // In the waterfall, under-invested terms should move DOWN toward LOW (aggressive bidding).
   // direction === 'downward' means moving toward LOW (deeper in funnel = more aggressive).
   if (keywordData?.avgMonthlySearches && term.impact) {

@@ -267,15 +267,15 @@ export function scoreTerm(
     case 'block':
       actionReason = `Block — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
       break
-    case 'constrain':
+    case 'demote':
       if (term.total_conversions === 0) {
-        actionReason = `Constrain to HIGH — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
+        actionReason = `Demote to HIGH — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
       } else {
-        actionReason = `Constrain — underperforming in ${currentTier}, move to ${targetTier} for restricted bidding`
+        actionReason = `Demote — underperforming in ${currentTier}, move to ${targetTier} for restricted bidding`
       }
       break
     case 'promote':
-      actionReason = `Promote to ${targetTier} — strong performer in constrained ${currentTier} tier`
+      actionReason = `Promote to ${targetTier} — strong performer in ${currentTier} tier`
       break
     default:
       actionReason = `Aligned — performing as expected in ${currentTier}`
@@ -305,6 +305,7 @@ export function scoreTerm(
     peerContext,
     recommendedAction,
     actionReason,
+    targetTier,
     totalImpressions: term.total_impressions ?? 0,
   }
 }
@@ -499,7 +500,7 @@ function determineAction(
   // 1. Wasted spend: zero conversions + meaningful spend (unchanged)
   if (totalConversions === 0 && costDollars > 5) {
     if (currentTier === 'HIGH') return { action: 'block', targetTier: 'HIGH' }
-    return { action: 'constrain', targetTier: 'HIGH' }
+    return { action: 'demote', targetTier: 'HIGH' }
   }
 
   // 2. Not flagged as misplaced by calibration gates — observe
@@ -509,9 +510,9 @@ function determineAction(
   const p25 = currentTierDist.metrics.roas.p25
   const p75 = currentTierDist.metrics.roas.p75
 
-  // Underperformer: ROAS below current tier's p25 — constrain (move UP toward HIGH)
+  // Underperformer: ROAS below current tier's p25 — demote (move UP toward HIGH)
   if (termRoas < p25 && currentTier !== 'HIGH') {
-    return { action: 'constrain', targetTier: TIER_UP[currentTier] }
+    return { action: 'demote', targetTier: TIER_UP[currentTier] }
   }
 
   // High performer: ROAS above current tier's p75 — promote (move DOWN toward LOW)
