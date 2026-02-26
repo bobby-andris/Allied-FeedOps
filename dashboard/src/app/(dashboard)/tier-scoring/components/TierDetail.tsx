@@ -15,6 +15,7 @@ import { ArrowLeft, ArrowUpDown, CheckCircle2, AlertCircle } from 'lucide-react'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { FallbackIndicator } from './FallbackIndicator'
 import { MisplacedTermRow } from './MisplacedTermRow'
+import { classifyAllTerms } from '../lib/reason-codes'
 import type { TermScore, TierDistribution } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 import { formatDollars } from '@/lib/formatting'
@@ -48,28 +49,29 @@ export function TierDetail({
   const [sortKey, setSortKey] = useState<SortKey>('status')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
-  const misplacedTerms = useMemo(
-    () => scores.filter(s => s.isMisplaced).sort((a, b) => (b.impact?.mid ?? 0) - (a.impact?.mid ?? 0)),
-    [scores]
-  )
+  const actionableTerms = useMemo(() => {
+    const classified = classifyAllTerms(scores)
+    return classified.filter(t => t.trigger && t.trigger !== 'observe')
+  }, [scores])
 
   // Inline callout
   const callout = useMemo(() => {
-    if (misplacedTerms.length === 0) {
+    if (actionableTerms.length === 0) {
       return {
         type: 'success' as const,
         text: `All ${scores.length} terms align with ${tier} tier — data confirms placement`,
       }
     }
-    const topTerm = misplacedTerms[0]
+    const topTerm = actionableTerms[0]
+    const targetTier = topTerm.targetTier ?? topTerm.recommendedTier
     const impactStr = topTerm.impact
       ? `$${Math.round(topTerm.impact.mid)}/mo`
       : ''
     return {
       type: 'warning' as const,
-      text: `Data suggests ${misplacedTerms.length} term${misplacedTerms.length !== 1 ? 's' : ''} could perform better in ${topTerm.recommendedTier} — the top opportunity is "${topTerm.searchTerm}" with ${impactStr} potential impact`,
+      text: `${actionableTerms.length} term${actionableTerms.length !== 1 ? 's' : ''} need action — top opportunity: "${topTerm.searchTerm}" (${topTerm.trigger?.replace(/_/g, ' ')}) targeting ${targetTier}${impactStr ? ` with ${impactStr} potential impact` : ''}`,
     }
-  }, [misplacedTerms, scores.length, tier])
+  }, [actionableTerms, scores.length, tier])
 
   // Sort logic
   const sortedScores = useMemo(() => {
@@ -81,7 +83,7 @@ export function TierDetail({
           cmp = a.searchTerm.localeCompare(b.searchTerm)
           break
         case 'roas':
-          cmp = (a.tierFitScores[a.recommendedTier] ?? 0) - (b.tierFitScores[b.recommendedTier] ?? 0)
+          cmp = (a.tierFitScores[a.targetTier ?? a.recommendedTier] ?? 0) - (b.tierFitScores[b.targetTier ?? b.recommendedTier] ?? 0)
           break
         case 'cvr':
           cmp = (a.confidence.factors.consistency ?? 0) - (b.confidence.factors.consistency ?? 0)
@@ -92,14 +94,17 @@ export function TierDetail({
         case 'confidence':
           cmp = a.confidence.score - b.confidence.score
           break
-        case 'status':
-          // Misplaced first, then by impact
-          if (a.isMisplaced !== b.isMisplaced) {
-            cmp = a.isMisplaced ? 1 : -1
+        case 'status': {
+          // Actionable (has trigger) first, then by impact
+          const aActionable = !!(a.trigger && a.trigger !== 'observe')
+          const bActionable = !!(b.trigger && b.trigger !== 'observe')
+          if (aActionable !== bActionable) {
+            cmp = aActionable ? 1 : -1
           } else {
             cmp = (a.impact?.mid ?? 0) - (b.impact?.mid ?? 0)
           }
           break
+        }
       }
       return sortDir === 'desc' ? -cmp : cmp
     })
@@ -232,11 +237,11 @@ export function TierDetail({
                     <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
                   </TableCell>
                   <TableCell>
-                    {term.isMisplaced ? (
+                    {term.trigger && term.trigger !== 'observe' ? (
                       <span className="flex items-center gap-1.5 text-xs">
                         <span className={tierColors[term.currentTier]}>{term.currentTier}</span>
                         <span className="text-muted-foreground">&rarr;</span>
-                        <span className={tierColors[term.recommendedTier]}>{term.recommendedTier}</span>
+                        <span className={tierColors[term.targetTier ?? term.recommendedTier]}>{term.targetTier ?? term.recommendedTier}</span>
                         {term.impact && (
                           <span className="text-muted-foreground ml-1">
                             {formatDollars(term.impact.low)}&ndash;{formatDollars(term.impact.high)}/mo
@@ -257,16 +262,16 @@ export function TierDetail({
         </CardContent>
       </Card>
 
-      {/* Dedicated Misplaced Terms Section */}
-      {misplacedTerms.length > 0 && (
+      {/* Dedicated Actionable Terms Section */}
+      {actionableTerms.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
-              Opportunities in {tier} Tier ({misplacedTerms.length})
+              Opportunities in {tier} Tier ({actionableTerms.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {misplacedTerms.map(term => (
+            {actionableTerms.map(term => (
               <MisplacedTermRow
                 key={`${term.searchTerm}::${term.customLabel0}`}
                 term={term}

@@ -300,7 +300,7 @@ export async function GET(request: NextRequest) {
       computedAt: new Date().toISOString(),
       totalGroups: distributions.size,
       totalTermsScored: scores.length,
-      totalMisplaced: scores.filter(s => s.isMisplaced || (s.trigger && s.trigger !== 'observe')).length,
+      totalMisplaced: scores.filter(s => s.trigger && s.trigger !== 'observe').length,
       totalImpact: aggregateImpact(scores),
     })
   } catch (error) {
