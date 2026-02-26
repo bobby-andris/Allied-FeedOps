@@ -56,6 +56,14 @@ export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, 
     return groupActionableTerms([...accepted, ...others])
   }, [terms, recommendationStatuses])
 
+  const labelCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const term of terms) {
+      counts.set(term.searchTerm, (counts.get(term.searchTerm) ?? 0) + 1)
+    }
+    return counts
+  }, [terms])
+
   const toggleGroup = useCallback((key: ActionGroup) => {
     setExpandedGroups(prev => {
       const next = new Set(prev)
@@ -128,6 +136,7 @@ export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, 
                         key={key}
                         term={term}
                         accentClass={ACCENT_CLASSES[group.key]}
+                        labelCount={labelCounts.get(term.searchTerm) ?? 1}
                         onViewDetails={onSelectTerm}
                         onUndo={onUndo}
                         onApprove={onApprove}

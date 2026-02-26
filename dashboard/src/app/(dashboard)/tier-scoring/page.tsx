@@ -49,6 +49,14 @@ export default function TierScoringPage() {
   const [selectedTier, setSelectedTier] = useState<FunnelTier | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<TermScore | null>(null)
 
+  // Multi-label: all scores for the currently-viewed term (across all custom_label_0 groups)
+  const allScoresForTerm = useMemo(() => {
+    if (!data) return []
+    const currentTerm = actionSelectedTerm || selectedTerm
+    if (!currentTerm) return []
+    return data.scores.filter(s => s.searchTerm === currentTerm.searchTerm)
+  }, [actionSelectedTerm, selectedTerm, data])
+
   // Revenue Leakage computed data (all misplaced + trigger-based terms)
   const classifiedTerms = useMemo(() => {
     if (!data) return []
@@ -166,7 +174,9 @@ export default function TierScoringPage() {
           {actionSelectedTerm ? (
             <TermScorecard
               term={actionSelectedTerm}
+              allScoresForTerm={allScoresForTerm}
               onBack={() => setActionSelectedTerm(null)}
+              onSwitchLabel={(term) => setActionSelectedTerm(term)}
             />
           ) : (
             <>
@@ -201,7 +211,9 @@ export default function TierScoringPage() {
           {selectedTerm ? (
             <TermScorecard
               term={selectedTerm}
+              allScoresForTerm={allScoresForTerm}
               onBack={() => setSelectedTerm(null)}
+              onSwitchLabel={(term) => setSelectedTerm(term)}
             />
           ) : selectedTier && selectedGroup ? (
             <TierDetail

@@ -19,7 +19,9 @@ import { formatDollars } from '@/lib/formatting'
 
 interface TermScorecardProps {
   term: TermScore
+  allScoresForTerm?: TermScore[]
   onBack: () => void
+  onSwitchLabel?: (term: TermScore) => void
 }
 
 function scoreColor(score: number): string {
@@ -247,7 +249,7 @@ function ExpandableFactor({ factor }: { factor: ScorecardFactor }) {
   )
 }
 
-export function TermScorecard({ term, onBack }: TermScorecardProps) {
+export function TermScorecard({ term, allScoresForTerm, onBack, onSwitchLabel }: TermScorecardProps) {
   const factors = buildFactors(term)
   const tiers: FunnelTier[] = ['HIGH', 'MEDIUM', 'LOW']
   const maxFit = Math.max(...tiers.map(t => term.tierFitScores[t] ?? 0))
@@ -529,6 +531,65 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Multi-Label Context */}
+      {allScoresForTerm && allScoresForTerm.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Multi-Label Context</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              This term appears in {allScoresForTerm.length} product groups:
+            </p>
+            <div className="space-y-2">
+              {allScoresForTerm.map(score => {
+                const isCurrentView = score.customLabel0 === term.customLabel0
+                const destination = score.targetTier ?? score.recommendedTier
+                const hasMovement = destination !== score.currentTier
+                return (
+                  <div
+                    key={score.customLabel0}
+                    className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 text-sm ${
+                      isCurrentView ? 'border-primary bg-primary/5' : 'hover:bg-muted/50 cursor-pointer'
+                    }`}
+                    onClick={() => {
+                      if (!isCurrentView && onSwitchLabel) onSwitchLabel(score)
+                    }}
+                  >
+                    <span className="font-medium min-w-[120px]">{score.customLabel0}</span>
+                    {hasMovement ? (
+                      <span className="flex items-center gap-1.5 text-xs">
+                        <span className={tierTextColor[score.currentTier]}>{score.currentTier}</span>
+                        <span className="text-muted-foreground">&rarr;</span>
+                        <span className={tierTextColor[destination]}>{destination}</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-green-700">Aligned in {score.currentTier}</span>
+                    )}
+                    {score.trigger && score.trigger !== 'observe' && (
+                      <span className="text-xs text-muted-foreground">
+                        ({score.trigger === 'wasted_spend' ? 'Wasted Spend' :
+                          score.trigger === 'demote_underperform' ? 'Demote' :
+                          score.trigger === 'promote_conversion' ? 'Conversion-Proven' :
+                          score.trigger === 'promote_intent' ? 'Intent-Proven' :
+                          score.trigger === 'under_invested' ? 'Under-Invested' : score.trigger})
+                      </span>
+                    )}
+                    <span className="ml-auto text-xs">
+                      {isCurrentView ? (
+                        <span className="text-primary font-medium">Currently viewing</span>
+                      ) : (
+                        <span className="text-primary hover:underline">View this label</span>
+                      )}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
       )}

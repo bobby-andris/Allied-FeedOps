@@ -13,13 +13,14 @@ interface ActionQueueRowProps {
   term: ClassifiedTerm
   onViewDetails: (term: TermScore) => void
   accentClass?: string
+  labelCount?: number
   onUndo?: (searchTerm: string, customLabel0: string) => void
   onApprove?: (term: TermScore, options?: ApproveOptions) => void
   onReject?: (term: TermScore) => void
   reviewStatus?: 'pending' | 'accepted' | 'rejected' | 'expired'
 }
 
-export function ActionQueueRow({ term, onViewDetails, accentClass, onUndo, onApprove, onReject, reviewStatus = 'pending' }: ActionQueueRowProps) {
+export function ActionQueueRow({ term, onViewDetails, accentClass, labelCount, onUndo, onApprove, onReject, reviewStatus = 'pending' }: ActionQueueRowProps) {
   // Use trigger from determineAction() as source of truth, fall back to reasonCode
   const isWastedSpend = term.trigger === 'wasted_spend' || (!term.trigger && term.reasonCode === 'wasted_spend')
 
@@ -66,6 +67,9 @@ export function ActionQueueRow({ term, onViewDetails, accentClass, onUndo, onApp
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="font-medium truncate">{term.searchTerm}</span>
+          {labelCount && labelCount > 1 && (
+            <span className="text-xs text-muted-foreground shrink-0">({labelCount} labels)</span>
+          )}
           <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">{term.customLabel0}</Badge>
         </div>
         <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.actionReason || term.verdict}</p>
