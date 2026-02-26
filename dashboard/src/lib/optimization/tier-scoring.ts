@@ -30,6 +30,7 @@ import type {
   ImpactRange,
   ScoringResult,
   CalibrationConfig,
+  RecommendedAction,
 } from './tier-scoring.types'
 import { DEFAULT_CALIBRATION } from './tier-scoring.types'
 
@@ -220,7 +221,9 @@ export function scoreTerm(
 
     // Fit score: negative absolute z-score (closer to 0 = better fit)
     // Weight ROAS most heavily (50%), then CVR (20%), CPC (15%), CTR (15%)
-    const absDeviation = 0.50 * Math.abs(zRoas) + 0.20 * Math.abs(zCvr) + 0.15 * Math.abs(zCpc) + 0.15 * Math.abs(zCtr)
+    // CPC is inverse: lower = better. Only penalize expensive terms (positive z-score).
+    const cpcPenalty = Math.max(0, zCpc)
+    const absDeviation = 0.50 * Math.abs(zRoas) + 0.20 * Math.abs(zCvr) + 0.15 * cpcPenalty + 0.15 * Math.abs(zCtr)
     tierFitScores[tier] = -absDeviation // Higher is better fit
   }
 
@@ -245,18 +248,37 @@ export function scoreTerm(
 
   const dataConfirmed = recommendedTier === currentTier && hasMinimumData && meetsConfidenceFloor
 
-  // Impact (only if misplaced)
+  // Determine prescriptive action
+  const recommendedAction = determineAction(currentTier, recommendedTier, term.total_conversions, term.total_cost_micros, isMisplaced)
+
+  // Impact: compute for misplaced OR wasted spend terms
+  const isWastedSpend = term.total_conversions === 0 && term.total_cost_micros > 5_000_000
   let impact: ImpactRange | null = null
-  if (isMisplaced) {
+  if (isMisplaced || isWastedSpend) {
     impact = estimateImpact(term, chooseDist(currentTier), chooseDist(recommendedTier), config)
   }
 
-  // Verdict
-  const fitStrength = Math.abs(tierFitScores[recommendedTier])
-  const strengthWord = fitStrength < 0.5 ? 'strong' : fitStrength < 1.5 ? 'moderate' : 'weak'
-  const verdict = isMisplaced
-    ? `This term is a ${strengthWord} fit for ${recommendedTier} because its ROAS (${termRoas.toFixed(1)}) aligns with ${recommendedTier} tier distributions`
-    : `This term is correctly placed in ${currentTier} — it is a ${strengthWord} fit`
+  // Prescriptive verdict and action reason
+  let actionReason: string
+  switch (recommendedAction) {
+    case 'block':
+      actionReason = `Block — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
+      break
+    case 'constrain':
+      if (term.total_conversions === 0) {
+        actionReason = `Constrain to HIGH — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
+      } else {
+        actionReason = `Constrain — underperforming in ${currentTier}, move to ${recommendedTier} for restricted bidding`
+      }
+      break
+    case 'promote':
+      actionReason = `Promote to ${recommendedTier} — strong performer in constrained ${currentTier} tier`
+      break
+    default:
+      actionReason = `Aligned — performing as expected in ${currentTier}`
+  }
+
+  const verdict = actionReason
 
   // Peer context
   const peerContext = buildPeerContext(termRoas, groupDist, customLabel0)
@@ -278,6 +300,9 @@ export function scoreTerm(
     actualRoas: termRoas,
     verdict,
     peerContext,
+    recommendedAction,
+    actionReason,
+    totalImpressions: term.total_impressions ?? 0,
   }
 }
 
@@ -359,6 +384,18 @@ export function estimateImpact(
   config: CalibrationConfig = DEFAULT_CALIBRATION
 ): ImpactRange {
   const monthlySpend = term.total_cost_micros / 1_000_000
+
+  // Wasted spend fast path: zero conversions with meaningful spend
+  if (term.total_conversions === 0 && term.total_cost_micros > 5_000_000) {
+    return {
+      low: monthlySpend * 0.5,
+      mid: monthlySpend * 0.8,
+      high: monthlySpend,
+      currency: 'USD',
+      period: 'monthly',
+      direction: (currentDist.tier === 'HIGH' ? 'lateral' : 'upward') as ImpactRange['direction'],
+    }
+  }
 
   // Use ROAS delta as primary signal (aligned with 50% weighting in scoring)
   const currentRoas = currentDist.metrics.roas.p50
@@ -443,6 +480,34 @@ export function buildHeroCallout(scores: TermScore[]): string {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+function determineAction(
+  currentTier: FunnelTier,
+  recommendedTier: FunnelTier,
+  totalConversions: number,
+  totalCostMicros: number,
+  isMisplaced: boolean
+): RecommendedAction {
+  const costDollars = totalCostMicros / 1_000_000
+  const funnelDepth: Record<FunnelTier, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 }
+
+  // 1. Wasted spend: zero conversions + meaningful spend
+  if (totalConversions === 0 && costDollars > 5) {
+    return currentTier === 'HIGH' ? 'block' : 'constrain'
+  }
+
+  // 2. Misplaced: determine direction
+  if (isMisplaced) {
+    if (funnelDepth[recommendedTier] > funnelDepth[currentTier]) {
+      return 'promote'  // push down funnel for aggressive bidding
+    }
+    if (funnelDepth[recommendedTier] < funnelDepth[currentTier]) {
+      return 'constrain'  // push up funnel to restrict bidding
+    }
+  }
+
+  return 'observe'
+}
 
 function computeSingleTierDistribution(
   rows: LabelTierPerformance[],
