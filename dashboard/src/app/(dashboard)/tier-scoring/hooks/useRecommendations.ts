@@ -245,7 +245,7 @@ export function useRecommendations(): UseRecommendationsReturn {
           terms: terms.map(t => ({
             searchTerm: t.searchTerm,
             customLabel0: t.customLabel0,
-            recommendedTier: t.recommendedTier,
+            recommendedTier: t.targetTier ?? t.recommendedTier,
             currentTier: t.currentTier,
             confidence: t.confidence.score,
             impact: t.impact,

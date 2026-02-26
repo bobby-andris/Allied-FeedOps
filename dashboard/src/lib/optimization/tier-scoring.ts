@@ -455,7 +455,9 @@ export function estimateImpact(
   const monthlySpend = term.total_cost_micros / 1_000_000
 
   // Wasted spend fast path: zero conversions with meaningful spend
-  if (term.total_conversions === 0 && term.total_cost_micros > 5_000_000) {
+  // Use calibrated threshold: 1.5x avgCPA (default $64.22 * 1.5 = $96.33)
+  const wastedSpendThresholdMicros = config.avgCPA * 1.5 * 1_000_000
+  if (term.total_conversions === 0 && term.total_cost_micros > wastedSpendThresholdMicros) {
     return {
       low: monthlySpend * 0.5,
       mid: monthlySpend * 0.8,
@@ -531,14 +533,15 @@ export function getCachedDistributions(
 // ---------------------------------------------------------------------------
 
 export function buildHeroCallout(scores: TermScore[]): string {
-  const misplaced = scores.filter(s => s.isMisplaced)
-  const count = misplaced.length
+  // Count all actionable terms: misplaced OR trigger-based (from Phase 34.2 intent scoring)
+  const actionable = scores.filter(s => s.isMisplaced || (s.trigger && s.trigger !== 'observe'))
+  const count = actionable.length
 
   if (count === 0) {
     return 'All scored terms appear correctly placed'
   }
 
-  const totalLow = misplaced.reduce((sum, s) => sum + (s.impact?.low ?? 0), 0)
+  const totalLow = actionable.reduce((sum, s) => sum + (s.impact?.low ?? 0), 0)
   const formatted = totalLow >= 1000
     ? `$${(totalLow / 1000).toFixed(1)}K`
     : `$${Math.round(totalLow)}`

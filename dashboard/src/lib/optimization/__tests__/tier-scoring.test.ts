@@ -637,6 +637,11 @@ describe('Phase 33.1: Calibration', () => {
       minConfidence: 0.40,
       minImpressions: 50,
       averageOrderValue: 85,
+      avgCPA: 64.22,
+      minIntentScore: 0.65,
+      feedAlignmentWeight: 0.55,
+      minRCTR: 1.5,
+      minQueryWords: 3,
     }
 
     const score = scoreTerm(term, group, globalFallback, undefined, strictConfig)
@@ -670,6 +675,11 @@ describe('Phase 33.1: Calibration', () => {
       minConfidence: 0.40,
       minImpressions: 0, // no impression threshold
       averageOrderValue: 85,
+      avgCPA: 64.22,
+      minIntentScore: 0.65,
+      feedAlignmentWeight: 0.55,
+      minRCTR: 1.5,
+      minQueryWords: 3,
     }
 
     const score = scoreTerm(term, group, globalFallback, undefined, config)
@@ -700,6 +710,11 @@ describe('Phase 33.1: Calibration', () => {
       minConfidence: 0.0,
       minImpressions: 50,
       averageOrderValue: 85,
+      avgCPA: 64.22,
+      minIntentScore: 0.65,
+      feedAlignmentWeight: 0.55,
+      minRCTR: 1.5,
+      minQueryWords: 3,
     }
 
     const score = scoreTerm(term, group, globalFallback, undefined, config)

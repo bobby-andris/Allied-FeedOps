@@ -52,16 +52,17 @@ interface ScorecardFactor {
 }
 
 function buildFactors(term: TermScore): ScorecardFactor[] {
-  const recommended = term.recommendedTier
-  const fitScore = term.tierFitScores[recommended] ?? 0
+  // Prefer targetTier (from trigger system) over recommendedTier (statistical best-fit)
+  const destination = term.targetTier ?? term.recommendedTier
+  const fitScore = term.tierFitScores[destination] ?? 0
   // Normalize fit score to 0-1 range (z-scores typically range -3 to +3, clamp to 0-1)
   const normalizedFit = Math.max(0, Math.min(1, (fitScore + 2) / 4))
 
-  return [
+  const factors: ScorecardFactor[] = [
     {
       name: 'ROAS Position',
       score: normalizedFit,
-      expandedDetail: `Tier fit z-score: ${fitScore.toFixed(3)} (normalized: ${normalizedFit.toFixed(2)}). Higher values indicate better alignment with the ${recommended} tier distribution. Based on robust z-score using median and MAD.`,
+      expandedDetail: `Tier fit z-score: ${fitScore.toFixed(3)} (normalized: ${normalizedFit.toFixed(2)}). Higher values indicate better alignment with the ${destination} tier distribution. Based on robust z-score using median and MAD.`,
     },
     {
       name: 'Consistency',
@@ -76,9 +77,25 @@ function buildFactors(term: TermScore): ScorecardFactor[] {
     {
       name: 'Intent Alignment',
       score: term.confidence.factors.intentAlignment,
-      expandedDetail: `Score: ${term.confidence.factors.intentAlignment.toFixed(3)}. Measures how well this term's intent signals align with the ${recommended} tier's typical intent profile.`,
+      expandedDetail: `Score: ${term.confidence.factors.intentAlignment.toFixed(3)}. Measures how well this term's intent signals align with the ${destination} tier's typical intent profile.`,
     },
   ]
+
+  // Add unified intent score if available (from Phase 34.2 intent scoring)
+  if (term.intentScore) {
+    factors.push({
+      name: 'Feed Alignment',
+      score: term.intentScore.feedAlignmentScore,
+      expandedDetail: `Score: ${term.intentScore.feedAlignmentScore.toFixed(3)}. How well this query's attributes match your product feed data. Combines TF-IDF term importance (60%) and query specificity (40%).`,
+    })
+    factors.push({
+      name: 'Behavioral Intent',
+      score: term.intentScore.behavioralScore,
+      expandedDetail: `Score: ${term.intentScore.behavioralScore.toFixed(3)}. Purchase intent signals from Google Ads behavior: relative CTR, CPC ceiling proximity, micro-conversions, and cost velocity.`,
+    })
+  }
+
+  return factors
 }
 
 function ExpandableFactor({ factor }: { factor: ScorecardFactor }) {
@@ -208,7 +225,7 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
         <CardContent className="space-y-3">
           {tiers.map(t => {
             const fitScore = term.tierFitScores[t] ?? 0
-            const isRecommended = t === term.recommendedTier
+            const isRecommended = t === (term.targetTier ?? term.recommendedTier)
             const isBest = fitScore === maxFit
             // Normalize for display: z-scores can be negative, shift to 0-100
             const barValue = Math.max(0, Math.min(100, ((fitScore + 2) / 4) * 100))
@@ -279,6 +296,31 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Behavioral signals (when available from Phase 34.2) */}
+      {term.behavioralSignals && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Behavioral Signals</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: 'Relative CTR', value: term.behavioralSignals.rCTR, format: (v: number) => `${v.toFixed(2)}x`, explain: 'vs tier median' },
+                { label: 'CPC Ceiling', value: term.behavioralSignals.cpcCeilingRatio, format: (v: number) => `${(v * 100).toFixed(0)}%`, explain: 'of tier cap' },
+                { label: 'Micro-Conversions', value: term.behavioralSignals.microConversionDelta, format: (v: number) => v.toFixed(1), explain: 'non-purchase actions' },
+                { label: 'Composite', value: term.behavioralSignals.composite, format: (v: number) => v.toFixed(2), explain: 'weighted score' },
+              ].map(s => (
+                <div key={s.label} className="rounded-lg border p-3 text-center space-y-1">
+                  <p className="text-lg font-mono font-semibold">{s.format(s.value)}</p>
+                  <p className="text-xs font-medium">{s.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.explain}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Fallback transparency */}
       <Card>
