@@ -3,8 +3,6 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Ban, ArrowUp, Check, X, Undo2 } from 'lucide-react'
-import { ConfidenceBadge } from './ConfidenceBadge'
-import { ReasonBadge } from './ReasonBadge'
 import { TierMovementArrow } from './TierMovementArrow'
 import { ImpactBadge } from './ImpactBadge'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
@@ -13,16 +11,15 @@ import type { ApproveOptions } from './LeakageTermRow'
 
 interface ActionQueueRowProps {
   term: ClassifiedTerm
-  rank: number
   onViewDetails: (term: TermScore) => void
-  showUndo?: boolean
+  accentClass?: string
   onUndo?: (searchTerm: string, customLabel0: string) => void
   onApprove?: (term: TermScore, options?: ApproveOptions) => void
   onReject?: (term: TermScore) => void
   reviewStatus?: 'pending' | 'accepted' | 'rejected' | 'expired'
 }
 
-export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, onApprove, onReject, reviewStatus = 'pending' }: ActionQueueRowProps) {
+export function ActionQueueRow({ term, onViewDetails, accentClass, onUndo, onApprove, onReject, reviewStatus = 'pending' }: ActionQueueRowProps) {
   // Use trigger from determineAction() as source of truth, fall back to reasonCode
   const isWastedSpend = term.trigger === 'wasted_spend' || (!term.trigger && term.reasonCode === 'wasted_spend')
 
@@ -54,7 +51,7 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
 
   return (
     <div
-      className="flex items-center gap-4 rounded-lg border px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
+      className={`flex items-center gap-4 rounded-lg border px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors ${accentClass ?? ''}`}
       onClick={() => onViewDetails(term)}
       role="button"
       tabIndex={0}
@@ -65,40 +62,9 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
         }
       }}
     >
-      {/* Rank */}
-      <span className="text-sm font-mono text-muted-foreground w-6 shrink-0">#{rank}</span>
-
-      {/* Term name + verdict */}
+      {/* Term name + action reason */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium truncate">{term.searchTerm}</span>
-          <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
-          <ReasonBadge reasonCode={term.reasonCode} />
-          {term.intentScore && (
-            <Badge
-              variant="outline"
-              className={
-                term.intentScore.unifiedScore >= 0.65
-                  ? 'border-green-300 text-green-700 bg-green-50'
-                  : term.intentScore.unifiedScore >= 0.40
-                  ? 'border-amber-300 text-amber-700 bg-amber-50'
-                  : 'border-red-300 text-red-700 bg-red-50'
-              }
-            >
-              Intent: {term.intentScore.unifiedScore.toFixed(2)}
-            </Badge>
-          )}
-          {term.trigger === 'promote_intent' && (
-            <Badge variant="outline" className="border-blue-300 text-blue-700 bg-blue-50">
-              Intent-Proven
-            </Badge>
-          )}
-          {term.trigger === 'promote_conversion' && (
-            <Badge variant="outline" className="border-green-300 text-green-700 bg-green-50">
-              Conversion-Proven
-            </Badge>
-          )}
-        </div>
+        <span className="font-medium truncate">{term.searchTerm}</span>
         <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.actionReason || term.verdict}</p>
       </div>
 

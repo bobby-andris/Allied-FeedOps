@@ -1,12 +1,14 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2 } from 'lucide-react'
 import { ActionQueueRow } from './ActionQueueRow'
+import { ActionGroupHeader } from './ActionGroupHeader'
+import { groupActionableTerms } from '../lib/reason-codes'
+import type { ActionGroup, ClassifiedTerm } from '../lib/reason-codes'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
-import type { ClassifiedTerm } from '../lib/reason-codes'
 import type { RecommendationStatus } from '../hooks/useRecommendations'
 import type { ApproveOptions } from './LeakageTermRow'
 
@@ -19,19 +21,27 @@ interface ActionQueueTableProps {
   onReject?: (term: TermScore) => void
 }
 
-const PAGE_SIZE = 20
+const DEFAULT_VISIBLE = 10
+
+const ACCENT_CLASSES: Record<ActionGroup, string> = {
+  stop_wasting: 'border-l-2 border-l-red-500',
+  restrict_bidding: 'border-l-2 border-l-amber-500',
+  bid_aggressive: 'border-l-2 border-l-green-500',
+}
 
 function makeKey(searchTerm: string, customLabel0: string): string {
   return `${searchTerm}::${customLabel0}`
 }
 
 export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, onUndo, onApprove, onReject }: ActionQueueTableProps) {
-  const [showCount, setShowCount] = useState(PAGE_SIZE)
+  const [expandedGroups, setExpandedGroups] = useState<Set<ActionGroup>>(() => new Set(['stop_wasting', 'restrict_bidding', 'bid_aggressive']))
+  const [showAllMap, setShowAllMap] = useState<Record<string, boolean>>({})
 
-  const actionQueue = useMemo(() => {
-    if (!recommendationStatuses) return terms
+  // Sort accepted-first within each group, then group by action type
+  const groups = useMemo(() => {
+    // Partition accepted first within input terms to preserve accepted-first ordering
+    if (!recommendationStatuses) return groupActionableTerms(terms)
 
-    // Partition: accepted items first, then other misplaced items
     const accepted: ClassifiedTerm[] = []
     const others: ClassifiedTerm[] = []
     for (const term of terms) {
@@ -43,13 +53,30 @@ export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, 
         others.push(term)
       }
     }
-    return [...accepted, ...others]
+    return groupActionableTerms([...accepted, ...others])
   }, [terms, recommendationStatuses])
 
-  const visibleTerms = actionQueue.slice(0, showCount)
-  const hasMore = showCount < actionQueue.length
+  const toggleGroup = useCallback((key: ActionGroup) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
+      return next
+    })
+  }, [])
 
-  if (actionQueue.length === 0) {
+  const handleBatchApprove = useCallback((highConfTerms: ClassifiedTerm[]) => {
+    for (const t of highConfTerms) {
+      onApprove?.(t)
+    }
+  }, [onApprove])
+
+  const totalTerms = groups.reduce((sum, g) => sum + g.terms.length, 0)
+
+  if (totalTerms === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -67,42 +94,65 @@ export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, 
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">
-            Top Opportunities ({actionQueue.length} total)
+            Top Opportunities ({totalTerms} total)
           </CardTitle>
           <span className="text-xs text-muted-foreground">
-            Sorted by potential impact
+            Grouped by action type, sorted by impact
           </span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {visibleTerms.map((term, i) => {
-          const key = makeKey(term.searchTerm, term.customLabel0)
-          const status = recommendationStatuses?.[key]
+      <CardContent className="space-y-4">
+        {groups.map(group => {
+          const isExpanded = expandedGroups.has(group.key)
+          const showAll = showAllMap[group.key] ?? false
+          const visibleTerms = showAll ? group.terms : group.terms.slice(0, DEFAULT_VISIBLE)
+          const hasMore = !showAll && group.terms.length > DEFAULT_VISIBLE
+
           return (
-            <ActionQueueRow
-              key={key}
-              term={term}
-              rank={i + 1}
-              onViewDetails={onSelectTerm}
-              onUndo={onUndo}
-              onApprove={onApprove}
-              onReject={onReject}
-              reviewStatus={status?.status ?? 'pending'}
-            />
+            <div key={group.key} className="space-y-2">
+              <ActionGroupHeader
+                group={group}
+                groupKey={group.key}
+                isExpanded={isExpanded}
+                onToggle={() => toggleGroup(group.key)}
+                onBatchApprove={handleBatchApprove}
+              />
+
+              {isExpanded && (
+                <div className="space-y-2 pl-2">
+                  {visibleTerms.map(term => {
+                    const key = makeKey(term.searchTerm, term.customLabel0)
+                    const status = recommendationStatuses?.[key]
+                    return (
+                      <ActionQueueRow
+                        key={key}
+                        term={term}
+                        accentClass={ACCENT_CLASSES[group.key]}
+                        onViewDetails={onSelectTerm}
+                        onUndo={onUndo}
+                        onApprove={onApprove}
+                        onReject={onReject}
+                        reviewStatus={status?.status ?? 'pending'}
+                      />
+                    )
+                  })}
+
+                  {hasMore && (
+                    <div className="flex justify-center pt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllMap(prev => ({ ...prev, [group.key]: true }))}
+                      >
+                        Show all {group.terms.length}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )
         })}
-
-        {hasMore && (
-          <div className="flex justify-center pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCount(prev => prev + PAGE_SIZE)}
-            >
-              Show {Math.min(PAGE_SIZE, actionQueue.length - showCount)} more
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   )
