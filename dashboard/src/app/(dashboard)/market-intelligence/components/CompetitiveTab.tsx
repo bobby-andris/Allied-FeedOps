@@ -2,6 +2,7 @@
 
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useCompetitiveData } from '../hooks/useCompetitiveData'
@@ -77,8 +78,24 @@ export function CompetitiveTab({ customLabel0 }: Props) {
 
   const { kpis } = data
 
+  const periodLabel = data.period?.from && data.period?.to
+    ? `${new Date(data.period.from + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — ${new Date(data.period.to + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : null
+
   return (
     <div className="space-y-4">
+      {/* Period + Term Count */}
+      {(periodLabel || data.period?.totalTerms > 0) && (
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          {periodLabel && (
+            <Badge variant="outline" className="font-normal">{periodLabel}</Badge>
+          )}
+          {data.period?.totalTerms > 0 && (
+            <span>{data.period.totalTerms.toLocaleString()} search terms analyzed</span>
+          )}
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
