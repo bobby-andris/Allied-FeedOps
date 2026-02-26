@@ -270,6 +270,8 @@ export function scoreTerm(
     confidence,
     impact,
     fallbackLevel,
+    totalConversions: term.total_conversions,
+    totalCostMicros: term.total_cost_micros,
     verdict,
     peerContext,
   }

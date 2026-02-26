@@ -79,6 +79,8 @@ export interface TermScore {
   confidence: ConfidenceResult
   impact: ImpactRange | null // null if not misplaced
   fallbackLevel: FallbackLevel
+  totalConversions: number // raw conversions for wasted spend detection (LEAK-03)
+  totalCostMicros: number // raw cost for wasted spend detection (LEAK-03)
   verdict: string // plain English explanation
   peerContext: string // e.g., "ranks in top 15% of Towel Bar terms"
 }

@@ -19,6 +19,8 @@ function makeTermScore(overrides: Partial<TermScore> = {}): TermScore {
     },
     impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'upward' },
     fallbackLevel: 'per_group',
+    totalConversions: 5,
+    totalCostMicros: 3_000_000,
     verdict: 'original verdict',
     peerContext: 'ranks in top 15% of Towel Bar terms',
     ...overrides,
