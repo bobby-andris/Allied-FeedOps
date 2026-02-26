@@ -6,6 +6,7 @@ import {
   computeTrendDirection,
   costMicrosToDollars,
   paginateRpc,
+  fetchLatestPeriod,
 } from '@/lib/market-intelligence/computations'
 import type { ProductsData, ProductGroup, ProductGroupDetail } from '@/lib/market-intelligence/types'
 
@@ -40,18 +41,22 @@ export async function GET(request: NextRequest) {
     const customLabel0 = request.nextUrl.searchParams.get('customLabel0')
     const groupParam = request.nextUrl.searchParams.get('group')
 
+    // Use latest major period for accurate single-period metrics
+    const latestPeriod = await fetchLatestPeriod(supabase)
+
     // If group param provided, return drill-down detail
     if (groupParam) {
-      return handleGroupDetail(supabase, groupParam)
+      return handleGroupDetail(supabase, groupParam, latestPeriod)
     }
 
     // --- Default mode: BCG overview ---
 
-    // 1. Fetch pre-aggregated product group metrics via SQL function
+    // 1. Fetch pre-aggregated product group metrics for the latest period
     let groupRows: ProductGroupRow[]
     try {
       groupRows = await paginateRpc<ProductGroupRow>(supabase, 'market_intelligence_product_groups', {
         p_custom_label_0: customLabel0 || null,
+        p_period_start: latestPeriod,
       })
     } catch (err) {
       console.error('product groups rpc failed:', err)
@@ -90,6 +95,10 @@ export async function GET(request: NextRequest) {
       priorRevByLabel.set(label, (priorRevByLabel.get(label) ?? 0) + Number(row.conversions_value ?? 0))
     }
 
+    // Detect insufficient prior data — if prior window has <10% of recent window rows,
+    // trends are unreliable and should show as flat
+    const priorDataSufficient = (priorSnapshots?.length ?? 0) > (recentSnapshots?.length ?? 0) * 0.3
+
     // 3. Build groups with trends and quadrants
     const rawGroups: Array<{
       customLabel0: string
@@ -111,7 +120,10 @@ export async function GET(request: NextRequest) {
 
       const recentRev = recentRevByLabel.get(label) ?? 0
       const priorRev = priorRevByLabel.get(label) ?? 0
-      const trend = priorRev > 0 ? ((recentRev - priorRev) / priorRev) * 100 : 0
+      // Only compute trend if prior period has sufficient data
+      const trend = priorDataSufficient && priorRev > 0
+        ? ((recentRev - priorRev) / priorRev) * 100
+        : 0
 
       rawGroups.push({
         customLabel0: label,
@@ -160,8 +172,8 @@ export async function GET(request: NextRequest) {
         totalSpend,
       },
       period: {
-        from: '', // products aggregates from search_queries + funnel_snapshots
-        to: '',
+        from: latestPeriod ?? '',
+        to: latestPeriod ?? '',
         totalTerms: groups.reduce((s, g) => s + g.termCount, 0),
       },
     }
@@ -177,12 +189,13 @@ export async function GET(request: NextRequest) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleGroupDetail(supabase: any, group: string): Promise<NextResponse> {
-  // Fetch term-level metrics for this specific group using the RPC function
+async function handleGroupDetail(supabase: any, group: string, latestPeriod: string | null): Promise<NextResponse> {
+  // Fetch term-level metrics for this specific group, filtered to latest period
   let typedTermRows: TermMetricsRow[]
   try {
     typedTermRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
       p_custom_label_0: group,
+      p_period_start: latestPeriod,
     })
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'RPC failed' }, { status: 500 })
@@ -260,7 +273,9 @@ async function handleGroupDetail(supabase: any, group: string): Promise<NextResp
     (s: number, r: { conversions_value: number }) => s + Number(r.conversions_value ?? 0),
     0
   )
-  const trend = priorRev > 0 ? ((recentRev - priorRev) / priorRev) * 100 : 0
+  // Only compute trend if prior period has sufficient data (>30% of recent)
+  const priorSufficient = (priorSnaps?.length ?? 0) > (recentSnaps?.length ?? 0) * 0.3
+  const trend = priorSufficient && priorRev > 0 ? ((recentRev - priorRev) / priorRev) * 100 : 0
 
   // Determine quadrant (approximate — overview computes proper medians)
   const quadrant = roas > 2 && totalRevenue > 100 ? 'star' as const :

@@ -4,6 +4,38 @@ import type { BcgQuadrant, LongTailBucket, MonthlySearchVolume } from './types'
 import { LONG_TAIL_BUCKETS, SEASONAL_THRESHOLD } from './constants'
 
 /**
+ * Fetch the latest "major" period from the MV (>500 unique terms).
+ * Falls back to the most recent period if none qualifies.
+ */
+export async function fetchLatestPeriod(supabase: SupabaseClient): Promise<string | null> {
+  const { data, error } = await supabase.rpc('market_intelligence_latest_period')
+  if (error || !data) return null
+  return data as string
+}
+
+/**
+ * Fetch the prior major period (the one before the latest).
+ * Used for new term detection (comparing current vs prior).
+ */
+export async function fetchPriorPeriod(supabase: SupabaseClient, latestPeriod: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('market_intelligence_mv')
+    .select('period_start')
+    .lt('period_start', latestPeriod)
+    .order('period_start', { ascending: false })
+    .limit(1)
+  if (error || !data || data.length === 0) return null
+  // Only return if it's a "major" period (check term count)
+  const period = data[0].period_start as string
+  const { count } = await supabase
+    .from('market_intelligence_mv')
+    .select('*', { count: 'exact', head: true })
+    .eq('period_start', period)
+  if ((count ?? 0) < 500) return null
+  return period
+}
+
+/**
  * Paginate through an RPC call that may exceed Supabase's 1000-row server limit.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,11 +98,20 @@ export function parseMonthlySearchVolumes(raw: unknown): MonthlySearchVolume[] {
   // monthly_searches JSONB may be stored as text string per project conventions
   const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
   if (!Array.isArray(parsed)) return []
-  return parsed.map((entry: { year?: number; month?: number; monthly_searches?: number }) => ({
-    year: entry.year ?? 0,
-    month: entry.month ?? 0,
-    searches: entry.monthly_searches ?? 0,
-  }))
+  return parsed.map((entry: { year?: number; month?: number; monthly_searches?: number; searches?: number }) => {
+    let year = entry.year ?? 0
+    let month = entry.month ?? 0
+    // Google Keyword Planner uses month 13 to represent January of the next year
+    if (month > 12) {
+      year += Math.floor((month - 1) / 12)
+      month = ((month - 1) % 12) + 1
+    }
+    return {
+      year,
+      month,
+      searches: entry.monthly_searches ?? entry.searches ?? 0,
+    }
+  })
 }
 
 export function computeMoMChange(volumes: MonthlySearchVolume[]): { current: number; prior: number; changePercent: number } {

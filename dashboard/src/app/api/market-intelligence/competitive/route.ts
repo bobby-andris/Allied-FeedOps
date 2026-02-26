@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { COMPETITOR_TOKENS, BRAND_TOKENS } from '@/lib/market-intelligence/constants'
-import { isBrandTerm, matchesCompetitor, costMicrosToDollars, paginateRpc } from '@/lib/market-intelligence/computations'
+import { isBrandTerm, matchesCompetitor, costMicrosToDollars, paginateRpc, fetchLatestPeriod } from '@/lib/market-intelligence/computations'
 import type { CompetitiveData, BrandSplit, CompetitorMention } from '@/lib/market-intelligence/types'
 
 export const dynamic = 'force-dynamic'
@@ -24,11 +24,15 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient()
     const customLabel0 = request.nextUrl.searchParams.get('customLabel0')
 
-    // Fetch pre-aggregated term metrics via SQL function (paginates past 1000-row limit)
+    // Use latest major period for accurate single-period metrics
+    const latestPeriod = await fetchLatestPeriod(supabase)
+
+    // Fetch pre-aggregated term metrics for the latest period only
     let termRows: TermMetricsRow[]
     try {
       termRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
         p_custom_label_0: customLabel0 || null,
+        p_period_start: latestPeriod,
       })
     } catch (err) {
       console.error('term metrics rpc failed:', err)
@@ -139,8 +143,8 @@ export async function GET(request: NextRequest) {
         nonBrandRoas,
       },
       period: {
-        from: '', // competitive uses same data as demand
-        to: '',
+        from: latestPeriod ?? '',
+        to: latestPeriod ?? '',
         totalTerms: allTerms.length,
       },
     }

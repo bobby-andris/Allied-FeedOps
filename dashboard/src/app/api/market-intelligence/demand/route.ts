@@ -7,6 +7,8 @@ import {
   classifySeasonalDirection,
   costMicrosToDollars,
   paginateRpc,
+  fetchLatestPeriod,
+  fetchPriorPeriod,
 } from '@/lib/market-intelligence/computations'
 import type {
   DemandData,
@@ -15,7 +17,7 @@ import type {
   SeasonalTerm,
   NewTerm,
 } from '@/lib/market-intelligence/types'
-import { NEW_TERM_WINDOW_DAYS } from '@/lib/market-intelligence/constants'
+// NEW_TERM_WINDOW_DAYS no longer needed — new terms computed by comparing periods
 
 export const dynamic = 'force-dynamic'
 
@@ -37,11 +39,15 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient()
     const customLabel0 = request.nextUrl.searchParams.get('customLabel0')
 
-    // Fetch pre-aggregated term metrics via SQL function (paginates past 1000-row limit)
+    // Determine the latest major reporting period for accurate single-period metrics
+    const latestPeriod = await fetchLatestPeriod(supabase)
+
+    // Fetch pre-aggregated term metrics for the latest period only
     let termRows: TermMetricsRow[]
     try {
       termRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
         p_custom_label_0: customLabel0 || null,
+        p_period_start: latestPeriod,
       })
     } catch (err) {
       console.error('term metrics rpc failed:', err)
@@ -168,26 +174,37 @@ export async function GET(request: NextRequest) {
     seasonal.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))
 
     // --- 4. New Term Discovery (DEMAND-04) ---
-    const cutoffDate = new Date(Date.now() - NEW_TERM_WINDOW_DAYS * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('T')[0]
+    // Compare current period terms against prior period to find genuinely new terms
+    let newTerms: NewTerm[] = []
+    if (latestPeriod) {
+      const priorPeriod = await fetchPriorPeriod(supabase, latestPeriod)
+      if (priorPeriod) {
+        // Fetch prior period terms to build the "known terms" set
+        let priorRows: TermMetricsRow[]
+        try {
+          priorRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
+            p_custom_label_0: customLabel0 || null,
+            p_period_start: priorPeriod,
+          })
+        } catch {
+          priorRows = []
+        }
+        const priorTermSet = new Set(priorRows.map(r => (r.query_text as string).toLowerCase()))
 
-    const recentTerms = allTerms.filter(t => t.periodStart >= cutoffDate)
-    const olderTermSet = new Set(
-      allTerms.filter(t => t.periodStart < cutoffDate).map(t => t.queryText.toLowerCase())
-    )
-    const newTerms: NewTerm[] = recentTerms
-      .filter(t => !olderTermSet.has(t.queryText.toLowerCase()))
-      .map(t => ({
-        queryText: t.queryText,
-        customLabel0: t.customLabel0,
-        firstSeen: t.periodStart,
-        impressions: t.impressions,
-        clicks: t.clicks,
-        conversions: t.conversions,
-      }))
-      .sort((a, b) => b.impressions - a.impressions)
-      .slice(0, 50)
+        newTerms = allTerms
+          .filter(t => !priorTermSet.has(t.queryText.toLowerCase()))
+          .map(t => ({
+            queryText: t.queryText,
+            customLabel0: t.customLabel0,
+            firstSeen: t.periodStart,
+            impressions: t.impressions,
+            clicks: t.clicks,
+            conversions: t.conversions,
+          }))
+          .sort((a, b) => b.impressions - a.impressions)
+          .slice(0, 50)
+      }
+    }
 
     // --- 5. Long-Tail Analysis (DEMAND-07) ---
     const longTailInput = allTerms.map(t => ({
