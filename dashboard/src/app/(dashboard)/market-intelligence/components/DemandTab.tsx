@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useDemandData } from '../hooks/useDemandData'
-import { ImpressionShareChart } from './ImpressionShareChart'
 import { CpcOpportunityChart } from './CpcOpportunityChart'
 import { SeasonalTrendsChart } from './SeasonalTrendsChart'
 import { NewTermsCard } from './NewTermsCard'
@@ -190,17 +189,32 @@ export function DemandTab({ customLabel0 }: Props) {
         </Card>
       </div>
 
-      {/* 2x2 Grid */}
+      {/* Top Terms Table — most actionable view, promoted to top */}
+      <TopTermsTable data={data.impressionShare} />
+
+      {/* 2-column: Long-tail + New Terms */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Impression Share Gaps</CardTitle>
+            <CardTitle className="text-base">Long-Tail Analysis</CardTitle>
           </CardHeader>
           <CardContent>
-            <ImpressionShareChart data={data.impressionShare} />
+            <LongTailAnalysis data={data.longTail} />
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">New Terms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <NewTermsCard data={data.newTerms} count={kpis.newTermCount} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 2-column: CPC Opportunity + Seasonal Trends */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">CPC Opportunity</CardTitle>
@@ -218,29 +232,7 @@ export function DemandTab({ customLabel0 }: Props) {
             <SeasonalTrendsChart data={data.seasonal} />
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">New Terms</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <NewTermsCard data={data.newTerms} count={kpis.newTermCount} />
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Full-width Long-tail Analysis */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Long-Tail Analysis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LongTailAnalysis data={data.longTail} />
-        </CardContent>
-      </Card>
-
-      {/* Top Terms Table — shows actual search terms with metrics */}
-      <TopTermsTable data={data.impressionShare} />
     </div>
   )
 }

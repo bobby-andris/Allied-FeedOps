@@ -61,9 +61,11 @@ export function classifyQuadrant(
   medianRoas: number,
   medianRevenue: number
 ): BcgQuadrant {
-  if (roas >= medianRoas && revenue >= medianRevenue) return 'star'
-  if (roas >= medianRoas && revenue < medianRevenue) return 'cashCow'
-  if (roas < medianRoas && revenue >= medianRevenue) return 'questionMark'
+  // Use strict > for median so values at exactly the median fall to the lower quadrant.
+  // This prevents all-Stars when many groups sit at 0.
+  if (roas > medianRoas && revenue > medianRevenue) return 'star'
+  if (roas > medianRoas && revenue <= medianRevenue) return 'cashCow'
+  if (roas <= medianRoas && revenue > medianRevenue) return 'questionMark'
   return 'dog'
 }
 

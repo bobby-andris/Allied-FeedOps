@@ -138,8 +138,11 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const roasValues = rawGroups.map(g => g.roas)
-    const revenueValues = rawGroups.map(g => g.revenue)
+    // Compute medians from ACTIVE groups only (revenue > 0).
+    // With 33/59 groups at $0, including zeros makes medians 0 → all groups become "Stars".
+    const activeGroups = rawGroups.filter(g => g.revenue > 0)
+    const roasValues = activeGroups.map(g => g.roas)
+    const revenueValues = activeGroups.map(g => g.revenue)
     const medianRoas = computeMedians(roasValues)
     const medianRevenue = computeMedians(revenueValues)
 
