@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react'
 import { formatDollars } from '@/lib/formatting'
+import { classifyAllTerms } from '../lib/reason-codes'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
 
 interface LabelProfitability {
@@ -26,16 +27,16 @@ export function LabelProfitabilitySummary({ scores }: LabelProfitabilitySummaryP
   const [labels, setLabels] = useState<LabelProfitability[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Count opportunities per label from in-memory TermScore data
-  const opportunityCounts = new Map<string, number>()
-  for (const score of scores) {
-    if (score.isMisplaced) {
-      opportunityCounts.set(
-        score.customLabel0,
-        (opportunityCounts.get(score.customLabel0) ?? 0) + 1
-      )
+  // Count opportunities per label using trigger-based classification
+  const opportunityCounts = useMemo(() => {
+    const map = new Map<string, number>()
+    const classified = classifyAllTerms(scores)
+    const actionable = classified.filter(t => t.trigger && t.trigger !== 'observe')
+    for (const term of actionable) {
+      map.set(term.customLabel0, (map.get(term.customLabel0) ?? 0) + 1)
     }
-  }
+    return map
+  }, [scores])
 
   useEffect(() => {
     let cancelled = false

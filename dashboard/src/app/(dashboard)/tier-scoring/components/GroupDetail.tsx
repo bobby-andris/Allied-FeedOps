@@ -15,6 +15,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react'
 import { FallbackIndicator } from './FallbackIndicator'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { DistributionChart } from './DistributionChart'
+import { classifyAllTerms } from '../lib/reason-codes'
 import type { GroupDistributions, TermScore, FallbackLevel } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 import { formatDollars } from '@/lib/formatting'
@@ -41,33 +42,48 @@ function formatMetricCompact(value: number, metric: string): string {
   return `${value.toFixed(2)}x`
 }
 
+function getTriggerBadge(trigger: string | undefined) {
+  switch (trigger) {
+    case 'wasted_spend':
+      return <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px] font-medium">Block</span>
+    case 'demote_underperform':
+      return <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[11px] font-medium">Demote</span>
+    case 'promote_conversion':
+      return <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-[11px] font-medium">Promote</span>
+    case 'promote_intent':
+      return <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[11px] font-medium">Promote</span>
+    case 'under_invested':
+      return <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[11px] font-medium">Budget</span>
+    default:
+      return <span className="text-muted-foreground text-[11px]">&mdash;</span>
+  }
+}
+
 export function GroupDetail({ group, scores, onBack, onSelectTier, onSelectTerm }: GroupDetailProps) {
-  const misplacedTerms = useMemo(
-    () => scores.filter(s => s.isMisplaced).sort((a, b) => (b.impact?.mid ?? 0) - (a.impact?.mid ?? 0)),
-    [scores]
-  )
+  const actionableTerms = useMemo(() => {
+    const classified = classifyAllTerms(scores)
+    return classified.filter(t => t.trigger && t.trigger !== 'observe')
+  }, [scores])
 
   // Generate inline callout
   const callout = useMemo(() => {
-    if (misplacedTerms.length === 0) {
+    if (actionableTerms.length === 0) {
       return { type: 'success' as const, text: `All terms in ${group.customLabel0} align with current tiers — no action needed` }
     }
 
-    // Find tier with most misplaced terms
-    const tierCounts: Record<string, number> = {}
-    for (const t of misplacedTerms) {
-      tierCounts[t.currentTier] = (tierCounts[t.currentTier] ?? 0) + 1
+    // Find trigger type with most terms
+    const triggerCounts: Record<string, number> = {}
+    for (const t of actionableTerms) {
+      const key = t.trigger ?? 'unknown'
+      triggerCounts[key] = (triggerCounts[key] ?? 0) + 1
     }
-    const topTier = Object.entries(tierCounts).sort(([, a], [, b]) => b - a)[0]
-    const boundary = topTier[0] === 'HIGH'
-      ? group.boundaries.highFloor.value
-      : group.boundaries.lowCeiling.value
+    const topTrigger = Object.entries(triggerCounts).sort(([, a], [, b]) => b - a)[0]
 
     return {
       type: 'warning' as const,
-      text: `${topTier[0]} tier has ${topTier[1]} term${topTier[1] !== 1 ? 's' : ''} where data suggests a different tier could improve performance — look at terms with ROAS ${topTier[0] === 'HIGH' ? 'below' : 'above'} ${boundary.toFixed(1)}x`,
+      text: `${actionableTerms.length} term${actionableTerms.length !== 1 ? 's' : ''} need attention — top issue: ${topTrigger[1]} ${topTrigger[0].replace(/_/g, ' ')} term${topTrigger[1] !== 1 ? 's' : ''}`,
     }
-  }, [misplacedTerms, group])
+  }, [actionableTerms, group])
 
   return (
     <div className="space-y-6">
@@ -214,15 +230,15 @@ export function GroupDetail({ group, scores, onBack, onSelectTier, onSelectTerm 
         </CardContent>
       </Card>
 
-      {/* Misplaced terms table */}
+      {/* Actionable terms table */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">
-            Optimization Opportunities ({misplacedTerms.length})
+            Optimization Opportunities ({actionableTerms.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {misplacedTerms.length === 0 ? (
+          {actionableTerms.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-lg px-4 py-3">
               <CheckCircle2 className="h-4 w-4" />
               No optimization opportunities in this group — all terms align with current tiers
@@ -233,49 +249,56 @@ export function GroupDetail({ group, scores, onBack, onSelectTier, onSelectTerm 
                 <TableRow>
                   <TableHead>Search Term</TableHead>
                   <TableHead>Current</TableHead>
+                  <TableHead>Action</TableHead>
                   <TableHead></TableHead>
-                  <TableHead>Recommended</TableHead>
+                  <TableHead>Target</TableHead>
                   <TableHead>Impact (range)</TableHead>
                   <TableHead>Confidence</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {misplacedTerms.map(term => (
-                  <TableRow
-                    key={`${term.searchTerm}::${term.customLabel0}`}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => onSelectTerm(term)}
-                  >
-                    <TableCell className="font-medium max-w-[200px] truncate" title={term.searchTerm}>
-                      {term.searchTerm}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`text-xs font-medium ${tierColors[term.currentTier].text}`}>
-                        {term.currentTier}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-1">
-                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                    </TableCell>
-                    <TableCell>
-                      <span className={`text-xs font-medium ${tierColors[term.recommendedTier].text}`}>
-                        {term.recommendedTier}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {term.impact ? (
-                        <span>
-                          {formatDollars(term.impact.low)}&ndash;{formatDollars(term.impact.high)}/mo
+                {actionableTerms.map(term => {
+                  const targetTier = term.targetTier ?? term.recommendedTier
+                  return (
+                    <TableRow
+                      key={`${term.searchTerm}::${term.customLabel0}`}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => onSelectTerm(term)}
+                    >
+                      <TableCell className="font-medium max-w-[200px] truncate" title={term.searchTerm}>
+                        {term.searchTerm}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-medium ${tierColors[term.currentTier].text}`}>
+                          {term.currentTier}
                         </span>
-                      ) : (
-                        <span className="text-muted-foreground">&mdash;</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>
+                        {getTriggerBadge(term.trigger)}
+                      </TableCell>
+                      <TableCell className="px-1">
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-medium ${tierColors[targetTier].text}`}>
+                          {targetTier}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {term.impact ? (
+                          <span>
+                            {formatDollars(term.impact.low)}&ndash;{formatDollars(term.impact.high)}/mo
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">&mdash;</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           )}

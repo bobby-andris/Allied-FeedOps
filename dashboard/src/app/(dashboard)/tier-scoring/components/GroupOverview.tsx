@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, ArrowRight, ShieldBan } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FallbackIndicator } from './FallbackIndicator'
+import { classifyAllTerms } from '../lib/reason-codes'
 import type { GroupDistributions, TermScore, ImpactRange } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 import { formatDollars } from '@/lib/formatting'
@@ -34,9 +35,10 @@ export function GroupOverview({ distributions, scores, onSelectGroup, onBlockLab
   const sortedGroups = useMemo(() => {
     const groups: GroupSummary[] = Object.values(distributions).map(group => {
       const groupScores = scores.filter(s => s.customLabel0 === group.customLabel0)
-      const misplaced = groupScores.filter(s => s.isMisplaced)
-      const misplacedImpact = misplaced.reduce((sum, s) => sum + (s.impact?.mid ?? 0), 0)
-      return { group, misplacedCount: misplaced.length, misplacedImpact }
+      const classified = classifyAllTerms(groupScores)
+      const actionable = classified.filter(t => t.trigger && t.trigger !== 'observe')
+      const misplacedImpact = actionable.reduce((sum, s) => sum + (s.impact?.mid ?? 0), 0)
+      return { group, misplacedCount: actionable.length, misplacedImpact }
     })
 
     groups.sort((a, b) => {
