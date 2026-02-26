@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-26T06:52:45.236Z"
+last_updated: "2026-02-26T06:59:52.477Z"
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 29
-  completed_plans: 24
+  completed_plans: 26
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 34.2 (v1.3c) — IN PROGRESS
-Plan: 2 of 6 complete
-Status: Completed 34.2-02 (Google Ads account audit for scoring engine parameterization)
-Last activity: 2026-02-26 — Completed 34.2-02: Account audit with CPA, CPC, conversion actions
+Plan: 4 of 6 complete
+Status: Completed 34.2-04 (Behavioral intent signals — rCTR, CPC ceiling, micro-conv delta)
+Last activity: 2026-02-26 — Completed 34.2-04: Behavioral intent signals in tier-scoring engine
 
-Progress: [###-------] 33% (Phase 34.2)
+Progress: [######----] 67% (Phase 34.2)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [###-------] 33% (Phase 34.2)
 | Phase 35 P02 | 5min | 2 tasks | 11 files |
 | Phase 34.2 P01 | 9min | 3 tasks | 10 files |
 | Phase 34.2 P02 | 8min | 2 tasks | 2 files |
+| Phase 34.2 P04 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -131,6 +132,12 @@ Recent decisions affecting current work:
 - [Phase 34.2]: Wasted spend threshold: $96.33 (1.5x avg CPA) replaces hardcoded $5
 - [Phase 34.2]: CPC caps all $0.01 (Target ROAS bidding) — use metrics.average_cpc from search_term_view
 - [Phase 34.2]: Only 1/19 conversion actions is purchase — metrics.conversions is purchase-only, all_conversions has 58.6x multiplier
+- [Phase 34.2-04]: CPC ceiling uses tier median CPC (not ad_group cap $0.01) under Target ROAS bidding
+- [Phase 34.2-04]: Cross-device signal deferred (weight 0.15 → 0 contribution), composite max ~0.85
+- [Phase 34.2-04]: BehavioralSignals optional on TermScore to avoid breaking 15+ consumers
+- [Phase 34.2-03]: Composite weights: 0.60 attribute + 0.40 specificity for feed alignment score
+- [Phase 34.2-03]: Model number detection short-circuits to score 1.0; unknown TF-IDF terms get 80% max IDF
+- [Phase 34.2-03]: Lazy-init IntentScorer with threading.Lock on first /score-intent request (not at startup)
 
 ### Pending Todos
 
@@ -161,8 +168,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34.2-02-PLAN.md (Google Ads account audit)
-Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-02-SUMMARY.md
+Stopped at: Completed 34.2-04-PLAN.md (Behavioral intent signals)
+Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-04-SUMMARY.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase

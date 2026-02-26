@@ -65,8 +65,8 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 ### Zero-Conversion Intent Scoring (Phase 34.2)
 
 - [x] **INTENT-01**: Eradicate "constrain" terminology — replace with "demote" across all types, logic, UI components, tests, and verdict text
-- [ ] **INTENT-02**: Deploy feed alignment scoring on Cloud Run — attribute extraction (28 finishes, 41 collections, product types, dimensions, model numbers via rapidfuzz) + TF-IDF specificity scoring from product catalog corpus
-- [ ] **INTENT-03**: Add behavioral intent signals to tier-scoring pipeline — rCTR (term CTR / tier median CTR), CPC ceiling pressure (avg CPC / Max CPC cap), micro-conversion delta (all_conversions - conversions) from Google Ads API
+- [x] **INTENT-02**: Deploy feed alignment scoring on Cloud Run — attribute extraction (28 finishes, 41 collections, product types, dimensions, model numbers via rapidfuzz) + TF-IDF specificity scoring from product catalog corpus
+- [x] **INTENT-03**: Add behavioral intent signals to tier-scoring pipeline — rCTR (term CTR / tier median CTR), CPC ceiling pressure (avg CPC / Max CPC cap), micro-conversion delta (all_conversions - conversions) from Google Ads API
 - [ ] **INTENT-04**: Implement unified intent score (0.55 * feed_alignment + 0.45 * behavioral_intent) and new determineAction() decision matrix with Trigger E (zero-conversion promotion when intentScore >= 0.65 AND rCTR >= 1.5 OR wordCount >= 3)
 - [x] **INTENT-05**: Fix tier-scoring UI — add targetTier to TermScore type, fix TierMovementArrow direction, show Promote/Demote buttons with target tier labels, display intent score breakdown (attribute + behavioral + composite)
 - [ ] **INTENT-06**: Wire action queue execution to Shopping Funnel pipeline (applyTierAssignment → blockedTiersForAssignment → Google Ads API negative keyword management)

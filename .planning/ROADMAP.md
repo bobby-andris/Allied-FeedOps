@@ -271,7 +271,7 @@ Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 | 33.2 UI Redesign | 3/3 | Complete    | 2026-02-25 | - |
 | 34. Revenue Leakage and Execution | 4/4 | Complete    | 2026-02-26 | - |
 | 34.1 Fix Decision Logic | 3/3 | Complete    | 2026-02-26 | - |
-| 34.2 Intent Scoring Engine | 2/6 | In Progress|  | - |
+| 34.2 Intent Scoring Engine | 4/6 | In Progress|  | - |
 | 35. Market Intelligence | 3/4 | In Progress|  | - |
 | 36. Automation and Experiments | v1.3c | 0/TBD | Not started | - |
 | 37. Reporting and Benchmarks | v1.3c | 0/TBD | Not started | - |
