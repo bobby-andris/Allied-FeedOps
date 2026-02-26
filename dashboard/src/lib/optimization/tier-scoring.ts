@@ -25,6 +25,7 @@ import type {
   BoundaryValue,
   GroupDistributions,
   TermScore,
+  BehavioralSignals,
   ConfidenceResult,
   ConfidenceFactors,
   ImpactRange,
@@ -286,6 +287,31 @@ export function scoreTerm(
   // Peer context
   const peerContext = buildPeerContext(termRoas, groupDist, customLabel0)
 
+  // Behavioral intent signals (Domain B)
+  let behavioralSignals: BehavioralSignals | undefined
+  if (term.total_average_cpc !== undefined && term.total_all_conversions !== undefined) {
+    const tierMedianCtr = currentTierDist.metrics.ctr.p50
+    const tierMedianCpcMicros = currentTierDist.metrics.cpc.p50 * 1_000_000 // dist stores CPC in dollars
+    // Estimate tier median daily spend: tier median CPC * tier median clicks-per-term / 30 days
+    // Approximate: use the term's cost / impressions ratio against tier median
+    const tierMedianDailySpend = (currentTierDist.metrics.cpc.p50 * 1_000_000 *
+      Math.max(currentTierDist.metrics.ctr.p50 * 100, 1)) / 30
+
+    behavioralSignals = computeBehavioralIntent(
+      {
+        ctr: termCtr,
+        avgCpcMicros: term.total_average_cpc,
+        allConversions: term.total_all_conversions,
+        conversions: term.total_conversions,
+        costMicros: term.total_cost_micros,
+        impressions: term.total_impressions,
+      },
+      tierMedianCtr,
+      tierMedianCpcMicros,
+      tierMedianDailySpend,
+    )
+  }
+
   return {
     searchTerm: term.search_term,
     customLabel0,
@@ -307,6 +333,7 @@ export function scoreTerm(
     actionReason,
     targetTier,
     totalImpressions: term.total_impressions ?? 0,
+    behavioralSignals,
   }
 }
 
@@ -479,6 +506,91 @@ export function buildHeroCallout(scores: TermScore[]): string {
     : `$${Math.round(totalLow)}`
 
   return `${count} term${count === 1 ? '' : 's'} may be in the wrong tier — ${formatted}/mo potential impact`
+}
+
+// ---------------------------------------------------------------------------
+// Core: computeBehavioralIntent
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute behavioral intent signals from Google Ads data (Domain B).
+ *
+ * Three signals indicate genuine purchase intent for zero-conversion terms:
+ * 1. rCTR: high relative CTR (users clicking this term more than peers)
+ * 2. CPC ceiling: Smart Bidding is pushing CPC toward tier median (Google sees value)
+ * 3. Micro-conversions: add-to-cart / begin-checkout without purchase (near-converters)
+ * 4. Cost velocity: how fast this term burns budget relative to tier median daily spend
+ *
+ * @param term - Term-level metrics (CTR, avgCpc in micros, allConversions, conversions, costMicros, impressions)
+ * @param tierMedianCtr - Median CTR for the current tier (from distribution)
+ * @param tierMedianCpcMicros - Median CPC in micros for the current tier
+ * @param tierMedianDailySpend - Median daily spend in micros for the current tier (0 if unknown)
+ */
+export function computeBehavioralIntent(
+  term: {
+    ctr: number
+    avgCpcMicros: number
+    allConversions: number
+    conversions: number
+    costMicros: number
+    impressions: number
+  },
+  tierMedianCtr: number,
+  tierMedianCpcMicros: number,
+  tierMedianDailySpend: number,
+): BehavioralSignals {
+  // 1. Relative CTR: term CTR / tier median CTR
+  const effectiveMedianCtr = Math.max(tierMedianCtr, 0.01)
+  const rCTR = term.ctr / effectiveMedianCtr
+  const rCTRScore = Math.min(rCTR / 3.0, 1.0) // 3x median = max score
+
+  // 2. CPC ceiling pressure: avg CPC / tier median CPC
+  // With Target ROAS bidding, CPC caps are $0.01 (nominal). Instead we compare
+  // the term's actual CPC against the tier's median CPC. A ratio near or above 1.0
+  // means Smart Bidding is pushing this term's CPC to the tier ceiling — it sees value.
+  const cpcCeilingRatio = tierMedianCpcMicros > 0
+    ? term.avgCpcMicros / tierMedianCpcMicros
+    : 0
+  const cpcCeilingScore = Math.min(cpcCeilingRatio / 1.0, 1.0) // at or above median = max
+
+  // 3. Micro-conversion delta: all_conversions - conversions (clamp to 0+)
+  const microConversionDelta = Math.max(term.allConversions - term.conversions, 0)
+  const microConvScore = Math.min(microConversionDelta / 2.0, 1.0) // 2+ micro-convs = max
+
+  // 4. Cost velocity: how fast this term spends relative to tier median daily spend
+  // Estimate term daily spend assuming 30-day window
+  const termDailySpend = term.costMicros / 30
+  const effectiveMedianDailySpend = Math.max(tierMedianDailySpend, 1)
+  const velocityRatio = termDailySpend / effectiveMedianDailySpend
+  let costVelocityScore: number
+  if (microConversionDelta > 0) {
+    // Has micro-conversions: moderate spend velocity is positive (active engagement)
+    costVelocityScore = Math.min(velocityRatio / 3.0, 1.0) * 0.5
+  } else {
+    // No micro-conversions: fast spend with no signal = bad (wasted)
+    costVelocityScore = 1.0 - Math.min(velocityRatio / 3.0, 1.0)
+  }
+
+  // Composite: research weights with cross_device (0.15) redistributed
+  // rCTR: 0.30, CPC ceiling: 0.25, micro-conv: 0.20, cost velocity: 0.10
+  // cross_device deferred (0.15 weight → set to 0 contribution)
+  // Total active weight: 0.85 — composite can be < 1.0 max (fine for unified scoring)
+  const composite =
+    0.30 * rCTRScore +
+    0.25 * cpcCeilingScore +
+    0.20 * microConvScore +
+    0.10 * costVelocityScore
+
+  return {
+    rCTR,
+    cpcCeilingRatio,
+    microConversionDelta,
+    rCTRScore,
+    cpcCeilingScore,
+    microConvScore,
+    costVelocityScore,
+    composite,
+  }
 }
 
 // ---------------------------------------------------------------------------

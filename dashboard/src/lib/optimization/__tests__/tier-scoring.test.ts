@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { LabelTierPerformance, ExistingFunnelTerm, FunnelTier, QueryIntentFeatures } from '@/lib/shopping-funnel/types'
-import type { GroupDistributions, TierDistribution, TierBoundaries, CalibrationConfig, RecommendedAction } from '../tier-scoring.types'
+import type { GroupDistributions, TierDistribution, TierBoundaries, CalibrationConfig, RecommendedAction, BehavioralSignals } from '../tier-scoring.types'
 import { DEFAULT_CALIBRATION } from '../tier-scoring.types'
 import {
   computeTierDistributions,
@@ -10,6 +10,7 @@ import {
   estimateImpact,
   computeGlobalDistributions,
   buildHeroCallout,
+  computeBehavioralIntent,
 } from '../tier-scoring'
 
 // ---------------------------------------------------------------------------
@@ -1221,5 +1222,139 @@ describe('Phase 34.1: Bug 4 — Prescriptive verdicts', () => {
     }
     // Also verify the verdict field is prescriptive
     expect(score.verdict.toLowerCase()).not.toMatch(/resembles/)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// computeBehavioralIntent
+// ---------------------------------------------------------------------------
+
+describe('computeBehavioralIntent', () => {
+  const baseTerm = {
+    ctr: 0.04,
+    avgCpcMicros: 2_000_000, // $2.00
+    allConversions: 3,
+    conversions: 1,
+    costMicros: 10_000_000, // $10
+    impressions: 500,
+  }
+
+  const tierMedianCtr = 0.02
+  const tierMedianCpcMicros = 2_000_000 // $2.00
+  const tierMedianDailySpend = 500_000 // $0.50/day
+
+  it('computes high rCTR correctly (3x median = max score)', () => {
+    const term = { ...baseTerm, ctr: 0.06 } // 3x median of 0.02
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.rCTR).toBeCloseTo(3.0)
+    expect(signals.rCTRScore).toBeCloseTo(1.0)
+  })
+
+  it('computes rCTR below median', () => {
+    const term = { ...baseTerm, ctr: 0.01 } // 0.5x median
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.rCTR).toBeCloseTo(0.5)
+    expect(signals.rCTRScore).toBeCloseTo(0.5 / 3.0)
+  })
+
+  it('computes CPC ceiling at 90% of median', () => {
+    const term = { ...baseTerm, avgCpcMicros: 1_800_000 } // 90% of $2.00
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.cpcCeilingRatio).toBeCloseTo(0.9)
+    expect(signals.cpcCeilingScore).toBeCloseTo(0.9)
+  })
+
+  it('caps CPC ceiling score at 1.0 when above median', () => {
+    const term = { ...baseTerm, avgCpcMicros: 3_000_000 } // 150% of median
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.cpcCeilingRatio).toBeCloseTo(1.5)
+    expect(signals.cpcCeilingScore).toBe(1.0)
+  })
+
+  it('computes 2 micro-conversions = max score', () => {
+    const term = { ...baseTerm, allConversions: 3, conversions: 1 } // delta = 2
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.microConversionDelta).toBe(2)
+    expect(signals.microConvScore).toBeCloseTo(1.0)
+  })
+
+  it('handles single micro-conversion (half score)', () => {
+    const term = { ...baseTerm, allConversions: 2, conversions: 1 } // delta = 1
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.microConversionDelta).toBe(1)
+    expect(signals.microConvScore).toBeCloseTo(0.5)
+  })
+
+  it('returns near-zero composite for zero-everything term', () => {
+    const term = {
+      ctr: 0,
+      avgCpcMicros: 0,
+      allConversions: 0,
+      conversions: 0,
+      costMicros: 0,
+      impressions: 0,
+    }
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.rCTRScore).toBe(0)
+    expect(signals.cpcCeilingScore).toBe(0)
+    expect(signals.microConvScore).toBe(0)
+    // Cost velocity with no micro-convs and zero spend: 1.0 - 0 = 1.0
+    expect(signals.costVelocityScore).toBeCloseTo(1.0)
+    // composite = 0.30*0 + 0.25*0 + 0.20*0 + 0.10*1.0 = 0.10
+    expect(signals.composite).toBeCloseTo(0.10)
+  })
+
+  it('handles zero median CTR gracefully (uses 0.01 floor)', () => {
+    const term = { ...baseTerm, ctr: 0.03 }
+    const signals = computeBehavioralIntent(term, 0, tierMedianCpcMicros, tierMedianDailySpend)
+    // 0.03 / 0.01 = 3.0 → rCTRScore = 1.0
+    expect(signals.rCTR).toBeCloseTo(3.0)
+    expect(signals.rCTRScore).toBeCloseTo(1.0)
+  })
+
+  it('handles zero CPC median (returns 0 for CPC ceiling)', () => {
+    const signals = computeBehavioralIntent(baseTerm, tierMedianCtr, 0, tierMedianDailySpend)
+    expect(signals.cpcCeilingRatio).toBe(0)
+    expect(signals.cpcCeilingScore).toBe(0)
+  })
+
+  it('clamps negative micro-conversion delta to 0', () => {
+    // all_conversions < conversions should not happen but handle gracefully
+    const term = { ...baseTerm, allConversions: 0, conversions: 2 }
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    expect(signals.microConversionDelta).toBe(0)
+    expect(signals.microConvScore).toBe(0)
+  })
+
+  it('produces composite in expected range for strong intent term', () => {
+    // High rCTR (3x), CPC at ceiling, 2 micro-convs
+    const term = {
+      ctr: 0.06,              // 3x median → rCTRScore = 1.0
+      avgCpcMicros: 2_000_000, // = median → cpcCeilingScore = 1.0
+      allConversions: 3,
+      conversions: 1,          // delta = 2 → microConvScore = 1.0
+      costMicros: 10_000_000,
+      impressions: 500,
+    }
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    // composite = 0.30*1.0 + 0.25*1.0 + 0.20*1.0 + 0.10*costVelocity
+    expect(signals.composite).toBeGreaterThan(0.7)
+    expect(signals.composite).toBeLessThanOrEqual(0.85) // max without cross_device
+  })
+
+  it('cost velocity penalizes fast spend without micro-conversions', () => {
+    // High spend, no micro-convs
+    const term = {
+      ctr: 0.02,
+      avgCpcMicros: 1_000_000,
+      allConversions: 0,
+      conversions: 0,
+      costMicros: 50_000_000, // $50 → $1.67/day → high ratio
+      impressions: 500,
+    }
+    const signals = computeBehavioralIntent(term, tierMedianCtr, tierMedianCpcMicros, tierMedianDailySpend)
+    // No micro-convs: costVelocityScore = 1.0 - min(ratio/3, 1.0)
+    // ratio = (50M/30) / 500000 = 3.33 → min(3.33/3, 1) = 1.0 → score = 0.0
+    expect(signals.costVelocityScore).toBeCloseTo(0.0, 1)
   })
 })
