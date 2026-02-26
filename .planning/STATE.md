@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets through data-driven content optimization at scale
-**Current focus:** Phase 34.1 — Fix Decision Logic
+**Current focus:** Phase 35 — Market Intelligence
 
 ## Current Position
 
-Phase: 34.1 (v1.3c) — COMPLETE
-Plan: 3 of 3 complete
-Status: Completed 34.1-03 (label blocking, search promotion, label profitability, schema docs)
-Last activity: 2026-02-26 — Completed 34.1-03-PLAN.md (label_block API, LabelProfitabilitySummary, SCHEMA.md)
+Phase: 35 (v1.3c) — IN PROGRESS
+Plan: 1 of 4 complete
+Status: Completed 35-01 (data layer: types, constants, computations, 3 API routes)
+Last activity: 2026-02-26 — Completed 35-01-PLAN.md (demand, competitive, products API routes)
 
-Progress: [##########] 100% (Phase 34.1)
+Progress: [###-------] 25% (Phase 35)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [##########] 100% (Phase 34.1)
 | Phase 34.1 P01 | 4min | 3 tasks | 3 files |
 | Phase 34.1 P02 | 5min | 3 tasks | 8 files |
 | Phase 34.1 P03 | 6min | 3 tasks | 9 files |
+| Phase 35 P01 | 6min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,10 @@ Recent decisions affecting current work:
 - [Phase 34.1-03]: Search candidate thresholds: ROAS > 3.0, impressions > 100, conversions > 0
 - [Phase 34.1-03]: funnel_snapshots_daily is correct table name (not label_tier_daily_snapshot)
 - [Phase 34.1-03]: Block Label uses window.confirm for destructive action confirmation
+- [Phase 35-01]: In-memory join: search_queries lacks custom_label_0, joined through query_value_scores lookup map
+- [Phase 35-01]: Keyword enrichment: merge search_queries.avg_monthly_searches with keyword_metrics for best coverage
+- [Phase 35-01]: BCG classification: dynamic medians from computeMedians(), not hardcoded thresholds
+- [Phase 35-01]: Detail drill-down approximates quadrant locally (exact requires global medians)
 
 ### Pending Todos
 
@@ -134,8 +139,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34.1-03-PLAN.md (Phase 34.1 COMPLETE)
-Resume file: .planning/phases/34.1-fix-decision-logic/.continue-here.md
+Stopped at: Completed 35-01-PLAN.md
+Resume file: .planning/phases/35-market-intelligence/35-01-SUMMARY.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase

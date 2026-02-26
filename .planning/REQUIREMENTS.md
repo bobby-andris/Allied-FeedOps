@@ -64,20 +64,20 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 
 ### Demand Intelligence
 
-- [ ] **DEMAND-01**: User can view impression share gaps (actual impressions vs Keyword Planner avg_monthly_searches) per term
-- [ ] **DEMAND-02**: User can view CPC opportunity scores showing headroom between actual CPC and Keyword Planner high_top_of_page_bid
-- [ ] **DEMAND-03**: User can view seasonal demand patterns from monthly_search_volumes with terms spiking or declining >20% flagged
-- [ ] **DEMAND-04**: User can view new term discovery rate (terms appearing for first time in last 7 days)
-- [ ] **DEMAND-05**: User can view brand vs non-brand revenue split using NLP decomposition
-- [ ] **DEMAND-06**: User can view competitor mention tracking per competitor token (moen, delta, kohler, etc.) with impressions, spend, conversions
-- [ ] **DEMAND-07**: User can view long-tail vs head term analysis grouped by word count with ROAS/CVR comparison
+- [x] **DEMAND-01**: User can view impression share gaps (actual impressions vs Keyword Planner avg_monthly_searches) per term
+- [x] **DEMAND-02**: User can view CPC opportunity scores showing headroom between actual CPC and Keyword Planner high_top_of_page_bid
+- [x] **DEMAND-03**: User can view seasonal demand patterns from monthly_search_volumes with terms spiking or declining >20% flagged
+- [x] **DEMAND-04**: User can view new term discovery rate (terms appearing for first time in last 7 days)
+- [x] **DEMAND-05**: User can view brand vs non-brand revenue split using NLP decomposition
+- [x] **DEMAND-06**: User can view competitor mention tracking per competitor token (moen, delta, kohler, etc.) with impressions, spend, conversions
+- [x] **DEMAND-07**: User can view long-tail vs head term analysis grouped by word count with ROAS/CVR comparison
 
 ### Product Intelligence
 
-- [ ] **PROD-01**: User can view all 59 product groups classified into BCG quadrants (Stars/Cash Cows/Question Marks/Dogs) based on ROAS and revenue medians
-- [ ] **PROD-02**: User can interact with bubble chart visualization (X: ROAS, Y: Revenue, Size: Spend, Color: Trend)
-- [ ] **PROD-03**: User can click a product group bubble to drill down to term-level breakdown
-- [ ] **PROD-04**: User can view tabular alternative to bubble chart with sortable columns
+- [x] **PROD-01**: User can view all 59 product groups classified into BCG quadrants (Stars/Cash Cows/Question Marks/Dogs) based on ROAS and revenue medians
+- [x] **PROD-02**: User can interact with bubble chart visualization (X: ROAS, Y: Revenue, Size: Spend, Color: Trend)
+- [x] **PROD-03**: User can click a product group bubble to drill down to term-level breakdown
+- [x] **PROD-04**: User can view tabular alternative to bubble chart with sortable columns
 
 ### Automation
 
@@ -161,17 +161,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXEC-03 | Phase 34 | Complete |
 | EXEC-04 | Phase 34 | Complete |
 | EXEC-05 | Phase 34 | Complete |
-| DEMAND-01 | Phase 35 | Pending |
-| DEMAND-02 | Phase 35 | Pending |
-| DEMAND-03 | Phase 35 | Pending |
-| DEMAND-04 | Phase 35 | Pending |
-| DEMAND-05 | Phase 35 | Pending |
-| DEMAND-06 | Phase 35 | Pending |
-| DEMAND-07 | Phase 35 | Pending |
-| PROD-01 | Phase 35 | Pending |
-| PROD-02 | Phase 35 | Pending |
-| PROD-03 | Phase 35 | Pending |
-| PROD-04 | Phase 35 | Pending |
+| DEMAND-01 | Phase 35 | Complete |
+| DEMAND-02 | Phase 35 | Complete |
+| DEMAND-03 | Phase 35 | Complete |
+| DEMAND-04 | Phase 35 | Complete |
+| DEMAND-05 | Phase 35 | Complete |
+| DEMAND-06 | Phase 35 | Complete |
+| DEMAND-07 | Phase 35 | Complete |
+| PROD-01 | Phase 35 | Complete |
+| PROD-02 | Phase 35 | Complete |
+| PROD-03 | Phase 35 | Complete |
+| PROD-04 | Phase 35 | Complete |
 | AUTO-01 | Phase 36 | Pending |
 | AUTO-02 | Phase 36 | Pending |
 | AUTO-03 | Phase 36 | Pending |
