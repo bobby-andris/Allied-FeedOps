@@ -43,14 +43,14 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 ### Decision Logic Fixes (Phase 34.1 — Urgent)
 
 - [x] **FIX-01**: Wasted spend terms (0 conversions, >$5 spend) get recommendedAction='block' (if HIGH) or 'constrain' (if MEDIUM/LOW), NEVER 'promote'
-- [ ] **FIX-02**: Under-invested detection compares avgMonthlySearches against actual totalImpressions (not boolean > 2)
+- [x] **FIX-02**: Under-invested detection compares avgMonthlySearches against actual totalImpressions (not boolean > 2)
 - [x] **FIX-03**: Impact estimate for wasted spend equals monthly cost saved (not $0)
 - [x] **FIX-04**: CPC fit scoring uses max(0, zCpc) penalty — cheap terms not penalized, expensive terms penalized
-- [ ] **FIX-05**: Constrain button hidden when term is already in HIGH tier (no-op guard)
+- [x] **FIX-05**: Constrain button hidden when term is already in HIGH tier (no-op guard)
 - [x] **FIX-06**: Verdict text uses prescriptive language ('Block — spent $X with zero conversions') not descriptive ('fits LOW distribution')
-- [ ] **FIX-07**: ROAS recommendations compare against tier distribution, not bid target
-- [ ] **FIX-08**: estimateTierFromMetrics() has wasted-spend guard — never returns LOW for zero-conversion terms
-- [ ] **FIX-09**: Scoring systems unified — recommendations API uses distribution-based scoring
+- [x] **FIX-07**: ROAS recommendations compare against tier distribution, not bid target
+- [x] **FIX-08**: estimateTierFromMetrics() has wasted-spend guard — never returns LOW for zero-conversion terms
+- [x] **FIX-09**: Scoring systems unified — recommendations API uses distribution-based scoring
 
 ### New Capabilities (Phase 34.1)
 
@@ -191,14 +191,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RPT-04 | Phase 37 | Pending |
 
 | FIX-01 | Phase 34.1 | Complete |
-| FIX-02 | Phase 34.1 | Pending |
+| FIX-02 | Phase 34.1 | Complete |
 | FIX-03 | Phase 34.1 | Complete |
 | FIX-04 | Phase 34.1 | Complete |
-| FIX-05 | Phase 34.1 | Pending |
+| FIX-05 | Phase 34.1 | Complete |
 | FIX-06 | Phase 34.1 | Complete |
-| FIX-07 | Phase 34.1 | Pending |
-| FIX-08 | Phase 34.1 | Pending |
-| FIX-09 | Phase 34.1 | Pending |
+| FIX-07 | Phase 34.1 | Complete |
+| FIX-08 | Phase 34.1 | Complete |
+| FIX-09 | Phase 34.1 | Complete |
 | FEAT-01 | Phase 34.1 | Pending |
 | FEAT-02 | Phase 34.1 | Pending |
 | FEAT-03 | Phase 34.1 | Pending |

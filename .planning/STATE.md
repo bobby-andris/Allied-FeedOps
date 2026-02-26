@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 34.1 (v1.3c) — IN PROGRESS
-Plan: 1 of 3 complete
-Status: Completed 34.1-01 (TDD fix of 4 scoring engine bugs)
-Last activity: 2026-02-26 — Completed 34.1-01-PLAN.md (RecommendedAction, wasted spend, CPC, verdicts)
+Plan: 2 of 3 complete
+Status: Completed 34.1-02 (consumers, UI guards, wasted-spend overrides)
+Last activity: 2026-02-26 — Completed 34.1-02-PLAN.md (under_invested, Constrain guard, prescriptive verdicts, API persistence)
 
-Progress: [███-------] 33% (Phase 34.1)
+Progress: [██████----] 67% (Phase 34.1)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [███-------] 33% (Phase 34.1)
 | Phase 34 P03 | 5min | 3 tasks | 8 files |
 | Phase 34 P04 | 5min | 4 tasks | 7 files |
 | Phase 34.1 P01 | 4min | 3 tasks | 3 files |
+| Phase 34.1 P02 | 5min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,11 @@ Recent decisions affecting current work:
 - [Phase 34.1-01]: CPC asymmetric penalty: max(0, zCpc) — cheap CPC neutral, expensive penalized
 - [Phase 34.1-01]: New TermScore fields optional to avoid breaking 15+ consumers
 - [Phase 34.1-01]: verdict field now matches prescriptive actionReason text
+- [Phase 34.1-02]: Under-invested uses totalImpressions for genuine impression gap detection
+- [Phase 34.1-02]: Constrain button hidden at HIGH tier (no-op action)
+- [Phase 34.1-02]: actionReason takes priority over verdict for display with fallback
+- [Phase 34.1-02]: estimateTierFromMetrics deprecated, wasted-spend guard added
+- [Phase 34.1-02]: buildRoasRecommendations wasted-spend override raises target to constrain
 
 ### Pending Todos
 
@@ -122,7 +128,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34.1-01-PLAN.md
+Stopped at: Completed 34.1-02-PLAN.md
 Resume file: .planning/phases/34.1-fix-decision-logic/.continue-here.md
 
 **Phase 33 Completion Summary**:
