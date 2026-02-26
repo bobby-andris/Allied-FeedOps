@@ -70,6 +70,18 @@ export interface GroupDistributions {
   insufficientTiers: FunnelTier[] // tiers with <5 non-zero-metric terms
 }
 
+/** Behavioral intent signals from Google Ads data (Domain B of dual-domain scoring) */
+export interface BehavioralSignals {
+  rCTR: number              // term CTR / tier median CTR (0+, >1 = above average)
+  cpcCeilingRatio: number   // avg CPC / tier median CPC (0+, near/above 1 = hitting ceiling)
+  microConversionDelta: number // all_conversions - conversions (0+)
+  rCTRScore: number         // normalized 0-1: min(rCTR / 3.0, 1.0)
+  cpcCeilingScore: number   // normalized 0-1: min(ratio / 1.0, 1.0)
+  microConvScore: number    // normalized 0-1: min(delta / 2.0, 1.0)
+  costVelocityScore: number // normalized 0-1: spend velocity relative to tier median
+  composite: number         // weighted behavioral intent score 0-1
+}
+
 export interface TermScore {
   searchTerm: string
   customLabel0: string
@@ -91,6 +103,7 @@ export interface TermScore {
   actionReason?: string // why (prescriptive explanation)
   targetTier?: FunnelTier // the tier determineAction wants to move to
   totalImpressions?: number // needed for under_invested fix in Plan 02
+  behavioralSignals?: BehavioralSignals // Domain B: behavioral intent from Google Ads data
 }
 
 export interface ConfidenceResult {

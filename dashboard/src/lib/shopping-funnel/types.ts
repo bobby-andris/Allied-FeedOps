@@ -67,6 +67,8 @@ export interface ExistingFunnelTerm {
   total_cost_micros: number
   total_conversions: number
   total_conversions_value: number
+  total_average_cpc?: number       // weighted average CPC in micros across rows
+  total_all_conversions?: number   // sum of all_conversions (includes micro-conversions)
   funnels: ExistingFunnelAssignment[]
 }
 

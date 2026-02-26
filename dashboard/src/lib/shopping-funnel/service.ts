@@ -59,6 +59,8 @@ interface SearchTermRow {
   costMicros: number
   conversions: number
   conversionsValue: number
+  averageCpc: number      // micros — actual CPC from Smart Bidding (not ad_group cap)
+  allConversions: number  // includes micro-conversions (add-to-cart, begin-checkout, etc.)
 }
 
 interface LabelCampaignSet {
@@ -95,6 +97,9 @@ interface AssignmentAggregate {
   costMicros: number
   conversions: number
   conversionsValue: number
+  averageCpcWeightedSum: number  // sum(averageCpc * clicks) for weighted avg
+  totalClicksForCpc: number      // sum(clicks) for weighted avg denominator
+  allConversions: number          // sum of all_conversions across rows
 }
 
 interface ExistingTierResult {
@@ -560,7 +565,9 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
           metrics.clicks,
           metrics.cost_micros,
           metrics.conversions,
-          metrics.conversions_value
+          metrics.conversions_value,
+          metrics.average_cpc,
+          metrics.all_conversions
         FROM search_term_view
         WHERE campaign.advertising_channel_type = SHOPPING
           AND campaign.status = ENABLED
@@ -748,6 +755,8 @@ async function fetchAdsContext(window: DateWindow): Promise<AdsContext> {
       costMicros: Number(metrics.cost_micros ?? 0),
       conversions: Number(metrics.conversions ?? 0),
       conversionsValue: Number(metrics.conversions_value ?? 0),
+      averageCpc: Number(metrics.average_cpc ?? 0),
+      allConversions: Number(metrics.all_conversions ?? 0),
     })
   }
 
@@ -799,6 +808,9 @@ function aggregateByTermAndLabel(searchRows: SearchTermRow[]): Map<string, Map<s
       costMicros: 0,
       conversions: 0,
       conversionsValue: 0,
+      averageCpcWeightedSum: 0,
+      totalClicksForCpc: 0,
+      allConversions: 0,
     }
 
     current.impressions += row.impressions
@@ -806,6 +818,9 @@ function aggregateByTermAndLabel(searchRows: SearchTermRow[]): Map<string, Map<s
     current.costMicros += row.costMicros
     current.conversions += row.conversions
     current.conversionsValue += row.conversionsValue
+    current.averageCpcWeightedSum += row.averageCpc * row.clicks
+    current.totalClicksForCpc += row.clicks
+    current.allConversions += row.allConversions
 
     if (row.impressions > current.sourceImpressionsMax) {
       current.sourceCampaign = row.campaignName
@@ -994,16 +1009,22 @@ export async function getExistingFunnelTerms(
       errorTermCount += 1
     }
 
+    const totalClicks = [...labelMap.values()].reduce((sum, value) => sum + value.clicks, 0)
+    const totalCpcWeightedSum = [...labelMap.values()].reduce((sum, value) => sum + value.averageCpcWeightedSum, 0)
+    const totalClicksForCpc = [...labelMap.values()].reduce((sum, value) => sum + value.totalClicksForCpc, 0)
+
     terms.push({
       search_term: normalizedTerm,
       total_impressions: totalImpressions,
-      total_clicks: [...labelMap.values()].reduce((sum, value) => sum + value.clicks, 0),
+      total_clicks: totalClicks,
       total_cost_micros: [...labelMap.values()].reduce((sum, value) => sum + value.costMicros, 0),
       total_conversions: [...labelMap.values()].reduce((sum, value) => sum + value.conversions, 0),
       total_conversions_value: [...labelMap.values()].reduce(
         (sum, value) => sum + value.conversionsValue,
         0
       ),
+      total_average_cpc: totalClicksForCpc > 0 ? totalCpcWeightedSum / totalClicksForCpc : 0,
+      total_all_conversions: [...labelMap.values()].reduce((sum, value) => sum + value.allConversions, 0),
       funnels,
     })
   }
