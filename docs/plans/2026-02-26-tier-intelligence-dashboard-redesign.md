@@ -2,267 +2,473 @@
 
 **Date:** 2026-02-26
 **Status:** Approved design, ready for implementation
-**Context:** Phase 34.2 is complete. The scoring engine and intent-based logic are correct. This redesign improves how results are presented to the user.
+**Context:** Phase 34.2 is complete. The scoring engine and intent-based logic are correct (77 tests pass). This redesign improves how results are **presented** to the user. The scoring engine (`tier-scoring.ts`) must NOT be modified.
+
+**Required reading before implementing:** This document is self-contained. You do NOT need to read other docs. Everything you need is here.
+
+---
+
+## DOMAIN KNOWLEDGE: The Waterfall Shopping Paradox
+
+**You MUST understand this before touching any code.**
+
+Allied Brass uses a "Waterfall" Google Shopping structure with 3 campaign tiers. ALL search queries enter the HIGH tier first. Negative keywords push terms DOWN the funnel.
+
+| Tier | Funnel Position | tROAS Setting | Bidding Behavior | Expected Actual ROAS |
+|------|----------------|---------------|------------------|---------------------|
+| **HIGH** | Top (entry point) | **Highest** (most restrictive) | Conservative — Google bids low | **Lowest** |
+| **MEDIUM** | Middle | Moderate | Moderate bidding | Moderate |
+| **LOW** | Bottom (high-intent) | **Lowest** (most aggressive) | Aggressive — Google bids high to win | **Highest** |
+
+**THE PARADOX:** Target ROAS setting is INVERSE to Actual ROAS. High tROAS = low actual ROAS (restricts bidding on broad traffic). Low tROAS = high actual ROAS (aggressive bidding on converting traffic).
+
+**Actions:**
+- **"Promote" = push DOWN the funnel** (e.g., MEDIUM → LOW). Adds negative keyword in current tier so term falls to a lower tier with more aggressive bidding. Used for high-intent terms that deserve more spend.
+- **"Demote" = push UP the funnel** (e.g., LOW → HIGH). Removes negative keywords so term gets caught by a higher tier with restrictive bidding. Used for low-intent terms wasting budget.
+- **"Block"** = account-level negative keyword. Completely stops bidding on irrelevant terms.
+
+**Tier descriptions for UI tooltips:**
+- **HIGH:** "Top-of-funnel tier. Catches generic, broad searches (e.g., 'grab bar'). Highest Target ROAS setting restricts bidding. Expected: lowest ROAS, lowest CVR."
+- **MEDIUM:** "Mid-funnel tier. Catches category + 1 attribute queries (e.g., 'polished nickel grab bar'). Moderate Target ROAS. Expected: moderate ROAS and CVR."
+- **LOW:** "Bottom-of-funnel tier. Catches specific, high-intent searches with 2+ attributes (e.g., 'polished nickel grab bar 18in'). Lowest Target ROAS allows aggressive bidding. Expected: highest ROAS and CVR."
+
+---
 
 ## Problem Statement
 
-The Tier Intelligence page has three UX problems:
-
-1. **Action Queue is a wall of noise** — Every row has 4-5 badges (confidence, reason, intent, trigger type), a verdict line, tier arrow, impact badge, AND action buttons. No information hierarchy. User can't quickly identify what matters.
-2. **Term detail page lacks narrative clarity** — Shows scores and metrics but doesn't answer "what is the current state, what would change, and why?" User can't verify the recommendation against their Google Ads account.
-3. **Multi-label keywords are invisible** — A keyword can appear in multiple custom_label_0 waterfall funnels at different tier levels, but the system only scores against `funnels[0]`. This hides critical routing information.
-
-## Design: Three Changes
+1. **Action Queue is a wall of noise** — Every row has 4-5 badges (confidence, reason, intent, trigger), a verdict line, tier arrow, impact badge, AND action buttons. No information hierarchy.
+2. **Term detail page lacks narrative clarity** — Shows scores and metrics but doesn't answer "what is the current state, what would change in my Google Ads account, and why?"
+3. **Multi-label keywords are invisible** — A keyword can appear in multiple custom_label_0 funnels at different tiers, but scoring only uses `funnels[0]`.
 
 ---
 
-### Change 1: Action Queue — Group by Action Type with Priority Ranking
+## Change 1: Action Queue — Group by Action Type
 
-**Replace** the current flat list of 60+ rows with **three collapsible groups**, sorted by urgency:
+### Current State (what exists now)
 
-#### Group 1: "Stop Wasting Money" (red accent)
-- Contains: `wasted_spend` trigger terms
-- Primary actions: **Block** (account-level negative) or **Restrict** (demote to HIGH tier)
-- Why first: These are actively draining budget with zero return
+File: `dashboard/src/app/(dashboard)/tier-scoring/components/ActionQueueTable.tsx`
 
-#### Group 2: "Restrict Bidding" (amber accent)
-- Contains: `demote_underperform` trigger terms
-- Primary action: **Move to [tier]** (move UP the funnel to a more restrictive tier)
-- Why second: These are in tiers with aggressive bidding but their intent doesn't warrant it
+Currently renders a flat list of ALL actionable terms sorted by impact. Each `ActionQueueRow` shows:
+- Rank number, term name, ConfidenceBadge, ReasonBadge, Intent score badge, "Intent-Proven"/"Conversion-Proven" badges
+- `actionReason` text line
+- TierMovementArrow (current → target)
+- ImpactBadge
+- Action buttons (Block/Demote for wasted_spend, Approve/Reject for others)
 
-#### Group 3: "Bid More Aggressively" (green accent)
-- Contains: `promote_conversion` + `promote_intent` + `under_invested` trigger terms
-- Primary action: **Move to [tier]** (move DOWN the funnel to a more aggressive tier)
-- Why third: These are opportunities to capture more value, not bleeding money
+This creates visual overload — 60+ rows each with 4-5 colored badges.
 
-#### Each group header shows:
-- Group name + term count
-- Total monthly impact (sum of all terms in group)
-- "Approve All High-Confidence" batch button (confidence > 0.80)
+### Proposed Change
 
-#### Each row within a group is simplified to:
+Replace the flat list with **three collapsible groups** sorted by urgency:
+
+**Group 1: "Stop Wasting Money"** (red accent — `border-l-red-500`)
+- Contains: terms where `trigger === 'wasted_spend'`
+- Actions per row: **Block** button + **Restrict to HIGH** button (if not already in HIGH)
+- These are actively draining budget with zero return — show first
+
+**Group 2: "Restrict Bidding"** (amber accent — `border-l-amber-500`)
+- Contains: terms where `trigger === 'demote_underperform'`
+- Action per row: **Move to [targetTier]** (single approve button)
+- Generic terms in tiers with aggressive bidding — restrict them
+
+**Group 3: "Bid More Aggressively"** (green accent — `border-l-green-500`)
+- Contains: terms where `trigger === 'promote_conversion' || 'promote_intent' || 'under_invested'`
+- Action per row: **Move to [targetTier]** (single approve button)
+- High-intent terms stuck in restrictive tiers — unleash them
+
+**Each group header shows:**
 ```
-[term name]                    [MEDIUM → HIGH]    [$17/mo]    [Approve] [Reject]
+[Group Name]                    [N terms]    [Total: $X/mo impact]    [Approve All High-Confidence]
+```
+The batch button approves all terms in that group with confidence > 0.80.
+
+**Each row within a group is simplified to:**
+```
+[term name]                    [MEDIUM → HIGH]    [$17/mo]    [Block] [Restrict]
 Zero purchases, $17 spent — restrict bidding
 ```
 
-**What's removed from the row** (moved to detail page only):
-- Confidence badge
+**REMOVED from row** (now only on detail page):
+- ConfidenceBadge
+- ReasonBadge (redundant — the group IS the reason category)
 - Intent score badge
-- Reason badge (redundant — the group IS the reason)
 - "Intent-Proven" / "Conversion-Proven" badges
-- Trigger type badge
 
-**What stays on the row:**
-- Term name (clickable to detail)
-- One-line plain English reason (the `actionReason` text, shortened)
-- Tier movement arrow (current → proposed)
-- Monthly impact estimate
-- Approve / Reject buttons (or Block / Restrict for wasted spend)
+**KEPT on row:**
+- Term name (clickable → opens TermScorecard detail)
+- One-line `actionReason` text (already exists on TermScore)
+- TierMovementArrow (current → proposed)
+- Monthly impact (from `term.impact.low` – `term.impact.high`)
+- Action buttons (Block/Restrict for wasted_spend group; Approve/Reject for others)
 
-#### Priority ranking within each group:
-- Primary sort: Impact (descending) — highest dollar impact first
-- Secondary sort: Confidence (descending) — most certain recommendations first
-- Show top 10 per group by default, "Show all N" expander for the rest
+**Sort within each group:**
+- Primary: `impact.mid` descending (highest dollar impact first)
+- Secondary: `confidence.score` descending
+- Show top 10 per group by default; "Show all N" button expands
 
----
+### Files to Modify
 
-### Change 2: Term Detail Page — Narrative Briefing + Raw Data + Tooltips
+1. **`dashboard/src/app/(dashboard)/tier-scoring/lib/reason-codes.ts`** — Add a `groupActionableTerms()` function:
+```typescript
+export type ActionGroup = 'stop_wasting' | 'restrict_bidding' | 'bid_aggressive'
 
-**Replace** the current layout with a structured top-to-bottom flow:
+export interface ActionGroupData {
+  key: ActionGroup
+  label: string
+  terms: ClassifiedTerm[]
+  totalImpact: { low: number; mid: number; high: number }
+  highConfidenceCount: number
+}
 
-#### Section 1: Narrative Briefing (NEW — top of page)
-
-A card with three clearly labeled paragraphs:
-
-**Current State:**
-> "recessed toilet paper holder polished chrome" is in the **MEDIUM** tier for the `recessed tp holder` product group. In this tier, Google bids at a moderate Target ROAS, allowing moderate spend. Over the last 90 days: 487 impressions, 33 clicks, $17.42 spent, 0 purchases.
-
-**Proposed Change:**
-> Move to **HIGH** tier. This is the most restrictive tier — Google's bidding will be capped by the highest Target ROAS setting. Expected result: spend on this term drops significantly, saving an estimated $8–$17/mo.
-
-**Why:**
-> Zero purchases despite $17 spend exceeds the $15 wasted-spend threshold (1.5x account average CPA of $64.22). The term has strong click engagement (6.82x relative CTR) suggesting relevance, but it's not converting — restrict bidding until conversion data improves.
-
-#### Section 2: Raw Google Ads Data (NEW)
-
-A "Google Ads Performance" card showing the actual numbers from the API — not aggregations, the real data:
-
-| Metric | Value |
-|--------|-------|
-| Impressions | 487 |
-| Clicks | 33 |
-| CTR | 6.78% |
-| Avg CPC | $0.53 |
-| Total Cost | $17.42 |
-| Conversions | 0 |
-| All Conversions (incl. micro) | 4.8 |
-| Conversion Value | $0.00 |
-| ROAS | 0.00x |
-
-This section builds trust — the user can cross-reference with their Google Ads account.
-
-Fields to show (all available on `ExistingFunnelTerm`):
-- `total_impressions`
-- `total_clicks`
-- CTR (computed: clicks / impressions)
-- `total_average_cpc` (converted from micros to dollars)
-- `total_cost_micros` (converted to dollars)
-- `total_conversions`
-- `total_all_conversions` (includes micro-conversions like add-to-cart)
-- `total_conversions_value`
-- Actual ROAS (computed: conversions_value / cost)
-
-#### Section 3: Verdict + Tier Movement (existing, kept)
-
-The current Verdict card with the tier arrow. No changes needed.
-
-#### Section 4: Decision Reasoning (existing, kept)
-
-The trigger label, explanation, supporting evidence grid, intent→tier mapping. No changes needed — this is already good.
-
-#### Section 5: Scoring Factors with Tooltips (ENHANCED)
-
-Keep the existing expandable scoring factors, but add **info icon tooltips** to each factor name. Tooltip content:
-
-- **ROAS Position**: "How well this term's ROAS fits the target tier's distribution. Computed as a robust z-score (using median and MAD) — 0 means perfect median fit, negative means below median. Weight: 50% of tier fit score."
-- **Consistency**: "How stable this term's performance is across its data. Score of 0.9 = all funnel assignments agree on tier, 0.3 = conflicting assignments. Weight: 30% of confidence."
-- **Data Volume**: "Reliability based on click volume. Computed as min(clicks / 100, 1.0). At 100+ clicks this maxes out. Weight: 30% of confidence."
-- **Intent Alignment**: "How well this term's query specificity matches the tier's expected intent profile. Generic queries score high in HIGH tier, specific queries score high in LOW tier. Weight: 20% of confidence."
-- **Feed Alignment**: "How well this query's words match your product feed attributes. Computed via TF-IDF term matching (60%) and query specificity/word count (40%). From Cloud Run /score-intent endpoint. Weight: 55% of unified intent score."
-- **Behavioral Intent**: "Purchase intent signals from Google Ads behavior. Combines: relative CTR (30%), CPC ceiling proximity (25%), micro-conversions (20%), cost velocity (10%). Weight: 45% of unified intent score."
-
-Also add tooltips to the **Tier Fit Comparison** bars:
-- **HIGH**: "Top-of-funnel tier. Catches generic, broad searches. Highest Target ROAS setting restricts bidding. Expected: lowest ROAS, lowest CVR."
-- **MEDIUM**: "Mid-funnel tier. Catches category + 1 attribute queries. Moderate Target ROAS. Expected: moderate ROAS and CVR."
-- **LOW**: "Bottom-of-funnel tier. Catches specific, high-intent searches (2+ attributes). Lowest Target ROAS allows aggressive bidding. Expected: highest ROAS and CVR."
-
-#### Section 6: Behavioral Signals (existing, kept)
-#### Section 7: Confidence Breakdown (existing, kept)
-#### Section 8: Data Source (existing, kept)
-
-#### Section ordering (top to bottom):
-1. Narrative Briefing (NEW)
-2. Raw Google Ads Data (NEW)
-3. Verdict + Tier Movement
-4. Decision Reasoning
-5. Multi-Label Context (NEW — see Change 3)
-6. Scoring Factors (with tooltips)
-7. Tier Fit Comparison (with tooltips)
-8. Confidence Breakdown
-9. Behavioral Signals
-10. Data Source
-
----
-
-### Change 3: Multi-Label Keywords — Score Per Label
-
-#### Data Model Change
-
-Currently `scoreTerm()` uses `term.funnels[0]` only. Change to:
-
-**In the API route (`/api/shopping-funnel/tier-scoring/route.ts`):**
-- For each `ExistingFunnelTerm`, iterate over ALL `funnels` entries (not just `[0]`)
-- Call `scoreTerm()` once per funnel assignment (per custom_label_0)
-- Each call uses that label's group distribution
-- This produces multiple `TermScore` objects for the same search term, differentiated by `customLabel0`
-
-**The `TermScore` type already has `customLabel0` as a field**, and the `makeKey()` function in useRecommendations already uses `${searchTerm}::${customLabel0}` as a composite key. So the data model already supports this — it's just the scoring loop that needs to iterate.
-
-#### UI Changes
-
-**Action Queue:**
-- Terms that appear in multiple labels show a small "(2 labels)" indicator
-- Each label-specific score is a separate row (because the action is per-label — you might block in one label but promote in another)
-- If the same term has the same action across labels, they could be grouped visually (future optimization, not required for v1)
-
-**Detail Page — Multi-Label Context section (NEW):**
-- Appears between Decision Reasoning and Scoring Factors
-- Shows a card: "This term appears in N product groups"
-- Tab or accordion per label showing:
-  - Label name + current tier in that label
-  - Recommendation for that label (may differ!)
-  - Key metrics for that label's funnel
-
-Example:
-```
-This term appears in 2 product groups:
-
-[recessed tp holder]  MEDIUM → HIGH  (Wasted Spend — $17, 0 conversions)  [Viewing]
-[toilet paper holder] HIGH → HIGH    (Aligned — performing as expected)
+export function groupActionableTerms(terms: ClassifiedTerm[]): ActionGroupData[] {
+  // Group by trigger → action group
+  // wasted_spend → stop_wasting
+  // demote_underperform → restrict_bidding
+  // promote_conversion, promote_intent, under_invested → bid_aggressive
+  // Sort each group by impact.mid desc, then confidence.score desc
+  // Return in order: stop_wasting, restrict_bidding, bid_aggressive
+}
 ```
 
-The user is viewing one label's detail at a time. Clicking another label switches the full scorecard context to that label's scoring.
+2. **`dashboard/src/app/(dashboard)/tier-scoring/components/ActionGroupHeader.tsx`** — NEW component:
+```typescript
+interface ActionGroupHeaderProps {
+  group: ActionGroupData
+  accentColor: string // 'red' | 'amber' | 'green'
+  isExpanded: boolean
+  onToggle: () => void
+  onBatchApprove: (terms: ClassifiedTerm[]) => void
+}
+```
+Renders: group label, term count, total impact range, batch approve button, expand/collapse chevron.
+
+3. **`dashboard/src/app/(dashboard)/tier-scoring/components/ActionQueueTable.tsx`** — Rewrite to use grouped layout:
+- Call `groupActionableTerms()` on the terms prop
+- Render an `ActionGroupHeader` + list of simplified `ActionQueueRow` per group
+- Each group shows top 10, with "Show all N" expander
+
+4. **`dashboard/src/app/(dashboard)/tier-scoring/components/ActionQueueRow.tsx`** — Simplify:
+- Remove: ConfidenceBadge, ReasonBadge, Intent badge, trigger badges
+- Keep: term name, actionReason line, TierMovementArrow, ImpactBadge, action buttons
+- The row is now much cleaner — just the essential info
+
+5. **`dashboard/src/app/(dashboard)/tier-scoring/page.tsx`** — No changes to data flow. The `actionableTerms` useMemo already filters correctly. Just pass them to the updated ActionQueueTable.
 
 ---
 
-## Implementation Plan
+## Change 2: Term Detail Page — Narrative Briefing + Raw Data + Tooltips
 
-### Wave 1: Multi-Label Scoring (backend, no UI change)
-**Files:** `dashboard/src/app/api/shopping-funnel/tier-scoring/route.ts`
-**Task:** Change the scoring loop to iterate over all funnels per term, not just `funnels[0]`. Each produces a separate TermScore. Verify with tests that a term with 2 funnels produces 2 scored entries.
-**Risk:** Low — the data model already supports composite keys.
-**Tests:** Add test case for multi-funnel term scoring.
+### Current State (what exists now)
 
-### Wave 2: Action Queue Redesign (UI only)
-**Files:**
-- `dashboard/src/app/(dashboard)/tier-scoring/components/ActionQueueTable.tsx` — Replace with grouped layout
-- `dashboard/src/app/(dashboard)/tier-scoring/components/ActionQueueRow.tsx` — Simplify row
-- `dashboard/src/app/(dashboard)/tier-scoring/components/ActionGroupHeader.tsx` — NEW: group header with count + impact + batch approve
-- `dashboard/src/app/(dashboard)/tier-scoring/page.tsx` — Wire up grouping logic
-- `dashboard/src/app/(dashboard)/tier-scoring/lib/reason-codes.ts` — Add grouping function
+File: `dashboard/src/app/(dashboard)/tier-scoring/components/TermScorecard.tsx`
 
-**Task:** Group classified terms into three buckets (Stop Wasting Money, Restrict Bidding, Bid More Aggressively). Simplify rows. Add group headers with aggregate stats. Show top 10 per group with expander.
+Current section order:
+1. Back button + term header with badges
+2. Verdict card (action reason + tier arrow)
+3. Decision Reasoning card (trigger label, explanation, evidence grid, intent mapping)
+4. Peer context text
+5. Scoring Factors card (expandable factors with progress bars)
+6. Tier Fit Comparison card (bar chart per tier)
+7. Confidence Breakdown card
+8. Behavioral Signals card (when available)
+9. Data Source card
 
-### Wave 3: Detail Page Narrative + Raw Data
-**Files:**
-- `dashboard/src/app/(dashboard)/tier-scoring/components/TermScorecard.tsx` — Add narrative briefing, raw data section, reorder sections
-**Task:** Build the "Current State / Proposed Change / Why" narrative card. Build the raw Google Ads data card. Both use data already available on TermScore + the original ExistingFunnelTerm (may need to pass raw term data through).
+`TermScorecard` receives `{ term: TermScore; onBack: () => void }`.
 
-**Data threading concern:** TermScorecard currently receives `TermScore` which has computed metrics but not all raw fields. Need to either:
-- (a) Add raw fields to TermScore (total_impressions is already there, need total_clicks, total_average_cpc, total_all_conversions), OR
-- (b) Pass the original ExistingFunnelTerm alongside TermScore
+### Current TermScore Fields Available
 
-Recommend (a) — add the missing raw fields to TermScore type and populate in scoreTerm().
+```typescript
+interface TermScore {
+  searchTerm: string
+  customLabel0: string
+  currentTier: FunnelTier           // 'HIGH' | 'MEDIUM' | 'LOW'
+  recommendedTier: FunnelTier       // statistical best-fit tier
+  targetTier?: FunnelTier           // trigger-based target (preferred over recommendedTier)
+  isMisplaced: boolean
+  tierFitScores: Record<FunnelTier, number>
+  fitScoreDelta: number
+  dataConfirmed: boolean
+  confidence: ConfidenceResult      // { score, level, factors: { dataVolume, consistency, significance, intentAlignment } }
+  impact: ImpactRange | null        // { low, mid, high, currency, period, direction }
+  fallbackLevel: FallbackLevel
+  totalConversions: number          // raw
+  totalCostMicros: number           // raw (in micros — divide by 1,000,000 for dollars)
+  totalImpressions?: number         // raw
+  actualRoas: number                // computed: conversions_value / cost
+  verdict: string
+  peerContext: string
+  recommendedAction?: 'promote' | 'demote' | 'block' | 'observe'
+  actionReason?: string
+  behavioralSignals?: BehavioralSignals  // { rCTR, cpcCeilingRatio, microConversionDelta, composite, ... }
+  intentScore?: IntentScoreBreakdown     // { feedAlignmentScore, behavioralScore, unifiedScore }
+  trigger?: string                       // 'wasted_spend' | 'demote_underperform' | 'promote_conversion' | 'promote_intent' | 'under_invested' | 'observe'
+}
+```
+
+### Fields MISSING from TermScore (need to add for raw data card)
+
+These exist on `ExistingFunnelTerm` but are NOT currently passed through to `TermScore`:
+- `total_clicks` — needed for raw data display
+- `total_conversions_value` — needed for raw data display
+- `total_average_cpc` — needed for raw data display (in micros)
+- `total_all_conversions` — needed for raw data display (includes micro-conversions)
+
+**Action:** Add these 4 fields to the `TermScore` interface in `tier-scoring.types.ts` and populate them in the `scoreTerm()` function in `tier-scoring.ts`. All 4 values are available on the `term: ExistingFunnelTerm` parameter.
+
+```typescript
+// Add to TermScore interface:
+totalClicks?: number
+totalConversionsValue?: number
+totalAverageCpcMicros?: number
+totalAllConversions?: number
+```
+
+**Populate in `scoreTerm()` return object:**
+```typescript
+totalClicks: term.total_clicks,
+totalConversionsValue: term.total_conversions_value,
+totalAverageCpcMicros: term.total_average_cpc,
+totalAllConversions: term.total_all_conversions,
+```
+
+### Proposed Section Order
+
+1. **Narrative Briefing** (NEW — most important, goes first)
+2. **Raw Google Ads Data** (NEW — trust-building)
+3. Verdict + Tier Movement (existing)
+4. Decision Reasoning (existing)
+5. Multi-Label Context (NEW — Wave 5, see Change 3)
+6. Scoring Factors with tooltips (enhanced)
+7. Tier Fit Comparison with tooltips (enhanced)
+8. Confidence Breakdown (existing)
+9. Behavioral Signals (existing)
+10. Data Source (existing)
+
+### Section 1: Narrative Briefing Card
+
+NEW card at the top. Three paragraphs with bold labels:
+
+**Current State:** Generate from TermScore data:
+- `"{term.searchTerm}" is in the **{term.currentTier}** tier for the `{term.customLabel0}` product group.`
+- Tier description from domain knowledge (HIGH = restrictive, MEDIUM = moderate, LOW = aggressive)
+- `"Over the last 90 days: {totalImpressions} impressions, {totalClicks} clicks, ${totalCostMicros/1M} spent, {totalConversions} purchases."`
+
+**Proposed Change:** Generate from trigger + targetTier:
+- `"Move to **{targetTier}** tier."` + tier description
+- For wasted_spend + block: `"Add as account-level negative keyword — completely stop bidding on this term."`
+- For wasted_spend + demote: `"Move to HIGH tier to restrict bidding via highest tROAS cap."`
+- For demote_underperform: `"Move to {targetTier} to restrict bidding — this query is too generic for aggressive spend."`
+- For promote_conversion: `"Move to {targetTier} for more aggressive bidding — this term has proven conversions."`
+- For promote_intent: `"Move to {targetTier} for more aggressive bidding — intent signals are strong despite zero conversions so far."`
+- Impact estimate: `"Expected savings/gain: ${impact.low}–${impact.high}/mo"`
+
+**Why:** Generate from trigger:
+- For wasted_spend: `"Zero purchases despite ${cost} spend exceeds the $15 wasted-spend threshold. {rCTR context if available}."`
+- For demote_underperform: `"Query intent score of {unifiedScore} maps to {expectedTier} tier, but currently in {currentTier}. {word count or specificity context}."`
+- For promote_conversion: `"{totalConversions} conversions confirm purchase intent. Intent score {unifiedScore} maps to {expectedTier}. More aggressive bidding would capture more volume."`
+- For promote_intent: `"Intent score {unifiedScore} exceeds the 0.65 threshold. {rCTR or word count context}. Worth promoting despite zero conversions."`
+
+### Section 2: Raw Google Ads Data Card
+
+A grid (3 columns on desktop, 2 on mobile) of stat boxes:
+
+```
+| Impressions    | Clicks        | CTR           |
+| {totalImpressions} | {totalClicks} | {clicks/impressions as %}  |
+|                |               |               |
+| Avg CPC        | Total Cost    | ROAS          |
+| ${avgCpc}      | ${cost}       | {actualRoas}x |
+|                |               |               |
+| Conversions    | All Conv.     | Conv. Value   |
+| {totalConversions} | {totalAllConversions} | ${totalConversionsValue} |
+```
+
+Use the same `rounded-lg bg-muted/50 p-2.5` stat box styling already used in the Decision Reasoning evidence grid.
+
+### Tooltips
+
+The shadcn Tooltip component already exists at `dashboard/src/components/ui/tooltip.tsx`.
+
+Add an info icon (`lucide-react` `Info` icon, `h-3.5 w-3.5 text-muted-foreground`) next to each factor name in the Scoring Factors card and each tier name in the Tier Fit Comparison card. Wrap with:
+
+```tsx
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Info } from 'lucide-react'
+
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Info className="h-3.5 w-3.5 text-muted-foreground inline ml-1 cursor-help" />
+    </TooltipTrigger>
+    <TooltipContent className="max-w-xs">
+      <p className="text-xs">{tooltipText}</p>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+```
+
+**Scoring Factor tooltip texts:**
+- **ROAS Position**: "How well this term's ROAS fits the target tier's distribution. Computed as a robust z-score using median and MAD. 0 = perfect median fit, negative = below. Weight: 50% of tier fit score."
+- **Consistency**: "Performance stability. 0.9 = all funnel assignments agree, 0.3 = conflicting. Weight: 30% of confidence."
+- **Data Volume**: "Reliability from click volume. min(clicks/100, 1.0). Maxes at 100+ clicks. Weight: 30% of confidence."
+- **Intent Alignment**: "Query specificity vs tier profile. Generic → HIGH, specific → LOW. Weight: 20% of confidence."
+- **Feed Alignment**: "Query-to-feed attribute matching via TF-IDF (60%) + specificity (40%). From Cloud Run /score-intent. Weight: 55% of unified intent."
+- **Behavioral Intent**: "Google Ads purchase signals: relative CTR (30%), CPC ceiling (25%), micro-conversions (20%), cost velocity (10%). Weight: 45% of unified intent."
+
+**Tier Fit Comparison tooltip texts:** (see tier descriptions in Domain Knowledge section above)
+
+---
+
+## Change 3: Multi-Label Keywords — Score Per Label
+
+### Current Scoring Loop (must change)
+
+File: `dashboard/src/app/api/shopping-funnel/tier-scoring/route.ts`, lines 167-190
+
+```typescript
+// CURRENT CODE — only uses funnels[0]:
+const scores: TermScore[] = []
+for (const term of existingTermsResult.terms) {
+  if (!term.funnels.length) continue
+
+  const primaryFunnel = term.funnels[0]              // BUG: only first funnel
+  const currentTier = mapTierToFunnelTier(primaryFunnel.tier)
+  if (!currentTier) continue
+
+  const groupKey = primaryFunnel.custom_label_0
+  const groupDist = distributions.get(groupKey)
+  if (!groupDist) continue
+
+  const intentFeatures = decomposeSearchTerm(term.search_term)
+  const feedScore = feedAlignmentMap.get(term.search_term)
+  const scored = scoreTerm(term, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION, feedScore, AVG_CPA)
+  scores.push(scored)
+}
+```
+
+### New Scoring Loop
+
+```typescript
+// NEW CODE — iterate over ALL funnels per term:
+const scores: TermScore[] = []
+for (const term of existingTermsResult.terms) {
+  if (!term.funnels.length) continue
+
+  const intentFeatures = decomposeSearchTerm(term.search_term)
+  const feedScore = feedAlignmentMap.get(term.search_term)
+
+  // Score once per custom_label_0 funnel assignment
+  for (const funnel of term.funnels) {
+    const currentTier = mapTierToFunnelTier(funnel.tier)
+    if (!currentTier) continue // Skip 'Campaign Negative' and 'Unknown'
+
+    const groupKey = funnel.custom_label_0
+    const groupDist = distributions.get(groupKey)
+    if (!groupDist) continue // Skip if no distribution data
+
+    // scoreTerm uses funnels[0] internally for tier — we need to ensure
+    // it uses THIS funnel. Create a shallow copy with this funnel first.
+    const termForThisFunnel = {
+      ...term,
+      funnels: [funnel, ...term.funnels.filter(f => f !== funnel)],
+    }
+
+    const scored = scoreTerm(termForThisFunnel, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION, feedScore, AVG_CPA)
+    scores.push(scored)
+  }
+}
+```
+
+**Key detail:** `scoreTerm()` internally reads `term.funnels[0]` to get `currentTier` and `customLabel0`. By creating a shallow copy with the target funnel at index 0, we don't need to modify `scoreTerm()` at all.
+
+### Impact on Existing Code
+
+- `aggregateImpact()` in route.ts — Already uses composite key logic. Same term with 2 labels = 2 separate TermScore objects with different `customLabel0`. Works correctly.
+- `makeKey()` in useRecommendations.ts — Already uses `${searchTerm}::${customLabel0}`. Works correctly.
+- `classifyAllTerms()` in reason-codes.ts — Works on TermScore[], doesn't assume unique search terms. Works correctly.
+- DB upsert in route.ts — Uses `onConflict: 'search_term,custom_label_0'` composite key. Works correctly.
+
+### Multi-Label UI (Wave 5)
+
+**On the detail page (TermScorecard.tsx):**
+
+Add a "Multi-Label Context" card between Decision Reasoning and Scoring Factors. Only render when the same `searchTerm` appears with multiple `customLabel0` values in the scores array.
+
+To enable this, the page.tsx needs to pass all scores for the current term (not just the selected one). Add a prop:
+
+```typescript
+interface TermScorecardProps {
+  term: TermScore
+  allScoresForTerm?: TermScore[]  // all label-specific scores for this searchTerm
+  onBack: () => void
+  onSwitchLabel?: (term: TermScore) => void  // switch to viewing a different label's score
+}
+```
+
+In page.tsx, compute `allScoresForTerm` when a term is selected:
+```typescript
+const allScoresForTerm = useMemo(() => {
+  if (!actionSelectedTerm || !data) return []
+  return data.scores.filter(s => s.searchTerm === actionSelectedTerm.searchTerm)
+}, [actionSelectedTerm, data])
+```
+
+The Multi-Label Context card renders:
+```
+This term appears in N product groups:
+
+[label1]  MEDIUM → HIGH  (Wasted Spend)  [Currently viewing]
+[label2]  HIGH → HIGH    (Aligned)       [View this label]
+```
+
+Clicking "View this label" calls `onSwitchLabel(otherTermScore)` which updates `actionSelectedTerm` in page.tsx.
+
+**On the Action Queue row (ActionQueueRow.tsx):**
+
+If the same searchTerm has multiple entries in the actionableTerms list, show a small `(N labels)` text after the term name:
+```tsx
+{labelCount > 1 && (
+  <span className="text-xs text-muted-foreground">({labelCount} labels)</span>
+)}
+```
+Pass `labelCount` as a prop computed in ActionQueueTable by counting entries with the same searchTerm.
+
+---
+
+## Implementation Waves
+
+### Wave 1: Multi-Label Scoring Backend
+**Files:** `route.ts` only
+**Scope:** Replace the scoring loop (see exact code above). No UI changes.
+**Test:** Verify a term with 2 funnels produces 2 TermScore objects with different customLabel0.
+**Build verification:** `npm run build` must pass.
+
+### Wave 2: Action Queue Redesign
+**Files:** `reason-codes.ts`, `ActionGroupHeader.tsx` (new), `ActionQueueTable.tsx`, `ActionQueueRow.tsx`, `page.tsx`
+**Scope:** Group terms into 3 categories. Simplify rows. Add group headers.
+**Build verification:** `npm run build` must pass.
+
+### Wave 3: Detail Page — Narrative + Raw Data + New Fields
+**Files:** `tier-scoring.types.ts` (add 4 fields), `tier-scoring.ts` (populate 4 fields in scoreTerm return), `TermScorecard.tsx` (add 2 new sections, reorder)
+**Scope:** Add Narrative Briefing card, Raw Google Ads Data card. Add missing raw fields to TermScore.
+**Build verification:** `npm run build` must pass. Existing 77 tests must still pass.
 
 ### Wave 4: Tooltips
-**Files:**
-- `dashboard/src/app/(dashboard)/tier-scoring/components/TermScorecard.tsx` — Add Tooltip components to scoring factors and tier fit comparison
-- May need `@radix-ui/react-tooltip` or use existing shadcn Tooltip component
-
-**Task:** Add info icon + tooltip to each scoring factor name and each tier label in the Tier Fit Comparison. Tooltip text is defined in this design doc above.
+**Files:** `TermScorecard.tsx` only
+**Scope:** Add Info icon + Tooltip to scoring factors and tier fit comparison. Use existing shadcn Tooltip from `@/components/ui/tooltip`.
+**Build verification:** `npm run build` must pass.
 
 ### Wave 5: Multi-Label UI
-**Files:**
-- `dashboard/src/app/(dashboard)/tier-scoring/components/TermScorecard.tsx` — Add multi-label context section
-- `dashboard/src/app/(dashboard)/tier-scoring/components/ActionQueueRow.tsx` — Add "(N labels)" indicator
-- `dashboard/src/app/(dashboard)/tier-scoring/page.tsx` — Handle label switching on detail page
-
-**Task:** Show multi-label context on the detail page. Allow switching between labels to see different recommendations.
+**Files:** `TermScorecard.tsx`, `ActionQueueRow.tsx`, `ActionQueueTable.tsx`, `page.tsx`
+**Scope:** Add Multi-Label Context section to detail page. Add label count indicator to rows. Requires Wave 1 (multi-label data) and Wave 3 (TermScorecard structure) to be done first.
+**Build verification:** `npm run build` must pass.
 
 ---
 
-## Key Domain Rules (for implementer reference)
+## Pre-Deploy Gates (MANDATORY for every wave)
 
-### Waterfall Paradox
-- HIGH priority = top of funnel, HIGHEST tROAS setting, LOWEST actual ROAS
-- LOW priority = bottom of funnel, LOWEST tROAS setting, HIGHEST actual ROAS
-- "Promote" = push DOWN the funnel (toward LOW, more aggressive bidding)
-- "Demote" = push UP the funnel (toward HIGH, more restricted bidding)
-
-### Trigger Priority (from determineAction)
-- A: Wasted Spend — zero conversions + >$15 spend → block or demote to HIGH
-- B: Demote — intent says term is too generic for current tier → move UP
-- C: Promote (Conversion-Proven) — intent + conversions confirm high intent → move DOWN
-- D: Promote (Intent-Proven) — intent signals strong but zero conversions yet → move DOWN with evidence gate
-- E: Under-Invested — high performer not getting volume → move DOWN
-
-### Intent Score Thresholds
-- < 0.30 → HIGH (generic)
-- 0.30–0.60 → MEDIUM (mid-specificity)
-- > 0.60 → LOW (specific, high-intent)
-
-### Files That Must Not Change (scoring engine is correct)
-- `dashboard/src/lib/optimization/tier-scoring.ts` — Core scoring logic
-- `dashboard/src/lib/optimization/tier-scoring.types.ts` — Types (extend only, don't modify existing)
-- `dashboard/src/lib/optimization/__tests__/tier-scoring.test.ts` — 77 passing tests
+1. `cd dashboard && npm run build` — MUST pass
+2. `npx tsc --noEmit` — zero errors
+3. `npx vitest run src/lib/optimization/__tests__/tier-scoring.test.ts` — 77+ tests pass
+4. `npm run lint` — fix all issues
+5. Only THEN: `git push origin master` (auto-deploys to Vercel + Cloud Run)
