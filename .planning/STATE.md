@@ -169,6 +169,7 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 3 | Fix determineAction to use ROAS-based logic instead of recommendedTier direction | 2026-02-26 | df6ed49a | [3-fix-determineaction-to-use-roas-based-lo](./quick/3-fix-determineaction-to-use-roas-based-lo/) |
+| 4 | Multi-label scoring loop for tier intelligence (Wave 1) | 2026-02-26 | 6f993364 | [4-implement-wave-1-of-tier-intelligence-da](./quick/4-implement-wave-1-of-tier-intelligence-da/) |
 
 ## Session Continuity
 
