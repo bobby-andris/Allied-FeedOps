@@ -34,11 +34,11 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 
 ### Execution
 
-- [ ] **EXEC-01**: User can approve/reject individual tier movement recommendations with one click
-- [ ] **EXEC-02**: User can batch-approve all high-confidence recommendations (confidence > 0.80) in one action
-- [ ] **EXEC-03**: User can undo a tier movement using negative_registry audit trail and criterion IDs
+- [x] **EXEC-01**: User can approve/reject individual tier movement recommendations with one click
+- [x] **EXEC-02**: User can batch-approve all high-confidence recommendations (confidence > 0.80) in one action
+- [x] **EXEC-03**: User can undo a tier movement using negative_registry audit trail and criterion IDs
 - [ ] **EXEC-04**: User can view movement history from policy_action_execution_log
-- [ ] **EXEC-05**: Recommendations persist to routing_recommendations table for asynchronous operator review
+- [x] **EXEC-05**: Recommendations persist to routing_recommendations table for asynchronous operator review
 
 ### Demand Intelligence
 
@@ -134,11 +134,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEAK-04 | Phase 34 | Pending |
 | LEAK-05 | Phase 34 | Pending |
 | LEAK-06 | Phase 34 | Pending |
-| EXEC-01 | Phase 34 | Pending |
-| EXEC-02 | Phase 34 | Pending |
-| EXEC-03 | Phase 34 | Pending |
+| EXEC-01 | Phase 34 | Complete |
+| EXEC-02 | Phase 34 | Complete |
+| EXEC-03 | Phase 34 | Complete |
 | EXEC-04 | Phase 34 | Pending |
-| EXEC-05 | Phase 34 | Pending |
+| EXEC-05 | Phase 34 | Complete |
 | DEMAND-01 | Phase 35 | Pending |
 | DEMAND-02 | Phase 35 | Pending |
 | DEMAND-03 | Phase 35 | Pending |
