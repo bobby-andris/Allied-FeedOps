@@ -2,6 +2,15 @@
 # Triggered on push to master branch
 
 steps:
+  # Pre-deploy parity gate: fail the build if production contract tests fail.
+  - name: 'python:3.11-slim'
+    entrypoint: 'bash'
+    args:
+      - '-lc'
+      - |
+        python -m pip install --no-cache-dir -r requirements.txt pytest
+        ./scripts/verify_cloud_run_parity.sh
+
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args:
