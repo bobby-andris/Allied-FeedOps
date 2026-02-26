@@ -67,9 +67,9 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 - [x] **INTENT-01**: Eradicate "constrain" terminology — replace with "demote" across all types, logic, UI components, tests, and verdict text
 - [x] **INTENT-02**: Deploy feed alignment scoring on Cloud Run — attribute extraction (28 finishes, 41 collections, product types, dimensions, model numbers via rapidfuzz) + TF-IDF specificity scoring from product catalog corpus
 - [x] **INTENT-03**: Add behavioral intent signals to tier-scoring pipeline — rCTR (term CTR / tier median CTR), CPC ceiling pressure (avg CPC / Max CPC cap), micro-conversion delta (all_conversions - conversions) from Google Ads API
-- [ ] **INTENT-04**: Implement unified intent score (0.55 * feed_alignment + 0.45 * behavioral_intent) and new determineAction() decision matrix with Trigger E (zero-conversion promotion when intentScore >= 0.65 AND rCTR >= 1.5 OR wordCount >= 3)
+- [x] **INTENT-04**: Implement unified intent score (0.55 * feed_alignment + 0.45 * behavioral_intent) and new determineAction() decision matrix with Trigger E (zero-conversion promotion when intentScore >= 0.65 AND rCTR >= 1.5 OR wordCount >= 3)
 - [x] **INTENT-05**: Fix tier-scoring UI — add targetTier to TermScore type, fix TierMovementArrow direction, show Promote/Demote buttons with target tier labels, display intent score breakdown (attribute + behavioral + composite)
-- [ ] **INTENT-06**: Wire action queue execution to Shopping Funnel pipeline (applyTierAssignment → blockedTiersForAssignment → Google Ads API negative keyword management)
+- [x] **INTENT-06**: Wire action queue execution to Shopping Funnel pipeline (applyTierAssignment → blockedTiersForAssignment → Google Ads API negative keyword management)
 - [x] **INTENT-07**: Audit Google Ads account — catalog all 19 conversion actions (identify micro-conversions vs purchases), compute average CPA, document HIGH tier CPC caps per product group, validate historical behavioral data availability
 - [ ] **INTENT-08**: Calibrate intent score thresholds — score 1000+ historical search terms, correlate with actual ROAS outcomes, adjust tier boundary thresholds (0.25/0.50/0.65) based on real data
 

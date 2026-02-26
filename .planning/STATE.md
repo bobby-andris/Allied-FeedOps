@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 34.2 (v1.3c) — IN PROGRESS
-Plan: 4 of 6 complete
-Status: Completed 34.2-04 (Behavioral intent signals — rCTR, CPC ceiling, micro-conv delta)
-Last activity: 2026-02-26 — Completed 34.2-04: Behavioral intent signals in tier-scoring engine
+Plan: 5 of 6 complete
+Status: Completed 34.2-05 (Unified intent scoring + 5-trigger determineAction)
+Last activity: 2026-02-26 — Completed 34.2-05: Unified intent scoring with 5-trigger decision matrix
 
-Progress: [######----] 67% (Phase 34.2)
+Progress: [########--] 83% (Phase 34.2)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [######----] 67% (Phase 34.2)
 | Phase 34.2 P01 | 9min | 3 tasks | 10 files |
 | Phase 34.2 P02 | 8min | 2 tasks | 2 files |
 | Phase 34.2 P04 | 3min | 2 tasks | 5 files |
+| Phase 34.2 P05 | 7min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,10 @@ Recent decisions affecting current work:
 - [Phase 34.2-03]: Composite weights: 0.60 attribute + 0.40 specificity for feed alignment score
 - [Phase 34.2-03]: Model number detection short-circuits to score 1.0; unknown TF-IDF terms get 80% max IDF
 - [Phase 34.2-03]: Lazy-init IntentScorer with threading.Lock on first /score-intent request (not at startup)
+- [Phase 34.2-05]: Unified intent = 0.55 * feedAlignment + 0.45 * behavioral; avgCPA $64.22 hardcoded from audit
+- [Phase 34.2-05]: 5-trigger priority: wasted_spend > demote_underperform > promote_conversion > promote_intent > observe
+- [Phase 34.2-05]: Trigger D dual gate: intentScore >= 0.65 AND (rCTR >= 1.5 OR wordCount >= 3)
+- [Phase 34.2-05]: Approval flow prefers targetTier (sequential one-step) over recommendedTier (statistical best-fit)
 
 ### Pending Todos
 
@@ -168,8 +173,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34.2-04-PLAN.md (Behavioral intent signals)
-Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-04-SUMMARY.md
+Stopped at: Completed 34.2-05-PLAN.md (Unified intent scoring + 5-trigger determineAction)
+Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-05-SUMMARY.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase
