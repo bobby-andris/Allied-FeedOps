@@ -1,85 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { COMPETITOR_TOKENS, BRAND_TOKENS } from '@/lib/market-intelligence/constants'
-import { isBrandTerm, matchesCompetitor, costMicrosToDollars } from '@/lib/market-intelligence/computations'
+import { isBrandTerm, matchesCompetitor, costMicrosToDollars, paginateRpc } from '@/lib/market-intelligence/computations'
 import type { CompetitiveData, BrandSplit, CompetitorMention } from '@/lib/market-intelligence/types'
 
 export const dynamic = 'force-dynamic'
+
+interface TermMetricsRow {
+  query_text: string
+  custom_label_0: string
+  impressions: number
+  clicks: number
+  cost_micros: number
+  conversions: number
+  revenue: number
+  period_start: string
+  avg_monthly_searches: number | null
+  high_cpc_micros: number | null
+}
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient()
     const customLabel0 = request.nextUrl.searchParams.get('customLabel0')
 
-    // Build term->label lookup from query_value_scores
-    let qvsQuery = supabase
-      .from('query_value_scores')
-      .select('search_term, custom_label_0')
-
-    if (customLabel0) {
-      qvsQuery = qvsQuery.eq('custom_label_0', customLabel0)
+    // Fetch pre-aggregated term metrics via SQL function (paginates past 1000-row limit)
+    let termRows: TermMetricsRow[]
+    try {
+      termRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
+        p_custom_label_0: customLabel0 || null,
+      })
+    } catch (err) {
+      console.error('term metrics rpc failed:', err)
+      return NextResponse.json({ error: err instanceof Error ? err.message : 'RPC failed' }, { status: 500 })
     }
 
-    const { data: qvsRows, error: qvsError } = await qvsQuery
-
-    if (qvsError) {
-      console.error('query_value_scores fetch failed:', qvsError)
-      return NextResponse.json({ error: qvsError.message }, { status: 500 })
-    }
-
-    const termToLabel = new Map<string, string>()
-    for (const row of qvsRows ?? []) {
-      termToLabel.set(row.search_term.toLowerCase(), row.custom_label_0)
-    }
-
-    // Fetch search_queries
-    const { data: sqRows, error: sqError } = await supabase
-      .from('search_queries')
-      .select('query_text, impressions, clicks, cost_micros, conversions, conversion_value')
-      .gt('impressions', 0)
-
-    if (sqError) {
-      console.error('search_queries fetch failed:', sqError)
-      return NextResponse.json({ error: sqError.message }, { status: 500 })
-    }
-
-    // Aggregate by query_text
-    interface AggTerm {
-      queryText: string
-      impressions: number
-      clicks: number
-      costMicros: number
-      conversions: number
-      revenue: number
-    }
-
-    const termAgg = new Map<string, AggTerm>()
-
-    for (const row of sqRows ?? []) {
-      const lower = (row.query_text as string).toLowerCase()
-      const label = termToLabel.get(lower)
-      if (customLabel0 && !label) continue
-
-      const existing = termAgg.get(lower)
-      if (existing) {
-        existing.impressions += Number(row.impressions ?? 0)
-        existing.clicks += Number(row.clicks ?? 0)
-        existing.costMicros += Number(row.cost_micros ?? 0)
-        existing.conversions += Number(row.conversions ?? 0)
-        existing.revenue += Number(row.conversion_value ?? 0)
-      } else {
-        termAgg.set(lower, {
-          queryText: row.query_text as string,
-          impressions: Number(row.impressions ?? 0),
-          clicks: Number(row.clicks ?? 0),
-          costMicros: Number(row.cost_micros ?? 0),
-          conversions: Number(row.conversions ?? 0),
-          revenue: Number(row.conversion_value ?? 0),
-        })
-      }
-    }
-
-    const allTerms = Array.from(termAgg.values())
+    const allTerms = termRows.map((row) => ({
+      queryText: row.query_text as string,
+      impressions: Number(row.impressions ?? 0),
+      clicks: Number(row.clicks ?? 0),
+      costMicros: Number(row.cost_micros ?? 0),
+      conversions: Number(row.conversions ?? 0),
+      revenue: Number(row.revenue ?? 0),
+    }))
 
     // --- 1. Brand vs Non-Brand Split (DEMAND-05) ---
     const segments: Record<BrandSplit['segment'], Omit<BrandSplit, 'segment' | 'roas'> & { costMicros: number }> = {
@@ -138,7 +101,6 @@ export async function GET(request: NextRequest) {
       const totalRevenue = matchingTerms.reduce((s, t) => s + t.revenue, 0)
       const spend = costMicrosToDollars(totalCostMicros)
 
-      // Top 5 terms by impressions
       const topTerms = [...matchingTerms]
         .sort((a, b) => b.impressions - a.impressions)
         .slice(0, 5)
@@ -175,6 +137,11 @@ export async function GET(request: NextRequest) {
         competitorSpend,
         topCompetitor,
         nonBrandRoas,
+      },
+      period: {
+        from: '', // competitive uses same data as demand
+        to: '',
+        totalTerms: allTerms.length,
       },
     }
 

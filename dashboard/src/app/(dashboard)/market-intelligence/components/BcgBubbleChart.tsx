@@ -68,9 +68,11 @@ export function BcgBubbleChart({
   dimmed = false,
 }: BcgBubbleChartProps) {
   const handleClick = useCallback(
-    (entry: ProductGroup) => {
-      if (entry?.customLabel0) {
-        onGroupClick(entry.customLabel0)
+    // Recharts Scatter onClick passes { payload: ProductGroup, ... }
+    (entry: { payload?: ProductGroup } | ProductGroup) => {
+      const group = 'payload' in entry && entry.payload ? entry.payload : entry as ProductGroup
+      if (group?.customLabel0) {
+        onGroupClick(group.customLabel0)
       }
     },
     [onGroupClick]

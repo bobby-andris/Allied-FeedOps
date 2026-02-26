@@ -5,6 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { useDemandData } from '../hooks/useDemandData'
 import { ImpressionShareChart } from './ImpressionShareChart'
 import { CpcOpportunityChart } from './CpcOpportunityChart'
@@ -78,8 +86,24 @@ export function DemandTab({ customLabel0 }: Props) {
 
   const { kpis } = data
 
+  const periodLabel = data.period?.from && data.period?.to
+    ? `${new Date(data.period.from + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — ${new Date(data.period.to + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : null
+
   return (
     <div className="space-y-4">
+      {/* Period + Term Count */}
+      {(periodLabel || data.period?.totalTerms) && (
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          {periodLabel && (
+            <Badge variant="outline" className="font-normal">{periodLabel}</Badge>
+          )}
+          {data.period?.totalTerms > 0 && (
+            <span>{data.period.totalTerms.toLocaleString()} search terms analyzed</span>
+          )}
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
@@ -176,6 +200,49 @@ export function DemandTab({ customLabel0 }: Props) {
         </CardHeader>
         <CardContent>
           <LongTailAnalysis data={data.longTail} />
+        </CardContent>
+      </Card>
+
+      {/* Top Terms Table — shows actual search terms with metrics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Top Search Terms by Market Volume</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-[400px] overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Search Term</TableHead>
+                  <TableHead>Product Group</TableHead>
+                  <TableHead className="text-right">Your Impressions</TableHead>
+                  <TableHead className="text-right">Market Volume</TableHead>
+                  <TableHead className="text-right">Share</TableHead>
+                  <TableHead className="text-right">Gap</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.impressionShare.slice(0, 50).map((row) => (
+                  <TableRow key={row.queryText}>
+                    <TableCell className="font-medium">{row.queryText}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{row.customLabel0 || '—'}</TableCell>
+                    <TableCell className="text-right">{row.actualImpressions.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{row.marketVolume?.toLocaleString() ?? 'N/A'}</TableCell>
+                    <TableCell className="text-right">
+                      {row.sharePercent !== null ? (
+                        <span className={row.sharePercent < 20 ? 'text-red-500' : row.sharePercent < 50 ? 'text-amber-500' : 'text-green-500'}>
+                          {row.sharePercent.toFixed(1)}%
+                        </span>
+                      ) : 'N/A'}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {row.gap !== null ? row.gap.toLocaleString() : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

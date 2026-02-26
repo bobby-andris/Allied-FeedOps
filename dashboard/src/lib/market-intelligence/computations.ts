@@ -1,6 +1,27 @@
 import { median } from 'simple-statistics'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { BcgQuadrant, LongTailBucket, MonthlySearchVolume } from './types'
 import { LONG_TAIL_BUCKETS, SEASONAL_THRESHOLD } from './constants'
+
+/**
+ * Paginate through an RPC call that may exceed Supabase's 1000-row server limit.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function paginateRpc<T>(supabase: SupabaseClient, fnName: string, params: Record<string, unknown>, pageSize = 1000): Promise<T[]> {
+  const all: T[] = []
+  let offset = 0
+  while (true) {
+    const { data, error } = await supabase
+      .rpc(fnName, params)
+      .range(offset, offset + pageSize - 1)
+    if (error) throw error
+    if (!data || (data as T[]).length === 0) break
+    all.push(...(data as T[]))
+    if ((data as T[]).length < pageSize) break
+    offset += pageSize
+  }
+  return all
+}
 
 export function classifyQuadrant(
   roas: number,

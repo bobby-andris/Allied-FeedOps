@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
-  costMicrosToDollars,
   buildLongTailBuckets,
   parseMonthlySearchVolumes,
   computeMoMChange,
   classifySeasonalDirection,
+  costMicrosToDollars,
+  paginateRpc,
 } from '@/lib/market-intelligence/computations'
 import type {
   DemandData,
@@ -18,106 +19,55 @@ import { NEW_TERM_WINDOW_DAYS } from '@/lib/market-intelligence/constants'
 
 export const dynamic = 'force-dynamic'
 
+interface TermMetricsRow {
+  query_text: string
+  custom_label_0: string
+  impressions: number
+  clicks: number
+  cost_micros: number
+  conversions: number
+  revenue: number
+  period_start: string
+  avg_monthly_searches: number | null
+  high_cpc_micros: number | null
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient()
     const customLabel0 = request.nextUrl.searchParams.get('customLabel0')
 
-    // Build a term->customLabel0 lookup from query_value_scores
-    // (search_queries doesn't have custom_label_0 directly)
-    let qvsQuery = supabase
-      .from('query_value_scores')
-      .select('search_term, custom_label_0')
-
-    if (customLabel0) {
-      qvsQuery = qvsQuery.eq('custom_label_0', customLabel0)
+    // Fetch pre-aggregated term metrics via SQL function (paginates past 1000-row limit)
+    let termRows: TermMetricsRow[]
+    try {
+      termRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
+        p_custom_label_0: customLabel0 || null,
+      })
+    } catch (err) {
+      console.error('term metrics rpc failed:', err)
+      return NextResponse.json({ error: err instanceof Error ? err.message : 'RPC failed' }, { status: 500 })
     }
 
-    const { data: qvsRows, error: qvsError } = await qvsQuery
+    const allTerms = termRows.map((row) => ({
+      queryText: row.query_text as string,
+      customLabel0: (row.custom_label_0 as string) || '',
+      impressions: Number(row.impressions ?? 0),
+      clicks: Number(row.clicks ?? 0),
+      costMicros: Number(row.cost_micros ?? 0),
+      conversions: Number(row.conversions ?? 0),
+      revenue: Number(row.revenue ?? 0),
+      periodStart: (row.period_start as string) ?? '',
+      avgMonthlySearches: row.avg_monthly_searches ? Number(row.avg_monthly_searches) : null,
+      highCpcMicros: row.high_cpc_micros ? Number(row.high_cpc_micros) : null,
+    }))
 
-    if (qvsError) {
-      console.error('query_value_scores fetch failed:', qvsError)
-      return NextResponse.json({ error: qvsError.message }, { status: 500 })
-    }
-
-    // Build lookup: search_term -> custom_label_0
+    // Build term->label lookup for seasonal (keyword_metrics doesn't have label)
     const termToLabel = new Map<string, string>()
-    for (const row of qvsRows ?? []) {
-      termToLabel.set(row.search_term.toLowerCase(), row.custom_label_0)
+    for (const t of allTerms) {
+      if (t.customLabel0) termToLabel.set(t.queryText.toLowerCase(), t.customLabel0)
     }
 
-    const termSet = new Set(termToLabel.keys())
-
-    // Fetch search_queries data
-    const { data: sqRows, error: sqError } = await supabase
-      .from('search_queries')
-      .select('query_text, impressions, clicks, cost_micros, conversions, conversion_value, period_start, avg_monthly_searches, high_cpc_micros')
-      .gt('impressions', 0)
-
-    if (sqError) {
-      console.error('search_queries fetch failed:', sqError)
-      return NextResponse.json({ error: sqError.message }, { status: 500 })
-    }
-
-    // Aggregate search_queries by query_text (may have multiple variant rows)
-    interface AggTerm {
-      queryText: string
-      customLabel0: string
-      impressions: number
-      clicks: number
-      costMicros: number
-      conversions: number
-      revenue: number
-      periodStart: string
-      avgMonthlySearches: number | null
-      highCpcMicros: number | null
-    }
-
-    const termAgg = new Map<string, AggTerm>()
-
-    for (const row of sqRows ?? []) {
-      const lower = (row.query_text as string).toLowerCase()
-      const label = termToLabel.get(lower)
-      // If customLabel0 filter active, skip terms not in query_value_scores
-      if (customLabel0 && !label) continue
-
-      const existing = termAgg.get(lower)
-      if (existing) {
-        existing.impressions += Number(row.impressions ?? 0)
-        existing.clicks += Number(row.clicks ?? 0)
-        existing.costMicros += Number(row.cost_micros ?? 0)
-        existing.conversions += Number(row.conversions ?? 0)
-        existing.revenue += Number(row.conversion_value ?? 0)
-        // Keep earliest period_start
-        if (row.period_start && row.period_start < existing.periodStart) {
-          existing.periodStart = row.period_start
-        }
-        // Keep non-null keyword metrics
-        if (row.avg_monthly_searches && !existing.avgMonthlySearches) {
-          existing.avgMonthlySearches = Number(row.avg_monthly_searches)
-        }
-        if (row.high_cpc_micros && !existing.highCpcMicros) {
-          existing.highCpcMicros = Number(row.high_cpc_micros)
-        }
-      } else {
-        termAgg.set(lower, {
-          queryText: row.query_text as string,
-          customLabel0: label ?? '',
-          impressions: Number(row.impressions ?? 0),
-          clicks: Number(row.clicks ?? 0),
-          costMicros: Number(row.cost_micros ?? 0),
-          conversions: Number(row.conversions ?? 0),
-          revenue: Number(row.conversion_value ?? 0),
-          periodStart: (row.period_start as string) ?? '',
-          avgMonthlySearches: row.avg_monthly_searches ? Number(row.avg_monthly_searches) : null,
-          highCpcMicros: row.high_cpc_micros ? Number(row.high_cpc_micros) : null,
-        })
-      }
-    }
-
-    const allTerms = Array.from(termAgg.values())
-
-    // Also fetch keyword_metrics for enrichment (seasonal + any missing market data)
+    // Fetch keyword_metrics for enrichment (small table: ~1.5K rows)
     const { data: kmRows } = await supabase
       .from('keyword_metrics')
       .select('keyword, avg_monthly_searches, high_cpc_micros, monthly_searches')
@@ -222,7 +172,6 @@ export async function GET(request: NextRequest) {
       .toISOString()
       .split('T')[0]
 
-    // Get terms only seen in the last N days
     const recentTerms = allTerms.filter(t => t.periodStart >= cutoffDate)
     const olderTermSet = new Set(
       allTerms.filter(t => t.periodStart < cutoffDate).map(t => t.queryText.toLowerCase())
@@ -265,6 +214,11 @@ export async function GET(request: NextRequest) {
         ? termsWithCpc.reduce((s, t) => s + (t.headroomPercent ?? 0), 0) / termsWithCpc.length
         : null
 
+    // Compute data period from actual term dates
+    const periods = allTerms.filter(t => t.periodStart).map(t => t.periodStart).sort()
+    const periodFrom = periods[0] ?? ''
+    const periodTo = periods[periods.length - 1] ?? ''
+
     const result: DemandData = {
       impressionShare,
       cpcOpportunity,
@@ -276,6 +230,11 @@ export async function GET(request: NextRequest) {
         avgCpcHeadroom,
         seasonalAlertCount: seasonal.length,
         newTermCount: newTerms.length,
+      },
+      period: {
+        from: periodFrom,
+        to: periodTo,
+        totalTerms: allTerms.length,
       },
     }
 

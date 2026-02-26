@@ -54,6 +54,12 @@ export interface LongTailBucket {
   totalSpend: number
 }
 
+export interface DataPeriod {
+  from: string // ISO date
+  to: string   // ISO date
+  totalTerms: number
+}
+
 export interface DemandData {
   impressionShare: ImpressionShareGap[]
   cpcOpportunity: CpcOpportunity[]
@@ -66,6 +72,7 @@ export interface DemandData {
     seasonalAlertCount: number
     newTermCount: number
   }
+  period: DataPeriod
 }
 
 // === Competitive Tab Types ===
@@ -101,6 +108,7 @@ export interface CompetitiveData {
     topCompetitor: string | null
     nonBrandRoas: number
   }
+  period: DataPeriod
 }
 
 // === Products Tab Types ===
@@ -148,4 +156,5 @@ export interface ProductsData {
     totalRevenue: number
     totalSpend: number
   }
+  period: DataPeriod
 }
