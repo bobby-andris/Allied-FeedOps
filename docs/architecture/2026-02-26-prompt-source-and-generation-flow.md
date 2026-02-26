@@ -1,175 +1,198 @@
-# Prompt Source And Generation Flow (2026-02-26)
+# Prompt Source and Generation Flow
 
-## Purpose
+Date: 2026-02-26  
+Scope: Current `origin/master` runtime behavior + v1.3a phase synthesis
 
-This document records:
+## 1) Runtime Prompt Source of Truth
 
-1. Where the runtime prompt is created from today.
-2. How `/api/regenerate` flows through dashboard, Python, GPT-5.2, and Supabase.
-3. How deterministic persistence and request lineage are enforced.
-4. Which v1.3a phase failures repeated, and how to remediate them in a rollout-safe way aligned to the strategic milestone plan.
+The production runtime prompt authority is:
 
-## Runtime Prompt Source Of Truth
+- `src/feedops/pipeline/prompts.py` (base canonical system prompt + schemas)
+- `src/feedops/api/prompt_loader.py` (`get_system_prompt`, system-prompt hashing, Supabase examples/guidance loading)
+- `src/feedops/api/prompt_builder.py` (platform-specific user prompt assembly)
 
-### Authoritative runtime source
+Supabase `prompt_templates` is **supporting context** (gold examples/category guidance), not runtime system-prompt authority.
 
-- Canonical system prompt base: `src/feedops/pipeline/prompts.py` (`SYSTEM_PROMPT`)
-- Canonical runtime loader: `src/feedops/api/prompt_loader.py`
-  - `get_system_prompt()` starts from `CANONICAL_SYSTEM_PROMPT`.
-  - Skill enrichment is appended via `load_skills_for_prompt(...)`.
-  - Supabase `prompt_templates.system_prompt` is not used as runtime authority.
-- Platform-targeted prompt extraction: `src/feedops/pipeline/skill_loader.py` via `get_platform_system_prompt(platform)`.
-- Per-platform user prompts are assembled in `src/feedops/api/prompt_builder.py`.
+Dashboard prompt files are legacy/reference (`dashboard/src/lib/regeneration/prompts.ts`) and are not the Cloud Run runtime authority.
 
-### Non-authoritative (lineage/reference only)
-
-- Supabase `prompt_templates.system_prompt` column.
-- Legacy dashboard prompt files under `dashboard/src/lib/regeneration/`.
+## 2) End-to-End Regenerate Call Flow
 
 ```mermaid
 flowchart LR
-  A["prompts.py SYSTEM_PROMPT"] --> B["prompt_loader.get_system_prompt"]
-  C["skill_loader.load_skills_for_prompt"] --> B
-  B --> D["generator.generate_per_platform"]
-  E["prompt_builder build_google build_bing build_shopify build_finish"] --> D
-  F["Supabase prompt_templates examples guidance"] --> E
-  G["Supabase prompt_templates system_prompt"] -. "lineage only not runtime authority" .-> E
-```
-
-## Regenerate End-To-End Flow
-
-### Request path
-
-1. Dashboard route receives regenerate request:
-   - `dashboard/src/app/api/regenerate/route.ts`
-2. Route resolves canonical SKU and forwards to Python:
-   - `POST {FEEDOPS_PIPELINE_URL}/regenerate`
-   - Forwards `X-Request-ID`.
-3. Python endpoint executes:
-   - `src/feedops/api/main.py` `/regenerate`
-4. Generation path:
-   - `generate_per_platform(...)` in `src/feedops/pipeline/generator.py` (per-platform mandatory path)
-   - OpenAI call via `src/feedops/providers/openai_provider.py`
-5. Deterministic persistence:
-   - `_persist_regeneration_result(...)` in `src/feedops/api/main.py`
-6. Dashboard returns pipeline-authored state fields.
-
-```mermaid
-flowchart LR
-  U["Dashboard UI"] --> R["dashboard /api/regenerate route"]
-  R --> P["Python /regenerate"]
-  P --> G["generator.generate_per_platform"]
-  G --> O["openai_provider GPT-5.2 call"]
-  O --> G
-  G --> V["required field validation"]
-  V --> S["persist regeneration result in Python"]
-  S --> DB["Supabase generated_content and regeneration_history"]
-  S --> P
-  P --> R
+  U["User clicks Regenerate in Dashboard"] --> R["Next.js route: dashboard/src/app/api/regenerate/route.ts"]
+  R -->|Forward body + "X-Request-ID"| P["Cloud Run API: POST /regenerate"]
+  P --> M["main.py: regenerate_content()"]
+  M --> G["pipeline/generator.py: generate_per_platform()"]
+  G --> PB["api/prompt_builder.py: build_google/bing/shopify_prompt()"]
+  PB --> PL["api/prompt_loader.py: get_system_prompt() + examples/guidance"]
+  PL --> SYS["pipeline/prompts.py canonical base prompt"]
+  G --> OAI["providers/openai_provider.py: GPT-5.2 calls + strict parsing/retries"]
+  OAI --> M
+  M --> DB1["Supabase: generated_content"]
+  M --> DB2["Supabase: regeneration_history (request_id, prompt_hash, links)"]
+  M --> R
   R --> U
 ```
 
-## Deterministic Persistence Lifecycle
-
-### Single-writer rule
-
-- Dashboard route does not write `generated_content` or `regeneration_history`.
-- Python `/regenerate` is sole writer for those tables.
-
-### State outcomes
-
-- `no_change`:
-  - Content equals current candidate.
-  - No `generated_content` write.
-  - No `regeneration_history` write.
-- `completed`:
-  - Content changed.
-  - Version increment in `generated_content`.
-  - Exactly one linked `regeneration_history` row with `request_id`.
-
-```mermaid
-flowchart LR
-  A["Python regenerate receives content"] --> B["Load current generated_content row"]
-  B --> C{"content changed"}
-  C -- "no" --> D["return state no_change idempotent true"]
-  C -- "yes" --> E["write generated_content with next version"]
-  E --> F["insert one regeneration_history row with request_id"]
-  F --> G["return state completed idempotent false"]
-```
-
-## GPT-5.2 Response Contract
-
-- `_parse_json_payload(...)` in `src/feedops/providers/openai_provider.py`:
-  - Parses strict JSON (or controlled fenced/substr recovery).
-  - Computes `missing_keys` against schema-required keys.
-  - Missing required keys raises parse failure.
-- Retry loop treats missing-key failures like other parse failures.
-- If retries are exhausted, endpoint returns actionable failure and does not persist partial payload.
-
-## Generation And Publishing Module Map
+## 3) Deterministic Persistence Lifecycle (Changed vs No-Change)
 
 ```mermaid
 flowchart TD
-  A["dashboard src app api regenerate"] --> B["src feedops api main regenerate"]
-  B --> C["src feedops pipeline generator"]
-  C --> D["src feedops api prompt_builder"]
-  C --> E["src feedops api prompt_loader"]
-  C --> F["src feedops pipeline skill_loader"]
-  C --> G["src feedops providers openai_provider"]
-  B --> H["src feedops db supabase_client"]
-  I["dashboard src lib publishing"] --> J["src feedops pipeline reporter"]
-  J --> K["src feedops integrations google_supplemental"]
+  A["main.py regenerate_content()"] --> B["Generate candidate content"]
+  B --> C["Compare with existing generated_content row"]
+  C -->|Unchanged| N1["Return state='no_change', idempotent=true"]
+  N1 --> N2["No generated_content write"]
+  N2 --> N3["No regeneration_history insert"]
+  C -->|Changed| Y1["Increment version"]
+  Y1 --> Y2["Update/upsert generated_content"]
+  Y2 --> Y3["Insert one linked regeneration_history row"]
+  Y3 --> Y4["Return state='completed', idempotent=false"]
 ```
 
-## v1.3a Phase Synthesis: Recurring Issues And Remediation
+## 4) Prompt Construction Path (Authority vs Lineage)
 
-Source reviewed: `/Users/bobby/Documents/GitHub/Allied-FeedOps/.planning/milestones/v1.3a-phases`
+```mermaid
+flowchart LR
+  A["prompts.py SYSTEM_PROMPT"] --> B["prompt_loader.get_system_prompt()"]
+  B --> C["skill_loader loads runtime skill content"]
+  C --> D["Final system prompt sent to GPT-5.2"]
+  E["Supabase prompt_templates.gold_standard_examples"] --> F["prompt_loader format_gold_standard_examples(_bundle)"]
+  G["Supabase prompt_templates.category_guidance"] --> H["prompt_loader get_category_guidance()"]
+  F --> I["prompt_builder platform prompt assembly"]
+  H --> I
+  I --> J["generator.generate_per_platform()"]
+  J --> D
+```
 
-| Recurring issue | Where it appeared in phases | Current impact | Deterministic remediation |
+## 5) Module Map (Generation + Persistence)
+
+```mermaid
+flowchart TB
+  subgraph Dashboard
+    D1["dashboard/src/app/api/regenerate/route.ts"]
+  end
+
+  subgraph Python_API
+    P1["src/feedops/api/main.py"]
+    P2["src/feedops/api/prompt_loader.py"]
+    P3["src/feedops/api/prompt_builder.py"]
+    P4["src/feedops/api/env_contract.py"]
+  end
+
+  subgraph Pipeline
+    G1["src/feedops/pipeline/generator.py"]
+    G2["src/feedops/pipeline/prompts.py"]
+  end
+
+  subgraph Providers
+    O1["src/feedops/providers/openai_provider.py"]
+  end
+
+  subgraph Data
+    S1["generated_content"]
+    S2["regeneration_history"]
+    S3["prompt_templates"]
+  end
+
+  D1 --> P1
+  P1 --> G1
+  G1 --> P3
+  P3 --> P2
+  P2 --> G2
+  G1 --> O1
+  P1 --> S1
+  P1 --> S2
+  P2 --> S3
+  P1 --> P4
+```
+
+## 6) v1.3a Recurring Failure Themes (from phase artifacts)
+
+Primary artifacts reviewed:
+
+- `.planning/milestones/v1.3a-phases/25.2-gpt52-prompt-engineering/ROOT-CAUSE-ANALYSIS.md`
+- `.planning/milestones/v1.3a-phases/25.3-prompt-rewrite/25.3-03-SUMMARY.md`
+- `.planning/milestones/v1.3a-phases/25.4-production-impact-audit/AUDIT-REPORT.md`
+- `.planning/milestones/v1.3a-phases/26-human-evaluation-test-batch/26-02-quality-scores.md`
+- `.planning/milestones/v1.3a-phases/26-human-evaluation-test-batch/26-02-blind-comparison.md`
+- `docs/plans/2026-02-21-strategic-milestone-assessment.md`
+
+Recurring issues:
+
+1. Prompt-routing drift between harness/runtime paths.
+2. Overloaded prompts with contradictory instructions.
+3. Template-like openings and generic copy patterns.
+4. Placeholder behavior causing unnatural sentence flow.
+5. Self-scoring optimism vs human-perceived quality gaps.
+6. Inconsistent persistence and lineage visibility under regeneration retries.
+
+## 7) Issue-to-Remediation Matrix
+
+| Issue | Likely Root Cause | Deterministic Remediation | Verification Gate |
 |---|---|---|---|
-| Runtime routing drift (`v1` vs `v2`) | 25.4, 26, 27 | Inconsistent content behavior and regressions after env/config changes | Remove runtime behavior split; keep per-platform generation path mandatory |
-| Harness vs runtime mismatch | 26.02 and prompt eval artifacts | Good offline results not matching Cloud Run behavior | Run parity suite against real runtime contracts and endpoint flow |
-| Template-like openings and generic copy | 24 and 26 outputs | Weak CTR/CVR due to robotic intros | Add prompt quality gates that reject fragment/template-style openings |
-| Placeholder leakage | 26 blind comparisons and quality notes | Broken or low-trust customer-facing copy | Enforce placeholder integrity checks and block save on unresolved placeholders |
-| Weak example enforcement | 23/24/25 quality scaffolding vs observed outputs | Gold examples not consistently reflected in generation | Add explicit rubric gates + stronger evidence-to-brief assembly constraints |
-| Parse leniency | Pre-fix provider behavior patterns | Silent partial success, polluted persistence | Missing required keys is hard parse failure with retry and hard-stop |
-| Ambiguous persistence writers | Dashboard and Python ownership concerns | Duplicate writes and version/history mismatch risk | Python single-writer contract and dashboard orchestration-only behavior |
+| Generic, repetitive openings | Prompt structure over-weights fixed templates | Enforce per-platform opening templates with 3 approved structural patterns; randomize by deterministic seed per `master_sku` | Golden-SKU test asserts pattern distribution and non-duplication |
+| Prompt regressions after edits | Multiple implicit prompt sources and flag drift | Keep code-owned canonical prompt only; treat DB prompt text as non-authoritative | Static test forbids runtime use of DB `system_prompt` |
+| Partial schema success | Missing required key fallback accepted | Strict parse failure on missing required platform keys; retry then fail loud | Contract test asserts 5xx on missing key after retries |
+| No-change vs changed ambiguity | Multiple writers and weak response metadata | Python single-writer contract (`state/idempotent/version/generated_content_id`) | API contract test + DB write-count assertions |
+| Hard to debug production incidents | Missing end-to-end lineage keys | Require `X-Request-ID` propagation and DB persistence in history rows | Smoke test + DB query by request_id |
+| Local/prod mismatch | Tests not running inside runtime-equivalent image | Add dockerized parity gate in Cloud Build before deploy | CI gate blocks deploy on parity failure |
 
-## Strategic Alignment To 2026-02-21 Assessment
+## 8) Final Prompt Improvement Plan (Strategic Alignment)
 
-Reference: `docs/plans/2026-02-21-strategic-milestone-assessment.md`
+Aligned to `docs/plans/2026-02-21-strategic-milestone-assessment.md` objective: higher-quality feed content that improves CTR/CVR and supports closed-loop optimization.
 
-This implementation aligns with the staged strategy:
+### Phase A: Prompt Contract Stabilization (Now)
 
-1. **Content foundation first**:
-   - Deterministic runtime behavior and strict output contract.
-2. **Architecture confidence**:
-   - Cloud Run parity gate prevents environment drift regressions.
-3. **Actionable optimization next**:
-   - Request-level lineage (`request_id`) and deterministic state/version enable reliable measurement loops.
+1. Freeze prompt architecture:
+- one canonical system prompt source in code
+- one platform-specific prompt builder path
+- strict required-field response contract
 
-## Rollout-Safe Prompt Improvement Recommendations
+2. Add regression corpus:
+- 20 canonical SKUs + 20 unseen SKUs
+- fixed seed, fixed constraints, deterministic evaluation outputs
 
-These recommendations are designed to avoid architectural regressions while improving title/description quality:
+3. Add hard quality guardrails:
+- ban template-fragment openings
+- require one product-specific differentiator sentence
+- require one customer-use-case sentence for descriptions
 
-1. Keep one canonical runtime prompt path in Python and remove behavior flags from runtime routing.
-2. Add deterministic quality guardrails before persistence:
-   - fail on fragment-first intros.
-   - fail on unresolved placeholders for publishable platform fields.
-   - fail on missing required per-platform keys.
-3. Keep Supabase prompt templates as evidence/guidance storage, not runtime prompt override source.
-4. Evaluate prompt changes through the same runtime path used by Cloud Run endpoints.
-5. Gate rollout with parity + contract suites before merge/deploy.
+### Phase B: Quality Lift Without Drift
 
-## Verification References
+1. Replace self-score-only gating with mixed evaluation:
+- automated rule checks
+- embedding similarity against low-quality phrase blacklist
+- human rubric sampling on rotating SKU batch
 
-- Cloud Run parity suite script: `scripts/verify_cloud_run_parity.sh`
-- Cloud Run parity tests: `tests/test_cloud_run_parity.py`, `tests/test_env_parity.py`
-- Regenerate contract tests:
-  - `tests/api/test_dashboard_regenerate_route_contract.py`
-  - `tests/api/test_main_master_sku_alias_runtime.py`
-  - `tests/api/test_regenerate_response_contract.py`
-- Parser strictness tests:
-  - `tests/test_phase28_prompt_quality.py`
-- Routing drift test:
-  - `tests/test_v1_path_regression.py`
+2. Enforce “no generic boilerplate” constraints:
+- reject known generic phrases from phase audits
+- add retry hint with explicit failed phrase
+
+3. Improve finish sentence integration:
+- verify context sentence before and after `{FINISH_SENTENCE}`
+- reject if placeholder is sentence-initial unless policy-justified
+
+### Phase C: Closed-Loop Improvement
+
+1. Join content lineage to performance outcomes:
+- tie `prompt_hash + request_id + generated_content_id` to downstream CTR/CVR
+
+2. Weekly optimization loop:
+- identify lowest-performing prompt_hash cohorts
+- run controlled prompt experiments on those cohorts only
+- ship only if unseen-SKU gate + live KPI guardrail pass
+
+## 9) Operational Checklist
+
+Before merge:
+
+1. Run `bash scripts/verify_cloud_run_parity.sh`
+2. Run `python scripts/smoke_regenerate_lineage.py --pipeline-url "<run.app URL>" ...`
+3. Execute DB sign-off queries emitted by the smoke script
+4. Confirm one changed case and one no-change case behave deterministically
+
+After deploy:
+
+1. Verify Cloud Run has `FEEDOPS_ENV_CONTRACT_STRICT=1`
+2. Monitor `request_id` lineage for first 10 regenerations
+3. Review one human spot-check batch before bulk publish

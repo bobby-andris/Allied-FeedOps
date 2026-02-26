@@ -52,11 +52,31 @@ bash scripts/verify_live_supabase_canary.sh
 3. Dashboard -> Python request-id propagation (`X-Request-ID`)
 4. Deterministic regenerate contracts (single-writer/idempotent state surface)
 5. Strict parser/routing drift guards
+6. Runtime env contract validation coverage (`tests/test_runtime_env_contract.py`)
 
 **Usage**:
 ```bash
 cd /path/to/Allied-FeedOps
 bash scripts/verify_cloud_run_parity.sh
+```
+
+### `smoke_regenerate_lineage.py`
+
+**Purpose**: Run a live post-deploy `/regenerate` smoke test and print exact SQL for request-id lineage verification.
+
+**What it validates**:
+1. Live endpoint response on deployed Cloud Run
+2. Request-id propagation readiness (`X-Request-ID`)
+3. Merge/deploy sign-off query template for `regeneration_history` and `generated_content`
+
+**Usage**:
+```bash
+cd /path/to/Allied-FeedOps
+python scripts/smoke_regenerate_lineage.py \
+  --pipeline-url "https://feedops-pipeline-623866089882.us-east1.run.app" \
+  --master-sku "1031/30" \
+  --platform google \
+  --content-type description
 ```
 
 ## cleanup_duplicate_media.py

@@ -15,10 +15,12 @@ def test_cloudbuild_contains_required_cloud_run_secrets_and_env() -> None:
     source = _read(CLOUDBUILD_PATH)
 
     assert "./scripts/verify_cloud_run_parity.sh" in source
+    assert "docker run --rm" in source
     assert "OPENAI_API_KEY=feedops-openai-api-key:latest" in source
     assert "SUPABASE_URL=feedops-supabase-url:latest" in source
     assert "SUPABASE_KEY=feedops-supabase-key:latest" in source
     assert "GOOGLE_ADS_API_ENABLED=1" in source
+    assert "FEEDOPS_ENV_CONTRACT_STRICT=1" in source
     assert "GOOGLE_ADS_CUSTOMER_ID=" in source
 
 
@@ -44,3 +46,10 @@ def test_dashboard_and_python_propagate_request_id_contract() -> None:
 
     assert "'X-Request-ID': requestId" in route_source
     assert 'response.headers["X-Request-ID"] = request_id' in api_source
+
+
+def test_python_api_enforces_runtime_env_contract_on_startup() -> None:
+    api_source = _read(MAIN_API_PATH)
+
+    assert '@app.on_event("startup")' in api_source
+    assert "validate_runtime_env_contract()" in api_source
