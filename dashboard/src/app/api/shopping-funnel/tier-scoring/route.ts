@@ -181,9 +181,17 @@ export async function GET(request: NextRequest) {
         const groupDist = distributions.get(groupKey)
         if (!groupDist) continue // Skip if no distribution data for this group
 
-        // scoreTerm reads funnels[0] internally — shallow copy with this funnel first
+        // Use per-label metrics instead of cross-label aggregates
+        // Falls back to aggregated term-level metrics if per-label not available
         const termForThisFunnel = {
           ...term,
+          total_impressions: funnel.impressions ?? term.total_impressions,
+          total_clicks: funnel.clicks ?? term.total_clicks,
+          total_cost_micros: funnel.cost_micros ?? term.total_cost_micros,
+          total_conversions: funnel.conversions ?? term.total_conversions,
+          total_conversions_value: funnel.conversions_value ?? term.total_conversions_value,
+          total_average_cpc: funnel.average_cpc ?? term.total_average_cpc,
+          total_all_conversions: funnel.all_conversions ?? term.total_all_conversions,
           funnels: [funnel, ...term.funnels.filter(f => f !== funnel)],
         }
 

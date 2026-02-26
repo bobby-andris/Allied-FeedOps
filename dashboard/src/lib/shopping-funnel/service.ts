@@ -994,6 +994,16 @@ export async function getExistingFunnelTerms(
         tier: existing.tier,
         error: existing.error,
         error_message: existing.errorMessage,
+        // Per-label metrics for label-specific scoring
+        impressions: aggregate.impressions,
+        clicks: aggregate.clicks,
+        cost_micros: aggregate.costMicros,
+        conversions: aggregate.conversions,
+        conversions_value: aggregate.conversionsValue,
+        average_cpc: aggregate.totalClicksForCpc > 0
+          ? aggregate.averageCpcWeightedSum / aggregate.totalClicksForCpc
+          : 0,
+        all_conversions: aggregate.allConversions,
       })
     }
 

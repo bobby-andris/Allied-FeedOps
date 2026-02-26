@@ -58,6 +58,14 @@ export interface ExistingFunnelAssignment {
   tier: 'High' | 'Medium' | 'Low' | 'Campaign Negative' | 'Unknown'
   error: boolean
   error_message: string | null
+  // Per-label metrics (for label-specific scoring instead of cross-label aggregates)
+  impressions?: number
+  clicks?: number
+  cost_micros?: number
+  conversions?: number
+  conversions_value?: number
+  average_cpc?: number        // weighted average CPC in micros
+  all_conversions?: number
 }
 
 export interface ExistingFunnelTerm {
