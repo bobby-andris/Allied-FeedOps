@@ -190,6 +190,22 @@ Plans:
 - [x] 34.1-02-PLAN.md — Downstream fixes: under_invested, Constrain guard, scoring unification, API routes (Wave 2)
 - [x] 34.1-03-PLAN.md — New capabilities: label blocking, search promotion, label profitability, schema docs (Wave 2)
 
+### Phase 34.2: Zero-Conversion Intent Scoring Engine (INSERTED)
+
+**Goal:** Replace the brittle MPN-match promotion rule with a mathematically sound, dual-domain intent scoring engine that combines feed alignment analysis (attribute extraction + TF-IDF specificity) with behavioral Google Ads signals (rCTR, CPC ceiling pressure, micro-conversions) to confidently promote zero-conversion terms through the waterfall — plus fix all terminology (constrain → demote) and wire the tier-scoring UI to the proven Shopping Funnel execution pipeline
+**Depends on:** Phase 34.1
+**Requirements**: INTENT-01, INTENT-02, INTENT-03, INTENT-04, INTENT-05, INTENT-06, INTENT-07, INTENT-08
+**Success Criteria** (what must be TRUE):
+  1. "Constrain" is fully eradicated from codebase — replaced with "Demote" everywhere (types, logic, UI, tests)
+  2. Feed alignment scoring (attribute extraction + TF-IDF) is deployed on Cloud Run and returns intent scores for any search term
+  3. Behavioral intent signals (rCTR, CPC ceiling ratio, micro-conversion delta) are computed in tier-scoring pipeline from Google Ads API data
+  4. Unified intent score (feed alignment + behavioral) drives the new determineAction() decision matrix including zero-conversion promotion via Trigger E
+  5. UI shows Promote/Demote buttons with target tier labels, correct TierMovementArrow direction using targetTier, and intent score breakdown
+  6. Action queue connects to the Shopping Funnel execution pipeline (applyTierAssignment) for actual Google Ads keyword movements
+  7. Account audit completed: conversion actions cataloged, average CPA computed, CPC caps documented, historical data validated
+  8. All changes pass build + lint + existing tests + new intent scoring tests
+**Plans**: TBD
+
 ### Phase 35: Market Intelligence
 **Goal**: Users can understand demand patterns, competitive positioning, and product group health to make strategic decisions beyond individual term optimization
 **Depends on**: Phase 33
