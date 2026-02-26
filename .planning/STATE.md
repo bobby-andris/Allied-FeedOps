@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 Phase: 34.2 (v1.3c) — COMPLETE
 Plan: 6 of 6 complete
 Status: Completed 34.2-06 (Calibration + bug fixes from code review)
-Last activity: 2026-02-26 - Completed quick task 7: Fix Explorer tab tier cards + Wave 5 multi-label UI
+Last activity: 2026-02-26 - Completed quick task 8: Fix Explorer tab old isMisplaced logic with trigger system
 
 Progress: [##########] 100% (Phase 34.2)
 
@@ -173,11 +173,12 @@ Recent decisions affecting current work:
 | 5 | Action queue grouped layout (Wave 2 dashboard redesign) | 2026-02-26 | 1fc64c02 | [5-implement-wave-2-action-queue-redesign-f](./quick/5-implement-wave-2-action-queue-redesign-f/) |
 | 6 | Waves 3+4: Narrative Briefing, Raw Ads Data, Tooltips on detail page | 2026-02-26 | b8617170 | [6-implement-waves-3-and-4-detail-page-narr](./quick/6-implement-waves-3-and-4-detail-page-narr/) |
 | 7 | Fix Explorer tab tier cards + clickable opportunities + Wave 5 Multi-Label UI | 2026-02-26 | 06538449 | [7-fix-explorer-tab-tier-card-data-clickabl](./quick/7-fix-explorer-tab-tier-card-data-clickabl/) |
+| 8 | Fix Explorer tab old isMisplaced logic with trigger system | 2026-02-26 | a1792068 | [8-fix-explorer-tab-old-logic](./quick/8-fix-explorer-tab-old-logic/) |
 
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed quick-7 — Fix Explorer tab tier cards + Wave 5 multi-label UI
+Stopped at: Completed quick-8 — Fix Explorer tab old isMisplaced logic with trigger system
 Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-06-SUMMARY.md
 
 **Phase 33 Completion Summary**:
