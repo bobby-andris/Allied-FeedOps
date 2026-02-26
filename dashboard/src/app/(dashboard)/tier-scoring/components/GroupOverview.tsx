@@ -6,7 +6,7 @@ import { AlertCircle, ArrowRight, ShieldBan } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FallbackIndicator } from './FallbackIndicator'
 import { classifyAllTerms } from '../lib/reason-codes'
-import type { GroupDistributions, TermScore, ImpactRange } from '@/lib/optimization/tier-scoring.types'
+import type { GroupDistributions, TermScore } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
 import { formatDollars } from '@/lib/formatting'
 
@@ -71,7 +71,7 @@ export function GroupOverview({ distributions, scores, onSelectGroup, onBlockLab
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sortedGroups.map(({ group, misplacedCount, misplacedImpact }) => {
+        {sortedGroups.map(({ group, misplacedCount }) => {
           const isNoData = group.scoredTerms === 0
 
           if (isNoData) {
