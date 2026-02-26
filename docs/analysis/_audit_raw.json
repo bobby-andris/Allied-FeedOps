@@ -1,0 +1,3253 @@
+{
+  "conversion_actions": [
+    {
+      "name": "Transactions (Master - Allied Brass)",
+      "type": "UNIVERSAL_ANALYTICS_TRANSACTION",
+      "category": "PURCHASE",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "**LP Micro - 3+ Pages On Site (Master - Allied Brass)",
+      "type": "UNIVERSAL_ANALYTICS_GOAL",
+      "category": "ENGAGEMENT",
+      "counting_type": "ONE_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "**LP Micro - 2+ Minutes On Site (Master - Allied Brass)",
+      "type": "UNIVERSAL_ANALYTICS_GOAL",
+      "category": "ENGAGEMENT",
+      "counting_type": "ONE_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "**LP Micro - Cart View (Master - Allied Brass)",
+      "type": "UNIVERSAL_ANALYTICS_GOAL",
+      "category": "DEFAULT",
+      "counting_type": "ONE_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Calls from ads",
+      "type": "AD_CALL",
+      "category": "PHONE_CALL_LEAD",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "YouTube channel subscriptions",
+      "type": "UNKNOWN",
+      "category": "ENGAGEMENT",
+      "counting_type": "ONE_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Allied Brass - GA4 (Old) (web) purchase",
+      "type": "GOOGLE_ANALYTICS_4_PURCHASE",
+      "category": "PURCHASE",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "\u2705 Website Purchase",
+      "type": "WEBPAGE",
+      "category": "PURCHASE",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": true
+    },
+    {
+      "name": "\u2705 Add to Cart",
+      "type": "WEBPAGE",
+      "category": "ADD_TO_CART",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Analyzify - Product Detail",
+      "type": "WEBPAGE",
+      "category": "PAGE_VIEW",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "\u2705 Begin checkout",
+      "type": "WEBPAGE",
+      "category": "BEGIN_CHECKOUT",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "YouTube follow-on views",
+      "type": "UNKNOWN",
+      "category": "UNKNOWN",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Android installs (all other apps)",
+      "type": "ANDROID_INSTALLS_ALL_OTHER_APPS",
+      "category": "DOWNLOAD",
+      "counting_type": "ONE_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Local actions - Website visits",
+      "type": "GOOGLE_HOSTED",
+      "category": "PAGE_VIEW",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Local actions - Other engagements",
+      "type": "GOOGLE_HOSTED",
+      "category": "ENGAGEMENT",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Local actions - Directions",
+      "type": "GOOGLE_HOSTED",
+      "category": "GET_DIRECTIONS",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Clicks to call",
+      "type": "GOOGLE_HOSTED",
+      "category": "CONTACT",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Analyzify - Purchase test pixel",
+      "type": "WEBPAGE",
+      "category": "PURCHASE",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    },
+    {
+      "name": "Store visits",
+      "type": "STORE_VISITS",
+      "category": "STORE_VISIT",
+      "counting_type": "MANY_PER_CLICK",
+      "include_in_conversions": false
+    }
+  ],
+  "campaign_metrics": [
+    {
+      "name": "AVD - Shopping - US - baskets - HIGH",
+      "cost_micros": 625390000,
+      "conversions": 14.829294,
+      "all_conversions": 604.177982
+    },
+    {
+      "name": "AVD - Shopping - US - assorted wall mounted accessories - HIGH",
+      "cost_micros": 107320000,
+      "conversions": 0.0,
+      "all_conversions": 133.707983
+    },
+    {
+      "name": "AVD - Shopping - US - door pull - HIGH",
+      "cost_micros": 60180000,
+      "conversions": 0.0,
+      "all_conversions": 61.556726
+    },
+    {
+      "name": "AVD - Shopping - US - double glass shelf with towel bar - HIGH",
+      "cost_micros": 911050000,
+      "conversions": 15.000801,
+      "all_conversions": 747.247225
+    },
+    {
+      "name": "AVD - Shopping - US - grab bars - HIGH",
+      "cost_micros": 858260000,
+      "conversions": 10.422077,
+      "all_conversions": 820.477275
+    },
+    {
+      "name": "AVD - Shopping - US - refrigerator pull - HIGH",
+      "cost_micros": 72090000,
+      "conversions": 0.0,
+      "all_conversions": 57.00323
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder - HIGH",
+      "cost_micros": 98560000,
+      "conversions": 3.0,
+      "all_conversions": 72.896683
+    },
+    {
+      "name": "AVD - Shopping - US - shower door towel bars - HIGH",
+      "cost_micros": 561640000,
+      "conversions": 7.055818,
+      "all_conversions": 544.3218
+    },
+    {
+      "name": "AVD - Shopping - US - soap dishes & holders - HIGH",
+      "cost_micros": 231520000,
+      "conversions": 5.333334,
+      "all_conversions": 431.889839
+    },
+    {
+      "name": "AVD - Shopping - US - soap dispensers - HIGH",
+      "cost_micros": 323950000,
+      "conversions": 8.484508,
+      "all_conversions": 340.891479
+    },
+    {
+      "name": "AVD - Shopping - US - shower door knobs and hooks - HIGH",
+      "cost_micros": 320660000,
+      "conversions": 5.111577,
+      "all_conversions": 313.36044
+    },
+    {
+      "name": "AVD - Shopping - US - recessed tp holder - HIGH",
+      "cost_micros": 610480000,
+      "conversions": 14.853969,
+      "all_conversions": 624.308317
+    },
+    {
+      "name": "AVD - Shopping - US - retractable hooks - HIGH",
+      "cost_micros": 815620000,
+      "conversions": 17.79502,
+      "all_conversions": 1052.828322
+    },
+    {
+      "name": "AVD - Shopping - US - wall mirrors - HIGH",
+      "cost_micros": 52550000,
+      "conversions": 0.0,
+      "all_conversions": 46.014346
+    },
+    {
+      "name": "AVD - Shopping - US - vanity top make-up mirrors - HIGH",
+      "cost_micros": 614990000,
+      "conversions": 5.428572,
+      "all_conversions": 401.382301
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted double towel bar - HIGH",
+      "cost_micros": 315110000,
+      "conversions": 2.0,
+      "all_conversions": 151.991514
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted towel bars - HIGH",
+      "cost_micros": 3892380000,
+      "conversions": 54.043161,
+      "all_conversions": 3096.294732
+    },
+    {
+      "name": "AVD - Shopping - US - vanity towel stand - HIGH",
+      "cost_micros": 415370000,
+      "conversions": 7.167969,
+      "all_conversions": 345.804751
+    },
+    {
+      "name": "AVD - Shopping - US - vanity top make-up mirrors - MEDIUM",
+      "cost_micros": 51370000,
+      "conversions": 1.0,
+      "all_conversions": 25.993152
+    },
+    {
+      "name": "AVD - Shopping - US - upright tp holder - HIGH",
+      "cost_micros": 67690000,
+      "conversions": 1.307082,
+      "all_conversions": 120.232472
+    },
+    {
+      "name": "AVD - Shopping - US - freestanding towel stand - MEDIUM",
+      "cost_micros": 149980000,
+      "conversions": 0.514848,
+      "all_conversions": 77.294766
+    },
+    {
+      "name": "AVD - Shopping - US - door pull - MEDIUM",
+      "cost_micros": 120000,
+      "conversions": 0.0,
+      "all_conversions": 1.0
+    },
+    {
+      "name": "AVD - Shopping - US - freestanding tp holder - MEDIUM",
+      "cost_micros": 108560000,
+      "conversions": 0.0,
+      "all_conversions": 46.529455
+    },
+    {
+      "name": "AVD - Shopping - US - guest towel tray - MEDIUM",
+      "cost_micros": 7120000,
+      "conversions": 0.0,
+      "all_conversions": 7.297235
+    },
+    {
+      "name": "AVD - Shopping - US - free standing make-up mirrors - MEDIUM",
+      "cost_micros": 52570000,
+      "conversions": 0.5,
+      "all_conversions": 27.477504
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder with wood shelf - MEDIUM",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - recessed tp holder - MEDIUM",
+      "cost_micros": 289870000,
+      "conversions": 4.111717,
+      "all_conversions": 203.923378
+    },
+    {
+      "name": "AVD - Shopping - US - robe hook - MEDIUM",
+      "cost_micros": 55090000,
+      "conversions": 0.0,
+      "all_conversions": 33.719354
+    },
+    {
+      "name": "AVD - Shopping - US - grab bars - MEDIUM",
+      "cost_micros": 103320000,
+      "conversions": 0.0,
+      "all_conversions": 53.783525
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder - MEDIUM",
+      "cost_micros": 56750000,
+      "conversions": 0.0,
+      "all_conversions": 16.661519
+    },
+    {
+      "name": "AVD - Shopping - US - shower curtain brackets - MEDIUM",
+      "cost_micros": 174710000,
+      "conversions": 2.0,
+      "all_conversions": 131.849822
+    },
+    {
+      "name": "AVD - Shopping - US - shower door knobs and hooks - MEDIUM",
+      "cost_micros": 9240000,
+      "conversions": 0.0,
+      "all_conversions": 11.314814
+    },
+    {
+      "name": "AVD - Shopping - US - single glass shelf - MEDIUM",
+      "cost_micros": 230770000,
+      "conversions": 6.344018,
+      "all_conversions": 160.686392
+    },
+    {
+      "name": "AVD - Shopping - US - soap dispensers - MEDIUM",
+      "cost_micros": 135920000,
+      "conversions": 1.093324,
+      "all_conversions": 102.733169
+    },
+    {
+      "name": "AVD - Shopping - US - mug holders - MEDIUM",
+      "cost_micros": 1590000,
+      "conversions": 0.0,
+      "all_conversions": 4.0
+    },
+    {
+      "name": "AVD - Shopping - US - vanity towel rings - MEDIUM",
+      "cost_micros": 36470000,
+      "conversions": 0.014848,
+      "all_conversions": 28.88191
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted double towel bar - MEDIUM",
+      "cost_micros": 178520000,
+      "conversions": 1.0,
+      "all_conversions": 52.999339
+    },
+    {
+      "name": "AVD - Shopping - US - wood shelves - MEDIUM",
+      "cost_micros": 39730000,
+      "conversions": 0.0,
+      "all_conversions": 22.510242
+    },
+    {
+      "name": "AVD - Shopping - US - upright tp holder - MEDIUM",
+      "cost_micros": 11890000,
+      "conversions": 1.0,
+      "all_conversions": 14.527852
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted multi hooks - MEDIUM",
+      "cost_micros": 19460000,
+      "conversions": 0.0,
+      "all_conversions": 11.846202
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted towel bars - MEDIUM",
+      "cost_micros": 444680000,
+      "conversions": 1.002643,
+      "all_conversions": 335.254288
+    },
+    {
+      "name": "AVD - Shopping - US - grab bars - LOW",
+      "cost_micros": 78680000,
+      "conversions": 0.0,
+      "all_conversions": 22.007131
+    },
+    {
+      "name": "AVD - Shopping - US - shower door towel bars - LOW",
+      "cost_micros": 16810000,
+      "conversions": 0.0,
+      "all_conversions": 11.656004
+    },
+    {
+      "name": "AVD - Shopping - US - towel bar with hook - LOW",
+      "cost_micros": 23180000,
+      "conversions": 0.0,
+      "all_conversions": 14.995891
+    },
+    {
+      "name": "AVD - Shopping - US - wall mirrors - MEDIUM",
+      "cost_micros": 3230000,
+      "conversions": 0.0,
+      "all_conversions": 2.0
+    },
+    {
+      "name": "AVD - Shopping - US - candle holders - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - ladder towel bar - LOW",
+      "cost_micros": 18180000,
+      "conversions": 0.0,
+      "all_conversions": 17.99922
+    },
+    {
+      "name": "AVD - Shopping - US - 2 post tp holder - LOW",
+      "cost_micros": 10980000,
+      "conversions": 0.0,
+      "all_conversions": 3.639737
+    },
+    {
+      "name": "AVD - Shopping - US - assorted freestanding accessories - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - baskets - LOW",
+      "cost_micros": 7030000,
+      "conversions": 0.0,
+      "all_conversions": 2.5
+    },
+    {
+      "name": "AVD - Shopping - US - garment rods - LOW",
+      "cost_micros": 252940000,
+      "conversions": 6.0,
+      "all_conversions": 185.410275
+    },
+    {
+      "name": "AVD - Shopping - US - freestanding towel stand - LOW",
+      "cost_micros": 60910000,
+      "conversions": 1.0,
+      "all_conversions": 34.346028
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder with wood shelf - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - mug holders - LOW",
+      "cost_micros": 16110000,
+      "conversions": 0.0,
+      "all_conversions": 5.0
+    },
+    {
+      "name": "AVD - Shopping - US - paper towel holders - LOW",
+      "cost_micros": 420420000,
+      "conversions": 6.46639,
+      "all_conversions": 282.442546
+    },
+    {
+      "name": "AVD - Shopping - US - recessed tp holder - LOW",
+      "cost_micros": 106880000,
+      "conversions": 1.5,
+      "all_conversions": 105.265016
+    },
+    {
+      "name": "AVD - Shopping - US - robe hook - LOW",
+      "cost_micros": 11750000,
+      "conversions": 0.0,
+      "all_conversions": 6.0
+    },
+    {
+      "name": "AVD - Shopping - US - shower curtain brackets - LOW",
+      "cost_micros": 71880000,
+      "conversions": 1.0,
+      "all_conversions": 38.865525
+    },
+    {
+      "name": "AVD - Shopping - US - shower door knobs and hooks - LOW",
+      "cost_micros": 4840000,
+      "conversions": 0.0,
+      "all_conversions": 2.0
+    },
+    {
+      "name": "AVD - Shopping - US - tp holder with glass shelf - LOW",
+      "cost_micros": 77000000,
+      "conversions": 0.0,
+      "all_conversions": 31.471943
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted swing towel arms - LOW",
+      "cost_micros": 7720000,
+      "conversions": 0.0,
+      "all_conversions": 9.5
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted towel bars - LOW",
+      "cost_micros": 247570000,
+      "conversions": 4.040456,
+      "all_conversions": 299.874264
+    },
+    {
+      "name": "AVD - Shopping - US - toothbrush holders - LOW",
+      "cost_micros": 24470000,
+      "conversions": 1.0,
+      "all_conversions": 33.031034
+    },
+    {
+      "name": "AVD - Shopping - US - upright tp holder - LOW",
+      "cost_micros": 17110000,
+      "conversions": 0.0,
+      "all_conversions": 23.155969
+    },
+    {
+      "name": "AVD - Shopping - US - wall mirrors - LOW",
+      "cost_micros": 4760000,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted double towel bar - LOW",
+      "cost_micros": 96680000,
+      "conversions": 0.0,
+      "all_conversions": 34.815699
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted make-up mirrors - LOW",
+      "cost_micros": 120030000,
+      "conversions": 2.0,
+      "all_conversions": 89.82673
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted multi hooks - LOW",
+      "cost_micros": 80630000,
+      "conversions": 0.0,
+      "all_conversions": 33.166666
+    },
+    {
+      "name": "AVD - Shopping - US - wood shelves - LOW",
+      "cost_micros": 21080000,
+      "conversions": 0.0,
+      "all_conversions": 11.366029
+    },
+    {
+      "name": "AVD - Shopping - US - ceiling hung mirrors - HIGH",
+      "cost_micros": 123860000,
+      "conversions": 0.0,
+      "all_conversions": 104.109209
+    },
+    {
+      "name": "AVD - Shopping - US - double glass shelf - HIGH",
+      "cost_micros": 1191500000,
+      "conversions": 16.631736,
+      "all_conversions": 1203.121603
+    },
+    {
+      "name": "AVD - Shopping - US - paper towel holders - HIGH",
+      "cost_micros": 1716680000,
+      "conversions": 40.360949,
+      "all_conversions": 1503.39749
+    },
+    {
+      "name": "AVD - Shopping - US - robe hook - HIGH",
+      "cost_micros": 250670000,
+      "conversions": 7.43764,
+      "all_conversions": 326.325827
+    },
+    {
+      "name": "AVD - Shopping - US - tp holder with glass shelf - HIGH",
+      "cost_micros": 254550000,
+      "conversions": 9.056928,
+      "all_conversions": 208.53193
+    },
+    {
+      "name": "AVD - Shopping - US - free standing make-up mirrors - HIGH",
+      "cost_micros": 308630000,
+      "conversions": 5.928571,
+      "all_conversions": 346.741569
+    },
+    {
+      "name": "AVD - Shopping - US - catchall - HIGH",
+      "cost_micros": 527090000,
+      "conversions": 0.932003,
+      "all_conversions": 626.706046
+    },
+    {
+      "name": "AVD - Shopping - US - mug holders - HIGH",
+      "cost_micros": 102820000,
+      "conversions": 1.0,
+      "all_conversions": 123.104492
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder with glass shelf - HIGH",
+      "cost_micros": 24570000,
+      "conversions": 0.5,
+      "all_conversions": 18.02516
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder with wood shelf - HIGH",
+      "cost_micros": 11080000,
+      "conversions": 0.0,
+      "all_conversions": 11.496446
+    },
+    {
+      "name": "AVD - Shopping - US - shower curtain brackets - HIGH",
+      "cost_micros": 465330000,
+      "conversions": 3.0,
+      "all_conversions": 407.401644
+    },
+    {
+      "name": "AVD - Shopping - US - shower squeegee - HIGH",
+      "cost_micros": 459770000,
+      "conversions": 11.011483,
+      "all_conversions": 408.961701
+    },
+    {
+      "name": "AVD - Shopping - US - rollerless - HIGH",
+      "cost_micros": 95410000,
+      "conversions": 2.007557,
+      "all_conversions": 83.945287
+    },
+    {
+      "name": "AVD - Shopping - US - shower door pull - HIGH",
+      "cost_micros": 132790000,
+      "conversions": 0.0,
+      "all_conversions": 106.728034
+    },
+    {
+      "name": "AVD - Shopping - US - single glass shelf - HIGH",
+      "cost_micros": 1051980000,
+      "conversions": 12.982664,
+      "all_conversions": 939.843245
+    },
+    {
+      "name": "AVD - Shopping - US - single glass shelf with towel bar - HIGH",
+      "cost_micros": 1062060000,
+      "conversions": 12.908857,
+      "all_conversions": 1009.656117
+    },
+    {
+      "name": "AVD - Shopping - US - triple glass shelf - HIGH",
+      "cost_micros": 292310000,
+      "conversions": 4.203787,
+      "all_conversions": 352.287577
+    },
+    {
+      "name": "AVD - Shopping - US - triple glass shelf with towel bar - HIGH",
+      "cost_micros": 383050000,
+      "conversions": 5.988432,
+      "all_conversions": 396.359002
+    },
+    {
+      "name": "AVD - Shopping - US - vanity towel rings - HIGH",
+      "cost_micros": 165340000,
+      "conversions": 2.32981,
+      "all_conversions": 137.472309
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted swing towel arms - HIGH",
+      "cost_micros": 404760000,
+      "conversions": 4.666667,
+      "all_conversions": 544.342764
+    },
+    {
+      "name": "AVD - Shopping - US - toothbrush holders - HIGH",
+      "cost_micros": 214590000,
+      "conversions": 5.628146,
+      "all_conversions": 372.711182
+    },
+    {
+      "name": "AVD - Shopping - US - towel bar with hook - HIGH",
+      "cost_micros": 93710000,
+      "conversions": 2.0,
+      "all_conversions": 94.21426
+    },
+    {
+      "name": "AVD - Shopping - US - towel shelves - HIGH",
+      "cost_micros": 692760000,
+      "conversions": 3.0,
+      "all_conversions": 523.029788
+    },
+    {
+      "name": "AVD - Shopping - US - tp holder with wood shelf - HIGH",
+      "cost_micros": 3310000,
+      "conversions": 0.0,
+      "all_conversions": 2.0
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted towel rings - HIGH",
+      "cost_micros": 416740000,
+      "conversions": 10.074423,
+      "all_conversions": 561.03357
+    },
+    {
+      "name": "AVD - Shopping - US - 2 post tp holder - MEDIUM",
+      "cost_micros": 147360000,
+      "conversions": 2.0,
+      "all_conversions": 84.346056
+    },
+    {
+      "name": "AVD - Shopping - US - cabinet hardware - MEDIUM",
+      "cost_micros": 63930000,
+      "conversions": 1.666667,
+      "all_conversions": 102.06743
+    },
+    {
+      "name": "AVD - Shopping - US - corner glass shelves - MEDIUM",
+      "cost_micros": 23220000,
+      "conversions": 0.0,
+      "all_conversions": 15.0
+    },
+    {
+      "name": "AVD - Shopping - US - double glass shelf - MEDIUM",
+      "cost_micros": 75750000,
+      "conversions": 5.0,
+      "all_conversions": 95.613755
+    },
+    {
+      "name": "AVD - Shopping - US - 4 tier glass wall shelf - MEDIUM",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - assorted freestanding accessories - MEDIUM",
+      "cost_micros": 8040000,
+      "conversions": 0.0,
+      "all_conversions": 1.51277
+    },
+    {
+      "name": "AVD - Shopping - US - baskets - MEDIUM",
+      "cost_micros": 104700000,
+      "conversions": 0.666667,
+      "all_conversions": 47.296312
+    },
+    {
+      "name": "AVD - Shopping - US - assorted wall mounted accessories - MEDIUM",
+      "cost_micros": 21280000,
+      "conversions": 0.0,
+      "all_conversions": 15.011657
+    },
+    {
+      "name": "AVD - Shopping - US - european style tp holder - MEDIUM",
+      "cost_micros": 234870000,
+      "conversions": 8.935372,
+      "all_conversions": 248.660104
+    },
+    {
+      "name": "AVD - Shopping - US - paper towel holders - MEDIUM",
+      "cost_micros": 789280000,
+      "conversions": 20.617044,
+      "all_conversions": 558.441759
+    },
+    {
+      "name": "AVD - Shopping - US - rollerless - MEDIUM",
+      "cost_micros": 30730000,
+      "conversions": 0.0,
+      "all_conversions": 19.761021
+    },
+    {
+      "name": "AVD - Shopping - US - shower door pull - MEDIUM",
+      "cost_micros": 17290000,
+      "conversions": 0.0,
+      "all_conversions": 5.0
+    },
+    {
+      "name": "AVD - Shopping - US - shower door towel bars - MEDIUM",
+      "cost_micros": 63950000,
+      "conversions": 1.334731,
+      "all_conversions": 90.337359
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder with glass shelf - MEDIUM",
+      "cost_micros": 3060000,
+      "conversions": 0.0,
+      "all_conversions": 1.0
+    },
+    {
+      "name": "AVD - Shopping - US - refrigerator pull - MEDIUM",
+      "cost_micros": 6050000,
+      "conversions": 0.0,
+      "all_conversions": 3.0
+    },
+    {
+      "name": "AVD - Shopping - US - single glass shelf with towel bar - MEDIUM",
+      "cost_micros": 293270000,
+      "conversions": 4.124593,
+      "all_conversions": 269.810869
+    },
+    {
+      "name": "AVD - Shopping - US - soap dishes & holders - MEDIUM",
+      "cost_micros": 38570000,
+      "conversions": 0.0,
+      "all_conversions": 60.312023
+    },
+    {
+      "name": "AVD - Shopping - US - retractable hooks - MEDIUM",
+      "cost_micros": 89000000,
+      "conversions": 2.0,
+      "all_conversions": 106.628316
+    },
+    {
+      "name": "AVD - Shopping - US - toothbrush holders - MEDIUM",
+      "cost_micros": 28620000,
+      "conversions": 1.0,
+      "all_conversions": 51.0
+    },
+    {
+      "name": "AVD - Shopping - US - towel bar with hook - MEDIUM",
+      "cost_micros": 35570000,
+      "conversions": 0.0,
+      "all_conversions": 4.837443
+    },
+    {
+      "name": "AVD - Shopping - US - 4 tier glass wall shelf - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - tp holder with wood shelf - MEDIUM",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - cabinet hardware - LOW",
+      "cost_micros": 5890000,
+      "conversions": 0.0,
+      "all_conversions": 7.0
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted guest towel holder - MEDIUM",
+      "cost_micros": 48290000,
+      "conversions": 2.259094,
+      "all_conversions": 59.554553
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted make-up mirrors - MEDIUM",
+      "cost_micros": 150440000,
+      "conversions": 0.0,
+      "all_conversions": 63.983151
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted swing towel arms - MEDIUM",
+      "cost_micros": 28450000,
+      "conversions": 0.0,
+      "all_conversions": 30.773015
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted towel rings - MEDIUM",
+      "cost_micros": 93700000,
+      "conversions": 6.184853,
+      "all_conversions": 81.876939
+    },
+    {
+      "name": "AVD - Shopping - US - european style tp holder - LOW",
+      "cost_micros": 170120000,
+      "conversions": 6.968757,
+      "all_conversions": 162.490599
+    },
+    {
+      "name": "AVD - Shopping - US - double glass shelf with towel bar - LOW",
+      "cost_micros": 37700000,
+      "conversions": 0.0,
+      "all_conversions": 22.450847
+    },
+    {
+      "name": "AVD - Shopping - US - door pull - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - assorted wall mounted accessories - LOW",
+      "cost_micros": 5740000,
+      "conversions": 0.0,
+      "all_conversions": 7.0
+    },
+    {
+      "name": "AVD - Shopping - US - corner glass shelves - LOW",
+      "cost_micros": 3010000,
+      "conversions": 0.0,
+      "all_conversions": 3.0
+    },
+    {
+      "name": "AVD - Shopping - US - ceiling hung mirrors - LOW",
+      "cost_micros": 40440000,
+      "conversions": 0.0,
+      "all_conversions": 18.986604
+    },
+    {
+      "name": "AVD - Shopping - US - double glass shelf - LOW",
+      "cost_micros": 16720000,
+      "conversions": 0.0,
+      "all_conversions": 12.846103
+    },
+    {
+      "name": "AVD - Shopping - US - guest towel tray - LOW",
+      "cost_micros": 19370000,
+      "conversions": 0.0,
+      "all_conversions": 8.989739
+    },
+    {
+      "name": "AVD - Shopping - US - free standing make-up mirrors - LOW",
+      "cost_micros": 7450000,
+      "conversions": 0.0,
+      "all_conversions": 6.0
+    },
+    {
+      "name": "AVD - Shopping - US - freestanding tp holder - LOW",
+      "cost_micros": 59420000,
+      "conversions": 1.0,
+      "all_conversions": 31.88604
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - multi roll tp holder with glass shelf - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - vanity towel stand - LOW",
+      "cost_micros": 71420000,
+      "conversions": 0.142857,
+      "all_conversions": 61.731775
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted guest towel holder - LOW",
+      "cost_micros": 39750000,
+      "conversions": 0.666666,
+      "all_conversions": 38.936476
+    },
+    {
+      "name": "AVD - Shopping - US - 2 post tp holder - HIGH",
+      "cost_micros": 149030000,
+      "conversions": 6.077923,
+      "all_conversions": 273.184684
+    },
+    {
+      "name": "AVD - Shopping - US - corner glass shelves - HIGH",
+      "cost_micros": 187960000,
+      "conversions": 1.0,
+      "all_conversions": 238.107151
+    },
+    {
+      "name": "AVD - Shopping - US - freestanding tp holder - HIGH",
+      "cost_micros": 290530000,
+      "conversions": 4.0,
+      "all_conversions": 162.252645
+    },
+    {
+      "name": "AVD - Shopping - US - 4 tier glass wall shelf - HIGH",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - assorted freestanding accessories - HIGH",
+      "cost_micros": 96050000,
+      "conversions": 1.0,
+      "all_conversions": 51.283333
+    },
+    {
+      "name": "AVD - Shopping - US - cabinet hardware - HIGH",
+      "cost_micros": 356820000,
+      "conversions": 8.038748,
+      "all_conversions": 595.419896
+    },
+    {
+      "name": "AVD - Shopping - US - candle holders - HIGH",
+      "cost_micros": 9820000,
+      "conversions": 0.0,
+      "all_conversions": 15.49227
+    },
+    {
+      "name": "AVD - Shopping - US - freestanding towel stand - HIGH",
+      "cost_micros": 1021100000,
+      "conversions": 15.336211,
+      "all_conversions": 769.107555
+    },
+    {
+      "name": "AVD - Shopping - US - guest towel tray - HIGH",
+      "cost_micros": 128970000,
+      "conversions": 3.0,
+      "all_conversions": 179.452147
+    },
+    {
+      "name": "AVD - Shopping - US - european style tp holder - HIGH",
+      "cost_micros": 786780000,
+      "conversions": 12.509612,
+      "all_conversions": 899.042885
+    },
+    {
+      "name": "AVD - Shopping - US - garment rods - HIGH",
+      "cost_micros": 2433350000,
+      "conversions": 31.273687,
+      "all_conversions": 2192.798476
+    },
+    {
+      "name": "AVD - Shopping - US - ladder towel bar - HIGH",
+      "cost_micros": 556490000,
+      "conversions": 2.25,
+      "all_conversions": 504.753501
+    },
+    {
+      "name": "AVD - Shopping - US - ceiling hung mirrors - MEDIUM",
+      "cost_micros": 22980000,
+      "conversions": 0.0,
+      "all_conversions": 25.021986
+    },
+    {
+      "name": "AVD - Shopping - US - double glass shelf with towel bar - MEDIUM",
+      "cost_micros": 132890000,
+      "conversions": 6.5,
+      "all_conversions": 142.161816
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted guest towel holder - HIGH",
+      "cost_micros": 262590000,
+      "conversions": 7.253041,
+      "all_conversions": 463.573728
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted make-up mirrors - HIGH",
+      "cost_micros": 500430000,
+      "conversions": 6.142857,
+      "all_conversions": 465.721599
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted multi hooks - HIGH",
+      "cost_micros": 301730000,
+      "conversions": 3.791043,
+      "all_conversions": 220.758881
+    },
+    {
+      "name": "AVD - Shopping - US - wood shelves - HIGH",
+      "cost_micros": 128900000,
+      "conversions": 0.0,
+      "all_conversions": 127.209411
+    },
+    {
+      "name": "AVD - Shopping - US - candle holders - MEDIUM",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - garment rods - MEDIUM",
+      "cost_micros": 450100000,
+      "conversions": 4.03712,
+      "all_conversions": 226.654896
+    },
+    {
+      "name": "AVD - Shopping - US - ladder towel bar - MEDIUM",
+      "cost_micros": 30470000,
+      "conversions": 0.0,
+      "all_conversions": 43.725434
+    },
+    {
+      "name": "AVD - Shopping - US - towel shelves - MEDIUM",
+      "cost_micros": 117840000,
+      "conversions": 0.0,
+      "all_conversions": 80.456488
+    },
+    {
+      "name": "AVD - Shopping - US - tp holder with glass shelf - MEDIUM",
+      "cost_micros": 69800000,
+      "conversions": 0.512373,
+      "all_conversions": 61.962533
+    },
+    {
+      "name": "AVD - Shopping - US - triple glass shelf - MEDIUM",
+      "cost_micros": 32380000,
+      "conversions": 0.0,
+      "all_conversions": 22.678817
+    },
+    {
+      "name": "AVD - Shopping - US - triple glass shelf with towel bar - MEDIUM",
+      "cost_micros": 52200000,
+      "conversions": 0.03712,
+      "all_conversions": 43.740305
+    },
+    {
+      "name": "AVD - Shopping - US - vanity towel stand - MEDIUM",
+      "cost_micros": 192650000,
+      "conversions": 0.014848,
+      "all_conversions": 110.403158
+    },
+    {
+      "name": "AVD - Shopping - US - shower squeegee - MEDIUM",
+      "cost_micros": 80810000,
+      "conversions": 5.0,
+      "all_conversions": 82.923521
+    },
+    {
+      "name": "AVD - Shopping - US - shower door pull - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - soap dispensers - LOW",
+      "cost_micros": 113580000,
+      "conversions": 3.963977,
+      "all_conversions": 101.486555
+    },
+    {
+      "name": "AVD - Shopping - US - single glass shelf - LOW",
+      "cost_micros": 36100000,
+      "conversions": 0.0,
+      "all_conversions": 28.5
+    },
+    {
+      "name": "AVD - Shopping - US - vanity top make-up mirrors - LOW",
+      "cost_micros": 34220000,
+      "conversions": 0.0,
+      "all_conversions": 12.793491
+    },
+    {
+      "name": "AVD - Shopping - US - retractable hooks - LOW",
+      "cost_micros": 55820000,
+      "conversions": 0.0,
+      "all_conversions": 59.285703
+    },
+    {
+      "name": "AVD - Shopping - US - rollerless - LOW",
+      "cost_micros": 14100000,
+      "conversions": 0.0,
+      "all_conversions": 2.5
+    },
+    {
+      "name": "AVD - Shopping - US - refrigerator pull - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - soap dishes & holders - LOW",
+      "cost_micros": 22720000,
+      "conversions": 0.0,
+      "all_conversions": 39.266922
+    },
+    {
+      "name": "AVD - Shopping - US - towel shelves - LOW",
+      "cost_micros": 142990000,
+      "conversions": 0.0,
+      "all_conversions": 53.783139
+    },
+    {
+      "name": "AVD - Shopping - US - triple glass shelf - LOW",
+      "cost_micros": 36080000,
+      "conversions": 0.984056,
+      "all_conversions": 28.499414
+    },
+    {
+      "name": "AVD - Shopping - US - shower squeegee - LOW",
+      "cost_micros": 34370000,
+      "conversions": 1.0,
+      "all_conversions": 30.173412
+    },
+    {
+      "name": "AVD - Shopping - US - single glass shelf with towel bar - LOW",
+      "cost_micros": 135120000,
+      "conversions": 3.06189,
+      "all_conversions": 100.913602
+    },
+    {
+      "name": "AVD - Shopping - US - tp holder with wood shelf - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - triple glass shelf with towel bar - LOW",
+      "cost_micros": 20630000,
+      "conversions": 0.0,
+      "all_conversions": 16.683332
+    },
+    {
+      "name": "AVD - Shopping - US - wall mounted towel rings - LOW",
+      "cost_micros": 165320000,
+      "conversions": 1.25,
+      "all_conversions": 104.372339
+    },
+    {
+      "name": "AVD - Shopping - US - vanity towel rings - LOW",
+      "cost_micros": 17310000,
+      "conversions": 0.0,
+      "all_conversions": 9.421665
+    },
+    {
+      "name": "AVD - Shopping - BRANDED - US",
+      "cost_micros": 921100000,
+      "conversions": 29.832026,
+      "all_conversions": 1004.165107
+    },
+    {
+      "name": "AVD - Shopping - US - Reserve Roll TP Holder - HIGH",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - Reserve Roll TP Holder - LOW",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    },
+    {
+      "name": "AVD - Shopping - US - Reserve Roll TP Holder - MEDIUM",
+      "cost_micros": 0,
+      "conversions": 0.0,
+      "all_conversions": 0.0
+    }
+  ],
+  "totals": {
+    "total_cost_micros": 38373350000,
+    "total_cost_dollars": 38373.35,
+    "total_conversions": 597.5049120000001,
+    "total_all_conversions": 35035.42780599999,
+    "avg_cpa": 64.22265194700189,
+    "avg_micro_cpa": 1.095272768252836
+  },
+  "ad_group_cpc_caps": [
+    {
+      "campaign_name": "AVD - Shopping - US - candle holders - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - candle holders - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ceiling hung mirrors - LOW",
+      "ad_group_name": "AVD - Shopping - US - ceiling hung mirrors - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - free standing make-up mirrors - HIGH",
+      "ad_group_name": "AVD - Shopping - US - free standing make-up mirrors - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - robe hook - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - robe hook - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - robe hook - LOW",
+      "ad_group_name": "AVD - Shopping - US - robe hook - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - toothbrush holders - HIGH",
+      "ad_group_name": "AVD - Shopping - US - toothbrush holders - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel shelves - HIGH",
+      "ad_group_name": "AVD - Shopping - US - towel shelves - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted swing towel arms - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted swing towel arms - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - refrigerator pull - LOW",
+      "ad_group_name": "AVD - Shopping - US - refrigerator pull - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower curtain brackets - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - shower curtain brackets - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel rings - HIGH",
+      "ad_group_name": "AVD - Shopping - US - vanity towel rings - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - european style tp holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - european style tp holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf with towel bar - HIGH",
+      "ad_group_name": "AVD - Shopping - US - triple glass shelf with towel bar - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf with towel bar - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - triple glass shelf with towel bar - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity top make-up mirrors - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - vanity top make-up mirrors - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wood shelves - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wood shelves - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wood shelves - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wood shelves - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ceiling hung mirrors - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - ceiling hung mirrors - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower curtain brackets - HIGH",
+      "ad_group_name": "AVD - Shopping - US - shower curtain brackets - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door knobs and hooks - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - shower door knobs and hooks - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted freestanding accessories - HIGH",
+      "ad_group_name": "AVD - Shopping - US - assorted freestanding accessories - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - grab bars - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - grab bars - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dishes & holders - LOW",
+      "ad_group_name": "AVD - Shopping - US - soap dishes & holders - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel rings - LOW",
+      "ad_group_name": "AVD - Shopping - US - vanity towel rings - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 2 post tp holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - 2 post tp holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted freestanding accessories - LOW",
+      "ad_group_name": "AVD - Shopping - US - assorted freestanding accessories - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - european style tp holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - european style tp holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 4 tier glass wall shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - 4 tier glass wall shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - mug holders - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - mug holders - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door knobs and hooks - LOW",
+      "ad_group_name": "AVD - Shopping - US - shower door knobs and hooks - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door pull - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - shower door pull - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door pull - LOW",
+      "ad_group_name": "AVD - Shopping - US - shower door pull - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door towel bars - HIGH",
+      "ad_group_name": "AVD - Shopping - US - shower door towel bars - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door towel bars - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - shower door towel bars - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding tp holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - freestanding tp holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - toothbrush holders - LOW",
+      "ad_group_name": "AVD - Shopping - US - toothbrush holders - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - cabinet hardware - HIGH",
+      "ad_group_name": "AVD - Shopping - US - cabinet hardware - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding towel stand - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - freestanding towel stand - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - toothbrush holders - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - toothbrush holders - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel bar with hook - LOW",
+      "ad_group_name": "AVD - Shopping - US - towel bar with hook - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - upright tp holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - upright tp holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel stand - HIGH",
+      "ad_group_name": "AVD - Shopping - US - vanity towel stand - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted guest towel holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted guest towel holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted guest towel holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted guest towel holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - catchall - HIGH",
+      "ad_group_name": "AVD - Shopping - US - catchall - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - candle holders - LOW",
+      "ad_group_name": "AVD - Shopping - US - candle holders - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - candle holders - HIGH",
+      "ad_group_name": "AVD - Shopping - US - candle holders - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - garment rods - HIGH",
+      "ad_group_name": "AVD - Shopping - US - garment rods - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - guest towel tray - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - guest towel tray - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door knobs and hooks - HIGH",
+      "ad_group_name": "AVD - Shopping - US - shower door knobs and hooks - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel shelves - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - towel shelves - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel bars - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted towel bars - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted wall mounted accessories - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - assorted wall mounted accessories - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf with towel bar - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - double glass shelf with towel bar - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower squeegee - HIGH",
+      "ad_group_name": "AVD - Shopping - US - shower squeegee - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted wall mounted accessories - LOW",
+      "ad_group_name": "AVD - Shopping - US - assorted wall mounted accessories - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - corner glass shelves - HIGH",
+      "ad_group_name": "AVD - Shopping - US - corner glass shelves - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - grab bars - LOW",
+      "ad_group_name": "AVD - Shopping - US - grab bars - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - rollerless - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - rollerless - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf with towel bar - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - single glass shelf with towel bar - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity top make-up mirrors - HIGH",
+      "ad_group_name": "AVD - Shopping - US - vanity top make-up mirrors - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mirrors - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mirrors - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - BRANDED - US",
+      "ad_group_name": "AVD - Shopping - BRANDED - US",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ladder towel bar - LOW",
+      "ad_group_name": "AVD - Shopping - US - ladder towel bar - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ladder towel bar - HIGH",
+      "ad_group_name": "AVD - Shopping - US - ladder towel bar - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with wood shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - tp holder with wood shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel rings - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - vanity towel rings - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted guest towel holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted guest towel holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted swing towel arms - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted swing towel arms - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel rings - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted towel rings - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - door pull - LOW",
+      "ad_group_name": "AVD - Shopping - US - door pull - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - european style tp holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - european style tp holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel stand - LOW",
+      "ad_group_name": "AVD - Shopping - US - vanity towel stand - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted multi hooks - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted multi hooks - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wood shelves - LOW",
+      "ad_group_name": "AVD - Shopping - US - wood shelves - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - double glass shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding towel stand - HIGH",
+      "ad_group_name": "AVD - Shopping - US - freestanding towel stand - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - guest towel tray - HIGH",
+      "ad_group_name": "AVD - Shopping - US - guest towel tray - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower squeegee - LOW",
+      "ad_group_name": "AVD - Shopping - US - shower squeegee - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - free standing make-up mirrors - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - free standing make-up mirrors - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - upright tp holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - upright tp holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted swing towel arms - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted swing towel arms - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel rings - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted towel rings - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - cabinet hardware - LOW",
+      "ad_group_name": "AVD - Shopping - US - cabinet hardware - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - refrigerator pull - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - refrigerator pull - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - retractable hooks - HIGH",
+      "ad_group_name": "AVD - Shopping - US - retractable hooks - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf with towel bar - LOW",
+      "ad_group_name": "AVD - Shopping - US - triple glass shelf with towel bar - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - upright tp holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - upright tp holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - rollerless - HIGH",
+      "ad_group_name": "AVD - Shopping - US - rollerless - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel bar with hook - HIGH",
+      "ad_group_name": "AVD - Shopping - US - towel bar with hook - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - triple glass shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - triple glass shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mirrors - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mirrors - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted make-up mirrors - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted make-up mirrors - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - baskets - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - baskets - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - paper towel holders - HIGH",
+      "ad_group_name": "AVD - Shopping - US - paper towel holders - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dispensers - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - soap dispensers - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with glass shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - tp holder with glass shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted double towel bar - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted double towel bar - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted double towel bar - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted double towel bar - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - garment rods - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - garment rods - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel stand - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - vanity towel stand - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - corner glass shelves - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - corner glass shelves - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - free standing make-up mirrors - LOW",
+      "ad_group_name": "AVD - Shopping - US - free standing make-up mirrors - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - refrigerator pull - HIGH",
+      "ad_group_name": "AVD - Shopping - US - refrigerator pull - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - guest towel tray - LOW",
+      "ad_group_name": "AVD - Shopping - US - guest towel tray - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door towel bars - LOW",
+      "ad_group_name": "AVD - Shopping - US - shower door towel bars - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dispensers - HIGH",
+      "ad_group_name": "AVD - Shopping - US - soap dispensers - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding towel stand - LOW",
+      "ad_group_name": "AVD - Shopping - US - freestanding towel stand - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower squeegee - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - shower squeegee - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf with towel bar - HIGH",
+      "ad_group_name": "AVD - Shopping - US - single glass shelf with towel bar - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf with towel bar - LOW",
+      "ad_group_name": "AVD - Shopping - US - single glass shelf with towel bar - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with wood shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - tp holder with wood shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - door pull - HIGH",
+      "ad_group_name": "AVD - Shopping - US - door pull - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - retractable hooks - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - retractable hooks - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - retractable hooks - LOW",
+      "ad_group_name": "AVD - Shopping - US - retractable hooks - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dishes & holders - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - soap dishes & holders - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 4 tier glass wall shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - 4 tier glass wall shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - double glass shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity top make-up mirrors - LOW",
+      "ad_group_name": "AVD - Shopping - US - vanity top make-up mirrors - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - baskets - HIGH",
+      "ad_group_name": "AVD - Shopping - US - baskets - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ceiling hung mirrors - HIGH",
+      "ad_group_name": "AVD - Shopping - US - ceiling hung mirrors - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - mug holders - HIGH",
+      "ad_group_name": "AVD - Shopping - US - mug holders - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - paper towel holders - LOW",
+      "ad_group_name": "AVD - Shopping - US - paper towel holders - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with glass shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - tp holder with glass shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with glass shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - tp holder with glass shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mirrors - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mirrors - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - door pull - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - door pull - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - grab bars - HIGH",
+      "ad_group_name": "AVD - Shopping - US - grab bars - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel bar with hook - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - towel bar with hook - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted wall mounted accessories - HIGH",
+      "ad_group_name": "AVD - Shopping - US - assorted wall mounted accessories - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - mug holders - LOW",
+      "ad_group_name": "AVD - Shopping - US - mug holders - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted make-up mirrors - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted make-up mirrors - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel rings - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted towel rings - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dispensers - LOW",
+      "ad_group_name": "AVD - Shopping - US - soap dispensers - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 2 post tp holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - 2 post tp holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted freestanding accessories - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - assorted freestanding accessories - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding tp holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - freestanding tp holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dishes & holders - HIGH",
+      "ad_group_name": "AVD - Shopping - US - soap dishes & holders - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel shelves - LOW",
+      "ad_group_name": "AVD - Shopping - US - towel shelves - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 4 tier glass wall shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - 4 tier glass wall shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower curtain brackets - LOW",
+      "ad_group_name": "AVD - Shopping - US - shower curtain brackets - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - triple glass shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - cabinet hardware - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - cabinet hardware - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - corner glass shelves - LOW",
+      "ad_group_name": "AVD - Shopping - US - corner glass shelves - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - double glass shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf with towel bar - LOW",
+      "ad_group_name": "AVD - Shopping - US - double glass shelf with towel bar - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - garment rods - LOW",
+      "ad_group_name": "AVD - Shopping - US - garment rods - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - recessed tp holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - recessed tp holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - recessed tp holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - recessed tp holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - Reserve Roll TP Holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - Reserve Roll TP Holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 2 post tp holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - 2 post tp holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf with towel bar - HIGH",
+      "ad_group_name": "AVD - Shopping - US - double glass shelf with towel bar - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - robe hook - HIGH",
+      "ad_group_name": "AVD - Shopping - US - robe hook - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf - LOW",
+      "ad_group_name": "AVD - Shopping - US - single glass shelf - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with wood shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - tp holder with wood shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding tp holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - freestanding tp holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder - HIGH",
+      "ad_group_name": "AVD - Shopping - US - multi roll tp holder - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - paper towel holders - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - paper towel holders - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - recessed tp holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - recessed tp holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted double towel bar - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted double towel bar - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted make-up mirrors - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted make-up mirrors - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted multi hooks - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - wall mounted multi hooks - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted multi hooks - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted multi hooks - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ladder towel bar - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - ladder towel bar - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door pull - HIGH",
+      "ad_group_name": "AVD - Shopping - US - shower door pull - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - baskets - LOW",
+      "ad_group_name": "AVD - Shopping - US - baskets - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - Reserve Roll TP Holder - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - Reserve Roll TP Holder - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - rollerless - LOW",
+      "ad_group_name": "AVD - Shopping - US - rollerless - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf - MEDIUM",
+      "ad_group_name": "AVD - Shopping - US - single glass shelf - MEDIUM",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf - HIGH",
+      "ad_group_name": "AVD - Shopping - US - single glass shelf - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel bars - HIGH",
+      "ad_group_name": "AVD - Shopping - US - wall mounted towel bars - HIGH",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel bars - LOW",
+      "ad_group_name": "AVD - Shopping - US - wall mounted towel bars - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - Reserve Roll TP Holder - LOW",
+      "ad_group_name": "AVD - Shopping - US - Reserve Roll TP Holder - LOW",
+      "cpc_bid_micros": 10000,
+      "cpc_bid_dollars": 0.01
+    }
+  ],
+  "behavioral_signal_sample": [
+    {
+      "search_term": "recessed toilet paper holder",
+      "impressions": 6658,
+      "clicks": 43,
+      "average_cpc": 1158372.0930232557,
+      "all_conversions": 57.716837,
+      "conversions": 0.994714,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "polished nickel paper towel holder",
+      "impressions": 2003,
+      "clicks": 41,
+      "average_cpc": 3146097.56097561,
+      "all_conversions": 71.54761,
+      "conversions": 5.74074,
+      "cross_device_conversions": 0.333333
+    },
+    {
+      "search_term": "brass paper towel holder",
+      "impressions": 2753,
+      "clicks": 34,
+      "average_cpc": 2211176.470588235,
+      "all_conversions": 55.942756,
+      "conversions": 1.5,
+      "cross_device_conversions": 1.897277
+    },
+    {
+      "search_term": "unlacquered brass paper towel holder",
+      "impressions": 804,
+      "clicks": 22,
+      "average_cpc": 3470909.090909091,
+      "all_conversions": 43.471831,
+      "conversions": 2.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "valet rod",
+      "impressions": 4523,
+      "clicks": 21,
+      "average_cpc": 1872857.142857143,
+      "all_conversions": 45.481705,
+      "conversions": 1.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "shower squeegee",
+      "impressions": 3733,
+      "clicks": 20,
+      "average_cpc": 2678000.0,
+      "all_conversions": 23.0,
+      "conversions": 1.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "polished nickel toilet paper holder",
+      "impressions": 562,
+      "clicks": 17,
+      "average_cpc": 920000.0,
+      "all_conversions": 27.862682,
+      "conversions": 1.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "polished brass toilet paper holder",
+      "impressions": 449,
+      "clicks": 15,
+      "average_cpc": 1147333.3333333333,
+      "all_conversions": 22.989117,
+      "conversions": 1.92576,
+      "cross_device_conversions": 0.333333
+    },
+    {
+      "search_term": "antique brass paper towel holder",
+      "impressions": 938,
+      "clicks": 15,
+      "average_cpc": 3332666.6666666665,
+      "all_conversions": 17.0,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "unlacquered brass toilet paper holder",
+      "impressions": 1411,
+      "clicks": 15,
+      "average_cpc": 2326000.0,
+      "all_conversions": 28.058411,
+      "conversions": 1.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "bathroom shelves",
+      "impressions": 872,
+      "clicks": 14,
+      "average_cpc": 2570714.285714286,
+      "all_conversions": 13.010265,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "valet rods",
+      "impressions": 1341,
+      "clicks": 14,
+      "average_cpc": 2421428.5714285714,
+      "all_conversions": 28.990442,
+      "conversions": 1.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "bathroom shelf with towel bar",
+      "impressions": 845,
+      "clicks": 13,
+      "average_cpc": 1435384.6153846155,
+      "all_conversions": 21.985405,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "unlacquered brass towel bar",
+      "impressions": 1316,
+      "clicks": 12,
+      "average_cpc": 3294166.6666666665,
+      "all_conversions": 24.319724,
+      "conversions": 0.055006,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "polished brass towel bar",
+      "impressions": 488,
+      "clicks": 11,
+      "average_cpc": 2608181.8181818184,
+      "all_conversions": 11.435535,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "polished nickel shower curtain rod",
+      "impressions": 813,
+      "clicks": 11,
+      "average_cpc": 1970000.0,
+      "all_conversions": 20.812249,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "wall mounted toothbrush holder",
+      "impressions": 568,
+      "clicks": 11,
+      "average_cpc": 272727.2727272727,
+      "all_conversions": 15.010529,
+      "conversions": 0.0,
+      "cross_device_conversions": 1.0
+    },
+    {
+      "search_term": "unlacquered brass valet rod",
+      "impressions": 323,
+      "clicks": 11,
+      "average_cpc": 4240000.0,
+      "all_conversions": 16.471345,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    },
+    {
+      "search_term": "unlacquered brass shower curtain rod",
+      "impressions": 368,
+      "clicks": 10,
+      "average_cpc": 3679000.0,
+      "all_conversions": 19.0,
+      "conversions": 1.0,
+      "cross_device_conversions": 1.0
+    },
+    {
+      "search_term": "brass recessed toilet paper holder",
+      "impressions": 485,
+      "clicks": 9,
+      "average_cpc": 2252222.222222222,
+      "all_conversions": 11.510946,
+      "conversions": 0.0,
+      "cross_device_conversions": 0.0
+    }
+  ],
+  "signal_availability": {
+    "impressions": true,
+    "clicks": true,
+    "average_cpc": true,
+    "all_conversions": true,
+    "conversions": true,
+    "cross_device_conversions": true
+  },
+  "impression_shares": [
+    {
+      "campaign_name": "AVD - Shopping - US - baskets - HIGH",
+      "search_impression_share": 0.6134885977680737
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted wall mounted accessories - HIGH",
+      "search_impression_share": 0.4990266060999351
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - door pull - HIGH",
+      "search_impression_share": 0.6194756554307116
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf with towel bar - HIGH",
+      "search_impression_share": 0.7642050106435239
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - grab bars - HIGH",
+      "search_impression_share": 0.6715476190476191
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - refrigerator pull - HIGH",
+      "search_impression_share": 0.41265822784810124
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder - HIGH",
+      "search_impression_share": 0.6642156862745098
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door towel bars - HIGH",
+      "search_impression_share": 0.7220956719817767
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dishes & holders - HIGH",
+      "search_impression_share": 0.6431543491182881
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dispensers - HIGH",
+      "search_impression_share": 0.6225793160280181
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door knobs and hooks - HIGH",
+      "search_impression_share": 0.5754350397026525
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - recessed tp holder - HIGH",
+      "search_impression_share": 0.7213403880070547
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - retractable hooks - HIGH",
+      "search_impression_share": 0.42798796216680995
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mirrors - HIGH",
+      "search_impression_share": 0.5023201856148491
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity top make-up mirrors - HIGH",
+      "search_impression_share": 0.6353463245224773
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted double towel bar - HIGH",
+      "search_impression_share": 0.7617021276595745
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel bars - HIGH",
+      "search_impression_share": 0.6828147438966012
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel stand - HIGH",
+      "search_impression_share": 0.7378277153558053
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity top make-up mirrors - MEDIUM",
+      "search_impression_share": 0.7636363636363637
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - upright tp holder - HIGH",
+      "search_impression_share": 0.5343511450381679
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding towel stand - MEDIUM",
+      "search_impression_share": 0.8995633187772926
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - door pull - MEDIUM",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding tp holder - MEDIUM",
+      "search_impression_share": 0.8755020080321285
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - guest towel tray - MEDIUM",
+      "search_impression_share": 0.8529411764705882
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - free standing make-up mirrors - MEDIUM",
+      "search_impression_share": 0.9152542372881356
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - MEDIUM",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - recessed tp holder - MEDIUM",
+      "search_impression_share": 0.9009174311926605
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - robe hook - MEDIUM",
+      "search_impression_share": 0.7859531772575251
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - grab bars - MEDIUM",
+      "search_impression_share": 0.8542713567839196
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder - MEDIUM",
+      "search_impression_share": 0.8125
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower curtain brackets - MEDIUM",
+      "search_impression_share": 0.8552631578947368
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door knobs and hooks - MEDIUM",
+      "search_impression_share": 0.9101123595505618
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf - MEDIUM",
+      "search_impression_share": 0.9102564102564102
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dispensers - MEDIUM",
+      "search_impression_share": 0.8360189573459715
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - mug holders - MEDIUM",
+      "search_impression_share": 0.8478260869565217
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel rings - MEDIUM",
+      "search_impression_share": 0.75
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted double towel bar - MEDIUM",
+      "search_impression_share": 0.8634538152610441
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wood shelves - MEDIUM",
+      "search_impression_share": 0.7134831460674157
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - upright tp holder - MEDIUM",
+      "search_impression_share": 0.7586206896551724
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted multi hooks - MEDIUM",
+      "search_impression_share": 0.7545454545454545
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel bars - MEDIUM",
+      "search_impression_share": 0.8742004264392325
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - grab bars - LOW",
+      "search_impression_share": 0.9247787610619469
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door towel bars - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel bar with hook - LOW",
+      "search_impression_share": 0.9058823529411765
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mirrors - MEDIUM",
+      "search_impression_share": 0.875
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - candle holders - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ladder towel bar - LOW",
+      "search_impression_share": 0.9428571428571428
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 2 post tp holder - LOW",
+      "search_impression_share": 0.8
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted freestanding accessories - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - baskets - LOW",
+      "search_impression_share": 0.7142857142857143
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - garment rods - LOW",
+      "search_impression_share": 0.9782608695652174
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding towel stand - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - mug holders - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - paper towel holders - LOW",
+      "search_impression_share": 0.8714285714285714
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - recessed tp holder - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - robe hook - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower curtain brackets - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door knobs and hooks - LOW",
+      "search_impression_share": 0.0999
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with glass shelf - LOW",
+      "search_impression_share": 0.9192546583850931
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted swing towel arms - LOW",
+      "search_impression_share": 0.9430379746835443
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel bars - LOW",
+      "search_impression_share": 0.9218106995884774
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - toothbrush holders - LOW",
+      "search_impression_share": 0.9473684210526315
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - upright tp holder - LOW",
+      "search_impression_share": 0.9130434782608695
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mirrors - LOW",
+      "search_impression_share": 0.8333333333333334
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted double towel bar - LOW",
+      "search_impression_share": 0.9512195121951219
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted make-up mirrors - LOW",
+      "search_impression_share": 0.7958333333333333
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted multi hooks - LOW",
+      "search_impression_share": 0.7738095238095238
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wood shelves - LOW",
+      "search_impression_share": 0.7027027027027027
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ceiling hung mirrors - HIGH",
+      "search_impression_share": 0.543459174714662
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf - HIGH",
+      "search_impression_share": 0.6756887385210246
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - paper towel holders - HIGH",
+      "search_impression_share": 0.6277105846990625
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - robe hook - HIGH",
+      "search_impression_share": 0.5700372979693328
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with glass shelf - HIGH",
+      "search_impression_share": 0.6509387351778656
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - free standing make-up mirrors - HIGH",
+      "search_impression_share": 0.4750508015353353
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - catchall - HIGH",
+      "search_impression_share": 0.5444584156637328
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - mug holders - HIGH",
+      "search_impression_share": 0.6207253886010363
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - HIGH",
+      "search_impression_share": 0.694331983805668
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with wood shelf - HIGH",
+      "search_impression_share": 0.6394557823129252
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower curtain brackets - HIGH",
+      "search_impression_share": 0.6456346294937637
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower squeegee - HIGH",
+      "search_impression_share": 0.6556935508005387
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - rollerless - HIGH",
+      "search_impression_share": 0.6315192743764172
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door pull - HIGH",
+      "search_impression_share": 0.6158612143742255
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf - HIGH",
+      "search_impression_share": 0.6876451953537487
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf with towel bar - HIGH",
+      "search_impression_share": 0.7483296213808464
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf - HIGH",
+      "search_impression_share": 0.5567084078711986
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf with towel bar - HIGH",
+      "search_impression_share": 0.5980629539951574
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel rings - HIGH",
+      "search_impression_share": 0.6170940170940171
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted swing towel arms - HIGH",
+      "search_impression_share": 0.6332874828060523
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - toothbrush holders - HIGH",
+      "search_impression_share": 0.6167216721672167
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel bar with hook - HIGH",
+      "search_impression_share": 0.6638054363376252
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel shelves - HIGH",
+      "search_impression_share": 0.752845220030349
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with wood shelf - HIGH",
+      "search_impression_share": 0.7525773195876289
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel rings - HIGH",
+      "search_impression_share": 0.6826318335752298
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 2 post tp holder - MEDIUM",
+      "search_impression_share": 0.7699346405228759
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - cabinet hardware - MEDIUM",
+      "search_impression_share": 0.735207100591716
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - corner glass shelves - MEDIUM",
+      "search_impression_share": 0.8506224066390041
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf - MEDIUM",
+      "search_impression_share": 0.9541984732824428
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 4 tier glass wall shelf - MEDIUM",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted freestanding accessories - MEDIUM",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - baskets - MEDIUM",
+      "search_impression_share": 0.9078947368421053
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted wall mounted accessories - MEDIUM",
+      "search_impression_share": 0.7913669064748201
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - european style tp holder - MEDIUM",
+      "search_impression_share": 0.7817589576547231
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - paper towel holders - MEDIUM",
+      "search_impression_share": 0.8490146217418945
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - rollerless - MEDIUM",
+      "search_impression_share": 0.7931034482758621
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door pull - MEDIUM",
+      "search_impression_share": 0.8253968253968254
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door towel bars - MEDIUM",
+      "search_impression_share": 0.8740157480314961
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - MEDIUM",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - refrigerator pull - MEDIUM",
+      "search_impression_share": 0.9772727272727273
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf with towel bar - MEDIUM",
+      "search_impression_share": 0.9587628865979382
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dishes & holders - MEDIUM",
+      "search_impression_share": 0.8662420382165605
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - retractable hooks - MEDIUM",
+      "search_impression_share": 0.9390681003584229
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - toothbrush holders - MEDIUM",
+      "search_impression_share": 0.9105691056910569
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel bar with hook - MEDIUM",
+      "search_impression_share": 0.9166666666666666
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 4 tier glass wall shelf - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with wood shelf - MEDIUM",
+      "search_impression_share": 0.7272727272727273
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - cabinet hardware - LOW",
+      "search_impression_share": 0.8478260869565217
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted guest towel holder - MEDIUM",
+      "search_impression_share": 0.8395061728395061
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted make-up mirrors - MEDIUM",
+      "search_impression_share": 0.8457943925233645
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted swing towel arms - MEDIUM",
+      "search_impression_share": 0.8844984802431611
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel rings - MEDIUM",
+      "search_impression_share": 0.8401015228426396
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - european style tp holder - LOW",
+      "search_impression_share": 0.9347826086956522
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf with towel bar - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - door pull - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted wall mounted accessories - LOW",
+      "search_impression_share": 0.725925925925926
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - corner glass shelves - LOW",
+      "search_impression_share": 0.8888888888888888
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ceiling hung mirrors - LOW",
+      "search_impression_share": 0.8340425531914893
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - guest towel tray - LOW",
+      "search_impression_share": 0.9722222222222222
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - free standing make-up mirrors - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding tp holder - LOW",
+      "search_impression_share": 0.936
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - multi roll tp holder with glass shelf - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel stand - LOW",
+      "search_impression_share": 0.8848920863309353
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted guest towel holder - LOW",
+      "search_impression_share": 0.8879310344827587
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 2 post tp holder - HIGH",
+      "search_impression_share": 0.5690385902297569
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - corner glass shelves - HIGH",
+      "search_impression_share": 0.5844986016779864
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding tp holder - HIGH",
+      "search_impression_share": 0.7656540607563547
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - 4 tier glass wall shelf - HIGH",
+      "search_impression_share": 0.4634146341463415
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - assorted freestanding accessories - HIGH",
+      "search_impression_share": 0.6827896512935883
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - cabinet hardware - HIGH",
+      "search_impression_share": 0.5742417023979672
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - candle holders - HIGH",
+      "search_impression_share": 0.5561440677966102
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - freestanding towel stand - HIGH",
+      "search_impression_share": 0.7257583965330444
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - guest towel tray - HIGH",
+      "search_impression_share": 0.5694070080862533
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - european style tp holder - HIGH",
+      "search_impression_share": 0.6849533106960951
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - garment rods - HIGH",
+      "search_impression_share": 0.49416342412451364
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ladder towel bar - HIGH",
+      "search_impression_share": 0.6549047282992237
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ceiling hung mirrors - MEDIUM",
+      "search_impression_share": 0.8386167146974063
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - double glass shelf with towel bar - MEDIUM",
+      "search_impression_share": 0.8823529411764706
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted guest towel holder - HIGH",
+      "search_impression_share": 0.684774665042631
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted make-up mirrors - HIGH",
+      "search_impression_share": 0.641468253968254
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted multi hooks - HIGH",
+      "search_impression_share": 0.548745372274784
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wood shelves - HIGH",
+      "search_impression_share": 0.4887688370770543
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - candle holders - MEDIUM",
+      "search_impression_share": 0.625
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - garment rods - MEDIUM",
+      "search_impression_share": 0.9568181818181818
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - ladder towel bar - MEDIUM",
+      "search_impression_share": 0.9096774193548387
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel shelves - MEDIUM",
+      "search_impression_share": 0.8705234159779615
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with glass shelf - MEDIUM",
+      "search_impression_share": 0.827485380116959
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf - MEDIUM",
+      "search_impression_share": 0.9130434782608695
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf with towel bar - MEDIUM",
+      "search_impression_share": 0.8571428571428571
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel stand - MEDIUM",
+      "search_impression_share": 0.8322981366459627
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower squeegee - MEDIUM",
+      "search_impression_share": 0.94
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower door pull - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dispensers - LOW",
+      "search_impression_share": 0.9166666666666666
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity top make-up mirrors - LOW",
+      "search_impression_share": 0.9047619047619048
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - retractable hooks - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - rollerless - LOW",
+      "search_impression_share": 0.8260869565217391
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - refrigerator pull - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - soap dishes & holders - LOW",
+      "search_impression_share": 0.8
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - towel shelves - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - shower squeegee - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - single glass shelf with towel bar - LOW",
+      "search_impression_share": 1.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - tp holder with wood shelf - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - triple glass shelf with towel bar - LOW",
+      "search_impression_share": 0.8
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - wall mounted towel rings - LOW",
+      "search_impression_share": 0.8397435897435898
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - vanity towel rings - LOW",
+      "search_impression_share": 0.6923076923076923
+    },
+    {
+      "campaign_name": "AVD - Shopping - BRANDED - US",
+      "search_impression_share": 0.9290540540540541
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - Reserve Roll TP Holder - HIGH",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - Reserve Roll TP Holder - LOW",
+      "search_impression_share": 0.0
+    },
+    {
+      "campaign_name": "AVD - Shopping - US - Reserve Roll TP Holder - MEDIUM",
+      "search_impression_share": 0.0
+    }
+  ]
+}

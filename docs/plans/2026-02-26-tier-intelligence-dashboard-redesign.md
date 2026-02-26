@@ -14,11 +14,11 @@
 
 Allied Brass uses a "Waterfall" Google Shopping structure with 3 campaign tiers. ALL search queries enter the HIGH tier first. Negative keywords push terms DOWN the funnel.
 
-| Tier | Funnel Position | tROAS Setting | Bidding Behavior | Expected Actual ROAS |
-|------|----------------|---------------|------------------|---------------------|
-| **HIGH** | Top (entry point) | **Highest** (most restrictive) | Conservative — Google bids low | **Lowest** |
-| **MEDIUM** | Middle | Moderate | Moderate bidding | Moderate |
-| **LOW** | Bottom (high-intent) | **Lowest** (most aggressive) | Aggressive — Google bids high to win | **Highest** |
+| Tier       | Funnel Position      | tROAS Setting                  | Bidding Behavior                     | Expected Actual ROAS |
+| ---------- | -------------------- | ------------------------------ | ------------------------------------ | -------------------- |
+| **HIGH**   | Top (entry point)    | **Highest** (most restrictive) | Conservative — Google bids low       | **Lowest**           |
+| **MEDIUM** | Middle               | Moderate                       | Moderate bidding                     | Moderate             |
+| **LOW**    | Bottom (high-intent) | **Lowest** (most aggressive)   | Aggressive — Google bids high to win | **Highest**          |
 
 **THE PARADOX:** Target ROAS setting is INVERSE to Actual ROAS. High tROAS = low actual ROAS (restricts bidding on broad traffic). Low tROAS = high actual ROAS (aggressive bidding on converting traffic).
 
@@ -467,8 +467,10 @@ Pass `labelCount` as a prop computed in ActionQueueTable by counting entries wit
 
 ## Pre-Deploy Gates (MANDATORY for every wave)
 
-1. `cd dashboard && npm run build` — MUST pass
+1. `cd /Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard && npm run build` — MUST pass
 2. `npx tsc --noEmit` — zero errors
 3. `npx vitest run src/lib/optimization/__tests__/tier-scoring.test.ts` — 77+ tests pass
 4. `npm run lint` — fix all issues
-5. Only THEN: `git push origin master` (auto-deploys to Vercel + Cloud Run)
+5. `cd /Users/bobby/Documents/GitHub/Allied-FeedOps/dashboard && npm run dev` — Launch local dev server
+6. Use agent-browser skill to launch browser and visually and manually ensure that dashboard has no errors and functionality is implemented correctly
+7. Only THEN: `git push origin master` (auto-deploys to Vercel + Cloud Run)
