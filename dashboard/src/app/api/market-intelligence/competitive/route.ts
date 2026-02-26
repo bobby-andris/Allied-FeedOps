@@ -159,8 +159,12 @@ export async function GET(request: NextRequest) {
         nonBrandRoas,
       },
       period: {
-        from: '',
-        to: '',
+        from: termRows.length > 0
+          ? termRows.reduce((min, r) => r.period_start < min ? r.period_start : min, termRows[0].period_start)
+          : '',
+        to: termRows.length > 0
+          ? termRows.reduce((max, r) => r.period_start > max ? r.period_start : max, termRows[0].period_start)
+          : '',
         totalTerms: allTerms.length,
       },
     }

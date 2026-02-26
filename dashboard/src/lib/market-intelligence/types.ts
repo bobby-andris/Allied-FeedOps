@@ -127,6 +127,23 @@ export interface ProductGroup {
   quadrant: BcgQuadrant
 }
 
+export interface ProductGroupDetailTerm {
+  searchTerm: string
+  currentTier: string
+  impressions: number
+  clicks: number
+  revenue: number
+  roas: number
+}
+
+export interface TierGroup {
+  tier: string
+  termCount: number
+  totalImpressions: number
+  totalRevenue: number
+  terms: ProductGroupDetailTerm[]
+}
+
 export interface ProductGroupDetail {
   customLabel0: string
   quadrant: BcgQuadrant
@@ -134,14 +151,8 @@ export interface ProductGroupDetail {
   revenue: number
   spend: number
   trend: number
-  topTerms: Array<{
-    searchTerm: string
-    currentTier: string
-    impressions: number
-    clicks: number
-    revenue: number
-    roas: number
-  }>
+  topTerms: ProductGroupDetailTerm[]
+  tierGroups: TierGroup[]
 }
 
 export interface ProductsData {

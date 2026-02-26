@@ -8,7 +8,7 @@ import {
   paginateRpc,
   fetchLatestPeriod,
 } from '@/lib/market-intelligence/computations'
-import type { ProductsData, ProductGroup, ProductGroupDetail } from '@/lib/market-intelligence/types'
+import type { ProductsData, ProductGroup, ProductGroupDetail, TierGroup } from '@/lib/market-intelligence/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -235,6 +235,28 @@ async function handleGroupDetail(supabase: any, group: string, latestPeriod: str
     .sort((a, b) => b.impressions - a.impressions)
     .slice(0, 50)
 
+  // Build tier groups from topTerms
+  const tierMap = new Map<string, typeof topTerms>()
+  for (const term of topTerms) {
+    const tier = term.currentTier || 'UNKNOWN'
+    if (!tierMap.has(tier)) tierMap.set(tier, [])
+    tierMap.get(tier)!.push(term)
+  }
+
+  const TIER_ORDER = ['HIGH', 'MEDIUM', 'LOW', 'UNKNOWN']
+  const tierGroups: TierGroup[] = TIER_ORDER
+    .filter(tier => tierMap.has(tier))
+    .map(tier => {
+      const terms = tierMap.get(tier)!
+      return {
+        tier,
+        termCount: terms.length,
+        totalImpressions: terms.reduce((s, t) => s + t.impressions, 0),
+        totalRevenue: terms.reduce((s, t) => s + t.revenue, 0),
+        terms,
+      }
+    })
+
   // Compute group-level metrics
   const totalRevenue = topTerms.reduce((s, t) => s + t.revenue, 0)
   const totalSpend = typedTermRows.reduce(
@@ -291,6 +313,7 @@ async function handleGroupDetail(supabase: any, group: string, latestPeriod: str
     spend: totalSpend,
     trend,
     topTerms,
+    tierGroups,
   }
 
   return NextResponse.json(detail)

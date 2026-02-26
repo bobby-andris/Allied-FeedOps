@@ -8,7 +8,6 @@ import {
   costMicrosToDollars,
   paginateRpc,
   fetchLatestPeriod,
-  fetchPriorPeriod,
 } from '@/lib/market-intelligence/computations'
 import type {
   DemandData,
@@ -174,22 +173,20 @@ export async function GET(request: NextRequest) {
     seasonal.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))
 
     // --- 4. New Term Discovery (DEMAND-04) ---
-    // Compare current period terms against prior period to find genuinely new terms
+    // Compare current period terms against ALL prior periods to find genuinely new terms.
+    // Using single prior period was inflating new term count by ~2x (terms existed in older periods).
     let newTerms: NewTerm[] = []
     if (latestPeriod) {
-      const priorPeriod = await fetchPriorPeriod(supabase, latestPeriod)
-      if (priorPeriod) {
-        // Fetch prior period terms to build the "known terms" set
-        let priorRows: TermMetricsRow[]
-        try {
-          priorRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
-            p_custom_label_0: customLabel0 || null,
-            p_period_start: priorPeriod,
-          })
-        } catch {
-          priorRows = []
-        }
-        const priorTermSet = new Set(priorRows.map(r => (r.query_text as string).toLowerCase()))
+      // Fetch all distinct terms from ALL prior periods (single efficient query)
+      const { data: priorTermRows, error: priorErr } = await supabase
+        .from('market_intelligence_mv')
+        .select('query_text')
+        .lt('period_start', latestPeriod)
+
+      if (!priorErr && priorTermRows) {
+        const priorTermSet = new Set(
+          priorTermRows.map((r: { query_text: string }) => r.query_text.toLowerCase())
+        )
 
         newTerms = allTerms
           .filter(t => !priorTermSet.has(t.queryText.toLowerCase()))

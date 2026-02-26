@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { AlertCircle, RefreshCw, ArrowUpDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +20,41 @@ import { CpcOpportunityChart } from './CpcOpportunityChart'
 import { SeasonalTrendsChart } from './SeasonalTrendsChart'
 import { NewTermsCard } from './NewTermsCard'
 import { LongTailAnalysis } from './LongTailAnalysis'
+
+type TopTermSortField = 'queryText' | 'customLabel0' | 'actualImpressions' | 'marketVolume' | 'sharePercent' | 'gap'
+type SortDirection = 'asc' | 'desc'
+
+function TopTermSortableHeader({
+  children,
+  field,
+  currentField,
+  direction,
+  onSort,
+  className,
+}: {
+  children: React.ReactNode
+  field: TopTermSortField
+  currentField: TopTermSortField
+  direction: SortDirection
+  onSort: (field: TopTermSortField) => void
+  className?: string
+}) {
+  const isActive = currentField === field
+  return (
+    <TableHead
+      className={`cursor-pointer select-none hover:bg-muted/50 ${className || ''}`}
+      onClick={() => onSort(field)}
+    >
+      <div className={`flex items-center gap-1 ${className?.includes('text-right') ? 'justify-end' : ''}`}>
+        {children}
+        <ArrowUpDown className={`h-3 w-3 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`} />
+        {isActive && (
+          <span className="text-[10px] text-muted-foreground">{direction === 'asc' ? '\u2191' : '\u2193'}</span>
+        )}
+      </div>
+    </TableHead>
+  )
+}
 
 interface Props {
   customLabel0?: string
@@ -204,47 +240,83 @@ export function DemandTab({ customLabel0 }: Props) {
       </Card>
 
       {/* Top Terms Table — shows actual search terms with metrics */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Top Search Terms by Market Volume</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="max-h-[400px] overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Search Term</TableHead>
-                  <TableHead>Product Group</TableHead>
-                  <TableHead className="text-right">Your Impressions</TableHead>
-                  <TableHead className="text-right">Market Volume</TableHead>
-                  <TableHead className="text-right">Share</TableHead>
-                  <TableHead className="text-right">Gap</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.impressionShare.slice(0, 50).map((row) => (
-                  <TableRow key={row.queryText}>
-                    <TableCell className="font-medium">{row.queryText}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{row.customLabel0 || '—'}</TableCell>
-                    <TableCell className="text-right">{row.actualImpressions.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">{row.marketVolume?.toLocaleString() ?? 'N/A'}</TableCell>
-                    <TableCell className="text-right">
-                      {row.sharePercent !== null ? (
-                        <span className={row.sharePercent < 20 ? 'text-red-500' : row.sharePercent < 50 ? 'text-amber-500' : 'text-green-500'}>
-                          {row.sharePercent.toFixed(1)}%
-                        </span>
-                      ) : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {row.gap !== null ? row.gap.toLocaleString() : '—'}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <TopTermsTable data={data.impressionShare} />
     </div>
+  )
+}
+
+function TopTermsTable({ data }: { data: { queryText: string; customLabel0: string; actualImpressions: number; marketVolume: number | null; sharePercent: number | null; gap: number | null }[] }) {
+  const [sortField, setSortField] = useState<TopTermSortField>('marketVolume')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+
+  function handleSort(field: TopTermSortField) {
+    if (sortField === field) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('desc')
+    }
+  }
+
+  const sortedData = useMemo(() => {
+    const sliced = data.slice(0, 50)
+    return [...sliced].sort((a, b) => {
+      const aVal = a[sortField]
+      const bVal = b[sortField]
+      // Handle nulls — push to bottom
+      if (aVal === null && bVal === null) return 0
+      if (aVal === null) return 1
+      if (bVal === null) return -1
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      return sortDirection === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal)
+    })
+  }, [data, sortField, sortDirection])
+
+  const headerProps = { currentField: sortField, direction: sortDirection, onSort: handleSort }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Top Search Terms by Market Volume</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="max-h-[400px] overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TopTermSortableHeader field="queryText" {...headerProps}>Search Term</TopTermSortableHeader>
+                <TopTermSortableHeader field="customLabel0" {...headerProps}>Product Group</TopTermSortableHeader>
+                <TopTermSortableHeader field="actualImpressions" className="text-right" {...headerProps}>Your Impressions</TopTermSortableHeader>
+                <TopTermSortableHeader field="marketVolume" className="text-right" {...headerProps}>Market Volume</TopTermSortableHeader>
+                <TopTermSortableHeader field="sharePercent" className="text-right" {...headerProps}>Share</TopTermSortableHeader>
+                <TopTermSortableHeader field="gap" className="text-right" {...headerProps}>Gap</TopTermSortableHeader>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedData.map((row) => (
+                <TableRow key={row.queryText}>
+                  <TableCell className="font-medium">{row.queryText}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{row.customLabel0 || '\u2014'}</TableCell>
+                  <TableCell className="text-right">{row.actualImpressions.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{row.marketVolume?.toLocaleString() ?? 'N/A'}</TableCell>
+                  <TableCell className="text-right">
+                    {row.sharePercent !== null ? (
+                      <span className={row.sharePercent < 20 ? 'text-red-500' : row.sharePercent < 50 ? 'text-amber-500' : 'text-green-500'}>
+                        {row.sharePercent.toFixed(1)}%
+                      </span>
+                    ) : 'N/A'}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {row.gap !== null ? row.gap.toLocaleString() : '\u2014'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
