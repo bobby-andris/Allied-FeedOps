@@ -19,6 +19,7 @@
 | Content Generation | 5 | regeneration_history, prompt_version_aliases, prompt_templates, batch_generation_jobs, batch_generation_job_skus |
 | Legacy/Jobs | 1 | generation_jobs |
 | Measurement & Classification | 2 | sku_bottleneck_classifications, gmc_product_status |
+| Tier Scoring & Routing | 2 | query_value_scores, routing_recommendations |
 | Competitor Intelligence | 3 | competitor_listings, competitor_patterns, competitor_scrape_jobs |
 | Support | 1 | shopify_products |
 | Backfill Infrastructure | 2 | backfill_jobs, backfill_job_errors |
@@ -1584,6 +1585,75 @@ WHERE gc.master_sku = 'WP-2/16-GAL' AND gc.platform = 'google'
 
 ---
 
-*Schema last rebuilt: 2026-02-25 (Phase 31-01)*
+## Tier Scoring & Routing Tables
+
+### routing_recommendations
+
+Stores operator decisions on search term routing: approve/reject/undo tier changes, block wasted spend terms, and label-level category blocks.
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | uuid | PK, default gen_random_uuid() | |
+| search_term | text | NOT NULL | For label blocks, uses sentinel `__LABEL_BLOCK__` |
+| custom_label_0 | text | NOT NULL | Product category |
+| recommended_action | text | NOT NULL, CHECK IN ('global_block', 'competitor', 'branded', 'funnel', 'label_block') | Action type |
+| recommended_tier | text | CHECK IN (NULL, 'campaign_negative', 'high', 'medium', 'low') | Target tier (nullable) |
+| reason_codes | text[] | NOT NULL, default '{}' | |
+| confidence | numeric(5,4) | NOT NULL, default 0 | |
+| review_status | text | NOT NULL, default 'pending', CHECK IN ('pending', 'accepted', 'rejected', 'expired') | |
+| accepted | boolean | | |
+| accepted_at | timestamptz | | |
+| accepted_by | text | | |
+| action_scope | text | NOT NULL, default 'term', CHECK IN ('term', 'label') | 'label' for category-level blocks |
+| metadata | jsonb | NOT NULL, default '{}' | Stores currentTier, impact, append-only history array |
+| created_at | timestamptz | NOT NULL, default now() | |
+
+**Unique constraint:** `(search_term, custom_label_0)` — enables upsert for idempotent approve/reject/undo.
+
+**Label blocks:** Use `search_term = '__LABEL_BLOCK__'` sentinel with `action_scope = 'label'` and `recommended_action = 'label_block'`. This blocks all terms under the given `custom_label_0` category.
+
+**Indexes:**
+- `idx_routing_recommendations_term_label_created` on `(search_term, custom_label_0, created_at DESC)`
+- `idx_routing_recommendations_status_created` on `(review_status, created_at DESC)`
+
+**Source:** Migrations 033b (original), 039 (upsert support), 040 (label scope)
+
+---
+
+### query_value_scores
+
+Stores per-term scoring results from the tier scoring engine. Upserted by the `/api/shopping-funnel/tier-scoring` route on each computation.
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | uuid | PK, default gen_random_uuid() | |
+| search_term | text | NOT NULL | |
+| custom_label_0 | text | NOT NULL | Product category |
+| score_version | text | NOT NULL, default 'v1' | Currently 'v2-tier-scoring' |
+| expected_clicks | numeric(12,4) | NOT NULL, default 0 | Legacy field |
+| expected_cvr | numeric(10,6) | NOT NULL, default 0 | Legacy field |
+| expected_conversion_value | numeric(14,4) | NOT NULL, default 0 | Legacy field |
+| expected_profit_proxy | numeric(14,4) | NOT NULL, default 0 | Legacy field |
+| uncertainty | numeric(10,6) | NOT NULL, default 1 | `1 - confidence.score` |
+| impact_score | numeric(14,4) | NOT NULL, default 0 | Monthly impact mid estimate |
+| model_inputs | jsonb | NOT NULL, default '{}' | Stores confidence, fallbackLevel, currentTier, fitScoreDelta, dataConfirmed, isMisplaced |
+| tier_fit_scores | jsonb | | Per-tier fit scores object |
+| recommended_tier | text | CHECK IN (NULL, 'HIGH', 'MEDIUM', 'LOW') | Best-fit tier |
+| net_monthly_impact | numeric(14,4) | | Monthly revenue impact estimate |
+| scored_at | timestamptz | | When last scored |
+| created_at | timestamptz | NOT NULL, default now() | |
+
+**Unique index:** `(search_term, custom_label_0)` — enables upsert conflict resolution.
+
+**Indexes:**
+- `idx_query_value_scores_term_label_created` on `(search_term, custom_label_0, created_at DESC)`
+- `idx_query_value_scores_impact_created` on `(impact_score DESC, created_at DESC)`
+- `idx_query_value_scores_scored_at` on `(scored_at DESC NULLS LAST)`
+
+**Source:** Migrations 033b (original), 037 (tier scoring columns), 038 (unique index)
+
+---
+
+*Schema last rebuilt: 2026-02-25 (Phase 31-01), updated 2026-02-26 (Phase 34.1-03)*
 *Source: Migration SQL files cross-referenced with production state*
 *Total tables: 56 (38 core + 4 GA4 KEEP + 10 intent KEEP + 4 DEFER)*
