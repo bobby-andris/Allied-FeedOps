@@ -88,7 +88,7 @@
 
 </details>
 
-### 🚧 v1.3c Actionable Shopping Intelligence (In Progress)
+### v1.3c Actionable Shopping Intelligence (In Progress)
 
 **Milestone Goal:** Transform the shopping funnel from passive reporting into an active revenue optimization engine with distribution-based scoring, dollar-value leakage detection, market intelligence, and semi-automated tier optimization with measurement.
 
@@ -97,6 +97,8 @@
 - [x] **Phase 33.1: Scoring Calibration** - Fix $0 impact bug, calibrate 95% misplaced rate down to actionable 10-20% (completed 2026-02-25)
 - [x] **Phase 33.2: UI Redesign** - Redesign Tier Intelligence from statistical exploration to action-oriented decision-making (completed 2026-02-25)
 - [x] **Phase 34: Revenue Leakage and Execution** - Dollar-value leakage dashboard with one-click tier movement execution and undo (completed 2026-02-26)
+- [ ] **Phase 34.1: Fix Decision Logic** - Core scoring fixes, under-invested detection, label blocking (completed 2026-02-26)
+- [ ] **Phase 34.2: Zero-Conversion Intent Scoring** - Dual-domain intent scoring (feed alignment + behavioral), terminology fix, execution wiring
 - [ ] **Phase 35: Market Intelligence** - Demand gap analysis, competitive intel, product group BCG matrix, seasonal patterns
 - [ ] **Phase 36: Automation and Experiments** - Rule-based tier rebalancing with safety guardrails and A/B testing framework
 - [ ] **Phase 37: Reporting and Benchmarks** - Optimization impact tracker, weekly digest, competitive benchmarks, budget recommendations
@@ -113,16 +115,16 @@
   3. `experiment_outcomes` table has `p_value`, `confidence_interval`, and `minimum_sample_size` columns available
 **Plans**: TBD
 
-### Phase 33: Tier Scoring Engine ✓ COMPLETE 2026-02-25
+### Phase 33: Tier Scoring Engine COMPLETE 2026-02-25
 **Goal**: Users can see dynamically computed tier boundaries and per-term scoring that adapts to actual performance distributions instead of hardcoded thresholds
 **Depends on**: Phase 32
 **Requirements**: TIER-01, TIER-02, TIER-03, TIER-04, TIER-05, TIER-06
 **Success Criteria** (what must be TRUE):
-  1. ✓ User sees tier performance distributions (p25/p50/p75 for ROAS, CVR, CPC, CTR per tier) that update when underlying data changes, not static 3.6/3.1/2.6 values
-  2. ✓ User sees per-term placement scores using robust z-scores (median/MAD) with hierarchical fallback displayed when per-group data is sparse
-  3. ✓ User sees "Insufficient data" degraded state for any tier with fewer than 5 terms with non-zero metrics
-  4. ✓ User sees confidence scores per term that combine data volume, consistency, statistical significance, and NLP intent alignment into a single 0-1 value
-  5. ✓ Tier boundary thresholds auto-adjust based on actual MEDIUM tier percentiles without manual configuration
+  1. User sees tier performance distributions (p25/p50/p75 for ROAS, CVR, CPC, CTR per tier) that update when underlying data changes, not static 3.6/3.1/2.6 values
+  2. User sees per-term placement scores using robust z-scores (median/MAD) with hierarchical fallback displayed when per-group data is sparse
+  3. User sees "Insufficient data" degraded state for any tier with fewer than 5 terms with non-zero metrics
+  4. User sees confidence scores per term that combine data volume, consistency, statistical significance, and NLP intent alignment into a single 0-1 value
+  5. Tier boundary thresholds auto-adjust based on actual MEDIUM tier percentiles without manual configuration
 **Plans**: 4 plans
 - [x] 33-01-PLAN.md — Core computation module (TDD): types, distributions, scoring, confidence, impact (Complete 2026-02-25)
 - [x] 33-02-PLAN.md — Infrastructure: install simple-statistics, unique index migration, API route (Complete 2026-02-25)
@@ -192,7 +194,7 @@ Plans:
 
 ### Phase 34.2: Zero-Conversion Intent Scoring Engine (INSERTED)
 
-**Goal:** Replace the brittle MPN-match promotion rule with a mathematically sound, dual-domain intent scoring engine that combines feed alignment analysis (attribute extraction + TF-IDF specificity) with behavioral Google Ads signals (rCTR, CPC ceiling pressure, micro-conversions) to confidently promote zero-conversion terms through the waterfall — plus fix all terminology (constrain → demote) and wire the tier-scoring UI to the proven Shopping Funnel execution pipeline
+**Goal:** Replace the brittle MPN-match promotion rule with a mathematically sound, dual-domain intent scoring engine that combines feed alignment analysis (attribute extraction + TF-IDF specificity) with behavioral Google Ads signals (rCTR, CPC ceiling pressure, micro-conversions) to confidently promote zero-conversion terms through the waterfall — plus fix all terminology (constrain to demote) and wire the tier-scoring UI to the proven Shopping Funnel execution pipeline
 **Depends on:** Phase 34.1
 **Requirements**: INTENT-01, INTENT-02, INTENT-03, INTENT-04, INTENT-05, INTENT-06, INTENT-07, INTENT-08
 **Success Criteria** (what must be TRUE):
@@ -204,7 +206,15 @@ Plans:
   6. Action queue connects to the Shopping Funnel execution pipeline (applyTierAssignment) for actual Google Ads keyword movements
   7. Account audit completed: conversion actions cataloged, average CPA computed, CPC caps documented, historical data validated
   8. All changes pass build + lint + existing tests + new intent scoring tests
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 34.2-01-PLAN.md — Terminology fix: eradicate "constrain", add targetTier to TermScore (Wave 1)
+- [ ] 34.2-02-PLAN.md — Google Ads account audit: conversion actions, CPC caps, avg CPA (Wave 1)
+- [ ] 34.2-03-PLAN.md — Feed alignment scoring: attribute extraction + TF-IDF on Cloud Run (Wave 2)
+- [ ] 34.2-04-PLAN.md — Behavioral intent signals: extend GAQL query, compute rCTR/CPC/micro-conv (Wave 2)
+- [ ] 34.2-05-PLAN.md — Unified scoring + 5-trigger determineAction + UI + execution wiring (Wave 3)
+- [ ] 34.2-06-PLAN.md — Calibration: score 1000+ terms, validate thresholds, apply to engine (Wave 4)
 
 ### Phase 35: Market Intelligence
 **Goal**: Users can understand demand patterns, competitive positioning, and product group health to make strategic decisions beyond individual term optimization
@@ -243,7 +253,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 32 → 33 → 33.1 → 33.2 → 34 → 35 → 36 → 37
+Phases execute in numeric order: 32 -> 33 -> 33.1 -> 33.2 -> 34 -> 34.1 -> 34.2 -> 35 -> 36 -> 37
 Note: Phase 35 depends only on Phase 33.1 (not Phase 34), so it can begin after 33.1 completes.
 Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 
@@ -260,6 +270,8 @@ Note: Phase 33.2 may merge into Phase 34 if scope overlaps significantly.
 | 33.1 Scoring Calibration | 2/2 | Complete    | 2026-02-25 | - |
 | 33.2 UI Redesign | 3/3 | Complete    | 2026-02-25 | - |
 | 34. Revenue Leakage and Execution | 4/4 | Complete    | 2026-02-26 | - |
+| 34.1 Fix Decision Logic | 3/3 | Complete    | 2026-02-26 | - |
+| 34.2 Intent Scoring Engine | v1.3c | 0/6 | Not started | - |
 | 35. Market Intelligence | 3/4 | In Progress|  | - |
 | 36. Automation and Experiments | v1.3c | 0/TBD | Not started | - |
 | 37. Reporting and Benchmarks | v1.3c | 0/TBD | Not started | - |
