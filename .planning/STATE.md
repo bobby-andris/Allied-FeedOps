@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets through data-driven content optimization at scale
-**Current focus:** Phase 34 — Revenue Leakage Execution
+**Current focus:** Phase 34.1 — Fix Decision Logic
 
 ## Current Position
 
-Phase: 34 (v1.3c) — COMPLETE
-Plan: 4 of 4 complete
-Status: Completed 34-04 (History tab, page integration, Action Queue undo)
-Last activity: 2026-02-26 — Completed 34-04-PLAN.md (4 tabs, history grouping, undo, 10 tests)
+Phase: 34.1 (v1.3c) — IN PROGRESS
+Plan: 1 of 3 complete
+Status: Completed 34.1-01 (TDD fix of 4 scoring engine bugs)
+Last activity: 2026-02-26 — Completed 34.1-01-PLAN.md (RecommendedAction, wasted spend, CPC, verdicts)
 
-Progress: [██████████] 100% (Phase 34)
+Progress: [███-------] 33% (Phase 34.1)
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100% (Phase 34)
 | Phase 34 P02 | 4min | 3 tasks | 6 files |
 | Phase 34 P03 | 5min | 3 tasks | 8 files |
 | Phase 34 P04 | 5min | 4 tasks | 7 files |
+| Phase 34.1 P01 | 4min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,10 @@ Recent decisions affecting current work:
 - [Phase 34-04]: Controlled Tabs state for programmatic tab switching from HeroSummary button
 - [Phase 34-04]: Extracted groupHistoryByDay as pure function for independent unit testing
 - [Phase 34-04]: Undo in History tab only for accepted entries (rejected don't need undo)
+- [Phase 34.1-01]: Wasted spend override: block for HIGH tier, constrain for MEDIUM/LOW (never promote)
+- [Phase 34.1-01]: CPC asymmetric penalty: max(0, zCpc) — cheap CPC neutral, expensive penalized
+- [Phase 34.1-01]: New TermScore fields optional to avoid breaking 15+ consumers
+- [Phase 34.1-01]: verdict field now matches prescriptive actionReason text
 
 ### Pending Todos
 
@@ -102,7 +107,12 @@ Recent decisions affecting current work:
 - [Phase 33.1]: Calibrate scoring to reduce 95% misplaced rate to 10-20%
 - [Phase 33.1]: Account for gut-assigned tiers (Robert's manual assignments, no historical data basis)
 - ~~[Phase 33.2]: Redesign UI from statistical exploration to action-oriented decision-making~~ DONE
-- [Phase 34]: Apply migration 039 (routing_recommendations table) to production Supabase
+- ~~[Phase 34]: Apply migration 039 (routing_recommendations table) to production Supabase~~ DONE
+
+### Roadmap Evolution
+
+- Phase 34.1 inserted after Phase 34: Fix Decision Logic (URGENT) — scoring engine recommends 0.0 ROAS terms move HIGH→LOW, which is backwards
+- Phase 34.1 scope expanded: custom_label_0-level blocking, Shopping→Search promotion pipeline, cross-category insights
 
 ### Blockers/Concerns
 
@@ -112,8 +122,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34-04-PLAN.md (Phase 34 complete — all 4 plans delivered)
-Resume file: None
+Stopped at: Completed 34.1-01-PLAN.md
+Resume file: .planning/phases/34.1-fix-decision-logic/.continue-here.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase
