@@ -42,6 +42,23 @@ cd /path/to/Allied-FeedOps
 bash scripts/verify_live_supabase_canary.sh
 ```
 
+### `verify_cloud_run_parity.sh`
+
+**Purpose**: Run the Cloud Run production-parity contract suite before deploy/merge.
+
+**What it validates**:
+1. Cloud Build + Docker runtime contract assumptions (`cloudbuild.yaml`, `Dockerfile`)
+2. Required Cloud Run env/secret wiring invariants
+3. Dashboard -> Python request-id propagation (`X-Request-ID`)
+4. Deterministic regenerate contracts (single-writer/idempotent state surface)
+5. Strict parser/routing drift guards
+
+**Usage**:
+```bash
+cd /path/to/Allied-FeedOps
+bash scripts/verify_cloud_run_parity.sh
+```
+
 ## cleanup_duplicate_media.py
 
 **Purpose**: Remove duplicate Shopify media records that were created during testing.

@@ -93,6 +93,12 @@ def _parse_json_payload(
                 "missing_keys": missing_keys,
             }
         )
+    if missing_keys:
+        raise json.JSONDecodeError(
+            f"missing required keys: {', '.join(missing_keys)}",
+            raw,
+            0,
+        )
     if used_partial_recovery:
         logger.warning(
             "Recovered JSON via substring fallback: parsed_key_count=%s expected_key_count=%s missing_keys=%s",
@@ -281,6 +287,7 @@ class OpenAIProvider(LLMProvider):
 
         for attempt in range(self.max_retries):
             response = None
+            parse_details: dict[str, Any] = {}
             try:
                 reasoning_params: dict[str, str] = {}
                 if current_reasoning_effort:
@@ -352,7 +359,6 @@ class OpenAIProvider(LLMProvider):
                 else:
                     logger.debug(f"Token usage: {self._last_usage}")
                 expected_keys = set(schema.get("properties", {}).keys())
-                parse_details: dict[str, Any] = {}
                 result = _parse_json_payload(
                     content,
                     expected_keys=expected_keys,
@@ -376,12 +382,27 @@ class OpenAIProvider(LLMProvider):
 
             except json.JSONDecodeError as e:
                 last_error = str(e)
-                self._last_parse_details = {
-                    "parse_mode": "json_decode_error",
-                    "parsed_key_count": 0,
-                    "expected_key_count": len(schema.get("properties", {})),
-                    "missing_keys": sorted(schema.get("properties", {}).keys()),
-                }
+                if parse_details:
+                    self._last_parse_details = {
+                        "parse_mode": parse_details.get(
+                            "parse_mode", "json_decode_error"
+                        ),
+                        "parsed_key_count": parse_details.get("parsed_key_count", 0),
+                        "expected_key_count": parse_details.get(
+                            "expected_key_count", len(schema.get("properties", {}))
+                        ),
+                        "missing_keys": parse_details.get(
+                            "missing_keys",
+                            sorted(schema.get("properties", {}).keys()),
+                        ),
+                    }
+                else:
+                    self._last_parse_details = {
+                        "parse_mode": "json_decode_error",
+                        "parsed_key_count": 0,
+                        "expected_key_count": len(schema.get("properties", {})),
+                        "missing_keys": sorted(schema.get("properties", {}).keys()),
+                    }
                 finish_reason = None
                 raw_chars = len(content or "")
                 if response is not None and getattr(response, "choices", None):

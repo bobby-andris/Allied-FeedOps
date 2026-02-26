@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 import { FeedbackPreset } from '@/lib/supabase/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateGeneratedContent } from '@/lib/regeneration/prompts'
@@ -156,26 +157,6 @@ export async function POST(request: NextRequest) {
         console.warn('Background data collection failed:', error)
       })
 
-    // Quick schema sanity check (migration 004 must be applied)
-    const schemaCheck = await supabase
-      .from('generated_content')
-      .select('id,version,is_current')
-      .limit(1)
-
-    if (schemaCheck.error) {
-      logSupabaseError('Supabase schema check failed (generated_content)', schemaCheck.error)
-      return errorResponse(500, {
-        error:
-          'Supabase schema is out of date for regeneration (run migration 004_regeneration_history.sql)',
-        code: schemaCheck.error.code ?? null,
-        details: schemaCheck.error.message ?? null,
-        hint: schemaCheck.error.hint ?? null,
-        step: 'schema_check_generated_content',
-        actionable_message:
-          'Apply dashboard Supabase migrations before retrying regeneration.',
-      })
-    }
-
     // Get variant data for finish info
     const { data: variantData, error: variantError } = await supabase
       .from('variant_index')
@@ -186,19 +167,6 @@ export async function POST(request: NextRequest) {
 
     if (variantError) {
       logSupabaseError('Failed to fetch variant data', variantError)
-    }
-
-    // Get current content for comparison (needed for history logging)
-    const { data: currentContentData, error: currentContentError } = await supabase
-      .from('generated_content')
-      .select('*')
-      .eq('master_sku', canonicalMasterSku)
-      .eq('platform', platform)
-      .eq('content_type', content_type)
-      .maybeSingle()
-
-    if (currentContentError) {
-      logSupabaseError('Failed to fetch current generated content', currentContentError)
     }
 
     // ==================== CALL PYTHON CLOUD RUN PIPELINE ====================
@@ -235,18 +203,32 @@ export async function POST(request: NextRequest) {
       ...(lengthPreference ? { length_preference: lengthPreference } : {}),
       ...(saveAsCorrection ? { save_as_correction: true } : {}),
     }
+    const requestId = request.headers.get('x-request-id') ?? randomUUID()
 
     const pipelineResponse = await fetch(`${PIPELINE_URL}/regenerate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId,
+      },
       body: JSON.stringify(pipelinePayload),
     })
 
     if (!pipelineResponse.ok) {
       const errorData = await pipelineResponse.json().catch(() => ({ detail: 'Unknown pipeline error' }))
       console.error(`Pipeline error (${pipelineResponse.status}):`, errorData)
+      const detail = errorData?.detail
+      const detailMessage = typeof detail === 'string'
+        ? detail
+        : typeof detail?.message === 'string'
+          ? detail.message
+          : `Pipeline returned ${pipelineResponse.status}`
+      const detailCode = typeof detail === 'object' && detail && 'code' in detail
+        ? String((detail as Record<string, unknown>).code)
+        : null
       return errorResponse(pipelineResponse.status === 404 ? 404 : 500, {
-        error: errorData.detail || `Pipeline returned ${pipelineResponse.status}`,
+        error: detailMessage,
+        code: detailCode,
         step: 'pipeline_call',
         actionable_message:
           'Check Cloud Run pipeline health and FEEDOPS_PIPELINE_URL configuration, then retry.',
@@ -295,145 +277,62 @@ export async function POST(request: NextRequest) {
       ? normalizeFinishSentences(pipelineData.finish_sentences)
       : null
 
-    // ==================== SAVE TO DATABASE ====================
-    const currentVersion = currentContentData?.version ?? 0
-    let savedContentId: string | null = null
-    let nextVersion = currentVersion + 1
-
-    const currentCandidate = typeof currentContentData?.candidate_content === 'string'
-      ? currentContentData.candidate_content.trim()
+    // Python pipeline is the single writer for generated_content/regeneration_history.
+    // Treat authoritative persistence metadata as required contract fields.
+    const pipelineState = pipelineData.state
+    const pipelineIdempotent = pipelineData.idempotent
+    const pipelineVersion = pipelineData.version
+    const state = (pipelineState === 'no_change' || pipelineState === 'completed')
+      ? pipelineState
       : null
-    const isNoChange = currentCandidate !== null && currentCandidate === newContent
+    const idempotent = typeof pipelineIdempotent === 'boolean'
+      ? pipelineIdempotent
+      : null
+    const version = (typeof pipelineVersion === 'number' && Number.isFinite(pipelineVersion))
+      ? pipelineVersion
+      : null
 
-    if (isNoChange) {
-      return NextResponse.json({
-        success: true,
-        content: newContent,
-        version: currentVersion,
-        mode,
-        model: pipelineModel,
-        generated_content_id: currentContentData?.id ?? null,
-        used_evidence: true,
-        used_vision: false,
-        finish_sentences_count: finishSentences ? Object.keys(finishSentences).length : 0,
-        finish_sentences_saved: false,
-        pipeline: 'python',
-        state: 'no_change',
-        idempotent: true,
-        validation_errors: violations,
+    if (state === null || idempotent === null || version === null) {
+      const missing: string[] = []
+      if (state === null) missing.push('state')
+      if (idempotent === null) missing.push('idempotent')
+      if (version === null) missing.push('version')
+      return errorResponse(500, {
+        error: `Pipeline response missing required regeneration metadata: ${missing.join(', ')}`,
+        code: 'pipeline_contract_missing_regenerate_metadata',
+        step: 'pipeline_response_validation',
         actionable_message:
-          'Generated content is identical to the current candidate content; no database update was needed.',
+          'Cloud Run regenerate contract drift detected. Ensure Python returns state/idempotent/version and retry.',
       })
     }
-
-    if (currentContentData) {
-      const { data: updated, error: updateError } = await supabase
-        .from('generated_content')
-        .update({
-          candidate_content: newContent,
-          version: nextVersion,
-          is_current: true,
-          generation_model: pipelineModel,
-          generation_prompt_hash: pipelinePromptHash,
-          generation_timestamp: new Date().toISOString(),
-        })
-        .eq('id', currentContentData.id)
-        .select('id')
-        .single()
-
-      if (updateError) {
-        logSupabaseError('Failed to update generated_content', updateError)
-        return errorResponse(500, {
-          error: 'Failed to save generated content',
-          code: updateError.code ?? null,
-          details: updateError.message ?? null,
-          hint: updateError.hint ?? null,
-          step: 'generated_content_update',
-          actionable_message:
-            'Review Supabase write permissions/schema for generated_content and retry regeneration.',
-        })
-      }
-
-      savedContentId = updated?.id ?? null
-    } else {
-      nextVersion = 1
-      const { data: inserted, error: insertError } = await supabase
-        .from('generated_content')
-        .insert({
-          master_sku: canonicalMasterSku,
-          platform,
-          content_type,
-          candidate_content: newContent,
-          baseline_content: null,
-          version: nextVersion,
-          is_current: true,
-          generation_model: pipelineModel,
-          generation_prompt_hash: pipelinePromptHash,
-          generation_timestamp: new Date().toISOString(),
-        })
-        .select('id')
-        .single()
-
-      if (insertError) {
-        logSupabaseError('Failed to insert generated_content', insertError)
-        return errorResponse(500, {
-          error: 'Failed to save generated content',
-          code: insertError.code ?? null,
-          details: insertError.message ?? null,
-          hint: insertError.hint ?? null,
-          step: 'generated_content_insert',
-          actionable_message:
-            'Review Supabase insert permissions/schema for generated_content and retry regeneration.',
-        })
-      }
-
-      savedContentId = inserted?.id ?? null
-    }
-
-    // Python pipeline already logs history authoritatively (including prompt hash + model metadata).
-    // Do not insert a second dashboard-side row; duplicate records break traceability.
-
-    // Save finish_sentences to separate table (for Google/Bing descriptions only)
-    let finishSentencesSaved = false
-    if (finishSentences && Object.keys(finishSentences).length > 0 && (platform === 'google' || platform === 'bing')) {
-      const { error: finishError } = await supabase
-        .from('variant_finish_sentences')
-        .upsert(
-          {
-            master_sku: canonicalMasterSku,
-            platform,
-            finish_sentences: finishSentences,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'master_sku,platform' }
-        )
-
-      if (finishError) {
-        logSupabaseError('Failed to save finish sentences', finishError)
-        console.warn('Finish sentences not saved, but content was saved successfully')
-      } else {
-        finishSentencesSaved = true
-        console.log(`Saved ${Object.keys(finishSentences).length} finish sentences for ${canonicalMasterSku}/${platform}`)
-      }
-    }
+    const finishSentencesSaved = typeof pipelineData.finish_sentences_saved === 'boolean'
+      ? pipelineData.finish_sentences_saved
+      : (state === 'completed' && Boolean(finishSentences && Object.keys(finishSentences).length > 0))
+    const pipelineRequestId = typeof pipelineData.request_id === 'string'
+      ? pipelineData.request_id
+      : requestId
 
     return NextResponse.json({
       success: true,
       content: newContent,
-      version: nextVersion,
+      version,
       mode,
       model: pipelineModel,
-      generated_content_id: savedContentId,
+      prompt_hash: pipelinePromptHash,
+      generated_content_id: pipelineData.generated_content_id ?? null,
       used_evidence: true, // Python pipeline always uses evidence
       used_vision: false, // Vision handled by Python pipeline internally
       finish_sentences_count: finishSentences ? Object.keys(finishSentences).length : 0,
       finish_sentences_saved: finishSentencesSaved,
       pipeline: 'python', // Indicate content came from Python pipeline
-      state: 'completed',
-      idempotent: false,
+      state,
+      idempotent,
+      request_id: pipelineRequestId,
       validation_errors: violations,
       actionable_message:
-        violations.length > 0
+        state === 'no_change'
+          ? 'Generated content is unchanged; no persistence update was performed.'
+          : violations.length > 0
           ? 'Validation warnings detected. Review violations before approving/publishing this content.'
           : null,
     })

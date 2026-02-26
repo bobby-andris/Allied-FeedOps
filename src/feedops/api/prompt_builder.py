@@ -10,11 +10,6 @@ Public API:
     apply_feedback_layer() -> str
 
 Feature flags:
-    PROMPT_CONTRACT_V2: Controls whether Shopping intelligence section is included.
-                        When enabled (default), the prompt includes the
-                        '=== GOOGLE SHOPPING OPTIMIZATION ===' block.
-                        When disabled, the block is omitted — this makes the flag
-                        observably structural.
     SEGMENT_STRATEGY_V1: Controls whether segment strategy guidance is included.
                          When disabled, the segment strategy section is omitted.
     INTENT_CURATOR_V1: Effect is upstream in evidence.py — when disabled, the
@@ -43,7 +38,6 @@ from feedops.pipeline.evidence import (
     sanitize_prompt_text,
 )
 from feedops.pipeline.feature_flags import (
-    is_prompt_contract_v2_enabled,
     is_segment_strategy_v1_enabled,
 )
 from feedops.pipeline.finish_injection import get_finish_metadata
@@ -553,7 +547,7 @@ def build_core_prompt(
     """Build rich prompt — identical for batch and single-SKU paths.
 
     Includes: keyword placement plan, segment strategy, gold examples,
-    Shopping intelligence (when PROMPT_CONTRACT_V2 enabled),
+    Shopping intelligence (always included when available),
     category guidance, finish context.
 
     This is the canonical prompt construction function. Both /regenerate and
@@ -689,31 +683,21 @@ def build_core_prompt(
         )
 
     # --- 5. Shopping intelligence section ---
-    # FIX-02: PROMPT_CONTRACT_V2 gates this section.
-    # Toggling PROMPT_CONTRACT_V2=0 removes the Shopping intelligence section from the prompt.
-    # This makes the flag observably structural — the prompt is structurally different when toggled.
-    # INTENT_CURATOR_V1 effect is in evidence.py (curated vs raw evidence content).
-    # SEGMENT_STRATEGY_V1 gates the segment strategy guidance section (see step 4 above).
-    if is_prompt_contract_v2_enabled():
-        custom_label_0 = _extract_custom_label_0(parent_sku)
-        shopping_section = ""
-        try:
-            shopping_section = get_shopping_intelligence_section(custom_label_0)
-        except Exception as exc:
-            logger.warning(
-                "Shopping intelligence section skipped for %s: %s",
-                parent_sku.master_sku,
-                exc,
-            )
-            shopping_section = ""
-
-        if shopping_section:
-            sections.append(shopping_section)
-    else:
-        logger.debug(
-            "PROMPT_CONTRACT_V2 disabled — Shopping intelligence section omitted for %s",
+    # Always include when available; prompt architecture is now v2-only.
+    custom_label_0 = _extract_custom_label_0(parent_sku)
+    shopping_section = ""
+    try:
+        shopping_section = get_shopping_intelligence_section(custom_label_0)
+    except Exception as exc:
+        logger.warning(
+            "Shopping intelligence section skipped for %s: %s",
             parent_sku.master_sku,
+            exc,
         )
+        shopping_section = ""
+
+    if shopping_section:
+        sections.append(shopping_section)
 
     # --- 6. Category guidance ---
     # shopping_intelligence.yaml is the canonical source (PRMT-03)

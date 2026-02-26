@@ -7,11 +7,9 @@ Maintains brand consistency while updating key specification differences.
 Python port of dashboard/src/lib/regeneration/core.ts (adaptVariantContent)
 """
 
-import openai
 from datetime import datetime, timezone
 import json
 import logging
-import os
 import time
 
 from feedops.api.prompt_loader import (
@@ -26,13 +24,7 @@ from feedops.models import Candidate, Score
 from feedops.observability import log_event
 from feedops.observability.metrics import metrics_registry
 from feedops.pipeline.generator import generate_per_platform
-from feedops.pipeline.finish_sentence_validation import (
-    normalize_and_validate_finish_sentences,
-)
 from feedops.pipeline.finish_sentence_placeholder import (
-    build_fallback_finish_sentences,
-    normalize_base_description_with_finish_placeholder,
-    strip_hardcoded_finish_names,
     strip_generic_finish_count_claims,
 )
 from feedops.pipeline.validators import validate_candidate_content
@@ -279,311 +271,46 @@ async def adapt_variant_content(
             content_type=content_type,
             include_finish_sentences=include_finish_sentences,
         )
-        prompt_version = (os.getenv("FEEDOPS_PROMPT_VERSION", "v1") or "v1").strip().lower()
-        if prompt_version == "v2":
-            parent_sku = load_parent_sku_from_supabase(variant_sku)
-            if not parent_sku:
-                return {
-                    "success": False,
-                    "error": f"SKU not found for v2 variant generation: {variant_sku}",
-                }
-
-            provider = get_provider()
-            generated = await generate_per_platform(
-                parent_sku=parent_sku,
-                provider=provider,
-                prompt_version="v2",
-            )
-            field_map = {
-                ("google", "title"): "google_title",
-                ("google", "description"): "google_description",
-                ("bing", "title"): "bing_title",
-                ("bing", "description"): "bing_description",
-                ("shopify", "title"): "shopify_title",
-                ("shopify", "description"): "shopify_description",
-            }
-            field_key = field_map.get((platform, content_type))
-            if not field_key:
-                return {
-                    "success": False,
-                    "error": f"Unsupported platform/content_type: {platform}/{content_type}",
-                }
-
-            new_content = str(generated.get(field_key, "")).strip()
-            finish_sentences = None
-            if content_type == "description" and platform in {"google", "bing"}:
-                raw_finish_sentences = generated.get("finish_sentences")
-                if isinstance(raw_finish_sentences, dict):
-                    finish_sentences = raw_finish_sentences
-
-            content_validation_errors = validate_adapted_variant_content(
-                content_type=content_type,
-                platform=platform,
-                content=new_content,
-            )
-            if content_validation_errors:
-                metrics_registry.increment(
-                    "validation_failure_total",
-                    type="variant_content_validation",
-                    platform=platform,
-                )
-                return {
-                    "success": False,
-                    "error": (
-                        "Variant adaptation failed policy validation: "
-                        + "; ".join(content_validation_errors[:3])
-                    ),
-                    "validation_errors": content_validation_errors,
-                }
-
-            current_result = (
-                supabase.table("generated_content")
-                .select("*")
-                .eq("master_sku", variant_sku)
-                .eq("platform", platform)
-                .eq("content_type", content_type)
-                .maybe_single()
-                .execute()
-            )
-            current_data = current_result.data if current_result and hasattr(current_result, "data") else None
-            current_version = current_data["version"] if current_data else 0
-            next_version = current_version + 1
-
-            prompt_hash = str(
-                generated.get("prompt_hashes", {}).get(platform, get_system_prompt_hash())
-            )
-            system_prompt = str(generated.get("system_prompts", {}).get(platform, get_system_prompt()))
-            user_prompt = str(generated.get("user_prompts", {}).get(platform, ""))
-            model = provider.name
-
-            if current_data:
-                supabase.table("generated_content").update(
-                    {
-                        "candidate_content": new_content,
-                        "version": next_version,
-                        "is_current": True,
-                        "generation_model": f"{model}-variant-v2",
-                        "generation_prompt_hash": prompt_hash,
-                        "generation_timestamp": datetime.now(timezone.utc).isoformat(),
-                    }
-                ).eq("id", current_data["id"]).execute()
-            else:
-                supabase.table("generated_content").insert(
-                    {
-                        "master_sku": variant_sku,
-                        "platform": platform,
-                        "content_type": content_type,
-                        "candidate_content": new_content,
-                        "version": 1,
-                        "is_current": True,
-                        "generation_model": f"{model}-variant-v2",
-                        "generation_prompt_hash": prompt_hash,
-                        "generation_timestamp": datetime.now(timezone.utc).isoformat(),
-                    }
-                ).execute()
-
-            content_id_result = (
-                supabase.table("generated_content")
-                .select("id")
-                .eq("master_sku", variant_sku)
-                .eq("platform", platform)
-                .eq("content_type", content_type)
-                .single()
-                .execute()
-            )
-            supabase.table("regeneration_history").insert(
-                {
-                    "generated_content_id": content_id_result.data["id"],
-                    "master_sku": variant_sku,
-                    "platform": platform,
-                    "content_type": content_type,
-                    "system_prompt": system_prompt,
-                    "user_prompt": user_prompt,
-                    "model_version": model,
-                    "prompt_hash": prompt_hash,
-                    "mode": "variant-adaptation-v2",
-                }
-            ).execute()
-
-            if finish_sentences and platform in {"google", "bing"}:
-                supabase.table("variant_finish_sentences").upsert(
-                    {
-                        "master_sku": variant_sku,
-                        "platform": platform,
-                        "finish_sentences": finish_sentences,
-                    },
-                    on_conflict="master_sku,platform",
-                ).execute()
-
-            metrics_registry.observe(
-                "generation_latency_seconds",
-                time.perf_counter() - started,
-                endpoint="adapt_variant_content",
-                provider=model,
-                platform=platform,
-                content_type=content_type,
-            )
-            return {"success": True, "content": new_content, "mode": "v2"}
-
-        # Get base content
-        base_result = (
-            supabase.table("generated_content")
-            .select("candidate_content, approved_content")
-            .eq("master_sku", base_sku)
-            .eq("platform", platform)
-            .eq("content_type", content_type)
-            .maybe_single()
-            .execute()
-        )
-
-        if not base_result.data:
+        parent_sku = load_parent_sku_from_supabase(variant_sku)
+        if not parent_sku:
             return {
                 "success": False,
-                "error": f"No base content found for {base_sku}/{platform}/{content_type}",
+                "error": f"SKU not found for v2 variant generation: {variant_sku}",
             }
 
-        base_content = base_result.data.get("approved_content") or base_result.data.get(
-            "candidate_content"
-        )
-        if not base_content:
-            return {
-                "success": False,
-                "error": f"Base content is empty for {base_sku}/{platform}/{content_type}",
-            }
-
-        # Get current content for version tracking
-        try:
-            current_result = (
-                supabase.table("generated_content")
-                .select("*")
-                .eq("master_sku", variant_sku)
-                .eq("platform", platform)
-                .eq("content_type", content_type)
-                .maybe_single()
-                .execute()
-            )
-
-            # Validate result
-            if not current_result or not hasattr(current_result, 'data'):
-                logger.warning(
-                    f"Query for existing content returned invalid result for {variant_sku}/{platform}/{content_type}"
-                )
-                current_result = type('obj', (object,), {'data': None})()
-        except Exception as e:
-            logger.warning(
-                f"Failed to query existing content for {variant_sku}/{platform}/{content_type}: {e}"
-            )
-            current_result = type('obj', (object,), {'data': None})()
-
-        # Build prompt
-        system_prompt = get_system_prompt()
-
-        user_prompt, requires_json = build_variant_adaptation_prompt(
-            content_type,
-            platform,
-            base_sku,
-            variant_sku,
-            base_content,
-            base_spec,
-            variant_spec,
-            include_finish_sentences=include_finish_sentences,
-        )
-
-        prompt_hash = get_system_prompt_hash()
-
-        # Call OpenAI
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        model = os.getenv("OPENAI_MODEL", "gpt-5.2")
-
-        completion = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.6,  # Lower than full generation (0.7)
-            max_completion_tokens=_variant_completion_tokens(
-                platform=platform, content_type=content_type, requires_json=requires_json
-            ),
-            **({"response_format": {"type": "json_object"}} if requires_json else {}),
-        )
-
-        raw_response = completion.choices[0].message.content.strip()
-
-        # Parse response
-        finish_sentences = None
-        if requires_json:
-            try:
-                parsed = json.loads(raw_response)
-                new_content = parsed.get("content", "").strip()
-                raw_finish_sentences = parsed.get("finish_sentences")
-
-                if not new_content:
-                    return {
-                        "success": False,
-                        "error": "Invalid JSON response: missing content field",
-                    }
-                if isinstance(raw_finish_sentences, dict):
-                    validated_finish_sentences, rejected = normalize_and_validate_finish_sentences(
-                        raw=raw_finish_sentences,
-                        finish_names=get_finish_list(),
-                        base_description=new_content,
-                    )
-                    if rejected:
-                        metrics_registry.increment(
-                            "validation_failure_total",
-                            type="variant_finish_sentence_rejected",
-                            platform=platform,
-                        )
-                        logger.warning(
-                            "Variant finish sentence validation rejected entries for %s/%s/%s: %s",
-                            variant_sku,
-                            platform,
-                            content_type,
-                            rejected,
-                        )
-                    if len(validated_finish_sentences) == len(get_finish_list()):
-                        finish_sentences = validated_finish_sentences
-                    else:
-                        metrics_registry.increment(
-                            "validation_failure_total",
-                            type="variant_finish_sentence_incomplete",
-                            platform=platform,
-                        )
-                        logger.warning(
-                            "Variant finish sentence payload incomplete for %s/%s/%s (%s/%s accepted)",
-                            variant_sku,
-                            platform,
-                            content_type,
-                            len(validated_finish_sentences),
-                            len(get_finish_list()),
-                        )
-            except json.JSONDecodeError as e:
-                metrics_registry.increment(
-                    "provider_error_total",
-                    provider=f"openai/{model}",
-                    error_type="JSONDecodeError",
-                )
-                logger.error(f"Failed to parse JSON response: {e}")
-                new_content = raw_response
-        else:
-            new_content = raw_response
-
+        provider = get_provider()
+        selected_platforms = [platform]
         if content_type == "description" and platform in {"google", "bing"}:
-            finish_names = get_finish_list()
-            new_content = normalize_base_description_with_finish_placeholder(
-                strip_hardcoded_finish_names(
-                    strip_generic_finish_count_claims(new_content),
-                    finish_names,
-                )
-            )
-            if not finish_sentences:
-                metrics_registry.increment(
-                    "validation_failure_total",
-                    type="variant_finish_sentence_fallback_used",
-                    platform=platform,
-                )
-                finish_sentences = build_fallback_finish_sentences(finish_names)
+            selected_platforms.append("finish")
+
+        generated = await generate_per_platform(
+            parent_sku=parent_sku,
+            provider=provider,
+            prompt_version="v2",
+            selected_platforms=selected_platforms,
+        )
+        field_map = {
+            ("google", "title"): "google_title",
+            ("google", "description"): "google_description",
+            ("bing", "title"): "bing_title",
+            ("bing", "description"): "bing_description",
+            ("shopify", "title"): "shopify_title",
+            ("shopify", "description"): "shopify_description",
+        }
+        field_key = field_map.get((platform, content_type))
+        if not field_key:
+            return {
+                "success": False,
+                "error": f"Unsupported platform/content_type: {platform}/{content_type}",
+            }
+
+        new_content = str(generated.get(field_key, "")).strip()
+        finish_sentences = None
+        if content_type == "description" and platform in {"google", "bing"}:
+            new_content = strip_generic_finish_count_claims(new_content)
+            raw_finish_sentences = generated.get("finish_sentences")
+            if isinstance(raw_finish_sentences, dict):
+                finish_sentences = raw_finish_sentences
 
         content_validation_errors = validate_adapted_variant_content(
             content_type=content_type,
@@ -596,13 +323,6 @@ async def adapt_variant_content(
                 type="variant_content_validation",
                 platform=platform,
             )
-            logger.warning(
-                "Variant adaptation validation failed for %s/%s/%s: %s",
-                variant_sku,
-                platform,
-                content_type,
-                content_validation_errors,
-            )
             return {
                 "success": False,
                 "error": (
@@ -612,21 +332,43 @@ async def adapt_variant_content(
                 "validation_errors": content_validation_errors,
             }
 
-        # Save to database
-        current_version = current_result.data["version"] if current_result.data else 0
+        current_result = (
+            supabase.table("generated_content")
+            .select("*")
+            .eq("master_sku", variant_sku)
+            .eq("platform", platform)
+            .eq("content_type", content_type)
+            .maybe_single()
+            .execute()
+        )
+        current_data = (
+            current_result.data
+            if current_result and hasattr(current_result, "data")
+            else None
+        )
+        current_version = current_data["version"] if current_data else 0
         next_version = current_version + 1
 
-        if current_result.data:
+        prompt_hash = str(
+            generated.get("prompt_hashes", {}).get(platform, get_system_prompt_hash())
+        )
+        system_prompt = str(
+            generated.get("system_prompts", {}).get(platform, get_system_prompt())
+        )
+        user_prompt = str(generated.get("user_prompts", {}).get(platform, ""))
+        model = provider.name
+
+        if current_data:
             supabase.table("generated_content").update(
                 {
                     "candidate_content": new_content,
                     "version": next_version,
                     "is_current": True,
-                    "generation_model": f"{model}-variant-adaptation",
+                    "generation_model": f"{model}-variant-v2",
                     "generation_prompt_hash": prompt_hash,
                     "generation_timestamp": datetime.now(timezone.utc).isoformat(),
                 }
-            ).eq("id", current_result.data["id"]).execute()
+            ).eq("id", current_data["id"]).execute()
         else:
             supabase.table("generated_content").insert(
                 {
@@ -636,13 +378,12 @@ async def adapt_variant_content(
                     "candidate_content": new_content,
                     "version": 1,
                     "is_current": True,
-                    "generation_model": f"{model}-variant-adaptation",
+                    "generation_model": f"{model}-variant-v2",
                     "generation_prompt_hash": prompt_hash,
                     "generation_timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             ).execute()
 
-        # Save to regeneration_history
         content_id_result = (
             supabase.table("generated_content")
             .select("id")
@@ -652,7 +393,6 @@ async def adapt_variant_content(
             .single()
             .execute()
         )
-
         supabase.table("regeneration_history").insert(
             {
                 "generated_content_id": content_id_result.data["id"],
@@ -663,12 +403,11 @@ async def adapt_variant_content(
                 "user_prompt": user_prompt,
                 "model_version": model,
                 "prompt_hash": prompt_hash,
-                "mode": "variant-adaptation",
+                "mode": "variant-adaptation-v2",
             }
         ).execute()
 
-        # Save finish_sentences if present (for descriptions)
-        if finish_sentences and platform in ["google", "bing"]:
+        if finish_sentences and platform in {"google", "bing"}:
             supabase.table("variant_finish_sentences").upsert(
                 {
                     "master_sku": variant_sku,
@@ -682,7 +421,7 @@ async def adapt_variant_content(
             "generation_latency_seconds",
             time.perf_counter() - started,
             endpoint="adapt_variant_content",
-            provider=f"openai/{model}",
+            provider=model,
             platform=platform,
             content_type=content_type,
         )
@@ -694,7 +433,7 @@ async def adapt_variant_content(
             platform=platform,
             content_type=content_type,
         )
-        return {"success": True, "content": new_content}
+        return {"success": True, "content": new_content, "mode": "v2"}
 
     except Exception as e:
         metrics_registry.increment(

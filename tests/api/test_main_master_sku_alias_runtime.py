@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from types import SimpleNamespace
 
 import pytest
@@ -12,29 +13,104 @@ class _NoopProvider:
     name = "test/provider"
 
 
-class _WriteTable:
-    def __init__(self, db: "_WriteSupabase", table_name: str):
+class _TableQuery:
+    def __init__(self, db: "_FakeSupabase", table_name: str):
         self._db = db
         self._table_name = table_name
+        self._op = "select"
+        self._payload: dict | None = None
+        self._filters: dict[str, object] = {}
 
-    def upsert(self, payload, **_kwargs):
-        self._db.ops.append({"table": self._table_name, "op": "upsert", "payload": payload})
+    def select(self, _columns: str):
+        # Preserve write intent for insert/update(...).select("id") chains.
+        if self._op == "select":
+            self._op = "select"
         return self
 
-    def insert(self, payload, **_kwargs):
-        self._db.ops.append({"table": self._table_name, "op": "insert", "payload": payload})
+    def limit(self, _n: int):
+        return self
+
+    def eq(self, key: str, value):
+        self._filters[key] = value
+        return self
+
+    def in_(self, _key: str, _values: list):
+        return self
+
+    def maybe_single(self):
+        return self
+
+    def single(self):
+        return self
+
+    def upsert(self, payload: dict, **_kwargs):
+        self._op = "upsert"
+        self._payload = deepcopy(payload)
+        return self
+
+    def update(self, payload: dict, **_kwargs):
+        self._op = "update"
+        self._payload = deepcopy(payload)
+        return self
+
+    def insert(self, payload: dict | list[dict], **_kwargs):
+        self._op = "insert"
+        self._payload = deepcopy(payload if isinstance(payload, dict) else payload[0])
         return self
 
     def execute(self):
+        if self._op == "select":
+            if self._table_name == "generated_content":
+                row = self._db.generated_content_row
+                if not row:
+                    return SimpleNamespace(data=None)
+                for key, value in self._filters.items():
+                    if row.get(key) != value:
+                        return SimpleNamespace(data=None)
+                return SimpleNamespace(data=deepcopy(row))
+            if self._table_name == "sku_corrections":
+                return SimpleNamespace(data=[])
+            return SimpleNamespace(data=None)
+
+        payload = deepcopy(self._payload or {})
+        self._db.ops.append({"table": self._table_name, "op": self._op, "payload": payload})
+
+        if self._table_name == "generated_content":
+            if self._op == "insert":
+                generated_id = payload.get("id") or "generated-new"
+                payload["id"] = generated_id
+                self._db.generated_content_row = payload
+                return SimpleNamespace(data={"id": generated_id})
+            if self._op == "update":
+                row = self._db.generated_content_row or {}
+                if self._filters.get("id") and row.get("id") != self._filters["id"]:
+                    return SimpleNamespace(data=None)
+                row.update(payload)
+                row.setdefault("id", "generated-existing")
+                self._db.generated_content_row = row
+                return SimpleNamespace(data={"id": row["id"]})
+            if self._op == "upsert":
+                row = self._db.generated_content_row or {}
+                row.update(payload)
+                row.setdefault("id", "generated-upsert")
+                self._db.generated_content_row = row
+                return SimpleNamespace(data=[{"id": row["id"]}])
+
+        if self._table_name == "regeneration_history" and self._op == "insert":
+            self._db.history_rows.append(payload)
+            return SimpleNamespace(data=[{"id": "history-1"}])
+
         return SimpleNamespace(data=[{"id": "row-1"}])
 
 
-class _WriteSupabase:
-    def __init__(self):
+class _FakeSupabase:
+    def __init__(self, generated_content_row: dict | None = None):
+        self.generated_content_row = deepcopy(generated_content_row)
         self.ops: list[dict] = []
+        self.history_rows: list[dict] = []
 
     def table(self, table_name: str):
-        return _WriteTable(self, table_name)
+        return _TableQuery(self, table_name)
 
 
 def _sample_parent(master_sku: str) -> ParentSKU:
@@ -55,64 +131,21 @@ def _sample_parent(master_sku: str) -> ParentSKU:
     )
 
 
-@pytest.mark.asyncio
-async def test_optimize_single_sku_persists_canonical_master_sku(monkeypatch):
-    requested = "WP-2TB-16-GAL"
-    canonical = "WP-2TB/16-GAL"
-    writes = _WriteSupabase()
-    persisted_master_skus: list[str] = []
-
-    async def _fake_generate_with_metrics(**_kwargs):
-        return {"content": "Base candidate content."}
-
-    async def _fake_enforce_finish_sentence_parity(**_kwargs):
-        return ("Base candidate content with {FINISH_SENTENCE}.", {"Antique Brass": "Sentence."})
-
-    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
-    monkeypatch.setattr(
-        api_main,
-        "resolve_canonical_master_sku",
-        lambda _supabase, _master_sku: canonical,
-        raising=False,
-    )
-    monkeypatch.setattr(api_main, "get_client", lambda: writes)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _parent: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _e: "evidence")
-    monkeypatch.setattr(api_main, "_generate_with_metrics", _fake_generate_with_metrics)
-    monkeypatch.setattr(api_main, "_enforce_finish_sentence_parity", _fake_enforce_finish_sentence_parity)
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
-    monkeypatch.setattr(
-        api_main,
-        "_persist_generated_content_and_history",
-        lambda **kwargs: persisted_master_skus.append(kwargs["master_sku"]),
-    )
-
-    request = api_main.OptimizeRequest(master_sku=requested, dry_run=False)
-    response = await api_main.optimize_single_sku(request)
-
-    assert response.success is True
-    assert response.master_sku == canonical
-    assert persisted_master_skus
-    assert set(persisted_master_skus) == {canonical}
-    finish_rows = [op for op in writes.ops if op["table"] == "variant_finish_sentences"]
-    assert finish_rows
-    assert {row["payload"]["master_sku"] for row in finish_rows} == {canonical}
+def _base_generated_payload(content: str) -> dict:
+    return {
+        "google_title": content,
+        "prompt_hashes": {"google": "hash-google"},
+        "system_prompts": {"google": "sys-google"},
+        "user_prompts": {"google": "user-google"},
+        "latency_by_platform": {"google": 125},
+    }
 
 
 @pytest.mark.asyncio
 async def test_regenerate_content_writes_canonical_master_sku(monkeypatch):
     requested = "WP-2TB-16-GAL"
     canonical = "WP-2TB/16-GAL"
-    writes = _WriteSupabase()
-
-    async def _fake_generate_with_metrics(**_kwargs):
-        return {"content": "Generated description text."}
-
-    async def _fake_enforce_finish_sentence_parity(**_kwargs):
-        return ("Generated description with {FINISH_SENTENCE}.", {"Antique Brass": "Sentence."})
+    writes = _FakeSupabase()
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
@@ -123,23 +156,20 @@ async def test_regenerate_content_writes_canonical_master_sku(monkeypatch):
     )
     monkeypatch.setattr(api_main, "get_client", lambda: writes)
     monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _parent: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _e: "evidence")
-    monkeypatch.setattr(api_main, "_generate_with_metrics", _fake_generate_with_metrics)
-    monkeypatch.setattr(api_main, "_enforce_finish_sentence_parity", _fake_enforce_finish_sentence_parity)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-canonical")
     monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    async def _fake_generate_per_platform(**_kwargs):
+        return _base_generated_payload("Canonical regenerated title")
     monkeypatch.setattr(
         api_main,
-        "_lookup_generated_content_id",
-        lambda **_kwargs: "row-1",
+        "generate_per_platform",
+        _fake_generate_per_platform,
     )
 
     request = api_main.RegenerateRequest(
         master_sku=requested,
         platform="google",
-        content_type="description",
+        content_type="title",
     )
     response = await api_main.regenerate_content(request)
 
@@ -152,3 +182,105 @@ async def test_regenerate_content_writes_canonical_master_sku(monkeypatch):
     assert {
         op["payload"]["master_sku"] for op in writes_for_generated_content
     } == {canonical}
+
+
+@pytest.mark.asyncio
+async def test_regenerate_content_no_change_returns_idempotent_without_writes(monkeypatch):
+    canonical = "WP-2TB/16-GAL"
+    existing_row = {
+        "id": "generated-existing",
+        "master_sku": canonical,
+        "platform": "google",
+        "content_type": "title",
+        "candidate_content": "No change title",
+        "version": 4,
+    }
+    db = _FakeSupabase(generated_content_row=existing_row)
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, _master_sku: canonical,
+        raising=False,
+    )
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-no-change")
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    async def _fake_generate_per_platform(**_kwargs):
+        return _base_generated_payload("No change title")
+    monkeypatch.setattr(
+        api_main,
+        "generate_per_platform",
+        _fake_generate_per_platform,
+    )
+
+    request = api_main.RegenerateRequest(
+        master_sku=canonical,
+        platform="google",
+        content_type="title",
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.state == "no_change"
+    assert response.idempotent is True
+    assert response.version == 4
+    assert response.generated_content_id == "generated-existing"
+    assert response.request_id == "req-no-change"
+    assert not [op for op in db.ops if op["table"] == "generated_content"]
+    assert not [op for op in db.ops if op["table"] == "regeneration_history"]
+
+
+@pytest.mark.asyncio
+async def test_regenerate_content_change_updates_version_and_writes_single_history_row(monkeypatch):
+    canonical = "WP-2TB/16-GAL"
+    existing_row = {
+        "id": "generated-existing",
+        "master_sku": canonical,
+        "platform": "google",
+        "content_type": "title",
+        "candidate_content": "Old title",
+        "version": 2,
+    }
+    db = _FakeSupabase(generated_content_row=existing_row)
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, _master_sku: canonical,
+        raising=False,
+    )
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-changed")
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    async def _fake_generate_per_platform(**_kwargs):
+        return _base_generated_payload("Updated title")
+    monkeypatch.setattr(
+        api_main,
+        "generate_per_platform",
+        _fake_generate_per_platform,
+    )
+
+    request = api_main.RegenerateRequest(
+        master_sku=canonical,
+        platform="google",
+        content_type="title",
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.state == "completed"
+    assert response.idempotent is False
+    assert response.version == 3
+    assert response.generated_content_id == "generated-existing"
+    assert response.request_id == "req-changed"
+
+    generated_writes = [op for op in db.ops if op["table"] == "generated_content"]
+    history_writes = [op for op in db.ops if op["table"] == "regeneration_history"]
+    assert len(generated_writes) == 1
+    assert generated_writes[0]["op"] == "update"
+    assert len(history_writes) == 1
+    assert history_writes[0]["payload"]["generated_content_id"] == "generated-existing"
+    assert history_writes[0]["payload"]["request_id"] == "req-changed"

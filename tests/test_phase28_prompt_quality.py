@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import hashlib
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -84,14 +85,14 @@ def test_prompt_experiment_variant_unknown_falls_back(monkeypatch) -> None:
     assert get_prompt_experiment_variant() == "control"
 
 
-def test_parse_json_payload_emits_markdown_fence_parse_details() -> None:
+def test_parse_json_payload_missing_required_keys_raises_parse_failure() -> None:
     parse_details: dict[str, object] = {}
-    payload = _parse_json_payload(
-        "```json\n{\"google_title\":\"T\"}\n```",
-        expected_keys={"google_title", "google_description"},
-        parse_details=parse_details,
-    )
-    assert payload["google_title"] == "T"
+    with pytest.raises(json.JSONDecodeError):
+        _parse_json_payload(
+            "```json\n{\"google_title\":\"T\"}\n```",
+            expected_keys={"google_title", "google_description"},
+            parse_details=parse_details,
+        )
     assert parse_details["parse_mode"] == "markdown_fence"
     assert parse_details["missing_keys"] == ["google_description"]
     assert parse_details["parsed_key_count"] == 1
