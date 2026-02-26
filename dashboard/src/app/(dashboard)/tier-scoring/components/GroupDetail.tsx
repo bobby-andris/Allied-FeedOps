@@ -239,7 +239,7 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
               </TableHeader>
               <TableBody>
                 {misplacedTerms.map(term => (
-                  <TableRow key={term.searchTerm}>
+                  <TableRow key={`${term.searchTerm}::${term.customLabel0}`}>
                     <TableCell className="font-medium max-w-[200px] truncate" title={term.searchTerm}>
                       {term.searchTerm}
                     </TableCell>

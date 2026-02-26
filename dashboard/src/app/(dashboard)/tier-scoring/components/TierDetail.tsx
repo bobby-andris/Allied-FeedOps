@@ -218,7 +218,7 @@ export function TierDetail({
             <TableBody>
               {sortedScores.map(term => (
                 <TableRow
-                  key={term.searchTerm}
+                  key={`${term.searchTerm}::${term.customLabel0}`}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => onSelectTerm(term)}
                 >
@@ -268,7 +268,7 @@ export function TierDetail({
           <CardContent className="space-y-2">
             {misplacedTerms.map(term => (
               <MisplacedTermRow
-                key={term.searchTerm}
+                key={`${term.searchTerm}::${term.customLabel0}`}
                 term={term}
                 onClick={() => onSelectTerm(term)}
               />

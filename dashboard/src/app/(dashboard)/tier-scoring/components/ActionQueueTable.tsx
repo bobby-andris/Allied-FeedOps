@@ -80,7 +80,7 @@ export function ActionQueueTable({ terms, onSelectTerm, recommendationStatuses, 
           const status = recommendationStatuses?.[key]
           return (
             <ActionQueueRow
-              key={term.searchTerm}
+              key={key}
               term={term}
               rank={i + 1}
               onViewDetails={onSelectTerm}

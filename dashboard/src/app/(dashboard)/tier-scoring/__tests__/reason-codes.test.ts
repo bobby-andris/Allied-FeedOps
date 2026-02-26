@@ -49,7 +49,8 @@ describe('classifyLeakageReason', () => {
   it('returns wasted_spend for zero conversions with meaningful spend', () => {
     const term = makeTermScore({
       totalConversions: 0,
-      totalCostMicros: 10_000_000, // $10 > $5 threshold
+      totalCostMicros: 10_000_000,
+      trigger: 'wasted_spend', // scoring engine sets trigger for wasted spend terms
     })
     expect(classifyLeakageReason(term)).toBe('wasted_spend')
   })
@@ -75,7 +76,8 @@ describe('classifyLeakageReason', () => {
   it('wasted_spend takes priority over under_invested', () => {
     const term = makeTermScore({
       totalConversions: 0,
-      totalCostMicros: 8_000_000, // > $5 threshold
+      totalCostMicros: 8_000_000,
+      trigger: 'wasted_spend', // scoring engine sets trigger; takes priority over under_invested
       impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'upward' },
     })
     const keywordData: KeywordData = { avgMonthlySearches: 10000 }
