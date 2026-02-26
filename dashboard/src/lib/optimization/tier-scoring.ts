@@ -248,14 +248,17 @@ export function scoreTerm(
 
   const dataConfirmed = recommendedTier === currentTier && hasMinimumData && meetsConfidenceFloor
 
-  // Determine prescriptive action
-  const recommendedAction = determineAction(currentTier, recommendedTier, term.total_conversions, term.total_cost_micros, isMisplaced)
+  // Determine prescriptive action using ROAS-based logic
+  const currentTierDist = chooseDist(currentTier)
+  const { action: recommendedAction, targetTier } = determineAction(
+    currentTier, currentTierDist, termRoas, term.total_conversions, term.total_cost_micros, isMisplaced
+  )
 
   // Impact: compute for misplaced OR wasted spend terms
   const isWastedSpend = term.total_conversions === 0 && term.total_cost_micros > 5_000_000
   let impact: ImpactRange | null = null
   if (isMisplaced || isWastedSpend) {
-    impact = estimateImpact(term, chooseDist(currentTier), chooseDist(recommendedTier), config)
+    impact = estimateImpact(term, chooseDist(currentTier), chooseDist(targetTier), config)
   }
 
   // Prescriptive verdict and action reason
@@ -268,11 +271,11 @@ export function scoreTerm(
       if (term.total_conversions === 0) {
         actionReason = `Constrain to HIGH — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
       } else {
-        actionReason = `Constrain — underperforming in ${currentTier}, move to ${recommendedTier} for restricted bidding`
+        actionReason = `Constrain — underperforming in ${currentTier}, move to ${targetTier} for restricted bidding`
       }
       break
     case 'promote':
-      actionReason = `Promote to ${recommendedTier} — strong performer in constrained ${currentTier} tier`
+      actionReason = `Promote to ${targetTier} — strong performer in constrained ${currentTier} tier`
       break
     default:
       actionReason = `Aligned — performing as expected in ${currentTier}`
@@ -483,30 +486,41 @@ export function buildHeroCallout(scores: TermScore[]): string {
 
 function determineAction(
   currentTier: FunnelTier,
-  recommendedTier: FunnelTier,
+  currentTierDist: TierDistribution,
+  termRoas: number,
   totalConversions: number,
   totalCostMicros: number,
   isMisplaced: boolean
-): RecommendedAction {
+): { action: RecommendedAction; targetTier: FunnelTier } {
   const costDollars = totalCostMicros / 1_000_000
-  const funnelDepth: Record<FunnelTier, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 }
+  const TIER_UP: Record<FunnelTier, FunnelTier> = { HIGH: 'HIGH', MEDIUM: 'HIGH', LOW: 'MEDIUM' }
+  const TIER_DOWN: Record<FunnelTier, FunnelTier> = { HIGH: 'MEDIUM', MEDIUM: 'LOW', LOW: 'LOW' }
 
-  // 1. Wasted spend: zero conversions + meaningful spend
+  // 1. Wasted spend: zero conversions + meaningful spend (unchanged)
   if (totalConversions === 0 && costDollars > 5) {
-    return currentTier === 'HIGH' ? 'block' : 'constrain'
+    if (currentTier === 'HIGH') return { action: 'block', targetTier: 'HIGH' }
+    return { action: 'constrain', targetTier: 'HIGH' }
   }
 
-  // 2. Misplaced: determine direction
-  if (isMisplaced) {
-    if (funnelDepth[recommendedTier] > funnelDepth[currentTier]) {
-      return 'promote'  // push down funnel for aggressive bidding
-    }
-    if (funnelDepth[recommendedTier] < funnelDepth[currentTier]) {
-      return 'constrain'  // push up funnel to restrict bidding
-    }
+  // 2. Not flagged as misplaced by calibration gates — observe
+  if (!isMisplaced) return { action: 'observe', targetTier: currentTier }
+
+  // 3. ROAS-based action: compare term ROAS against current tier's distribution
+  const p25 = currentTierDist.metrics.roas.p25
+  const p75 = currentTierDist.metrics.roas.p75
+
+  // Underperformer: ROAS below current tier's p25 — constrain (move UP toward HIGH)
+  if (termRoas < p25 && currentTier !== 'HIGH') {
+    return { action: 'constrain', targetTier: TIER_UP[currentTier] }
   }
 
-  return 'observe'
+  // High performer: ROAS above current tier's p75 — promote (move DOWN toward LOW)
+  if (termRoas > p75 && currentTier !== 'LOW') {
+    return { action: 'promote', targetTier: TIER_DOWN[currentTier] }
+  }
+
+  // Within IQR or at boundary tier — observe
+  return { action: 'observe', targetTier: currentTier }
 }
 
 function computeSingleTierDistribution(
