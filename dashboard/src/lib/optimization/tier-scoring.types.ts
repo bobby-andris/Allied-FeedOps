@@ -124,6 +124,10 @@ export interface TermScore {
   actionReason?: string // why (prescriptive explanation)
   targetTier?: FunnelTier // the tier determineAction wants to move to
   totalImpressions?: number // needed for under_invested fix in Plan 02
+  totalClicks?: number // raw clicks for detail page display
+  totalConversionsValue?: number // revenue for detail page display
+  totalAverageCpcMicros?: number // weighted avg CPC in micros for detail page display
+  totalAllConversions?: number // includes micro-conversions for detail page display
   behavioralSignals?: BehavioralSignals // Domain B: behavioral intent from Google Ads data
   intentScore?: IntentScoreBreakdown // Unified intent score combining feed alignment + behavioral
   trigger?: string // which trigger fired in determineAction (wasted_spend, demote_underperform, promote_conversion, promote_intent, under_invested, observe)
