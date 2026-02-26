@@ -147,7 +147,7 @@ export function GroupOverview({ distributions, scores, onSelectGroup }: GroupOve
                 {/* Footer */}
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t">
                   <span>
-                    {group.scoredTerms} of {group.totalTerms} terms scored
+                    {group.scoredTerms} terms scored
                     {misplacedCount > 0 && (
                       <> &middot; <span className="text-amber-600 font-medium">{misplacedCount} {misplacedCount !== 1 ? 'opportunities' : 'opportunity'}</span></>
                     )}

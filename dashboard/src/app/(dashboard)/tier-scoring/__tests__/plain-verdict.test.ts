@@ -21,6 +21,7 @@ function makeTermScore(overrides: Partial<TermScore> = {}): TermScore {
     fallbackLevel: 'per_group',
     totalConversions: 5,
     totalCostMicros: 3_000_000,
+    actualRoas: 3.5,
     verdict: 'original verdict',
     peerContext: 'ranks in top 15% of Towel Bar terms',
     ...overrides,

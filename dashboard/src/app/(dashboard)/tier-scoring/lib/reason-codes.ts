@@ -41,12 +41,12 @@ export function classifyLeakageReason(
     return 'wasted_spend'
   }
 
-  // Under-invested: keyword data shows impression share gap
+  // Under-invested: high-converting term stuck in a constrained tier
+  // In the waterfall, under-invested terms should move DOWN toward LOW (aggressive bidding).
+  // direction === 'downward' means moving toward LOW (deeper in funnel = more aggressive).
   if (keywordData?.avgMonthlySearches && term.impact) {
-    // If market volume is 2x+ what we're capturing AND direction is upward,
-    // this term is under-invested (could get more traffic with proper tier placement)
     if (
-      term.impact.direction === 'upward' &&
+      term.impact.direction === 'downward' &&
       keywordData.avgMonthlySearches > UNDER_INVESTED_MULTIPLIER * (term.totalCostMicros > 0 ? 1 : 0)
     ) {
       return 'under_invested'

@@ -81,6 +81,7 @@ export interface TermScore {
   fallbackLevel: FallbackLevel
   totalConversions: number // raw conversions for wasted spend detection (LEAK-03)
   totalCostMicros: number // raw cost for wasted spend detection (LEAK-03)
+  actualRoas: number // actual ROAS = conversions_value / spend
   verdict: string // plain English explanation
   peerContext: string // e.g., "ranks in top 15% of Towel Bar terms"
 }

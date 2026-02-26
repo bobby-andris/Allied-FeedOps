@@ -45,14 +45,17 @@ const DEFAULT_METRIC_DIST: MetricDistribution = {
   p25: 0, p50: 0, p75: 0, mean: 0, mad: 0, min: 0, max: 0,
 }
 
+// Waterfall Shopping defaults: HIGH priority = top-of-funnel (broad, constrained bidding, lowest ROAS),
+// LOW priority = bottom-of-funnel (high-intent, aggressive bidding, highest ROAS).
+// See docs/domain/waterfall-shopping-structure.md for full explanation.
 const DEFAULT_DISTRIBUTIONS: Record<FunnelTier, TierDistribution> = {
   HIGH: {
     tier: 'HIGH',
     metrics: {
-      roas: { p25: 4.0, p50: 5.5, p75: 8.0, mean: 6.0, mad: 1.5, min: 3.0, max: 15.0 },
-      cvr: { p25: 0.04, p50: 0.06, p75: 0.10, mean: 0.07, mad: 0.02, min: 0.02, max: 0.20 },
-      cpc: { p25: 0.50, p50: 0.80, p75: 1.20, mean: 0.85, mad: 0.25, min: 0.20, max: 2.00 },
-      ctr: { p25: 0.03, p50: 0.05, p75: 0.08, mean: 0.05, mad: 0.02, min: 0.01, max: 0.15 },
+      roas: { p25: 0.5, p50: 1.2, p75: 2.0, mean: 1.2, mad: 0.5, min: 0.0, max: 3.0 },
+      cvr: { p25: 0.005, p50: 0.01, p75: 0.02, mean: 0.01, mad: 0.005, min: 0.0, max: 0.05 },
+      cpc: { p25: 0.30, p50: 0.50, p75: 0.80, mean: 0.55, mad: 0.15, min: 0.10, max: 1.20 },
+      ctr: { p25: 0.01, p50: 0.02, p75: 0.03, mean: 0.02, mad: 0.008, min: 0.002, max: 0.06 },
     },
     sampleSize: 0,
     fallbackLevel: 'defaults',
@@ -71,10 +74,10 @@ const DEFAULT_DISTRIBUTIONS: Record<FunnelTier, TierDistribution> = {
   LOW: {
     tier: 'LOW',
     metrics: {
-      roas: { p25: 0.5, p50: 1.2, p75: 2.0, mean: 1.2, mad: 0.5, min: 0.0, max: 3.0 },
-      cvr: { p25: 0.005, p50: 0.01, p75: 0.02, mean: 0.01, mad: 0.005, min: 0.0, max: 0.05 },
-      cpc: { p25: 0.30, p50: 0.50, p75: 0.80, mean: 0.55, mad: 0.15, min: 0.10, max: 1.20 },
-      ctr: { p25: 0.01, p50: 0.02, p75: 0.03, mean: 0.02, mad: 0.008, min: 0.002, max: 0.06 },
+      roas: { p25: 4.0, p50: 5.5, p75: 8.0, mean: 6.0, mad: 1.5, min: 3.0, max: 15.0 },
+      cvr: { p25: 0.04, p50: 0.06, p75: 0.10, mean: 0.07, mad: 0.02, min: 0.02, max: 0.20 },
+      cpc: { p25: 0.50, p50: 0.80, p75: 1.20, mean: 0.85, mad: 0.25, min: 0.20, max: 2.00 },
+      ctr: { p25: 0.03, p50: 0.05, p75: 0.08, mean: 0.05, mad: 0.02, min: 0.01, max: 0.15 },
     },
     sampleSize: 0,
     fallbackLevel: 'defaults',
@@ -272,6 +275,7 @@ export function scoreTerm(
     fallbackLevel,
     totalConversions: term.total_conversions,
     totalCostMicros: term.total_cost_micros,
+    actualRoas: termRoas,
     verdict,
     peerContext,
   }
@@ -301,21 +305,31 @@ export function computeConfidence(
   // Statistical significance (20%): conversions / 10, capped at 1
   const significance = Math.min(term.total_conversions / 10, 1)
 
-  // NLP alignment (20%): intent → tier alignment
+  // NLP alignment (20%): query specificity → tier alignment
+  // Waterfall model: specific/transactional → LOW (aggressive bidding), broad/generic → HIGH (constrained)
+  // Branded terms have separate campaigns and should NOT appear in the waterfall structure.
+  // If they do appear, treat as anomaly (low alignment in any tier).
   let intentAlignment = 0.5 // neutral default
   if (intentFeatures && currentTier) {
-    if (intentFeatures.is_branded && currentTier === 'HIGH') {
-      intentAlignment = 0.9 // branded queries convert well in HIGH
-    } else if (intentFeatures.is_branded && currentTier !== 'HIGH') {
-      intentAlignment = 0.3
-    } else if (intentFeatures.is_competitor && currentTier === 'LOW') {
-      intentAlignment = 0.8 // competitor queries are defensive in LOW
-    } else if (intentFeatures.is_competitor && currentTier !== 'LOW') {
-      intentAlignment = 0.3
-    } else if (intentFeatures.product_object && currentTier === 'MEDIUM') {
-      intentAlignment = 0.7 // product-specific terms align with MEDIUM
+    if (intentFeatures.is_branded) {
+      // Branded terms shouldn't be in the waterfall — separate campaigns handle these.
+      // Low alignment regardless of tier signals a routing anomaly.
+      intentAlignment = 0.2
+    } else if (intentFeatures.is_competitor) {
+      // Competitor terms are defensive — keep constrained in HIGH/MEDIUM to limit spend
+      if (currentTier === 'HIGH') intentAlignment = 0.7
+      else if (currentTier === 'MEDIUM') intentAlignment = 0.5
+      else intentAlignment = 0.3 // competitor in LOW = risky aggressive spend
+    } else if (intentFeatures.product_object) {
+      // Product-specific terms (e.g., "brass toilet paper holder") = mid-to-high intent
+      if (currentTier === 'LOW') intentAlignment = 0.8
+      else if (currentTier === 'MEDIUM') intentAlignment = 0.7
+      else intentAlignment = 0.4 // product-specific stuck in broad tier
     } else {
-      intentAlignment = 0.5
+      // Generic/broad terms belong in HIGH (constrained)
+      if (currentTier === 'HIGH') intentAlignment = 0.7
+      else if (currentTier === 'MEDIUM') intentAlignment = 0.5
+      else intentAlignment = 0.3 // generic in LOW = wasting aggressive bids
     }
   }
 
@@ -357,11 +371,14 @@ export function estimateImpact(
   const midDelta = targetRoasP50 - currentRoas
   const highDelta = targetRoasP75 - currentRoas
 
-  // Determine movement direction
-  const tierRank: Record<FunnelTier, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 }
+  // Determine movement direction in the waterfall funnel
+  // "promote" (downward in funnel) = moving toward LOW (more aggressive bidding, higher intent)
+  // "demote" (upward in funnel) = moving toward HIGH (more constrained bidding)
+  // funnelDepth: HIGH=1 (top/broad), MEDIUM=2, LOW=3 (bottom/high-intent)
+  const funnelDepth: Record<FunnelTier, number> = { HIGH: 1, MEDIUM: 2, LOW: 3 }
   const direction: 'upward' | 'downward' | 'lateral' =
-    tierRank[targetDist.tier] > tierRank[currentDist.tier] ? 'upward'
-    : tierRank[targetDist.tier] < tierRank[currentDist.tier] ? 'downward'
+    funnelDepth[targetDist.tier] > funnelDepth[currentDist.tier] ? 'downward'
+    : funnelDepth[targetDist.tier] < funnelDepth[currentDist.tier] ? 'upward'
     : 'lateral'
 
   return {

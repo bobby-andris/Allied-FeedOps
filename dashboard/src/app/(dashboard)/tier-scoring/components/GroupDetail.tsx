@@ -89,7 +89,7 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
           groupName={group.customLabel0}
         />
         <span className="text-sm text-muted-foreground">
-          {group.scoredTerms} of {group.totalTerms} terms scored
+          {group.scoredTerms} terms scored
         </span>
       </div>
 

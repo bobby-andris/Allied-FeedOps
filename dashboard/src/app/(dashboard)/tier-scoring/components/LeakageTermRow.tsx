@@ -81,7 +81,9 @@ export function LeakageTermRow({
 
   const handleDemote = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onApprove(term, { recommendedAction: 'funnel', recommendedTier: 'low' })
+    // Wasted spend "Demote" pushes UP the funnel to HIGH — where restrictive tROAS/CPC caps constrain spending.
+    // NOT to LOW, which would unleash aggressive bidding on a non-converting term.
+    onApprove(term, { recommendedAction: 'funnel', recommendedTier: 'high' })
   }
 
   const handleReject = (e: React.MouseEvent) => {
@@ -169,9 +171,10 @@ export function LeakageTermRow({
                     size="sm"
                     onClick={handleDemote}
                     className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
+                    title="Push to HIGH tier where restrictive settings constrain spending"
                   >
                     <ArrowDown className="h-3.5 w-3.5" />
-                    Demote
+                    Constrain
                   </Button>
                 </>
               ) : (
@@ -260,11 +263,11 @@ export function LeakageTermRow({
         <div className="px-4 pb-3 pt-1 border-t bg-muted/30 text-sm space-y-2">
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-muted-foreground">
             <span>
-              Current ROAS: {term.tierFitScores[term.currentTier]?.toFixed(2) ?? 'N/A'}
+              Actual ROAS: {term.actualRoas?.toFixed(2) ?? 'N/A'}x
             </span>
             <span>Peer average: {term.peerContext}</span>
             <span>
-              Tier fit: {term.tierFitScores[term.currentTier]?.toFixed(2) ?? '?'} &rarr;{' '}
+              Fit score: {term.tierFitScores[term.currentTier]?.toFixed(2) ?? '?'} &rarr;{' '}
               {term.tierFitScores[term.recommendedTier]?.toFixed(2) ?? '?'}
             </span>
           </div>

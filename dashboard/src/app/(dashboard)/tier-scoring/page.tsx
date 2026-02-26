@@ -248,7 +248,10 @@ export default function TierScoringPage() {
             onApprove={recommendations.approve}
             onReject={recommendations.reject}
             onUndo={recommendations.undo}
-            onViewDetails={setActionSelectedTerm}
+            onViewDetails={(term) => {
+              setActionSelectedTerm(term)
+              setActiveTab('actions')
+            }}
           />
         </TabsContent>
 

@@ -31,6 +31,7 @@ function makeTermScore(overrides: Partial<TermScore> = {}): TermScore {
     fallbackLevel: 'per_group',
     totalConversions: 5,
     totalCostMicros: 3_000_000,
+    actualRoas: 3.5,
     verdict: 'test verdict',
     peerContext: 'ranks in top 15% of Towel Bar terms',
     ...overrides,
@@ -50,11 +51,11 @@ describe('classifyLeakageReason', () => {
     expect(classifyLeakageReason(term)).toBe('wasted_spend')
   })
 
-  it('returns under_invested when keyword data shows search gap and direction is upward', () => {
+  it('returns under_invested when keyword data shows search gap and direction is downward (toward LOW)', () => {
     const term = makeTermScore({
       totalConversions: 5,
       totalCostMicros: 3_000_000,
-      impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'upward' },
+      impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'downward' },
     })
     const keywordData: KeywordData = { avgMonthlySearches: 5000 }
     expect(classifyLeakageReason(term, keywordData)).toBe('under_invested')
@@ -94,11 +95,11 @@ describe('classifyLeakageReason', () => {
     expect(classifyLeakageReason(term)).toBe('misplaced')
   })
 
-  it('returns misplaced when keyword data exists but direction is downward', () => {
+  it('returns misplaced when keyword data exists but direction is upward (toward HIGH)', () => {
     const term = makeTermScore({
       totalConversions: 5,
       totalCostMicros: 3_000_000,
-      impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'downward' },
+      impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'upward' },
     })
     const keywordData: KeywordData = { avgMonthlySearches: 5000 }
     expect(classifyLeakageReason(term, keywordData)).toBe('misplaced')
@@ -145,7 +146,7 @@ describe('classifyAllTerms', () => {
         isMisplaced: true,
         totalConversions: 5,
         totalCostMicros: 3_000_000,
-        impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'upward' },
+        impact: { low: 50, mid: 120, high: 200, currency: 'USD', period: 'monthly', direction: 'downward' },
       }),
     ]
     const kwMap = new Map<string, KeywordData>([
