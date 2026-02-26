@@ -21,6 +21,7 @@ import {
   FlaskConical,
   Target,
   TrendingUp,
+  Compass,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -45,6 +46,7 @@ const navigation: NavItem[] = [
   { name: 'Search Insights', href: '/search-insights', icon: Search },
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
   { name: 'Tier Intelligence', href: '/tier-scoring', icon: Target },
+  { name: 'Market Intelligence', href: '/market-intelligence', icon: Compass },
   { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge, badge: 'Soon' },
   { name: 'Intent Control', href: '/intent-control-center', icon: Gauge, badge: 'Soon' },
   { name: 'Search Governance', href: '/search-governance', icon: GitBranch },
