@@ -23,9 +23,9 @@ export interface ClassifiedTerm extends TermScore {
 }
 
 // Wasted spend classification now driven by the trigger from determineAction()
-// which uses the calibrated 1.5x avgCPA threshold ($96.33).
-// Fallback uses same calibrated value: avgCPA $64.22 * 1.5 = $96.33
-const WASTED_SPEND_FALLBACK_MICROS = 96_330_000
+// which uses the term-level threshold ($15 = 2x median converting term spend).
+// Fallback uses same threshold for legacy paths without trigger data.
+const WASTED_SPEND_FALLBACK_MICROS = 15_000_000
 
 // Under-invested: market volume must be 2x+ actual impressions
 const UNDER_INVESTED_MULTIPLIER = 2

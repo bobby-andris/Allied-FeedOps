@@ -869,14 +869,14 @@ describe('Phase 34.1: Bug 2 — Impact formula for wasted spend', () => {
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 8_000_000, // $8
+      total_cost_micros: 20_000_000, // $20 (above $15 term-level wasted spend threshold)
       total_conversions: 0,
       total_conversions_value: 0,
     })
 
     const score = scoreTerm(term, group, globalFallback)
     expect(score.impact).not.toBeNull()
-    expect(score.impact!.mid).toBeGreaterThanOrEqual(4) // at least 50% of $8
+    expect(score.impact!.mid).toBeGreaterThanOrEqual(10) // at least 50% of $20
     expect(score.impact!.mid).toBeGreaterThan(0) // NOT $0
   })
 
@@ -1399,25 +1399,25 @@ describe('5-trigger determineAction', () => {
     fallbackLevel: 'per_group',
   })
 
-  it('Trigger A: wasted spend with avgCPA threshold (not hardcoded $5)', () => {
+  it('Trigger A: wasted spend with term-level $15 threshold', () => {
     const dist = makeDistWithRoas(2.0, 6.0)
-    // avgCPA = $64.22 → threshold = $96.33
-    const result = determineAction('HIGH', dist, 0, 0, 100_000_000, false, undefined, undefined, undefined, 64.22)
-    // $100 > $96.33 → wasted spend
+    // Term-level threshold = $15. Spend = $20 > $15 → wasted spend
+    const result = determineAction('HIGH', dist, 0, 0, 20_000_000, false)
     expect(result.action).toBe('block')
     expect(result.trigger).toBe('wasted_spend')
   })
 
-  it('Trigger A: wasted spend with avgCPA below threshold → observe', () => {
+  it('Trigger A: wasted spend below $15 threshold → observe', () => {
     const dist = makeDistWithRoas(2.0, 6.0)
-    // avgCPA = $64.22 → threshold = $96.33. Spend = $50 → not wasted
-    const result = determineAction('HIGH', dist, 0, 0, 50_000_000, false, undefined, undefined, undefined, 64.22)
+    // Spend = $10 < $15 → not wasted
+    const result = determineAction('HIGH', dist, 0, 0, 10_000_000, false)
     expect(result.trigger).toBe('observe')
   })
 
   it('Trigger A: wasted spend from MEDIUM → demote to HIGH', () => {
     const dist = makeDistWithRoas(2.0, 6.0)
-    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 0, 0, 100_000_000, false, undefined, undefined, undefined, 64.22)
+    // Spend = $20 > $15, in MEDIUM → demote to HIGH
+    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 0, 0, 20_000_000, false)
     expect(result.action).toBe('demote')
     expect(result.targetTier).toBe('HIGH')
     expect(result.trigger).toBe('wasted_spend')
@@ -1589,37 +1589,33 @@ describe('Unified intent scoring in scoreTerm', () => {
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // Default avgCPA=$64.22 from CalibrationConfig → threshold=$96.33
-    // $80 spend < $96.33 → NOT wasted spend with default config
-    const term80 = makeTermWithFunnels({
+    // Term-level wasted spend threshold = $15 (2x median converting term spend)
+    // $10 spend < $15 → NOT wasted spend
+    const term10 = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 80_000_000, // $80
+      total_cost_micros: 10_000_000, // $10
       total_conversions: 0,
       total_conversions_value: 0,
     })
 
-    const scoreDefault = scoreTerm(term80, group, globalFallback)
-    // $80 < $96.33 threshold (1.5 * $64.22) → should NOT be wasted_spend
-    expect(scoreDefault.trigger).not.toBe('wasted_spend')
+    const scoreBelowThreshold = scoreTerm(term10, group, globalFallback)
+    // $10 < $15 → should NOT be wasted_spend
+    expect(scoreBelowThreshold.trigger).not.toBe('wasted_spend')
 
-    // With explicit low avgCPA=$20 → threshold=$30 → $80 > $30 → wasted_spend
-    const scoreWithLowCPA = scoreTerm(term80, group, globalFallback, undefined, DEFAULT_CALIBRATION, undefined, 20)
-    expect(scoreWithLowCPA.trigger).toBe('wasted_spend')
-
-    // $100 spend with default config → $100 > $96.33 → wasted_spend
-    const term100 = makeTermWithFunnels({
+    // $20 spend > $15 → wasted_spend
+    const term20 = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 100_000_000, // $100
+      total_cost_micros: 20_000_000, // $20
       total_conversions: 0,
       total_conversions_value: 0,
     })
-    const scoreAboveThreshold = scoreTerm(term100, group, globalFallback)
+    const scoreAboveThreshold = scoreTerm(term20, group, globalFallback)
     expect(scoreAboveThreshold.trigger).toBe('wasted_spend')
   })
 

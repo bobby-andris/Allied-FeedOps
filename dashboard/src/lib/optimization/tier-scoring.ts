@@ -309,11 +309,10 @@ export function scoreTerm(
     config,
   )
 
-  // Impact: compute for misplaced OR wasted spend terms
-  const wastedSpendThreshold = (avgCPA ?? config.avgCPA) * 1.5
-  const isWastedSpend = term.total_conversions === 0 && costDollars > wastedSpendThreshold
+  // Impact: compute for any actionable term (misplaced, wasted spend, or trigger-based)
+  const hasActionableTrigger = trigger !== 'observe'
   let impact: ImpactRange | null = null
-  if (isMisplaced || isWastedSpend) {
+  if (isMisplaced || hasActionableTrigger) {
     impact = estimateImpact(term, chooseDist(currentTier), chooseDist(targetTier), config)
   }
 
@@ -455,9 +454,9 @@ export function estimateImpact(
   const monthlySpend = term.total_cost_micros / 1_000_000
 
   // Wasted spend fast path: zero conversions with meaningful spend
-  // Use calibrated threshold: 1.5x avgCPA (default $64.22 * 1.5 = $96.33)
-  const wastedSpendThresholdMicros = config.avgCPA * 1.5 * 1_000_000
-  if (term.total_conversions === 0 && term.total_cost_micros > wastedSpendThresholdMicros) {
+  // Term-level threshold: $15 (2x median converting term spend of $7.17)
+  const WASTED_SPEND_MICROS = 15_000_000
+  if (term.total_conversions === 0 && term.total_cost_micros > WASTED_SPEND_MICROS) {
     return {
       low: monthlySpend * 0.5,
       mid: monthlySpend * 0.8,
@@ -667,20 +666,27 @@ export function determineAction(
   const TIER_UP: Record<FunnelTier, FunnelTier> = { HIGH: 'HIGH', MEDIUM: 'HIGH', LOW: 'MEDIUM' }
   const TIER_DOWN: Record<FunnelTier, FunnelTier> = { HIGH: 'MEDIUM', MEDIUM: 'LOW', LOW: 'LOW' }
 
-  const effectiveAvgCPA = avgCPA ?? config.avgCPA
-  const wastedSpendThreshold = 1.5 * effectiveAvgCPA
-
   // --- Trigger A: Wasted Spend Override ---
-  // Zero conversions + spent more than 1.5x avg CPA = wasted spend
-  if (totalConversions === 0 && costDollars > wastedSpendThreshold) {
+  // Zero conversions + meaningful spend = wasted.
+  // Term-level threshold: median converting term spends ~$7; spending 2x that ($15) with
+  // zero conversions means you've given this term a fair shot and it produced nothing.
+  // Account-level 1.5x avgCPA ($96.33) is too high — individual terms rarely accumulate that much.
+  const WASTED_SPEND_TERM_THRESHOLD = 15 // dollars — 2x median converting term spend ($7.17)
+  if (totalConversions === 0 && costDollars > WASTED_SPEND_TERM_THRESHOLD) {
     if (currentTier === 'HIGH') {
       return { action: 'block', targetTier: 'HIGH', trigger: 'wasted_spend' }
     }
     return { action: 'demote', targetTier: 'HIGH', trigger: 'wasted_spend' }
   }
 
-  const p25 = currentTierDist.metrics.roas.p25
-  const p75 = currentTierDist.metrics.roas.p75
+  // When ~96% of terms have zero ROAS, real p25/p75 collapse to 0 and triggers become
+  // useless (demote requires ROAS < 0, promote fires for any ROAS > 0).
+  // Fall back to DEFAULT_DISTRIBUTIONS which encode expected waterfall ROAS ranges:
+  //   HIGH: p25=0.5, p75=2.0  |  MEDIUM: p25=2.0, p75=4.0  |  LOW: p25=4.0, p75=8.0
+  const distIsZeroDominated = currentTierDist.metrics.roas.p25 === 0 && currentTierDist.metrics.roas.p75 === 0
+  const effectiveDist = distIsZeroDominated ? DEFAULT_DISTRIBUTIONS[currentTier] : currentTierDist
+  const p25 = effectiveDist.metrics.roas.p25
+  const p75 = effectiveDist.metrics.roas.p75
 
   // --- Trigger B: Demote (Underperforming) ---
   // Has conversions but ROAS is below tier's p25 — demote one step toward HIGH
@@ -691,10 +697,6 @@ export function determineAction(
   // --- Trigger C: Promote (Conversion-Proven) ---
   // ROAS above tier p75 — promote one step toward LOW (more aggressive bidding)
   if (termRoas > p75 && currentTier !== 'LOW') {
-    // Check for under-invested (Trigger E): if also low impression share, flag it
-    // Use totalImpressions as proxy — terms with < 30% of typical volume are under-invested
-    // (Impression share data not directly available on the term; this is a placeholder for
-    // when campaign-level impression share is passed through)
     return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_conversion' }
   }
 
