@@ -76,6 +76,10 @@ from feedops.api.runtime_controls import (
     ensure_generation_enabled,
     finish_sentence_regeneration_enabled,
 )
+from feedops.api.env_contract import (
+    RuntimeEnvContractError,
+    validate_runtime_env_contract,
+)
 from feedops.pipeline.feature_flags import capture_flag_snapshot
 from feedops.pipeline.generator import generate_per_platform
 from feedops.observability import get_request_id, log_event, request_context
@@ -113,6 +117,16 @@ app.add_middleware(
 from prometheus_client import make_asgi_app, REGISTRY
 metrics_app = make_asgi_app(registry=REGISTRY)
 app.mount("/metrics", metrics_app)
+
+
+@app.on_event("startup")
+async def _validate_runtime_env_on_startup() -> None:
+    """Fail fast on missing runtime env contract requirements."""
+    try:
+        validate_runtime_env_contract()
+    except RuntimeEnvContractError as exc:
+        logger.error(str(exc))
+        raise RuntimeError(str(exc)) from exc
 
 # Include search insights router
 from feedops.api.search_insights import router as search_insights_router
