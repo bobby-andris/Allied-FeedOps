@@ -224,6 +224,7 @@ export default function TierScoringPage() {
                 setSelectedTerm(null)
               }}
               onSelectTier={(tier) => setSelectedTier(tier)}
+              onSelectTerm={(term) => setSelectedTerm(term)}
             />
           ) : (
             <>

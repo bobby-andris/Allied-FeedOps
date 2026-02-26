@@ -24,6 +24,7 @@ interface GroupDetailProps {
   scores: TermScore[]
   onBack: () => void
   onSelectTier: (tier: FunnelTier) => void
+  onSelectTerm: (term: TermScore) => void
 }
 
 const TIER_ORDER: FunnelTier[] = ['HIGH', 'MEDIUM', 'LOW']
@@ -40,7 +41,7 @@ function formatMetricCompact(value: number, metric: string): string {
   return `${value.toFixed(2)}x`
 }
 
-export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetailProps) {
+export function GroupDetail({ group, scores, onBack, onSelectTier, onSelectTerm }: GroupDetailProps) {
   const misplacedTerms = useMemo(
     () => scores.filter(s => s.isMisplaced).sort((a, b) => (b.impact?.mid ?? 0) - (a.impact?.mid ?? 0)),
     [scores]
@@ -111,8 +112,9 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {TIER_ORDER.map(tier => {
           const tierDist = group.tiers[tier]
-          const isInsufficient = group.insufficientTiers.includes(tier)
-          const termCount = tierDist?.sampleSize ?? 0
+          const tierScores = scores.filter(s => s.currentTier === tier)
+          const termCount = tierScores.length
+          const isInsufficient = termCount === 0
           const colors = tierColors[tier]
 
           return (
@@ -239,7 +241,11 @@ export function GroupDetail({ group, scores, onBack, onSelectTier }: GroupDetail
               </TableHeader>
               <TableBody>
                 {misplacedTerms.map(term => (
-                  <TableRow key={`${term.searchTerm}::${term.customLabel0}`}>
+                  <TableRow
+                    key={`${term.searchTerm}::${term.customLabel0}`}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => onSelectTerm(term)}
+                  >
                     <TableCell className="font-medium max-w-[200px] truncate" title={term.searchTerm}>
                       {term.searchTerm}
                     </TableCell>

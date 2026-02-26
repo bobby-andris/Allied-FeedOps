@@ -135,8 +135,10 @@ export function GroupOverview({ distributions, scores, onSelectGroup, onBlockLab
                 <div className="grid grid-cols-3 gap-2">
                   {TIER_ORDER.map(tier => {
                     const tierDist = group.tiers[tier]
-                    const isInsufficient = group.insufficientTiers.includes(tier)
-                    const termCount = tierDist?.sampleSize ?? 0
+                    const groupScores = scores.filter(s => s.customLabel0 === group.customLabel0)
+                    const tierTermCount = groupScores.filter(s => s.currentTier === tier).length
+                    const isInsufficient = tierTermCount === 0
+                    const termCount = tierTermCount
                     const roasP50 = tierDist?.metrics?.roas?.p50 ?? 0
 
                     return (
