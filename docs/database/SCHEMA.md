@@ -19,7 +19,7 @@
 | Content Generation | 5 | regeneration_history, prompt_version_aliases, prompt_templates, batch_generation_jobs, batch_generation_job_skus |
 | Legacy/Jobs | 1 | generation_jobs |
 | Measurement & Classification | 2 | sku_bottleneck_classifications, gmc_product_status |
-| Tier Scoring & Routing | 2 | query_value_scores, routing_recommendations |
+| Tier Scoring & Routing | 3 | query_value_scores, routing_recommendations, search_buildout_recommendations |
 | Competitor Intelligence | 3 | competitor_listings, competitor_patterns, competitor_scrape_jobs |
 | Support | 1 | shopify_products |
 | Backfill Infrastructure | 2 | backfill_jobs, backfill_job_errors |
@@ -1654,6 +1654,36 @@ Stores per-term scoring results from the tier scoring engine. Upserted by the `/
 
 ---
 
-*Schema last rebuilt: 2026-02-25 (Phase 31-01), updated 2026-02-26 (Phase 34.1-03)*
+### search_buildout_recommendations
+
+Shopping-to-Search promotion candidates. Populated automatically by the tier scoring engine when it finds high-ROAS, high-volume, converting terms. Consumed by the Search Governance page (`/search-governance`).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto-generated |
+| search_term | text | NOT NULL, UNIQUE |
+| custom_label_0 | text | Product category |
+| recommended_search_tier | text | 'broad', 'phrase', or 'exact' |
+| status | text | 'candidate', 'approved', 'applied', 'rejected', 'paused' |
+| confidence | numeric(5,4) | 0-1 confidence score |
+| metadata | jsonb | Source, ROAS, conversions, impressions |
+| approved_by | text | Who approved |
+| approved_at | timestamptz | When approved |
+| created_at | timestamptz | When identified |
+
+**Constraints:**
+- `search_buildout_reco_term_unique` UNIQUE on `search_term`
+- `search_buildout_reco_tier_check` CHECK tier in ('broad', 'phrase', 'exact')
+- `search_buildout_reco_status_check` CHECK status in ('candidate', 'approved', 'applied', 'rejected', 'paused')
+
+**Indexes:**
+- `idx_search_buildout_recommendations_status_created` on `(status, created_at DESC)`
+- `idx_search_buildout_recommendations_term` on `(search_term, created_at DESC)`
+
+**Source:** Migration 041
+
+---
+
+*Schema last rebuilt: 2026-02-25 (Phase 31-01), updated 2026-02-26 (Phase 34.1-03, migration 041)*
 *Source: Migration SQL files cross-referenced with production state*
-*Total tables: 56 (38 core + 4 GA4 KEEP + 10 intent KEEP + 4 DEFER)*
+*Total tables: 57 (39 core + 4 GA4 KEEP + 10 intent KEEP + 4 DEFER)*

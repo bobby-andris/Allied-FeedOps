@@ -186,6 +186,9 @@ export async function GET(request: NextRequest) {
             recommendedAction: s.recommendedAction,
             actionReason: s.actionReason,
             totalImpressions: s.totalImpressions,
+            actualRoas: s.actualRoas,
+            totalConversions: s.totalConversions,
+            totalCostMicros: s.totalCostMicros,
           },
         })),
         { onConflict: 'search_term,custom_label_0' }
@@ -194,6 +197,34 @@ export async function GET(request: NextRequest) {
       if (error) {
         console.error('Failed to persist tier scores chunk:', error)
         // Continue processing remaining chunks even if one fails
+      }
+    }
+
+    // Auto-identify search promotion candidates (high-ROAS, high-volume, converting terms)
+    const searchCandidates = scores
+      .filter(s => s.actualRoas > 3.0 && (s.totalImpressions ?? 0) > 100 && s.totalConversions > 0)
+      .map(s => ({
+        search_term: s.searchTerm,
+        custom_label_0: s.customLabel0,
+        recommended_search_tier: 'exact' as const,
+        status: 'candidate',
+        confidence: s.confidence.score,
+        metadata: {
+          source: 'tier_scoring_auto',
+          actual_roas: s.actualRoas,
+          total_conversions: s.totalConversions,
+          total_impressions: s.totalImpressions,
+          identified_at: new Date().toISOString(),
+        },
+      }))
+
+    if (searchCandidates.length > 0) {
+      const { error: searchError } = await supabase
+        .from('search_buildout_recommendations')
+        .upsert(searchCandidates, { onConflict: 'search_term' })
+
+      if (searchError) {
+        console.error('Failed to persist search candidates:', searchError)
       }
     }
 

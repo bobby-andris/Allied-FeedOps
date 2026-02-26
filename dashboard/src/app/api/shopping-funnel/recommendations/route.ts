@@ -373,9 +373,9 @@ export async function POST(request: NextRequest) {
           .filter((c) => {
             const inputs = c.model_inputs as Record<string, unknown> | null
             if (!inputs) return false
-            const roas = Number(inputs.roas ?? 0)
-            const impressions = Number(inputs.impressions ?? 0)
-            const conversions = Number(inputs.conversions ?? 0)
+            const roas = Number(inputs.actualRoas ?? 0)
+            const impressions = Number(inputs.totalImpressions ?? 0)
+            const conversions = Number(inputs.totalConversions ?? 0)
             return roas > 3.0 && impressions > 100 && conversions > 0
           })
           .map((c) => ({
