@@ -6,5 +6,6 @@ how closely search queries match the Allied Brass product catalog.
 
 from feedops.scoring.attribute_extractor import AttributeExtractor
 from feedops.scoring.tfidf_scorer import TfidfSpecificityScorer
+from feedops.scoring.intent_scorer import IntentScorer
 
-__all__ = ["AttributeExtractor", "TfidfSpecificityScorer"]
+__all__ = ["AttributeExtractor", "TfidfSpecificityScorer", "IntentScorer"]

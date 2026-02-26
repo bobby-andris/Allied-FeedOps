@@ -90,6 +90,10 @@ class TfidfSpecificityScorer:
         if not self._is_fitted or not query or not query.strip():
             return 0.0
 
+        # If no vocabulary (empty corpus), return 0.0
+        if not self._idf_map:
+            return 0.0
+
         # Tokenize same way as vectorizer
         tokens = query.lower().split()
         if not tokens:

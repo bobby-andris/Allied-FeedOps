@@ -136,7 +136,7 @@ class AttributeExtractor:
         r"\b[A-Za-z]{2,4}[-/]\d+(?:[-/]\d+[A-Za-z]*)*\b"
     )
     DIMENSION_PATTERN = re.compile(
-        r"\b\d+(?:\.\d+)?\s*(?:inch|inches|in|\"|\u2033|cm|mm)\b",
+        r"\b\d+(?:\.\d+)?\s*(?:inch|inches|in\b|\"|\u201d|\u2033|cm\b|mm\b)",
         re.IGNORECASE,
     )
 
