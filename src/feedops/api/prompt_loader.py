@@ -17,7 +17,6 @@ from datetime import datetime, timezone
 from typing import Any, TypedDict
 
 from feedops.db.supabase_client import get_client, is_supabase_available
-from feedops.pipeline.feature_flags import is_prompt_contract_v2_enabled
 from feedops.pipeline.prompts import SYSTEM_PROMPT as CANONICAL_SYSTEM_PROMPT
 from feedops.pipeline.skill_loader import get_platform_system_prompt
 from feedops.pipeline.skill_loader import load_skills_for_prompt
@@ -148,8 +147,7 @@ def get_system_prompt(
     """Get the canonical system prompt enriched with skill content.
 
     Assembles the system prompt by starting with the canonical SYSTEM_PROMPT
-    from code (or Supabase fallback when PROMPT_CONTRACT_V2 disabled), then
-    appending all relevant Claude Code skill SKILL.md files.
+    from code, then appending all relevant Claude Code skill SKILL.md files.
 
     Args:
         mode: "batch" loads all skills (system prompt cached across all SKUs
@@ -166,14 +164,6 @@ def get_system_prompt(
     global _prompt_size_warning_emitted
 
     prompt = CANONICAL_SYSTEM_PROMPT
-    if not is_prompt_contract_v2_enabled():
-        template = load_active_prompt_template()
-        db_prompt = template.get("system_prompt") if template else None
-        if isinstance(db_prompt, str) and db_prompt.strip():
-            prompt = db_prompt.strip()
-            logger.warning(
-                "PROMPT_CONTRACT_V2 disabled: using Supabase system_prompt fallback for rollback."
-            )
 
     # Append skill content for enriched prompts.
     # Skills are loaded from .claude/skills/{name}/SKILL.md with lru_cache.

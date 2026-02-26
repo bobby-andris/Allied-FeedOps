@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-import json
 from dataclasses import dataclass
 from types import SimpleNamespace
 
@@ -129,96 +127,48 @@ def _seed_base_content(
     )
 
 
-def _fake_openai_client(response_content: str):
-    completion = SimpleNamespace(
-        choices=[SimpleNamespace(message=SimpleNamespace(content=response_content))]
-    )
-    return SimpleNamespace(
-        chat=SimpleNamespace(
-            completions=SimpleNamespace(create=lambda **_kwargs: completion)
-        )
-    )
-
-
 @pytest.fixture(autouse=True)
 def _reset_env(monkeypatch):
     monkeypatch.delenv("FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN", raising=False)
-    monkeypatch.setenv("OPENAI_API_KEY", "test")
-    monkeypatch.setenv("OPENAI_MODEL", "gpt-5.2")
 
 
 @pytest.mark.asyncio
-async def test_adapt_variant_content_google_description_uses_fallback_when_finish_regen_disabled(
-    monkeypatch,
-):
-    monkeypatch.setenv("FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN", "1")
-    supabase = _HybridSupabase()
-    _seed_base_content(
-        supabase,
-        base_sku="SB-16",
-        platform="google",
-        content_type="description",
-        content="Keep towels organized with this wall-mounted towel bar.",
-    )
-
-    monkeypatch.setattr(
-        hybrid_generation.openai,
-        "OpenAI",
-        lambda api_key: _fake_openai_client(
-            "Polished Nickel keeps towels organized. Choose from 28 designer finishes."
-        ),
-    )
-    monkeypatch.setattr(hybrid_generation, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(hybrid_generation, "get_system_prompt_hash", lambda: "hash123")
-
-    result = await hybrid_generation.adapt_variant_content(
-        supabase=supabase,
-        base_sku="SB-16",
-        variant_sku="SB-18",
-        platform="google",
-        content_type="description",
-        base_spec="16 inch",
-        variant_spec="18 inch",
-    )
-
-    assert result["success"] is True
-    assert "{FINISH_SENTENCE}" in result["content"]
-    assert result["content"].count("{FINISH_SENTENCE}") == 1
-    assert "Polished Nickel" not in result["content"]
-    finish_rows = [
-        op
-        for op in supabase.operations
-        if op["table"] == "variant_finish_sentences" and op["op"] == "upsert"
-    ]
-    assert len(finish_rows) == 1
-    assert len(finish_rows[0]["payload"]["finish_sentences"]) == len(
-        hybrid_generation.get_finish_list()
-    )
-
-
-@pytest.mark.asyncio
-async def test_adapt_variant_content_google_description_falls_back_when_json_finish_sentences_incomplete(
+async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     monkeypatch,
 ):
     supabase = _HybridSupabase()
-    _seed_base_content(
-        supabase,
-        base_sku="SB-16",
-        platform="google",
-        content_type="description",
-        content="Keep towels organized with this wall-mounted towel bar.",
-    )
-    incomplete_payload = {
-        "content": "Antique Brass updates the look for this 18 inch profile.",
-        "finish_sentences": {"Antique Brass": "Antique Brass adds warmth to this profile."},
+    finish_payload = {
+        finish: f"{finish} complements this profile."
+        for finish in hybrid_generation.get_finish_list()
     }
+    selected_platforms_seen = {}
+
+    async def _fake_generate(**kwargs):
+        selected_platforms_seen["value"] = tuple(kwargs.get("selected_platforms", ()))
+        return {
+            "google_description": "Wall-mounted towel bar with durable brass construction.",
+            "finish_sentences": finish_payload,
+            "prompt_hashes": {"google": "hash123"},
+            "system_prompts": {"google": "system"},
+            "user_prompts": {"google": "user"},
+        }
+
     monkeypatch.setattr(
-        hybrid_generation.openai,
-        "OpenAI",
-        lambda api_key: _fake_openai_client(json.dumps(incomplete_payload)),
+        hybrid_generation,
+        "resolve_canonical_master_sku",
+        lambda _supabase, sku: sku,
     )
-    monkeypatch.setattr(hybrid_generation, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(hybrid_generation, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(
+        hybrid_generation,
+        "load_parent_sku_from_supabase",
+        lambda _sku: SimpleNamespace(master_sku="SB-18-parent"),
+    )
+    monkeypatch.setattr(
+        hybrid_generation,
+        "get_provider",
+        lambda: SimpleNamespace(name="fake-provider"),
+    )
+    monkeypatch.setattr(hybrid_generation, "generate_per_platform", _fake_generate)
 
     result = await hybrid_generation.adapt_variant_content(
         supabase=supabase,
@@ -231,9 +181,12 @@ async def test_adapt_variant_content_google_description_falls_back_when_json_fin
     )
 
     assert result["success"] is True
-    assert "{FINISH_SENTENCE}" in result["content"]
-    assert result["content"].count("{FINISH_SENTENCE}") == 1
-    assert "Antique Brass" not in result["content"]
+    assert result["mode"] == "v2"
+    assert selected_platforms_seen["value"] == ("google", "finish")
+    assert (
+        result["content"]
+        == "Wall-mounted towel bar with durable brass construction."
+    )
     finish_rows = [
         op
         for op in supabase.operations
@@ -243,6 +196,58 @@ async def test_adapt_variant_content_google_description_falls_back_when_json_fin
     assert len(finish_rows[0]["payload"]["finish_sentences"]) == len(
         hybrid_generation.get_finish_list()
     )
+
+
+@pytest.mark.asyncio
+async def test_adapt_variant_content_google_description_allows_missing_finish_payload_and_sanitizes_generic_claim(
+    monkeypatch,
+):
+    supabase = _HybridSupabase()
+    async def _fake_generate(**_kwargs):
+        return {
+            "google_description": (
+                "Solid brass profile for daily use. Choose from 28 designer finishes."
+            ),
+            "prompt_hashes": {"google": "hash123"},
+            "system_prompts": {"google": "system"},
+            "user_prompts": {"google": "user"},
+        }
+
+    monkeypatch.setattr(
+        hybrid_generation,
+        "resolve_canonical_master_sku",
+        lambda _supabase, sku: sku,
+    )
+    monkeypatch.setattr(
+        hybrid_generation,
+        "load_parent_sku_from_supabase",
+        lambda _sku: SimpleNamespace(master_sku="SB-18-parent"),
+    )
+    monkeypatch.setattr(
+        hybrid_generation,
+        "get_provider",
+        lambda: SimpleNamespace(name="fake-provider"),
+    )
+    monkeypatch.setattr(hybrid_generation, "generate_per_platform", _fake_generate)
+
+    result = await hybrid_generation.adapt_variant_content(
+        supabase=supabase,
+        base_sku="SB-16",
+        variant_sku="SB-18",
+        platform="google",
+        content_type="description",
+        base_spec="16 inch",
+        variant_spec="18 inch",
+    )
+
+    assert result["success"] is True
+    assert "Choose from 28 designer finishes" not in result["content"]
+    finish_rows = [
+        op
+        for op in supabase.operations
+        if op["table"] == "variant_finish_sentences" and op["op"] == "upsert"
+    ]
+    assert finish_rows == []
 
 
 def test_variant_completion_tokens_policy_prevents_low_description_caps() -> None:
