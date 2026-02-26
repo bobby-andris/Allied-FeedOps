@@ -68,9 +68,15 @@ export function BcgBubbleChart({
   dimmed = false,
 }: BcgBubbleChartProps) {
   const handleClick = useCallback(
-    // Recharts Scatter onClick passes { payload: ProductGroup, ... }
-    (entry: { payload?: ProductGroup } | ProductGroup) => {
-      const group = 'payload' in entry && entry.payload ? entry.payload : entry as ProductGroup
+    // Recharts v3 Scatter onClick passes the data point directly
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data: any) => {
+      // Recharts v3: data is the point itself with all fields
+      // Recharts v2: data might be wrapped in { payload: ... }
+      const group: ProductGroup | undefined =
+        data?.customLabel0 ? data :
+        data?.payload?.customLabel0 ? data.payload :
+        undefined
       if (group?.customLabel0) {
         onGroupClick(group.customLabel0)
       }
