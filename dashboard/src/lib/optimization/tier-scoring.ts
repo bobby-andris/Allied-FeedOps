@@ -638,14 +638,29 @@ export function computeBehavioralIntent(
 // ---------------------------------------------------------------------------
 
 /**
- * 5-trigger decision matrix for term routing recommendations.
+ * Intent-based decision matrix for term routing recommendations.
  *
- * Trigger priority (ORDER MATTERS — first match wins):
- *   A. Wasted Spend Override: zero conversions + spend > 1.5x avgCPA
- *   B. Demote (Underperforming): has conversions but ROAS < tier p25
- *   C. Promote (Conversion-Proven): ROAS > tier p75
- *   D. Promote (Intent-Proven): zero conversions + high intent score + (high rCTR OR 3+ word query)
- *   E. Under-Invested: meets promote criteria (C or D) AND low impression share
+ * Tier placement is determined by QUERY INTENT/SPECIFICITY, not ROAS:
+ *   HIGH = generic queries ("grab bar") — restricted bidding
+ *   MEDIUM = category + 1 attribute ("polished nickel grab bar") — moderate bidding
+ *   LOW = category + 2+ attributes ("polished nickel grab bar 18in") — aggressive bidding
+ *
+ * Intent score (0-1) combines:
+ *   - Feed alignment (0.55 weight): TF-IDF attribute matching + query specificity
+ *   - Behavioral signals (0.45 weight): rCTR, CPC ceiling, micro-conversions
+ *
+ * Expected tier from intent:
+ *   intentScore < 0.30 → HIGH (generic, broad)
+ *   intentScore 0.30-0.60 → MEDIUM (mid-specificity)
+ *   intentScore > 0.60 → LOW (specific, high-intent)
+ *
+ * Historical data (conversions, rCTR, spend) provides CONFIDENCE, not direction.
+ *
+ * Trigger priority (first match wins):
+ *   A. Wasted Spend: zero conversions + meaningful spend → block or demote to HIGH
+ *   B. Demote (Low Intent): intent says term belongs in a HIGHER tier (more restricted)
+ *   C. Promote (High Intent): intent says term belongs in a LOWER tier (more aggressive)
+ *   D. Observe: intent matches current tier, or insufficient data
  *
  * Sequential movement enforced: never skip tiers (HIGH -> LOW not allowed).
  */
@@ -656,10 +671,10 @@ export function determineAction(
   totalConversions: number,
   totalCostMicros: number,
   isMisplaced: boolean,
-  intentScore?: number,      // unified 0-1
-  rCTR?: number,             // raw rCTR for Trigger D gate
-  queryWordCount?: number,   // word count for Trigger D gate
-  avgCPA?: number,           // from account audit, replaces hardcoded $5
+  intentScore?: number,      // unified 0-1 (feed alignment + behavioral)
+  rCTR?: number,             // raw rCTR for supporting evidence
+  queryWordCount?: number,   // word count — core specificity signal
+  avgCPA?: number,           // from account audit
   config: CalibrationConfig = DEFAULT_CALIBRATION,
 ): { action: RecommendedAction; targetTier: FunnelTier; trigger: string } {
   const costDollars = totalCostMicros / 1_000_000
@@ -667,11 +682,9 @@ export function determineAction(
   const TIER_DOWN: Record<FunnelTier, FunnelTier> = { HIGH: 'MEDIUM', MEDIUM: 'LOW', LOW: 'LOW' }
 
   // --- Trigger A: Wasted Spend Override ---
-  // Zero conversions + meaningful spend = wasted.
-  // Term-level threshold: median converting term spends ~$7; spending 2x that ($15) with
-  // zero conversions means you've given this term a fair shot and it produced nothing.
-  // Account-level 1.5x avgCPA ($96.33) is too high — individual terms rarely accumulate that much.
-  const WASTED_SPEND_TERM_THRESHOLD = 15 // dollars — 2x median converting term spend ($7.17)
+  // Zero conversions + meaningful spend = wasted regardless of intent.
+  // Term-level threshold: $15 (2x median converting term spend of $7.17).
+  const WASTED_SPEND_TERM_THRESHOLD = 15
   if (totalConversions === 0 && costDollars > WASTED_SPEND_TERM_THRESHOLD) {
     if (currentTier === 'HIGH') {
       return { action: 'block', targetTier: 'HIGH', trigger: 'wasted_spend' }
@@ -679,41 +692,68 @@ export function determineAction(
     return { action: 'demote', targetTier: 'HIGH', trigger: 'wasted_spend' }
   }
 
-  // When ~96% of terms have zero ROAS, real p25/p75 collapse to 0 and triggers become
-  // useless (demote requires ROAS < 0, promote fires for any ROAS > 0).
-  // Fall back to DEFAULT_DISTRIBUTIONS which encode expected waterfall ROAS ranges:
-  //   HIGH: p25=0.5, p75=2.0  |  MEDIUM: p25=2.0, p75=4.0  |  LOW: p25=4.0, p75=8.0
-  const distIsZeroDominated = currentTierDist.metrics.roas.p25 === 0 && currentTierDist.metrics.roas.p75 === 0
-  const effectiveDist = distIsZeroDominated ? DEFAULT_DISTRIBUTIONS[currentTier] : currentTierDist
-  const p25 = effectiveDist.metrics.roas.p25
-  const p75 = effectiveDist.metrics.roas.p75
+  // If no intent score available, we can't make intent-based decisions
+  if (intentScore === undefined) {
+    // Fallback: use query word count as crude specificity proxy
+    if (queryWordCount !== undefined) {
+      const expectedTier = queryWordCount >= config.minQueryWords ? 'LOW'
+        : queryWordCount >= 2 ? 'MEDIUM'
+        : 'HIGH'
+      const TIER_DEPTH: Record<FunnelTier, number> = { HIGH: 1, MEDIUM: 2, LOW: 3 }
+      if (TIER_DEPTH[expectedTier] > TIER_DEPTH[currentTier] && currentTier !== 'LOW') {
+        return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_intent' }
+      }
+      if (TIER_DEPTH[expectedTier] < TIER_DEPTH[currentTier] && currentTier !== 'HIGH') {
+        return { action: 'demote', targetTier: TIER_UP[currentTier], trigger: 'demote_underperform' }
+      }
+    }
+    return { action: 'observe', targetTier: currentTier, trigger: 'observe' }
+  }
 
-  // --- Trigger B: Demote (Underperforming) ---
-  // Has conversions but ROAS is below tier's p25 — demote one step toward HIGH
-  if (totalConversions > 0 && termRoas < p25 && currentTier !== 'HIGH') {
+  // --- Map intent score to expected tier ---
+  // HIGH (generic): intentScore < 0.30
+  // MEDIUM (mid-specificity): 0.30 <= intentScore < 0.60
+  // LOW (high-intent): intentScore >= 0.60
+  const INTENT_LOW_THRESHOLD = 0.30   // below = generic → belongs in HIGH
+  const INTENT_HIGH_THRESHOLD = 0.60  // above = specific → belongs in LOW
+
+  const expectedTier: FunnelTier =
+    intentScore >= INTENT_HIGH_THRESHOLD ? 'LOW'
+    : intentScore >= INTENT_LOW_THRESHOLD ? 'MEDIUM'
+    : 'HIGH'
+
+  const TIER_DEPTH: Record<FunnelTier, number> = { HIGH: 1, MEDIUM: 2, LOW: 3 }
+
+  // --- Trigger B: Demote (Low Intent) ---
+  // Term's intent says it belongs in a more restricted tier than where it is.
+  // Historical data as confidence boost: poor conversions or low rCTR support the demote.
+  if (TIER_DEPTH[expectedTier] < TIER_DEPTH[currentTier] && currentTier !== 'HIGH') {
+    // Historical evidence strengthens the case but isn't required
+    // (intent is the primary signal — a generic query in LOW should be demoted
+    //  even if it happens to have decent ROAS by luck)
     return { action: 'demote', targetTier: TIER_UP[currentTier], trigger: 'demote_underperform' }
   }
 
-  // --- Trigger C: Promote (Conversion-Proven) ---
-  // ROAS above tier p75 — promote one step toward LOW (more aggressive bidding)
-  if (termRoas > p75 && currentTier !== 'LOW') {
+  // --- Trigger C: Promote (High Intent) ---
+  // Term's intent says it belongs in a more aggressive tier than where it is.
+  // Historical data as confidence boost: conversions or strong rCTR support the promote.
+  if (TIER_DEPTH[expectedTier] > TIER_DEPTH[currentTier] && currentTier !== 'LOW') {
+    // For zero-conversion terms, require additional evidence gate
+    // (don't promote purely on intent without ANY historical signal)
+    if (totalConversions === 0) {
+      const hasHistoricalSupport =
+        (rCTR !== undefined && rCTR >= config.minRCTR) ||
+        (queryWordCount !== undefined && queryWordCount >= config.minQueryWords)
+      if (!hasHistoricalSupport) {
+        return { action: 'observe', targetTier: currentTier, trigger: 'observe' }
+      }
+      return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_intent' }
+    }
     return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_conversion' }
   }
 
-  // --- Trigger D: Promote (Intent-Proven, Zero Conversions) ---
-  // Zero conversions BUT high unified intent score AND supporting evidence
-  // Thresholds calibrated via docs/analysis/intent-score-calibration.md
-  if (
-    totalConversions === 0 &&
-    intentScore !== undefined &&
-    intentScore >= config.minIntentScore &&
-    ((rCTR !== undefined && rCTR >= config.minRCTR) || (queryWordCount !== undefined && queryWordCount >= config.minQueryWords)) &&
-    currentTier !== 'LOW'
-  ) {
-    return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_intent' }
-  }
-
   // --- Default: Observe ---
+  // Intent matches current tier placement — term is where it should be.
   return { action: 'observe', targetTier: currentTier, trigger: 'observe' }
 }
 
