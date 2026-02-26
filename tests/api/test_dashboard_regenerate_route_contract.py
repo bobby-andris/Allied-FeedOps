@@ -26,8 +26,10 @@ def test_regenerate_route_has_no_dashboard_side_generated_content_writes() -> No
 def test_regenerate_route_surfaces_pipeline_state_fields_and_validation() -> None:
     source = _source()
 
-    assert "state = pipelineData.state === 'no_change' ? 'no_change' : 'completed'" in source
-    assert "idempotent = Boolean(pipelineData.idempotent)" in source
+    assert "pipeline_contract_missing_regenerate_metadata" in source
+    assert "pipelineState === 'no_change' || pipelineState === 'completed'" in source
+    assert "typeof pipelineIdempotent === 'boolean'" in source
+    assert "typeof pipelineVersion === 'number'" in source
     assert "generated_content_id: pipelineData.generated_content_id ?? null" in source
     assert "request_id: pipelineRequestId" in source
     assert "validation_errors: violations" in source

@@ -278,11 +278,33 @@ export async function POST(request: NextRequest) {
       : null
 
     // Python pipeline is the single writer for generated_content/regeneration_history.
-    const state = pipelineData.state === 'no_change' ? 'no_change' : 'completed'
-    const idempotent = Boolean(pipelineData.idempotent)
-    const version = typeof pipelineData.version === 'number'
-      ? pipelineData.version
-      : 0
+    // Treat authoritative persistence metadata as required contract fields.
+    const pipelineState = pipelineData.state
+    const pipelineIdempotent = pipelineData.idempotent
+    const pipelineVersion = pipelineData.version
+    const state = (pipelineState === 'no_change' || pipelineState === 'completed')
+      ? pipelineState
+      : null
+    const idempotent = typeof pipelineIdempotent === 'boolean'
+      ? pipelineIdempotent
+      : null
+    const version = (typeof pipelineVersion === 'number' && Number.isFinite(pipelineVersion))
+      ? pipelineVersion
+      : null
+
+    if (state === null || idempotent === null || version === null) {
+      const missing: string[] = []
+      if (state === null) missing.push('state')
+      if (idempotent === null) missing.push('idempotent')
+      if (version === null) missing.push('version')
+      return errorResponse(500, {
+        error: `Pipeline response missing required regeneration metadata: ${missing.join(', ')}`,
+        code: 'pipeline_contract_missing_regenerate_metadata',
+        step: 'pipeline_response_validation',
+        actionable_message:
+          'Cloud Run regenerate contract drift detected. Ensure Python returns state/idempotent/version and retry.',
+      })
+    }
     const finishSentencesSaved = typeof pipelineData.finish_sentences_saved === 'boolean'
       ? pipelineData.finish_sentences_saved
       : (state === 'completed' && Boolean(finishSentences && Object.keys(finishSentences).length > 0))
