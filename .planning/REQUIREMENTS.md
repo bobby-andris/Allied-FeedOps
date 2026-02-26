@@ -26,9 +26,9 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 ### Revenue Leakage
 
 - [ ] **LEAK-01**: User can see total revenue leakage estimate as a hero number showing a range with confidence coloring
-- [ ] **LEAK-02**: User can view misplaced terms sorted by dollar impact with revenue estimate ranges (not point values) and reason codes
-- [ ] **LEAK-03**: User can view wasted spend alerts for terms with zero conversions and high spend, with Block/Demote action buttons
-- [ ] **LEAK-04**: User can view under-invested winners showing impression share gap (actual vs Keyword Planner market) with potential revenue gain
+- [x] **LEAK-02**: User can view misplaced terms sorted by dollar impact with revenue estimate ranges (not point values) and reason codes
+- [x] **LEAK-03**: User can view wasted spend alerts for terms with zero conversions and high spend, with Block/Demote action buttons
+- [x] **LEAK-04**: User can view under-invested winners showing impression share gap (actual vs Keyword Planner market) with potential revenue gain
 - [ ] **LEAK-05**: User can view tier ROAS distribution box plots showing overlap zones between tiers
 - [ ] **LEAK-06**: User can see "Last computed" timestamp on all revenue leakage data
 
@@ -37,7 +37,7 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 - [x] **EXEC-01**: User can approve/reject individual tier movement recommendations with one click
 - [x] **EXEC-02**: User can batch-approve all high-confidence recommendations (confidence > 0.80) in one action
 - [x] **EXEC-03**: User can undo a tier movement using negative_registry audit trail and criterion IDs
-- [ ] **EXEC-04**: User can view movement history from policy_action_execution_log
+- [x] **EXEC-04**: User can view movement history from policy_action_execution_log
 - [x] **EXEC-05**: Recommendations persist to routing_recommendations table for asynchronous operator review
 
 ### Demand Intelligence
@@ -129,15 +129,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIER-05 | Phase 33 | Complete |
 | TIER-06 | Phase 33 | Complete |
 | LEAK-01 | Phase 34 | Pending |
-| LEAK-02 | Phase 34 | Pending |
-| LEAK-03 | Phase 34 | Pending |
-| LEAK-04 | Phase 34 | Pending |
+| LEAK-02 | Phase 34 | Complete |
+| LEAK-03 | Phase 34 | Complete |
+| LEAK-04 | Phase 34 | Complete |
 | LEAK-05 | Phase 34 | Pending |
 | LEAK-06 | Phase 34 | Pending |
 | EXEC-01 | Phase 34 | Complete |
 | EXEC-02 | Phase 34 | Complete |
 | EXEC-03 | Phase 34 | Complete |
-| EXEC-04 | Phase 34 | Pending |
+| EXEC-04 | Phase 34 | Complete |
 | EXEC-05 | Phase 34 | Complete |
 | DEMAND-01 | Phase 35 | Pending |
 | DEMAND-02 | Phase 35 | Pending |

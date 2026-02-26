@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 34 (v1.3c) — IN PROGRESS
-Plan: 1 of 4 complete
-Status: Completed 34-01 (DB migration + CRUD API for routing_recommendations)
-Last activity: 2026-02-25 — Completed 34-01-PLAN.md (routing_recommendations table + CRUD API)
+Plan: 2 of 4 complete
+Status: Completed 34-02 (useRecommendations hook + reason code classification)
+Last activity: 2026-02-26 — Completed 34-02-PLAN.md (client-side data layer with optimistic updates)
 
-Progress: [███░░░░░░░] 25% (Phase 34)
+Progress: [█████░░░░░] 50% (Phase 34)
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [███░░░░░░░] 25% (Phase 34)
 | v1.3a | ~8 | ~20 | 2026-02-25 |
 | v1.3b | 5 | 13 | 2026-02-25 |
 | Phase 34 P01 | 3min | 3 tasks | 3 files |
+| Phase 34 P02 | 4min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ Recent decisions affecting current work:
 - [Phase 34-01]: Upsert on (search_term, custom_label_0) unique constraint for idempotent approve/reject
 - [Phase 34-01]: Metadata JSONB stores currentTier, impact, and append-only history array for audit
 - [Phase 34-01]: recommended_action defaults to 'funnel'; supports 'global_block' for wasted spend blocks
+- [Phase 34-02]: Wasted spend threshold $5 (5M micros) — below is noise, not actionable
+- [Phase 34-02]: Classification priority: wasted_spend > under_invested > misplaced
+- [Phase 34-02]: Hook uses searchTerm::customLabel0 composite key matching API unique constraint
 
 ### Pending Todos
 
@@ -99,8 +103,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-25
-Stopped at: Completed 34-01-PLAN.md (routing_recommendations table + CRUD API)
+Last session: 2026-02-26
+Stopped at: Completed 34-02-PLAN.md (useRecommendations hook + reason code classification)
 Resume file: None
 
 **Phase 33 Completion Summary**:
