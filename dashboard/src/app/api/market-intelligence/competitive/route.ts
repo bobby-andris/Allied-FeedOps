@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { COMPETITOR_TOKENS, BRAND_TOKENS } from '@/lib/market-intelligence/constants'
-import { isBrandTerm, matchesCompetitor, costMicrosToDollars, paginateRpc, fetchLatestPeriod } from '@/lib/market-intelligence/computations'
+import { isBrandTerm, matchesCompetitor, costMicrosToDollars, paginateRpc } from '@/lib/market-intelligence/computations'
 import type { CompetitiveData, BrandSplit, CompetitorMention } from '@/lib/market-intelligence/types'
 
 export const dynamic = 'force-dynamic'
@@ -24,28 +24,44 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient()
     const customLabel0 = request.nextUrl.searchParams.get('customLabel0')
 
-    // Use latest major period for accurate single-period metrics
-    const latestPeriod = await fetchLatestPeriod(supabase)
-
-    // Fetch pre-aggregated term metrics for the latest period only
+    // Competitive analysis uses ALL periods (no period filter) because
+    // competitor/brand terms are sparse — filtering to one period loses most of them.
+    // The MV is already properly deduped (offer-level inflation removed).
     let termRows: TermMetricsRow[]
     try {
       termRows = await paginateRpc<TermMetricsRow>(supabase, 'market_intelligence_term_metrics', {
         p_custom_label_0: customLabel0 || null,
-        p_period_start: latestPeriod,
+        p_period_start: null,
       })
     } catch (err) {
       console.error('term metrics rpc failed:', err)
       return NextResponse.json({ error: err instanceof Error ? err.message : 'RPC failed' }, { status: 500 })
     }
 
-    const allTerms = termRows.map((row) => ({
-      queryText: row.query_text as string,
-      impressions: Number(row.impressions ?? 0),
-      clicks: Number(row.clicks ?? 0),
-      costMicros: Number(row.cost_micros ?? 0),
-      conversions: Number(row.conversions ?? 0),
-      revenue: Number(row.revenue ?? 0),
+    // MV has per-period rows — aggregate across periods per unique term
+    const termAgg = new Map<string, { impressions: number; clicks: number; costMicros: number; conversions: number; revenue: number }>()
+    for (const row of termRows) {
+      const key = (row.query_text as string).toLowerCase()
+      const existing = termAgg.get(key)
+      if (existing) {
+        existing.impressions += Number(row.impressions ?? 0)
+        existing.clicks += Number(row.clicks ?? 0)
+        existing.costMicros += Number(row.cost_micros ?? 0)
+        existing.conversions += Number(row.conversions ?? 0)
+        existing.revenue += Number(row.revenue ?? 0)
+      } else {
+        termAgg.set(key, {
+          impressions: Number(row.impressions ?? 0),
+          clicks: Number(row.clicks ?? 0),
+          costMicros: Number(row.cost_micros ?? 0),
+          conversions: Number(row.conversions ?? 0),
+          revenue: Number(row.revenue ?? 0),
+        })
+      }
+    }
+    const allTerms = Array.from(termAgg.entries()).map(([queryText, metrics]) => ({
+      queryText,
+      ...metrics,
     }))
 
     // --- 1. Brand vs Non-Brand Split (DEMAND-05) ---
@@ -143,8 +159,8 @@ export async function GET(request: NextRequest) {
         nonBrandRoas,
       },
       period: {
-        from: latestPeriod ?? '',
-        to: latestPeriod ?? '',
+        from: '',
+        to: '',
         totalTerms: allTerms.length,
       },
     }
