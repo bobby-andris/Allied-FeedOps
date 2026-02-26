@@ -6,22 +6,45 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2 } from 'lucide-react'
 import { ActionQueueRow } from './ActionQueueRow'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
+import type { RecommendationStatus } from '../hooks/useRecommendations'
 
 interface ActionQueueTableProps {
   scores: TermScore[]
   onSelectTerm: (term: TermScore) => void
+  recommendationStatuses?: Record<string, RecommendationStatus>
+  onUndo?: (searchTerm: string, customLabel0: string) => void
 }
 
 const PAGE_SIZE = 20
 
-export function ActionQueueTable({ scores, onSelectTerm }: ActionQueueTableProps) {
+function makeKey(searchTerm: string, customLabel0: string): string {
+  return `${searchTerm}::${customLabel0}`
+}
+
+export function ActionQueueTable({ scores, onSelectTerm, recommendationStatuses, onUndo }: ActionQueueTableProps) {
   const [showCount, setShowCount] = useState(PAGE_SIZE)
 
   const actionQueue = useMemo(() => {
-    return scores
+    const misplaced = scores
       .filter(s => s.isMisplaced)
       .sort((a, b) => (b.impact?.mid ?? 0) - (a.impact?.mid ?? 0))
-  }, [scores])
+
+    if (!recommendationStatuses) return misplaced
+
+    // Partition: accepted items first, then other misplaced items
+    const accepted: TermScore[] = []
+    const others: TermScore[] = []
+    for (const term of misplaced) {
+      const key = makeKey(term.searchTerm, term.customLabel0)
+      const s = recommendationStatuses[key]
+      if (s?.status === 'accepted') {
+        accepted.push(term)
+      } else {
+        others.push(term)
+      }
+    }
+    return [...accepted, ...others]
+  }, [scores, recommendationStatuses])
 
   const visibleTerms = actionQueue.slice(0, showCount)
   const hasMore = showCount < actionQueue.length
@@ -52,14 +75,20 @@ export function ActionQueueTable({ scores, onSelectTerm }: ActionQueueTableProps
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        {visibleTerms.map((term, i) => (
-          <ActionQueueRow
-            key={term.searchTerm}
-            term={term}
-            rank={i + 1}
-            onViewDetails={onSelectTerm}
-          />
-        ))}
+        {visibleTerms.map((term, i) => {
+          const key = makeKey(term.searchTerm, term.customLabel0)
+          const isAccepted = recommendationStatuses?.[key]?.status === 'accepted'
+          return (
+            <ActionQueueRow
+              key={term.searchTerm}
+              term={term}
+              rank={i + 1}
+              onViewDetails={onSelectTerm}
+              showUndo={isAccepted}
+              onUndo={onUndo}
+            />
+          )
+        })}
 
         {hasMore && (
           <div className="flex justify-center pt-2">

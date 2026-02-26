@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import { Undo2 } from 'lucide-react'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { TierMovementArrow } from './TierMovementArrow'
 import { ImpactBadge } from './ImpactBadge'
@@ -10,9 +12,11 @@ interface ActionQueueRowProps {
   term: TermScore
   rank: number
   onViewDetails: (term: TermScore) => void
+  showUndo?: boolean
+  onUndo?: (searchTerm: string, customLabel0: string) => void
 }
 
-export function ActionQueueRow({ term, rank, onViewDetails }: ActionQueueRowProps) {
+export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo }: ActionQueueRowProps) {
   const verdict = generatePlainVerdict(term)
 
   return (
@@ -49,6 +53,22 @@ export function ActionQueueRow({ term, rank, onViewDetails }: ActionQueueRowProp
       <div className="shrink-0">
         <ImpactBadge impact={term.impact} />
       </div>
+
+      {/* Undo button (for accepted recommendations) */}
+      {showUndo && onUndo && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1 text-muted-foreground shrink-0"
+          onClick={(e) => {
+            e.stopPropagation()
+            onUndo(term.searchTerm, term.customLabel0)
+          }}
+        >
+          <Undo2 className="h-3.5 w-3.5" />
+          Undo
+        </Button>
+      )}
     </div>
   )
 }

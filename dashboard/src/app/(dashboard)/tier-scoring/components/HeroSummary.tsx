@@ -2,12 +2,6 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { CheckCircle2, TrendingUp, Zap } from 'lucide-react'
 import { formatDollars } from '@/lib/formatting'
 import type { ImpactRange } from '@/lib/optimization/tier-scoring.types'
@@ -17,6 +11,7 @@ interface HeroSummaryProps {
   totalImpact: ImpactRange
   totalTermsScored: number
   computedAt: string
+  onApplyClick?: () => void
 }
 
 export function HeroSummary({
@@ -24,6 +19,7 @@ export function HeroSummary({
   totalImpact,
   totalTermsScored,
   computedAt,
+  onApplyClick,
 }: HeroSummaryProps) {
   const isAllGood = totalMisplaced === 0
   const computedDate = new Date(computedAt)
@@ -75,19 +71,10 @@ export function HeroSummary({
           </div>
 
           <div className="flex items-center gap-3">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button disabled className="gap-1.5">
-                    <Zap className="h-4 w-4" />
-                    Apply Recommendations
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Coming in Phase 34 — one-click tier movements</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button className="gap-1.5" onClick={onApplyClick}>
+              <Zap className="h-4 w-4" />
+              Apply Recommendations
+            </Button>
             <span className="text-xs text-muted-foreground">
               Last analyzed {formattedDate}
             </span>
