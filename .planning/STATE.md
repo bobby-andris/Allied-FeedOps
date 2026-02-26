@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 Phase: 34.2 (v1.3c) — COMPLETE
 Plan: 6 of 6 complete
 Status: Completed 34.2-06 (Calibration + bug fixes from code review)
-Last activity: 2026-02-26 - Completed quick task 4: implement Wave 1 of tier-intelligence-dashboard-redesign
+Last activity: 2026-02-26 - Completed quick task 5: Wave 2 action queue grouped layout
 
 Progress: [##########] 100% (Phase 34.2)
 
@@ -170,11 +170,12 @@ Recent decisions affecting current work:
 |---|-------------|------|--------|-----------|
 | 3 | Fix determineAction to use ROAS-based logic instead of recommendedTier direction | 2026-02-26 | df6ed49a | [3-fix-determineaction-to-use-roas-based-lo](./quick/3-fix-determineaction-to-use-roas-based-lo/) |
 | 4 | Multi-label scoring loop for tier intelligence (Wave 1) | 2026-02-26 | 6f993364 | [4-implement-wave-1-of-tier-intelligence-da](./quick/4-implement-wave-1-of-tier-intelligence-da/) |
+| 5 | Action queue grouped layout (Wave 2 dashboard redesign) | 2026-02-26 | 1fc64c02 | [5-implement-wave-2-action-queue-redesign-f](./quick/5-implement-wave-2-action-queue-redesign-f/) |
 
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Phase 34.2 complete — all 6 plans done, critical bugs fixed, ready for deploy
+Stopped at: Completed quick-5 — Wave 2 action queue grouped layout
 Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-06-SUMMARY.md
 
 **Phase 33 Completion Summary**:
