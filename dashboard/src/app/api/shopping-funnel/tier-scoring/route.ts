@@ -164,29 +164,32 @@ export async function GET(request: NextRequest) {
       console.warn('Cloud Run /score-intent unavailable — proceeding with behavioral signals only:', err instanceof Error ? err.message : err)
     }
 
-    // Score each term
+    // Score each term once per custom_label_0 funnel assignment (multi-label support)
     const scores: TermScore[] = []
     for (const term of existingTermsResult.terms) {
-      // Skip terms with no valid funnel assignment
       if (!term.funnels.length) continue
 
-      const primaryFunnel = term.funnels[0]
-      const currentTier = mapTierToFunnelTier(primaryFunnel.tier)
-      if (!currentTier) continue // Skip 'Campaign Negative' and 'Unknown'
-
-      const groupKey = primaryFunnel.custom_label_0
-      const groupDist = distributions.get(groupKey)
-      if (!groupDist) continue // Skip if no distribution data for this group
-
-      // Get intent features for NLP alignment
       const intentFeatures = decomposeSearchTerm(term.search_term)
-
-      // Get feed alignment score for this term (may be undefined if Cloud Run unavailable)
       const feedScore = feedAlignmentMap.get(term.search_term)
 
-      // Score the term with calibration config, feed alignment, and real avgCPA
-      const scored = scoreTerm(term, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION, feedScore, AVG_CPA)
-      scores.push(scored)
+      // Score once per custom_label_0 funnel assignment
+      for (const funnel of term.funnels) {
+        const currentTier = mapTierToFunnelTier(funnel.tier)
+        if (!currentTier) continue // Skip 'Campaign Negative' and 'Unknown'
+
+        const groupKey = funnel.custom_label_0
+        const groupDist = distributions.get(groupKey)
+        if (!groupDist) continue // Skip if no distribution data for this group
+
+        // scoreTerm reads funnels[0] internally — shallow copy with this funnel first
+        const termForThisFunnel = {
+          ...term,
+          funnels: [funnel, ...term.funnels.filter(f => f !== funnel)],
+        }
+
+        const scored = scoreTerm(termForThisFunnel, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION, feedScore, AVG_CPA)
+        scores.push(scored)
+      }
     }
 
     // Update scoredTerms on each group's distribution
