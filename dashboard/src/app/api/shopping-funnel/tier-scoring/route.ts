@@ -183,6 +183,9 @@ export async function GET(request: NextRequest) {
             fitScoreDelta: s.fitScoreDelta,
             dataConfirmed: s.dataConfirmed,
             isMisplaced: s.isMisplaced,
+            recommendedAction: s.recommendedAction,
+            actionReason: s.actionReason,
+            totalImpressions: s.totalImpressions,
           },
         })),
         { onConflict: 'search_term,custom_label_0' }
