@@ -26,6 +26,7 @@ import type {
   GroupDistributions,
   TermScore,
   BehavioralSignals,
+  IntentScoreBreakdown,
   ConfidenceResult,
   ConfidenceFactors,
   ImpactRange,
@@ -189,7 +190,9 @@ export function scoreTerm(
   groupDist: GroupDistributions,
   globalFallback: Record<FunnelTier, TierDistribution>,
   intentFeatures?: QueryIntentFeatures,
-  config: CalibrationConfig = DEFAULT_CALIBRATION
+  config: CalibrationConfig = DEFAULT_CALIBRATION,
+  feedAlignmentScore?: number,  // 0-1 from Cloud Run /score-intent
+  avgCPA?: number,              // from account audit, replaces hardcoded $5
 ): TermScore {
   const currentTier = mapTierLabel(term.funnels[0]?.tier ?? 'Unknown')
   const customLabel0 = term.funnels[0]?.custom_label_0 ?? ''
@@ -249,51 +252,18 @@ export function scoreTerm(
 
   const dataConfirmed = recommendedTier === currentTier && hasMinimumData && meetsConfidenceFloor
 
-  // Determine prescriptive action using ROAS-based logic
+  // Compute unified intent score (Domain A feed alignment + Domain B behavioral)
+  let intentScoreBreakdown: IntentScoreBreakdown | undefined
+  const queryWordCount = term.search_term.trim().split(/\s+/).length
+
+  // Determine prescriptive action using ROAS-based logic + intent scoring
   const currentTierDist = chooseDist(currentTier)
-  const { action: recommendedAction, targetTier } = determineAction(
-    currentTier, currentTierDist, termRoas, term.total_conversions, term.total_cost_micros, isMisplaced
-  )
 
-  // Impact: compute for misplaced OR wasted spend terms
-  const isWastedSpend = term.total_conversions === 0 && term.total_cost_micros > 5_000_000
-  let impact: ImpactRange | null = null
-  if (isMisplaced || isWastedSpend) {
-    impact = estimateImpact(term, chooseDist(currentTier), chooseDist(targetTier), config)
-  }
-
-  // Prescriptive verdict and action reason
-  let actionReason: string
-  switch (recommendedAction) {
-    case 'block':
-      actionReason = `Block — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
-      break
-    case 'demote':
-      if (term.total_conversions === 0) {
-        actionReason = `Demote to HIGH — spent $${(term.total_cost_micros / 1_000_000).toFixed(0)} with zero conversions`
-      } else {
-        actionReason = `Demote — underperforming in ${currentTier}, move to ${targetTier} for restricted bidding`
-      }
-      break
-    case 'promote':
-      actionReason = `Promote to ${targetTier} — strong performer in ${currentTier} tier`
-      break
-    default:
-      actionReason = `Aligned — performing as expected in ${currentTier}`
-  }
-
-  const verdict = actionReason
-
-  // Peer context
-  const peerContext = buildPeerContext(termRoas, groupDist, customLabel0)
-
-  // Behavioral intent signals (Domain B)
+  // Behavioral intent signals (Domain B) — compute BEFORE determineAction so we have rCTR
   let behavioralSignals: BehavioralSignals | undefined
   if (term.total_average_cpc !== undefined && term.total_all_conversions !== undefined) {
     const tierMedianCtr = currentTierDist.metrics.ctr.p50
     const tierMedianCpcMicros = currentTierDist.metrics.cpc.p50 * 1_000_000 // dist stores CPC in dollars
-    // Estimate tier median daily spend: tier median CPC * tier median clicks-per-term / 30 days
-    // Approximate: use the term's cost / impressions ratio against tier median
     const tierMedianDailySpend = (currentTierDist.metrics.cpc.p50 * 1_000_000 *
       Math.max(currentTierDist.metrics.ctr.p50 * 100, 1)) / 30
 
@@ -311,6 +281,69 @@ export function scoreTerm(
       tierMedianDailySpend,
     )
   }
+
+  // Compute unified intent score
+  if (feedAlignmentScore !== undefined || behavioralSignals) {
+    const feed = feedAlignmentScore ?? 0
+    const behavioral = behavioralSignals?.composite ?? 0
+    intentScoreBreakdown = {
+      feedAlignmentScore: feed,
+      behavioralScore: behavioral,
+      unifiedScore: 0.55 * feed + 0.45 * behavioral,
+    }
+  }
+
+  const { action: recommendedAction, targetTier, trigger } = determineAction(
+    currentTier,
+    currentTierDist,
+    termRoas,
+    term.total_conversions,
+    term.total_cost_micros,
+    isMisplaced,
+    intentScoreBreakdown?.unifiedScore,
+    behavioralSignals?.rCTR,
+    queryWordCount,
+    avgCPA,
+  )
+
+  // Impact: compute for misplaced OR wasted spend terms
+  const wastedSpendThreshold = (avgCPA ?? 5) * 1.5
+  const isWastedSpend = term.total_conversions === 0 && costDollars > wastedSpendThreshold
+  let impact: ImpactRange | null = null
+  if (isMisplaced || isWastedSpend) {
+    impact = estimateImpact(term, chooseDist(currentTier), chooseDist(targetTier), config)
+  }
+
+  // Prescriptive verdict and action reason
+  let actionReason: string
+  switch (trigger) {
+    case 'wasted_spend':
+      if (recommendedAction === 'block') {
+        actionReason = `Block — spent $${costDollars.toFixed(0)} with zero conversions`
+      } else {
+        actionReason = `Demote to ${targetTier} — spent $${costDollars.toFixed(0)} with zero conversions`
+      }
+      break
+    case 'demote_underperform':
+      actionReason = `Demote — underperforming in ${currentTier}, move to ${targetTier} for restricted bidding`
+      break
+    case 'promote_conversion':
+      actionReason = `Promote to ${targetTier} — conversion-proven performer in ${currentTier} tier`
+      break
+    case 'promote_intent':
+      actionReason = `Promote to ${targetTier} — intent-proven (score ${intentScoreBreakdown?.unifiedScore?.toFixed(2) ?? '?'}) with zero conversions`
+      break
+    case 'under_invested':
+      actionReason = `Under-invested — promote to ${targetTier} for more aggressive bidding`
+      break
+    default:
+      actionReason = `Aligned — performing as expected in ${currentTier}`
+  }
+
+  const verdict = actionReason
+
+  // Peer context
+  const peerContext = buildPeerContext(termRoas, groupDist, customLabel0)
 
   return {
     searchTerm: term.search_term,
@@ -334,6 +367,8 @@ export function scoreTerm(
     targetTier,
     totalImpressions: term.total_impressions ?? 0,
     behavioralSignals,
+    intentScore: intentScoreBreakdown,
+    trigger: trigger,
   }
 }
 
@@ -597,43 +632,78 @@ export function computeBehavioralIntent(
 // Helpers
 // ---------------------------------------------------------------------------
 
-function determineAction(
+/**
+ * 5-trigger decision matrix for term routing recommendations.
+ *
+ * Trigger priority (ORDER MATTERS — first match wins):
+ *   A. Wasted Spend Override: zero conversions + spend > 1.5x avgCPA
+ *   B. Demote (Underperforming): has conversions but ROAS < tier p25
+ *   C. Promote (Conversion-Proven): ROAS > tier p75
+ *   D. Promote (Intent-Proven): zero conversions + high intent score + (high rCTR OR 3+ word query)
+ *   E. Under-Invested: meets promote criteria (C or D) AND low impression share
+ *
+ * Sequential movement enforced: never skip tiers (HIGH -> LOW not allowed).
+ */
+export function determineAction(
   currentTier: FunnelTier,
   currentTierDist: TierDistribution,
   termRoas: number,
   totalConversions: number,
   totalCostMicros: number,
-  isMisplaced: boolean
-): { action: RecommendedAction; targetTier: FunnelTier } {
+  isMisplaced: boolean,
+  intentScore?: number,      // unified 0-1
+  rCTR?: number,             // raw rCTR for Trigger D gate
+  queryWordCount?: number,   // word count for Trigger D gate
+  avgCPA?: number,           // from account audit, replaces hardcoded $5
+): { action: RecommendedAction; targetTier: FunnelTier; trigger: string } {
   const costDollars = totalCostMicros / 1_000_000
   const TIER_UP: Record<FunnelTier, FunnelTier> = { HIGH: 'HIGH', MEDIUM: 'HIGH', LOW: 'MEDIUM' }
   const TIER_DOWN: Record<FunnelTier, FunnelTier> = { HIGH: 'MEDIUM', MEDIUM: 'LOW', LOW: 'LOW' }
 
-  // 1. Wasted spend: zero conversions + meaningful spend (unchanged)
-  if (totalConversions === 0 && costDollars > 5) {
-    if (currentTier === 'HIGH') return { action: 'block', targetTier: 'HIGH' }
-    return { action: 'demote', targetTier: 'HIGH' }
+  const wastedSpendThreshold = 1.5 * (avgCPA || 5)
+
+  // --- Trigger A: Wasted Spend Override ---
+  // Zero conversions + spent more than 1.5x avg CPA = wasted spend
+  if (totalConversions === 0 && costDollars > wastedSpendThreshold) {
+    if (currentTier === 'HIGH') {
+      return { action: 'block', targetTier: 'HIGH', trigger: 'wasted_spend' }
+    }
+    return { action: 'demote', targetTier: 'HIGH', trigger: 'wasted_spend' }
   }
 
-  // 2. Not flagged as misplaced by calibration gates — observe
-  if (!isMisplaced) return { action: 'observe', targetTier: currentTier }
-
-  // 3. ROAS-based action: compare term ROAS against current tier's distribution
   const p25 = currentTierDist.metrics.roas.p25
   const p75 = currentTierDist.metrics.roas.p75
 
-  // Underperformer: ROAS below current tier's p25 — demote (move UP toward HIGH)
-  if (termRoas < p25 && currentTier !== 'HIGH') {
-    return { action: 'demote', targetTier: TIER_UP[currentTier] }
+  // --- Trigger B: Demote (Underperforming) ---
+  // Has conversions but ROAS is below tier's p25 — demote one step toward HIGH
+  if (totalConversions > 0 && termRoas < p25 && currentTier !== 'HIGH') {
+    return { action: 'demote', targetTier: TIER_UP[currentTier], trigger: 'demote_underperform' }
   }
 
-  // High performer: ROAS above current tier's p75 — promote (move DOWN toward LOW)
+  // --- Trigger C: Promote (Conversion-Proven) ---
+  // ROAS above tier p75 — promote one step toward LOW (more aggressive bidding)
   if (termRoas > p75 && currentTier !== 'LOW') {
-    return { action: 'promote', targetTier: TIER_DOWN[currentTier] }
+    // Check for under-invested (Trigger E): if also low impression share, flag it
+    // Use totalImpressions as proxy — terms with < 30% of typical volume are under-invested
+    // (Impression share data not directly available on the term; this is a placeholder for
+    // when campaign-level impression share is passed through)
+    return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_conversion' }
   }
 
-  // Within IQR or at boundary tier — observe
-  return { action: 'observe', targetTier: currentTier }
+  // --- Trigger D: Promote (Intent-Proven, Zero Conversions) ---
+  // Zero conversions BUT high unified intent score AND supporting evidence
+  if (
+    totalConversions === 0 &&
+    intentScore !== undefined &&
+    intentScore >= 0.65 &&
+    ((rCTR !== undefined && rCTR >= 1.5) || (queryWordCount !== undefined && queryWordCount >= 3)) &&
+    currentTier !== 'LOW'
+  ) {
+    return { action: 'promote', targetTier: TIER_DOWN[currentTier], trigger: 'promote_intent' }
+  }
+
+  // --- Default: Observe ---
+  return { action: 'observe', targetTier: currentTier, trigger: 'observe' }
 }
 
 function computeSingleTierDistribution(

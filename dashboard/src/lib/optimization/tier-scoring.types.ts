@@ -104,6 +104,15 @@ export interface TermScore {
   targetTier?: FunnelTier // the tier determineAction wants to move to
   totalImpressions?: number // needed for under_invested fix in Plan 02
   behavioralSignals?: BehavioralSignals // Domain B: behavioral intent from Google Ads data
+  intentScore?: IntentScoreBreakdown // Unified intent score combining feed alignment + behavioral
+  trigger?: string // which trigger fired in determineAction (wasted_spend, demote_underperform, promote_conversion, promote_intent, under_invested, observe)
+}
+
+/** Unified intent score combining Domain A (feed alignment) + Domain B (behavioral signals) */
+export interface IntentScoreBreakdown {
+  feedAlignmentScore: number  // 0-1 from Cloud Run /score-intent
+  behavioralScore: number     // 0-1 from computeBehavioralIntent
+  unifiedScore: number        // 0.55 * feed + 0.45 * behavioral
 }
 
 export interface ConfidenceResult {

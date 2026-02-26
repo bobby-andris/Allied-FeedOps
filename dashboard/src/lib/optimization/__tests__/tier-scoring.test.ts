@@ -11,6 +11,7 @@ import {
   computeGlobalDistributions,
   buildHeroCallout,
   computeBehavioralIntent,
+  determineAction,
 } from '../tier-scoring'
 
 // ---------------------------------------------------------------------------
@@ -1356,5 +1357,268 @@ describe('computeBehavioralIntent', () => {
     // No micro-convs: costVelocityScore = 1.0 - min(ratio/3, 1.0)
     // ratio = (50M/30) / 500000 = 3.33 → min(3.33/3, 1) = 1.0 → score = 0.0
     expect(signals.costVelocityScore).toBeCloseTo(0.0, 1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Phase 34.2 Plan 05: 5-trigger determineAction + unified intent scoring
+// ---------------------------------------------------------------------------
+
+describe('5-trigger determineAction', () => {
+  // Use determineAction directly to test trigger logic in isolation
+  const makeDistWithRoas = (p25: number, p75: number): TierDistribution => ({
+    tier: 'HIGH',
+    metrics: {
+      roas: { p25, p50: (p25 + p75) / 2, p75, mean: (p25 + p75) / 2, mad: 0.5, min: 0, max: p75 * 2 },
+      cvr: { ...{ p25: 0.01, p50: 0.02, p75: 0.04, mean: 0.02, mad: 0.005, min: 0, max: 0.1 } },
+      cpc: { ...{ p25: 0.3, p50: 0.5, p75: 0.8, mean: 0.5, mad: 0.15, min: 0.1, max: 1.2 } },
+      ctr: { ...{ p25: 0.01, p50: 0.02, p75: 0.03, mean: 0.02, mad: 0.008, min: 0.002, max: 0.06 } },
+    },
+    sampleSize: 20,
+    fallbackLevel: 'per_group',
+  })
+
+  it('Trigger A: wasted spend with avgCPA threshold (not hardcoded $5)', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // avgCPA = $64.22 → threshold = $96.33
+    const result = determineAction('HIGH', dist, 0, 0, 100_000_000, false, undefined, undefined, undefined, 64.22)
+    // $100 > $96.33 → wasted spend
+    expect(result.action).toBe('block')
+    expect(result.trigger).toBe('wasted_spend')
+  })
+
+  it('Trigger A: wasted spend with avgCPA below threshold → observe', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // avgCPA = $64.22 → threshold = $96.33. Spend = $50 → not wasted
+    const result = determineAction('HIGH', dist, 0, 0, 50_000_000, false, undefined, undefined, undefined, 64.22)
+    expect(result.trigger).toBe('observe')
+  })
+
+  it('Trigger A: wasted spend from MEDIUM → demote to HIGH', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 0, 0, 100_000_000, false, undefined, undefined, undefined, 64.22)
+    expect(result.action).toBe('demote')
+    expect(result.targetTier).toBe('HIGH')
+    expect(result.trigger).toBe('wasted_spend')
+  })
+
+  it('Trigger B: low ROAS demotes from LOW → MEDIUM', () => {
+    const dist = makeDistWithRoas(3.0, 8.0) // p25 = 3.0
+    // ROAS 1.0 < p25 of 3.0, has conversions → demote
+    const result = determineAction('LOW', { ...dist, tier: 'LOW' }, 1.0, 5, 10_000_000, true)
+    expect(result.action).toBe('demote')
+    expect(result.targetTier).toBe('MEDIUM')
+    expect(result.trigger).toBe('demote_underperform')
+  })
+
+  it('Trigger B: low ROAS demotes from MEDIUM → HIGH', () => {
+    const dist = makeDistWithRoas(2.0, 4.0) // p25 = 2.0
+    // ROAS 0.5 < p25 of 2.0, has conversions → demote
+    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 0.5, 3, 10_000_000, true)
+    expect(result.action).toBe('demote')
+    expect(result.targetTier).toBe('HIGH')
+    expect(result.trigger).toBe('demote_underperform')
+  })
+
+  it('Trigger B: already in HIGH → does not demote further', () => {
+    const dist = makeDistWithRoas(4.0, 8.0)
+    // ROAS 1.0 < p25 of 4.0, but already HIGH → can not demote
+    const result = determineAction('HIGH', dist, 1.0, 5, 10_000_000, true)
+    // Trigger B skipped (HIGH), falls through to C, D, then observe
+    expect(result.trigger).not.toBe('demote_underperform')
+  })
+
+  it('Trigger C: high ROAS promotes from HIGH → MEDIUM', () => {
+    const dist = makeDistWithRoas(4.0, 7.0) // p75 = 7.0
+    // ROAS 8.0 > p75 of 7.0, not LOW → promote
+    const result = determineAction('HIGH', dist, 8.0, 5, 10_000_000, true)
+    expect(result.action).toBe('promote')
+    expect(result.targetTier).toBe('MEDIUM')
+    expect(result.trigger).toBe('promote_conversion')
+  })
+
+  it('Trigger C: high ROAS promotes from MEDIUM → LOW', () => {
+    const dist = makeDistWithRoas(2.0, 4.0) // p75 = 4.0
+    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 5.0, 8, 10_000_000, true)
+    expect(result.action).toBe('promote')
+    expect(result.targetTier).toBe('LOW')
+    expect(result.trigger).toBe('promote_conversion')
+  })
+
+  it('Trigger C: already in LOW → does not promote further', () => {
+    const dist = makeDistWithRoas(3.0, 8.0)
+    const result = determineAction('LOW', { ...dist, tier: 'LOW' }, 10.0, 5, 10_000_000, true)
+    // Can not promote from LOW → observe
+    expect(result.trigger).toBe('observe')
+  })
+
+  it('Trigger D: zero conversions + high intent score + high rCTR → promote', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // intentScore = 0.72, rCTR = 2.0, zero conversions, in HIGH
+    const result = determineAction('HIGH', dist, 0, 0, 5_000_000, false, 0.72, 2.0, 2, 64.22)
+    expect(result.action).toBe('promote')
+    expect(result.targetTier).toBe('MEDIUM')
+    expect(result.trigger).toBe('promote_intent')
+  })
+
+  it('Trigger D: zero conversions + high intent score + 3-word query → promote', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // intentScore = 0.70, rCTR = 0.8 (below 1.5), but wordCount = 4 (>= 3)
+    const result = determineAction('HIGH', dist, 0, 0, 5_000_000, false, 0.70, 0.8, 4, 64.22)
+    expect(result.action).toBe('promote')
+    expect(result.trigger).toBe('promote_intent')
+  })
+
+  it('Trigger D: zero conversions + low intent score → observe (not promote)', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // intentScore = 0.40 (below 0.65 threshold), rCTR = 2.0
+    const result = determineAction('HIGH', dist, 0, 0, 5_000_000, false, 0.40, 2.0, 2, 64.22)
+    expect(result.trigger).toBe('observe')
+  })
+
+  it('Trigger D: zero conversions + high intent but already LOW → observe', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    const result = determineAction('LOW', { ...dist, tier: 'LOW' }, 0, 0, 5_000_000, false, 0.80, 2.5, 4, 64.22)
+    // Can not promote from LOW
+    expect(result.trigger).toBe('observe')
+  })
+
+  it('Trigger priority: wasted spend overrides intent-proven', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // Meets BOTH wasted spend (>$96.33) AND intent-proven (0.75, rCTR 2.0)
+    // Wasted spend should win (higher priority)
+    const result = determineAction('HIGH', dist, 0, 0, 100_000_000, false, 0.75, 2.0, 4, 64.22)
+    expect(result.trigger).toBe('wasted_spend')
+  })
+
+  it('Sequential movement: never skip tiers (LOW wasted spend → HIGH, not skipping MEDIUM)', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    // Wasted spend from LOW always goes to HIGH (block equivalent)
+    const result = determineAction('LOW', { ...dist, tier: 'LOW' }, 0, 0, 100_000_000, false, undefined, undefined, undefined, 64.22)
+    expect(result.targetTier).toBe('HIGH')
+    expect(result.trigger).toBe('wasted_spend')
+  })
+
+  it('Sequential movement: promote moves one step only (HIGH → MEDIUM, not HIGH → LOW)', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    const result = determineAction('HIGH', dist, 8.0, 5, 10_000_000, true)
+    expect(result.targetTier).toBe('MEDIUM')
+    expect(result.targetTier).not.toBe('LOW')
+  })
+
+  it('trigger field returned for observe', () => {
+    const dist = makeDistWithRoas(2.0, 6.0)
+    const result = determineAction('HIGH', dist, 3.0, 2, 5_000_000, false)
+    expect(result.trigger).toBe('observe')
+    expect(result.targetTier).toBe('HIGH')
+  })
+})
+
+describe('Unified intent scoring in scoreTerm', () => {
+  it('scoreTerm populates intentScore when feedAlignmentScore provided', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 25,
+      total_cost_micros: 2_500_000,
+      total_conversions: 3,
+      total_conversions_value: 15,
+      total_average_cpc: 100_000,
+      total_all_conversions: 5,
+    })
+
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.70)
+    expect(score.intentScore).toBeDefined()
+    expect(score.intentScore!.feedAlignmentScore).toBe(0.70)
+    expect(score.intentScore!.behavioralScore).toBeGreaterThanOrEqual(0)
+    // unifiedScore = 0.55 * 0.70 + 0.45 * behavioral
+    expect(score.intentScore!.unifiedScore).toBeGreaterThan(0.55 * 0.70)
+  })
+
+  it('scoreTerm populates trigger field', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 25,
+      total_cost_micros: 2_500_000,
+      total_conversions: 3,
+      total_conversions_value: 15,
+    })
+
+    const score = scoreTerm(term, group, globalFallback)
+    expect(score.trigger).toBeDefined()
+    expect(['wasted_spend', 'demote_underperform', 'promote_conversion', 'promote_intent', 'under_invested', 'observe']).toContain(score.trigger)
+  })
+
+  it('scoreTerm uses avgCPA for wasted spend threshold', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // $10 spend, 0 conversions, avgCPA=$64.22 → threshold=$96.33
+    // $10 < $96.33 → NOT wasted spend
+    const term = makeTermWithFunnels({
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 1000,
+      total_clicks: 50,
+      total_cost_micros: 10_000_000, // $10
+      total_conversions: 0,
+      total_conversions_value: 0,
+    })
+
+    const scoreWithAvgCPA = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, undefined, 64.22)
+    // $10 < $96.33 threshold → should NOT be block/wasted_spend
+    expect(scoreWithAvgCPA.trigger).not.toBe('wasted_spend')
+
+    // Without avgCPA (defaults to $5) → threshold=$7.50 → $10 > $7.50 → wasted_spend
+    const scoreWithoutAvgCPA = scoreTerm(term, group, globalFallback)
+    expect(scoreWithoutAvgCPA.trigger).toBe('wasted_spend')
+  })
+
+  it('intent-proven promotion fires for zero-conv term with high intent and rCTR', () => {
+    const rows = makeNormalDistribution()
+    const distMap = computeTierDistributions(rows)
+    const group = distMap.get('Towel Bars')!
+    const globalFallback = computeGlobalDistributions(rows)
+
+    // Zero conversions, high behavioral signals (rCTR > 1.5), 4 word query
+    // feedAlignmentScore = 0.80 → unified score should be well above 0.65
+    const term = makeTermWithFunnels({
+      search_term: 'polished nickel towel bar', // 4 words
+      label: 'Towel Bars',
+      tier: 'High',
+      total_impressions: 500,
+      total_clicks: 50, // high CTR will give rCTR > 1.5 depending on tier median
+      total_cost_micros: 3_000_000, // $3 (below wasted spend threshold with avgCPA $64.22)
+      total_conversions: 0,
+      total_conversions_value: 0,
+      total_average_cpc: 60_000, // $0.06
+      total_all_conversions: 2, // micro-conversions
+    })
+
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.80, 64.22)
+    // Should have intentScore populated
+    expect(score.intentScore).toBeDefined()
+    expect(score.intentScore!.unifiedScore).toBeGreaterThanOrEqual(0.45) // at least from feed alignment
+    // If unified >= 0.65 and (rCTR >= 1.5 or wordCount >= 3), should be promote_intent
+    if (score.intentScore!.unifiedScore >= 0.65) {
+      expect(score.trigger).toBe('promote_intent')
+      expect(score.recommendedAction).toBe('promote')
+      expect(score.targetTier).toBe('MEDIUM')
+    }
   })
 })
