@@ -25,12 +25,12 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 
 ### Revenue Leakage
 
-- [ ] **LEAK-01**: User can see total revenue leakage estimate as a hero number showing a range with confidence coloring
+- [x] **LEAK-01**: User can see total revenue leakage estimate as a hero number showing a range with confidence coloring
 - [x] **LEAK-02**: User can view misplaced terms sorted by dollar impact with revenue estimate ranges (not point values) and reason codes
 - [x] **LEAK-03**: User can view wasted spend alerts for terms with zero conversions and high spend, with Block/Demote action buttons
 - [x] **LEAK-04**: User can view under-invested winners showing impression share gap (actual vs Keyword Planner market) with potential revenue gain
-- [ ] **LEAK-05**: User can view tier ROAS distribution box plots showing overlap zones between tiers
-- [ ] **LEAK-06**: User can see "Last computed" timestamp on all revenue leakage data
+- [x] **LEAK-05**: User can view tier ROAS distribution box plots showing overlap zones between tiers
+- [x] **LEAK-06**: User can see "Last computed" timestamp on all revenue leakage data
 
 ### Execution
 
@@ -128,12 +128,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIER-04 | Phase 33 | Complete |
 | TIER-05 | Phase 33 | Complete |
 | TIER-06 | Phase 33 | Complete |
-| LEAK-01 | Phase 34 | Pending |
+| LEAK-01 | Phase 34 | Complete |
 | LEAK-02 | Phase 34 | Complete |
 | LEAK-03 | Phase 34 | Complete |
 | LEAK-04 | Phase 34 | Complete |
-| LEAK-05 | Phase 34 | Pending |
-| LEAK-06 | Phase 34 | Pending |
+| LEAK-05 | Phase 34 | Complete |
+| LEAK-06 | Phase 34 | Complete |
 | EXEC-01 | Phase 34 | Complete |
 | EXEC-02 | Phase 34 | Complete |
 | EXEC-03 | Phase 34 | Complete |
