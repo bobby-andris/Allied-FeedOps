@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Ban, ArrowDown, Check, X, Undo2 } from 'lucide-react'
+import { Ban, ArrowUp, Check, X, Undo2 } from 'lucide-react'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { ReasonBadge } from './ReasonBadge'
 import { TierMovementArrow } from './TierMovementArrow'
@@ -130,7 +130,7 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
                     className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
                     title={`Demote to ${term.targetTier ?? 'HIGH'} tier to restrict spending`}
                   >
-                    <ArrowDown className="h-3.5 w-3.5" />
+                    <ArrowUp className="h-3.5 w-3.5" />
                     Demote to {term.targetTier ?? 'HIGH'}
                   </Button>
                 )}

@@ -21,12 +21,16 @@ import { DEFAULT_CALIBRATION } from '@/lib/optimization/tier-scoring.types'
 export const maxDuration = 60
 
 /**
- * Aggregate impact ranges across all misplaced terms.
+ * Aggregate impact ranges across all actionable terms.
+ * Includes both statistically misplaced terms AND trigger-based terms
+ * (wasted_spend, promote_intent, promote_conversion, demote_underperform, under_invested).
  * Sums the low/mid/high bounds independently.
  */
 function aggregateImpact(scores: TermScore[]): ImpactRange {
-  const misplaced = scores.filter(s => s.isMisplaced && s.impact)
-  const totals = misplaced.reduce(
+  const actionable = scores.filter(s =>
+    (s.isMisplaced || (s.trigger && s.trigger !== 'observe')) && s.impact
+  )
+  const totals = actionable.reduce(
     (acc, s) => {
       if (s.impact) {
         acc.low += s.impact.low
@@ -285,7 +289,7 @@ export async function GET(request: NextRequest) {
       computedAt: new Date().toISOString(),
       totalGroups: distributions.size,
       totalTermsScored: scores.length,
-      totalMisplaced: scores.filter(s => s.isMisplaced).length,
+      totalMisplaced: scores.filter(s => s.isMisplaced || (s.trigger && s.trigger !== 'observe')).length,
       totalImpact: aggregateImpact(scores),
     })
   } catch (error) {

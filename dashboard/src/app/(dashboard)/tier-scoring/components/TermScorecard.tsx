@@ -198,6 +198,143 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
         </CardContent>
       </Card>
 
+      {/* Decision Reasoning — detailed breakdown of WHY this action was recommended */}
+      {term.trigger && term.trigger !== 'observe' && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Decision Reasoning</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Trigger explanation */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Trigger</span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  term.trigger === 'wasted_spend' ? 'bg-red-100 text-red-800' :
+                  term.trigger === 'demote_underperform' ? 'bg-amber-100 text-amber-800' :
+                  term.trigger === 'promote_conversion' ? 'bg-green-100 text-green-800' :
+                  term.trigger === 'promote_intent' ? 'bg-blue-100 text-blue-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {term.trigger === 'wasted_spend' ? 'A: Wasted Spend' :
+                   term.trigger === 'demote_underperform' ? 'B: Low Intent — Demote' :
+                   term.trigger === 'promote_conversion' ? 'C: High Intent — Promote (Conversion-Proven)' :
+                   term.trigger === 'promote_intent' ? 'D: High Intent — Promote (Intent-Proven)' :
+                   term.trigger === 'under_invested' ? 'E: Under-Invested' : term.trigger}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {term.trigger === 'wasted_spend' && (
+                  <>This term spent <span className="font-medium text-red-700">{formatDollars(term.totalCostMicros / 1_000_000)}</span> with <span className="font-medium text-red-700">zero purchases</span>. Exceeds the $15 wasted spend threshold. {term.currentTier === 'HIGH' ? 'Block this term entirely.' : `Demote to ${term.targetTier} to restrict bidding.`}</>
+                )}
+                {term.trigger === 'demote_underperform' && (
+                  <>Query intent analysis indicates this is a <span className="font-medium">generic/broad query</span> that belongs in a more restricted tier. {term.intentScore ? <>Unified intent score of <span className="font-medium">{term.intentScore.unifiedScore.toFixed(2)}</span> maps to {term.intentScore.unifiedScore < 0.30 ? 'HIGH' : 'MEDIUM'} tier, but currently in {term.currentTier}.</> : <>Word count suggests lower specificity than current {term.currentTier} tier requires.</>}</>
+                )}
+                {term.trigger === 'promote_conversion' && (
+                  <>Query intent analysis indicates this is a <span className="font-medium">specific, high-intent query</span> that deserves more aggressive bidding. Has <span className="font-medium text-green-700">{term.totalConversions} conversion{term.totalConversions !== 1 ? 's' : ''}</span> confirming purchase intent. {term.intentScore ? <>Unified intent score of <span className="font-medium">{term.intentScore.unifiedScore.toFixed(2)}</span> maps to {term.intentScore.unifiedScore >= 0.60 ? 'LOW' : 'MEDIUM'} tier.</> : null}</>
+                )}
+                {term.trigger === 'promote_intent' && (
+                  <>Zero conversions yet, but intent signals strongly suggest this query will convert. {term.intentScore ? <>Unified intent score of <span className="font-medium">{term.intentScore.unifiedScore.toFixed(2)}</span> exceeds the 0.65 threshold.</> : null} {term.behavioralSignals && term.behavioralSignals.rCTR >= 1.5 ? <> Relative CTR of <span className="font-medium">{term.behavioralSignals.rCTR.toFixed(1)}x</span> tier median supports promotion.</> : <>Query has {term.searchTerm.trim().split(/\s+/).length}+ words indicating high specificity.</>}</>
+                )}
+                {term.trigger === 'under_invested' && (
+                  <>This term is performing well but not getting enough impressions. Market volume suggests significantly more search demand exists than current ad spend captures.</>
+                )}
+              </p>
+            </div>
+
+            {/* Supporting evidence grid */}
+            <div className="border-t pt-3">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Supporting Evidence</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                  <p className="text-xs text-muted-foreground">Spend</p>
+                  <p className="text-sm font-mono font-medium">{formatDollars(term.totalCostMicros / 1_000_000)}</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                  <p className="text-xs text-muted-foreground">Conversions</p>
+                  <p className="text-sm font-mono font-medium">{term.totalConversions}</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                  <p className="text-xs text-muted-foreground">ROAS</p>
+                  <p className="text-sm font-mono font-medium">{term.actualRoas.toFixed(2)}x</p>
+                </div>
+                {term.intentScore && (
+                  <>
+                    <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Feed Alignment</p>
+                      <p className={`text-sm font-mono font-medium ${scoreColor(term.intentScore.feedAlignmentScore)}`}>
+                        {term.intentScore.feedAlignmentScore.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Behavioral</p>
+                      <p className={`text-sm font-mono font-medium ${scoreColor(term.intentScore.behavioralScore)}`}>
+                        {term.intentScore.behavioralScore.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Unified Intent</p>
+                      <p className={`text-sm font-mono font-medium ${scoreColor(term.intentScore.unifiedScore)}`}>
+                        {term.intentScore.unifiedScore.toFixed(2)}
+                      </p>
+                    </div>
+                  </>
+                )}
+                {term.behavioralSignals && (
+                  <>
+                    <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Relative CTR</p>
+                      <p className="text-sm font-mono font-medium">{term.behavioralSignals.rCTR.toFixed(2)}x</p>
+                    </div>
+                    <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                      <p className="text-xs text-muted-foreground">CPC Ceiling</p>
+                      <p className="text-sm font-mono font-medium">{(term.behavioralSignals.cpcCeilingRatio * 100).toFixed(0)}%</p>
+                    </div>
+                  </>
+                )}
+                <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+                  <p className="text-xs text-muted-foreground">Word Count</p>
+                  <p className="text-sm font-mono font-medium">{term.searchTerm.trim().split(/\s+/).length}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Intent tier mapping explanation */}
+            {term.intentScore && (
+              <div className="border-t pt-3">
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Intent → Tier Mapping</span>
+                <div className="mt-2 flex items-center gap-2 text-xs">
+                  {[
+                    { tier: 'HIGH' as FunnelTier, range: '< 0.30', label: 'Generic' },
+                    { tier: 'MEDIUM' as FunnelTier, range: '0.30 – 0.60', label: 'Mid' },
+                    { tier: 'LOW' as FunnelTier, range: '> 0.60', label: 'Specific' },
+                  ].map(({ tier, range, label }) => {
+                    const expectedTier = term.intentScore!.unifiedScore >= 0.60 ? 'LOW'
+                      : term.intentScore!.unifiedScore >= 0.30 ? 'MEDIUM' : 'HIGH'
+                    const isExpected = tier === expectedTier
+                    const isCurrent = tier === term.currentTier
+                    return (
+                      <div
+                        key={tier}
+                        className={`flex-1 rounded-lg border p-2 text-center ${
+                          isExpected ? 'border-primary bg-primary/5 font-medium' : 'border-muted'
+                        }`}
+                      >
+                        <p className={`font-medium ${tierTextColor[tier]}`}>{tier}</p>
+                        <p className="text-muted-foreground">{range}</p>
+                        <p className="text-muted-foreground">{label}</p>
+                        {isExpected && <p className="text-primary text-[10px] mt-0.5">Expected</p>}
+                        {isCurrent && !isExpected && <p className="text-amber-600 text-[10px] mt-0.5">Current</p>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Peer context */}
       {term.peerContext && (
         <p className="text-sm text-muted-foreground px-1">

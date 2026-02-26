@@ -491,8 +491,8 @@ describe('TIER-06: computeConfidence', () => {
     const withIntent = computeConfidence(term, brandedIntent, 'HIGH')
     const withoutIntent = computeConfidence(term)
 
-    // Branded + HIGH tier should have good alignment
-    expect(withIntent.factors.intentAlignment).toBeGreaterThanOrEqual(0.5)
+    // Branded terms are anomalies in the waterfall (separate campaigns) → low alignment
+    expect(withIntent.factors.intentAlignment).toBe(0.2)
     // Without intent, should use neutral 0.5
     expect(withoutIntent.factors.intentAlignment).toBe(0.5)
   })
@@ -800,11 +800,16 @@ describe('Phase 33.1: Calibration', () => {
 
     const scores = terms.map(t => scoreTerm(t, group, globalFallback))
     const hero = buildHeroCallout(scores)
-    // With calibrated scoring, well-placed terms should not be flagged
-    const misplacedCount = scores.filter(s => s.isMisplaced).length
-    expect(misplacedCount).toBeLessThanOrEqual(1) // most should be correctly placed
-    if (misplacedCount === 0) {
+    // Intent-based system uses word-count fallback when no feedAlignmentScore provided.
+    // "brass towel bar premium" (4 words → LOW expected, in HIGH → promote trigger)
+    // "cheap bar" (2 words → MEDIUM expected, in LOW → demote trigger)
+    // Both terms get actionable triggers, so hero reflects that.
+    // With no intent scores, the fallback word-count heuristic drives trigger assignment.
+    const actionableCount = scores.filter(s => s.trigger && s.trigger !== 'observe').length
+    if (actionableCount === 0) {
       expect(hero).toBe('All scored terms appear correctly placed')
+    } else {
+      expect(hero).toMatch(/\d+ terms? may be/)
     }
   })
 })
@@ -988,44 +993,42 @@ describe('Phase 34.1: Bug 3 — CPC inversion', () => {
 })
 
 // ---------------------------------------------------------------------------
-// ROAS-based determineAction logic (Quick Task 3)
+// Intent-based determineAction logic (rewritten from ROAS-based in Phase 34.2)
 // ---------------------------------------------------------------------------
 
-describe('ROAS-based determineAction logic', () => {
-  it('underperformer in MEDIUM gets demote, not promote', () => {
+describe('Intent-based determineAction logic', () => {
+  it('generic query in MEDIUM gets demote (intent says HIGH)', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // ROAS 0.5 is well below MEDIUM p25 (~2.575) — should get demote
-    // Statistical fit will say LOW (best fit for 0.5 ROAS), triggering isMisplaced
+    // Low intent score = generic query → should be in HIGH → demote from MEDIUM
+    // Omit total_average_cpc/total_all_conversions so behavioral signals don't inflate unified score
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Medium',
       total_impressions: 500,
       total_clicks: 100,
-      total_cost_micros: 10_000_000, // $10
+      total_cost_micros: 10_000_000,
       total_conversions: 5,
-      total_conversions_value: 5, // ROAS = 5/10 = 0.5
+      total_conversions_value: 5,
     })
 
-    const score = scoreTerm(term, group, globalFallback)
+    // feedAlignmentScore=0.10 → no behavioral → unified = 0.55*0.10 = 0.055 → expected HIGH
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.10)
     expect(score.recommendedAction).toBe('demote')
     expect(score.verdict.toLowerCase()).toMatch(/demote/)
     expect(score.verdict.toLowerCase()).not.toMatch(/promote/)
   })
 
-  it('high performer in HIGH gets promote, not observe', () => {
+  it('specific query in HIGH gets promote (intent says MEDIUM or LOW)', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // ROAS 12.0 is well above HIGH p75 (~6.625) — should get promote
-    // Need isMisplaced to be true: statistical fit should say MEDIUM or LOW
-    // With ROAS 12.0, HIGH range is 4-8, so it may still fit HIGH best... need enough delta
-    // Use a term with metrics that make MEDIUM a statistical fit
+    // High feed alignment score → unified intent will be high → expected tier MEDIUM or LOW
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
@@ -1033,84 +1036,63 @@ describe('ROAS-based determineAction logic', () => {
       total_clicks: 100,
       total_cost_micros: 5_000_000, // $5
       total_conversions: 8,
-      total_conversions_value: 15, // ROAS = 15/5 = 3.0 (fits MEDIUM range 2-4, far from HIGH range 4-8)
+      total_conversions_value: 40,
+      total_average_cpc: 50_000,
+      total_all_conversions: 10,
     })
 
-    const score = scoreTerm(term, group, globalFallback)
-    // ROAS 3.0 in HIGH tier: if isMisplaced triggers (recommendedTier=MEDIUM, delta meets threshold),
-    // then ROAS-based logic checks: 3.0 < HIGH p25 (~4.625)? Yes, but currentTier is HIGH so demote is blocked.
-    // 3.0 > HIGH p75 (~6.625)? No.
-    // So for HIGH tier with below-IQR ROAS but can't demote (already at HIGH), it observes.
-    // Let's instead test a term in HIGH with ROAS above p75
-    // Actually, the plan asks for "high performer in HIGH gets promote" — ROAS > HIGH p75 (~6.625)
-    // and NOT at LOW tier boundary. Let's use ROAS 8.0 which is above p75.
-    // But we need isMisplaced=true, meaning statistical fit says NOT HIGH.
-    // With ROAS 8.0 and HIGH range [4-8], it might still fit HIGH best.
-    // Use a more extreme ROAS that clearly fits MEDIUM or LOW better on other metrics.
-
-    // Actually let me just verify what happens with this specific term
-    if (score.isMisplaced && score.recommendedAction === 'promote') {
-      expect(score.recommendedAction).toBe('promote')
-    }
-    // The term with ROAS 3.0 in HIGH: statistical fit says MEDIUM (best fit),
-    // isMisplaced gates trigger, ROAS 3.0 < HIGH p25 (~4.625) AND currentTier=HIGH
-    // => can't demote from HIGH, falls through to observe
-    // This demonstrates the boundary correctly — HIGH tier underperformers observe (can't go higher)
-    expect(['promote', 'observe']).toContain(score.recommendedAction)
+    // feedAlignmentScore=0.85 → high unified intent → expected LOW, currently HIGH → promote
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.85)
+    expect(score.recommendedAction).toBe('promote')
+    expect(score.targetTier).toBe('MEDIUM') // sequential: HIGH → MEDIUM (not HIGH → LOW)
   })
 
-  it('underperformer in LOW gets demote toward MEDIUM', () => {
+  it('generic query in LOW gets demote toward MEDIUM', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // LOW ROAS range: [0.5-2.0], p25~0.85. Use ROAS 0.3 (well below p25)
-    // Statistical fit: with 0.3 ROAS, LOW is still closest match (0.5-2.0 is nearest)
-    // but MEDIUM (2-4) and HIGH (4-8) are farther away
-    // isMisplaced needs recommendedTier != currentTier... ROAS 0.3 may still best-fit LOW
-    // Use a term where other metrics shift statistical fit away from LOW
+    // Low intent → expected HIGH, current LOW → demote to MEDIUM
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Low',
       total_impressions: 500,
       total_clicks: 50,
-      total_cost_micros: 20_000_000, // $20
+      total_cost_micros: 20_000_000,
       total_conversions: 6,
-      total_conversions_value: 6, // ROAS = 6/20 = 0.3
+      total_conversions_value: 6,
+      total_average_cpc: 400_000,
+      total_all_conversions: 6,
     })
 
-    const score = scoreTerm(term, group, globalFallback)
-    // If isMisplaced triggers and ROAS < LOW p25, demote toward MEDIUM
-    if (score.isMisplaced) {
-      expect(score.recommendedAction).toBe('demote')
-      if (score.recommendedAction === 'demote') {
-        expect(score.verdict).toMatch(/MEDIUM|HIGH/)
-      }
-    }
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.10)
+    expect(score.recommendedAction).toBe('demote')
+    expect(score.targetTier).toBe('MEDIUM')
+    expect(score.verdict).toMatch(/MEDIUM|HIGH/)
   })
 
-  it('term within IQR gets observe even if recommendedTier differs', () => {
+  it('intent-aligned term gets observe', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // MEDIUM ROAS range: p25~2.575, p75~3.575. Use ROAS 3.0 (solidly within IQR)
+    // Mid intent → expected MEDIUM, current MEDIUM → observe
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Medium',
       total_impressions: 500,
       total_clicks: 50,
-      total_cost_micros: 5_000_000, // $5
+      total_cost_micros: 5_000_000,
       total_conversions: 5,
-      total_conversions_value: 15, // ROAS = 15/5 = 3.0
+      total_conversions_value: 15,
+      total_average_cpc: 100_000,
+      total_all_conversions: 5,
     })
 
-    const score = scoreTerm(term, group, globalFallback)
-    // ROAS 3.0 is between MEDIUM p25 (~2.575) and p75 (~3.575)
-    // Even if statistical fit says another tier, ROAS-based logic should observe
-    // (because neither < p25 nor > p75 condition triggers)
+    // feedAlignmentScore=0.50 → unified ~0.50*0.55 + behavioral*0.45 ≈ 0.30-0.50 → MEDIUM expected
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.50)
     expect(score.recommendedAction).toBe('observe')
   })
 
@@ -1120,39 +1102,40 @@ describe('ROAS-based determineAction logic', () => {
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // Underperforming MEDIUM term that gets demote — target should be HIGH
+    // Generic query in MEDIUM → demote to HIGH
+    // Omit behavioral fields so unified score stays low
     const term = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'Medium',
       total_impressions: 500,
       total_clicks: 100,
-      total_cost_micros: 10_000_000, // $10
+      total_cost_micros: 10_000_000,
       total_conversions: 5,
-      total_conversions_value: 5, // ROAS = 5/10 = 0.5 (well below MEDIUM p25)
+      total_conversions_value: 5,
     })
 
-    const score = scoreTerm(term, group, globalFallback)
-    if (score.recommendedAction === 'demote' && score.impact) {
-      // Impact direction should be upward (moving toward HIGH = restricted tier)
+    const score = scoreTerm(term, group, globalFallback, undefined, DEFAULT_CALIBRATION, 0.10)
+    expect(score.recommendedAction).toBe('demote')
+    expect(score.targetTier).toBe('HIGH')
+    if (score.impact) {
       expect(score.impact.direction).toBe('upward')
     }
   })
 
-  it('wasted spend logic unchanged by ROAS-based refactor', () => {
+  it('wasted spend logic unchanged by intent-based refactor', () => {
     const rows = makeNormalDistribution()
     const distMap = computeTierDistributions(rows)
     const group = distMap.get('Towel Bars')!
     const globalFallback = computeGlobalDistributions(rows)
 
-    // Wasted spend threshold = 1.5 * avgCPA ($64.22) = $96.33
-    // Use $100 spend (100_000_000 micros) to exceed threshold
+    // Wasted spend: $20 > $15 threshold, zero conversions
     // HIGH tier wasted spend -> block
     const highTerm = makeTermWithFunnels({
       label: 'Towel Bars',
       tier: 'High',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
+      total_cost_micros: 20_000_000, // $20 > $15 threshold
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1165,7 +1148,7 @@ describe('ROAS-based determineAction logic', () => {
       tier: 'Medium',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
+      total_cost_micros: 20_000_000,
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1178,7 +1161,7 @@ describe('ROAS-based determineAction logic', () => {
       tier: 'Low',
       total_impressions: 1000,
       total_clicks: 50,
-      total_cost_micros: 100_000_000, // $100 > $96.33 threshold
+      total_cost_micros: 20_000_000,
       total_conversions: 0,
       total_conversions_value: 0,
     })
@@ -1423,19 +1406,19 @@ describe('5-trigger determineAction', () => {
     expect(result.trigger).toBe('wasted_spend')
   })
 
-  it('Trigger B: low ROAS demotes from LOW → MEDIUM', () => {
-    const dist = makeDistWithRoas(3.0, 8.0) // p25 = 3.0
-    // ROAS 1.0 < p25 of 3.0, has conversions → demote
-    const result = determineAction('LOW', { ...dist, tier: 'LOW' }, 1.0, 5, 10_000_000, true)
+  it('Trigger B: low intent demotes from LOW → MEDIUM', () => {
+    const dist = makeDistWithRoas(3.0, 8.0)
+    // intentScore 0.15 → expected HIGH, current LOW → demote to MEDIUM
+    const result = determineAction('LOW', { ...dist, tier: 'LOW' }, 1.0, 5, 10_000_000, true, 0.15, 1.0, 1)
     expect(result.action).toBe('demote')
     expect(result.targetTier).toBe('MEDIUM')
     expect(result.trigger).toBe('demote_underperform')
   })
 
-  it('Trigger B: low ROAS demotes from MEDIUM → HIGH', () => {
-    const dist = makeDistWithRoas(2.0, 4.0) // p25 = 2.0
-    // ROAS 0.5 < p25 of 2.0, has conversions → demote
-    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 0.5, 3, 10_000_000, true)
+  it('Trigger B: low intent demotes from MEDIUM → HIGH', () => {
+    const dist = makeDistWithRoas(2.0, 4.0)
+    // intentScore 0.15 → expected HIGH, current MEDIUM → demote to HIGH
+    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 0.5, 3, 10_000_000, true, 0.15, 0.5, 1)
     expect(result.action).toBe('demote')
     expect(result.targetTier).toBe('HIGH')
     expect(result.trigger).toBe('demote_underperform')
@@ -1449,18 +1432,20 @@ describe('5-trigger determineAction', () => {
     expect(result.trigger).not.toBe('demote_underperform')
   })
 
-  it('Trigger C: high ROAS promotes from HIGH → MEDIUM', () => {
-    const dist = makeDistWithRoas(4.0, 7.0) // p75 = 7.0
-    // ROAS 8.0 > p75 of 7.0, not LOW → promote
-    const result = determineAction('HIGH', dist, 8.0, 5, 10_000_000, true)
+  it('Trigger C: high intent promotes from HIGH → MEDIUM (with conversions)', () => {
+    const dist = makeDistWithRoas(4.0, 7.0)
+    // intentScore 0.75 → expected LOW, current HIGH → promote to MEDIUM (sequential)
+    // has conversions → promote_conversion trigger
+    const result = determineAction('HIGH', dist, 8.0, 5, 10_000_000, true, 0.75, 2.0, 4)
     expect(result.action).toBe('promote')
     expect(result.targetTier).toBe('MEDIUM')
     expect(result.trigger).toBe('promote_conversion')
   })
 
-  it('Trigger C: high ROAS promotes from MEDIUM → LOW', () => {
-    const dist = makeDistWithRoas(2.0, 4.0) // p75 = 4.0
-    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 5.0, 8, 10_000_000, true)
+  it('Trigger C: high intent promotes from MEDIUM → LOW (with conversions)', () => {
+    const dist = makeDistWithRoas(2.0, 4.0)
+    // intentScore 0.75 → expected LOW, current MEDIUM → promote to LOW
+    const result = determineAction('MEDIUM', { ...dist, tier: 'MEDIUM' }, 5.0, 8, 10_000_000, true, 0.75, 2.0, 4)
     expect(result.action).toBe('promote')
     expect(result.targetTier).toBe('LOW')
     expect(result.trigger).toBe('promote_conversion')
@@ -1492,8 +1477,8 @@ describe('5-trigger determineAction', () => {
 
   it('Trigger D: zero conversions + low intent score → observe (not promote)', () => {
     const dist = makeDistWithRoas(2.0, 6.0)
-    // intentScore = 0.40 (below 0.65 threshold), rCTR = 2.0
-    const result = determineAction('HIGH', dist, 0, 0, 5_000_000, false, 0.40, 2.0, 2, 64.22)
+    // intentScore = 0.20 → expected HIGH (< 0.30), current HIGH → no movement → observe
+    const result = determineAction('HIGH', dist, 0, 0, 5_000_000, false, 0.20, 2.0, 2, 64.22)
     expect(result.trigger).toBe('observe')
   })
 
@@ -1522,7 +1507,8 @@ describe('5-trigger determineAction', () => {
 
   it('Sequential movement: promote moves one step only (HIGH → MEDIUM, not HIGH → LOW)', () => {
     const dist = makeDistWithRoas(2.0, 6.0)
-    const result = determineAction('HIGH', dist, 8.0, 5, 10_000_000, true)
+    // intentScore 0.80 → expected LOW, current HIGH → promote to MEDIUM (sequential, not LOW)
+    const result = determineAction('HIGH', dist, 8.0, 5, 10_000_000, true, 0.80, 2.0, 4)
     expect(result.targetTier).toBe('MEDIUM')
     expect(result.targetTier).not.toBe('LOW')
   })
