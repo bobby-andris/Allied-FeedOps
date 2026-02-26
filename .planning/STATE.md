@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Transform low-performing product feeds into high-converting assets through data-driven content optimization at scale
-**Current focus:** Phase 35 — Market Intelligence
+**Current focus:** Phase 34.2 — Zero-Conversion Intent Scoring
 
 ## Current Position
 
-Phase: 35 (v1.3c) — IN PROGRESS
-Plan: 3 of 4 complete
-Status: Completed 35-03 (Products tab: BCG bubble chart, table view, slide-out panel)
-Last activity: 2026-02-26 — Completed quick task 3: Fix determineAction ROAS-based logic
+Phase: 34.2 (v1.3c) — IN PROGRESS
+Plan: 1 of 3 complete
+Status: Completed 34.2-01 (constrain-to-demote terminology cleanup + targetTier)
+Last activity: 2026-02-26 — Completed 34.2-01: Eradicate constrain, add targetTier
 
-Progress: [########--] 75% (Phase 35)
+Progress: [###-------] 33% (Phase 34.2)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [########--] 75% (Phase 35)
 | Phase 35 P01 | 6min | 3 tasks | 6 files |
 | Phase 35 P03 | 5min | 2 tasks | 5 files |
 | Phase 35 P02 | 5min | 2 tasks | 11 files |
+| Phase 34.2 P01 | 9min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,9 @@ Recent decisions affecting current work:
 - [Phase 35-02]: Color coding: green/amber/red at 50%/20% for impression share, 20%/0% for CPC headroom
 - [Phase 35-02]: SeasonalTrendsChart limits to 10 lines max for readability with Keyword Planner empty state
 - [Phase quick-3]: determineAction returns {action, targetTier} tuple using ROAS p25/p75 instead of statistical best-fit tier
+- [Phase 34.2-01]: Replaced all 'constrain' with 'demote' — zero tolerance across types, logic, tests, UI
+- [Phase 34.2-01]: targetTier optional field on TermScore, populated by determineAction()
+- [Phase 34.2-01]: Domain comments use 'restricted' instead of 'constrained' for bidding behavior
 
 ### Pending Todos
 
@@ -153,8 +157,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Quick-3 done (ROAS-based scoring). Still needs: rename constrain→demote, add targetTier to TermScore, fix UI buttons/arrows
-Resume file: .planning/phases/34.1-fix-decision-logic/action-queue-terminology-fix.md
+Stopped at: Completed 34.2-01-PLAN.md (constrain-to-demote cleanup + targetTier)
+Resume file: .planning/phases/34.2-zero-conversion-intent-scoring/34.2-01-SUMMARY.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase
