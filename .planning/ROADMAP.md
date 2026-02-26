@@ -171,6 +171,25 @@
   5. User can undo a previously executed tier movement and see the reversal logged in policy_action_execution_log with criterion IDs
 **Plans**: TBD
 
+### Phase 34.1: Fix Decision Logic (INSERTED)
+
+**Goal:** Fix the scoring engine's broken decision logic so recommendations are prescriptive (what action to take) rather than descriptive (which tier's distribution you resemble), and add custom_label_0 level blocking, search promotion candidates, and label profitability summaries
+**Requirements**: FIX-01, FIX-02, FIX-03, FIX-04, FIX-05, FIX-06, FIX-07, FIX-08, FIX-09, FEAT-01, FEAT-02, FEAT-03, DOC-01
+**Depends on:** Phase 34
+**Plans:** 3 plans
+**Success Criteria** (what must be TRUE):
+  1. Wasted spend terms (0 conversions, >$5 spend) NEVER get recommended to LOW tier — always block or constrain
+  2. Impact estimates for wasted spend equal cost saved (not $0)
+  3. Under-invested detection compares search volume against actual impressions (not > 2 for all terms)
+  4. Constrain button hidden when term already in HIGH tier
+  5. User can block all terms under a product category with one click
+  6. routing_recommendations and query_value_scores documented in SCHEMA.md
+
+Plans:
+- [ ] 34.1-01-PLAN.md — Core scoring engine fixes (TDD): action model, impact formula, CPC inversion, prescriptive verdicts (Wave 1)
+- [ ] 34.1-02-PLAN.md — Downstream fixes: under_invested, Constrain guard, scoring unification, API routes (Wave 2)
+- [ ] 34.1-03-PLAN.md — New capabilities: label blocking, search promotion, label profitability, schema docs (Wave 2)
+
 ### Phase 35: Market Intelligence
 **Goal**: Users can understand demand patterns, competitive positioning, and product group health to make strategic decisions beyond individual term optimization
 **Depends on**: Phase 33
