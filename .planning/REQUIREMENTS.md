@@ -54,13 +54,13 @@ Requirements for Actionable Shopping Intelligence milestone. Each maps to roadma
 
 ### New Capabilities (Phase 34.1)
 
-- [ ] **FEAT-01**: User can block all terms under a custom_label_0 category with one click (label-level blocking)
-- [ ] **FEAT-02**: Search promotion candidates identified from high-ROAS terms and written to search_buildout_recommendations
-- [ ] **FEAT-03**: Label profitability summary shows profitable vs unprofitable categories with spend, ROAS, opportunity counts
+- [x] **FEAT-01**: User can block all terms under a custom_label_0 category with one click (label-level blocking)
+- [x] **FEAT-02**: Search promotion candidates identified from high-ROAS terms and written to search_buildout_recommendations
+- [x] **FEAT-03**: Label profitability summary shows profitable vs unprofitable categories with spend, ROAS, opportunity counts
 
 ### Documentation (Phase 34.1)
 
-- [ ] **DOC-01**: routing_recommendations and query_value_scores tables documented in SCHEMA.md
+- [x] **DOC-01**: routing_recommendations and query_value_scores tables documented in SCHEMA.md
 
 ### Demand Intelligence
 
@@ -199,10 +199,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FIX-07 | Phase 34.1 | Complete |
 | FIX-08 | Phase 34.1 | Complete |
 | FIX-09 | Phase 34.1 | Complete |
-| FEAT-01 | Phase 34.1 | Pending |
-| FEAT-02 | Phase 34.1 | Pending |
-| FEAT-03 | Phase 34.1 | Pending |
-| DOC-01 | Phase 34.1 | Pending |
+| FEAT-01 | Phase 34.1 | Complete |
+| FEAT-02 | Phase 34.1 | Complete |
+| FEAT-03 | Phase 34.1 | Complete |
+| DOC-01 | Phase 34.1 | Complete |
 
 **Coverage:**
 - v1.3c requirements: 62 total (49 original + 13 Phase 34.1)

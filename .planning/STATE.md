@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 34.1 (v1.3c) — IN PROGRESS
-Plan: 2 of 3 complete
-Status: Completed 34.1-02 (consumers, UI guards, wasted-spend overrides)
-Last activity: 2026-02-26 — Completed 34.1-02-PLAN.md (under_invested, Constrain guard, prescriptive verdicts, API persistence)
+Phase: 34.1 (v1.3c) — COMPLETE
+Plan: 3 of 3 complete
+Status: Completed 34.1-03 (label blocking, search promotion, label profitability, schema docs)
+Last activity: 2026-02-26 — Completed 34.1-03-PLAN.md (label_block API, LabelProfitabilitySummary, SCHEMA.md)
 
-Progress: [██████----] 67% (Phase 34.1)
+Progress: [##########] 100% (Phase 34.1)
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [██████----] 67% (Phase 34.1)
 | Phase 34 P04 | 5min | 4 tasks | 7 files |
 | Phase 34.1 P01 | 4min | 3 tasks | 3 files |
 | Phase 34.1 P02 | 5min | 3 tasks | 8 files |
+| Phase 34.1 P03 | 6min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,10 @@ Recent decisions affecting current work:
 - [Phase 34.1-02]: actionReason takes priority over verdict for display with fallback
 - [Phase 34.1-02]: estimateTierFromMetrics deprecated, wasted-spend guard added
 - [Phase 34.1-02]: buildRoasRecommendations wasted-spend override raises target to constrain
+- [Phase 34.1-03]: Label blocks use __LABEL_BLOCK__ sentinel with action_scope='label'
+- [Phase 34.1-03]: Search candidate thresholds: ROAS > 3.0, impressions > 100, conversions > 0
+- [Phase 34.1-03]: funnel_snapshots_daily is correct table name (not label_tier_daily_snapshot)
+- [Phase 34.1-03]: Block Label uses window.confirm for destructive action confirmation
 
 ### Pending Todos
 
@@ -114,6 +119,7 @@ Recent decisions affecting current work:
 - [Phase 33.1]: Account for gut-assigned tiers (Robert's manual assignments, no historical data basis)
 - ~~[Phase 33.2]: Redesign UI from statistical exploration to action-oriented decision-making~~ DONE
 - ~~[Phase 34]: Apply migration 039 (routing_recommendations table) to production Supabase~~ DONE
+- [Phase 34.1-03]: Apply migration 040 (action_scope column + label_block) to production Supabase
 
 ### Roadmap Evolution
 
@@ -128,7 +134,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 34.1-02-PLAN.md
+Stopped at: Completed 34.1-03-PLAN.md (Phase 34.1 COMPLETE)
 Resume file: .planning/phases/34.1-fix-decision-logic/.continue-here.md
 
 **Phase 33 Completion Summary**:

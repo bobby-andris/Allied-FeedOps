@@ -186,9 +186,9 @@
   6. routing_recommendations and query_value_scores documented in SCHEMA.md
 
 Plans:
-- [ ] 34.1-01-PLAN.md — Core scoring engine fixes (TDD): action model, impact formula, CPC inversion, prescriptive verdicts (Wave 1)
-- [ ] 34.1-02-PLAN.md — Downstream fixes: under_invested, Constrain guard, scoring unification, API routes (Wave 2)
-- [ ] 34.1-03-PLAN.md — New capabilities: label blocking, search promotion, label profitability, schema docs (Wave 2)
+- [x] 34.1-01-PLAN.md — Core scoring engine fixes (TDD): action model, impact formula, CPC inversion, prescriptive verdicts (Wave 1)
+- [x] 34.1-02-PLAN.md — Downstream fixes: under_invested, Constrain guard, scoring unification, API routes (Wave 2)
+- [x] 34.1-03-PLAN.md — New capabilities: label blocking, search promotion, label profitability, schema docs (Wave 2)
 
 ### Phase 35: Market Intelligence
 **Goal**: Users can understand demand patterns, competitive positioning, and product group health to make strategic decisions beyond individual term optimization
