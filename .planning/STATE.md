@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 35 (v1.3c) — IN PROGRESS
-Plan: 1 of 4 complete
-Status: Completed 35-01 (data layer: types, constants, computations, 3 API routes)
-Last activity: 2026-02-26 — Completed 35-01-PLAN.md (demand, competitive, products API routes)
+Plan: 3 of 4 complete
+Status: Completed 35-03 (Products tab: BCG bubble chart, table view, slide-out panel)
+Last activity: 2026-02-26 — Completed 35-03-PLAN.md (Products tab components)
 
-Progress: [###-------] 25% (Phase 35)
+Progress: [########--] 75% (Phase 35)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [###-------] 25% (Phase 35)
 | Phase 34.1 P02 | 5min | 3 tasks | 8 files |
 | Phase 34.1 P03 | 6min | 3 tasks | 9 files |
 | Phase 35 P01 | 6min | 3 tasks | 6 files |
+| Phase 35 P03 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase 35-01]: Keyword enrichment: merge search_queries.avg_monthly_searches with keyword_metrics for best coverage
 - [Phase 35-01]: BCG classification: dynamic medians from computeMedians(), not hardcoded thresholds
 - [Phase 35-01]: Detail drill-down approximates quadrant locally (exact requires global medians)
+- [Phase 35-03]: Quadrant legend as inline flex row below chart (not overlaid in corners) for readability
+- [Phase 35-03]: fetchGroupDetail passed as callback prop to slide-out for centralized data fetching
+- [Phase 35-03]: View toggle uses Button group (secondary/ghost) inline with CardHeader
 
 ### Pending Todos
 
@@ -139,8 +143,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 35-01-PLAN.md
-Resume file: .planning/phases/35-market-intelligence/35-01-SUMMARY.md
+Stopped at: Completed 35-03-PLAN.md
+Resume file: .planning/phases/35-market-intelligence/35-03-SUMMARY.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase
