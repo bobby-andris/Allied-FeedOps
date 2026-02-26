@@ -1,16 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, RefreshCw, LayoutList, Search } from 'lucide-react'
+import { AlertCircle, RefreshCw, LayoutList, Search, DollarSign, Clock } from 'lucide-react'
 import { useTierScoring } from './hooks/useTierScoring'
+import { useRecommendations } from './hooks/useRecommendations'
+import { classifyAllTerms } from './lib/reason-codes'
 
 // Action Queue components
 import { HeroSummary } from './components/HeroSummary'
 import { ActionQueueTable } from './components/ActionQueueTable'
+
+// Revenue Leakage components
+import { LeakageHero } from './components/LeakageHero'
+import { RoasBoxPlot } from './components/RoasBoxPlot'
+import { LeakageTermList } from './components/LeakageTermList'
+import { BatchApproveBar } from './components/BatchApproveBar'
+
+// History components
+import { HistoryView } from './components/HistoryView'
 
 // Explorer view components (preserved from Phase 33)
 import { HeroCallout } from './components/HeroCallout'
@@ -24,6 +35,10 @@ import type { FunnelTier } from '@/lib/shopping-funnel/types'
 
 export default function TierScoringPage() {
   const { data, loading, error, refresh } = useTierScoring()
+  const recommendations = useRecommendations()
+
+  // Tab state (controlled for programmatic switching)
+  const [activeTab, setActiveTab] = useState('actions')
 
   // Action Queue view state
   const [actionSelectedTerm, setActionSelectedTerm] = useState<TermScore | null>(null)
@@ -32,6 +47,28 @@ export default function TierScoringPage() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [selectedTier, setSelectedTier] = useState<FunnelTier | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<TermScore | null>(null)
+
+  // Revenue Leakage computed data
+  const classifiedTerms = useMemo(() => {
+    if (!data) return []
+    return classifyAllTerms(data.scores)
+  }, [data])
+
+  const pendingTerms = useMemo(() => {
+    return classifiedTerms.filter(t => {
+      const status = recommendations.getStatus(t.searchTerm, t.customLabel0)
+      return !status || status.status === 'pending' || status.status === 'rejected'
+    })
+  }, [classifiedTerms, recommendations])
+
+  const highConfidenceCount = useMemo(() => {
+    return pendingTerms.filter(t => t.confidence.score > 0.80).length
+  }, [pendingTerms])
+
+  const avgConfidence = useMemo(() => {
+    if (pendingTerms.length === 0) return 0
+    return pendingTerms.reduce((sum, t) => sum + t.confidence.score, 0) / pendingTerms.length
+  }, [pendingTerms])
 
   if (loading) {
     return (
@@ -92,8 +129,8 @@ export default function TierScoringPage() {
         </Button>
       </div>
 
-      {/* Two-view Tabs */}
-      <Tabs defaultValue="actions">
+      {/* Four-view Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="actions" className="gap-1.5">
             <LayoutList className="h-3.5 w-3.5" />
@@ -102,6 +139,19 @@ export default function TierScoringPage() {
           <TabsTrigger value="explorer" className="gap-1.5">
             <Search className="h-3.5 w-3.5" />
             Explorer
+          </TabsTrigger>
+          <TabsTrigger value="leakage" className="gap-1.5">
+            <DollarSign className="h-3.5 w-3.5" />
+            Revenue Leakage
+            {pendingTerms.length > 0 && (
+              <span className="ml-1 rounded-full bg-amber-100 text-amber-800 px-1.5 py-0.5 text-xs font-medium">
+                {pendingTerms.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5">
+            <Clock className="h-3.5 w-3.5" />
+            History
           </TabsTrigger>
         </TabsList>
 
@@ -119,10 +169,13 @@ export default function TierScoringPage() {
                 totalImpact={data.totalImpact}
                 totalTermsScored={data.totalTermsScored}
                 computedAt={data.computedAt}
+                onApplyClick={() => setActiveTab('leakage')}
               />
               <ActionQueueTable
                 scores={data.scores}
                 onSelectTerm={(term) => setActionSelectedTerm(term)}
+                recommendationStatuses={recommendations.statuses}
+                onUndo={recommendations.undo}
               />
             </>
           )}
@@ -171,6 +224,42 @@ export default function TierScoringPage() {
               onSelectGroup={(group) => setSelectedGroup(group)}
             />
           )}
+        </TabsContent>
+
+        {/* REVENUE LEAKAGE TAB */}
+        <TabsContent value="leakage" className="space-y-6 mt-4">
+          <LeakageHero
+            totalImpact={data.totalImpact}
+            avgConfidence={avgConfidence}
+            actionableCount={pendingTerms.length}
+            computedAt={data.computedAt}
+          />
+          <RoasBoxPlot distributions={data.distributions} />
+          <BatchApproveBar
+            highConfidenceCount={highConfidenceCount}
+            onBatchApprove={() => {
+              const highConfTerms = pendingTerms.filter(t => t.confidence.score > 0.80)
+              recommendations.batchApprove(highConfTerms)
+            }}
+          />
+          <LeakageTermList
+            terms={pendingTerms}
+            statuses={recommendations.statuses}
+            onApprove={recommendations.approve}
+            onReject={recommendations.reject}
+            onUndo={recommendations.undo}
+            onViewDetails={setActionSelectedTerm}
+          />
+        </TabsContent>
+
+        {/* HISTORY TAB */}
+        <TabsContent value="history" className="space-y-6 mt-4">
+          <HistoryView
+            history={recommendations.history}
+            historyLoading={recommendations.historyLoading}
+            onUndo={recommendations.undo}
+            onLoadHistory={recommendations.loadHistory}
+          />
         </TabsContent>
       </Tabs>
     </div>
