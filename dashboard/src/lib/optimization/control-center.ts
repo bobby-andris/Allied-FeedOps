@@ -255,6 +255,21 @@ export function buildRoasRecommendations(
       const observedRoas = row.spend > 0 ? row.conversionValue / row.spend : 0
       const confidence = normalizeConfidence(row.clicks, row.conversions)
 
+      // Wasted spend override: zero conversions with meaningful spend should raise target ROAS
+      // to constrain bidding, regardless of other heuristics
+      if (row.conversions === 0 && row.spend > 5) {
+        return {
+          customLabel0: row.customLabel0,
+          tier: row.tier,
+          currentTargetRoas,
+          observedRoas: 0,
+          recommendedTargetRoas: Number(boundChange(currentTargetRoas * 1.1, currentTargetRoas).toFixed(4)),
+          direction: 'increase' as const,
+          confidence,
+          rationale: `Spent $${row.spend.toFixed(0)} with zero conversions — raise target to constrain bidding`,
+        }
+      }
+
       let direction: RoasRecommendation['direction'] = 'hold'
       let recommendedTargetRoas: number = currentTargetRoas
       let rationale = 'Observed ROAS is near baseline target.'

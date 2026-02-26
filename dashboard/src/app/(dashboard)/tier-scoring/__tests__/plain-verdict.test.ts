@@ -24,6 +24,9 @@ function makeTermScore(overrides: Partial<TermScore> = {}): TermScore {
     actualRoas: 3.5,
     verdict: 'original verdict',
     peerContext: 'ranks in top 15% of Towel Bar terms',
+    totalImpressions: 500,
+    recommendedAction: 'observe',
+    actionReason: 'Aligned',
     ...overrides,
   }
 }

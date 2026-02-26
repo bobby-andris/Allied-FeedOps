@@ -114,6 +114,25 @@ describe('buildRoasRecommendations', () => {
     expect(recommendations[0].direction).toBe('decrease')
   })
 
+  it('zero-conversion rows always recommend increase (constrain bidding)', () => {
+    const rows: LabelTierPerformanceRow[] = [
+      {
+        customLabel0: 'Grab Bars',
+        tier: 'LOW',
+        spend: 200,
+        conversionValue: 0,
+        conversions: 0,
+        clicks: 150,
+      },
+    ]
+
+    const recommendations = buildRoasRecommendations(rows)
+    expect(recommendations.length).toBe(1)
+    expect(recommendations[0].direction).toBe('increase')
+    expect(recommendations[0].observedRoas).toBe(0)
+    expect(recommendations[0].rationale).toContain('zero conversions')
+  })
+
   it('recommends higher target when observed ROAS is materially below baseline target', () => {
     const rows: LabelTierPerformanceRow[] = [
       {

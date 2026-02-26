@@ -138,7 +138,7 @@ export function LeakageTermRow({
             <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
             <ReasonBadge reasonCode={term.reasonCode} />
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.verdict}</p>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.actionReason || term.verdict}</p>
         </div>
 
         {/* Tier movement */}
@@ -166,16 +166,18 @@ export function LeakageTermRow({
                     <Ban className="h-3.5 w-3.5" />
                     Block
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDemote}
-                    className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
-                    title="Push to HIGH tier where restrictive settings constrain spending"
-                  >
-                    <ArrowDown className="h-3.5 w-3.5" />
-                    Constrain
-                  </Button>
+                  {term.currentTier !== 'HIGH' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDemote}
+                      className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
+                      title="Push to HIGH tier where restrictive settings constrain spending"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                      Constrain
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>

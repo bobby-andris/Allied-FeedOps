@@ -113,6 +113,12 @@ export function decomposeSearchTerm(searchTerm: string): QueryIntentFeatures {
   }
 }
 
+/**
+ * @deprecated Use distribution-based scoring from tier-scoring.ts instead.
+ * Retained for backwards compatibility with recommendations queue endpoint.
+ * Hardcoded thresholds replaced with conservative defaults that avoid the
+ * worst recommendation (never suggests LOW for zero-ROAS terms).
+ */
 function estimateTierFromMetrics({
   clicks,
   conversions,
@@ -126,6 +132,11 @@ function estimateTierFromMetrics({
   conversionsValue: number
   intentFeatures: QueryIntentFeatures
 }): AssignmentTier {
+  // Wasted spend guard: zero-conversion terms should never be promoted to LOW (aggressive bidding)
+  if (conversions === 0 && costMicros > 5_000_000) {
+    return 'high' // Constrain zero-conversion terms, never promote to LOW
+  }
+
   const safeClicks = Math.max(clicks, 1)
   const cost = costMicros / 1_000_000
   const cvr = conversions / safeClicks
