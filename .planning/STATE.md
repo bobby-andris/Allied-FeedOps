@@ -153,8 +153,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed quick task 3: Fix determineAction ROAS-based logic
-Resume file: .planning/quick/3-fix-determineaction-to-use-roas-based-lo/3-SUMMARY.md
+Stopped at: Quick-3 done (ROAS-based scoring). Still needs: rename constrain→demote, add targetTier to TermScore, fix UI buttons/arrows
+Resume file: .planning/phases/34.1-fix-decision-logic/action-queue-terminology-fix.md
 
 **Phase 33 Completion Summary**:
 - Completed all 4 plans for tier scoring engine phase
