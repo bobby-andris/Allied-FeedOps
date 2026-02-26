@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-26T04:50:30.235Z"
+last_updated: "2026-02-26T04:57:36.166Z"
 progress:
   total_phases: 7
   completed_phases: 6
@@ -122,6 +122,7 @@ Recent decisions affecting current work:
 - [Phase 35-03]: View toggle uses Button group (secondary/ghost) inline with CardHeader
 - [Phase 35-02]: Color coding: green/amber/red at 50%/20% for impression share, 20%/0% for CPC headroom
 - [Phase 35-02]: SeasonalTrendsChart limits to 10 lines max for readability with Keyword Planner empty state
+- [Phase quick-3]: determineAction returns {action, targetTier} tuple using ROAS p25/p75 instead of statistical best-fit tier
 
 ### Pending Todos
 
