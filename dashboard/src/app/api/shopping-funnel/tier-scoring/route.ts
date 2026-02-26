@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         .map(t => t.search_term)
     )]
 
-    let feedAlignmentMap = new Map<string, number>()
+    const feedAlignmentMap = new Map<string, number>()
     const AVG_CPA = 64.22 // From Google Ads account audit (90-day window)
 
     try {

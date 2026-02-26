@@ -17,7 +17,7 @@ function makeEntry(overrides: Partial<HistoryEntry> = {}): HistoryEntry {
     accepted_by: 'user',
     metadata: {
       current_tier: 'LOW',
-      impact: { low: 10, mid: 25, high: 40 },
+      impact: { low: 10, mid: 25, high: 40, currency: 'USD' as const, period: 'monthly' as const, direction: 'upward' as const },
     },
     created_at: '2026-02-25T12:00:00Z',
     ...overrides,
@@ -64,7 +64,7 @@ describe('groupHistoryByDay', () => {
       search_term: 'test-term',
       review_status: 'accepted',
       accepted_at: '2026-02-25T14:30:00Z',
-      metadata: { current_tier: 'LOW', impact: { low: 5, mid: 10, high: 15 } },
+      metadata: { current_tier: 'LOW', impact: { low: 5, mid: 10, high: 15, currency: 'USD' as const, period: 'monthly' as const, direction: 'upward' as const } },
     })
 
     const groups = groupHistoryByDay([entry])
@@ -75,7 +75,7 @@ describe('groupHistoryByDay', () => {
     expect(result.review_status).toBe('accepted')
     expect(result.accepted_at).toBe('2026-02-25T14:30:00Z')
     expect(result.metadata.current_tier).toBe('LOW')
-    expect(result.metadata.impact).toEqual({ low: 5, mid: 10, high: 15 })
+    expect(result.metadata.impact).toEqual({ low: 5, mid: 10, high: 15, currency: 'USD', period: 'monthly', direction: 'upward' })
   })
 
   it('sorts entries within same day by timestamp descending (most recent first)', () => {

@@ -82,7 +82,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
     stubSupabaseRows([...currentRows, ...previousRows])
 
     const { GET } = await import('@/app/api/funnel-snapshots/trends/route')
-    const res = await GET(makeGetRequest())
+    const res = await GET()
     expect(res.status).toBe(200)
 
     const body = await res.json()
@@ -101,7 +101,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
     ])
 
     const { GET } = await import('@/app/api/funnel-snapshots/trends/route')
-    const res = await GET(makeGetRequest())
+    const res = await GET()
     const body = await res.json()
 
     // CTR = 50/1000 = 0.05
@@ -109,7 +109,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
 
     // Test zero-impression guard
     stubSupabaseRows([makeRow({ impressions: 0, clicks: 0 })])
-    const res2 = await GET(makeGetRequest())
+    const res2 = await GET()
     const body2 = await res2.json()
     expect(body2.current.ctr).toBe(0) // No NaN or Infinity
     expect(Number.isFinite(body2.current.ctr)).toBe(true)
@@ -121,7 +121,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
     ])
 
     const { GET } = await import('@/app/api/funnel-snapshots/trends/route')
-    const res = await GET(makeGetRequest())
+    const res = await GET()
     const body = await res.json()
 
     // ROAS = 300 / (3_000_000 / 1e6) = 300 / 3 = 100
@@ -129,7 +129,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
 
     // Test zero-cost guard
     stubSupabaseRows([makeRow({ conversions_value: 0, cost_micros: 0 })])
-    const res2 = await GET(makeGetRequest())
+    const res2 = await GET()
     const body2 = await res2.json()
     expect(body2.current.roas).toBe(0) // No NaN or Infinity
     expect(Number.isFinite(body2.current.roas)).toBe(true)
@@ -139,7 +139,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
     stubSupabaseRows([])
 
     const { GET } = await import('@/app/api/funnel-snapshots/trends/route')
-    const res = await GET(makeGetRequest())
+    const res = await GET()
     const body = await res.json()
 
     expect(body.has_data).toBe(false)
@@ -156,7 +156,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
     ])
 
     const { GET } = await import('@/app/api/funnel-snapshots/trends/route')
-    const res = await GET(makeGetRequest())
+    const res = await GET()
     const body = await res.json()
 
     expect(body.has_data).toBe(true)
@@ -167,7 +167,7 @@ describe('GET /api/funnel-snapshots/trends', () => {
     stubSupabaseRows([makeRow()])
 
     const { GET } = await import('@/app/api/funnel-snapshots/trends/route')
-    const res = await GET(makeGetRequest())
+    const res = await GET()
 
     const cacheControl = res.headers.get('cache-control')
     expect(cacheControl).toBeDefined()

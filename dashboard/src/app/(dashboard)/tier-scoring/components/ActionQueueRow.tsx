@@ -62,9 +62,12 @@ export function ActionQueueRow({ term, onViewDetails, accentClass, onUndo, onApp
         }
       }}
     >
-      {/* Term name + action reason */}
+      {/* Term name + label + action reason */}
       <div className="flex-1 min-w-0">
-        <span className="font-medium truncate">{term.searchTerm}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-medium truncate">{term.searchTerm}</span>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">{term.customLabel0}</Badge>
+        </div>
         <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.actionReason || term.verdict}</p>
       </div>
 
