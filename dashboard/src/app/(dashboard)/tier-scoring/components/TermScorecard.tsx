@@ -265,6 +265,9 @@ export function TermScorecard({ term, allScoresForTerm, onBack, onSwitchLabel }:
       {/* Term header */}
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="text-xl font-bold">{term.searchTerm}</h2>
+        <span className="inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground border">
+          {term.customLabel0}
+        </span>
         <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
         {(term.trigger && term.trigger !== 'observe') && (
           <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
