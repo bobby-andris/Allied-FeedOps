@@ -12,7 +12,6 @@ from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_category_guidance,
     get_finish_list,
-    get_system_prompt_hash,
     get_system_prompt,
 )
 from feedops.api.prompt_builder import (
@@ -385,53 +384,17 @@ async def generate_per_platform(
     max_completion_tokens: int = 8000,
     selected_platforms: tuple[str, ...] | list[str] | None = None,
 ) -> dict[str, object]:
-    """Generate content via per-platform prompts/schemas (v2) or legacy (v1)."""
+    """Generate content via per-platform prompts/schemas.
+
+    ``prompt_version`` is retained for API compatibility but runtime generation
+    is now deterministic and always uses the per-platform prompt path.
+    """
     experiment_variant = get_prompt_experiment_variant()
-    if (prompt_version or "v2").lower() == "v1":
-        system_prompt, user_prompt = build_split_prompt(parent_sku)
-        response = await provider.generate(
-            user_prompt,
-            CANDIDATE_SCHEMA,
-            system_prompt=system_prompt,
-            reasoning_effort=reasoning_effort,
-            max_completion_tokens=max_completion_tokens,
+    if (prompt_version or "v2").lower() != "v2":
+        logger.info(
+            "Ignoring non-v2 prompt_version=%s; per-platform generation is mandatory.",
+            prompt_version,
         )
-        candidate = parse_candidate_response(response)
-        return {
-            "google_title": candidate.google_title,
-            "google_short_title": candidate.google_short_title,
-            "google_description": candidate.google_description,
-            "bing_title": candidate.bing_title,
-            "bing_description": candidate.bing_description,
-            "shopify_title": candidate.shopify_title,
-            "shopify_description": candidate.shopify_description,
-            "shopify_meta_description": candidate.shopify_meta_description,
-            "finish_sentences": build_fallback_finish_sentences(get_finish_list()),
-            "prompt_hashes": {
-                "google": get_system_prompt_hash(mode="batch"),
-                "bing": get_system_prompt_hash(mode="batch"),
-                "shopify": get_system_prompt_hash(mode="batch"),
-                "finish": get_system_prompt_hash(mode="batch"),
-            },
-            "system_prompts": {
-                "google": system_prompt,
-                "bing": system_prompt,
-                "shopify": system_prompt,
-                "finish": system_prompt,
-            },
-            "user_prompts": {
-                "google": user_prompt,
-                "bing": user_prompt,
-                "shopify": user_prompt,
-                "finish": user_prompt,
-            },
-            "usage_by_platform": {},
-            "latency_by_platform": {},
-            "raw_by_platform": {"legacy": response},
-            "schema_hashes": {},
-            "parse_by_platform": {},
-            "prompt_experiment_variant": experiment_variant,
-        }
 
     evidence = build_evidence_table(parent_sku)
     evidence_for_copy = filter_evidence_for_copy_context(evidence)

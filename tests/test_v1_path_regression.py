@@ -4,6 +4,7 @@ from pathlib import Path
 MAIN_API_PATH = Path("src/feedops/api/main.py")
 HYBRID_API_PATH = Path("src/feedops/api/hybrid_generation.py")
 PROMPT_LOADER_PATH = Path("src/feedops/api/prompt_loader.py")
+GENERATOR_PATH = Path("src/feedops/pipeline/generator.py")
 
 
 def _read(path: Path) -> str:
@@ -23,6 +24,15 @@ def test_main_generation_paths_call_v2_per_platform_generation_only() -> None:
 
     assert "prompt_version=\"v2\"" in source
     assert "prompt_version == \"v2\"" not in source
+
+
+def test_generator_no_longer_contains_runtime_v1_path_split() -> None:
+    source = _read(GENERATOR_PATH)
+
+    assert "prompt_version or \"v2\"" in source
+    assert "prompt_version: str = \"v2\"" in source
+    assert "== \"v1\"" not in source
+    assert "raw_by_platform\": {\"legacy\": response}" not in source
 
 
 def test_prompt_loader_uses_code_owned_system_prompt() -> None:
