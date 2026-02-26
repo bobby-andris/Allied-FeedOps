@@ -9,7 +9,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { ArrowLeft, ChevronDown, ChevronRight, AlertCircle } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronRight, AlertCircle, Info } from 'lucide-react'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { FallbackIndicator } from './FallbackIndicator'
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
@@ -43,6 +44,111 @@ const tierBgColor: Record<FunnelTier, string> = {
   HIGH: 'bg-emerald-100',
   MEDIUM: 'bg-blue-100',
   LOW: 'bg-amber-100',
+}
+
+const FACTOR_TOOLTIPS: Record<string, string> = {
+  'ROAS Position': 'How well this term\'s ROAS fits the target tier\'s distribution. Computed as a robust z-score using median and MAD. 0 = perfect median fit, negative = below. Weight: 50% of tier fit score.',
+  'Consistency': 'Performance stability. 0.9 = all funnel assignments agree, 0.3 = conflicting. Weight: 30% of confidence.',
+  'Data Volume': 'Reliability from click volume. min(clicks/100, 1.0). Maxes at 100+ clicks. Weight: 30% of confidence.',
+  'Intent Alignment': 'Query specificity vs tier profile. Generic queries fit HIGH, specific queries fit LOW. Weight: 20% of confidence.',
+  'Feed Alignment': 'Query-to-feed attribute matching via TF-IDF (60%) + specificity (40%). From Cloud Run /score-intent. Weight: 55% of unified intent.',
+  'Behavioral Intent': 'Google Ads purchase signals: relative CTR (30%), CPC ceiling (25%), micro-conversions (20%), cost velocity (10%). Weight: 45% of unified intent.',
+}
+
+const TIER_TOOLTIPS: Record<string, string> = {
+  'HIGH': 'Top-of-funnel tier. Catches generic, broad searches (e.g., "grab bar"). Highest Target ROAS setting restricts bidding. Expected: lowest ROAS, lowest CVR.',
+  'MEDIUM': 'Mid-funnel tier. Catches category + 1 attribute queries (e.g., "polished nickel grab bar"). Moderate Target ROAS. Expected: moderate ROAS and CVR.',
+  'LOW': 'Bottom-of-funnel tier. Catches specific, high-intent searches with 2+ attributes (e.g., "polished nickel grab bar 18in"). Lowest Target ROAS allows aggressive bidding. Expected: highest ROAS and CVR.',
+}
+
+const TIER_DESCRIPTIONS: Record<string, string> = {
+  'HIGH': 'Top-of-funnel -- highest Target ROAS setting restricts bidding on broad queries.',
+  'MEDIUM': 'Mid-funnel -- moderate Target ROAS for category-level queries.',
+  'LOW': 'Bottom-of-funnel -- lowest Target ROAS allows aggressive bidding on high-intent queries.',
+}
+
+function buildNarrativeCurrentState(term: TermScore): string {
+  const clicks = term.totalClicks ?? 0
+  const impressions = term.totalImpressions ?? 0
+  const cost = formatDollars((term.totalCostMicros ?? 0) / 1_000_000)
+  const conversions = term.totalConversions ?? 0
+  const tierDesc = TIER_DESCRIPTIONS[term.currentTier] ?? ''
+  return `"${term.searchTerm}" is in the ${term.currentTier} tier for the ${term.customLabel0} product group. ${tierDesc} Over the last 90 days: ${impressions.toLocaleString()} impressions, ${clicks.toLocaleString()} clicks, ${cost} spent, ${conversions} purchase${conversions !== 1 ? 's' : ''}.`
+}
+
+function buildNarrativeProposedChange(term: TermScore): string {
+  const destination = term.targetTier ?? term.recommendedTier
+  const trigger = term.trigger ?? 'observe'
+  let line = ''
+
+  if (trigger === 'wasted_spend' && term.recommendedAction === 'block') {
+    line = 'Add as account-level negative keyword -- completely stop bidding on this term.'
+  } else if (trigger === 'wasted_spend') {
+    line = 'Move to HIGH tier to restrict bidding via highest tROAS cap.'
+  } else if (trigger === 'demote_underperform') {
+    line = `Move to ${destination} to restrict bidding -- this query is too generic for aggressive spend.`
+  } else if (trigger === 'promote_conversion') {
+    line = `Move to ${destination} for more aggressive bidding -- this term has proven conversions.`
+  } else if (trigger === 'promote_intent') {
+    line = `Move to ${destination} for more aggressive bidding -- intent signals are strong despite zero conversions so far.`
+  } else if (trigger === 'under_invested') {
+    line = `Increase budget allocation -- performing well but not getting enough impressions in ${term.currentTier}.`
+  } else {
+    line = `No change recommended -- performing as expected in ${term.currentTier}.`
+  }
+
+  if (term.impact) {
+    line += ` Expected savings/gain: ${formatDollars(term.impact.low)}--${formatDollars(term.impact.high)}/mo.`
+  }
+  return line
+}
+
+function buildNarrativeWhy(term: TermScore): string {
+  const trigger = term.trigger ?? 'observe'
+  const cost = formatDollars((term.totalCostMicros ?? 0) / 1_000_000)
+
+  if (trigger === 'wasted_spend') {
+    let why = `Zero purchases despite ${cost} spend exceeds the wasted-spend threshold.`
+    if (term.behavioralSignals) {
+      why += ` Relative CTR of ${term.behavioralSignals.rCTR.toFixed(1)}x tier median ${term.behavioralSignals.rCTR >= 1.0 ? 'suggests engagement but no conversion' : 'indicates low engagement'}.`
+    }
+    return why
+  }
+  if (trigger === 'demote_underperform') {
+    let why = ''
+    if (term.intentScore) {
+      const expectedTier = term.intentScore.unifiedScore >= 0.60 ? 'LOW' : term.intentScore.unifiedScore >= 0.30 ? 'MEDIUM' : 'HIGH'
+      why = `Query intent score of ${term.intentScore.unifiedScore.toFixed(2)} maps to ${expectedTier} tier, but currently in ${term.currentTier}.`
+    }
+    const wordCount = term.searchTerm.trim().split(/\s+/).length
+    why += ` Query has ${wordCount} word${wordCount !== 1 ? 's' : ''}, indicating ${wordCount <= 2 ? 'broad' : 'moderate'} specificity.`
+    return why.trim()
+  }
+  if (trigger === 'promote_conversion') {
+    let why = `${term.totalConversions} conversion${term.totalConversions !== 1 ? 's' : ''} confirm${term.totalConversions === 1 ? 's' : ''} purchase intent.`
+    if (term.intentScore) {
+      const expectedTier = term.intentScore.unifiedScore >= 0.60 ? 'LOW' : term.intentScore.unifiedScore >= 0.30 ? 'MEDIUM' : 'HIGH'
+      why += ` Intent score ${term.intentScore.unifiedScore.toFixed(2)} maps to ${expectedTier}. More aggressive bidding would capture more volume.`
+    }
+    return why
+  }
+  if (trigger === 'promote_intent') {
+    let why = ''
+    if (term.intentScore) {
+      why = `Intent score ${term.intentScore.unifiedScore.toFixed(2)} exceeds the 0.65 threshold.`
+    }
+    if (term.behavioralSignals && term.behavioralSignals.rCTR >= 1.5) {
+      why += ` Relative CTR of ${term.behavioralSignals.rCTR.toFixed(1)}x tier median confirms engagement.`
+    } else {
+      const wordCount = term.searchTerm.trim().split(/\s+/).length
+      why += ` Query has ${wordCount} word${wordCount !== 1 ? 's' : ''} indicating high specificity.`
+    }
+    return why.trim()
+  }
+  if (trigger === 'under_invested') {
+    return 'Performing well but not getting enough impressions. Market volume suggests more demand exists.'
+  }
+  return 'This term\'s intent profile matches its current tier placement.'
 }
 
 interface ScorecardFactor {
@@ -111,6 +217,18 @@ function ExpandableFactor({ factor }: { factor: ScorecardFactor }) {
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           )}
           <span className="text-sm font-medium min-w-[130px] text-left">{factor.name}</span>
+          {FACTOR_TOOLTIPS[factor.name] && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>{FACTOR_TOOLTIPS[factor.name]}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <Progress
             value={factor.score * 100}
             className={`h-2 flex-1 ${progressColor(factor.score)}`}
@@ -163,6 +281,86 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
           </span>
         )}
       </div>
+
+      {/* Narrative Briefing */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Narrative Briefing</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-sm leading-relaxed">
+              <span className="font-semibold">Current State: </span>
+              {buildNarrativeCurrentState(term)}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm leading-relaxed">
+              <span className="font-semibold">Proposed Change: </span>
+              {buildNarrativeProposedChange(term)}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm leading-relaxed">
+              <span className="font-semibold">Why: </span>
+              {buildNarrativeWhy(term)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Raw Google Ads Data */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Raw Google Ads Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">Impressions</p>
+              <p className="text-sm font-mono font-medium">{(term.totalImpressions ?? 0).toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">Clicks</p>
+              <p className="text-sm font-mono font-medium">{(term.totalClicks ?? 0).toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">CTR</p>
+              <p className="text-sm font-mono font-medium">
+                {(term.totalImpressions ?? 0) > 0
+                  ? `${(((term.totalClicks ?? 0) / (term.totalImpressions ?? 1)) * 100).toFixed(2)}%`
+                  : '0.00%'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">Avg CPC</p>
+              <p className="text-sm font-mono font-medium">
+                ${((term.totalAverageCpcMicros ?? 0) / 1_000_000).toFixed(2)}
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">Total Cost</p>
+              <p className="text-sm font-mono font-medium">{formatDollars(term.totalCostMicros / 1_000_000)}</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">ROAS</p>
+              <p className="text-sm font-mono font-medium">{term.actualRoas.toFixed(2)}x</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">Conversions</p>
+              <p className="text-sm font-mono font-medium">{term.totalConversions}</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">All Conv.</p>
+              <p className="text-sm font-mono font-medium">{(term.totalAllConversions ?? 0).toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-2.5 space-y-0.5">
+              <p className="text-xs text-muted-foreground">Conv. Value</p>
+              <p className="text-sm font-mono font-medium">{formatDollars(term.totalConversionsValue ?? 0)}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Verdict section */}
       <Card>
@@ -369,8 +567,20 @@ export function TermScorecard({ term, onBack }: TermScorecardProps) {
 
             return (
               <div key={t} className="flex items-center gap-3">
-                <span className={`text-sm font-medium w-20 ${tierTextColor[t]}`}>
+                <span className={`text-sm font-medium w-20 inline-flex items-center gap-1 ${tierTextColor[t]}`}>
                   {t}
+                  {TIER_TOOLTIPS[t] && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>{TIER_TOOLTIPS[t]}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </span>
                 <div className="flex-1 relative">
                   <div className={`h-6 rounded-full overflow-hidden ${
