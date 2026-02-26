@@ -139,7 +139,17 @@ interface BatchApprovePayload {
   }>
 }
 
-type ActionPayload = ApprovePayload | RejectPayload | UndoPayload | BatchApprovePayload
+interface LabelBlockPayload {
+  action: 'label_block'
+  customLabel0: string
+  metadata?: Record<string, unknown>
+}
+
+interface IdentifySearchCandidatesPayload {
+  action: 'identify_search_candidates'
+}
+
+type ActionPayload = ApprovePayload | RejectPayload | UndoPayload | BatchApprovePayload | LabelBlockPayload | IdentifySearchCandidatesPayload
 
 export async function POST(request: NextRequest) {
   try {
@@ -301,6 +311,99 @@ export async function POST(request: NextRequest) {
           ok: true,
           approved_count: data?.length ?? 0,
           records: data,
+        })
+      }
+
+      case 'label_block': {
+        if (!body.customLabel0) {
+          return NextResponse.json(
+            { error: 'customLabel0 required' },
+            { status: 400 }
+          )
+        }
+
+        const now = new Date().toISOString()
+        const { error } = await supabase
+          .from('routing_recommendations')
+          .upsert(
+            {
+              search_term: '__LABEL_BLOCK__',
+              custom_label_0: body.customLabel0,
+              recommended_action: 'label_block',
+              action_scope: 'label',
+              review_status: 'accepted',
+              accepted: true,
+              accepted_at: now,
+              accepted_by: 'dashboard_user',
+              confidence: 1.0,
+              metadata: {
+                ...(body.metadata ?? {}),
+                history: [{ action: 'label_block', at: now, by: 'dashboard_user' }],
+              },
+            },
+            { onConflict: 'search_term,custom_label_0' }
+          )
+
+        if (error) {
+          console.error('Label block failed:', error)
+          return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+
+        return NextResponse.json({
+          success: true,
+          action: 'label_block',
+          customLabel0: body.customLabel0,
+        })
+      }
+
+      case 'identify_search_candidates': {
+        // Find high-ROAS, high-volume terms from query_value_scores
+        const { data: candidates, error: fetchError } = await supabase
+          .from('query_value_scores')
+          .select('search_term, custom_label_0, model_inputs')
+          .not('model_inputs', 'is', null)
+
+        if (fetchError) {
+          console.error('Search candidate fetch failed:', fetchError)
+          return NextResponse.json({ error: fetchError.message }, { status: 500 })
+        }
+
+        // Filter candidates: ROAS > 3.0, impressions > 100, conversions > 0
+        const searchCandidates = (candidates || [])
+          .filter((c) => {
+            const inputs = c.model_inputs as Record<string, unknown> | null
+            if (!inputs) return false
+            const roas = Number(inputs.roas ?? 0)
+            const impressions = Number(inputs.impressions ?? 0)
+            const conversions = Number(inputs.conversions ?? 0)
+            return roas > 3.0 && impressions > 100 && conversions > 0
+          })
+          .map((c) => ({
+            search_term: c.search_term,
+            custom_label_0: c.custom_label_0,
+            recommended_search_tier: 'exact' as const,
+            status: 'candidate',
+            confidence: 0.8,
+            metadata: {
+              source: 'tier_scoring_engine',
+              identified_at: new Date().toISOString(),
+            },
+          }))
+
+        if (searchCandidates.length > 0) {
+          const { error: insertError } = await supabase
+            .from('search_buildout_recommendations')
+            .upsert(searchCandidates, { onConflict: 'search_term' })
+
+          if (insertError) {
+            console.error('Search candidate insert failed:', insertError)
+            return NextResponse.json({ error: insertError.message }, { status: 500 })
+          }
+        }
+
+        return NextResponse.json({
+          success: true,
+          candidateCount: searchCandidates.length,
         })
       }
 

@@ -42,6 +42,7 @@ interface UseRecommendationsReturn {
   reject: (term: TermScore, reason?: string) => Promise<void>
   undo: (searchTerm: string, customLabel0: string) => Promise<void>
   batchApprove: (terms: TermScore[]) => Promise<void>
+  blockLabel: (customLabel0: string) => Promise<void>
   loadHistory: () => Promise<void>
   getStatus: (searchTerm: string, customLabel0: string) => RecommendationStatus | null
 }
@@ -265,6 +266,38 @@ export function useRecommendations(): UseRecommendationsReturn {
     }
   }, [statuses])
 
+  // ----- blockLabel -----
+  const blockLabel = useCallback(async (customLabel0: string) => {
+    const key = makeKey('__LABEL_BLOCK__', customLabel0)
+
+    // Optimistic update
+    setStatuses(prev => ({
+      ...prev,
+      [key]: { status: 'accepted', updatedAt: new Date().toISOString() },
+    }))
+
+    try {
+      const res = await fetch('/api/shopping-funnel/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'label_block',
+          customLabel0,
+          metadata: { blockedBy: 'group_overview' },
+        }),
+      })
+      if (!res.ok) throw new Error(`API error: ${res.status}`)
+    } catch (err) {
+      // Revert on failure
+      setStatuses(prev => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+      console.error('Failed to block label:', err)
+    }
+  }, [])
+
   // ----- loadHistory -----
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true)
@@ -300,6 +333,7 @@ export function useRecommendations(): UseRecommendationsReturn {
     reject,
     undo,
     batchApprove,
+    blockLabel,
     loadHistory,
     getStatus,
   }
