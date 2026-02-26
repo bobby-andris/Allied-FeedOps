@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, ArrowRight } from 'lucide-react'
+import { AlertCircle, ArrowRight, ShieldBan } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { FallbackIndicator } from './FallbackIndicator'
 import type { GroupDistributions, TermScore, ImpactRange } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
@@ -12,6 +13,7 @@ interface GroupOverviewProps {
   distributions: Record<string, GroupDistributions>
   scores: TermScore[]
   onSelectGroup: (group: string) => void
+  onBlockLabel?: (customLabel0: string) => void
 }
 
 const TIER_ORDER: FunnelTier[] = ['HIGH', 'MEDIUM', 'LOW']
@@ -28,7 +30,7 @@ interface GroupSummary {
   misplacedImpact: number
 }
 
-export function GroupOverview({ distributions, scores, onSelectGroup }: GroupOverviewProps) {
+export function GroupOverview({ distributions, scores, onSelectGroup, onBlockLabel }: GroupOverviewProps) {
   const sortedGroups = useMemo(() => {
     const groups: GroupSummary[] = Object.values(distributions).map(group => {
       const groupScores = scores.filter(s => s.customLabel0 === group.customLabel0)
@@ -105,6 +107,25 @@ export function GroupOverview({ distributions, scores, onSelectGroup }: GroupOve
                       <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-medium">
                         {misplacedCount} {misplacedCount !== 1 ? 'opportunities' : 'opportunity'}
                       </span>
+                    )}
+                    {onBlockLabel && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          const confirmed = window.confirm(
+                            `Block all terms under "${group.customLabel0}"? This will prevent all terms in this category from getting aggressive bidding.`
+                          )
+                          if (confirmed) {
+                            onBlockLabel(group.customLabel0)
+                          }
+                        }}
+                        title={`Block all terms in ${group.customLabel0}`}
+                      >
+                        <ShieldBan className="h-3.5 w-3.5" />
+                      </Button>
                     )}
                   </div>
                 </div>

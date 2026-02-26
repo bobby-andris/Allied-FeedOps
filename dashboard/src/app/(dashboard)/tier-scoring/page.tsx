@@ -29,6 +29,7 @@ import { GroupOverview } from './components/GroupOverview'
 import { GroupDetail } from './components/GroupDetail'
 import { TierDetail } from './components/TierDetail'
 import { TermScorecard } from './components/TermScorecard'
+import { LabelProfitabilitySummary } from './components/LabelProfitabilitySummary'
 
 import type { TermScore } from '@/lib/optimization/tier-scoring.types'
 import type { FunnelTier } from '@/lib/shopping-funnel/types'
@@ -218,11 +219,15 @@ export default function TierScoringPage() {
               onSelectTier={(tier) => setSelectedTier(tier)}
             />
           ) : (
-            <GroupOverview
-              distributions={data.distributions}
-              scores={data.scores}
-              onSelectGroup={(group) => setSelectedGroup(group)}
-            />
+            <>
+              <GroupOverview
+                distributions={data.distributions}
+                scores={data.scores}
+                onSelectGroup={(group) => setSelectedGroup(group)}
+                onBlockLabel={recommendations.blockLabel}
+              />
+              <LabelProfitabilitySummary scores={data.scores} />
+            </>
           )}
         </TabsContent>
 
