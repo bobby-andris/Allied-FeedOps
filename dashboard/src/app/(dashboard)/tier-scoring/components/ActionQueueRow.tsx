@@ -23,7 +23,8 @@ interface ActionQueueRowProps {
 }
 
 export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, onApprove, onReject, reviewStatus = 'pending' }: ActionQueueRowProps) {
-  const isWastedSpend = term.reasonCode === 'wasted_spend'
+  // Use trigger from determineAction() as source of truth, fall back to reasonCode
+  const isWastedSpend = term.trigger === 'wasted_spend' || (!term.trigger && term.reasonCode === 'wasted_spend')
 
   const handleBlock = (e: React.MouseEvent) => {
     e.stopPropagation()

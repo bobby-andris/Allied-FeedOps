@@ -44,7 +44,8 @@ export function LeakageTermRow({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const reviewStatus = status?.status ?? 'pending'
-  const isWastedSpend = term.reasonCode === 'wasted_spend'
+  // Use trigger from determineAction() as source of truth, fall back to reasonCode
+  const isWastedSpend = term.trigger === 'wasted_spend' || (!term.trigger && term.reasonCode === 'wasted_spend')
 
   // Auto-dismiss reject input after 5 seconds
   useEffect(() => {

@@ -22,8 +22,10 @@ export interface ClassifiedTerm extends TermScore {
   reasonLabel: string
 }
 
-// Wasted spend threshold: $5 in cost_micros (5,000,000 micros = $5)
-const WASTED_SPEND_THRESHOLD_MICROS = 5_000_000
+// Wasted spend classification now driven by the trigger from determineAction()
+// which uses the calibrated 1.5x avgCPA threshold ($96.33).
+// Fallback: $5 minimum for legacy paths that don't have trigger data.
+const WASTED_SPEND_FALLBACK_MICROS = 5_000_000
 
 // Under-invested: market volume must be 2x+ actual impressions
 const UNDER_INVESTED_MULTIPLIER = 2
@@ -36,8 +38,13 @@ export function classifyLeakageReason(
   term: TermScore,
   keywordData?: KeywordData
 ): ReasonCode {
-  // Check for wasted spend: zero conversions with meaningful spend
-  if (term.totalConversions === 0 && term.totalCostMicros > WASTED_SPEND_THRESHOLD_MICROS) {
+  // Use the trigger from determineAction() as source of truth for wasted spend.
+  // This uses the calibrated 1.5x avgCPA threshold instead of hardcoded $5.
+  if (term.trigger === 'wasted_spend') {
+    return 'wasted_spend'
+  }
+  // Fallback for terms without trigger data (legacy paths)
+  if (!term.trigger && term.totalConversions === 0 && term.totalCostMicros > WASTED_SPEND_FALLBACK_MICROS) {
     return 'wasted_spend'
   }
 
@@ -76,8 +83,10 @@ export function classifyAllTerms(
   terms: TermScore[],
   keywordDataMap?: Map<string, KeywordData>
 ): ClassifiedTerm[] {
+  // Include terms that are misplaced OR have an actionable trigger from determineAction()
+  const actionableTriggers = ['wasted_spend', 'demote_underperform', 'promote_conversion', 'promote_intent', 'under_invested']
   return terms
-    .filter(t => t.isMisplaced)
+    .filter(t => t.isMisplaced || (t.trigger && actionableTriggers.includes(t.trigger)))
     .map(t => {
       const reasonCode = classifyLeakageReason(t, keywordDataMap?.get(t.searchTerm))
       return {
