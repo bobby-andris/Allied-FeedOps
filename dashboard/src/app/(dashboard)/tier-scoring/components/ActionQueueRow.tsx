@@ -73,6 +73,30 @@ export function ActionQueueRow({ term, rank, onViewDetails, showUndo, onUndo, on
           <span className="font-medium truncate">{term.searchTerm}</span>
           <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
           <ReasonBadge reasonCode={term.reasonCode} />
+          {term.intentScore && (
+            <Badge
+              variant="outline"
+              className={
+                term.intentScore.unifiedScore >= 0.65
+                  ? 'border-green-300 text-green-700 bg-green-50'
+                  : term.intentScore.unifiedScore >= 0.40
+                  ? 'border-amber-300 text-amber-700 bg-amber-50'
+                  : 'border-red-300 text-red-700 bg-red-50'
+              }
+            >
+              Intent: {term.intentScore.unifiedScore.toFixed(2)}
+            </Badge>
+          )}
+          {term.trigger === 'promote_intent' && (
+            <Badge variant="outline" className="border-blue-300 text-blue-700 bg-blue-50">
+              Intent-Proven
+            </Badge>
+          )}
+          {term.trigger === 'promote_conversion' && (
+            <Badge variant="outline" className="border-green-300 text-green-700 bg-green-50">
+              Conversion-Proven
+            </Badge>
+          )}
         </div>
         <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.actionReason || term.verdict}</p>
       </div>

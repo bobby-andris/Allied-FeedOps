@@ -128,7 +128,7 @@ export function useRecommendations(): UseRecommendationsReturn {
           action: 'approve',
           searchTerm: term.searchTerm,
           customLabel0: term.customLabel0,
-          recommendedTier: options?.recommendedTier ?? term.recommendedTier,
+          recommendedTier: options?.recommendedTier ?? term.targetTier ?? term.recommendedTier,
           currentTier: term.currentTier,
           confidence: term.confidence.score,
           impact: term.impact,

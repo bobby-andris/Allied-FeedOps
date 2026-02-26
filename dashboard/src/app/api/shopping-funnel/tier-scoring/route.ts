@@ -123,6 +123,43 @@ export async function GET(request: NextRequest) {
       ? globalFallback
       : computeGlobalDistributions(labelTierPerf.rows)
 
+    // Fetch feed alignment scores from Cloud Run /score-intent (Domain A)
+    // Gracefully degrade if unavailable — scoring works with behavioral signals only
+    const uniqueTerms = [...new Set(
+      existingTermsResult.terms
+        .filter(t => t.funnels.length > 0)
+        .map(t => t.search_term)
+    )]
+
+    let feedAlignmentMap = new Map<string, number>()
+    const AVG_CPA = 64.22 // From Google Ads account audit (90-day window)
+
+    try {
+      const pipelineUrl = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+      const intentRes = await fetch(`${pipelineUrl}/score-intent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queries: uniqueTerms }),
+        signal: AbortSignal.timeout(10000), // 10s timeout
+      })
+
+      if (intentRes.ok) {
+        const intentData = await intentRes.json()
+        if (intentData.scores && Array.isArray(intentData.scores)) {
+          for (const scoreItem of intentData.scores) {
+            if (scoreItem.query && typeof scoreItem.feed_alignment_score === 'number') {
+              feedAlignmentMap.set(scoreItem.query, scoreItem.feed_alignment_score)
+            }
+          }
+        }
+        console.log(`Feed alignment scores fetched for ${feedAlignmentMap.size}/${uniqueTerms.length} terms`)
+      } else {
+        console.warn(`Cloud Run /score-intent returned ${intentRes.status} — proceeding without feed alignment`)
+      }
+    } catch (err) {
+      console.warn('Cloud Run /score-intent unavailable — proceeding with behavioral signals only:', err instanceof Error ? err.message : err)
+    }
+
     // Score each term
     const scores: TermScore[] = []
     for (const term of existingTermsResult.terms) {
@@ -140,8 +177,11 @@ export async function GET(request: NextRequest) {
       // Get intent features for NLP alignment
       const intentFeatures = decomposeSearchTerm(term.search_term)
 
-      // Score the term with calibration config
-      const scored = scoreTerm(term, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION)
+      // Get feed alignment score for this term (may be undefined if Cloud Run unavailable)
+      const feedScore = feedAlignmentMap.get(term.search_term)
+
+      // Score the term with calibration config, feed alignment, and real avgCPA
+      const scored = scoreTerm(term, groupDist, globalFallbackDists, intentFeatures, DEFAULT_CALIBRATION, feedScore, AVG_CPA)
       scores.push(scored)
     }
 
@@ -189,6 +229,9 @@ export async function GET(request: NextRequest) {
             actualRoas: s.actualRoas,
             totalConversions: s.totalConversions,
             totalCostMicros: s.totalCostMicros,
+            trigger: s.trigger,
+            intentScore: s.intentScore,
+            targetTier: s.targetTier,
           },
         })),
         { onConflict: 'search_term,custom_label_0' }

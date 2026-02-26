@@ -138,6 +138,30 @@ export function LeakageTermRow({
             <span className="font-medium truncate">{term.searchTerm}</span>
             <ConfidenceBadge level={term.confidence.level} score={term.confidence.score} />
             <ReasonBadge reasonCode={term.reasonCode} />
+            {term.intentScore && (
+              <Badge
+                variant="outline"
+                className={
+                  term.intentScore.unifiedScore >= 0.65
+                    ? 'border-green-300 text-green-700 bg-green-50'
+                    : term.intentScore.unifiedScore >= 0.40
+                    ? 'border-amber-300 text-amber-700 bg-amber-50'
+                    : 'border-red-300 text-red-700 bg-red-50'
+                }
+              >
+                Intent: {term.intentScore.unifiedScore.toFixed(2)}
+              </Badge>
+            )}
+            {term.trigger === 'promote_intent' && (
+              <Badge variant="outline" className="border-blue-300 text-blue-700 bg-blue-50">
+                Intent-Proven
+              </Badge>
+            )}
+            {term.trigger === 'promote_conversion' && (
+              <Badge variant="outline" className="border-green-300 text-green-700 bg-green-50">
+                Conversion-Proven
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mt-0.5 truncate">{term.actionReason || term.verdict}</p>
         </div>
@@ -274,6 +298,21 @@ export function LeakageTermRow({
               {term.tierFitScores[term.recommendedTier]?.toFixed(2) ?? '?'}
             </span>
           </div>
+          {term.intentScore && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
+              <span>Feed Alignment: {term.intentScore.feedAlignmentScore.toFixed(2)}</span>
+              <span>&bull; Behavioral: {term.intentScore.behavioralScore.toFixed(2)}</span>
+              <span>&bull; Unified: {term.intentScore.unifiedScore.toFixed(2)}</span>
+            </div>
+          )}
+          {isWastedSpend && term.behavioralSignals && (
+            <div className="text-xs text-muted-foreground">
+              Wasted: ${(term.totalCostMicros / 1_000_000).toFixed(0)} with 0 purchases
+              {term.behavioralSignals.microConversionDelta > 0 && (
+                <span>, {term.behavioralSignals.microConversionDelta.toFixed(0)} micro-conversions</span>
+              )}
+            </div>
+          )}
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
             <span>Data {term.confidence.factors.dataVolume.toFixed(2)}</span>
             <span>&bull; Consistency {term.confidence.factors.consistency.toFixed(2)}</span>
