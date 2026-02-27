@@ -3,9 +3,9 @@ name: Backend Parity
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [master]
+    branches: [master, main]
   push:
-    branches: [master]
+    branches: [master, main]
 
 jobs:
   backend-parity:

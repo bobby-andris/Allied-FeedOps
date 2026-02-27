@@ -340,3 +340,52 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
 
     assert not [op for op in db.ops if op["table"] == "generated_content"]
     assert not [op for op in db.ops if op["table"] == "regeneration_history"]
+
+
+@pytest.mark.asyncio
+async def test_process_regenerate_job_marks_failed_when_running_transition_raises(monkeypatch):
+    class _FailRunningUpdateQuery(_TableQuery):
+        def execute(self):
+            if (
+                self._table_name == "generation_jobs"
+                and self._op == "update"
+                and (self._payload or {}).get("status") == "running"
+            ):
+                raise RuntimeError("running transition failed")
+            return super().execute()
+
+    class _FailRunningUpdateSupabase(_FakeSupabase):
+        def table(self, table_name: str):
+            return _FailRunningUpdateQuery(self, table_name)
+
+    db = _FailRunningUpdateSupabase()
+    called = {"execute": False}
+
+    async def _should_not_execute(**_kwargs):
+        called["execute"] = True
+        raise AssertionError("regeneration should not execute if running update fails")
+
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "_execute_regeneration_request", _should_not_execute)
+
+    await api_main.process_regenerate_job(
+        job_id="job-1",
+        request_payload={
+            "master_sku": "WP-2TB/16-GAL",
+            "platform": "google",
+            "content_type": "title",
+            "async_mode": False,
+        },
+    )
+
+    assert called["execute"] is False
+    failed_updates = [
+        op
+        for op in db.ops
+        if op["table"] == "generation_jobs"
+        and op["op"] == "update"
+        and op["payload"].get("status") == "failed"
+    ]
+    assert len(failed_updates) == 1
+    assert "running transition failed" in str(failed_updates[0]["payload"].get("error", ""))

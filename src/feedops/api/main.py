@@ -1476,15 +1476,15 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
     from datetime import datetime, timezone
 
     supabase = get_client()
-    now_iso = datetime.now(timezone.utc).isoformat()
-    (
-        supabase.table("generation_jobs")
-        .update({"status": "running", "started_at": now_iso, "attempt_count": 1})
-        .eq("id", job_id)
-        .execute()
-    )
 
     try:
+        now_iso = datetime.now(timezone.utc).isoformat()
+        (
+            supabase.table("generation_jobs")
+            .update({"status": "running", "started_at": now_iso, "attempt_count": 1})
+            .eq("id", job_id)
+            .execute()
+        )
         ensure_generation_enabled(operation="process_regenerate_job")
         request = RegenerateRequest(**request_payload)
         request.async_mode = False
@@ -1506,18 +1506,25 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
     except Exception as exc:
         formatted = _format_job_error(exc)
         logger.error("Async regenerate job %s failed: %s", job_id, formatted)
-        (
-            supabase.table("generation_jobs")
-            .update(
-                {
-                    "status": "failed",
-                    "error": formatted,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                }
+        try:
+            (
+                supabase.table("generation_jobs")
+                .update(
+                    {
+                        "status": "failed",
+                        "error": formatted,
+                        "completed_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                )
+                .eq("id", job_id)
+                .execute()
             )
-            .eq("id", job_id)
-            .execute()
-        )
+        except Exception as persist_exc:
+            logger.error(
+                "Failed to persist failure state for async regenerate job %s: %s",
+                job_id,
+                persist_exc,
+            )
 
 
 @app.post(
