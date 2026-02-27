@@ -1,0 +1,5 @@
+SKU=CL-22 PLATFORM=bing
+LEN: 738
+PASS_GT_200: True
+IS_LITERAL_FINISH_SENTENCE: False
+HEAD300: Carolina Retractable Wall Hook is a wall-mounted brass retractable hook with a compact 1.75 in length. {FINISH_SENTENCE} The rod pulls out to create hanging space for coats, robes, and towels, then pushes back in so it stays out of the way when not in use. It installs without the need for additional

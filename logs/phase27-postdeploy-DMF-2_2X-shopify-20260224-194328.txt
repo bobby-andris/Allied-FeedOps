@@ -1,0 +1,4 @@
+SKU=DMF-2/2X PLATFORM=shopify
+LEN: 0
+PASS_GT_200: False
+HEAD300: 

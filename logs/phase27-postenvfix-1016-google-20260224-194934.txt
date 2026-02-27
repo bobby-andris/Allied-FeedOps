@@ -1,0 +1,5 @@
+SKU=1016 PLATFORM=google
+LEN: 704
+PASS_GT_200: True
+IS_LITERAL_FINISH_SENTENCE: False
+HEAD300: A 6-inch diameter, round towel ring with concealed screw mounting keeps the Skyline Collection profile crisp and uncluttered on the wall. {FINISH_SENTENCE} Constructed of solid brass, this brass towel ring is designed for daily use while the wall-mounted design makes smart use of bathroom space. The

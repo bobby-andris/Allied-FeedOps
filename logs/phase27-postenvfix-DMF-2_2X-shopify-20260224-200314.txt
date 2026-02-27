@@ -1,0 +1,7 @@
+SKU=DMF-2/2X PLATFORM=shopify
+LEN: 1427
+PASS_GT_200: True
+IS_LITERAL_FINISH_SENTENCE: False
+HEAD300: <p>When you need a closer view for precise makeup or grooming—without committing to wall mounting—this adjustable-height, floor-standing make-up mirror gives you magnification and stability right where you want it.</p>
+
+<p>Designed with traditional style and classic accents, the mirror’s double-face

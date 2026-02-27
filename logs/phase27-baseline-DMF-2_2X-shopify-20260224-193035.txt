@@ -1,0 +1,3 @@
+SKU=DMF-2/2X PLATFORM=shopify
+LEN: 0
+HEAD300: 

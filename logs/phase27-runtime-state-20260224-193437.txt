@@ -1,0 +1,39 @@
+TIMESTAMP: 2026-02-25T00:34:37Z
+=== gcloud config ===
+Project 'bobbys-project-346400' lacks an 'environment' tag. Please create or add a tag with key 'environment' and a value like 'Production', 'Development', 'Test', or 'Staging'. Add an 'environment' tag using `gcloud resource-manager tags bindings create`. See https://cloud.google.com/resource-manager/docs/creating-managing-projects#designate_project_environments_with_tags for details.
+[core]
+account = bobby.andris@avondaledecor.com
+disable_usage_reporting = False
+project = bobbys-project-346400
+
+Your active configuration is: [default]
+
+=== cloud run service describe ===
+metadata:
+  labels:
+    cloud.googleapis.com/location: us-east1
+  name: feedops-pipeline
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '10'
+        run.googleapis.com/client-name: gcloud
+        run.googleapis.com/client-version: 558.0.0
+        run.googleapis.com/startup-cpu-boost: 'true'
+status:
+  latestCreatedRevisionName: feedops-pipeline-00226-l4h
+  latestReadyRevisionName: feedops-pipeline-00226-l4h
+  traffic:
+  - latestRevision: true
+    percent: 100
+    revisionName: feedops-pipeline-00226-l4h
+  url: https://feedops-pipeline-3b43yg32oa-ue.a.run.app
+
+=== cloud builds latest 5 ===
+ID                                    STATUS   CREATE_TIME                FINISH_TIME                  BRANCH_NAME  IMAGES
+637bd229-1ce4-4431-be40-86ab3f57a3be  SUCCESS  2026-02-24T22:04:57+00:00  2026-02-24T22:10:42.259287Z               ['us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:359ede86133deab3f8837bfdb2df6f99196119ab', 'us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:latest']
+c9a05b10-333a-4563-8ce6-1bf3cc3bf22a  SUCCESS  2026-02-24T21:47:30+00:00  2026-02-24T21:53:53.220252Z               ['us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:8fd799b8a7fe5e0ca582051b85531d1dd2da8b14', 'us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:latest']
+e20e6e20-3731-4028-a524-91030cfbc04e  SUCCESS  2026-02-24T21:30:57+00:00  2026-02-24T21:37:21.205064Z               ['us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:bf6c0ebf61be7e9eb347d65951318c2c68f2555f', 'us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:latest']
+ee175ed8-0ecb-4e83-a104-72616de6a993  SUCCESS  2026-02-24T21:04:44+00:00  2026-02-24T21:10:53.407484Z               ['us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:2cd40738e938c709d0dd7ddfa83e264149d5c638', 'us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:latest']
+3d9125d7-b93e-42cf-9767-6528a3589393  SUCCESS  2026-02-24T19:08:05+00:00  2026-02-24T19:13:51.103589Z               ['us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:3c0db0fa24588a1dc5053827fbf9c8e145cb2272', 'us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:latest']
