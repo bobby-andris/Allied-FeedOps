@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { extractErrorMessage, isMissingRelationError } from '@/lib/intent/persistence'
 
 type CandidateStatus = 'proposed' | 'approved' | 'executing' | 'validated' | 'rejected'
+type RunStatus = 'proposed' | 'approved' | 'executing' | 'validated' | 'rejected'
 
 interface PromoteBody {
   run_id?: string
@@ -22,6 +23,10 @@ function sanitizeThreshold(value: unknown, fallback: number, min: number): numbe
 }
 
 function isCandidateStatus(value: unknown): value is CandidateStatus {
+  return value === 'proposed' || value === 'approved' || value === 'executing' || value === 'validated' || value === 'rejected'
+}
+
+function isRunStatus(value: unknown): value is RunStatus {
   return value === 'proposed' || value === 'approved' || value === 'executing' || value === 'validated' || value === 'rejected'
 }
 
@@ -65,6 +70,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Experiment run not found' }, { status: 404 })
     }
 
+    if (!isRunStatus(runRow.status)) {
+      return NextResponse.json({ error: `Invalid run status: ${String(runRow.status)}` }, { status: 409 })
+    }
+
+    if (runRow.status !== 'executing') {
+      return NextResponse.json(
+        { error: `Promotion gate requires run status executing; got ${runRow.status}` },
+        { status: 409 }
+      )
+    }
+
     const { data: candidates, error: candidateError } = await supabase
       .from('experiment_candidates')
       .select('id, status, observed_lift, sample_size')
@@ -83,14 +99,31 @@ export async function POST(request: NextRequest) {
     }
 
     const candidateRows = candidates ?? []
-    const sampleTotal = candidateRows.reduce((sum, row) => sum + (Number.isFinite(row.sample_size) ? Number(row.sample_size) : 0), 0)
+    const sampleTotal = candidateRows.reduce(
+      (sum, row) => sum + (Number.isFinite(row.sample_size) ? Number(row.sample_size) : 0),
+      0
+    )
 
-    const liftValues = candidateRows
-      .map((row) => (Number.isFinite(row.observed_lift) ? Number(row.observed_lift) : null))
-      .filter((value): value is number => value !== null)
+    const weightedLiftNumerator = candidateRows.reduce((sum, row) => {
+      const sampleSize = Number.isFinite(row.sample_size) ? Number(row.sample_size) : 0
+      const observedLift = Number.isFinite(row.observed_lift) ? Number(row.observed_lift) : null
+      if (sampleSize <= 0 || observedLift === null) {
+        return sum
+      }
+      return sum + observedLift * sampleSize
+    }, 0)
 
-    const averageLift = liftValues.length > 0
-      ? liftValues.reduce((sum, value) => sum + value, 0) / liftValues.length
+    const weightedLiftDenominator = candidateRows.reduce((sum, row) => {
+      const sampleSize = Number.isFinite(row.sample_size) ? Number(row.sample_size) : 0
+      const observedLift = Number.isFinite(row.observed_lift) ? Number(row.observed_lift) : null
+      if (sampleSize <= 0 || observedLift === null) {
+        return sum
+      }
+      return sum + sampleSize
+    }, 0)
+
+    const weightedAverageLift = weightedLiftDenominator > 0
+      ? weightedLiftNumerator / weightedLiftDenominator
       : null
 
     const hasRejectedCandidate = candidateRows.some((row) => row.status === 'rejected')
@@ -99,8 +132,8 @@ export async function POST(request: NextRequest) {
       decision === 'promote' &&
       candidateRows.length > 0 &&
       sampleTotal >= minSampleSize &&
-      averageLift !== null &&
-      averageLift >= minObservedLift &&
+      weightedAverageLift !== null &&
+      weightedAverageLift >= minObservedLift &&
       !hasRejectedCandidate
 
     const nowIso = new Date().toISOString()
@@ -119,7 +152,7 @@ export async function POST(request: NextRequest) {
       min_observed_lift: minObservedLift,
       candidate_count: candidateRows.length,
       sample_total: sampleTotal,
-      average_lift: averageLift,
+      weighted_average_lift: weightedAverageLift,
       has_rejected_candidate: hasRejectedCandidate,
       actor: body.actor ?? null,
       evaluated_at: nowIso,
@@ -155,14 +188,35 @@ export async function POST(request: NextRequest) {
     }
 
     if (runRow.action_id) {
+      const { data: actionRow, error: actionLookupError } = await supabase
+        .from('optimization_action_queue')
+        .select('metadata')
+        .eq('id', runRow.action_id)
+        .maybeSingle()
+
+      if (actionLookupError && !isMissingRelationError(actionLookupError, 'optimization_action_queue')) {
+        throw actionLookupError
+      }
+      if (actionLookupError && isMissingRelationError(actionLookupError, 'optimization_action_queue')) {
+        warnings.push('Table "optimization_action_queue" is missing. Queue lifecycle linkage was not updated.')
+      }
+
+      const existingMetadata =
+        actionRow?.metadata && typeof actionRow.metadata === 'object'
+          ? (actionRow.metadata as Record<string, unknown>)
+          : {}
+
       const actionUpdate: Record<string, unknown> = {
         current_state: nextRunStatus === 'validated' ? 'validated' : 'rejected',
         metadata: {
-          source: 'experiment-promotion-gate',
-          run_key: runRow.run_key,
-          gate_status: gateStatus,
-          gate_pass: gatePass,
-          evaluated_at: nowIso,
+          ...existingMetadata,
+          promotion_gate: {
+            source: 'experiment-promotion-gate',
+            run_key: runRow.run_key,
+            gate_status: gateStatus,
+            gate_pass: gatePass,
+            evaluated_at: nowIso,
+          },
         },
       }
 
@@ -170,16 +224,18 @@ export async function POST(request: NextRequest) {
         actionUpdate.validated_at = nowIso
       }
 
-      const { error: actionUpdateError } = await supabase
-        .from('optimization_action_queue')
-        .update(actionUpdate)
-        .eq('id', runRow.action_id)
+      if (!actionLookupError) {
+        const { error: actionUpdateError } = await supabase
+          .from('optimization_action_queue')
+          .update(actionUpdate)
+          .eq('id', runRow.action_id)
 
-      if (actionUpdateError && !isMissingRelationError(actionUpdateError, 'optimization_action_queue')) {
-        throw actionUpdateError
-      }
-      if (actionUpdateError && isMissingRelationError(actionUpdateError, 'optimization_action_queue')) {
-        warnings.push('Table "optimization_action_queue" is missing. Queue lifecycle linkage was not updated.')
+        if (actionUpdateError && !isMissingRelationError(actionUpdateError, 'optimization_action_queue')) {
+          throw actionUpdateError
+        }
+        if (actionUpdateError && isMissingRelationError(actionUpdateError, 'optimization_action_queue')) {
+          warnings.push('Table "optimization_action_queue" is missing. Queue lifecycle linkage was not updated.')
+        }
       }
     }
 
