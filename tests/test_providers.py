@@ -196,9 +196,20 @@ async def test_gemini_provider_includes_image_input():
 # Task 4.4: Provider Factory Tests
 def test_get_provider_returns_openai_by_default():
     """Factory returns OpenAI provider when configured."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
         assert provider.name.startswith("openai/")
+
+
+def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
+    """Factory defaults enforce bounded runtime behavior when env overrides are absent."""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True):
+        provider = get_provider()
+        assert provider.max_retries == 2
+        assert provider.max_total_seconds == 120
+        assert provider.client.max_retries == 0
+        assert provider.client.timeout is not None
+        assert getattr(provider, "json_retry_max") == 1
 
 
 def test_get_provider_uses_openai_model_env():
@@ -256,6 +267,7 @@ def test_get_provider_applies_retry_and_timeout_env_overrides():
             "FEEDOPS_OPENAI_SDK_MAX_RETRIES": "1",
             "FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS": "75",
             "FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS": "180",
+            "FEEDOPS_OPENAI_JSON_RETRY_MAX": "3",
         },
         clear=True,
     ):
@@ -263,3 +275,4 @@ def test_get_provider_applies_retry_and_timeout_env_overrides():
         assert provider.max_retries == 1
         assert provider.max_total_seconds == 180
         assert provider.client.max_retries == 1
+        assert getattr(provider, "json_retry_max") == 3

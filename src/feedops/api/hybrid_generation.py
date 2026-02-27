@@ -19,6 +19,7 @@ from feedops.api.prompt_loader import (
     get_system_prompt,
     get_system_prompt_hash,
 )
+from feedops.api.generation_telemetry import extract_platform_telemetry
 from feedops.api.supabase_loader import load_parent_sku_from_supabase
 from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
@@ -364,6 +365,12 @@ async def adapt_variant_content(
             }
 
         new_content = str(generated.get(field_key, "")).strip()
+        platform_telemetry = extract_platform_telemetry(
+            platform=platform,
+            usage_by_platform=generated.get("usage_by_platform"),
+            latency_by_platform=generated.get("latency_by_platform"),
+            retry_by_platform=generated.get("retry_by_platform"),
+        )
         finish_sentences = None
         if content_type == "description" and platform in {"google", "bing"}:
             new_content = strip_generic_finish_count_claims(new_content)
@@ -488,6 +495,11 @@ async def adapt_variant_content(
                 "idempotency_key": idempotency_key,
                 "canonical_platform_hash": canonical_platform_hash,
                 "assembled_prompt_hash": assembled_prompt_hash,
+                "tokens_used": platform_telemetry.get("tokens_used"),
+                "cost_usd": platform_telemetry.get("cost_usd"),
+                "latency_ms": platform_telemetry.get("latency_ms"),
+                "provider_attempt_count": platform_telemetry.get("provider_attempt_count"),
+                "parse_retry_count": platform_telemetry.get("parse_retry_count"),
             }
         ).execute()
 
