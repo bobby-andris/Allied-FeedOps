@@ -22,6 +22,16 @@ interface RegenerateButtonProps {
 
 type RegenerateApiResponse = {
   success?: boolean
+  queued?: boolean
+  job_id?: string
+  status?: 'pending' | 'running' | 'completed' | 'failed'
+  request_id?: string
+  content?: string
+  model?: string
+  prompt_hash?: string
+  generated_content_id?: string | null
+  version?: number
+  idempotent?: boolean
   error?: string
   code?: string | null
   details?: string | null
@@ -29,6 +39,15 @@ type RegenerateApiResponse = {
   state?: 'completed' | 'no_change'
   actionable_message?: string | null
   validation_errors?: string[]
+}
+
+type RegenerateStatusResponse = {
+  success?: boolean
+  job_id?: string
+  status?: 'pending' | 'running' | 'completed' | 'failed'
+  request_id?: string | null
+  result?: RegenerateApiResponse | null
+  error?: string | null
 }
 
 function formatActionableError(
@@ -66,27 +85,86 @@ export function RegenerateButton({
 
   const isInitialGeneration = !currentContent
 
+  const pollRegenerateJob = async (jobId: string): Promise<RegenerateApiResponse> => {
+    const maxWaitMs = 180_000
+    const pollIntervalMs = 1500
+    const startedAt = Date.now()
+
+    while (Date.now() - startedAt < maxWaitMs) {
+      const response = await fetch(`/api/regenerate/status/${jobId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+      })
+      const statusData: RegenerateStatusResponse = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          formatActionableError(statusData as RegenerateApiResponse, 'Failed to check regeneration status')
+        )
+      }
+
+      if (statusData.status === 'completed') {
+        if (!statusData.result) {
+          throw new Error('Regeneration completed but no result payload was returned')
+        }
+        return statusData.result
+      }
+
+      if (statusData.status === 'failed') {
+        throw new Error(statusData.error || 'Regeneration job failed')
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
+    }
+
+    throw new Error('Regeneration timed out before completion')
+  }
+
+  const submitRegeneration = async (
+    payload: Record<string, unknown>,
+    pendingMessage: string
+  ): Promise<RegenerateApiResponse> => {
+    const response = await fetch('/api/regenerate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...payload,
+        async_mode: true,
+      }),
+    })
+
+    const data: RegenerateApiResponse = await response.json()
+
+    if (!response.ok) {
+      throw new Error(formatActionableError(data, 'Failed to regenerate'))
+    }
+
+    if (data.queued) {
+      if (!data.job_id) {
+        throw new Error('Regeneration queue response missing job_id')
+      }
+      toast.info(pendingMessage)
+      return await pollRegenerateJob(data.job_id)
+    }
+
+    return data
+  }
+
   const handleSimpleRegenerate = async () => {
     setIsRegenerating(true)
     toast.info(isInitialGeneration ? 'Generating content...' : 'Regenerating with latest model...')
 
     try {
-      const response = await fetch('/api/regenerate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const data = await submitRegeneration(
+        {
           master_sku: sku,
           content_type: contentType,
           platform,
           mode: 'simple',
-        }),
-      })
-
-      const data: RegenerateApiResponse = await response.json()
-
-      if (!response.ok) {
-        throw new Error(formatActionableError(data, 'Failed to regenerate'))
-      }
+        },
+        'Regeneration queued. Processing in background...'
+      )
 
       if (data.state === 'no_change') {
         toast.info(data.actionable_message || 'No content changes were needed')
@@ -118,10 +196,8 @@ export function RegenerateButton({
     toast.info('Regenerating with feedback...')
 
     try {
-      const response = await fetch('/api/regenerate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const data = await submitRegeneration(
+        {
           master_sku: sku,
           content_type: contentType,
           platform,
@@ -136,14 +212,9 @@ export function RegenerateButton({
           ...(structured?.emphasis && structured.emphasis.length > 0 ? { emphasis: structured.emphasis } : {}),
           ...(structured?.length_preference ? { length_preference: structured.length_preference } : {}),
           ...(structured?.save_as_correction ? { save_as_correction: true } : {}),
-        }),
-      })
-
-      const data: RegenerateApiResponse = await response.json()
-
-      if (!response.ok) {
-        throw new Error(formatActionableError(data, 'Failed to regenerate'))
-      }
+        },
+        'Regeneration with feedback queued. Processing in background...'
+      )
 
       if (data.state === 'no_change') {
         toast.info(data.actionable_message || 'No content changes were needed')

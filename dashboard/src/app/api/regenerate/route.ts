@@ -29,6 +29,7 @@ interface RegenerateRequest {
   content_type: 'title' | 'description'
   platform: 'google' | 'bing' | 'shopify'
   mode: 'simple' | 'with_feedback'
+  async_mode?: boolean
   feedback?: {
     current_content: string
     user_feedback: string
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: RegenerateRequest = await request.json()
     const { master_sku, content_type, platform, mode, feedback } = body
+    const asyncMode = body.async_mode === true
 
     // Validate required fields
     if (!master_sku || !content_type || !platform || !mode) {
@@ -197,6 +199,7 @@ export async function POST(request: NextRequest) {
       platform,
       feedback: feedbackText,
       finish_code: finishCode,
+      async_mode: asyncMode,
       // Structured feedback (FIX-01): only include fields that are set
       ...(toneStyle ? { tone_style: toneStyle } : {}),
       ...(emphasis && emphasis.length > 0 ? { emphasis } : {}),
@@ -236,6 +239,37 @@ export async function POST(request: NextRequest) {
     }
 
     const pipelineData = await pipelineResponse.json()
+
+    if (asyncMode) {
+      const jobId = typeof pipelineData.job_id === 'string' ? pipelineData.job_id : null
+      const jobStatus = typeof pipelineData.status === 'string' ? pipelineData.status : null
+      const pipelineRequestId = typeof pipelineData.request_id === 'string'
+        ? pipelineData.request_id
+        : requestId
+
+      if (!jobId || !jobStatus) {
+        return errorResponse(500, {
+          error: 'Pipeline async response missing job_id/status',
+          code: 'pipeline_contract_missing_regenerate_job_metadata',
+          step: 'pipeline_response_validation_async',
+          actionable_message:
+            'Cloud Run regenerate async contract drift detected. Ensure Python returns job_id and status.',
+        })
+      }
+
+      return NextResponse.json({
+        success: true,
+        queued: true,
+        job_id: jobId,
+        status: jobStatus,
+        request_id: pipelineRequestId,
+        master_sku: canonicalMasterSku,
+        content_type,
+        platform,
+        mode,
+      })
+    }
+
     const newContent = pipelineData.content?.trim()
     const pipelineModel = pipelineData.model || 'python-pipeline'
     const pipelinePromptHash = typeof pipelineData.prompt_hash === 'string'

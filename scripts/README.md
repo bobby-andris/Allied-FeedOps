@@ -60,6 +60,25 @@ cd /path/to/Allied-FeedOps
 bash scripts/verify_cloud_run_parity.sh
 ```
 
+### `verify_locked_parity.sh`
+
+**Purpose**: Run parity tests in strict frozen mode and fail if `uv.lock` changes.
+
+**Why this exists**:
+1. Prevent accidental dependency/lockfile drift in feature PRs
+2. Make local test behavior deterministic
+3. Match the PR-time CI guardrail (`Backend Parity` workflow)
+
+**Usage**:
+```bash
+cd /path/to/Allied-FeedOps
+bash scripts/verify_locked_parity.sh
+```
+
+**Policy**:
+- If `uv.lock` changes, treat that as a separate dependency PR unless explicitly intended.
+- Frozen execution uses `UV_FROZEN=1` (`uv run --frozen --extra dev`) so dependency mismatch fails instead of silently mutating lock state while ensuring pytest/dev tooling is present.
+
 ### `smoke_regenerate_lineage.py`
 
 **Purpose**: Run a live post-deploy `/regenerate` smoke test and print exact SQL for request-id lineage verification.

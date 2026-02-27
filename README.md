@@ -213,6 +213,13 @@ Catalog resolution order is implemented in `src/feedops/loaders/catalog_resolver
 PYTHONPATH=./src .venv/bin/python -m feedops.cli.main healthcheck
 ```
 
+### 1.5) Locked parity check (recommended before PR)
+```bash
+bash scripts/verify_locked_parity.sh
+```
+
+This runs backend parity tests with `uv` in locked mode and fails if `uv.lock` changes.
+
 ### 2) Optimize a single Master SKU (generates candidate report + patches)
 ```bash
 PYTHONPATH=./src .venv/bin/python -m feedops.cli.main optimize --parent-sku "CL-41-18" --no-dry-run --candidates 1
