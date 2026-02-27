@@ -66,6 +66,83 @@ export interface PublishEvent {
   prompt_hash: string | null
   evidence_hash: string | null
   segment_key: string | null
+  change_package_id: string | null
+}
+
+export interface ChangePackage {
+  id: string
+  package_key: string
+  source_type: string
+  source_ref: string | null
+  action: string
+  environment: 'staging' | 'production'
+  created_by: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ChangePackageEvent {
+  id: string
+  change_package_id: string
+  publish_event_id: string
+  event_type: string
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface ChangePackageItem {
+  id: string
+  change_package_id: string
+  publish_event_id: string | null
+  master_sku: string
+  platform: 'google' | 'bing' | 'shopify'
+  content_type: string
+  published_title: string | null
+  published_description: string | null
+  content_version: number | null
+  prompt_hash: string | null
+  final_payload_hash: string | null
+  evidence_hash: string | null
+  segment_key: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface GenerationOutcomeLink {
+  id: string
+  change_package_id: string
+  publish_event_id: string
+  generated_content_id: string | null
+  regeneration_history_id: string | null
+  request_id: string | null
+  master_sku: string
+  platform: 'google' | 'bing' | 'shopify'
+  content_type: 'title' | 'description'
+  content_version: number | null
+  prompt_hash: string | null
+  effect_status: string
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface GenerationEffectWindow {
+  id: string
+  change_package_id: string
+  publish_event_id: string
+  master_sku: string
+  platform: 'google' | 'bing' | 'shopify'
+  environment: 'staging' | 'production'
+  window_pre_days: number
+  window_post_days: number
+  effect_start_date: string
+  effect_end_date: string
+  treated_snapshot_count: number
+  control_snapshot_count: number
+  metrics: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
 }
 
 export interface GeneratedContent {
@@ -686,6 +763,31 @@ export interface Database {
         Row: PublishEvent
         Insert: Omit<PublishEvent, 'id'>
         Update: Partial<Omit<PublishEvent, 'id'>>
+      }
+      change_packages: {
+        Row: ChangePackage
+        Insert: Omit<ChangePackage, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<ChangePackage, 'id' | 'created_at'>>
+      }
+      change_package_events: {
+        Row: ChangePackageEvent
+        Insert: Omit<ChangePackageEvent, 'id' | 'created_at'>
+        Update: Partial<Omit<ChangePackageEvent, 'id' | 'created_at'>>
+      }
+      change_package_items: {
+        Row: ChangePackageItem
+        Insert: Omit<ChangePackageItem, 'id' | 'created_at'>
+        Update: Partial<Omit<ChangePackageItem, 'id' | 'created_at'>>
+      }
+      generation_outcome_links: {
+        Row: GenerationOutcomeLink
+        Insert: Omit<GenerationOutcomeLink, 'id' | 'created_at'>
+        Update: Partial<Omit<GenerationOutcomeLink, 'id' | 'created_at'>>
+      }
+      generation_effect_windows: {
+        Row: GenerationEffectWindow
+        Insert: Omit<GenerationEffectWindow, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<GenerationEffectWindow, 'id' | 'created_at'>>
       }
       generated_content: {
         Row: GeneratedContent

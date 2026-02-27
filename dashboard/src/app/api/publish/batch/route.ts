@@ -10,6 +10,7 @@ import {
   buildShopifyFinalPayloadSnapshot,
   normalizeSegmentKey,
 } from '@/lib/publishing/final-payload'
+import { attachPublishEventLineage } from '@/lib/publishing/change-packages'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
 import type {
   BatchPublishRequest,
@@ -1117,7 +1118,30 @@ async function logPublishEvent(
       ...event,
       published_at: new Date().toISOString(),
     }
-    const { error } = await supabase.from('publish_events').insert(payload)
+    const selectColumnsList = [
+      'id',
+      'master_sku',
+      'platform',
+      'environment',
+      'action',
+      'status',
+      'published_at',
+      'batch_id',
+      'published_by',
+      'published_title',
+      'published_description',
+      'content_version',
+      'prompt_hash',
+      'final_payload_hash',
+      'evidence_hash',
+      'segment_key',
+    ]
+    const selectColumns = selectColumnsList.join(',')
+    const { data: insertedEvent, error } = await supabase
+      .from('publish_events')
+      .insert(payload)
+      .select(selectColumns)
+      .single()
     if (
       error
       && (
@@ -1139,7 +1163,29 @@ async function logPublishEvent(
       if (/prompt_hash/i.test(error.message)) {
         delete legacyPayload.prompt_hash
       }
-      await supabase.from('publish_events').insert(legacyPayload)
+      const legacySelectColumns = selectColumnsList
+        .filter((column) => !['prompt_hash', 'final_payload_hash', 'evidence_hash', 'segment_key'].includes(column))
+        .join(',')
+      const { data: fallbackInsertedEvent, error: fallbackError } = await supabase
+        .from('publish_events')
+        .insert(legacyPayload)
+        .select(legacySelectColumns)
+        .single()
+      if (fallbackError) {
+        throw fallbackError
+      }
+      const fallbackEventRow = fallbackInsertedEvent as unknown as Parameters<
+        typeof attachPublishEventLineage
+      >[1] | null
+      if (fallbackEventRow) {
+        await attachPublishEventLineage(supabase, fallbackEventRow, event)
+      }
+      return
+    }
+
+    const insertedEventRow = insertedEvent as Parameters<typeof attachPublishEventLineage>[1] | null
+    if (insertedEventRow) {
+      await attachPublishEventLineage(supabase, insertedEventRow, event)
     }
   } catch (error) {
     console.error('Failed to log publish event:', error)
