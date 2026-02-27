@@ -73,6 +73,18 @@ def _get_supabase_config() -> tuple[str, str] | None:
     Returns:
         Tuple of (url, key) or None if not configured.
     """
+    # Prefer environment variables so local/Vercel parity remains deterministic
+    # even when Streamlit secrets are present in process context.
+    url = os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+    key = (
+        os.environ.get("SUPABASE_KEY")
+        or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+        or os.environ.get("SUPABASE_SERVICE_KEY")
+    )
+    if url and key:
+        return url, key
+
     # Try Streamlit secrets first
     try:
         import streamlit as st
@@ -90,17 +102,6 @@ def _get_supabase_config() -> tuple[str, str] | None:
                 return url, key
     except Exception:
         pass
-
-    # Fall back to environment variables
-    url = os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-    key = (
-        os.environ.get("SUPABASE_KEY")
-        or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-        or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-        or os.environ.get("SUPABASE_SERVICE_KEY")
-    )
-    if url and key:
-        return url, key
 
     return None
 

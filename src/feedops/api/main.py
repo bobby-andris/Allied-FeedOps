@@ -815,7 +815,9 @@ def _persist_generated_content_and_history(
     user_prompt: str,
     mode: str,
     tokens_used: int | None = None,
+    cost_usd: float | None = None,
     latency_ms: int | None = None,
+    generation_diagnostics: dict | None = None,
     request_id: str | None = None,
 ):
     """Persist generated content and linked history in one canonical path."""
@@ -839,6 +841,11 @@ def _persist_generated_content_and_history(
     )
 
     lineage_request_id = _require_request_id(request_id or get_request_id())
+    flag_snapshot = capture_flag_snapshot()
+    if isinstance(generation_diagnostics, dict) and generation_diagnostics:
+        flag_snapshot = dict(flag_snapshot)
+        flag_snapshot["generation_diagnostics"] = generation_diagnostics
+
     history_payload = {
         "master_sku": master_sku,
         "content_type": content_type,
@@ -850,8 +857,9 @@ def _persist_generated_content_and_history(
         "user_prompt": user_prompt[:50000],
         "prompt_hash": prompt_hash,
         "generated_content_id": generated_content_id,
-        "feature_flags_active": capture_flag_snapshot(),
+        "feature_flags_active": flag_snapshot,
         "tokens_used": tokens_used,
+        "cost_usd": cost_usd,
         "latency_ms": latency_ms,
         "request_id": lineage_request_id,
     }
@@ -973,6 +981,131 @@ def _estimate_openai_cost_usd_from_usage(usage: dict[str, int] | None) -> float 
     input_cost = (uncached_input / 1_000_000) * 1.75 + (cached_tokens / 1_000_000) * 1.75 * 0.5
     output_cost = (int(completion_tokens) / 1_000_000) * 14.0
     return round(input_cost + output_cost, 6)
+
+
+def _safe_int(value: object, default: int = 0) -> int:
+    """Best-effort int conversion for telemetry snapshots."""
+    try:
+        if value is None:
+            return default
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _extract_platform_telemetry(
+    *,
+    platform: str,
+    usage_by_platform: dict | None,
+    latency_by_platform: dict | None,
+    retry_by_platform: dict | None,
+) -> dict[str, object]:
+    """Normalize per-platform usage/latency/retry diagnostics."""
+    usage_snapshot: dict = {}
+    if isinstance(usage_by_platform, dict):
+        raw_usage = usage_by_platform.get(platform)
+        if isinstance(raw_usage, dict):
+            usage_snapshot = raw_usage
+
+    latency_ms: int | None = None
+    if isinstance(latency_by_platform, dict) and platform in latency_by_platform:
+        latency_ms = _safe_int(latency_by_platform.get(platform), 0)
+
+    retry_snapshot: dict = {}
+    if isinstance(retry_by_platform, dict):
+        raw_retry = retry_by_platform.get(platform)
+        if isinstance(raw_retry, dict):
+            retry_snapshot = raw_retry
+
+    prompt_tokens = usage_snapshot.get("prompt_tokens")
+    completion_tokens = usage_snapshot.get("completion_tokens")
+    tokens_used: int | None = None
+    if prompt_tokens is not None and completion_tokens is not None:
+        tokens_used = _safe_int(prompt_tokens) + _safe_int(completion_tokens)
+
+    cost_usd = _estimate_openai_cost_usd_from_usage(usage_snapshot) if usage_snapshot else None
+
+    return {
+        "tokens_used": tokens_used,
+        "cost_usd": cost_usd,
+        "latency_ms": latency_ms,
+        "provider_attempt_count": _safe_int(retry_snapshot.get("attempt_count"), 0),
+        "parse_retry_count": _safe_int(retry_snapshot.get("json_decode_retries"), 0),
+    }
+
+
+def _emit_generation_summary(
+    *,
+    endpoint: str,
+    request_id: str | None,
+    master_sku: str,
+    platform: str | None,
+    content_type: str | None,
+    mode: str,
+    result_state: str,
+    job_id: str | None = None,
+    tokens_used: int | None = None,
+    cost_usd: float | None = None,
+    latency_ms: int | None = None,
+    provider_attempt_count: int | None = None,
+    parse_retry_count: int | None = None,
+) -> None:
+    """Emit a terminal generation summary event for observability."""
+    fields: dict[str, object] = {
+        "endpoint": endpoint,
+        "request_id": request_id,
+        "job_id": job_id,
+        "master_sku": master_sku,
+        "platform": platform,
+        "content_type": content_type,
+        "mode": mode,
+        "result_state": result_state,
+    }
+    if tokens_used is not None:
+        fields["tokens_used"] = int(tokens_used)
+    if cost_usd is not None:
+        fields["cost_usd"] = round(float(cost_usd), 6)
+    if latency_ms is not None:
+        fields["latency_ms"] = int(latency_ms)
+    if provider_attempt_count is not None:
+        fields["provider_attempt_count"] = int(provider_attempt_count)
+    if parse_retry_count is not None:
+        fields["parse_retry_count"] = int(parse_retry_count)
+
+    log_event(
+        logger,
+        logging.INFO if result_state in {"completed", "no_change"} else logging.WARNING,
+        "generation.request.summary",
+        **fields,
+    )
+
+
+def _upsert_batch_job_sku_status(
+    *,
+    supabase,
+    job_id: str,
+    master_sku: str,
+    status: str,
+    started_at: str | None = None,
+    completed_at: str | None = None,
+    error_message: str | None = None,
+) -> None:
+    """Ensure a batch SKU detail row exists and is updated deterministically."""
+    payload: dict[str, object] = {
+        "job_id": job_id,
+        "master_sku": master_sku,
+        "status": status,
+    }
+    if started_at:
+        payload["started_at"] = started_at
+    if completed_at:
+        payload["completed_at"] = completed_at
+    if error_message:
+        payload["error_message"] = error_message[:500]
+    supabase.table("batch_generation_job_skus").upsert(
+        payload,
+        on_conflict="job_id,master_sku",
+    ).execute()
 
 
 def _normalize_regeneration_job_row(job_row: dict) -> RegenerateJobStatusResponse:
@@ -1274,7 +1407,11 @@ async def optimize_single_sku(request: OptimizeRequest):
         prompt_hashes = generated.get("prompt_hashes", {})
         system_prompts = generated.get("system_prompts", {})
         user_prompts = generated.get("user_prompts", {})
+        usage_by_platform = generated.get("usage_by_platform", {})
         latencies = generated.get("latency_by_platform", {})
+        parse_by_platform = generated.get("parse_by_platform", {})
+        retry_by_platform = generated.get("retry_by_platform", {})
+        request_id = get_request_id()
 
         for platform in platforms:
             for content_type in content_types:
@@ -1283,6 +1420,12 @@ async def optimize_single_sku(request: OptimizeRequest):
                 results.append(f"{platform}/{content_type}: {content[:100]}...")
                 if request.dry_run:
                     continue
+                telemetry = _extract_platform_telemetry(
+                    platform=platform,
+                    usage_by_platform=usage_by_platform,
+                    latency_by_platform=latencies,
+                    retry_by_platform=retry_by_platform,
+                )
                 _persist_generated_content_and_history(
                     supabase=supabase,
                     master_sku=canonical_master_sku,
@@ -1298,7 +1441,39 @@ async def optimize_single_sku(request: OptimizeRequest):
                     system_prompt=str(system_prompts.get(platform, "")),
                     user_prompt=str(user_prompts.get(platform, "")),
                     mode="full_generation_v2",
-                    latency_ms=int(latencies.get(platform, 0) or 0),
+                    tokens_used=telemetry["tokens_used"],
+                    cost_usd=telemetry["cost_usd"],
+                    latency_ms=telemetry["latency_ms"],
+                    generation_diagnostics={
+                        "selected_platforms": list(platforms),
+                        "usage_by_platform": usage_by_platform
+                        if isinstance(usage_by_platform, dict)
+                        else {},
+                        "latency_by_platform": latencies
+                        if isinstance(latencies, dict)
+                        else {},
+                        "parse_by_platform": parse_by_platform
+                        if isinstance(parse_by_platform, dict)
+                        else {},
+                        "retry_by_platform": retry_by_platform
+                        if isinstance(retry_by_platform, dict)
+                        else {},
+                    },
+                    request_id=request_id,
+                )
+                _emit_generation_summary(
+                    endpoint="optimize_single_sku",
+                    request_id=request_id,
+                    master_sku=canonical_master_sku,
+                    platform=platform,
+                    content_type=content_type,
+                    mode="full_generation_v2",
+                    result_state="completed",
+                    tokens_used=telemetry["tokens_used"],
+                    cost_usd=telemetry["cost_usd"],
+                    latency_ms=telemetry["latency_ms"],
+                    provider_attempt_count=telemetry["provider_attempt_count"],
+                    parse_retry_count=telemetry["parse_retry_count"],
                 )
 
         finish_sentences = generated.get("finish_sentences", {})
@@ -1464,6 +1639,7 @@ async def _execute_regeneration_request(
     user_prompt = str(generated.get("user_prompts", {}).get(request.platform, ""))
     usage_by_platform = generated.get("usage_by_platform", {})
     latency_by_platform = generated.get("latency_by_platform", {})
+    retry_by_platform = generated.get("retry_by_platform", {})
     parse_by_platform = generated.get("parse_by_platform", {})
     regen_latency_ms = int(
         latency_by_platform.get(request.platform, 0) or 0
@@ -1471,6 +1647,8 @@ async def _execute_regeneration_request(
     total_tokens_used = 0
     estimated_cost_usd = 0.0
     has_cost_samples = False
+    provider_attempt_count = 0
+    parse_retry_count = 0
     if isinstance(usage_by_platform, dict):
         for _platform_name, usage_snapshot in usage_by_platform.items():
             if not isinstance(usage_snapshot, dict):
@@ -1482,6 +1660,13 @@ async def _execute_regeneration_request(
             if usage_cost is not None:
                 has_cost_samples = True
                 estimated_cost_usd += usage_cost
+    if isinstance(retry_by_platform, dict):
+        for platform_name in selected_platforms:
+            snapshot = retry_by_platform.get(platform_name)
+            if not isinstance(snapshot, dict):
+                continue
+            provider_attempt_count += _safe_int(snapshot.get("attempt_count"), 0)
+            parse_retry_count += _safe_int(snapshot.get("json_decode_retries"), 0)
     if include_finish:
         raw_finish = generated.get("finish_sentences")
         if isinstance(raw_finish, dict):
@@ -1506,6 +1691,7 @@ async def _execute_regeneration_request(
             "usage_by_platform": usage_by_platform if isinstance(usage_by_platform, dict) else {},
             "latency_by_platform": latency_by_platform if isinstance(latency_by_platform, dict) else {},
             "parse_by_platform": parse_by_platform if isinstance(parse_by_platform, dict) else {},
+            "retry_by_platform": retry_by_platform if isinstance(retry_by_platform, dict) else {},
         },
         latency_ms=regen_latency_ms,
         request_id=request_id,
@@ -1563,6 +1749,21 @@ async def _execute_regeneration_request(
         except Exception as e:
             logger.warning("Failed to save correction for %s: %s", canonical_master_sku, e)
 
+    _emit_generation_summary(
+        endpoint="regenerate",
+        request_id=request_id,
+        master_sku=canonical_master_sku,
+        platform=request.platform,
+        content_type=request.content_type,
+        mode="with_feedback" if request.feedback else "simple",
+        result_state=str(persistence.get("state", "completed")),
+        tokens_used=total_tokens_used or None,
+        cost_usd=round(estimated_cost_usd, 6) if has_cost_samples else None,
+        latency_ms=regen_latency_ms,
+        provider_attempt_count=provider_attempt_count or None,
+        parse_retry_count=parse_retry_count or None,
+    )
+
     return RegenerateResponse(
         success=True,
         master_sku=canonical_master_sku,
@@ -1617,9 +1818,20 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
             .eq("id", job_id)
             .execute()
         )
+        _emit_generation_summary(
+            endpoint="process_regenerate_job",
+            request_id=request_id,
+            job_id=job_id,
+            master_sku=str(request_payload.get("master_sku", "")),
+            platform=str(request_payload.get("platform", "")),
+            content_type=str(request_payload.get("content_type", "")),
+            mode="async_job",
+            result_state="completed",
+        )
     except Exception as exc:
         formatted = _format_job_error(exc)
         logger.error("Async regenerate job %s failed: %s", job_id, formatted)
+        request_id = get_request_id()
         try:
             (
                 supabase.table("generation_jobs")
@@ -1639,6 +1851,16 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
                 job_id,
                 persist_exc,
             )
+        _emit_generation_summary(
+            endpoint="process_regenerate_job",
+            request_id=request_id,
+            job_id=job_id,
+            master_sku=str(request_payload.get("master_sku", "")),
+            platform=str(request_payload.get("platform", "")),
+            content_type=str(request_payload.get("content_type", "")),
+            mode="async_job",
+            result_state="failed",
+        )
 
 
 @app.post(
@@ -1648,6 +1870,7 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
 )
 async def regenerate_content(request: RegenerateRequest):
     """Regenerate content either synchronously (default) or as queued async job."""
+    request_id: str | None = None
     try:
         ensure_generation_enabled(operation="regenerate_content")
         request_id = _require_request_id(get_request_id())
@@ -1710,9 +1933,27 @@ async def regenerate_content(request: RegenerateRequest):
         return await _execute_regeneration_request(request=request, request_id=request_id)
 
     except HTTPException:
+        _emit_generation_summary(
+            endpoint="regenerate",
+            request_id=request_id,
+            master_sku=request.master_sku,
+            platform=request.platform,
+            content_type=request.content_type,
+            mode="with_feedback" if request.feedback else "simple",
+            result_state="failed",
+        )
         raise
     except Exception as e:
         logger.error(f"Regeneration failed: {e}")
+        _emit_generation_summary(
+            endpoint="regenerate",
+            request_id=request_id,
+            master_sku=request.master_sku,
+            platform=request.platform,
+            content_type=request.content_type,
+            mode="with_feedback" if request.feedback else "simple",
+            result_state="failed",
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -2022,6 +2263,14 @@ async def hybrid_generate(request: HybridGenerateRequest):
 
         job_id = job_result.data[0]["id"]
 
+        # Ensure per-SKU detail rows exist for the entire processing scope.
+        sku_records = [
+            {"job_id": job_id, "master_sku": sku, "status": "pending"}
+            for sku in sorted(processing_scope)
+        ]
+        if sku_records:
+            supabase.table("batch_generation_job_skus").insert(sku_records).execute()
+
         # Calculate strategy counts
         total_variants = sum(len(f.variant_skus) for f in families)
         base_skus_count = len(families) + len(single_skus)
@@ -2087,6 +2336,8 @@ async def process_batch_job(
     failed = 0
     normalized_options = _normalize_generation_options(options)
     platforms = normalized_options["platforms"]
+    request_id = get_request_id()
+    lineage_request_id = request_id if request_id and request_id != "-" else None
     content_types = []
     if normalized_options["titles"]:
         content_types.append("title")
@@ -2094,15 +2345,17 @@ async def process_batch_job(
         content_types.append("description")
 
     for sku in skus:
+        canonical_sku = sku
         try:
             canonical_sku = resolve_canonical_master_sku(supabase, sku)
             # Update SKU status
-            supabase.table("batch_generation_job_skus").update(
-                {
-                    "status": "processing",
-                    "started_at": datetime.now(timezone.utc).isoformat(),
-                }
-            ).eq("job_id", job_id).eq("master_sku", sku).execute()
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=canonical_sku,
+                status="processing",
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
 
             # Load and generate for this SKU
             parent_sku = load_parent_sku_from_supabase(canonical_sku)
@@ -2118,13 +2371,22 @@ async def process_batch_job(
             prompt_hashes = generated.get("prompt_hashes", {})
             system_prompts = generated.get("system_prompts", {})
             user_prompts = generated.get("user_prompts", {})
+            usage_by_platform = generated.get("usage_by_platform", {})
             latencies = generated.get("latency_by_platform", {})
+            parse_by_platform = generated.get("parse_by_platform", {})
+            retry_by_platform = generated.get("retry_by_platform", {})
 
             if not dry_run:
                 for platform in platforms:
                     for content_type in content_types:
                         field_key = _content_field_key(platform, content_type)
                         content = str(generated.get(field_key, "")).strip()
+                        telemetry = _extract_platform_telemetry(
+                            platform=platform,
+                            usage_by_platform=usage_by_platform,
+                            latency_by_platform=latencies,
+                            retry_by_platform=retry_by_platform,
+                        )
                         _persist_generated_content_and_history(
                             supabase=supabase,
                             master_sku=canonical_sku,
@@ -2141,7 +2403,40 @@ async def process_batch_job(
                             system_prompt=str(system_prompts.get(platform, "")),
                             user_prompt=str(user_prompts.get(platform, "")),
                             mode="full_generation_v2",
-                            latency_ms=int(latencies.get(platform, 0) or 0),
+                            tokens_used=telemetry["tokens_used"],
+                            cost_usd=telemetry["cost_usd"],
+                            latency_ms=telemetry["latency_ms"],
+                            generation_diagnostics={
+                                "selected_platforms": list(platforms),
+                                "usage_by_platform": usage_by_platform
+                                if isinstance(usage_by_platform, dict)
+                                else {},
+                                "latency_by_platform": latencies
+                                if isinstance(latencies, dict)
+                                else {},
+                                "parse_by_platform": parse_by_platform
+                                if isinstance(parse_by_platform, dict)
+                                else {},
+                                "retry_by_platform": retry_by_platform
+                                if isinstance(retry_by_platform, dict)
+                                else {},
+                            },
+                            request_id=lineage_request_id,
+                        )
+                        _emit_generation_summary(
+                            endpoint="process_batch_job",
+                            request_id=request_id,
+                            job_id=job_id,
+                            master_sku=canonical_sku,
+                            platform=platform,
+                            content_type=content_type,
+                            mode="full_generation_v2",
+                            result_state="completed",
+                            tokens_used=telemetry["tokens_used"],
+                            cost_usd=telemetry["cost_usd"],
+                            latency_ms=telemetry["latency_ms"],
+                            provider_attempt_count=telemetry["provider_attempt_count"],
+                            parse_retry_count=telemetry["parse_retry_count"],
                         )
 
                 finish_sentences = generated.get("finish_sentences", {})
@@ -2160,25 +2455,37 @@ async def process_batch_job(
             completed += 1
 
             # Update SKU as completed
-            supabase.table("batch_generation_job_skus").update(
-                {
-                    "status": "completed",
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                }
-            ).eq("job_id", job_id).eq("master_sku", sku).execute()
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=canonical_sku,
+                status="completed",
+                completed_at=datetime.now(timezone.utc).isoformat(),
+            )
 
         except Exception as e:
             failed += 1
             logger.error(f"Batch SKU {sku} failed: {e}")
 
             # Update SKU as failed
-            supabase.table("batch_generation_job_skus").update(
-                {
-                    "status": "failed",
-                    "error_message": str(e)[:500],
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                }
-            ).eq("job_id", job_id).eq("master_sku", sku).execute()
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=canonical_sku,
+                status="failed",
+                completed_at=datetime.now(timezone.utc).isoformat(),
+                error_message=str(e),
+            )
+            _emit_generation_summary(
+                endpoint="process_batch_job",
+                request_id=request_id,
+                job_id=job_id,
+                master_sku=canonical_sku,
+                platform=None,
+                content_type=None,
+                mode="full_generation_v2",
+                result_state="failed",
+            )
 
         # Update job progress
         supabase.table("batch_generation_jobs").update(
@@ -2200,6 +2507,16 @@ async def process_batch_job(
     supabase.table("batch_generation_jobs").update(final_payload).eq("id", job_id).execute()
 
     logger.info(f"Batch job {job_id} finished: {completed} completed, {failed} failed")
+    _emit_generation_summary(
+        endpoint="process_batch_job",
+        request_id=request_id,
+        job_id=job_id,
+        master_sku="*batch*",
+        platform=None,
+        content_type=None,
+        mode="full_generation_v2",
+        result_state=final_status,
+    )
 
 
 async def process_hybrid_batch_job(
@@ -2247,6 +2564,8 @@ async def process_hybrid_batch_job(
     expanded_failed = 0
 
     platforms = options.get("platforms", ["google", "bing", "shopify"])
+    request_id = get_request_id()
+    lineage_request_id = request_id if request_id and request_id != "-" else None
     content_types = []
     if options.get("titles"):
         content_types.append("title")
@@ -2333,12 +2652,21 @@ async def process_hybrid_batch_job(
         prompt_hashes = generated.get("prompt_hashes", {})
         system_prompts = generated.get("system_prompts", {})
         user_prompts = generated.get("user_prompts", {})
+        usage_by_platform = generated.get("usage_by_platform", {})
         latencies = generated.get("latency_by_platform", {})
+        parse_by_platform = generated.get("parse_by_platform", {})
+        retry_by_platform = generated.get("retry_by_platform", {})
 
         for platform in platforms:
             for content_type in content_types:
                 field_key = _content_field_key(platform, content_type)
                 content = str(generated.get(field_key, "")).strip()
+                telemetry = _extract_platform_telemetry(
+                    platform=platform,
+                    usage_by_platform=usage_by_platform,
+                    latency_by_platform=latencies,
+                    retry_by_platform=retry_by_platform,
+                )
                 _persist_generated_content_and_history(
                     supabase=supabase,
                     master_sku=canonical_sku,
@@ -2355,7 +2683,40 @@ async def process_hybrid_batch_job(
                     system_prompt=str(system_prompts.get(platform, "")),
                     user_prompt=str(user_prompts.get(platform, "")),
                     mode="full_generation_v2",
-                    latency_ms=int(latencies.get(platform, 0) or 0),
+                    tokens_used=telemetry["tokens_used"],
+                    cost_usd=telemetry["cost_usd"],
+                    latency_ms=telemetry["latency_ms"],
+                    generation_diagnostics={
+                        "selected_platforms": list(platforms),
+                        "usage_by_platform": usage_by_platform
+                        if isinstance(usage_by_platform, dict)
+                        else {},
+                        "latency_by_platform": latencies
+                        if isinstance(latencies, dict)
+                        else {},
+                        "parse_by_platform": parse_by_platform
+                        if isinstance(parse_by_platform, dict)
+                        else {},
+                        "retry_by_platform": retry_by_platform
+                        if isinstance(retry_by_platform, dict)
+                        else {},
+                    },
+                    request_id=lineage_request_id,
+                )
+                _emit_generation_summary(
+                    endpoint="process_hybrid_batch_job",
+                    request_id=request_id,
+                    job_id=job_id,
+                    master_sku=canonical_sku,
+                    platform=platform,
+                    content_type=content_type,
+                    mode="full_generation_v2",
+                    result_state="completed",
+                    tokens_used=telemetry["tokens_used"],
+                    cost_usd=telemetry["cost_usd"],
+                    latency_ms=telemetry["latency_ms"],
+                    provider_attempt_count=telemetry["provider_attempt_count"],
+                    parse_retry_count=telemetry["parse_retry_count"],
                 )
         finish_sentences = generated.get("finish_sentences", {})
         if isinstance(finish_sentences, dict):
@@ -2375,14 +2736,41 @@ async def process_hybrid_batch_job(
         logger.info(f"Processing {len(single_skus)} single SKUs")
         for sku in single_skus:
             sku_failed = False
+            sku_error: str | None = None
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=sku,
+                status="processing",
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
             try:
                 await generate_full_content_v2(sku)
                 logger.info("✓ Generated %s via per-platform v2 package", sku)
             except Exception as e:
                 sku_failed = True
+                sku_error = str(e)
                 logger.error("✗ Failed %s via per-platform v2 package: %s", sku, e)
+                _emit_generation_summary(
+                    endpoint="process_hybrid_batch_job",
+                    request_id=request_id,
+                    job_id=job_id,
+                    master_sku=sku,
+                    platform=None,
+                    content_type=None,
+                    mode="full_generation_v2",
+                    result_state="failed",
+                )
 
             _record_sku_result(sku, success=not sku_failed)
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=sku,
+                status="failed" if sku_failed else "completed",
+                completed_at=datetime.now(timezone.utc).isoformat(),
+                error_message=sku_error if sku_failed else None,
+            )
             _update_job_progress()
 
         # Process multi-SKU families (hybrid approach)
@@ -2394,23 +2782,58 @@ async def process_hybrid_batch_job(
             base_sku = family.base_sku
 
             base_sku_failed = False
+            base_sku_error: str | None = None
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=base_sku,
+                status="processing",
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
             try:
                 await generate_full_content_v2(base_sku)
                 logger.info("✓ Generated BASE %s via per-platform v2 package", base_sku)
             except Exception as e:
                 base_sku_failed = True
+                base_sku_error = str(e)
                 logger.error(
                     "✗ Failed BASE %s via per-platform v2 package: %s",
                     base_sku,
                     e,
                 )
+                _emit_generation_summary(
+                    endpoint="process_hybrid_batch_job",
+                    request_id=request_id,
+                    job_id=job_id,
+                    master_sku=base_sku,
+                    platform=None,
+                    content_type=None,
+                    mode="full_generation_v2",
+                    result_state="failed",
+                )
 
             _record_sku_result(base_sku, success=not base_sku_failed)
+            _upsert_batch_job_sku_status(
+                supabase=supabase,
+                job_id=job_id,
+                master_sku=base_sku,
+                status="failed" if base_sku_failed else "completed",
+                completed_at=datetime.now(timezone.utc).isoformat(),
+                error_message=base_sku_error if base_sku_failed else None,
+            )
             _update_job_progress()
 
             # Step 2: Variant SKUs
             for variant_sku in family.variant_skus:
                 variant_sku_failed = False
+                variant_sku_error: str | None = None
+                _upsert_batch_job_sku_status(
+                    supabase=supabase,
+                    job_id=job_id,
+                    master_sku=variant_sku,
+                    status="processing",
+                    started_at=datetime.now(timezone.utc).isoformat(),
+                )
                 try:
                     await generate_full_content_v2(variant_sku)
                     logger.info(
@@ -2419,13 +2842,32 @@ async def process_hybrid_batch_job(
                     )
                 except Exception as e:
                     variant_sku_failed = True
+                    variant_sku_error = str(e)
                     logger.error(
                         "✗ Failed VARIANT %s via per-platform v2 package: %s",
                         variant_sku,
                         e,
                     )
+                    _emit_generation_summary(
+                        endpoint="process_hybrid_batch_job",
+                        request_id=request_id,
+                        job_id=job_id,
+                        master_sku=variant_sku,
+                        platform=None,
+                        content_type=None,
+                        mode="full_generation_v2",
+                        result_state="failed",
+                    )
 
                 _record_sku_result(variant_sku, success=not variant_sku_failed)
+                _upsert_batch_job_sku_status(
+                    supabase=supabase,
+                    job_id=job_id,
+                    master_sku=variant_sku,
+                    status="failed" if variant_sku_failed else "completed",
+                    completed_at=datetime.now(timezone.utc).isoformat(),
+                    error_message=variant_sku_error if variant_sku_failed else None,
+                )
                 _update_job_progress()
 
         # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
@@ -2455,6 +2897,16 @@ async def process_hybrid_batch_job(
             expanded_total,
             expanded_failed,
         )
+        _emit_generation_summary(
+            endpoint="process_hybrid_batch_job",
+            request_id=request_id,
+            job_id=job_id,
+            master_sku="*batch*",
+            platform=None,
+            content_type=None,
+            mode="full_generation_v2",
+            result_state=final_status,
+        )
 
     except Exception as e:
         logger.error(f"Hybrid generation processing error: {e}")
@@ -2463,6 +2915,16 @@ async def process_hybrid_batch_job(
             completed_at=datetime.now(timezone.utc).isoformat(),
             error_message=str(e),
             enforce_invariant=False,
+        )
+        _emit_generation_summary(
+            endpoint="process_hybrid_batch_job",
+            request_id=request_id,
+            job_id=job_id,
+            master_sku="*batch*",
+            platform=None,
+            content_type=None,
+            mode="full_generation_v2",
+            result_state="failed",
         )
 
 

@@ -462,6 +462,7 @@ async def generate_per_platform(
     usage_by_platform: dict[str, dict[str, int]] = {}
     latency_by_platform: dict[str, int] = {}
     parse_by_platform: dict[str, dict[str, object]] = {}
+    retry_by_platform: dict[str, dict[str, int]] = {}
     requested_platforms = _resolve_requested_platforms(selected_platforms)
     for platform in requested_platforms:
         platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
@@ -514,6 +515,10 @@ async def generate_per_platform(
         parse_by_platform[platform] = (
             parse_snapshot if isinstance(parse_snapshot, dict) else {}
         )
+        retry_snapshot = getattr(provider, "last_retry_counts", {})
+        retry_by_platform[platform] = (
+            retry_snapshot if isinstance(retry_snapshot, dict) else {}
+        )
         logger.info(
             "Per-platform generation usage: sku=%s platform=%s usage=%s latency_ms=%s cap=%s reasoning=%s",
             parent_sku.master_sku,
@@ -529,6 +534,12 @@ async def generate_per_platform(
             platform,
             parse_by_platform[platform].get("parse_mode", "unknown"),
             parse_by_platform[platform].get("missing_keys", []),
+        )
+        logger.info(
+            "Per-platform retry diagnostics: sku=%s platform=%s retries=%s",
+            parent_sku.master_sku,
+            platform,
+            retry_by_platform[platform],
         )
 
     finish_sentences = _normalize_finish_sentence_payload(
@@ -561,6 +572,7 @@ async def generate_per_platform(
         "raw_by_platform": raw_by_platform,
         "schema_hashes": schema_hashes,
         "parse_by_platform": parse_by_platform,
+        "retry_by_platform": retry_by_platform,
         "prompt_experiment_variant": experiment_variant,
     }
 

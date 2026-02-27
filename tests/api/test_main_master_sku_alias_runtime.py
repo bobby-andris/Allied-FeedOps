@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 import feedops.api.main as api_main
+from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.models import ParentSKU, Variant
 
 
@@ -496,3 +497,156 @@ async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypa
 def test_require_request_id_rejects_placeholder() -> None:
     with pytest.raises(RuntimeError, match="Missing request_id"):
         api_main._require_request_id("-")
+
+
+@pytest.mark.asyncio
+async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch):
+    db = _FakeSupabase()
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, master_sku: master_sku,
+    )
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-telemetry")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return {
+            "google_title": "Updated google title",
+            "google_description": "Updated google description {FINISH_SENTENCE}",
+            "prompt_hashes": {"google": "hash-google"},
+            "system_prompts": {"google": "sys-google"},
+            "user_prompts": {"google": "user-google"},
+            "usage_by_platform": {"google": {"prompt_tokens": 130, "completion_tokens": 70}},
+            "latency_by_platform": {"google": 210},
+            "parse_by_platform": {"google": {"parse_mode": "strict_json", "missing_keys": []}},
+            "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
+        }
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    await api_main.process_hybrid_batch_job(
+        job_id="job-hybrid-telemetry",
+        families=[],
+        single_skus=["CL-55"],
+        options={"titles": True, "descriptions": True, "platforms": ["google"]},
+        requested_skus=["CL-55"],
+    )
+
+    history_rows = [
+        op["payload"]
+        for op in db.ops
+        if op["table"] == "regeneration_history" and op["op"] == "insert"
+    ]
+    assert history_rows
+    for row in history_rows:
+        assert row["tokens_used"] is not None
+        assert row["cost_usd"] is not None
+        assert row["latency_ms"] is not None
+
+
+@pytest.mark.asyncio
+async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_scope(monkeypatch):
+    db = _FakeSupabase()
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, master_sku: master_sku,
+    )
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-sku-detail")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return {
+            "google_description": "Updated google description {FINISH_SENTENCE}",
+            "prompt_hashes": {"google": "hash-google"},
+            "system_prompts": {"google": "sys-google"},
+            "user_prompts": {"google": "user-google"},
+            "usage_by_platform": {"google": {"prompt_tokens": 100, "completion_tokens": 40}},
+            "latency_by_platform": {"google": 180},
+            "parse_by_platform": {"google": {"parse_mode": "strict_json", "missing_keys": []}},
+            "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
+        }
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    families = [
+        MultiSkuFamily(
+            product_id="family-1033",
+            master_skus=["1033/16", "1033/18", "1033/24"],
+            base_sku="1033/16",
+            variant_skus=["1033/18", "1033/24"],
+        )
+    ]
+    await api_main.process_hybrid_batch_job(
+        job_id="job-hybrid-sku-detail",
+        families=families,
+        single_skus=["CL-55"],
+        options={"titles": False, "descriptions": True, "platforms": ["google"]},
+        requested_skus=["CL-55", "1033/18"],
+    )
+
+    latest_status_by_sku: dict[str, str] = {}
+    for op in db.ops:
+        if op["table"] != "batch_generation_job_skus":
+            continue
+        payload = op["payload"]
+        sku = payload.get("master_sku")
+        status = payload.get("status")
+        if isinstance(sku, str) and isinstance(status, str):
+            latest_status_by_sku[sku] = status
+
+    assert set(latest_status_by_sku) >= {"CL-55", "1033/16", "1033/18", "1033/24"}
+    assert latest_status_by_sku["CL-55"] == "completed"
+    assert latest_status_by_sku["1033/16"] == "completed"
+    assert latest_status_by_sku["1033/18"] == "completed"
+    assert latest_status_by_sku["1033/24"] == "completed"
+
+
+def test_generation_summary_event_contract(monkeypatch):
+    captured: dict[str, object] = {}
+
+    def _fake_log_event(_logger, _level, event, **fields):
+        captured["event"] = event
+        captured["fields"] = fields
+
+    monkeypatch.setattr(api_main, "log_event", _fake_log_event)
+
+    api_main._emit_generation_summary(
+        endpoint="regenerate",
+        request_id="req-summary-1",
+        job_id="job-summary-1",
+        master_sku="CL-55",
+        platform="google",
+        content_type="description",
+        mode="with_feedback",
+        result_state="completed",
+        tokens_used=240,
+        cost_usd=0.00123,
+        latency_ms=900,
+        provider_attempt_count=2,
+        parse_retry_count=1,
+    )
+
+    assert captured["event"] == "generation.request.summary"
+    fields = captured["fields"]
+    assert fields["request_id"] == "req-summary-1"
+    assert fields["job_id"] == "job-summary-1"
+    assert fields["master_sku"] == "CL-55"
+    assert fields["platform"] == "google"
+    assert fields["content_type"] == "description"
+    assert fields["mode"] == "with_feedback"
+    assert fields["result_state"] == "completed"
+    assert fields["provider_attempt_count"] == 2
+    assert fields["parse_retry_count"] == 1
+    assert fields["tokens_used"] == 240
+    assert fields["latency_ms"] == 900
+    assert fields["cost_usd"] == pytest.approx(0.00123, rel=0, abs=1e-9)
