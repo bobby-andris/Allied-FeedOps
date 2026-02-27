@@ -44,6 +44,58 @@ describe('cost reconciliation monitoring route', () => {
     expect(response.status).toBe(200)
     expect(body.success).toBe(true)
     expect(mocks.readCostReconciliationReport).toHaveBeenCalledWith({ lookbackDays: 21 })
+    expect(mocks.runCostReconciliationCapture).not.toHaveBeenCalled()
+  })
+
+  it('GET with cron header runs capture and returns report + capture payload', async () => {
+    process.env.CRON_SECRET = 'secret-token'
+    mocks.runCostReconciliationCapture.mockResolvedValue({
+      generated_at: '2026-02-28T00:00:00.000Z',
+      windows_processed: 1,
+      capture_results: [],
+      warning_count: 0,
+    })
+    mocks.readCostReconciliationReport.mockResolvedValue({
+      generated_at: '2026-02-28T00:00:00.000Z',
+      lookback_days: 1,
+      latest: null,
+      windows: [],
+      cost_outliers: [],
+      latency_outliers: [],
+    })
+
+    const request = new NextRequest(
+      'http://localhost/api/monitoring/cost-reconciliation?lookback_days=1',
+      {
+        headers: {
+          'x-vercel-cron': '1',
+        },
+      }
+    )
+
+    const response = await GET(request)
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.success).toBe(true)
+    expect(body.capture.windows_processed).toBe(1)
+    expect(mocks.runCostReconciliationCapture).toHaveBeenCalledWith({ lookbackDays: 1 })
+    expect(mocks.readCostReconciliationReport).toHaveBeenCalledWith({ lookbackDays: 1 })
+  })
+
+  it('GET capture requests require authorization when CRON_SECRET is set', async () => {
+    process.env.CRON_SECRET = 'secret-token'
+
+    const request = new NextRequest(
+      'http://localhost/api/monitoring/cost-reconciliation?capture=1&lookback_days=1'
+    )
+
+    const response = await GET(request)
+    const body = await response.json()
+
+    expect(response.status).toBe(401)
+    expect(body.error).toBe('Unauthorized capture request')
+    expect(mocks.runCostReconciliationCapture).not.toHaveBeenCalled()
   })
 
   it('POST rejects unauthorized capture requests when CRON_SECRET is configured', async () => {
