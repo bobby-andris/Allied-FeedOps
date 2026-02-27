@@ -98,6 +98,31 @@ python scripts/smoke_regenerate_lineage.py \
   --content-type description
 ```
 
+### `run_generation_quality_baseline.sh`
+
+**Purpose**: Execute a deterministic generation-quality baseline run on a fixed SKU corpus using the current runtime-aligned Phase 28 evaluator.
+
+**What it does**:
+1. Loads `.env.vercel` if present
+2. Runs `scripts/phase28_root_cause_eval.py` in frozen mode (`UV_FROZEN=1`)
+3. Writes JSONL/CSV artifacts to `artifacts/prompt-quality/<run_id>/`
+4. Writes markdown report to `docs/experiments/<run_id>-report.md`
+
+**Usage**:
+```bash
+cd /path/to/Allied-FeedOps
+bash scripts/run_generation_quality_baseline.sh
+```
+
+**Config (optional env vars)**:
+- `RUN_ID` (default: `gq-baseline-<utc-timestamp>`)
+- `SAMPLE_FILE` (default: `samples/eval-skus-google-ads-90d.json`)
+- `VARIANTS` (default: `control`)
+- `PLATFORMS` (default: `google,bing,shopify`)
+- `REPLICATES` (default: `2`)
+- `REASONING_EFFORT` (default: `high`)
+- `MAX_COMPLETION_TOKENS` (default: `16000`)
+
 ## cleanup_duplicate_media.py
 
 **Purpose**: Remove duplicate Shopify media records that were created during testing.
