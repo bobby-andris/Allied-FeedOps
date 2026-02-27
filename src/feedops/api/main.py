@@ -1870,10 +1870,12 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
 )
 async def regenerate_content(request: RegenerateRequest):
     """Regenerate content either synchronously (default) or as queued async job."""
-    request_id: str | None = None
+    request_id = (get_request_id() or "").strip()
+    if not request_id or request_id == "-":
+        request_id = uuid.uuid4().hex
     try:
         ensure_generation_enabled(operation="regenerate_content")
-        request_id = _require_request_id(get_request_id())
+        request_id = _require_request_id(request_id)
 
         if request.async_mode:
             supabase = get_client()

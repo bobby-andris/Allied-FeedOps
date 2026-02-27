@@ -650,3 +650,35 @@ def test_generation_summary_event_contract(monkeypatch):
     assert fields["tokens_used"] == 240
     assert fields["latency_ms"] == 900
     assert fields["cost_usd"] == pytest.approx(0.00123, rel=0, abs=1e-9)
+
+
+@pytest.mark.asyncio
+async def test_regenerate_failure_summary_uses_non_null_request_id(monkeypatch):
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "-")
+
+    def _fake_emit_generation_summary(**kwargs):
+        captured.update(kwargs)
+
+    monkeypatch.setattr(api_main, "_emit_generation_summary", _fake_emit_generation_summary)
+    monkeypatch.setattr(
+        api_main,
+        "ensure_generation_enabled",
+        lambda **_kwargs: (_ for _ in ()).throw(api_main.HTTPException(status_code=503, detail="disabled")),
+    )
+
+    request = api_main.RegenerateRequest(
+        master_sku="CL-55",
+        platform="google",
+        content_type="title",
+    )
+
+    with pytest.raises(api_main.HTTPException):
+        await api_main.regenerate_content(request)
+
+    assert captured["endpoint"] == "regenerate"
+    assert captured["result_state"] == "failed"
+    assert isinstance(captured["request_id"], str)
+    assert captured["request_id"]
+    assert captured["request_id"] != "-"
