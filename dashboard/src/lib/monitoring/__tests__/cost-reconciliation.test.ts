@@ -3,7 +3,9 @@ import {
   buildUtcDailyWindows,
   classifyReconciliationDelta,
   computePercentile,
+  runCostReconciliationCapture,
 } from '@/lib/monitoring/cost-reconciliation'
+import { vi } from 'vitest'
 
 describe('cost reconciliation helpers', () => {
   it('builds deterministic UTC windows', () => {
@@ -59,5 +61,64 @@ describe('cost reconciliation helpers', () => {
   it('computes percentile for uneven distributions', () => {
     const value = computePercentile([10, 20, 30, 40], 0.95)
     expect(value).toBeCloseTo(38.5)
+  })
+
+  it('surfaces explicit auth warning when OpenAI organization APIs return 403', async () => {
+    process.env.OPENAI_USAGE_API_KEY = 'usage-key'
+    process.env.OPENAI_ORG_ID = 'org_test'
+
+    const originalFetch = global.fetch
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+    } as Response)
+
+    const rollups: Record<string, unknown>[] = []
+    const fakeSupabase = {
+      from(table: string) {
+        if (table === 'regeneration_history') {
+          return {
+            select() {
+              return this
+            },
+            gte() {
+              return this
+            },
+            async lt() {
+              return { data: [], error: null }
+            },
+          }
+        }
+        return {
+          async upsert(payload: Record<string, unknown>) {
+            rollups.push({ table, payload })
+            return { error: null }
+          },
+        }
+      },
+    }
+
+    try {
+      const summary = await runCostReconciliationCapture({
+        lookbackDays: 1,
+        now: new Date('2026-02-28T12:00:00.000Z'),
+        supabase: fakeSupabase as never,
+      })
+
+      const warnings = summary.capture_results[0]?.warnings ?? []
+      expect(warnings.some((w) => w.includes('org-level key with organization usage/cost permissions'))).toBe(
+        true
+      )
+
+      const deltaRows = rollups.filter((row) => row.table === 'cost_reconciliation_deltas')
+      expect(deltaRows.length).toBe(1)
+      const metadata = (deltaRows[0].payload as { metadata?: { warnings?: string[] } }).metadata
+      expect(Array.isArray(metadata?.warnings)).toBe(true)
+      expect(metadata?.warnings?.length).toBeGreaterThan(0)
+    } finally {
+      global.fetch = originalFetch
+      delete process.env.OPENAI_USAGE_API_KEY
+      delete process.env.OPENAI_ORG_ID
+    }
   })
 })
