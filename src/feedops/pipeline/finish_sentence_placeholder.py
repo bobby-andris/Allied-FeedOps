@@ -70,6 +70,11 @@ def build_fallback_finish_sentences(finish_names: list[str]) -> dict[str, str]:
     }
 
 
+def count_finish_sentence_placeholders(content: str) -> int:
+    """Return occurrences of `{FINISH_SENTENCE}` in content."""
+    return (content or "").count(FINISH_SENTENCE_PLACEHOLDER)
+
+
 def inject_finish_sentence_placeholder(content: str) -> str:
     """Ensure a base variant description contains `{FINISH_SENTENCE}` exactly once.
 
@@ -80,7 +85,7 @@ def inject_finish_sentence_placeholder(content: str) -> str:
     if not text:
         return FINISH_SENTENCE_PLACEHOLDER
 
-    placeholder_count = text.count(FINISH_SENTENCE_PLACEHOLDER)
+    placeholder_count = count_finish_sentence_placeholders(text)
     if placeholder_count == 1:
         return text
     if placeholder_count > 1:
