@@ -284,3 +284,59 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     assert len(history_writes) == 1
     assert history_writes[0]["payload"]["generated_content_id"] == "generated-existing"
     assert history_writes[0]["payload"]["request_id"] == "req-changed"
+
+
+@pytest.mark.asyncio
+async def test_regenerate_content_async_mode_queues_job_without_immediate_generation(monkeypatch):
+    canonical = "WP-2TB/16-GAL"
+    db = _FakeSupabase()
+    thread_call: dict[str, object] = {}
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, _master_sku: canonical,
+        raising=False,
+    )
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-async")
+
+    def _fake_run_async(async_func, request_id=None, **kwargs):
+        thread_call["async_func"] = async_func
+        thread_call["request_id"] = request_id
+        thread_call["kwargs"] = kwargs
+        return None
+
+    monkeypatch.setattr(api_main, "run_async_in_thread", _fake_run_async)
+
+    request = api_main.RegenerateRequest(
+        master_sku=canonical,
+        platform="google",
+        content_type="title",
+        async_mode=True,
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert isinstance(response, api_main.RegenerateJobResponse)
+    assert response.success is True
+    assert response.status == "pending"
+    assert response.request_id == "req-async"
+    assert response.master_sku == canonical
+    assert response.job_id == "row-1"
+
+    queued_job_writes = [
+        op for op in db.ops if op["table"] == "generation_jobs" and op["op"] == "insert"
+    ]
+    assert len(queued_job_writes) == 1
+    assert queued_job_writes[0]["payload"]["job_type"] == "regenerate"
+    assert queued_job_writes[0]["payload"]["status"] == "pending"
+
+    assert thread_call["request_id"] == "req-async"
+    kwargs = thread_call["kwargs"]
+    assert isinstance(kwargs, dict)
+    assert kwargs["job_id"] == "row-1"
+    assert kwargs["request_payload"]["async_mode"] is False
+
+    assert not [op for op in db.ops if op["table"] == "generated_content"]
+    assert not [op for op in db.ops if op["table"] == "regeneration_history"]

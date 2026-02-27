@@ -1,0 +1,43 @@
+name: Backend Parity
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  backend-parity:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Run frozen parity suite
+        env:
+          UV_FROZEN: "1"
+        run: |
+          uv run --frozen pytest -q \
+            tests/test_cloud_run_parity.py \
+            tests/test_env_parity.py \
+            tests/test_runtime_env_contract.py \
+            tests/api/test_dashboard_regenerate_route_contract.py \
+            tests/api/test_main_master_sku_alias_runtime.py \
+            tests/test_phase28_prompt_quality.py \
+            tests/api/test_regenerate_response_contract.py \
+            tests/test_v1_path_regression.py
+
+      - name: Ensure uv.lock is unchanged
+        run: git diff --exit-code uv.lock

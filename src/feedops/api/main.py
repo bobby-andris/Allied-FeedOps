@@ -29,6 +29,7 @@ Endpoints:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import threading
 import time
@@ -269,6 +270,10 @@ class RegenerateRequest(BaseModel):
         default=False,
         description="If true, save structured feedback as a persistent correction for this SKU",
     )
+    async_mode: bool = Field(
+        default=False,
+        description="If true, enqueue regeneration as a background job and return job_id immediately",
+    )
 
 
 class BatchOptimizeRequest(BaseModel):
@@ -327,6 +332,47 @@ class RegenerateResponse(BaseModel):
     state: Literal["completed", "no_change"] = "completed"
     idempotent: bool = False
     request_id: str
+
+
+class RegenerateJobResponse(BaseModel):
+    """Response when regeneration is queued asynchronously."""
+
+    success: bool
+    job_id: str
+    status: Literal["pending", "running", "completed", "failed"]
+    request_id: str
+    master_sku: str
+    content_type: str
+    platform: str
+
+
+class RegenerateJobStatusResponse(BaseModel):
+    """Status payload for asynchronous regeneration jobs."""
+
+    success: bool
+    job_id: str
+    status: Literal["pending", "running", "completed", "failed"]
+    request_id: str | None = None
+    master_sku: str | None = None
+    content_type: str | None = None
+    platform: str | None = None
+    result: RegenerateResponse | None = None
+    error: str | None = None
+    created_at: str | None = None
+    started_at: str | None = None
+    completed_at: str | None = None
+
+
+def _normalize_regeneration_job_status(raw_status: object) -> Literal["pending", "running", "completed", "failed"]:
+    """Normalize DB status values into API contract enum."""
+    value = str(raw_status or "").strip().lower()
+    if value in {"pending", "queued"}:
+        return "pending"
+    if value == "running":
+        return "running"
+    if value == "completed":
+        return "completed"
+    return "failed"
 
 
 class BatchJobResponse(BaseModel):
@@ -694,28 +740,27 @@ def _persist_regeneration_result(
 
     generated_content_id: str | None = None
     if isinstance(current_row, dict) and current_row.get("id"):
-        update_result = (
+        (
             supabase.table("generated_content")
             .update(write_payload)
             .eq("id", current_row["id"])
-            .select("id")
-            .single()
             .execute()
         )
-        updated = getattr(update_result, "data", None)
-        if isinstance(updated, dict):
-            generated_content_id = updated.get("id")
+        generated_content_id = str(current_row["id"])
     else:
-        insert_result = (
+        (
             supabase.table("generated_content")
             .insert(write_payload)
-            .select("id")
-            .single()
             .execute()
         )
-        inserted = getattr(insert_result, "data", None)
-        if isinstance(inserted, dict):
-            generated_content_id = inserted.get("id")
+
+    if not generated_content_id:
+        generated_content_id = _lookup_generated_content_id(
+            supabase=supabase,
+            master_sku=master_sku,
+            platform=platform,
+            content_type=content_type,
+        )
 
     history_payload = {
         "master_sku": master_sku,
@@ -797,6 +842,104 @@ def _persist_generated_content_and_history(
         "request_id": request_id or get_request_id(),
     }
     supabase.table("regeneration_history").insert(history_payload).execute()
+
+
+def _create_regeneration_job(
+    *,
+    supabase,
+    request: RegenerateRequest,
+    canonical_master_sku: str,
+    request_id: str,
+) -> str:
+    """Create a generation_jobs row for async regeneration tracking."""
+    job_payload = {
+        "master_sku": canonical_master_sku,
+        "job_type": "regenerate",
+        "status": "pending",
+        "priority": 0,
+        "input_params": {
+            "request": request.model_dump(),
+            "request_id": request_id,
+            "platform": request.platform,
+            "content_type": request.content_type,
+        },
+        "attempt_count": 0,
+        "max_attempts": 1,
+        "requested_by": "dashboard",
+    }
+    result = supabase.table("generation_jobs").insert(job_payload).execute()
+    data = getattr(result, "data", None)
+    if isinstance(data, list) and data and isinstance(data[0], dict) and data[0].get("id"):
+        return str(data[0]["id"])
+    if isinstance(data, dict) and data.get("id"):
+        return str(data["id"])
+    raise RuntimeError("Failed to create regeneration job: missing job id")
+
+
+def _format_job_error(exc: Exception) -> str:
+    """Create stable, actionable error text for async job records."""
+    if isinstance(exc, HTTPException):
+        detail = exc.detail
+        if isinstance(detail, dict):
+            return json.dumps(detail, default=str)[:2000]
+        return str(detail)[:2000]
+    return str(exc)[:2000]
+
+
+def _normalize_regeneration_job_row(job_row: dict) -> RegenerateJobStatusResponse:
+    """Normalize generation_jobs row into API response contract."""
+    raw_result = job_row.get("result")
+    parsed_result: RegenerateResponse | None = None
+    if isinstance(raw_result, dict):
+        try:
+            parsed_result = RegenerateResponse(**raw_result)
+        except Exception:
+            parsed_result = None
+
+    request_id = None
+    if parsed_result and parsed_result.request_id:
+        request_id = parsed_result.request_id
+    else:
+        input_params = job_row.get("input_params")
+        if isinstance(input_params, dict):
+            rid = input_params.get("request_id")
+            if isinstance(rid, str) and rid.strip():
+                request_id = rid.strip()
+
+    error_value = job_row.get("error")
+    if not isinstance(error_value, str) or not error_value:
+        error_value = None
+
+    return RegenerateJobStatusResponse(
+        success=True,
+        job_id=str(job_row["id"]),
+        status=_normalize_regeneration_job_status(job_row.get("status")),
+        request_id=request_id,
+        master_sku=job_row.get("master_sku"),
+        content_type=(
+            parsed_result.content_type
+            if parsed_result
+            else (
+                (job_row.get("input_params") or {}).get("content_type")
+                if isinstance(job_row.get("input_params"), dict)
+                else None
+            )
+        ),
+        platform=(
+            parsed_result.platform
+            if parsed_result
+            else (
+                (job_row.get("input_params") or {}).get("platform")
+                if isinstance(job_row.get("input_params"), dict)
+                else None
+            )
+        ),
+        result=parsed_result,
+        error=error_value,
+        created_at=job_row.get("created_at"),
+        started_at=job_row.get("started_at"),
+        completed_at=job_row.get("completed_at"),
+    )
 
 
 def _validate_finish_sentences_payload(
@@ -944,6 +1087,7 @@ async def root():
             "health": "GET /health",
             "optimize": "POST /optimize-sku",
             "regenerate": "POST /regenerate",
+            "regenerate_status": "GET /regenerate/status/{job_id}",
             "batch_optimize": "POST /batch-optimize",
             "batch_status": "GET /batch-status/{job_id}",
             "generate_images": "POST /generate-images",
@@ -1099,257 +1243,359 @@ async def optimize_single_sku(request: OptimizeRequest):
 # =============================================================================
 
 
-@app.post("/regenerate", response_model=RegenerateResponse, tags=["Generation"])
-async def regenerate_content(request: RegenerateRequest):
-    """Regenerate specific content with optional human feedback.
+async def _execute_regeneration_request(
+    *,
+    request: RegenerateRequest,
+    request_id: str,
+) -> RegenerateResponse:
+    """Execute a single regeneration request and return the full response payload."""
+    supabase = get_client()
+    canonical_master_sku = resolve_canonical_master_sku(supabase, request.master_sku)
+    logger.info(
+        "Regenerating %s for SKU: requested=%s canonical=%s",
+        request.content_type,
+        request.master_sku,
+        canonical_master_sku,
+    )
+    log_event(
+        logger,
+        logging.INFO,
+        "generation.regenerate.start",
+        endpoint="regenerate",
+        master_sku=canonical_master_sku,
+        requested_master_sku=request.master_sku,
+        platform=request.platform,
+        content_type=request.content_type,
+        request_id=request_id,
+    )
 
-    Uses the Python pipeline's comprehensive prompts and evidence building
-    for high-quality content generation.
-    """
+    # Load product data from Supabase
+    parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+    if not parent_sku:
+        raise HTTPException(status_code=404, detail=f"SKU not found: {request.master_sku}")
+
+    # Get LLM provider
+    provider = get_provider()
+    prompt_hash = get_platform_system_prompt_hash(request.platform)
+
+    # Load persistent corrections for this SKU (FIX-01: feedback layer)
+    # Corrections are platform/content_type scoped so "all" platform corrections apply everywhere
+    corrections: list[dict] = []
     try:
-        ensure_generation_enabled(operation="regenerate_content")
-        supabase = get_client()
-        canonical_master_sku = resolve_canonical_master_sku(
-            supabase, request.master_sku
+        corrections_resp = (
+            supabase.table("sku_corrections")
+            .select("*")
+            .eq("master_sku", canonical_master_sku)
+            .in_("platform", [request.platform, "all"])
+            .in_("content_type", [request.content_type, "all"])
+            .eq("is_active", True)
+            .execute()
         )
-        logger.info(
-            "Regenerating %s for SKU: requested=%s canonical=%s",
-            request.content_type,
-            request.master_sku,
-            canonical_master_sku,
-        )
-        log_event(
-            logger,
-            logging.INFO,
-            "generation.regenerate.start",
-            endpoint="regenerate",
-            master_sku=canonical_master_sku,
-            requested_master_sku=request.master_sku,
-            platform=request.platform,
-            content_type=request.content_type,
-        )
-
-        # Load product data from Supabase
-        parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
-        if not parent_sku:
-            raise HTTPException(
-                status_code=404, detail=f"SKU not found: {request.master_sku}"
+        corrections = corrections_resp.data or []
+        if corrections:
+            logger.info(
+                "Loaded %s persistent corrections for %s/%s/%s",
+                len(corrections),
+                canonical_master_sku,
+                request.platform,
+                request.content_type,
             )
+    except Exception as e:
+        logger.warning("Failed to load corrections for %s: %s", canonical_master_sku, e)
 
-        # Get LLM provider
-        provider = get_provider()
-        prompt_hash = get_platform_system_prompt_hash(request.platform)
-        request_id = get_request_id()
+    # Build session feedback from structured fields (FIX-01)
+    feedback_parts: list[str] = []
+    if request.tone_style:
+        feedback_parts.append(f"Tone/style: {request.tone_style}")
+    if request.emphasis:
+        feedback_parts.append(f"Emphasize: {', '.join(request.emphasis)}")
+    if request.length_preference:
+        feedback_parts.append(f"Length: {request.length_preference}")
+    if request.feedback:
+        feedback_parts.append(request.feedback)
+    session_feedback = "\n".join(feedback_parts) if feedback_parts else None
 
-        # Load persistent corrections for this SKU (FIX-01: feedback layer)
-        # Corrections are platform/content_type scoped so "all" platform corrections apply everywhere
-        corrections: list[dict] = []
+    finish_sentences: dict[str, str] | None = None
+    system_prompt = ""
+    user_prompt = ""
+    regen_latency_ms = 0
+    feedback_lines: list[str] = []
+    if corrections:
+        correction_lines = []
+        for correction in corrections:
+            text = (
+                correction.get("correction_text")
+                or correction.get("text")
+                or correction.get("correction")
+            )
+            if text:
+                correction_lines.append(f"- {text}")
+        if correction_lines:
+            feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
+    if session_feedback:
+        feedback_lines.append("Reviewer Feedback:\n" + session_feedback)
+
+    selected_platforms: list[str] = [request.platform]
+    include_finish = (
+        request.content_type == "description" and request.platform in {"google", "bing"}
+    )
+    if include_finish:
+        selected_platforms.append("finish")
+
+    generated = await generate_per_platform(
+        parent_sku=parent_sku,
+        provider=provider,
+        prompt_version="v2",
+        feedback_by_platform={request.platform: "\n\n".join(feedback_lines)}
+        if feedback_lines
+        else None,
+        selected_platforms=selected_platforms,
+    )
+    field_key = _content_field_key(request.platform, request.content_type)
+    content = str(generated.get(field_key, "")).strip()
+    if not content:
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "code": "regenerate_missing_required_platform_field",
+                "message": (
+                    f"Missing required regenerated field '{field_key}' for "
+                    f"{request.platform}/{request.content_type}."
+                ),
+                "platform": request.platform,
+                "content_type": request.content_type,
+            },
+        )
+    prompt_hash = str(
+        generated.get("prompt_hashes", {}).get(
+            request.platform, get_platform_system_prompt_hash(request.platform)
+        )
+    )
+    system_prompt = str(generated.get("system_prompts", {}).get(request.platform, ""))
+    user_prompt = str(generated.get("user_prompts", {}).get(request.platform, ""))
+    regen_latency_ms = int(
+        generated.get("latency_by_platform", {}).get(request.platform, 0) or 0
+    )
+    if include_finish:
+        raw_finish = generated.get("finish_sentences")
+        if isinstance(raw_finish, dict):
+            finish_sentences = raw_finish
+
+    persistence = _persist_regeneration_result(
+        supabase=supabase,
+        master_sku=canonical_master_sku,
+        platform=request.platform,
+        content_type=request.content_type,
+        content=content,
+        generation_model=provider.name,
+        prompt_hash=prompt_hash,
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        feedback_text=request.feedback,
+        mode="with_feedback" if request.feedback else "simple",
+        latency_ms=regen_latency_ms,
+        request_id=request_id,
+    )
+
+    if finish_sentences and persistence["state"] == "completed":
         try:
-            corrections_resp = (
-                supabase.table("sku_corrections")
-                .select("*")
-                .eq("master_sku", canonical_master_sku)
-                .in_("platform", [request.platform, "all"])
-                .in_("content_type", [request.content_type, "all"])
-                .eq("is_active", True)
-                .execute()
-            )
-            corrections = corrections_resp.data or []
-            if corrections:
-                logger.info(
-                    "Loaded %s persistent corrections for %s/%s/%s",
-                    len(corrections),
-                    canonical_master_sku,
-                    request.platform,
-                    request.content_type,
-                )
+            supabase.table("variant_finish_sentences").upsert(
+                {
+                    "master_sku": canonical_master_sku,
+                    "platform": request.platform,
+                    "finish_sentences": finish_sentences,
+                },
+                on_conflict="master_sku,platform",
+            ).execute()
         except Exception as e:
             logger.warning(
-                "Failed to load corrections for %s: %s", canonical_master_sku, e
+                "Failed to persist finish sentences for %s/%s: %s",
+                canonical_master_sku,
+                request.platform,
+                e,
             )
 
-        # Build session feedback from structured fields (FIX-01)
-        feedback_parts: list[str] = []
-        if request.tone_style:
-            feedback_parts.append(f"Tone/style: {request.tone_style}")
-        if request.emphasis:
-            feedback_parts.append(f"Emphasize: {', '.join(request.emphasis)}")
-        if request.length_preference:
-            feedback_parts.append(f"Length: {request.length_preference}")
-        if request.feedback:
-            feedback_parts.append(request.feedback)
-        session_feedback = "\n".join(feedback_parts) if feedback_parts else None
+    # Persist correction if save_as_correction=True and there's session feedback (FIX-01)
+    if request.save_as_correction and session_feedback:
+        try:
+            # Determine correction type from structured fields (priority order)
+            if request.tone_style:
+                correction_type = "tone"
+            elif request.emphasis:
+                correction_type = "emphasis"
+            elif request.length_preference:
+                correction_type = "length"
+            else:
+                correction_type = "free_text"
 
-        finish_sentences: dict[str, str] | None = None
-        system_prompt = ""
-        user_prompt = ""
-        _regen_latency_ms = 0
-        feedback_lines: list[str] = []
-        if corrections:
-            correction_lines = []
-            for correction in corrections:
-                text = (
-                    correction.get("correction_text")
-                    or correction.get("text")
-                    or correction.get("correction")
-                )
-                if text:
-                    correction_lines.append(f"- {text}")
-            if correction_lines:
-                feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
-        if session_feedback:
-            feedback_lines.append("Reviewer Feedback:\n" + session_feedback)
-
-        selected_platforms: list[str] = [request.platform]
-        include_finish = (
-            request.content_type == "description" and request.platform in {"google", "bing"}
-        )
-        if include_finish:
-            selected_platforms.append("finish")
-
-        generated = await generate_per_platform(
-            parent_sku=parent_sku,
-            provider=provider,
-            prompt_version="v2",
-            feedback_by_platform={
-                request.platform: "\n\n".join(feedback_lines)
-            }
-            if feedback_lines
-            else None,
-            selected_platforms=selected_platforms,
-        )
-        field_key = _content_field_key(request.platform, request.content_type)
-        content = str(generated.get(field_key, "")).strip()
-        if not content:
-            raise HTTPException(
-                status_code=502,
-                detail={
-                    "code": "regenerate_missing_required_platform_field",
-                    "message": (
-                        f"Missing required regenerated field '{field_key}' for "
-                        f"{request.platform}/{request.content_type}."
-                    ),
+            supabase.table("sku_corrections").upsert(
+                {
+                    "master_sku": canonical_master_sku,
                     "platform": request.platform,
                     "content_type": request.content_type,
+                    "correction_text": session_feedback,
+                    "correction_type": correction_type,
+                    "is_active": True,
                 },
+                on_conflict="master_sku,platform,content_type,correction_type,correction_text",
+            ).execute()
+            logger.info(
+                "Saved persistent correction for %s/%s/%s (type=%s)",
+                canonical_master_sku,
+                request.platform,
+                request.content_type,
+                correction_type,
             )
-        prompt_hash = str(
-            generated.get("prompt_hashes", {}).get(
-                request.platform, get_platform_system_prompt_hash(request.platform)
+        except Exception as e:
+            logger.warning("Failed to save correction for %s: %s", canonical_master_sku, e)
+
+    return RegenerateResponse(
+        success=True,
+        master_sku=canonical_master_sku,
+        content_type=request.content_type,
+        platform=request.platform,
+        content=content,
+        finish_sentences=finish_sentences,
+        used_feedback=session_feedback is not None,
+        prompt_hash=prompt_hash,
+        model=provider.name,
+        generated_content_id=(
+            str(persistence.get("generated_content_id"))
+            if persistence.get("generated_content_id")
+            else None
+        ),
+        version=int(persistence.get("version", 0) or 0),
+        state=str(persistence.get("state", "completed")),
+        idempotent=bool(persistence.get("idempotent", False)),
+        request_id=request_id,
+    )
+
+
+async def process_regenerate_job(job_id: str, request_payload: dict):
+    """Background worker for async regenerate jobs."""
+    from datetime import datetime, timezone
+
+    supabase = get_client()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    (
+        supabase.table("generation_jobs")
+        .update({"status": "running", "started_at": now_iso, "attempt_count": 1})
+        .eq("id", job_id)
+        .execute()
+    )
+
+    try:
+        ensure_generation_enabled(operation="process_regenerate_job")
+        request = RegenerateRequest(**request_payload)
+        request.async_mode = False
+        request_id = get_request_id()
+        result = await _execute_regeneration_request(request=request, request_id=request_id)
+        (
+            supabase.table("generation_jobs")
+            .update(
+                {
+                    "status": "completed",
+                    "result": result.model_dump(),
+                    "error": None,
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                }
             )
+            .eq("id", job_id)
+            .execute()
         )
-        system_prompt = str(
-            generated.get("system_prompts", {}).get(
-                request.platform, ""
+    except Exception as exc:
+        formatted = _format_job_error(exc)
+        logger.error("Async regenerate job %s failed: %s", job_id, formatted)
+        (
+            supabase.table("generation_jobs")
+            .update(
+                {
+                    "status": "failed",
+                    "error": formatted,
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                }
             )
-        )
-        user_prompt = str(
-            generated.get("user_prompts", {}).get(request.platform, "")
-        )
-        _regen_latency_ms = int(
-            generated.get("latency_by_platform", {}).get(request.platform, 0) or 0
-        )
-        if include_finish:
-            raw_finish = generated.get("finish_sentences")
-            if isinstance(raw_finish, dict):
-                finish_sentences = raw_finish
-
-        persistence = _persist_regeneration_result(
-            supabase=supabase,
-            master_sku=canonical_master_sku,
-            platform=request.platform,
-            content_type=request.content_type,
-            content=content,
-            generation_model=provider.name,
-            prompt_hash=prompt_hash,
-            system_prompt=system_prompt,
-            user_prompt=user_prompt,
-            feedback_text=request.feedback,
-            mode="with_feedback" if request.feedback else "simple",
-            latency_ms=_regen_latency_ms,
-            request_id=request_id,
+            .eq("id", job_id)
+            .execute()
         )
 
-        if finish_sentences and persistence["state"] == "completed":
-            try:
-                supabase.table("variant_finish_sentences").upsert(
-                    {
-                        "master_sku": canonical_master_sku,
-                        "platform": request.platform,
-                        "finish_sentences": finish_sentences,
-                    },
-                    on_conflict="master_sku,platform",
-                ).execute()
-            except Exception as e:
-                logger.warning(
-                    "Failed to persist finish sentences for %s/%s: %s",
-                    canonical_master_sku,
-                    request.platform,
-                    e,
-                )
 
-        # Persist correction if save_as_correction=True and there's session feedback (FIX-01)
-        if request.save_as_correction and session_feedback:
-            try:
-                # Determine correction type from structured fields (priority order)
-                if request.tone_style:
-                    correction_type = "tone"
-                elif request.emphasis:
-                    correction_type = "emphasis"
-                elif request.length_preference:
-                    correction_type = "length"
-                else:
-                    correction_type = "free_text"
+@app.post(
+    "/regenerate",
+    response_model=RegenerateResponse | RegenerateJobResponse,
+    tags=["Generation"],
+)
+async def regenerate_content(request: RegenerateRequest):
+    """Regenerate content either synchronously (default) or as queued async job."""
+    try:
+        ensure_generation_enabled(operation="regenerate_content")
+        request_id = get_request_id()
 
-                supabase.table("sku_corrections").upsert(
-                    {
-                        "master_sku": canonical_master_sku,
-                        "platform": request.platform,
-                        "content_type": request.content_type,
-                        "correction_text": session_feedback,
-                        "correction_type": correction_type,
-                        "is_active": True,
-                    },
-                    on_conflict="master_sku,platform,content_type,correction_type,correction_text",
-                ).execute()
-                logger.info(
-                    "Saved persistent correction for %s/%s/%s (type=%s)",
-                    canonical_master_sku,
-                    request.platform,
-                    request.content_type,
-                    correction_type,
-                )
-            except Exception as e:
-                logger.warning(
-                    "Failed to save correction for %s: %s", canonical_master_sku, e
-                )
+        if request.async_mode:
+            supabase = get_client()
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase, request.master_sku
+            )
+            job_id = _create_regeneration_job(
+                supabase=supabase,
+                request=request,
+                canonical_master_sku=canonical_master_sku,
+                request_id=request_id,
+            )
+            request_payload = request.model_dump()
+            request_payload["master_sku"] = canonical_master_sku
+            request_payload["async_mode"] = False
+            run_async_in_thread(
+                process_regenerate_job,
+                request_id=request_id,
+                job_id=job_id,
+                request_payload=request_payload,
+            )
+            return RegenerateJobResponse(
+                success=True,
+                job_id=job_id,
+                status="pending",
+                request_id=request_id,
+                master_sku=canonical_master_sku,
+                content_type=request.content_type,
+                platform=request.platform,
+            )
 
-        return RegenerateResponse(
-            success=True,
-            master_sku=canonical_master_sku,
-            content_type=request.content_type,
-            platform=request.platform,
-            content=content,
-            finish_sentences=finish_sentences,
-            used_feedback=session_feedback is not None,
-            prompt_hash=prompt_hash,
-            model=provider.name,
-            generated_content_id=(
-                str(persistence.get("generated_content_id"))
-                if persistence.get("generated_content_id")
-                else None
-            ),
-            version=int(persistence.get("version", 0) or 0),
-            state=str(persistence.get("state", "completed")),
-            idempotent=bool(persistence.get("idempotent", False)),
-            request_id=request_id,
-        )
+        return await _execute_regeneration_request(request=request, request_id=request_id)
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Regeneration failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get(
+    "/regenerate/status/{job_id}",
+    response_model=RegenerateJobStatusResponse,
+    tags=["Generation"],
+)
+async def get_regenerate_status(job_id: str):
+    """Get async regenerate job status and completed payload."""
+    try:
+        supabase = get_client()
+        job = (
+            supabase.table("generation_jobs")
+            .select("*")
+            .eq("id", job_id)
+            .eq("job_type", "regenerate")
+            .maybe_single()
+            .execute()
+        )
+        row = getattr(job, "data", None)
+        if not isinstance(row, dict):
+            raise HTTPException(status_code=404, detail=f"Regenerate job not found: {job_id}")
+        return _normalize_regeneration_job_row(row)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Failed to get regenerate job status for %s: %s", job_id, exc)
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 # =============================================================================
