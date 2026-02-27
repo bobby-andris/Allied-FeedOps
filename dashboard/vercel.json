@@ -7,6 +7,10 @@
     {
       "path": "/api/ga4/snapshot-capture",
       "schedule": "15 8 * * *"
+    },
+    {
+      "path": "/api/monitoring/cost-reconciliation",
+      "schedule": "45 8 * * *"
     }
   ]
 }

@@ -193,6 +193,9 @@ def _base_generated_payload(content: str) -> dict:
         "parse_by_platform": {
             "google": {"parse_mode": "strict_json", "missing_keys": []}
         },
+        "retry_by_platform": {
+            "google": {"attempt_count": 1, "json_decode_retries": 0}
+        },
     }
 
 
@@ -341,6 +344,8 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     assert history_writes[0]["payload"]["request_id"] == "req-changed"
     assert history_writes[0]["payload"]["tokens_used"] == 165
     assert history_writes[0]["payload"]["cost_usd"] is not None
+    assert history_writes[0]["payload"]["provider_attempt_count"] == 1
+    assert history_writes[0]["payload"]["parse_retry_count"] is None
     assert history_writes[0]["payload"]["result_state"] == "completed"
     assert history_writes[0]["payload"]["result_version"] == 3
     assert history_writes[0]["payload"]["result_idempotent"] is False
@@ -691,6 +696,8 @@ async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch)
         assert row["tokens_used"] is not None
         assert row["cost_usd"] is not None
         assert row["latency_ms"] is not None
+        assert row["provider_attempt_count"] == 1
+        assert row["parse_retry_count"] == 0
         assert row["result_state"] == "completed"
         assert row["result_idempotent"] is False
         assert row["result_version"] >= 1

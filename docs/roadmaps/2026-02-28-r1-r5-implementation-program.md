@@ -15,9 +15,9 @@ Execute R1-R5 sequentially with hard phase gates, one PR per phase, and deploy o
 | Phase | Branch | Status | PR | Deploy | Exit Gate |
 |---|---|---|---|---|---|
 | R0 Program Controls | `master` | completed | n/a | n/a | Baseline docs + SQL + tests captured |
-| R1 Telemetry Hardening | `codex/e245-r1-telemetry-hardening-20260228` | awaiting-deploy-verification | [#25](https://github.com/bobby-andris/Allied-FeedOps/pull/25) | pending | Hybrid telemetry non-null + batch detail completeness |
-| R2 Lineage/Idempotency/Placeholder | `codex/e245-r2-lineage-idempotency-20260228` | pending | pending | pending | Lineage fields + deterministic dedupe + write-time placeholder gate |
-| R3 Cost Reconciliation | `codex/e245-r3-cost-reconciliation-20260228` | pending | pending | pending | Daily reconciliation artifacts + retry attribution |
+| R1 Telemetry Hardening | `codex/e245-r1-telemetry-hardening-20260228` | merged | [#25](https://github.com/bobby-andris/Allied-FeedOps/pull/25) | pending | Hybrid telemetry non-null + batch detail completeness |
+| R2 Lineage/Idempotency/Placeholder | `codex/e245-r2-lineage-idempotency-20260228` | merged | [#26](https://github.com/bobby-andris/Allied-FeedOps/pull/26) | pending | Lineage fields + deterministic dedupe + write-time placeholder gate |
+| R3 Cost Reconciliation | `codex/e245-r3-cost-reconciliation-20260228` | in-progress | pending | pending | Daily reconciliation artifacts + retry attribution |
 | R4 Lineage Bridge + Change Packages | `codex/e245-r4-lineage-bridge-change-packages-20260228` | pending | pending | pending | Generation->outcome linkage + package-governed rollback |
 | R5 Prioritization + Experiment Lifecycle | `codex/e245-r5-prioritization-experiment-lifecycle-20260228` | pending | pending | pending | Closed-loop queue->experiment->outcome lifecycle |
 
