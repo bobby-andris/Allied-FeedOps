@@ -1,0 +1,60 @@
+    quoted_identifier = QuotedString('"', escChar="\\", unquoteResults=True)
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:365
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:365: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:494
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:494: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:498
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:498: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:502
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:502: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:506
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:506: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:538
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:538: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:542
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:542: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:546
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:546: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:550
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/pyiceberg/table/metadata.py:550: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+src/feedops/api/main.py:124
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/api/main.py:124: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+.venv/lib/python3.11/site-packages/fastapi/applications.py:4599
+  /Users/bobby/Documents/GitHub/Allied-FeedOps/.venv/lib/python3.11/site-packages/fastapi/applications.py:4599: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_env_parity.py::test_supabase_config_accepts_vercel_env_names
+1 failed, 44 passed, 14 warnings in 7.06s
