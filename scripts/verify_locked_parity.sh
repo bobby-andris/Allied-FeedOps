@@ -10,7 +10,7 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 echo "Running frozen parity suite (UV_FROZEN=1)..."
-UV_FROZEN=1 uv run --frozen pytest -q \
+UV_FROZEN=1 uv run --frozen --extra dev pytest -q \
   tests/test_cloud_run_parity.py \
   tests/test_env_parity.py \
   tests/test_runtime_env_contract.py \

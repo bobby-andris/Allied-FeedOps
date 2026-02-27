@@ -77,7 +77,7 @@ bash scripts/verify_locked_parity.sh
 
 **Policy**:
 - If `uv.lock` changes, treat that as a separate dependency PR unless explicitly intended.
-- Frozen execution uses `UV_FROZEN=1` (`uv run --frozen`) so dependency mismatch fails instead of silently mutating lock state.
+- Frozen execution uses `UV_FROZEN=1` (`uv run --frozen --extra dev`) so dependency mismatch fails instead of silently mutating lock state while ensuring pytest/dev tooling is present.
 
 ### `smoke_regenerate_lineage.py`
 
