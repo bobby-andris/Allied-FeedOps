@@ -20,6 +20,7 @@ class _TableQuery:
         self._op = "select"
         self._payload: dict | None = None
         self._filters: dict[str, object] = {}
+        self._in_filters: dict[str, set[object]] = {}
 
     def select(self, _columns: str):
         # Preserve write intent for insert/update(...).select("id") chains.
@@ -35,6 +36,7 @@ class _TableQuery:
         return self
 
     def in_(self, _key: str, _values: list):
+        self._in_filters[_key] = set(_values)
         return self
 
     def maybe_single(self):
@@ -70,6 +72,13 @@ class _TableQuery:
                 return SimpleNamespace(data=deepcopy(row))
             if self._table_name == "sku_corrections":
                 return SimpleNamespace(data=[])
+            if self._table_name == "generation_jobs":
+                rows = deepcopy(self._db.generation_jobs_rows)
+                for key, value in self._filters.items():
+                    rows = [row for row in rows if row.get(key) == value]
+                for key, allowed in self._in_filters.items():
+                    rows = [row for row in rows if row.get(key) in allowed]
+                return SimpleNamespace(data=rows)
             return SimpleNamespace(data=None)
 
         payload = deepcopy(self._payload or {})
@@ -100,6 +109,19 @@ class _TableQuery:
             self._db.history_rows.append(payload)
             return SimpleNamespace(data=[{"id": "history-1"}])
 
+        if self._table_name == "generation_jobs":
+            if self._op == "insert":
+                generated_id = payload.get("id") or f"job-{len(self._db.generation_jobs_rows) + 1}"
+                payload["id"] = generated_id
+                self._db.generation_jobs_rows.append(payload)
+                return SimpleNamespace(data=[{"id": generated_id}])
+            if self._op == "update":
+                target_id = self._filters.get("id")
+                for row in self._db.generation_jobs_rows:
+                    if target_id is None or row.get("id") == target_id:
+                        row.update(payload)
+                return SimpleNamespace(data=[{"id": target_id or "job-unknown"}])
+
         return SimpleNamespace(data=[{"id": "row-1"}])
 
 
@@ -108,6 +130,7 @@ class _FakeSupabase:
         self.generated_content_row = deepcopy(generated_content_row)
         self.ops: list[dict] = []
         self.history_rows: list[dict] = []
+        self.generation_jobs_rows: list[dict] = []
 
     def table(self, table_name: str):
         return _TableQuery(self, table_name)
@@ -138,6 +161,16 @@ def _base_generated_payload(content: str) -> dict:
         "system_prompts": {"google": "sys-google"},
         "user_prompts": {"google": "user-google"},
         "latency_by_platform": {"google": 125},
+        "usage_by_platform": {
+            "google": {
+                "prompt_tokens": 120,
+                "completion_tokens": 45,
+                "cached_tokens": 0,
+            }
+        },
+        "parse_by_platform": {
+            "google": {"parse_mode": "strict_json", "missing_keys": []}
+        },
     }
 
 
@@ -284,6 +317,14 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     assert len(history_writes) == 1
     assert history_writes[0]["payload"]["generated_content_id"] == "generated-existing"
     assert history_writes[0]["payload"]["request_id"] == "req-changed"
+    assert history_writes[0]["payload"]["tokens_used"] == 165
+    assert history_writes[0]["payload"]["cost_usd"] is not None
+    assert (
+        history_writes[0]["payload"]["feature_flags_active"]["generation_diagnostics"][
+            "selected_platforms"
+        ]
+        == ["google"]
+    )
 
 
 @pytest.mark.asyncio
@@ -323,7 +364,7 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
     assert response.status == "pending"
     assert response.request_id == "req-async"
     assert response.master_sku == canonical
-    assert response.job_id == "row-1"
+    assert response.job_id == "job-1"
 
     queued_job_writes = [
         op for op in db.ops if op["table"] == "generation_jobs" and op["op"] == "insert"
@@ -335,7 +376,7 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
     assert thread_call["request_id"] == "req-async"
     kwargs = thread_call["kwargs"]
     assert isinstance(kwargs, dict)
-    assert kwargs["job_id"] == "row-1"
+    assert kwargs["job_id"] == "job-1"
     assert kwargs["request_payload"]["async_mode"] is False
 
     assert not [op for op in db.ops if op["table"] == "generated_content"]
@@ -389,3 +430,69 @@ async def test_process_regenerate_job_marks_failed_when_running_transition_raise
     ]
     assert len(failed_updates) == 1
     assert "running transition failed" in str(failed_updates[0]["payload"].get("error", ""))
+
+
+@pytest.mark.asyncio
+async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypatch):
+    canonical = "WP-2TB/16-GAL"
+    db = _FakeSupabase()
+    db.generation_jobs_rows.append(
+        {
+            "id": "job-existing",
+            "master_sku": canonical,
+            "job_type": "regenerate",
+            "status": "running",
+            "input_params": {
+                "idempotency_key": api_main._regeneration_idempotency_key(
+                    request=api_main.RegenerateRequest(
+                        master_sku=canonical,
+                        platform="google",
+                        content_type="title",
+                        feedback="keep concise",
+                        async_mode=True,
+                    ),
+                    canonical_master_sku=canonical,
+                )
+            },
+        }
+    )
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, _master_sku: canonical,
+        raising=False,
+    )
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-reuse")
+
+    called = {"run_async": False}
+
+    def _fake_run_async(*_args, **_kwargs):
+        called["run_async"] = True
+        return None
+
+    monkeypatch.setattr(api_main, "run_async_in_thread", _fake_run_async)
+
+    request = api_main.RegenerateRequest(
+        master_sku=canonical,
+        platform="google",
+        content_type="title",
+        feedback="keep concise",
+        async_mode=True,
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.job_id == "job-existing"
+    assert response.deduplicated is True
+    assert called["run_async"] is False
+    queued_job_writes = [
+        op for op in db.ops if op["table"] == "generation_jobs" and op["op"] == "insert"
+    ]
+    assert not queued_job_writes
+
+
+def test_require_request_id_rejects_placeholder() -> None:
+    with pytest.raises(RuntimeError, match="Missing request_id"):
+        api_main._require_request_id("-")

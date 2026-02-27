@@ -246,6 +246,7 @@ export async function POST(request: NextRequest) {
       const pipelineRequestId = typeof pipelineData.request_id === 'string'
         ? pipelineData.request_id
         : requestId
+      const deduplicated = pipelineData.deduplicated === true
 
       if (!jobId || !jobStatus) {
         return errorResponse(500, {
@@ -263,6 +264,7 @@ export async function POST(request: NextRequest) {
         job_id: jobId,
         status: jobStatus,
         request_id: pipelineRequestId,
+        deduplicated,
         master_sku: canonicalMasterSku,
         content_type,
         platform,

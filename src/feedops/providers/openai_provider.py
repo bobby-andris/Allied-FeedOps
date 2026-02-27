@@ -168,10 +168,22 @@ class OpenAIProvider(LLMProvider):
         api_key: str,
         model: str = "gpt-5.2",
         max_retries: int = 3,
+        *,
+        sdk_timeout_seconds: float | None = None,
+        sdk_max_retries: int | None = None,
+        max_total_seconds: float | None = None,
     ):
-        self.client = AsyncOpenAI(api_key=api_key)
+        client_kwargs: dict[str, Any] = {"api_key": api_key}
+        if sdk_timeout_seconds is not None:
+            client_kwargs["timeout"] = max(sdk_timeout_seconds, 1.0)
+        if sdk_max_retries is not None:
+            client_kwargs["max_retries"] = max(sdk_max_retries, 0)
+        self.client = AsyncOpenAI(**client_kwargs)
         self.model = model
-        self.max_retries = max_retries
+        self.max_retries = max(1, max_retries)
+        self.max_total_seconds = (
+            max_total_seconds if max_total_seconds is not None else 300.0
+        )
         self._last_usage = {"prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0}
         self._last_parse_details = {
             "parse_mode": "none",
@@ -286,6 +298,12 @@ class OpenAIProvider(LLMProvider):
         content = ""
 
         for attempt in range(self.max_retries):
+            if (time.perf_counter() - start_time) >= self.max_total_seconds:
+                last_error = (
+                    f"provider_max_total_seconds_exceeded: "
+                    f"{self.max_total_seconds:.2f}s"
+                )
+                break
             response = None
             parse_details: dict[str, Any] = {}
             try:
