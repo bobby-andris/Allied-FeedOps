@@ -3,6 +3,12 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
+  "git": {
+    "deploymentEnabled": {
+      "master": true,
+      "codex/*": false
+    }
+  },
   "crons": [
     {
       "path": "/api/ga4/snapshot-capture",
