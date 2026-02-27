@@ -12,6 +12,7 @@ import {
 } from '@/lib/publishing/final-payload'
 import { attachPublishEventLineage } from '@/lib/publishing/change-packages'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
+import { enforcePilotCanaryForSkus } from '@/lib/rollout/pilot-canary'
 import type {
   BatchPublishRequest,
   BatchPublishResult,
@@ -347,6 +348,10 @@ export async function POST(request: NextRequest) {
     }
 
     const skuList = assignments.map((a) => a.master_sku)
+    const canaryGuard = enforcePilotCanaryForSkus(skuList, 'publish-batch')
+    if (!canaryGuard.allowed) {
+      return canaryGuard.response!
+    }
 
     // Update batch status to 'executing'
     await supabase

@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { validateGeneratedContent } from '@/lib/regeneration/prompts'
 import { ensureSkuData } from '@/lib/data-collection/ensure-data'
 import { resolveCanonicalMasterSku } from '@/lib/master-sku'
+import { enforcePilotCanaryForSkus } from '@/lib/rollout/pilot-canary'
 
 // Python Cloud Run pipeline URL
 const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL
@@ -147,6 +148,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient()
     const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
+    const canaryGuard = enforcePilotCanaryForSkus([canonicalMasterSku], 'regenerate')
+    if (!canaryGuard.allowed) {
+      return canaryGuard.response!
+    }
 
     // Ensure data collection before regeneration (non-blocking, best-effort)
     ensureSkuData(canonicalMasterSku, supabase)
