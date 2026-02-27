@@ -1,0 +1,54 @@
+{
+  "sku": "shopify_US_4531833766020_43094065709282",
+  "title": "Golden Yellow Shower Basket, 18.75-Inch Wall-Mounted Solid Brass Oval Combination Caddy, Matte Black, Allied Brass",
+  "description": "This 18.75-inch shower basket in Matte Black adds a bold, timeless accent while keeping shampoo, soap, and essentials organized in the bathroom. Available in Golden Yellow. Golden Yellow radiates warm, sunny energy. The rich satin-like finish makes a dramatic statement that pairs well with traditional bathroom hardware. Built for wet environments, it uses solid brass construction with heavy-gauge, ventilated solid brass wires that are rust proof and drain quickly. The wall-mounted design saves shower space, and the concealed screw mounting system creates a clean, finished appearance. Use it as a shower basket (also called a shower caddy) to keep clutter off ledges and corners. Includes the basket and all installation hardware, with no assembly required. Designer finish provides corrosion-free performance. Backed by a limited lifetime warranty.",
+  "_meta": {
+    "master_sku": "BSK-275LA",
+    "option_sku": "BSK-275LA-GLY",
+    "finish": "Golden Yellow",
+    "finish_keywords": [
+      "golden yellow basket",
+      "golden yellow bathroom basket",
+      "golden yellow bathroom hardware",
+      "golden yellow bath accessories",
+      "golden yellow statement finish",
+      "golden yellow designer hardware",
+      "golden yellow colored hardware",
+      "golden yellow color bathroom"
+    ],
+    "generated_at": "2026-02-03T18:39:19.400959",
+    "quality_score": 91.67,
+    "approval_status": "approved",
+    "heuristic_score": 84.0,
+    "selection_score_adjusted": 82.73,
+    "heuristic_score_breakdown": {
+      "google": 82.5,
+      "bing": 82.5,
+      "shopify": 92.5
+    },
+    "selection_weights": {
+      "google": 0.7,
+      "bing": 0.15,
+      "shopify": 0.15
+    },
+    "soft_gate_penalty": 1.27,
+    "soft_gate_warnings": [
+      "Google: Few measurable specs detected",
+      "Bing: Few measurable specs detected"
+    ],
+    "soft_gate_miss_counts": {
+      "google": 1,
+      "bing": 1,
+      "shopify": 0
+    },
+    "candidate_index": 1,
+    "num_candidates": 3,
+    "variant_title_warnings": [
+      "Finish 'Matte Black' appears after the first 70 characters; consider moving finish earlier for variant differentiation."
+    ]
+  },
+  "_previous": {
+    "title": "Oval Combination Shower Basket",
+    "description": "This decorative basket is made of solid brass to provide a lifetime of superior performance and durability. Ventilated wires are made of heavy gauge solid brass material that will never rust. Highest quality designer finishes provide a decorative accessory that would be a great addition to any bath or shower design. Matte Black, a rich black satin-like finish that makes a bold, dramatic statement Concealed Screw Mounting System Designer Finish will provide corrosion free performance Assembled in the U.S. A. Specification & Documentation Product dimensions, in. (LxHxW): 18.75x2.25x4.125 Box dimensions, in. (LxHxW): 24x8x8 Shipping weight, lbs: 6 Installation Instruction Technical Specification BSK275LA-Installation.PDF BSK275LA-Specification.PDF"
+  }
+}
