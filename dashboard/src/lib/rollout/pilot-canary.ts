@@ -60,6 +60,10 @@ export function enforcePilotCanaryForSkus(
     }
   }
 
+  if (allowedSkus.size === 0 && !failClosed) {
+    return { allowed: true, blockedSkus: [] }
+  }
+
   const blockedSkus = normalizedSkus.filter((sku) => !allowedSkus.has(sku.toUpperCase()))
 
   if (blockedSkus.length > 0) {

@@ -54,6 +54,17 @@ describe('pilot canary guard', () => {
     expect(result.response?.status).toBe(503)
   })
 
+  it('allows requests when enabled, fail-open, and allowlist is empty', () => {
+    process.env.FEEDOPS_PILOT_CANARY_ENABLED = 'true'
+    process.env.FEEDOPS_PILOT_ALLOWED_SKUS = ''
+    process.env.FEEDOPS_PILOT_FAIL_CLOSED = 'false'
+
+    const result = enforcePilotCanaryForSkus(['CL-55'], 'publish-batch')
+    expect(result.allowed).toBe(true)
+    expect(result.blockedSkus).toEqual([])
+    expect(result.response).toBeUndefined()
+  })
+
   it('provides snapshot metadata for operational checks', () => {
     process.env.FEEDOPS_PILOT_CANARY_ENABLED = '1'
     process.env.FEEDOPS_PILOT_ALLOWED_SKUS = 'CL-55,1033,CL-66'
