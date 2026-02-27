@@ -808,7 +808,7 @@ async function logPublishEvent(
       ...event,
       published_at: new Date().toISOString(),
     }
-    const selectColumns = [
+    const selectColumnsList = [
       'id',
       'master_sku',
       'platform',
@@ -825,7 +825,8 @@ async function logPublishEvent(
       'final_payload_hash',
       'evidence_hash',
       'segment_key',
-    ].join(',')
+    ]
+    const selectColumns = selectColumnsList.join(',')
     const { data: insertedEvent, error } = await supabase
       .from('publish_events')
       .insert(payload)
@@ -852,12 +853,18 @@ async function logPublishEvent(
       if (/prompt_hash/i.test(error.message)) {
         delete legacyPayload.prompt_hash
       }
-      const { data: fallbackInsertedEvent } = await supabase
+      const legacySelectColumns = selectColumnsList
+        .filter((column) => !['prompt_hash', 'final_payload_hash', 'evidence_hash', 'segment_key'].includes(column))
+        .join(',')
+      const { data: fallbackInsertedEvent, error: fallbackError } = await supabase
         .from('publish_events')
         .insert(legacyPayload)
-        .select(selectColumns)
+        .select(legacySelectColumns)
         .single()
-      const fallbackEventRow = fallbackInsertedEvent as Parameters<
+      if (fallbackError) {
+        throw fallbackError
+      }
+      const fallbackEventRow = fallbackInsertedEvent as unknown as Parameters<
         typeof attachPublishEventLineage
       >[1] | null
       if (fallbackEventRow) {

@@ -83,12 +83,15 @@ export async function attachPublishEventLineage(
 
     const changePackageId = packageRow.id as string
 
-    await supabase
+    const { error: publishEventUpdateError } = await supabase
       .from('publish_events')
       .update({ change_package_id: changePackageId })
       .eq('id', publishEvent.id)
+    if (publishEventUpdateError) {
+      throw new Error(`publish_events_update_failed: ${publishEventUpdateError.message}`)
+    }
 
-    await supabase
+    const { error: packageEventUpsertError } = await supabase
       .from('change_package_events')
       .upsert(
         {
@@ -101,8 +104,11 @@ export async function attachPublishEventLineage(
         },
         { onConflict: 'change_package_id,publish_event_id' }
       )
+    if (packageEventUpsertError) {
+      throw new Error(`change_package_events_upsert_failed: ${packageEventUpsertError.message}`)
+    }
 
-    await supabase
+    const { error: packageItemUpsertError } = await supabase
       .from('change_package_items')
       .upsert(
         {
@@ -125,6 +131,9 @@ export async function attachPublishEventLineage(
         },
         { onConflict: 'change_package_id,master_sku,platform,content_type' }
       )
+    if (packageItemUpsertError) {
+      throw new Error(`change_package_items_upsert_failed: ${packageItemUpsertError.message}`)
+    }
 
     if (publishEvent.status !== 'success' || publishEvent.action !== 'publish') {
       return
@@ -173,7 +182,7 @@ export async function attachPublishEventLineage(
       if (!generatedContentId) continue
 
       const latestHistory = latestHistoryByGeneratedContentId.get(generatedContentId)
-      await supabase
+      const { error: outcomeLinkUpsertError } = await supabase
         .from('generation_outcome_links')
         .upsert(
           {
@@ -194,12 +203,15 @@ export async function attachPublishEventLineage(
           },
           { onConflict: 'publish_event_id,content_type' }
         )
+      if (outcomeLinkUpsertError) {
+        throw new Error(`generation_outcome_links_upsert_failed: ${outcomeLinkUpsertError.message}`)
+      }
     }
 
     const effectStartDate = (publishEvent.published_at || new Date().toISOString()).slice(0, 10)
     const effectEndDate = addDays(`${effectStartDate}T00:00:00.000Z`, 30)
 
-    await supabase
+    const { error: effectWindowUpsertError } = await supabase
       .from('generation_effect_windows')
       .upsert(
         {
@@ -221,6 +233,9 @@ export async function attachPublishEventLineage(
         },
         { onConflict: 'publish_event_id,window_pre_days,window_post_days' }
       )
+    if (effectWindowUpsertError) {
+      throw new Error(`generation_effect_windows_upsert_failed: ${effectWindowUpsertError.message}`)
+    }
   } catch (error) {
     console.error('[R4] Failed to attach publish lineage:', error)
   }
