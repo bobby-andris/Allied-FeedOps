@@ -8,7 +8,7 @@ steps:
     args:
       - '-lc'
       - |
-        python -m pip install --no-cache-dir -r requirements.txt pytest
+        python -m pip install --no-cache-dir -r requirements.txt pytest pytest-asyncio
         ./scripts/verify_cloud_run_parity.sh
 
   # Build the container image
@@ -31,7 +31,7 @@ steps:
           -v /workspace:/workspace \
           -w /workspace \
           us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/feedops-pipeline:$COMMIT_SHA \
-          bash -lc "python -m pip install --no-cache-dir pytest && ./scripts/verify_cloud_run_parity.sh"
+          bash -lc "python -m pip install --no-cache-dir pytest pytest-asyncio && ./scripts/verify_cloud_run_parity.sh"
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
