@@ -80,6 +80,13 @@ class _TableQuery:
                 for key, allowed in self._in_filters.items():
                     rows = [row for row in rows if row.get(key) in allowed]
                 return SimpleNamespace(data=rows)
+            if self._table_name == "batch_generation_jobs":
+                rows = deepcopy(self._db.batch_generation_jobs_rows)
+                for key, value in self._filters.items():
+                    rows = [row for row in rows if row.get(key) == value]
+                for key, allowed in self._in_filters.items():
+                    rows = [row for row in rows if row.get(key) in allowed]
+                return SimpleNamespace(data=rows)
             return SimpleNamespace(data=None)
 
         payload = deepcopy(self._payload or {})
@@ -123,6 +130,19 @@ class _TableQuery:
                         row.update(payload)
                 return SimpleNamespace(data=[{"id": target_id or "job-unknown"}])
 
+        if self._table_name == "batch_generation_jobs":
+            if self._op == "insert":
+                generated_id = payload.get("id") or f"batch-job-{len(self._db.batch_generation_jobs_rows) + 1}"
+                payload["id"] = generated_id
+                self._db.batch_generation_jobs_rows.append(payload)
+                return SimpleNamespace(data=[{"id": generated_id}])
+            if self._op == "update":
+                target_id = self._filters.get("id")
+                for row in self._db.batch_generation_jobs_rows:
+                    if target_id is None or row.get("id") == target_id:
+                        row.update(payload)
+                return SimpleNamespace(data=[{"id": target_id or "batch-job-unknown"}])
+
         return SimpleNamespace(data=[{"id": "row-1"}])
 
 
@@ -132,6 +152,7 @@ class _FakeSupabase:
         self.ops: list[dict] = []
         self.history_rows: list[dict] = []
         self.generation_jobs_rows: list[dict] = []
+        self.batch_generation_jobs_rows: list[dict] = []
 
     def table(self, table_name: str):
         return _TableQuery(self, table_name)
@@ -320,6 +341,20 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     assert history_writes[0]["payload"]["request_id"] == "req-changed"
     assert history_writes[0]["payload"]["tokens_used"] == 165
     assert history_writes[0]["payload"]["cost_usd"] is not None
+    assert history_writes[0]["payload"]["result_state"] == "completed"
+    assert history_writes[0]["payload"]["result_version"] == 3
+    assert history_writes[0]["payload"]["result_idempotent"] is False
+    assert history_writes[0]["payload"]["idempotency_key"] == api_main._regeneration_idempotency_key(
+        request=request,
+        canonical_master_sku=canonical,
+    )
+    assert history_writes[0]["payload"]["canonical_platform_hash"] == api_main.get_platform_system_prompt_hash(
+        "google"
+    )
+    assert history_writes[0]["payload"]["assembled_prompt_hash"] == api_main._assembled_prompt_hash(
+        "sys-google",
+        "user-google",
+    )
     assert (
         history_writes[0]["payload"]["feature_flags_active"]["generation_diagnostics"][
             "selected_platforms"
@@ -494,6 +529,115 @@ async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypa
     assert not queued_job_writes
 
 
+def test_write_time_finish_placeholder_contract_rejects_missing_placeholder() -> None:
+    with pytest.raises(api_main.HTTPException) as exc_info:
+        api_main._enforce_write_time_finish_placeholder_contract(
+            platform="google",
+            content_type="description",
+            content="Solid brass wall-mounted towel bar copy without placeholder.",
+            endpoint="test",
+        )
+    assert exc_info.value.status_code == 422
+    assert exc_info.value.detail["code"] == "regenerate_description_missing_finish_placeholder"
+
+
+def test_write_time_finish_placeholder_contract_rejects_multiple_placeholders() -> None:
+    with pytest.raises(api_main.HTTPException) as exc_info:
+        api_main._enforce_write_time_finish_placeholder_contract(
+            platform="bing",
+            content_type="description",
+            content=(
+                "Solid brass wall-mounted towel bar. {FINISH_SENTENCE} "
+                "Concealed mounting hardware. {FINISH_SENTENCE}"
+            ),
+            endpoint="test",
+        )
+    assert exc_info.value.status_code == 422
+    assert exc_info.value.detail["code"] == "regenerate_description_multiple_finish_placeholders"
+
+
+def test_write_time_finish_placeholder_contract_accepts_exactly_one_placeholder() -> None:
+    api_main._enforce_write_time_finish_placeholder_contract(
+        platform="google",
+        content_type="description",
+        content="Solid brass wall-mounted towel bar. {FINISH_SENTENCE} Concealed mounting hardware.",
+        endpoint="test",
+    )
+
+
+@pytest.mark.asyncio
+async def test_hybrid_generate_reuses_matching_active_job(monkeypatch):
+    db = _FakeSupabase()
+    canonical_skus = ["1033/18", "CL-55"]
+    options = {"titles": True, "descriptions": True, "platforms": ["google"]}
+    idempotency_key = api_main._hybrid_generation_idempotency_key(
+        canonical_skus=canonical_skus,
+        options=options,
+    )
+    db.batch_generation_jobs_rows.append(
+        {
+            "id": "batch-existing",
+            "status": "processing",
+            "total_skus": len(canonical_skus),
+            "options": {
+                "idempotency_key": idempotency_key,
+                "multi_sku_families": 1,
+                "single_skus": 1,
+                "base_skus": 2,
+                "variant_skus": 1,
+            },
+        }
+    )
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_skus",
+        lambda _supabase, _master_skus: canonical_skus,
+    )
+
+    request = api_main.HybridGenerateRequest(skus=canonical_skus, options=options)
+    response = await api_main.hybrid_generate(request)
+
+    assert response.job_id == "batch-existing"
+    assert response.deduplicated is True
+    insert_ops = [
+        op for op in db.ops if op["table"] == "batch_generation_jobs" and op["op"] == "insert"
+    ]
+    assert not insert_ops
+
+
+@pytest.mark.asyncio
+async def test_hybrid_generate_persists_idempotency_key_on_new_job(monkeypatch):
+    db = _FakeSupabase()
+    canonical_skus = ["CL-55"]
+    options = {"titles": True, "descriptions": False, "platforms": ["google"]}
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_skus",
+        lambda _supabase, _master_skus: canonical_skus,
+    )
+    monkeypatch.setattr(api_main, "detect_multi_sku_families", lambda _supabase, _skus: [])
+    monkeypatch.setattr(api_main, "run_async_in_thread", lambda *_args, **_kwargs: None)
+
+    response = await api_main.hybrid_generate(
+        api_main.HybridGenerateRequest(skus=canonical_skus, options=options)
+    )
+
+    assert response.deduplicated is False
+    insert_ops = [
+        op for op in db.ops if op["table"] == "batch_generation_jobs" and op["op"] == "insert"
+    ]
+    assert len(insert_ops) == 1
+    persisted_options = insert_ops[0]["payload"]["options"]
+    assert isinstance(persisted_options.get("idempotency_key"), str)
+    assert persisted_options["idempotency_key"]
+
+
 def test_require_request_id_rejects_placeholder() -> None:
     with pytest.raises(RuntimeError, match="Missing request_id"):
         api_main._require_request_id("-")
@@ -547,6 +691,16 @@ async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch)
         assert row["tokens_used"] is not None
         assert row["cost_usd"] is not None
         assert row["latency_ms"] is not None
+        assert row["result_state"] == "completed"
+        assert row["result_idempotent"] is False
+        assert row["result_version"] >= 1
+        assert row["canonical_platform_hash"] == api_main.get_platform_system_prompt_hash(
+            "google"
+        )
+        assert row["assembled_prompt_hash"] == api_main._assembled_prompt_hash(
+            "sys-google",
+            "user-google",
+        )
 
 
 @pytest.mark.asyncio

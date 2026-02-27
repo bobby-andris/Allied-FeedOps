@@ -8,12 +8,14 @@ Python port of dashboard/src/lib/regeneration/core.ts (adaptVariantContent)
 """
 
 from datetime import datetime, timezone
+import hashlib
 import json
 import logging
 import time
 
 from feedops.api.prompt_loader import (
     get_finish_list,
+    get_platform_system_prompt_hash,
     get_system_prompt,
     get_system_prompt_hash,
 )
@@ -22,15 +24,72 @@ from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
 from feedops.models import Candidate, Score
 from feedops.observability import log_event
+from feedops.observability import get_request_id
 from feedops.observability.metrics import metrics_registry
 from feedops.pipeline.generator import generate_per_platform
 from feedops.pipeline.finish_sentence_placeholder import (
+    count_finish_sentence_placeholders,
     strip_generic_finish_count_claims,
 )
 from feedops.pipeline.validators import validate_candidate_content
 from feedops.providers import get_provider
 
 logger = logging.getLogger(__name__)
+
+
+def _assemble_prompt_hash(system_prompt: str, user_prompt: str) -> str:
+    canonical = json.dumps(
+        {
+            "system_prompt": system_prompt or "",
+            "user_prompt": user_prompt or "",
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _variant_adaptation_idempotency_key(
+    *,
+    base_sku: str,
+    variant_sku: str,
+    platform: str,
+    content_type: str,
+    base_spec: str,
+    variant_spec: str,
+) -> str:
+    payload = {
+        "base_sku": base_sku,
+        "variant_sku": variant_sku,
+        "platform": platform,
+        "content_type": content_type,
+        "base_spec": base_spec,
+        "variant_spec": variant_spec,
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _enforce_variant_placeholder_contract(
+    *,
+    platform: str,
+    content_type: str,
+    content: str,
+) -> None:
+    if content_type != "description" or platform not in {"google", "bing"}:
+        return
+    placeholder_count = count_finish_sentence_placeholders(content)
+    if placeholder_count == 1:
+        return
+    if placeholder_count == 0:
+        raise ValueError(
+            "regenerate_description_missing_finish_placeholder: "
+            "Google/Bing descriptions must contain exactly one {FINISH_SENTENCE}."
+        )
+    raise ValueError(
+        "regenerate_description_multiple_finish_placeholders: "
+        "Google/Bing descriptions must contain exactly one {FINISH_SENTENCE}."
+    )
 
 
 def _variant_completion_tokens(platform: str, content_type: str, requires_json: bool) -> int:
@@ -311,6 +370,11 @@ async def adapt_variant_content(
             raw_finish_sentences = generated.get("finish_sentences")
             if isinstance(raw_finish_sentences, dict):
                 finish_sentences = raw_finish_sentences
+        _enforce_variant_placeholder_contract(
+            platform=platform,
+            content_type=content_type,
+            content=new_content,
+        )
 
         content_validation_errors = validate_adapted_variant_content(
             content_type=content_type,
@@ -357,6 +421,19 @@ async def adapt_variant_content(
         )
         user_prompt = str(generated.get("user_prompts", {}).get(platform, ""))
         model = provider.name
+        request_id = (get_request_id() or "").strip()
+        if request_id == "-":
+            request_id = ""
+        idempotency_key = _variant_adaptation_idempotency_key(
+            base_sku=base_sku,
+            variant_sku=variant_sku,
+            platform=platform,
+            content_type=content_type,
+            base_spec=base_spec,
+            variant_spec=variant_spec,
+        )
+        canonical_platform_hash = get_platform_system_prompt_hash(platform)
+        assembled_prompt_hash = _assemble_prompt_hash(system_prompt, user_prompt)
 
         if current_data:
             supabase.table("generated_content").update(
@@ -404,6 +481,13 @@ async def adapt_variant_content(
                 "model_version": model,
                 "prompt_hash": prompt_hash,
                 "mode": "variant-adaptation-v2",
+                "request_id": request_id or None,
+                "result_state": "completed",
+                "result_version": next_version,
+                "result_idempotent": False,
+                "idempotency_key": idempotency_key,
+                "canonical_platform_hash": canonical_platform_hash,
+                "assembled_prompt_hash": assembled_prompt_hash,
             }
         ).execute()
 

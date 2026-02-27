@@ -62,6 +62,7 @@ from feedops.pipeline.finish_sentence_validation import (
 )
 from feedops.pipeline.finish_sentence_placeholder import (
     build_fallback_finish_sentences,
+    count_finish_sentence_placeholders,
     normalize_base_description_with_finish_placeholder,
     strip_hardcoded_finish_names,
     strip_generic_finish_count_claims,
@@ -449,6 +450,7 @@ class HybridJobResponse(BaseModel):
     multi_sku_families: int
     single_skus: int
     strategy: dict  # {base_skus: int, variant_skus: int}
+    deduplicated: bool = False
 
 
 def _normalize_generation_options(options: dict | None) -> dict:
@@ -685,6 +687,54 @@ def _load_generated_content_row(
     return data if isinstance(data, dict) else None
 
 
+def _assembled_prompt_hash(system_prompt: str, user_prompt: str) -> str:
+    """Build deterministic hash of the exact prompt pair used for generation."""
+    canonical = json.dumps(
+        {
+            "system_prompt": system_prompt or "",
+            "user_prompt": user_prompt or "",
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _enforce_write_time_finish_placeholder_contract(
+    *,
+    platform: str,
+    content_type: str,
+    content: str,
+    endpoint: str,
+) -> None:
+    """Fail fast if Google/Bing descriptions violate finish placeholder contract."""
+    if content_type != "description" or platform not in {"google", "bing"}:
+        return
+
+    placeholder_count = count_finish_sentence_placeholders(content)
+    if placeholder_count == 1:
+        return
+
+    if placeholder_count == 0:
+        code = "regenerate_description_missing_finish_placeholder"
+        message = "Google/Bing descriptions must include exactly one {FINISH_SENTENCE} placeholder before persistence."
+    else:
+        code = "regenerate_description_multiple_finish_placeholders"
+        message = "Google/Bing descriptions must include exactly one {FINISH_SENTENCE}; multiple placeholders are not allowed."
+
+    raise HTTPException(
+        status_code=422,
+        detail={
+            "code": code,
+            "message": message,
+            "platform": platform,
+            "content_type": content_type,
+            "placeholder_count": placeholder_count,
+            "endpoint": endpoint,
+        },
+    )
+
+
 def _persist_regeneration_result(
     *,
     supabase,
@@ -703,6 +753,7 @@ def _persist_regeneration_result(
     generation_diagnostics: dict | None = None,
     latency_ms: int | None = None,
     request_id: str | None = None,
+    idempotency_key: str | None = None,
 ) -> dict[str, object]:
     """Persist regeneration content/history with idempotent no-change behavior."""
     current_row = _load_generated_content_row(
@@ -731,6 +782,12 @@ def _persist_regeneration_result(
         int(current_row.get("version") or 0) + 1 if isinstance(current_row, dict) else 1
     )
     generation_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    _enforce_write_time_finish_placeholder_contract(
+        platform=platform,
+        content_type=content_type,
+        content=normalized_content,
+        endpoint="_persist_regeneration_result",
+    )
     write_payload = {
         "master_sku": master_sku,
         "platform": platform,
@@ -773,6 +830,8 @@ def _persist_regeneration_result(
         flag_snapshot = dict(flag_snapshot)
         flag_snapshot["generation_diagnostics"] = generation_diagnostics
 
+    canonical_platform_hash = get_platform_system_prompt_hash(platform)
+    assembled_prompt_hash = _assembled_prompt_hash(system_prompt, user_prompt)
     history_payload = {
         "master_sku": master_sku,
         "content_type": content_type,
@@ -791,6 +850,12 @@ def _persist_regeneration_result(
         "cost_usd": cost_usd,
         "latency_ms": latency_ms,
         "request_id": lineage_request_id,
+        "result_state": "completed",
+        "result_version": next_version,
+        "result_idempotent": False,
+        "idempotency_key": idempotency_key,
+        "canonical_platform_hash": canonical_platform_hash,
+        "assembled_prompt_hash": assembled_prompt_hash,
     }
     supabase.table("regeneration_history").insert(history_payload).execute()
 
@@ -819,8 +884,15 @@ def _persist_generated_content_and_history(
     latency_ms: int | None = None,
     generation_diagnostics: dict | None = None,
     request_id: str | None = None,
+    idempotency_key: str | None = None,
 ):
     """Persist generated content and linked history in one canonical path."""
+    _enforce_write_time_finish_placeholder_contract(
+        platform=platform,
+        content_type=content_type,
+        content=content,
+        endpoint="_persist_generated_content_and_history",
+    )
     supabase.table("generated_content").upsert(
         {
             "master_sku": master_sku,
@@ -839,6 +911,15 @@ def _persist_generated_content_and_history(
         platform=platform,
         content_type=content_type,
     )
+    content_row = _load_generated_content_row(
+        supabase=supabase,
+        master_sku=master_sku,
+        platform=platform,
+        content_type=content_type,
+    )
+    result_version = (
+        int(content_row.get("version") or 1) if isinstance(content_row, dict) else 1
+    )
 
     lineage_request_id = _require_request_id(request_id or get_request_id())
     flag_snapshot = capture_flag_snapshot()
@@ -846,6 +927,8 @@ def _persist_generated_content_and_history(
         flag_snapshot = dict(flag_snapshot)
         flag_snapshot["generation_diagnostics"] = generation_diagnostics
 
+    canonical_platform_hash = get_platform_system_prompt_hash(platform)
+    assembled_prompt_hash = _assembled_prompt_hash(system_prompt, user_prompt)
     history_payload = {
         "master_sku": master_sku,
         "content_type": content_type,
@@ -862,6 +945,12 @@ def _persist_generated_content_and_history(
         "cost_usd": cost_usd,
         "latency_ms": latency_ms,
         "request_id": lineage_request_id,
+        "result_state": "completed",
+        "result_version": result_version,
+        "result_idempotent": False,
+        "idempotency_key": idempotency_key,
+        "canonical_platform_hash": canonical_platform_hash,
+        "assembled_prompt_hash": assembled_prompt_hash,
     }
     supabase.table("regeneration_history").insert(history_payload).execute()
 
@@ -939,6 +1028,24 @@ def _regeneration_idempotency_key(
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _hybrid_generation_idempotency_key(
+    *,
+    canonical_skus: list[str],
+    options: dict,
+) -> str:
+    """Compute a stable idempotency key for hybrid generation submissions."""
+    payload = {
+        "skus": sorted({sku for sku in canonical_skus if isinstance(sku, str)}),
+        "titles": bool(options.get("titles", True)),
+        "descriptions": bool(options.get("descriptions", True)),
+        "platforms": sorted(
+            {platform for platform in options.get("platforms", []) if isinstance(platform, str)}
+        ),
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def _find_active_regeneration_job(
     *,
     supabase,
@@ -964,6 +1071,32 @@ def _find_active_regeneration_job(
         if not isinstance(input_params, dict):
             continue
         if input_params.get("idempotency_key") == idempotency_key:
+            return row
+    return None
+
+
+def _find_active_hybrid_job(
+    *,
+    supabase,
+    idempotency_key: str,
+) -> dict | None:
+    """Return matching queued/processing hybrid job for dedupe window."""
+    lookup = (
+        supabase.table("batch_generation_jobs")
+        .select("*")
+        .in_("status", ["queued", "processing"])
+        .execute()
+    )
+    rows = getattr(lookup, "data", None)
+    if not isinstance(rows, list):
+        return None
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        options = row.get("options")
+        if not isinstance(options, dict):
+            continue
+        if options.get("idempotency_key") == idempotency_key:
             return row
     return None
 
@@ -1515,6 +1648,10 @@ async def _execute_regeneration_request(
     """Execute a single regeneration request and return the full response payload."""
     supabase = get_client()
     canonical_master_sku = resolve_canonical_master_sku(supabase, request.master_sku)
+    request_idempotency_key = _regeneration_idempotency_key(
+        request=request,
+        canonical_master_sku=canonical_master_sku,
+    )
     logger.info(
         "Regenerating %s for SKU: requested=%s canonical=%s",
         request.content_type,
@@ -1695,6 +1832,7 @@ async def _execute_regeneration_request(
         },
         latency_ms=regen_latency_ms,
         request_id=request_id,
+        idempotency_key=request_idempotency_key,
     )
 
     if finish_sentences and persistence["state"] == "completed":
@@ -2200,7 +2338,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
         )
 
         # Validate options
-        options = request.options
+        options = _normalize_generation_options(request.options)
         if not options.get("titles") and not options.get("descriptions"):
             raise HTTPException(
                 status_code=400,
@@ -2211,6 +2349,32 @@ async def hybrid_generate(request: HybridGenerateRequest):
         if not platforms:
             raise HTTPException(
                 status_code=400, detail="At least one platform must be selected"
+            )
+
+        hybrid_idempotency_key = _hybrid_generation_idempotency_key(
+            canonical_skus=canonical_skus,
+            options=options,
+        )
+        options = dict(options)
+        options["idempotency_key"] = hybrid_idempotency_key
+        active_job = _find_active_hybrid_job(
+            supabase=supabase,
+            idempotency_key=hybrid_idempotency_key,
+        )
+        if active_job and active_job.get("id"):
+            active_options = active_job.get("options") if isinstance(active_job.get("options"), dict) else {}
+            return HybridJobResponse(
+                success=True,
+                job_id=str(active_job["id"]),
+                status=str(active_job.get("status") or "queued"),
+                total_skus=int(active_job.get("total_skus") or len(canonical_skus)),
+                multi_sku_families=int(active_options.get("multi_sku_families") or 0),
+                single_skus=int(active_options.get("single_skus") or 0),
+                strategy={
+                    "base_skus": int(active_options.get("base_skus") or 0),
+                    "variant_skus": int(active_options.get("variant_skus") or 0),
+                },
+                deduplicated=True,
             )
 
         logger.info(
@@ -2235,6 +2399,8 @@ async def hybrid_generate(request: HybridGenerateRequest):
             processing_scope.add(family.base_sku)
             processing_scope.update(family.variant_skus)
         expanded_total_skus = len(processing_scope - requested_scope)
+        total_variants = sum(len(f.variant_skus) for f in families)
+        base_skus_count = len(families) + len(single_skus)
 
         logger.info(
             f"Detected {len(families)} multi-SKU families and {len(single_skus)} single SKUs"
@@ -2254,9 +2420,14 @@ async def hybrid_generate(request: HybridGenerateRequest):
                         "descriptions": options.get("descriptions", True),
                         "platforms": platforms,
                         "hybrid": True,
+                        "idempotency_key": hybrid_idempotency_key,
                         "expanded_total_skus": expanded_total_skus,
                         "expanded_completed_skus": 0,
                         "expanded_failed_skus": 0,
+                        "multi_sku_families": len(families),
+                        "single_skus": len(single_skus),
+                        "base_skus": base_skus_count,
+                        "variant_skus": total_variants,
                     },
                 }
             )
@@ -2272,10 +2443,6 @@ async def hybrid_generate(request: HybridGenerateRequest):
         ]
         if sku_records:
             supabase.table("batch_generation_job_skus").insert(sku_records).execute()
-
-        # Calculate strategy counts
-        total_variants = sum(len(f.variant_skus) for f in families)
-        base_skus_count = len(families) + len(single_skus)
 
         # Queue background processing (using thread to survive container lifecycle)
         run_async_in_thread(
@@ -2299,6 +2466,7 @@ async def hybrid_generate(request: HybridGenerateRequest):
                 "base_skus": base_skus_count,
                 "variant_skus": total_variants,
             },
+            deduplicated=False,
         )
 
     except HTTPException:
@@ -2600,9 +2768,14 @@ async def process_hybrid_batch_job(
             "descriptions": options.get("descriptions", True),
             "platforms": platforms,
             "hybrid": True,
+            "idempotency_key": options.get("idempotency_key"),
             "expanded_total_skus": expanded_total,
             "expanded_completed_skus": expanded_completed,
             "expanded_failed_skus": expanded_failed,
+            "multi_sku_families": len(families),
+            "single_skus": len(single_skus),
+            "base_skus": len(families) + len(single_skus),
+            "variant_skus": sum(len(f.variant_skus) for f in families),
         }
 
     def _update_job_progress(
@@ -2722,6 +2895,7 @@ async def process_hybrid_batch_job(
                         else {},
                     },
                     request_id=lineage_request_id,
+                    idempotency_key=options.get("idempotency_key"),
                 )
                 _emit_generation_summary(
                     endpoint="process_hybrid_batch_job",
