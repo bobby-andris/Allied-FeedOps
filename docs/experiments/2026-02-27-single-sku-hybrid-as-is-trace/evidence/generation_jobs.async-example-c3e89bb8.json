@@ -1,0 +1,49 @@
+[
+  {
+    "id": "c3e89bb8-9550-4704-90d2-2de26ffcb41a",
+    "master_sku": "1031/30",
+    "job_type": "regenerate",
+    "status": "completed",
+    "priority": 0,
+    "input_params": {
+      "request": {
+        "emphasis": null,
+        "feedback": "post-merge async smoke",
+        "platform": "google",
+        "async_mode": true,
+        "master_sku": "1031/30",
+        "tone_style": null,
+        "finish_code": null,
+        "content_type": "title",
+        "length_preference": null,
+        "save_as_correction": false
+      },
+      "platform": "google",
+      "request_id": "673e0863-ea52-475d-aa23-87ca194d139d",
+      "content_type": "title"
+    },
+    "result": {
+      "model": "openai/gpt-5.2",
+      "state": "completed",
+      "content": "{FINISH_NAME} 30-Inch Wall Mount Towel Bar - Skyline Collection - Allied Brass",
+      "success": true,
+      "version": 3,
+      "platform": "google",
+      "idempotent": false,
+      "master_sku": "1031/30",
+      "request_id": "673e0863-ea52-475d-aa23-87ca194d139d",
+      "prompt_hash": "e0ce4f8d1d0a0c367d12b3886c936570d76058a3ad8024797dd706c14dcdafa8",
+      "content_type": "title",
+      "used_feedback": true,
+      "finish_sentences": null,
+      "generated_content_id": "50e8a7b0-5787-47d7-a915-be78d91b8d4c"
+    },
+    "error": null,
+    "created_at": "2026-02-27T03:00:09.717358+00:00",
+    "started_at": "2026-02-27T03:00:09.797808+00:00",
+    "completed_at": "2026-02-27T03:00:49.641864+00:00",
+    "attempt_count": 1,
+    "max_attempts": 1,
+    "requested_by": "dashboard"
+  }
+]

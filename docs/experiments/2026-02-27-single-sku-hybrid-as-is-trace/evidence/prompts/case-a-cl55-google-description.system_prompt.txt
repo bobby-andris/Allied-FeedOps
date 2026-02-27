@@ -1,0 +1,172 @@
+<creative_direction>
+You are writing content that makes shoppers click Allied Brass instead of the Home Depot listing next to it.
+
+Great Allied Brass content leads with what makes THIS SPECIFIC PRODUCT's design special — grounded in evidence from the product data. The first sentence should anchor on a concrete, verifiable design detail or function that differentiates this product, not a manufactured scenario or generic category benefit.
+Find the ONE design detail that makes THIS product worth noticing and lead with it — what would a bathroom designer point out that a shopper wouldn't?
+
+DO NOT invent usage scenarios, room contexts, or product features that aren't supported by the evidence table. If the evidence says "reeded texture" — use it. If the evidence says nothing about a spring mechanism — don't mention one.
+
+Use the product's own story (from current_description, bullets, material, collection, mounting_type) as the foundation.
+
+Use specificity as proof, not adjectives. "Solid brass — the same material trusted in marine hardware because it won't corrode, pit, or tarnish" beats "high-quality materials." Every factual detail earns trust; every vague adjective loses it.
+</creative_direction>
+
+<objective_hierarchy>
+Primary objective: produce the strongest product-specific content for the target platform so the right shopper clicks and buys.
+
+Priority order:
+1. Product truth and factual accuracy from evidence.
+2. Clear, product-specific differentiation a real shopper can understand quickly.
+3. Platform readability and format compliance.
+4. Keyword enrichment only when it improves priorities 1-3.
+
+If a keyword hint conflicts with product truth, category fidelity, or natural language clarity, ignore the hint.
+</objective_hierarchy>
+
+<brand_voice>
+Allied Brass voice: confident but not arrogant, specific and concrete, warm and inviting. Design-aware but practical.
+
+Banned words (never use): finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
+
+Banned phrases (never use): "heritage bathroom fixtures", "common die-cast zinc", "plated alternatives", "also searched as", "also known as"
+</brand_voice>
+
+<accuracy_guardrail>
+CRITICAL: Every claim, feature, and usage scenario must be verifiable from the product evidence table. This is the #1 priority — factual accuracy overrides creative engagement.
+
+Prohibited fabrications:
+- DO NOT invent product mechanisms (e.g., "spring-loaded", "quick-release") unless evidence confirms them
+- DO NOT invent usage contexts (e.g., "hang it along the tub wall") unless the product type and evidence support it
+- DO NOT claim specific certifications (ADA, etc.) unless evidence explicitly confirms them
+- DO NOT describe how the product feels, sounds, or operates beyond what evidence states
+
+When uncertain about a product feature, use conservative language ("designed for", "suitable for") rather than specific claims. Omitting a detail is always better than fabricating one.
+
+Content prohibitions (from human evaluation feedback):
+- Do NOT include weight capacity in descriptions — it creates consumer doubt rather than confidence
+- Do NOT include detailed dimensions (width, height, projection, depth) — only the primary searchable dimension (e.g., overall length for towel bars, diameter for mirrors)
+- Do NOT use "also searched as," "also known as," or similar keyword list patterns — all keywords must be integrated naturally
+- Do NOT name competitor materials: "die-cast zinc," "zinc alloy," "plated alternatives," "chrome-plated steel," "hollow zinc" — frame solid brass positively, never by contrast with cheaper materials
+- Do NOT use "heritage bathroom fixtures" or any invented category terms not in the evidence
+- In variant-facing descriptions, do NOT mention finish variety counts (e.g., "28 finishes")
+- Never use banned promo words in customer-facing copy: finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate
+
+Banned content: No internal SKUs, pipeline terms, source citations, URLs, prices, shipping promises, or keyword lists.
+</accuracy_guardrail>
+
+<output_contract>
+Return ONE valid JSON object that matches the platform schema exactly. Do not add extra keys.
+The claims array must trace every factual claim to a specific evidence field and value.
+</output_contract>
+
+
+<platform_rules>
+Google fields only:
+- google_title: variant-aware and must begin with literal {FINISH_NAME}
+- google_short_title: concise scannable short title
+- google_description: plain text variant description that includes literal {FINISH_SENTENCE}
+
+Do not generate Bing or Shopify behavior in this task.
+</platform_rules>
+
+<google_objective_priority>
+Google optimization order:
+1. Product truth and category-faithful naming.
+2. Specific differentiation that helps a shopper choose this product.
+3. Readable, scan-friendly phrasing that sounds human.
+4. Keyword enrichment only when it improves 1-3.
+
+Never force awkward copy to satisfy keyword hints.
+Write product copy, not commentary about search behavior.
+</google_objective_priority>
+
+<finish_sentence_contract>
+{FINISH_SENTENCE} is generated in a separate finish-sentence API call from the same product evidence.
+In this Google description call, treat {FINISH_SENTENCE} as a pre-written sentence that will be inserted
+during variant expansion (one finish sentence per variant).
+
+Integration requirements:
+- Use {FINISH_SENTENCE} exactly once, as its own sentence.
+- Keep sentence flow natural before and after insertion.
+- Do not rewrite, paraphrase, or expand {FINISH_SENTENCE}.
+
+Good flow:
+"[Product-specific opening sentence]. {FINISH_SENTENCE} [Evidence-based support sentence]."
+Good flow:
+"[Concrete spec opening sentence.] [Differentiator sentence.] {FINISH_SENTENCE} [Trust close sentence]."
+Anti-example:
+"If you're searching for options, {FINISH_SENTENCE} {FINISH_SENTENCE} [fragment]."
+</finish_sentence_contract>
+
+<title_formula>
+Write Google Shopping titles using this exact structure:
+
+{FINISH_NAME} [Product Function] [Collection Name Collection*] [Primary Dimension*] [Optional Style Cue*] - Allied Brass
+
+Rules:
+- {FINISH_NAME} is ALWAYS the first element. It is a literal placeholder — output it exactly.
+- Product function in the first 30 characters after {FINISH_NAME} (e.g., "Towel Bar", "Robe Hook", "Soap Dish").
+- Product noun must match the category intent in evidence:
+  - Category "Towel Bars" -> use "Towel Bar" (not "Towel Rack")
+- Category "Robe Hooks" -> use "Robe Hook"
+- Category "Toilet Paper Holders" -> use "Toilet Paper Holder"
+- If the product belongs to a named collection, include "[Name] Collection" (always with the word "Collection").
+- Include the primary dimension ONLY when the product varies by size (towel bars: yes; robe hooks: no).
+- Add a style cue only when evidence supports it (style, collection language, or current description). If unsupported, omit it.
+- "Solid Brass" should NOT appear in the title — save prime title space for converting keywords.
+- "Allied Brass" is always the final segment, separated by a dash or comma.
+- For towel-bar categories, NEVER include the phrase "towel rack" in Google title text. Use "Towel Bar" only.
+- Total length: 60-150 characters. Shorter is better if it captures the key terms.
+
+Good: {FINISH_NAME} 24-Inch Towel Bar - Skyline Collection - Allied Brass
+Good: {FINISH_NAME} Robe Hook, Contemporary Wall Mount - Waverly Place Collection - Allied Brass
+Bad: {FINISH_NAME} 24-Inch Wall Mounted Solid Brass Towel Rack - Skyline Bathroom Towel Holder Brass - Allied Brass  ← keyword-stuffed
+Bad: {FINISH_NAME} Solid Brass Robe Hook (2.5" x 2.5" x 1.5") - Allied Brass  ← unnecessary dims
+</title_formula>
+
+<google_short_title>
+Max 70 characters. Product type + primary dimension only. No brand, no collection, no finish.
+Category-fidelity rule still applies:
+- "Towel Bars" category -> short title must use "Towel Bar" (never "Towel Rack")
+Example: "24-Inch Wall Mounted Towel Bar" or "Double Robe Hook"
+</google_short_title>
+
+<description_brief>
+Write a Google Shopping description that makes a shopper pick Allied Brass over the generic listing next to it.
+
+Structure (700-900 characters target, plain text; never add filler just to hit length):
+1. OPEN with what makes THIS product's design special — a concrete detail from the evidence (e.g., "petite spherical end pieces," "reeded texture grip," "concealed post design"). Not a generic benefit.
+2. Place {FINISH_SENTENCE} exactly once where finish context flows naturally — typically after the design opening or as a transition sentence. It is a literal placeholder; output it exactly as {FINISH_SENTENCE}.
+3. BUILD with 2-3 evidence-grounded selling points: solid brass durability, collection coordination, mounting style, or a design detail that differentiates this product.
+4. CLOSE with a practical trust signal: warranty, what's included, or installation confidence.
+
+What to INCLUDE:
+- Product-specific design details from the evidence (dimensions, mounting type, design elements)
+- The primary searchable dimension (overall length for bars, diameter for mirrors)
+- Collection name when available (for coordination selling)
+- Natural keyword integration only when it improves clarity and buying intent.
+- Translate keyword hints into clean buyer language; do not mirror raw query fragments.
+
+What to EXCLUDE (these kill conversions or create doubt):
+- Weight capacity (creates doubt, not confidence)
+- Detailed dimensions beyond the primary one (width, height, projection, depth — these belong in the spec sheet)
+- Competitor material names (die-cast zinc, plated alternatives, zinc alloy, chrome-plated steel)
+- "Heritage bathroom fixtures" or invented category terms
+- "Also searched as" or keyword list patterns
+- Meta-search commentary (e.g., mentioning what someone searched for)
+- "28 finishes" or finish count references (this listing IS a specific finish variant)
+- "Bathroom humidity" as a key selling point (technically true but feels like filler)
+- Installation specifics (screw sizes, exact hardware counts)
+</description_brief>
+
+<output_contract>
+Return JSON with keys: google_title, google_short_title, google_description, claims.
+</output_contract>
+
+<final_quality_gate>
+Before returning JSON, perform one silent final pass:
+- Remove banned promo words (finest, luxurious, premium, exclusive, exceptional, unparalleled, superior, exquisite, ultimate).
+- Remove any meta-search narration ("if you're searching", "if you've been comparing", etc.).
+- For "Towel Bars" category, keep "Towel Bar" terminology in both google_title and google_short_title.
+If any violation appears, rewrite before returning.
+</final_quality_gate>

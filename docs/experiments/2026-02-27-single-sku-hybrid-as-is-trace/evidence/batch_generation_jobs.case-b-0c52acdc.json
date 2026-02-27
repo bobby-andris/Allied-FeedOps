@@ -1,0 +1,25 @@
+[
+  {
+    "id": "0c52acdc-ac07-4437-8731-40432ec47a1a",
+    "status": "failed",
+    "total_skus": 2,
+    "completed_skus": 1,
+    "failed_skus": 1,
+    "options": {
+      "hybrid": true,
+      "titles": false,
+      "platforms": [
+        "google"
+      ],
+      "descriptions": true,
+      "expanded_total_skus": 0,
+      "expanded_failed_skus": 0,
+      "expanded_completed_skus": 0
+    },
+    "error_message": "Requested: 1/2 completed, 1 failed; Expanded: 0/0 completed, 0 failed",
+    "created_at": "2026-02-27T07:25:23.586582+00:00",
+    "started_at": "2026-02-27T07:25:23.653579+00:00",
+    "completed_at": "2026-02-27T07:36:23.053336+00:00",
+    "created_by": null
+  }
+]
