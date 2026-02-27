@@ -548,6 +548,10 @@ class OpenAIProvider(LLMProvider):
         opened = circuit_breakers.record_failure(self.name)
         if opened:
             metrics_registry.increment("provider_circuit_open_total", provider=self.name)
+        attempts_made = max(
+            int(self._last_retry_counts.get("attempt_count", 0)),
+            1 if last_error is not None else 0,
+        )
         metrics_registry.observe(
             "provider_latency_seconds",
             time.perf_counter() - start_time,
@@ -558,12 +562,12 @@ class OpenAIProvider(LLMProvider):
             logging.ERROR,
             "provider.generate.failure",
             provider=self.name,
-            attempts=self.max_retries,
+            attempts=attempts_made,
             error=last_error,
             circuit_opened=opened,
         )
         raise LLMError(
-            f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries
+            f"Failed to generate valid JSON: {last_error}", self.name, attempts_made
         )
 
     @property

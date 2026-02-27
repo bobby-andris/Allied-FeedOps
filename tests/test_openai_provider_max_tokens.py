@@ -75,8 +75,9 @@ async def test_openai_provider_enforces_json_retry_budget(monkeypatch):
 
     monkeypatch.setattr(provider.client.chat.completions, "create", _fake_create)
 
-    with pytest.raises(LLMError, match="json_retry_budget_exceeded"):
+    with pytest.raises(LLMError, match="json_retry_budget_exceeded") as exc_info:
         await provider.generate(prompt="{}", schema={})
 
     # Initial attempt + one JSON repair retry.
     assert calls["count"] == 2
+    assert exc_info.value.retries == 2
