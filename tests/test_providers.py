@@ -209,6 +209,8 @@ def test_get_provider_uses_openai_model_env():
     ):
         provider = get_provider()
         assert provider.name == "openai/gpt-4o"
+        assert provider.max_retries == 2
+        assert provider.client.max_retries == 0
 
 
 def test_get_provider_falls_back_to_gemini():
@@ -242,3 +244,22 @@ def test_get_provider_raises_when_none_configured():
             get_provider()
         with pytest.raises(ValueError, match="No LLM provider configured"):
             get_provider()
+
+
+def test_get_provider_applies_retry_and_timeout_env_overrides():
+    """Factory applies bounded retry/timeout controls for OpenAI provider."""
+    with patch.dict(
+        "os.environ",
+        {
+            "OPENAI_API_KEY": "test-key",
+            "FEEDOPS_PROVIDER_MAX_RETRIES": "1",
+            "FEEDOPS_OPENAI_SDK_MAX_RETRIES": "1",
+            "FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS": "75",
+            "FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS": "180",
+        },
+        clear=True,
+    ):
+        provider = get_provider()
+        assert provider.max_retries == 1
+        assert provider.max_total_seconds == 180
+        assert provider.client.max_retries == 1

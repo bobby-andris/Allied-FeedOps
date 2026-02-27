@@ -29,6 +29,7 @@ Endpoints:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import threading
@@ -344,6 +345,7 @@ class RegenerateJobResponse(BaseModel):
     master_sku: str
     content_type: str
     platform: str
+    deduplicated: bool = False
 
 
 class RegenerateJobStatusResponse(BaseModel):
@@ -696,6 +698,9 @@ def _persist_regeneration_result(
     user_prompt: str,
     feedback_text: str | None,
     mode: str,
+    tokens_used: int | None = None,
+    cost_usd: float | None = None,
+    generation_diagnostics: dict | None = None,
     latency_ms: int | None = None,
     request_id: str | None = None,
 ) -> dict[str, object]:
@@ -762,6 +767,12 @@ def _persist_regeneration_result(
             content_type=content_type,
         )
 
+    lineage_request_id = _require_request_id(request_id or get_request_id())
+    flag_snapshot = capture_flag_snapshot()
+    if isinstance(generation_diagnostics, dict) and generation_diagnostics:
+        flag_snapshot = dict(flag_snapshot)
+        flag_snapshot["generation_diagnostics"] = generation_diagnostics
+
     history_payload = {
         "master_sku": master_sku,
         "content_type": content_type,
@@ -775,9 +786,11 @@ def _persist_regeneration_result(
         "user_prompt": user_prompt[:50000],
         "prompt_hash": prompt_hash,
         "generated_content_id": generated_content_id,
-        "feature_flags_active": capture_flag_snapshot(),
+        "feature_flags_active": flag_snapshot,
+        "tokens_used": tokens_used,
+        "cost_usd": cost_usd,
         "latency_ms": latency_ms,
-        "request_id": request_id or get_request_id(),
+        "request_id": lineage_request_id,
     }
     supabase.table("regeneration_history").insert(history_payload).execute()
 
@@ -825,6 +838,7 @@ def _persist_generated_content_and_history(
         content_type=content_type,
     )
 
+    lineage_request_id = _require_request_id(request_id or get_request_id())
     history_payload = {
         "master_sku": master_sku,
         "content_type": content_type,
@@ -839,7 +853,7 @@ def _persist_generated_content_and_history(
         "feature_flags_active": capture_flag_snapshot(),
         "tokens_used": tokens_used,
         "latency_ms": latency_ms,
-        "request_id": request_id or get_request_id(),
+        "request_id": lineage_request_id,
     }
     supabase.table("regeneration_history").insert(history_payload).execute()
 
@@ -850,6 +864,7 @@ def _create_regeneration_job(
     request: RegenerateRequest,
     canonical_master_sku: str,
     request_id: str,
+    idempotency_key: str,
 ) -> str:
     """Create a generation_jobs row for async regeneration tracking."""
     job_payload = {
@@ -862,6 +877,7 @@ def _create_regeneration_job(
             "request_id": request_id,
             "platform": request.platform,
             "content_type": request.content_type,
+            "idempotency_key": idempotency_key,
         },
         "attempt_count": 0,
         "max_attempts": 1,
@@ -884,6 +900,79 @@ def _format_job_error(exc: Exception) -> str:
             return json.dumps(detail, default=str)[:2000]
         return str(detail)[:2000]
     return str(exc)[:2000]
+
+
+def _require_request_id(request_id: str | None) -> str:
+    """Enforce non-placeholder request IDs for lineage writes."""
+    rid = (request_id or "").strip()
+    if not rid or rid == "-":
+        raise RuntimeError("Missing request_id for regeneration lineage write")
+    return rid
+
+
+def _regeneration_idempotency_key(
+    *,
+    request: RegenerateRequest,
+    canonical_master_sku: str,
+) -> str:
+    """Compute a stable idempotency key for async regenerate requests."""
+    payload = {
+        "master_sku": canonical_master_sku,
+        "platform": request.platform,
+        "content_type": request.content_type,
+        "feedback": (request.feedback or "").strip(),
+        "finish_code": (request.finish_code or "").strip(),
+        "tone_style": request.tone_style,
+        "emphasis": request.emphasis or [],
+        "length_preference": request.length_preference,
+        "save_as_correction": bool(request.save_as_correction),
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _find_active_regeneration_job(
+    *,
+    supabase,
+    canonical_master_sku: str,
+    idempotency_key: str,
+) -> dict | None:
+    """Return matching pending/running regenerate job for dedupe window."""
+    lookup = (
+        supabase.table("generation_jobs")
+        .select("*")
+        .eq("master_sku", canonical_master_sku)
+        .eq("job_type", "regenerate")
+        .in_("status", ["pending", "running"])
+        .execute()
+    )
+    rows = getattr(lookup, "data", None)
+    if not isinstance(rows, list):
+        return None
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        input_params = row.get("input_params")
+        if not isinstance(input_params, dict):
+            continue
+        if input_params.get("idempotency_key") == idempotency_key:
+            return row
+    return None
+
+
+def _estimate_openai_cost_usd_from_usage(usage: dict[str, int] | None) -> float | None:
+    """Estimate OpenAI cost from usage snapshot for lineage diagnostics."""
+    if not isinstance(usage, dict):
+        return None
+    prompt_tokens = usage.get("prompt_tokens")
+    completion_tokens = usage.get("completion_tokens")
+    if prompt_tokens is None or completion_tokens is None:
+        return None
+    cached_tokens = usage.get("cached_tokens", 0) or 0
+    uncached_input = max(int(prompt_tokens) - int(cached_tokens), 0)
+    input_cost = (uncached_input / 1_000_000) * 1.75 + (cached_tokens / 1_000_000) * 1.75 * 0.5
+    output_cost = (int(completion_tokens) / 1_000_000) * 14.0
+    return round(input_cost + output_cost, 6)
 
 
 def _normalize_regeneration_job_row(job_row: dict) -> RegenerateJobStatusResponse:
@@ -1373,9 +1462,26 @@ async def _execute_regeneration_request(
     )
     system_prompt = str(generated.get("system_prompts", {}).get(request.platform, ""))
     user_prompt = str(generated.get("user_prompts", {}).get(request.platform, ""))
+    usage_by_platform = generated.get("usage_by_platform", {})
+    latency_by_platform = generated.get("latency_by_platform", {})
+    parse_by_platform = generated.get("parse_by_platform", {})
     regen_latency_ms = int(
-        generated.get("latency_by_platform", {}).get(request.platform, 0) or 0
+        latency_by_platform.get(request.platform, 0) or 0
     )
+    total_tokens_used = 0
+    estimated_cost_usd = 0.0
+    has_cost_samples = False
+    if isinstance(usage_by_platform, dict):
+        for _platform_name, usage_snapshot in usage_by_platform.items():
+            if not isinstance(usage_snapshot, dict):
+                continue
+            prompt_tokens = int(usage_snapshot.get("prompt_tokens", 0) or 0)
+            completion_tokens = int(usage_snapshot.get("completion_tokens", 0) or 0)
+            total_tokens_used += prompt_tokens + completion_tokens
+            usage_cost = _estimate_openai_cost_usd_from_usage(usage_snapshot)
+            if usage_cost is not None:
+                has_cost_samples = True
+                estimated_cost_usd += usage_cost
     if include_finish:
         raw_finish = generated.get("finish_sentences")
         if isinstance(raw_finish, dict):
@@ -1393,6 +1499,14 @@ async def _execute_regeneration_request(
         user_prompt=user_prompt,
         feedback_text=request.feedback,
         mode="with_feedback" if request.feedback else "simple",
+        tokens_used=total_tokens_used or None,
+        cost_usd=round(estimated_cost_usd, 6) if has_cost_samples else None,
+        generation_diagnostics={
+            "selected_platforms": list(selected_platforms),
+            "usage_by_platform": usage_by_platform if isinstance(usage_by_platform, dict) else {},
+            "latency_by_platform": latency_by_platform if isinstance(latency_by_platform, dict) else {},
+            "parse_by_platform": parse_by_platform if isinstance(parse_by_platform, dict) else {},
+        },
         latency_ms=regen_latency_ms,
         request_id=request_id,
     )
@@ -1488,7 +1602,7 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
         ensure_generation_enabled(operation="process_regenerate_job")
         request = RegenerateRequest(**request_payload)
         request.async_mode = False
-        request_id = get_request_id()
+        request_id = _require_request_id(get_request_id())
         result = await _execute_regeneration_request(request=request, request_id=request_id)
         (
             supabase.table("generation_jobs")
@@ -1536,18 +1650,42 @@ async def regenerate_content(request: RegenerateRequest):
     """Regenerate content either synchronously (default) or as queued async job."""
     try:
         ensure_generation_enabled(operation="regenerate_content")
-        request_id = get_request_id()
+        request_id = _require_request_id(get_request_id())
 
         if request.async_mode:
             supabase = get_client()
             canonical_master_sku = resolve_canonical_master_sku(
                 supabase, request.master_sku
             )
+            idempotency_key = _regeneration_idempotency_key(
+                request=request,
+                canonical_master_sku=canonical_master_sku,
+            )
+            active_job = _find_active_regeneration_job(
+                supabase=supabase,
+                canonical_master_sku=canonical_master_sku,
+                idempotency_key=idempotency_key,
+            )
+            if active_job and active_job.get("id"):
+                normalized_status = _normalize_regeneration_job_status(
+                    active_job.get("status")
+                )
+                return RegenerateJobResponse(
+                    success=True,
+                    job_id=str(active_job["id"]),
+                    status=normalized_status,
+                    request_id=request_id,
+                    master_sku=canonical_master_sku,
+                    content_type=request.content_type,
+                    platform=request.platform,
+                    deduplicated=True,
+                )
             job_id = _create_regeneration_job(
                 supabase=supabase,
                 request=request,
                 canonical_master_sku=canonical_master_sku,
                 request_id=request_id,
+                idempotency_key=idempotency_key,
             )
             request_payload = request.model_dump()
             request_payload["master_sku"] = canonical_master_sku
@@ -1566,6 +1704,7 @@ async def regenerate_content(request: RegenerateRequest):
                 master_sku=canonical_master_sku,
                 content_type=request.content_type,
                 platform=request.platform,
+                deduplicated=False,
             )
 
         return await _execute_regeneration_request(request=request, request_id=request_id)

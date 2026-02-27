@@ -26,6 +26,7 @@ type RegenerateApiResponse = {
   job_id?: string
   status?: 'pending' | 'running' | 'completed' | 'failed'
   request_id?: string
+  deduplicated?: boolean
   content?: string
   model?: string
   prompt_hash?: string
@@ -144,7 +145,11 @@ export function RegenerateButton({
       if (!data.job_id) {
         throw new Error('Regeneration queue response missing job_id')
       }
-      toast.info(pendingMessage)
+      if (data.deduplicated) {
+        toast.info('An identical regeneration job is already running. Reusing active job...')
+      } else {
+        toast.info(pendingMessage)
+      }
       return await pollRegenerateJob(data.job_id)
     }
 

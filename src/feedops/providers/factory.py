@@ -16,6 +16,39 @@ def _truthy(value: str | None) -> bool:
     return (value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _int_env(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        logger.warning("Invalid integer for %s=%r, using default=%s", name, raw, default)
+        return default
+
+
+def _float_env(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        logger.warning("Invalid float for %s=%r, using default=%s", name, raw, default)
+        return default
+
+
+def _build_openai_provider(*, api_key: str, model: str) -> OpenAIProvider:
+    return OpenAIProvider(
+        api_key=api_key,
+        model=model,
+        max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 2),
+        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 120.0),
+        sdk_max_retries=_int_env("FEEDOPS_OPENAI_SDK_MAX_RETRIES", 0),
+        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 300.0),
+    )
+
+
 def get_provider(preferred: str | None = None) -> LLMProvider:
     """Get configured LLM provider with fallback chain.
 
@@ -42,13 +75,13 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
         if preferred == "gemini":
             return FallbackProvider(
                 primary=GeminiProvider(api_key=gemini_key),
-                fallback=OpenAIProvider(
+                fallback=_build_openai_provider(
                     api_key=openai_key,
                     model=openai_model or "gpt-5.2",
                 ),
             )
         return FallbackProvider(
-            primary=OpenAIProvider(
+            primary=_build_openai_provider(
                 api_key=openai_key,
                 model=openai_model or "gpt-5.2",
             ),
@@ -56,18 +89,20 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
         )
 
     if preferred == "openai" and openai_key:
-        if openai_model:
-            return OpenAIProvider(api_key=openai_key, model=openai_model)
-        return OpenAIProvider(api_key=openai_key)
+        return _build_openai_provider(
+            api_key=openai_key,
+            model=openai_model or "gpt-5.2",
+        )
 
     if preferred == "gemini" and gemini_key:
         return GeminiProvider(api_key=gemini_key)
 
     if openai_key:
         logger.info("Using OpenAI provider")
-        if openai_model:
-            return OpenAIProvider(api_key=openai_key, model=openai_model)
-        return OpenAIProvider(api_key=openai_key)
+        return _build_openai_provider(
+            api_key=openai_key,
+            model=openai_model or "gpt-5.2",
+        )
 
     if gemini_key:
         logger.info("Using Gemini provider (OpenAI not configured)")
