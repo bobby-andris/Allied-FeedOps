@@ -145,6 +145,90 @@ export interface GenerationEffectWindow {
   updated_at: string
 }
 
+export type OptimizationActionState = 'proposed' | 'approved' | 'executing' | 'validated' | 'rejected'
+
+export interface OptimizationActionQueue {
+  id: string
+  action_key: string
+  source_type: string
+  source_ref: string | null
+  change_package_id: string | null
+  generation_effect_window_id: number | null
+  experiment_key: string | null
+  master_sku: string | null
+  platform: 'google' | 'bing' | 'shopify' | string | null
+  action_type: string
+  title: string
+  rationale: string | null
+  recommended_payload: Record<string, unknown> | null
+  current_state: OptimizationActionState
+  priority_score: number | null
+  expected_revenue_impact: number | null
+  confidence_score: number | null
+  effort_score: number | null
+  policy_risk_score: number | null
+  approved_by: string | null
+  approved_at: string | null
+  executed_at: string | null
+  validated_at: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface OptimizationActionScore {
+  id: number
+  action_id: string
+  score_version: string
+  expected_revenue_impact: number
+  confidence_score: number
+  effort_score: number
+  policy_risk_score: number
+  composite_score: number
+  inputs: Record<string, unknown> | null
+  created_at: string
+}
+
+export type ExperimentRunStatus = 'proposed' | 'approved' | 'executing' | 'validated' | 'rejected'
+
+export interface ExperimentRun {
+  id: string
+  run_key: string
+  experiment_key: string
+  action_id: string | null
+  change_package_id: string | null
+  generation_effect_window_id: number | null
+  status: ExperimentRunStatus
+  gate_status: string | null
+  gate_results: Record<string, unknown> | null
+  started_at: string | null
+  completed_at: string | null
+  owner: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ExperimentCandidate {
+  id: number
+  run_id: string
+  candidate_key: string
+  generated_content_id: string | null
+  regeneration_history_id: string | null
+  request_id: string | null
+  master_sku: string | null
+  platform: 'google' | 'bing' | 'shopify' | string | null
+  content_type: string | null
+  cohort: 'control' | 'treatment' | 'holdout' | null
+  status: ExperimentRunStatus
+  observed_lift: number | null
+  sample_size: number | null
+  metrics: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
 export interface GeneratedContent {
   id: string
   master_sku: string

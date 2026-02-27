@@ -49,7 +49,7 @@ const navigation: NavItem[] = [
   { name: 'Shopping Funnel', href: '/shopping-funnel', icon: Funnel },
   { name: 'Tier Intelligence', href: '/tier-scoring', icon: Target },
   { name: 'Market Intelligence', href: '/market-intelligence', icon: Compass },
-  { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge, badge: 'Soon' },
+  { name: 'Optimization Control', href: '/optimization-control-center', icon: Gauge },
   { name: 'Intent Control', href: '/intent-control-center', icon: Gauge, badge: 'Soon' },
   { name: 'Search Governance', href: '/search-governance', icon: GitBranch },
   { name: 'Experiment Lab', href: '/experiment-lab', icon: FlaskConical },
