@@ -752,6 +752,8 @@ def _persist_regeneration_result(
     cost_usd: float | None = None,
     generation_diagnostics: dict | None = None,
     latency_ms: int | None = None,
+    provider_attempt_count: int | None = None,
+    parse_retry_count: int | None = None,
     request_id: str | None = None,
     idempotency_key: str | None = None,
 ) -> dict[str, object]:
@@ -849,6 +851,8 @@ def _persist_regeneration_result(
         "tokens_used": tokens_used,
         "cost_usd": cost_usd,
         "latency_ms": latency_ms,
+        "provider_attempt_count": provider_attempt_count,
+        "parse_retry_count": parse_retry_count,
         "request_id": lineage_request_id,
         "result_state": "completed",
         "result_version": next_version,
@@ -882,6 +886,8 @@ def _persist_generated_content_and_history(
     tokens_used: int | None = None,
     cost_usd: float | None = None,
     latency_ms: int | None = None,
+    provider_attempt_count: int | None = None,
+    parse_retry_count: int | None = None,
     generation_diagnostics: dict | None = None,
     request_id: str | None = None,
     idempotency_key: str | None = None,
@@ -944,6 +950,8 @@ def _persist_generated_content_and_history(
         "tokens_used": tokens_used,
         "cost_usd": cost_usd,
         "latency_ms": latency_ms,
+        "provider_attempt_count": provider_attempt_count,
+        "parse_retry_count": parse_retry_count,
         "request_id": lineage_request_id,
         "result_state": "completed",
         "result_version": result_version,
@@ -1577,6 +1585,8 @@ async def optimize_single_sku(request: OptimizeRequest):
                     tokens_used=telemetry["tokens_used"],
                     cost_usd=telemetry["cost_usd"],
                     latency_ms=telemetry["latency_ms"],
+                    provider_attempt_count=telemetry["provider_attempt_count"],
+                    parse_retry_count=telemetry["parse_retry_count"],
                     generation_diagnostics={
                         "selected_platforms": list(platforms),
                         "usage_by_platform": usage_by_platform
@@ -1831,6 +1841,8 @@ async def _execute_regeneration_request(
             "retry_by_platform": retry_by_platform if isinstance(retry_by_platform, dict) else {},
         },
         latency_ms=regen_latency_ms,
+        provider_attempt_count=provider_attempt_count or None,
+        parse_retry_count=parse_retry_count or None,
         request_id=request_id,
         idempotency_key=request_idempotency_key,
     )
@@ -2584,6 +2596,12 @@ async def process_batch_job(
                             latency_ms=platform_telemetry["latency_ms"]
                             if include_platform_telemetry
                             else None,
+                            provider_attempt_count=platform_telemetry["provider_attempt_count"]
+                            if include_platform_telemetry
+                            else None,
+                            parse_retry_count=platform_telemetry["parse_retry_count"]
+                            if include_platform_telemetry
+                            else None,
                             generation_diagnostics={
                                 "selected_platforms": list(platforms),
                                 "usage_by_platform": usage_by_platform
@@ -2879,6 +2897,8 @@ async def process_hybrid_batch_job(
                     tokens_used=telemetry["tokens_used"],
                     cost_usd=telemetry["cost_usd"],
                     latency_ms=telemetry["latency_ms"],
+                    provider_attempt_count=telemetry["provider_attempt_count"],
+                    parse_retry_count=telemetry["parse_retry_count"],
                     generation_diagnostics={
                         "selected_platforms": list(platforms),
                         "usage_by_platform": usage_by_platform

@@ -437,6 +437,25 @@ export default function MonitoringPage() {
         )}
       </Card>
 
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Cost Reconciliation</CardTitle>
+              <CardDescription>
+                Compare OpenAI organization usage with internal regenerate lineage to detect spend drift.
+              </CardDescription>
+            </div>
+            <Link href="/monitoring/cost-reconciliation">
+              <Button variant="outline" size="sm">
+                View Reconciliation
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+      </Card>
+
       {/* Controls */}
       <Card>
         <CardHeader>
