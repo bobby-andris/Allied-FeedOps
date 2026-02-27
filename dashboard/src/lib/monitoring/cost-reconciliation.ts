@@ -49,6 +49,13 @@ interface OpenAiWindowAggregate {
   warnings: string[]
 }
 
+interface OpenAiUsageCredentials {
+  apiKey: string | null
+  organizationId: string | null
+  projectId: string | null
+  sourceEnv: 'OPENAI_USAGE_API_KEY' | 'OPENAI_ADMIN_API_KEY' | 'OPENAI_API_KEY' | null
+}
+
 interface DeltaClassification {
   status: 'ok' | 'attention' | 'missing_openai_data'
   categories: string[]
@@ -307,8 +314,9 @@ function parseOpenAiCostsPayload(payload: unknown): {
 
 async function fetchOpenAiWindowAggregate(
   window: DailyWindow,
-  openAiApiKey: string | null
+  credentials: OpenAiUsageCredentials
 ): Promise<OpenAiWindowAggregate> {
+  const openAiApiKey = credentials.apiKey
   if (!openAiApiKey) {
     return {
       usageAvailable: false,
@@ -320,15 +328,23 @@ async function fetchOpenAiWindowAggregate(
       totalCostUsd: null,
       currency: 'usd',
       metadata: {},
-      warnings: ['OPENAI_API_KEY is not configured; OpenAI reconciliation unavailable'],
+      warnings: [
+        'OpenAI usage key is not configured; set OPENAI_USAGE_API_KEY (preferred), OPENAI_ADMIN_API_KEY, or OPENAI_API_KEY.',
+      ],
     }
   }
 
   const startUnix = Math.floor(new Date(window.startIso).getTime() / 1000)
   const endUnix = Math.floor(new Date(window.endIso).getTime() / 1000)
-  const headers = {
+  const headers: Record<string, string> = {
     Authorization: `Bearer ${openAiApiKey}`,
     'Content-Type': 'application/json',
+  }
+  if (credentials.organizationId) {
+    headers['OpenAI-Organization'] = credentials.organizationId
+  }
+  if (credentials.projectId) {
+    headers['OpenAI-Project'] = credentials.projectId
   }
 
   const warnings: string[] = []
@@ -348,7 +364,14 @@ async function fetchOpenAiWindowAggregate(
 
     const response = await fetch(usageUrl.toString(), { headers, cache: 'no-store' })
     if (!response.ok) {
-      warnings.push(`OpenAI usage API error (${response.status})`)
+      if (response.status === 401 || response.status === 403) {
+        warnings.push(
+          `OpenAI usage API auth error (${response.status}); key source=${credentials.sourceEnv ?? 'unknown'}. ` +
+            'Use an org-level key with organization usage/cost permissions and set OPENAI_ORG_ID if required.'
+        )
+      } else {
+        warnings.push(`OpenAI usage API error (${response.status})`)
+      }
     } else {
       const parsed = parseOpenAiUsagePayload(await response.json())
       usageAvailable = true
@@ -377,7 +400,14 @@ async function fetchOpenAiWindowAggregate(
 
     const response = await fetch(costsUrl.toString(), { headers, cache: 'no-store' })
     if (!response.ok) {
-      warnings.push(`OpenAI costs API error (${response.status})`)
+      if (response.status === 401 || response.status === 403) {
+        warnings.push(
+          `OpenAI costs API auth error (${response.status}); key source=${credentials.sourceEnv ?? 'unknown'}. ` +
+            'Use an org-level key with organization usage/cost permissions and set OPENAI_ORG_ID if required.'
+        )
+      } else {
+        warnings.push(`OpenAI costs API error (${response.status})`)
+      }
     } else {
       const parsed = parseOpenAiCostsPayload(await response.json())
       costsAvailable = parsed.totalCostUsd !== null
@@ -405,6 +435,36 @@ async function fetchOpenAiWindowAggregate(
       costs: costMetadata,
     },
     warnings,
+  }
+}
+
+function resolveOpenAiUsageCredentials(): OpenAiUsageCredentials {
+  const usageApiKey = process.env.OPENAI_USAGE_API_KEY?.trim() || null
+  if (usageApiKey) {
+    return {
+      apiKey: usageApiKey,
+      organizationId: process.env.OPENAI_ORG_ID?.trim() || null,
+      projectId: process.env.OPENAI_PROJECT_ID?.trim() || null,
+      sourceEnv: 'OPENAI_USAGE_API_KEY',
+    }
+  }
+
+  const adminApiKey = process.env.OPENAI_ADMIN_API_KEY?.trim() || null
+  if (adminApiKey) {
+    return {
+      apiKey: adminApiKey,
+      organizationId: process.env.OPENAI_ORG_ID?.trim() || null,
+      projectId: process.env.OPENAI_PROJECT_ID?.trim() || null,
+      sourceEnv: 'OPENAI_ADMIN_API_KEY',
+    }
+  }
+
+  const defaultApiKey = process.env.OPENAI_API_KEY?.trim() || null
+  return {
+    apiKey: defaultApiKey,
+    organizationId: process.env.OPENAI_ORG_ID?.trim() || null,
+    projectId: process.env.OPENAI_PROJECT_ID?.trim() || null,
+    sourceEnv: defaultApiKey ? 'OPENAI_API_KEY' : null,
   }
 }
 
@@ -491,7 +551,7 @@ export async function runCostReconciliationCapture(options?: {
   const lookbackDays = Math.max(1, Math.min(Math.trunc(options?.lookbackDays ?? 1), 30))
   const now = options?.now ?? new Date()
   const supabase = options?.supabase ?? createAdminClient()
-  const openAiApiKey = process.env.OPENAI_API_KEY?.trim() || null
+  const openAiCredentials = resolveOpenAiUsageCredentials()
 
   const windows = buildUtcDailyWindows(lookbackDays, now)
   const captureResults: ReconciliationWindowCapture[] = []
@@ -499,7 +559,7 @@ export async function runCostReconciliationCapture(options?: {
   for (const window of windows) {
     const [internal, openai] = await Promise.all([
       fetchInternalWindowAggregate(supabase, window),
-      fetchOpenAiWindowAggregate(window, openAiApiKey),
+      fetchOpenAiWindowAggregate(window, openAiCredentials),
     ])
 
     const classification = classifyReconciliationDelta({

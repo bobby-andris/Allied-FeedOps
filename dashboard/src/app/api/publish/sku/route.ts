@@ -10,6 +10,7 @@ import {
   buildShopifyFinalPayloadSnapshot,
   normalizeSegmentKey,
 } from '@/lib/publishing/final-payload'
+import { attachPublishEventLineage } from '@/lib/publishing/change-packages'
 import type { Platform, PublishEventInsert } from '@/lib/publishing/types'
 import { computePlatformReadiness, validateRequestedPlatformsReady } from '@/lib/publishing/platform-readiness'
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
@@ -807,7 +808,29 @@ async function logPublishEvent(
       ...event,
       published_at: new Date().toISOString(),
     }
-    const { error } = await supabase.from('publish_events').insert(payload)
+    const selectColumns = [
+      'id',
+      'master_sku',
+      'platform',
+      'environment',
+      'action',
+      'status',
+      'published_at',
+      'batch_id',
+      'published_by',
+      'published_title',
+      'published_description',
+      'content_version',
+      'prompt_hash',
+      'final_payload_hash',
+      'evidence_hash',
+      'segment_key',
+    ].join(',')
+    const { data: insertedEvent, error } = await supabase
+      .from('publish_events')
+      .insert(payload)
+      .select(selectColumns)
+      .single()
     if (
       error
       && (
@@ -829,7 +852,19 @@ async function logPublishEvent(
       if (/prompt_hash/i.test(error.message)) {
         delete legacyPayload.prompt_hash
       }
-      await supabase.from('publish_events').insert(legacyPayload)
+      const { data: fallbackInsertedEvent } = await supabase
+        .from('publish_events')
+        .insert(legacyPayload)
+        .select(selectColumns)
+        .single()
+      if (fallbackInsertedEvent) {
+        await attachPublishEventLineage(supabase, fallbackInsertedEvent, event)
+      }
+      return
+    }
+
+    if (insertedEvent) {
+      await attachPublishEventLineage(supabase, insertedEvent, event)
     }
   } catch (error) {
     console.error('Failed to log publish event:', error)
