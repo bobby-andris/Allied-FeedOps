@@ -2379,16 +2379,18 @@ async def process_batch_job(
             retry_by_platform = generated.get("retry_by_platform", {})
 
             if not dry_run:
+                primary_content_type = content_types[0] if content_types else None
                 for platform in platforms:
+                    platform_telemetry = _extract_platform_telemetry(
+                        platform=platform,
+                        usage_by_platform=usage_by_platform,
+                        latency_by_platform=latencies,
+                        retry_by_platform=retry_by_platform,
+                    )
                     for content_type in content_types:
                         field_key = _content_field_key(platform, content_type)
                         content = str(generated.get(field_key, "")).strip()
-                        telemetry = _extract_platform_telemetry(
-                            platform=platform,
-                            usage_by_platform=usage_by_platform,
-                            latency_by_platform=latencies,
-                            retry_by_platform=retry_by_platform,
-                        )
+                        include_platform_telemetry = content_type == primary_content_type
                         _persist_generated_content_and_history(
                             supabase=supabase,
                             master_sku=canonical_sku,
@@ -2405,9 +2407,15 @@ async def process_batch_job(
                             system_prompt=str(system_prompts.get(platform, "")),
                             user_prompt=str(user_prompts.get(platform, "")),
                             mode="full_generation_v2",
-                            tokens_used=telemetry["tokens_used"],
-                            cost_usd=telemetry["cost_usd"],
-                            latency_ms=telemetry["latency_ms"],
+                            tokens_used=platform_telemetry["tokens_used"]
+                            if include_platform_telemetry
+                            else None,
+                            cost_usd=platform_telemetry["cost_usd"]
+                            if include_platform_telemetry
+                            else None,
+                            latency_ms=platform_telemetry["latency_ms"]
+                            if include_platform_telemetry
+                            else None,
                             generation_diagnostics={
                                 "selected_platforms": list(platforms),
                                 "usage_by_platform": usage_by_platform
@@ -2434,11 +2442,21 @@ async def process_batch_job(
                             content_type=content_type,
                             mode="full_generation_v2",
                             result_state="completed",
-                            tokens_used=telemetry["tokens_used"],
-                            cost_usd=telemetry["cost_usd"],
-                            latency_ms=telemetry["latency_ms"],
-                            provider_attempt_count=telemetry["provider_attempt_count"],
-                            parse_retry_count=telemetry["parse_retry_count"],
+                            tokens_used=platform_telemetry["tokens_used"]
+                            if include_platform_telemetry
+                            else None,
+                            cost_usd=platform_telemetry["cost_usd"]
+                            if include_platform_telemetry
+                            else None,
+                            latency_ms=platform_telemetry["latency_ms"]
+                            if include_platform_telemetry
+                            else None,
+                            provider_attempt_count=platform_telemetry["provider_attempt_count"]
+                            if include_platform_telemetry
+                            else None,
+                            parse_retry_count=platform_telemetry["parse_retry_count"]
+                            if include_platform_telemetry
+                            else None,
                         )
 
                 finish_sentences = generated.get("finish_sentences", {})
