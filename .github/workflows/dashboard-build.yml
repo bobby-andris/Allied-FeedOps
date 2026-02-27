@@ -4,9 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [master, main]
-    paths:
-      - "dashboard/**"
-      - ".github/workflows/dashboard-build.yml"
   push:
     branches: [master, main]
     paths:
