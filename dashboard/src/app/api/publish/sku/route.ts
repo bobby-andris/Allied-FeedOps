@@ -16,6 +16,7 @@ import { computePlatformReadiness, validateRequestedPlatformsReady } from '@/lib
 import { enforcePublishGuard } from '@/lib/auth/publish-guard'
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveCanonicalMasterSku } from '@/lib/master-sku'
+import { enforcePilotCanaryForSkus } from '@/lib/rollout/pilot-canary'
 
 interface SkuPublishRequest {
   master_sku: string
@@ -320,6 +321,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const canonicalMasterSku = await resolveCanonicalMasterSku(supabase, master_sku)
     master_sku = canonicalMasterSku
+    const canaryGuard = enforcePilotCanaryForSkus([master_sku], 'publish-sku')
+    if (!canaryGuard.allowed) {
+      return canaryGuard.response!
+    }
     const segmentKey = await resolveSegmentKeyForSku(supabase, master_sku)
 
     const readiness = await getPlatformReadiness(supabase, master_sku)
