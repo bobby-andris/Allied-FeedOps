@@ -857,14 +857,18 @@ async function logPublishEvent(
         .insert(legacyPayload)
         .select(selectColumns)
         .single()
-      if (fallbackInsertedEvent) {
-        await attachPublishEventLineage(supabase, fallbackInsertedEvent, event)
+      const fallbackEventRow = fallbackInsertedEvent as Parameters<
+        typeof attachPublishEventLineage
+      >[1] | null
+      if (fallbackEventRow) {
+        await attachPublishEventLineage(supabase, fallbackEventRow, event)
       }
       return
     }
 
-    if (insertedEvent) {
-      await attachPublishEventLineage(supabase, insertedEvent, event)
+    const insertedEventRow = insertedEvent as Parameters<typeof attachPublishEventLineage>[1] | null
+    if (insertedEventRow) {
+      await attachPublishEventLineage(supabase, insertedEventRow, event)
     }
   } catch (error) {
     console.error('Failed to log publish event:', error)
