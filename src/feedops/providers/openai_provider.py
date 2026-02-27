@@ -191,6 +191,12 @@ class OpenAIProvider(LLMProvider):
             "expected_key_count": 0,
             "missing_keys": [],
         }
+        self._last_retry_counts = {
+            "attempt_count": 0,
+            "json_decode_retries": 0,
+            "api_retries": 0,
+            "budget_retries": 0,
+        }
 
     def _use_max_completion_tokens(self) -> bool:
         """Return True when model requires max_completion_tokens."""
@@ -296,8 +302,15 @@ class OpenAIProvider(LLMProvider):
         current_prompt = prompt
         last_error = None
         content = ""
+        self._last_retry_counts = {
+            "attempt_count": 0,
+            "json_decode_retries": 0,
+            "api_retries": 0,
+            "budget_retries": 0,
+        }
 
         for attempt in range(self.max_retries):
+            self._last_retry_counts["attempt_count"] = attempt + 1
             if (time.perf_counter() - start_time) >= self.max_total_seconds:
                 last_error = (
                     f"provider_max_total_seconds_exceeded: "
@@ -428,6 +441,7 @@ class OpenAIProvider(LLMProvider):
                 metrics_registry.increment(
                     "provider_retry_total", provider=self.name, reason="json_decode"
                 )
+                self._last_retry_counts["json_decode_retries"] += 1
                 logger.warning(
                     f"JSON parse error (attempt {attempt + 1}): {last_error} "
                     f"(finish_reason={finish_reason}, raw_chars={raw_chars}, "
@@ -450,6 +464,7 @@ class OpenAIProvider(LLMProvider):
                             provider=self.name,
                             reason="completion_budget",
                         )
+                        self._last_retry_counts["budget_retries"] += 1
                         delay = compute_backoff_seconds(attempt)
                         log_event(
                             logger,
@@ -500,6 +515,7 @@ class OpenAIProvider(LLMProvider):
                         provider=self.name,
                         reason="retryable_api_error",
                     )
+                    self._last_retry_counts["api_retries"] += 1
                     log_event(
                         logger,
                         logging.WARNING,
@@ -544,6 +560,11 @@ class OpenAIProvider(LLMProvider):
     def last_parse_details(self) -> dict[str, Any]:
         """Return parse diagnostics from last generation."""
         return self._last_parse_details.copy()
+
+    @property
+    def last_retry_counts(self) -> dict[str, int]:
+        """Return retry and attempt diagnostics from last generation."""
+        return self._last_retry_counts.copy()
 
 
 def _extract_cached_tokens(usage: Any) -> int:

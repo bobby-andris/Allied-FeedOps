@@ -1,0 +1,2 @@
+/Users/bobby/Documents/GitHub/Allied-FeedOps       080f7508 [master]
+/Users/bobby/.codex/worktrees/e245/Allied-FeedOps  d2aea933 [codex/e245-google-4sku-eval-20260227]

@@ -1,0 +1,14 @@
+{
+  "run_id": "20260227-063559",
+  "generated_at_utc": "2026-02-27T06:35:59.158218+00:00",
+  "source": "local_pipeline_generate_per_platform",
+  "skus": [
+    "CL-55",
+    "PR-25EC",
+    "1052",
+    "1051"
+  ],
+  "jsonl_path": "/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/experiments/2026-02-27-google-4sku-eval/raw/local-pipeline-google-4sku-20260227-063559.jsonl",
+  "rows": 4,
+  "errors": 0
+}

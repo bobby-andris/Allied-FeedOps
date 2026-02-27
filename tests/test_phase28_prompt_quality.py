@@ -243,6 +243,10 @@ async def test_generate_per_platform_respects_selected_platforms(monkeypatch) ->
         def last_parse_details(self):
             return getattr(self, "_last_parse_details", {})
 
+        @property
+        def last_retry_counts(self):
+            return {"attempt_count": 1, "json_decode_retries": 0}
+
     monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
     monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
     monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")
@@ -277,3 +281,4 @@ async def test_generate_per_platform_respects_selected_platforms(monkeypatch) ->
     assert result["prompt_hashes"]["google"] == expected_prompt_hash
     assert result["bing_title"] == ""
     assert result["shopify_title"] == ""
+    assert result["retry_by_platform"]["google"]["attempt_count"] == 1

@@ -1,0 +1,20 @@
+{
+  "id": "fce0e4b2-e3d3-4b99-971d-865630b2bafd",
+  "master_sku": "1033/18",
+  "platform": "google",
+  "content_type": "description",
+  "baseline_content": null,
+  "candidate_content": "Concealed screw mounting hardware is built into this Skyline Collection 18-inch glass shelf, so the focus stays on the glass and hardware—not exposed fasteners. {FINISH_SENTENCE} The shelf is made with 1/4-inch thick glass for safety and strength, and the mounting hardware is crafted from solid brass. Designed as a wall mount glass shelf, it’s a practical piece of wall mounted bath accessories for storing your products. Wall-mounted installation saves floor space. With its traditional style, it complements traditional bathroom hardware and classic bath accessories throughout the Skyline Collection. No assembly required. Includes the glass shelf and all installation hardware, backed by a Limited Lifetime Warranty.",
+  "quality_score": null,
+  "quality_breakdown": null,
+  "generation_model": "openai/gpt-5.2",
+  "generation_prompt_hash": "95ccb84cbd95ee645a5188922220947b0e48873aa551ecffdce178deba0fd10f",
+  "generation_timestamp": null,
+  "created_at": "2026-02-27T07:32:10.687534+00:00",
+  "updated_at": "2026-02-27T07:32:10.687534+00:00",
+  "version": 1,
+  "is_current": true,
+  "approved_content": null,
+  "approved_at": null,
+  "approved_version": null
+}

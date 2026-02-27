@@ -630,6 +630,61 @@ async def test_process_batch_job_persists_linked_history_for_all_platforms(monke
         assert row["mode"] == "full_generation"
 
 
+@pytest.mark.asyncio
+async def test_process_batch_job_persists_platform_telemetry_once_per_platform(monkeypatch):
+    provider = _RecordingProvider()
+    supabase = _CaptureSupabase()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-telemetry-once")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return {
+            "google_title": "Google title",
+            "google_description": "Google description {FINISH_SENTENCE}",
+            "prompt_hashes": {"google": "hash-google"},
+            "system_prompts": {"google": "sys-google"},
+            "user_prompts": {"google": "user-google"},
+            "usage_by_platform": {"google": {"prompt_tokens": 120, "completion_tokens": 45}},
+            "latency_by_platform": {"google": 125},
+            "parse_by_platform": {"google": {"parse_mode": "strict_json", "missing_keys": []}},
+            "retry_by_platform": {"google": {"attempt_count": 2, "json_decode_retries": 1}},
+        }
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    summary_events: list[dict] = []
+    monkeypatch.setattr(api_main, "_emit_generation_summary", lambda **kwargs: summary_events.append(kwargs))
+
+    await api_main.process_batch_job(
+        job_id="job-telemetry-once",
+        skus=["1031/18"],
+        num_candidates=1,
+        dry_run=False,
+        options={"titles": True, "descriptions": True, "platforms": ["google"]},
+    )
+
+    history_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["op"] == "insert" and op["table"] == "regeneration_history"
+    ]
+    assert len(history_rows) == 2
+    assert sum(1 for row in history_rows if row.get("tokens_used") is not None) == 1
+    assert sum(1 for row in history_rows if row.get("cost_usd") is not None) == 1
+    assert sum(1 for row in history_rows if row.get("latency_ms") is not None) == 1
+
+    platform_summaries = [
+        event
+        for event in summary_events
+        if event.get("endpoint") == "process_batch_job"
+        and event.get("platform") == "google"
+        and event.get("result_state") == "completed"
+    ]
+    assert len(platform_summaries) == 2
+    assert sum(1 for event in platform_summaries if event.get("tokens_used") is not None) == 1
+    assert sum(1 for event in platform_summaries if event.get("cost_usd") is not None) == 1
+    assert sum(1 for event in platform_summaries if event.get("latency_ms") is not None) == 1
+
+
 def test_batch_optimize_request_exposes_generation_options_field():
     assert "options" in api_main.BatchOptimizeRequest.model_fields
 
