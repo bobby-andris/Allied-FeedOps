@@ -5,6 +5,13 @@ Adapts content from a base SKU for variant SKUs with focused prompting.
 Maintains brand consistency while updating key specification differences.
 
 Python port of dashboard/src/lib/regeneration/core.ts (adaptVariantContent)
+
+Note:
+- The production batch hybrid path is implemented in `feedops.api.main`
+  (`process_hybrid_batch_job`) and currently uses unified v2 generation for
+  both base and variant SKUs.
+- `adapt_variant_content` in this module is retained as a legacy/test helper
+  for parity and controlled experiments, not as the active production path.
 """
 
 from datetime import datetime, timezone
@@ -297,7 +304,7 @@ async def adapt_variant_content(
     variant_spec: str,
 ) -> dict:
     """
-    Adapt content from base SKU for variant SKU.
+    Legacy helper for variant adaptation experiments.
 
     Args:
         supabase: Supabase client instance

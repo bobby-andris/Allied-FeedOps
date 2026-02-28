@@ -1,6 +1,7 @@
 """Shared generation telemetry normalization helpers."""
 
 from __future__ import annotations
+from typing import Any, cast
 
 
 def safe_int(value: object, default: int = 0) -> int:
@@ -8,7 +9,8 @@ def safe_int(value: object, default: int = 0) -> int:
     try:
         if value is None:
             return default
-        return int(value)
+        # Accept heterogeneous telemetry payload types without crashing callers.
+        return int(cast(Any, value))
     except (TypeError, ValueError):
         return default
 

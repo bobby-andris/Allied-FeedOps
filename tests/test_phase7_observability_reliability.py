@@ -89,23 +89,70 @@ class _RecordingProvider:
         self.calls: list[dict] = []
         self.name = "fake/parity-provider"
 
-    async def generate(self, prompt, schema, system_prompt) -> dict:
+    async def generate(self, prompt, schema, system_prompt, **kwargs) -> dict:
         self.calls.append(
-            {"prompt": prompt, "schema": schema, "system_prompt": system_prompt}
+            {
+                "prompt": prompt,
+                "schema": schema,
+                "system_prompt": system_prompt,
+                "kwargs": kwargs,
+            }
         )
-        if "finish_sentences" in (schema or {}).get("required", []):
+        required = set((schema or {}).get("required", []))
+        if "finish_sentences" in required:
             return {
                 "finish_sentences": {
                     finish: f"{finish} complements this wall-mounted towel bar profile."
                     for finish in api_main.get_finish_list()
                 }
             }
-        return {
-            "content": (
-                "Keep towels organized with this wall-mounted towel bar. "
-                "Available in 28 designer finishes for coordinated bathrooms."
-            )
+
+        score_payload = {
+            "hook_quality": 10,
+            "product_specificity": 10,
+            "competitive_diff": 10,
+            "keyword_integration": 10,
+            "customer_scenario": 10,
+            "emotional_resonance": 10,
+            "factual_accuracy": 10,
+            "platform_compliance": 10,
+            "finish_integration": 10,
+            "variety_score": 10,
         }
+        payload: dict[str, object] = {}
+        for key in required:
+            if key == "google_title":
+                payload[key] = "{FINISH_NAME} Wall-Mounted Towel Bar 18 Inch Solid Brass"
+            elif key == "google_short_title":
+                payload[key] = "{FINISH_NAME} Towel Bar 18 Inch"
+            elif key == "google_description":
+                payload[key] = (
+                    "Keep towels organized with this wall-mounted towel bar {FINISH_SENTENCE} "
+                    "Designed for daily use in high-moisture bathrooms."
+                )
+            elif key == "bing_title":
+                payload[key] = "{FINISH_NAME} Solid Brass Towel Bar 18 Inch"
+            elif key == "bing_description":
+                payload[key] = (
+                    "Upgrade your bathroom with a durable towel bar {FINISH_SENTENCE} "
+                    "Built from solid brass for long-term performance."
+                )
+            elif key == "shopify_title":
+                payload[key] = "Solid Brass Wall-Mounted Towel Bar 18 Inch"
+            elif key == "shopify_description":
+                payload[key] = (
+                    "Keep towels organized with this wall-mounted towel bar. "
+                    "Solid brass construction and concealed mounting."
+                )
+            elif key == "shopify_meta_description":
+                payload[key] = (
+                    "Solid brass wall-mounted towel bar in designer finishes."
+                )
+            elif key == "claims":
+                payload[key] = []
+            elif key == "self_score":
+                payload[key] = score_payload
+        return payload
 
 
 class _CaptureTable:
@@ -240,13 +287,15 @@ class _BatchJobSupabase:
 
 def _patch_generation_deps(monkeypatch, provider, supabase):
     monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [], raising=False)
+    monkeypatch.setattr(
+        api_main, "format_evidence_markdown", lambda _evidence: "table", raising=False
+    )
     monkeypatch.setattr(api_main, "get_provider", lambda: provider)
     monkeypatch.setattr(api_main, "get_client", lambda: supabase)
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system", raising=False)
+    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123", raising=False)
+    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "", raising=False)
 
 
 def test_structured_log_event_includes_request_id(caplog):
@@ -810,11 +859,7 @@ async def test_process_hybrid_batch_job_tracks_requested_and_expanded_counters(
     provider = _RecordingProvider()
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(
-        api_main,
-        "adapt_variant_content",
-        AsyncMock(return_value={"success": True, "content": "adapted"}),
-    )
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-phase7-hybrid")
 
     families = [
         MultiSkuFamily(

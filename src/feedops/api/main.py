@@ -47,11 +47,7 @@ from feedops.api.supabase_loader import (
     load_parent_sku_from_supabase,
 )
 from feedops.api.prompt_loader import (
-    get_system_prompt,
-    get_system_prompt_hash,
     get_platform_system_prompt,
-    get_category_guidance,
-    format_gold_standard_examples,
     get_finish_list,
     get_platform_system_prompt_hash,
 )
@@ -62,7 +58,6 @@ from feedops.api.generation_telemetry import (
 )
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.models.parent_sku import ParentSKU
-from feedops.pipeline.evidence import build_evidence_table, format_evidence_markdown
 from feedops.api.prompt_builder import build_core_prompt, apply_feedback_layer
 from feedops.pipeline.finish_sentence_validation import (
     normalize_and_validate_finish_sentences,
@@ -1494,10 +1489,6 @@ async def optimize_single_sku(request: OptimizeRequest):
             raise HTTPException(
                 status_code=404, detail=f"SKU not found: {request.master_sku}"
             )
-
-        # Build evidence table
-        evidence = build_evidence_table(parent_sku)
-        evidence_markdown = format_evidence_markdown(evidence)
 
         # Get LLM provider
         provider = get_provider()

@@ -867,6 +867,68 @@ async def test_process_hybrid_batch_job_respects_selected_platforms(monkeypatch)
     assert all(call == ("google", "finish") for call in selected_platform_calls)
 
 
+@pytest.mark.asyncio
+async def test_process_hybrid_batch_job_does_not_call_legacy_adapt_variant_content(
+    monkeypatch,
+):
+    """Production hybrid flow should use unified v2 generation, not legacy adapter."""
+    import feedops.api.hybrid_generation as hybrid_generation
+
+    db = _FakeSupabase()
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, master_sku: master_sku,
+    )
+    monkeypatch.setattr(
+        api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku)
+    )
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-no-legacy")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return {
+            "google_description": "Updated google description {FINISH_SENTENCE}",
+            "prompt_hashes": {"google": "hash-google", "finish": "hash-finish"},
+            "system_prompts": {"google": "sys-google", "finish": "sys-finish"},
+            "user_prompts": {"google": "user-google", "finish": "user-finish"},
+            "usage_by_platform": {"google": {"prompt_tokens": 90, "completion_tokens": 30}},
+            "latency_by_platform": {"google": 130},
+            "parse_by_platform": {"google": {"parse_mode": "strict_json", "missing_keys": []}},
+            "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
+            "finish_sentences": {"Polished Chrome": "Polished Chrome sentence."},
+        }
+
+    async def _fail_legacy_adapter(*_args, **_kwargs):
+        raise AssertionError("Legacy adapt_variant_content must not be called")
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(
+        hybrid_generation,
+        "adapt_variant_content",
+        _fail_legacy_adapter,
+    )
+
+    families = [
+        MultiSkuFamily(
+            product_id="family-1033",
+            master_skus=["1033/16", "1033/18", "1033/24"],
+            base_sku="1033/16",
+            variant_skus=["1033/18", "1033/24"],
+        )
+    ]
+    await api_main.process_hybrid_batch_job(
+        job_id="job-hybrid-no-legacy",
+        families=families,
+        single_skus=[],
+        options={"titles": False, "descriptions": True, "platforms": ["google"]},
+        requested_skus=["1033/18"],
+    )
+
+
 def test_generation_summary_event_contract(monkeypatch):
     captured: dict[str, object] = {}
 
