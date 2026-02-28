@@ -26,7 +26,8 @@ def mock_job_manager():
          patch("feedops.jobs.manager.update_job_status") as mock_update_status, \
          patch("feedops.jobs.manager.update_job_progress") as mock_update_progress, \
          patch("feedops.jobs.manager.save_checkpoint") as mock_save_checkpoint, \
-         patch("feedops.jobs.manager.log_job_error") as mock_log_error:
+         patch("feedops.jobs.manager.log_job_error") as mock_log_error, \
+         patch("feedops.jobs.quality_report.correct_job_status") as mock_correct_status:
 
         # Manager functions are sync, not async
         # Return a BackfillJob model (not dict)
@@ -42,6 +43,12 @@ def mock_job_manager():
             created_at="2026-02-13T00:00:00Z",
         )
         mock_get_job.return_value = mock_job
+        mock_correct_status.return_value = {
+            "job_id": mock_job.id,
+            "corrected": False,
+            "old_status": "complete",
+            "new_status": "complete",
+        }
 
         yield {
             "get_job": mock_get_job,
@@ -49,6 +56,7 @@ def mock_job_manager():
             "update_job_progress": mock_update_progress,
             "save_checkpoint": mock_save_checkpoint,
             "log_job_error": mock_log_error,
+            "correct_job_status": mock_correct_status,
         }
 
 

@@ -2,6 +2,7 @@
 
 import asyncio
 import hashlib
+import inspect
 import json
 import logging
 import os
@@ -125,6 +126,39 @@ def _payload_value_lengths(payload: dict[str, object]) -> dict[str, int]:
         else:
             lengths[key] = len(str(value))
     return lengths
+
+
+async def _generate_with_provider_compat(
+    *,
+    provider: LLMProvider,
+    prompt: str,
+    schema: dict[str, object],
+    system_prompt: str,
+    reasoning_effort: str,
+    max_completion_tokens: int,
+) -> dict[str, object]:
+    """Call provider.generate while tolerating legacy test doubles.
+
+    Some older tests still use lightweight provider stubs that only accept
+    `(prompt, schema, system_prompt)`. Runtime providers accept the newer
+    keyword arguments. We introspect the callable and pass only supported args.
+    """
+    generate_fn = provider.generate
+    signature = inspect.signature(generate_fn)
+    accepts_varkw = any(
+        param.kind == inspect.Parameter.VAR_KEYWORD
+        for param in signature.parameters.values()
+    )
+    kwargs: dict[str, object] = {
+        "prompt": prompt,
+        "schema": schema,
+        "system_prompt": system_prompt,
+    }
+    if accepts_varkw or "reasoning_effort" in signature.parameters:
+        kwargs["reasoning_effort"] = reasoning_effort
+    if accepts_varkw or "max_completion_tokens" in signature.parameters:
+        kwargs["max_completion_tokens"] = max_completion_tokens
+    return await generate_fn(**kwargs)
 
 
 def _schema_hash(schema: dict[str, object]) -> str:
@@ -525,7 +559,8 @@ async def generate_per_platform(
         platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
         platform_cap = _platform_completion_cap(platform, max_completion_tokens)
         started = time.perf_counter()
-        payload = await provider.generate(
+        payload = await _generate_with_provider_compat(
+            provider=provider,
             prompt=user_prompts[platform],
             schema=platform_schemas[platform],
             system_prompt=system_prompts[platform],

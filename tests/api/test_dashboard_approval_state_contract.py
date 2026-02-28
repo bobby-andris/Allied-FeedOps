@@ -31,8 +31,10 @@ def test_master_approval_route_only_versions_content_on_approval_transition() ->
     source = _read(SKU_APPROVAL_ROUTE)
 
     assert "transitionContentTypes" in source
-    assert "if (currentState.title_approved !== true && nextState.title_approved === true)" in source
-    assert "if (currentState.description_approved !== true && nextState.description_approved === true)" in source
+    assert "(platform && updateData.title_approved === true)" in source
+    assert "(platform && updateData.description_approved === true)" in source
+    assert "(!platform && currentState.title_approved !== true && nextState.title_approved === true)" in source
+    assert "(!platform && currentState.description_approved !== true && nextState.description_approved === true)" in source
     assert "approved_version: (source.approved_version || 0) + 1" in source
 
 
