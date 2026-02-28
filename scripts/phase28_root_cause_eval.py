@@ -17,6 +17,7 @@ import random
 import statistics
 import sys
 import time
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,39 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+try:
+    from pyparsing.warnings import (
+        PyparsingDeprecationWarning,
+        PyparsingDiagnosticWarning,
+    )
+except Exception:  # pragma: no cover - fallback for environments without pyparsing
+    PyparsingDeprecationWarning = Warning
+    PyparsingDiagnosticWarning = Warning
+
+try:
+    from pydantic.warnings import PydanticDeprecatedSince212
+except Exception:  # pragma: no cover - fallback for environments without pydantic warnings
+    PydanticDeprecatedSince212 = Warning
+
+warnings.filterwarnings(
+    "ignore",
+    message="'enablePackrat' deprecated - use 'enable_packrat'",
+    category=PyparsingDeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    category=PyparsingDeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="warn_ungrouped_named_tokens_in_collection.*",
+    category=PyparsingDiagnosticWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    category=PydanticDeprecatedSince212,
+)
 
 from feedops.api.supabase_loader import load_parent_sku_from_supabase
 from feedops.api.prompt_builder import get_prompt_experiment_variant

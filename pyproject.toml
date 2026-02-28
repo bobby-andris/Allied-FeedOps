@@ -47,8 +47,11 @@ packages = ["src/feedops"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "error",
+    "ignore:warn_ungrouped_named_tokens_in_collection.*:pyparsing.warnings.PyparsingDiagnosticWarning",
+    "ignore:'enablePackrat' deprecated - use 'enable_packrat':pyparsing.warnings.PyparsingDeprecationWarning",
     "ignore:'enablePackrat' deprecated - use 'enable_packrat':Warning:pyiceberg.expressions.parser",
     "ignore:'escChar' argument is deprecated, use 'esc_char':Warning:pyiceberg.expressions.parser",
     "ignore:'unquoteResults' argument is deprecated, use 'unquote_results':Warning:pyiceberg.expressions.parser",

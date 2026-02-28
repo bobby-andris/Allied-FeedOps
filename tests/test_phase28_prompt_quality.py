@@ -11,6 +11,7 @@ import pytest
 
 from feedops.models.parent_sku import ParentSKU
 from feedops.api.prompt_builder import get_prompt_experiment_variant
+from feedops.providers.factory import FallbackProvider
 from feedops.providers.openai_provider import _parse_json_payload
 from feedops.quality.evaluator import (
     PromptEvalRecord,
@@ -282,3 +283,157 @@ async def test_generate_per_platform_respects_selected_platforms(monkeypatch) ->
     assert result["bing_title"] == ""
     assert result["shopify_title"] == ""
     assert result["retry_by_platform"]["google"]["attempt_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_generate_per_platform_enforces_request_cost_budget(monkeypatch) -> None:
+    from feedops.pipeline import generator as gen
+
+    class StubProvider:
+        async def generate(self, *, prompt, schema, system_prompt, reasoning_effort, max_completion_tokens):
+            assert prompt == "prompt-google"
+            self._last_usage = {"prompt_tokens": 1200, "completion_tokens": 800}
+            self._last_parse_details = {"parse_mode": "strict_json", "missing_keys": []}
+            return {
+                "google_title": "{FINISH_NAME} 24-Inch Wall Mount Towel Bar",
+                "google_short_title": "{FINISH_NAME} 24-Inch Towel Bar",
+                "google_description": "Solid brass towel bar copy. {FINISH_SENTENCE}",
+                "claims": [],
+            }
+
+        @property
+        def last_usage(self):
+            return getattr(self, "_last_usage", {})
+
+        @property
+        def last_parse_details(self):
+            return getattr(self, "_last_parse_details", {})
+
+        @property
+        def last_retry_counts(self):
+            return {"attempt_count": 1, "json_decode_retries": 0}
+
+    monkeypatch.setenv("FEEDOPS_PROVIDER_REQUEST_COST_USD_CAP", "0.00001")
+    monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
+    monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")
+    monkeypatch.setattr(gen, "build_keyword_placement_plan", lambda *_args, **_kwargs: {})
+    monkeypatch.setattr(gen, "format_keyword_placement_section", lambda _plan: "")
+    monkeypatch.setattr(gen, "format_gold_standard_examples_bundle", lambda max_examples=2: "")
+    monkeypatch.setattr(gen, "_build_finish_metadata_rows", lambda _sku: [])
+    monkeypatch.setattr(gen, "build_google_prompt", lambda *_args, **_kwargs: "prompt-google")
+    monkeypatch.setattr(gen, "build_bing_prompt", lambda *_args, **_kwargs: "prompt-bing")
+    monkeypatch.setattr(gen, "build_shopify_prompt", lambda *_args, **_kwargs: "prompt-shopify")
+    monkeypatch.setattr(gen, "build_finish_prompt", lambda *_args, **_kwargs: "prompt-finish")
+    monkeypatch.setattr(gen, "get_platform_system_prompt", lambda platform: f"sys-{platform}")
+
+    parent = ParentSKU(
+        master_sku="1016",
+        category="Towel Bars",
+        current_title="24-Inch Wall Mount Towel Bar",
+        current_description="Current description",
+        variants=[],
+    )
+
+    with pytest.raises(gen.GenerationBudgetExceededError):
+        await gen.generate_per_platform(
+            parent_sku=parent,
+            provider=StubProvider(),
+            prompt_version="v2",
+            selected_platforms=("google",),
+        )
+
+
+@pytest.mark.asyncio
+async def test_generate_per_platform_budget_cap_honored_in_fallback_mode(monkeypatch) -> None:
+    from feedops.pipeline import generator as gen
+
+    class PrimaryProvider:
+        def __init__(self) -> None:
+            self._last_usage = {"prompt_tokens": 1300, "completion_tokens": 900}
+            self._last_parse_details = {"parse_mode": "strict_json", "missing_keys": []}
+            self._last_retry_counts = {"attempt_count": 1, "json_decode_retries": 0}
+
+        @property
+        def name(self) -> str:
+            return "openai/test"
+
+        @property
+        def last_usage(self):
+            return self._last_usage.copy()
+
+        @property
+        def last_parse_details(self):
+            return self._last_parse_details.copy()
+
+        @property
+        def last_retry_counts(self):
+            return self._last_retry_counts.copy()
+
+        async def health_check(self) -> bool:
+            return True
+
+        async def generate(
+            self,
+            prompt,
+            schema,
+            image=None,
+            system_prompt=None,
+            reasoning_effort=None,
+            max_completion_tokens=None,
+        ):
+            return {
+                "google_title": "{FINISH_NAME} 24-Inch Wall Mount Towel Bar",
+                "google_short_title": "{FINISH_NAME} 24-Inch Towel Bar",
+                "google_description": "Solid brass towel bar copy. {FINISH_SENTENCE}",
+                "claims": [],
+            }
+
+    class FallbackProviderStub:
+        @property
+        def name(self) -> str:
+            return "gemini/test"
+
+        async def health_check(self) -> bool:
+            return True
+
+        async def generate(
+            self,
+            prompt,
+            schema,
+            image=None,
+            system_prompt=None,
+            reasoning_effort=None,
+            max_completion_tokens=None,
+        ):
+            raise AssertionError("fallback should not be called")
+
+    monkeypatch.setenv("FEEDOPS_PROVIDER_REQUEST_COST_USD_CAP", "0.00001")
+    monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
+    monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")
+    monkeypatch.setattr(gen, "build_keyword_placement_plan", lambda *_args, **_kwargs: {})
+    monkeypatch.setattr(gen, "format_keyword_placement_section", lambda _plan: "")
+    monkeypatch.setattr(gen, "format_gold_standard_examples_bundle", lambda max_examples=2: "")
+    monkeypatch.setattr(gen, "_build_finish_metadata_rows", lambda _sku: [])
+    monkeypatch.setattr(gen, "build_google_prompt", lambda *_args, **_kwargs: "prompt-google")
+    monkeypatch.setattr(gen, "build_bing_prompt", lambda *_args, **_kwargs: "prompt-bing")
+    monkeypatch.setattr(gen, "build_shopify_prompt", lambda *_args, **_kwargs: "prompt-shopify")
+    monkeypatch.setattr(gen, "build_finish_prompt", lambda *_args, **_kwargs: "prompt-finish")
+    monkeypatch.setattr(gen, "get_platform_system_prompt", lambda platform: f"sys-{platform}")
+
+    parent = ParentSKU(
+        master_sku="1016",
+        category="Towel Bars",
+        current_title="24-Inch Wall Mount Towel Bar",
+        current_description="Current description",
+        variants=[],
+    )
+    wrapper = FallbackProvider(primary=PrimaryProvider(), fallback=FallbackProviderStub())
+    with pytest.raises(gen.GenerationBudgetExceededError):
+        await gen.generate_per_platform(
+            parent_sku=parent,
+            provider=wrapper,
+            prompt_version="v2",
+            selected_platforms=("google",),
+        )

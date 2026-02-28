@@ -14,6 +14,12 @@ from feedops.api.prompt_loader import (
     get_finish_list,
     get_system_prompt,
 )
+from feedops.api.generation_telemetry import estimate_openai_cost_usd_from_usage
+from feedops.api.runtime_controls import (
+    diagnostic_mode_enabled,
+    diagnostic_skip_finish_subcall_enabled,
+    request_cost_usd_cap,
+)
 from feedops.api.prompt_builder import (
     build_bing_prompt,
     build_finish_prompt,
@@ -59,6 +65,26 @@ from feedops.providers.base import LLMProvider
 
 logger = logging.getLogger(__name__)
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
+
+
+class GenerationBudgetExceededError(RuntimeError):
+    """Raised when estimated request cost exceeds configured per-request budget."""
+
+    def __init__(
+        self,
+        *,
+        cap_usd: float,
+        estimated_cost_usd: float,
+        platform: str,
+    ) -> None:
+        self.cap_usd = float(cap_usd)
+        self.estimated_cost_usd = float(estimated_cost_usd)
+        self.platform = platform
+        super().__init__(
+            "generation_request_budget_exceeded:"
+            f" platform={platform} estimated_cost_usd={estimated_cost_usd:.6f}"
+            f" cap_usd={cap_usd:.6f}"
+        )
 
 
 def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> str:
@@ -464,6 +490,24 @@ async def generate_per_platform(
     parse_by_platform: dict[str, dict[str, object]] = {}
     retry_by_platform: dict[str, dict[str, int]] = {}
     requested_platforms = _resolve_requested_platforms(selected_platforms)
+    diagnostic_mode = diagnostic_mode_enabled()
+    finish_subcall_skipped = False
+    if (
+        diagnostic_mode
+        and "finish" in requested_platforms
+        and diagnostic_skip_finish_subcall_enabled()
+    ):
+        requested_platforms = tuple(
+            platform for platform in requested_platforms if platform != "finish"
+        )
+        finish_subcall_skipped = True
+        logger.warning(
+            "Diagnostic mode skipped finish sub-call for sku=%s",
+            parent_sku.master_sku,
+        )
+
+    cost_cap_usd = request_cost_usd_cap()
+    estimated_cost_total_usd = 0.0
     for platform in requested_platforms:
         platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
         platform_cap = _platform_completion_cap(platform, max_completion_tokens)
@@ -511,6 +555,22 @@ async def generate_per_platform(
         usage_by_platform[platform] = (
             usage_snapshot if isinstance(usage_snapshot, dict) else {}
         )
+        usage_cost = estimate_openai_cost_usd_from_usage(usage_by_platform[platform])
+        if usage_cost is not None:
+            estimated_cost_total_usd += usage_cost
+        if cost_cap_usd is not None and estimated_cost_total_usd > cost_cap_usd:
+            logger.warning(
+                "Generation request budget exceeded: sku=%s platform=%s estimated_cost_usd=%.6f cap_usd=%.6f",
+                parent_sku.master_sku,
+                platform,
+                estimated_cost_total_usd,
+                cost_cap_usd,
+            )
+            raise GenerationBudgetExceededError(
+                cap_usd=cost_cap_usd,
+                estimated_cost_usd=estimated_cost_total_usd,
+                platform=platform,
+            )
         parse_snapshot = getattr(provider, "last_parse_details", {})
         parse_by_platform[platform] = (
             parse_snapshot if isinstance(parse_snapshot, dict) else {}
@@ -574,6 +634,11 @@ async def generate_per_platform(
         "parse_by_platform": parse_by_platform,
         "retry_by_platform": retry_by_platform,
         "prompt_experiment_variant": experiment_variant,
+        "diagnostic_mode": diagnostic_mode,
+        "finish_subcall_executed": "finish" in raw_by_platform,
+        "finish_subcall_skipped": finish_subcall_skipped,
+        "budget_stop_triggered": False,
+        "estimated_cost_total_usd": round(estimated_cost_total_usd, 6),
     }
 
 

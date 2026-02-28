@@ -205,8 +205,8 @@ def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
     """Factory defaults enforce bounded runtime behavior when env overrides are absent."""
     with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
-        assert provider.max_retries == 2
-        assert provider.max_total_seconds == 240
+        assert provider.max_retries == 1
+        assert provider.max_total_seconds == 120
         assert provider.client.max_retries == 0
         assert provider.client.timeout is not None
         timeout_read = (
@@ -214,7 +214,7 @@ def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
             if hasattr(provider.client.timeout, "read")
             else provider.client.timeout
         )
-        assert float(timeout_read) == 90.0
+        assert float(timeout_read) == 45.0
         assert getattr(provider, "json_retry_max") == 1
 
 
@@ -226,8 +226,25 @@ def test_get_provider_uses_openai_model_env():
     ):
         provider = get_provider()
         assert provider.name == "openai/gpt-4o"
-        assert provider.max_retries == 2
+        assert provider.max_retries == 1
         assert provider.client.max_retries == 0
+
+
+def test_get_provider_uses_diagnostic_model_when_enabled():
+    """Diagnostic mode forces low-cost model selection for debugging."""
+    with patch.dict(
+        "os.environ",
+        {
+            "OPENAI_API_KEY": "test-key",
+            "FEEDOPS_DIAGNOSTIC_MODE": "1",
+            "FEEDOPS_DIAGNOSTIC_FORCE_LOW_COST_MODEL": "1",
+            "FEEDOPS_DIAGNOSTIC_MODEL": "gpt-4.1-mini",
+            "FEEDOPS_OPENAI_MODEL": "gpt-5.2",
+        },
+        clear=True,
+    ):
+        provider = get_provider()
+        assert provider.name == "openai/gpt-4.1-mini"
 
 
 def test_get_provider_falls_back_to_gemini():
@@ -252,6 +269,124 @@ def test_get_provider_force_fallback_returns_fallback_provider():
         assert isinstance(provider, FallbackProvider)
         assert provider.primary.name.startswith("openai/")
         assert provider.fallback.name.startswith("gemini/")
+
+
+@pytest.mark.asyncio
+async def test_fallback_provider_exposes_primary_metrics_on_success():
+    """FallbackProvider forwards usage/parse/retry telemetry from primary success."""
+
+    class StubProvider(LLMProvider):
+        def __init__(self, name: str):
+            self._name = name
+            self._last_usage = {"prompt_tokens": 12, "completion_tokens": 34}
+            self._last_parse_details = {"parse_mode": "strict_json", "missing_keys": []}
+            self._last_retry_counts = {"attempt_count": 1, "json_decode_retries": 0}
+
+        @property
+        def name(self) -> str:
+            return self._name
+
+        @property
+        def last_usage(self) -> dict[str, int]:
+            return self._last_usage.copy()
+
+        @property
+        def last_parse_details(self) -> dict[str, object]:
+            return self._last_parse_details.copy()
+
+        @property
+        def last_retry_counts(self) -> dict[str, int]:
+            return self._last_retry_counts.copy()
+
+        async def generate(
+            self,
+            prompt: str,
+            schema: dict,
+            image: ImageInput | None = None,
+            system_prompt: str | None = None,
+            reasoning_effort: str | None = None,
+            max_completion_tokens: int | None = None,
+        ) -> dict:
+            return {"google_title": "ok"}
+
+        async def health_check(self) -> bool:
+            return True
+
+    primary = StubProvider("primary")
+    fallback = StubProvider("fallback")
+    provider = FallbackProvider(primary=primary, fallback=fallback)
+    payload = await provider.generate("prompt", {"type": "object"})
+    assert payload["google_title"] == "ok"
+    assert provider.last_usage == {"prompt_tokens": 12, "completion_tokens": 34}
+    assert provider.last_parse_details["parse_mode"] == "strict_json"
+    assert provider.last_retry_counts["attempt_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_fallback_provider_exposes_fallback_metrics_on_failover():
+    """FallbackProvider forwards telemetry from fallback provider when failover occurs."""
+
+    class FailingProvider(LLMProvider):
+        @property
+        def name(self) -> str:
+            return "primary"
+
+        async def generate(
+            self,
+            prompt: str,
+            schema: dict,
+            image: ImageInput | None = None,
+            system_prompt: str | None = None,
+            reasoning_effort: str | None = None,
+            max_completion_tokens: int | None = None,
+        ) -> dict:
+            raise RuntimeError("primary failed")
+
+        async def health_check(self) -> bool:
+            return True
+
+    class FallbackSuccessProvider(LLMProvider):
+        def __init__(self) -> None:
+            self._last_usage = {"prompt_tokens": 99, "completion_tokens": 7}
+            self._last_parse_details = {"parse_mode": "substring_fallback", "missing_keys": []}
+            self._last_retry_counts = {"attempt_count": 2, "json_decode_retries": 1}
+
+        @property
+        def name(self) -> str:
+            return "fallback"
+
+        @property
+        def last_usage(self) -> dict[str, int]:
+            return self._last_usage.copy()
+
+        @property
+        def last_parse_details(self) -> dict[str, object]:
+            return self._last_parse_details.copy()
+
+        @property
+        def last_retry_counts(self) -> dict[str, int]:
+            return self._last_retry_counts.copy()
+
+        async def generate(
+            self,
+            prompt: str,
+            schema: dict,
+            image: ImageInput | None = None,
+            system_prompt: str | None = None,
+            reasoning_effort: str | None = None,
+            max_completion_tokens: int | None = None,
+        ) -> dict:
+            return {"google_title": "ok"}
+
+        async def health_check(self) -> bool:
+            return True
+
+    provider = FallbackProvider(primary=FailingProvider(), fallback=FallbackSuccessProvider())
+    payload = await provider.generate("prompt", {"type": "object"})
+    assert payload["google_title"] == "ok"
+    assert provider.last_usage == {"prompt_tokens": 99, "completion_tokens": 7}
+    assert provider.last_parse_details["parse_mode"] == "substring_fallback"
+    assert provider.last_retry_counts["attempt_count"] == 2
 
 
 def test_get_provider_raises_when_none_configured():
