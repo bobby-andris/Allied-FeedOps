@@ -89,16 +89,29 @@ class GenerationBudgetExceededError(RuntimeError):
 
 def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> str:
     """Resolve per-platform reasoning effort."""
+    if platform == "finish":
+        return "low"
     return default_reasoning_effort
 
 
 def _platform_completion_cap(platform: str, base_cap: int) -> int:
-    """Apply per-platform completion caps for v2 generation."""
-    if platform == "finish":
-        return max(base_cap, 8000)
-    if platform in {"google", "bing", "shopify"}:
-        return max(base_cap, 16000)
-    return base_cap
+    """Apply per-platform completion caps for v2 generation.
+
+    We intentionally *bound* completion budgets to reduce long-tail latency and
+    runaway spend during strict JSON generation. Callers can pass a lower cap,
+    but platform-specific hard limits prevent overly large completions.
+    """
+    normalized_cap = max(1, int(base_cap))
+    platform_limits = {
+        "google": 2400,
+        "bing": 2400,
+        "shopify": 2400,
+        "finish": 1200,
+    }
+    limit = platform_limits.get(platform)
+    if limit is None:
+        return normalized_cap
+    return min(normalized_cap, limit)
 
 
 def _payload_value_lengths(payload: dict[str, object]) -> dict[str, int]:
@@ -406,8 +419,8 @@ async def generate_per_platform(
     prompt_version: str = "v2",
     *,
     feedback_by_platform: dict[str, str] | None = None,
-    reasoning_effort: str = "high",
-    max_completion_tokens: int = 8000,
+    reasoning_effort: str = "medium",
+    max_completion_tokens: int = 2400,
     selected_platforms: tuple[str, ...] | list[str] | None = None,
 ) -> dict[str, object]:
     """Generate content via per-platform prompts/schemas.
