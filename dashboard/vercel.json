@@ -6,7 +6,7 @@
   "git": {
     "deploymentEnabled": {
       "master": true,
-      "codex/*": false
+      "codex/*": true
     }
   },
   "crons": [

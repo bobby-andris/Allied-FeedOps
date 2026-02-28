@@ -172,6 +172,7 @@ class OpenAIProvider(LLMProvider):
         sdk_timeout_seconds: float | None = None,
         sdk_max_retries: int | None = None,
         max_total_seconds: float | None = None,
+        json_retry_max: int | None = None,
     ):
         client_kwargs: dict[str, Any] = {"api_key": api_key}
         if sdk_timeout_seconds is not None:
@@ -183,6 +184,9 @@ class OpenAIProvider(LLMProvider):
         self.max_retries = max(1, max_retries)
         self.max_total_seconds = (
             max_total_seconds if max_total_seconds is not None else 300.0
+        )
+        self.json_retry_max = (
+            max(0, int(json_retry_max)) if json_retry_max is not None else 1
         )
         self._last_usage = {"prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0}
         self._last_parse_details = {
@@ -448,6 +452,17 @@ class OpenAIProvider(LLMProvider):
                     f"max_completion_tokens={max_output_tokens}, "
                     f"reasoning_effort={current_reasoning_effort})"
                 )
+                if self._last_retry_counts["json_decode_retries"] > self.json_retry_max:
+                    last_error = (
+                        f"json_retry_budget_exceeded: "
+                        f"{self._last_retry_counts['json_decode_retries']}>{self.json_retry_max}"
+                    )
+                    logger.error(
+                        "JSON retry budget exceeded for provider=%s (%s)",
+                        self.name,
+                        last_error,
+                    )
+                    break
 
                 # High-reasoning strict JSON responses can occasionally terminate at
                 # the completion ceiling before emitting any visible JSON.
@@ -533,6 +548,10 @@ class OpenAIProvider(LLMProvider):
         opened = circuit_breakers.record_failure(self.name)
         if opened:
             metrics_registry.increment("provider_circuit_open_total", provider=self.name)
+        attempts_made = max(
+            int(self._last_retry_counts.get("attempt_count", 0)),
+            1 if last_error is not None else 0,
+        )
         metrics_registry.observe(
             "provider_latency_seconds",
             time.perf_counter() - start_time,
@@ -543,12 +562,12 @@ class OpenAIProvider(LLMProvider):
             logging.ERROR,
             "provider.generate.failure",
             provider=self.name,
-            attempts=self.max_retries,
+            attempts=attempts_made,
             error=last_error,
             circuit_opened=opened,
         )
         raise LLMError(
-            f"Failed to generate valid JSON: {last_error}", self.name, self.max_retries
+            f"Failed to generate valid JSON: {last_error}", self.name, attempts_made
         )
 
     @property

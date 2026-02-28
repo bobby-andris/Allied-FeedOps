@@ -146,11 +146,23 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     async def _fake_generate(**kwargs):
         selected_platforms_seen["value"] = tuple(kwargs.get("selected_platforms", ()))
         return {
-            "google_description": "Wall-mounted towel bar with durable brass construction.",
+            "google_description": (
+                "Wall-mounted towel bar with durable brass construction. "
+                "{FINISH_SENTENCE}"
+            ),
             "finish_sentences": finish_payload,
             "prompt_hashes": {"google": "hash123"},
             "system_prompts": {"google": "system"},
             "user_prompts": {"google": "user"},
+            "usage_by_platform": {
+                "google": {
+                    "prompt_tokens": 120,
+                    "completion_tokens": 80,
+                    "cached_tokens": 20,
+                }
+            },
+            "latency_by_platform": {"google": 950},
+            "retry_by_platform": {"google": {"attempt_count": 2, "json_decode_retries": 1}},
         }
 
     monkeypatch.setattr(
@@ -185,7 +197,7 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     assert selected_platforms_seen["value"] == ("google", "finish")
     assert (
         result["content"]
-        == "Wall-mounted towel bar with durable brass construction."
+        == "Wall-mounted towel bar with durable brass construction. {FINISH_SENTENCE}"
     )
     finish_rows = [
         op
@@ -196,6 +208,18 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     assert len(finish_rows[0]["payload"]["finish_sentences"]) == len(
         hybrid_generation.get_finish_list()
     )
+    history_rows = [
+        op
+        for op in supabase.operations
+        if op["table"] == "regeneration_history" and op["op"] == "insert"
+    ]
+    assert len(history_rows) == 1
+    payload = history_rows[0]["payload"]
+    assert payload["tokens_used"] == 200
+    assert payload["cost_usd"] is not None
+    assert payload["latency_ms"] == 950
+    assert payload["provider_attempt_count"] == 2
+    assert payload["parse_retry_count"] == 1
 
 
 @pytest.mark.asyncio
@@ -206,7 +230,8 @@ async def test_adapt_variant_content_google_description_allows_missing_finish_pa
     async def _fake_generate(**_kwargs):
         return {
             "google_description": (
-                "Solid brass profile for daily use. Choose from 28 designer finishes."
+                "Solid brass profile for daily use. {FINISH_SENTENCE} "
+                "Choose from 28 designer finishes."
             ),
             "prompt_hashes": {"google": "hash123"},
             "system_prompts": {"google": "system"},
