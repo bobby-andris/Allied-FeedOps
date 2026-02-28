@@ -1,10 +1,10 @@
-# Final Go/No-Go Baseline (2026-02-27)
+# Final Go/No-Go Baseline (2026-02-27 rerun)
 
 - Timestamp (ET): 2026-02-27
 - Repository: `bobby-andris/Allied-FeedOps`
 - Canonical path: `/Users/bobby/Documents/GitHub/Allied-FeedOps`
-- Branch: `codex/e245-final-go-nogo-20260227`
-- Baseline SHA: `5f0569e08b3d39f174f73f19c5f12fa1c0264fb1`
+- Branch: `codex/e245-final-go-nogo-rerun-20260227`
+- Baseline SHA: `376a238ec8da6a2aa3e7ce3cc4eadd0e60be7855`
 - Upstream baseline: `origin/master`
 - Environment mode: local parity (`uv`, `PYTHONPATH=src`)
 
@@ -24,3 +24,6 @@ PYTHONPATH=src uv run --frozen --extra dev pytest -q \
   tests/test_finish_injection.py \
   tests/test_hybrid_generation_parity.py
 ```
+
+Result:
+- `49 passed` (no warnings emitted by pytest in this rerun).
