@@ -525,13 +525,26 @@ async def generate_per_platform(
         platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
         platform_cap = _platform_completion_cap(platform, max_completion_tokens)
         started = time.perf_counter()
-        payload = await provider.generate(
-            prompt=user_prompts[platform],
-            schema=platform_schemas[platform],
-            system_prompt=system_prompts[platform],
-            reasoning_effort=platform_reasoning,
-            max_completion_tokens=platform_cap,
-        )
+        try:
+            payload = await provider.generate(
+                prompt=user_prompts[platform],
+                schema=platform_schemas[platform],
+                system_prompt=system_prompts[platform],
+                reasoning_effort=platform_reasoning,
+                max_completion_tokens=platform_cap,
+            )
+        except Exception:
+            logger.exception(
+                "Per-platform generation failed: sku=%s platform=%s cap=%s reasoning=%s prompt_hash=%s schema_hash=%s selected_platforms=%s",
+                parent_sku.master_sku,
+                platform,
+                platform_cap,
+                platform_reasoning,
+                prompt_hashes.get(platform),
+                schema_hashes.get(platform),
+                list(requested_platforms),
+            )
+            raise
         latency_by_platform[platform] = int((time.perf_counter() - started) * 1000)
         payload_keys: list[str] = []
         payload_lengths: dict[str, int] = {}

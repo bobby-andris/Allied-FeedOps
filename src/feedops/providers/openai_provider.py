@@ -313,7 +313,10 @@ class OpenAIProvider(LLMProvider):
             "budget_retries": 0,
         }
 
-        for attempt in range(self.max_retries):
+        max_attempts = self.max_retries
+        length_recovery_extended = False
+        attempt = 0
+        while attempt < max_attempts:
             self._last_retry_counts["attempt_count"] = attempt + 1
             if (time.perf_counter() - start_time) >= self.max_total_seconds:
                 last_error = (
@@ -469,17 +472,28 @@ class OpenAIProvider(LLMProvider):
                 if (
                     finish_reason == "length"
                     and raw_chars == 0
-                    and attempt < self.max_retries - 1
+                    and self._last_retry_counts["budget_retries"] == 0
                 ):
-                    new_budget = max(max_output_tokens * 2, 10000)
+                    # Keep recovery bounded: one extra attempt, capped token bump,
+                    # and lower reasoning effort to reduce hidden reasoning token burn.
+                    new_budget = min(max(max_output_tokens * 2, 3200), 4800)
+                    updated_recovery = False
                     if new_budget > max_output_tokens:
                         max_output_tokens = new_budget
+                        updated_recovery = True
+                    if current_reasoning_effort not in {None, "low"}:
+                        current_reasoning_effort = "low"
+                        updated_recovery = True
+                    if updated_recovery:
                         metrics_registry.increment(
                             "provider_retry_total",
                             provider=self.name,
                             reason="completion_budget",
                         )
                         self._last_retry_counts["budget_retries"] += 1
+                        if attempt >= max_attempts - 1 and not length_recovery_extended:
+                            max_attempts += 1
+                            length_recovery_extended = True
                         delay = compute_backoff_seconds(attempt)
                         log_event(
                             logger,
@@ -488,9 +502,14 @@ class OpenAIProvider(LLMProvider):
                             provider=self.name,
                             attempt=attempt + 1,
                             delay_seconds=round(delay, 4),
-                            reason=f"length_empty_output; bump_tokens={max_output_tokens}",
+                            reason=(
+                                "length_empty_output;"
+                                f" bump_tokens={max_output_tokens};"
+                                f" reasoning={current_reasoning_effort or 'none'}"
+                            ),
                         )
                         await asyncio.sleep(delay)
+                        attempt += 1
                         continue
 
                 if image:
@@ -510,9 +529,11 @@ class OpenAIProvider(LLMProvider):
                             "content": f"Your response was not valid JSON. Error: {last_error}. Please fix and respond with valid JSON only.",
                         }
                     )
-                if attempt < self.max_retries - 1:
+                if attempt < max_attempts - 1:
                     delay = compute_backoff_seconds(attempt)
                     await asyncio.sleep(delay)
+                    attempt += 1
+                    continue
 
             except Exception as e:
                 last_error = str(e)
@@ -523,7 +544,7 @@ class OpenAIProvider(LLMProvider):
                     error_type=type(e).__name__,
                 )
                 logger.error(f"OpenAI API error (attempt {attempt + 1}): {last_error}")
-                if retryable and attempt < self.max_retries - 1:
+                if retryable and attempt < max_attempts - 1:
                     delay = compute_backoff_seconds(attempt)
                     metrics_registry.increment(
                         "provider_retry_total",
@@ -541,9 +562,11 @@ class OpenAIProvider(LLMProvider):
                         reason=last_error[:200],
                     )
                     await asyncio.sleep(delay)
+                    attempt += 1
                     continue
                 if not retryable:
                     break
+            attempt += 1
 
         opened = circuit_breakers.record_failure(self.name)
         if opened:

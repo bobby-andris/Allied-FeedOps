@@ -81,3 +81,54 @@ async def test_openai_provider_enforces_json_retry_budget(monkeypatch):
     # Initial attempt + one JSON repair retry.
     assert calls["count"] == 2
     assert exc_info.value.retries == 2
+
+
+@pytest.mark.asyncio
+async def test_openai_provider_allows_single_length_recovery_retry_when_retries_is_one(
+    monkeypatch,
+):
+    from feedops.providers.openai_provider import OpenAIProvider
+
+    provider = OpenAIProvider(
+        api_key="test",
+        model="gpt-5.2",
+        max_retries=1,
+        json_retry_max=1,
+    )
+
+    calls: list[dict[str, object]] = []
+
+    async def _fake_create(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            return types.SimpleNamespace(
+                choices=[
+                    types.SimpleNamespace(
+                        message=types.SimpleNamespace(content=""),
+                        finish_reason="length",
+                    )
+                ],
+                usage={"prompt_tokens": 10, "completion_tokens": 10},
+            )
+        return types.SimpleNamespace(
+            choices=[
+                types.SimpleNamespace(
+                    message=types.SimpleNamespace(content="{}"),
+                    finish_reason="stop",
+                )
+            ],
+            usage={"prompt_tokens": 12, "completion_tokens": 12},
+        )
+
+    monkeypatch.setattr(provider.client.chat.completions, "create", _fake_create)
+
+    result = await provider.generate(prompt="{}", schema={})
+
+    assert result == {}
+    assert len(calls) == 2
+    assert calls[0]["max_completion_tokens"] == 8000
+    assert calls[1]["max_completion_tokens"] == 8000
+    assert calls[0]["reasoning_effort"] == "high"
+    assert calls[1]["reasoning_effort"] == "low"
+    assert provider.last_retry_counts["attempt_count"] == 2
+    assert provider.last_retry_counts["budget_retries"] == 1
