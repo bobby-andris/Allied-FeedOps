@@ -205,8 +205,8 @@ def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
     """Factory defaults enforce bounded runtime behavior when env overrides are absent."""
     with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
-        assert provider.max_retries == 2
-        assert provider.max_total_seconds == 240
+        assert provider.max_retries == 1
+        assert provider.max_total_seconds == 120
         assert provider.client.max_retries == 0
         assert provider.client.timeout is not None
         timeout_read = (
@@ -214,7 +214,7 @@ def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
             if hasattr(provider.client.timeout, "read")
             else provider.client.timeout
         )
-        assert float(timeout_read) == 90.0
+        assert float(timeout_read) == 45.0
         assert getattr(provider, "json_retry_max") == 1
 
 
@@ -226,8 +226,25 @@ def test_get_provider_uses_openai_model_env():
     ):
         provider = get_provider()
         assert provider.name == "openai/gpt-4o"
-        assert provider.max_retries == 2
+        assert provider.max_retries == 1
         assert provider.client.max_retries == 0
+
+
+def test_get_provider_uses_diagnostic_model_when_enabled():
+    """Diagnostic mode forces low-cost model selection for debugging."""
+    with patch.dict(
+        "os.environ",
+        {
+            "OPENAI_API_KEY": "test-key",
+            "FEEDOPS_DIAGNOSTIC_MODE": "1",
+            "FEEDOPS_DIAGNOSTIC_FORCE_LOW_COST_MODEL": "1",
+            "FEEDOPS_DIAGNOSTIC_MODEL": "gpt-4.1-mini",
+            "FEEDOPS_OPENAI_MODEL": "gpt-5.2",
+        },
+        clear=True,
+    ):
+        provider = get_provider()
+        assert provider.name == "openai/gpt-4.1-mini"
 
 
 def test_get_provider_falls_back_to_gemini():

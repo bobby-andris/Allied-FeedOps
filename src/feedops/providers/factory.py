@@ -5,6 +5,11 @@ import os
 
 from feedops.observability import log_event
 from feedops.observability.metrics import metrics_registry
+from feedops.api.runtime_controls import (
+    diagnostic_force_low_cost_model_enabled,
+    diagnostic_mode_enabled,
+    diagnostic_model_name,
+)
 from feedops.providers.base import ImageInput, LLMProvider
 from feedops.providers.gemini_provider import GeminiProvider
 from feedops.providers.openai_provider import OpenAIProvider
@@ -42,12 +47,18 @@ def _build_openai_provider(*, api_key: str, model: str) -> OpenAIProvider:
     return OpenAIProvider(
         api_key=api_key,
         model=model,
-        max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 2),
-        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 90.0),
+        max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 1),
+        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 45.0),
         sdk_max_retries=_int_env("FEEDOPS_OPENAI_SDK_MAX_RETRIES", 0),
-        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 240.0),
+        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 120.0),
         json_retry_max=_int_env("FEEDOPS_OPENAI_JSON_RETRY_MAX", 1),
     )
+
+
+def _resolve_openai_model(configured_model: str | None) -> str:
+    if diagnostic_mode_enabled() and diagnostic_force_low_cost_model_enabled():
+        return diagnostic_model_name()
+    return configured_model or "gpt-5.2"
 
 
 def get_provider(preferred: str | None = None) -> LLMProvider:
@@ -70,6 +81,7 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     openai_key = os.environ.get("OPENAI_API_KEY")
     gemini_key = os.environ.get("GEMINI_API_KEY")
     openai_model = os.environ.get("FEEDOPS_OPENAI_MODEL")
+    resolved_openai_model = _resolve_openai_model(openai_model)
     force_fallback = _truthy(os.environ.get("FEEDOPS_FORCE_PROVIDER_FALLBACK"))
 
     if force_fallback and openai_key and gemini_key:
@@ -78,13 +90,13 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
                 primary=GeminiProvider(api_key=gemini_key),
                 fallback=_build_openai_provider(
                     api_key=openai_key,
-                    model=openai_model or "gpt-5.2",
+                    model=resolved_openai_model,
                 ),
             )
         return FallbackProvider(
             primary=_build_openai_provider(
                 api_key=openai_key,
-                model=openai_model or "gpt-5.2",
+                model=resolved_openai_model,
             ),
             fallback=GeminiProvider(api_key=gemini_key),
         )
@@ -92,7 +104,7 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     if preferred == "openai" and openai_key:
         return _build_openai_provider(
             api_key=openai_key,
-            model=openai_model or "gpt-5.2",
+            model=resolved_openai_model,
         )
 
     if preferred == "gemini" and gemini_key:
@@ -102,7 +114,7 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
         logger.info("Using OpenAI provider")
         return _build_openai_provider(
             api_key=openai_key,
-            model=openai_model or "gpt-5.2",
+            model=resolved_openai_model,
         )
 
     if gemini_key:

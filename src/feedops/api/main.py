@@ -83,6 +83,7 @@ from feedops.api.sku_alias import (
     resolve_canonical_master_skus,
 )
 from feedops.api.runtime_controls import (
+    diagnostic_mode_enabled,
     ensure_generation_enabled,
     finish_sentence_regeneration_enabled,
 )
@@ -91,7 +92,7 @@ from feedops.api.env_contract import (
     validate_runtime_env_contract,
 )
 from feedops.pipeline.feature_flags import capture_flag_snapshot
-from feedops.pipeline.generator import generate_per_platform
+from feedops.pipeline.generator import GenerationBudgetExceededError, generate_per_platform
 from feedops.observability import get_request_id, log_event, request_context
 from feedops.observability.metrics import metrics_registry
 
@@ -1133,6 +1134,9 @@ def _emit_generation_summary(
     latency_ms: int | None = None,
     provider_attempt_count: int | None = None,
     parse_retry_count: int | None = None,
+    diagnostic_mode: bool | None = None,
+    finish_subcall_executed: bool | None = None,
+    budget_stop_triggered: bool | None = None,
 ) -> None:
     """Emit a terminal generation summary event for observability."""
     fields: dict[str, object] = {
@@ -1155,6 +1159,13 @@ def _emit_generation_summary(
         fields["provider_attempt_count"] = int(provider_attempt_count)
     if parse_retry_count is not None:
         fields["parse_retry_count"] = int(parse_retry_count)
+    if diagnostic_mode is None:
+        diagnostic_mode = diagnostic_mode_enabled()
+    fields["diagnostic_mode"] = bool(diagnostic_mode)
+    if finish_subcall_executed is not None:
+        fields["finish_subcall_executed"] = bool(finish_subcall_executed)
+    if budget_stop_triggered is not None:
+        fields["budget_stop_triggered"] = bool(budget_stop_triggered)
 
     log_event(
         logger,
@@ -1874,6 +1885,9 @@ async def _execute_regeneration_request(
         latency_ms=regen_latency_ms,
         provider_attempt_count=provider_attempt_count,
         parse_retry_count=parse_retry_count,
+        diagnostic_mode=bool(generated.get("diagnostic_mode", False)),
+        finish_subcall_executed=bool(generated.get("finish_subcall_executed", False)),
+        budget_stop_triggered=bool(generated.get("budget_stop_triggered", False)),
     )
 
     return RegenerateResponse(
@@ -1939,6 +1953,40 @@ async def process_regenerate_job(job_id: str, request_payload: dict):
             content_type=str(request_payload.get("content_type", "")),
             mode="async_job",
             result_state="completed",
+        )
+    except GenerationBudgetExceededError as exc:
+        formatted = _format_job_error(exc)
+        logger.warning("Async regenerate job %s budget-stopped: %s", job_id, formatted)
+        request_id = get_request_id()
+        try:
+            (
+                supabase.table("generation_jobs")
+                .update(
+                    {
+                        "status": "failed",
+                        "error": formatted,
+                        "completed_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                )
+                .eq("id", job_id)
+                .execute()
+            )
+        except Exception as persist_exc:
+            logger.error(
+                "Failed to persist budget-stop state for async regenerate job %s: %s",
+                job_id,
+                persist_exc,
+            )
+        _emit_generation_summary(
+            endpoint="process_regenerate_job",
+            request_id=request_id,
+            job_id=job_id,
+            master_sku=str(request_payload.get("master_sku", "")),
+            platform=str(request_payload.get("platform", "")),
+            content_type=str(request_payload.get("content_type", "")),
+            mode="async_job",
+            result_state="failed",
+            budget_stop_triggered=True,
         )
     except Exception as exc:
         formatted = _format_job_error(exc)
@@ -2046,6 +2094,26 @@ async def regenerate_content(request: RegenerateRequest):
 
         return await _execute_regeneration_request(request=request, request_id=request_id)
 
+    except GenerationBudgetExceededError as exc:
+        _emit_generation_summary(
+            endpoint="regenerate",
+            request_id=request_id,
+            master_sku=request.master_sku,
+            platform=request.platform,
+            content_type=request.content_type,
+            mode="with_feedback" if request.feedback else "simple",
+            result_state="failed",
+            budget_stop_triggered=True,
+        )
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "code": "generation_budget_cap_exceeded",
+                "message": str(exc),
+                "platform": request.platform,
+                "content_type": request.content_type,
+            },
+        ) from exc
     except HTTPException:
         _emit_generation_summary(
             endpoint="regenerate",
@@ -2055,6 +2123,7 @@ async def regenerate_content(request: RegenerateRequest):
             content_type=request.content_type,
             mode="with_feedback" if request.feedback else "simple",
             result_state="failed",
+            budget_stop_triggered=False,
         )
         raise
     except Exception as e:
@@ -2067,6 +2136,7 @@ async def regenerate_content(request: RegenerateRequest):
             content_type=request.content_type,
             mode="with_feedback" if request.feedback else "simple",
             result_state="failed",
+            budget_stop_triggered=False,
         )
         raise HTTPException(status_code=500, detail=str(e))
 

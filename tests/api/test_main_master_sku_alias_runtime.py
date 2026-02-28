@@ -882,3 +882,38 @@ async def test_regenerate_failure_summary_uses_non_null_request_id(monkeypatch):
     assert isinstance(captured["request_id"], str)
     assert captured["request_id"]
     assert captured["request_id"] != "-"
+
+
+@pytest.mark.asyncio
+async def test_regenerate_budget_cap_exceeded_returns_429(monkeypatch):
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-budget-1")
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+
+    async def _raise_budget_error(*, request, request_id):
+        raise api_main.GenerationBudgetExceededError(
+            cap_usd=0.05,
+            estimated_cost_usd=0.08,
+            platform="google",
+        )
+
+    def _fake_emit_generation_summary(**kwargs):
+        captured.update(kwargs)
+
+    monkeypatch.setattr(api_main, "_execute_regeneration_request", _raise_budget_error)
+    monkeypatch.setattr(api_main, "_emit_generation_summary", _fake_emit_generation_summary)
+
+    request = api_main.RegenerateRequest(
+        master_sku="CL-55",
+        platform="google",
+        content_type="description",
+    )
+
+    with pytest.raises(api_main.HTTPException) as exc_info:
+        await api_main.regenerate_content(request)
+
+    assert exc_info.value.status_code == 429
+    assert exc_info.value.detail["code"] == "generation_budget_cap_exceeded"
+    assert captured["endpoint"] == "regenerate"
+    assert captured["budget_stop_triggered"] is True
