@@ -29,6 +29,7 @@ Endpoints:
 from __future__ import annotations
 
 import asyncio
+from contextlib import asynccontextmanager
 import hashlib
 import json
 import logging
@@ -104,10 +105,22 @@ logger = logging.getLogger(__name__)
 # API version
 API_VERSION = "1.0.0"
 
+@asynccontextmanager
+async def _app_lifespan(_app: FastAPI):
+    """Fail fast on missing runtime env contract requirements."""
+    try:
+        validate_runtime_env_contract()
+    except RuntimeEnvContractError as exc:
+        logger.error(str(exc))
+        raise RuntimeError(str(exc)) from exc
+    yield
+
+
 app = FastAPI(
     title="FeedOps Pipeline API",
     description="Content generation pipeline for Allied Brass products",
     version=API_VERSION,
+    lifespan=_app_lifespan,
 )
 
 # CORS middleware — allow dashboard to call Cloud Run endpoints
@@ -126,16 +139,6 @@ app.add_middleware(
 from prometheus_client import make_asgi_app, REGISTRY
 metrics_app = make_asgi_app(registry=REGISTRY)
 app.mount("/metrics", metrics_app)
-
-
-@app.on_event("startup")
-async def _validate_runtime_env_on_startup() -> None:
-    """Fail fast on missing runtime env contract requirements."""
-    try:
-        validate_runtime_env_contract()
-    except RuntimeEnvContractError as exc:
-        logger.error(str(exc))
-        raise RuntimeError(str(exc)) from exc
 
 # Include search insights router
 from feedops.api.search_insights import router as search_insights_router
