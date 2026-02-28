@@ -369,6 +369,45 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
 
 
 @pytest.mark.asyncio
+async def test_regenerate_content_keeps_tokens_unknown_when_usage_snapshot_missing_token_keys(monkeypatch):
+    canonical = "WP-2TB/16-GAL"
+    db = _FakeSupabase()
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, _master_sku: canonical,
+        raising=False,
+    )
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-unknown-usage")
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+
+    async def _fake_generate_per_platform(**_kwargs):
+        payload = _base_generated_payload("Title with unknown usage")
+        payload["usage_by_platform"] = {"google": {}}
+        return payload
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    request = api_main.RegenerateRequest(
+        master_sku=canonical,
+        platform="google",
+        content_type="title",
+    )
+    response = await api_main.regenerate_content(request)
+
+    assert response.state == "completed"
+    history_writes = [op for op in db.ops if op["table"] == "regeneration_history"]
+    assert len(history_writes) == 1
+    assert history_writes[0]["payload"]["tokens_used"] is None
+    assert history_writes[0]["payload"]["provider_attempt_count"] == 1
+    assert history_writes[0]["payload"]["parse_retry_count"] == 0
+
+
+@pytest.mark.asyncio
 async def test_regenerate_content_async_mode_queues_job_without_immediate_generation(monkeypatch):
     canonical = "WP-2TB/16-GAL"
     db = _FakeSupabase()

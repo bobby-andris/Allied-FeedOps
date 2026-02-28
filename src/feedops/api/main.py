@@ -1756,8 +1756,12 @@ async def _execute_regeneration_request(
         for _platform_name, usage_snapshot in usage_by_platform.items():
             if not isinstance(usage_snapshot, dict):
                 continue
-            prompt_tokens = int(usage_snapshot.get("prompt_tokens", 0) or 0)
-            completion_tokens = int(usage_snapshot.get("completion_tokens", 0) or 0)
+            raw_prompt_tokens = usage_snapshot.get("prompt_tokens")
+            raw_completion_tokens = usage_snapshot.get("completion_tokens")
+            if raw_prompt_tokens is None or raw_completion_tokens is None:
+                continue
+            prompt_tokens = int(raw_prompt_tokens or 0)
+            completion_tokens = int(raw_completion_tokens or 0)
             total_tokens_used += prompt_tokens + completion_tokens
             has_usage_samples = True
             usage_cost = _estimate_openai_cost_usd_from_usage(usage_snapshot)
