@@ -860,8 +860,8 @@ def _persist_regeneration_result(
         "tokens_used": tokens_used,
         "cost_usd": cost_usd,
         "latency_ms": latency_ms,
-        "provider_attempt_count": provider_attempt_count,
-        "parse_retry_count": parse_retry_count,
+        "provider_attempt_count": _safe_int(provider_attempt_count, 0),
+        "parse_retry_count": _safe_int(parse_retry_count, 0),
         "request_id": lineage_request_id,
         "result_state": "completed",
         "result_version": next_version,
@@ -959,8 +959,8 @@ def _persist_generated_content_and_history(
         "tokens_used": tokens_used,
         "cost_usd": cost_usd,
         "latency_ms": latency_ms,
-        "provider_attempt_count": provider_attempt_count,
-        "parse_retry_count": parse_retry_count,
+        "provider_attempt_count": _safe_int(provider_attempt_count, 0),
+        "parse_retry_count": _safe_int(parse_retry_count, 0),
         "request_id": lineage_request_id,
         "result_state": "completed",
         "result_version": result_version,
@@ -2551,19 +2551,19 @@ async def process_batch_job(
                             mode="full_generation_v2",
                             tokens_used=platform_telemetry["tokens_used"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             cost_usd=platform_telemetry["cost_usd"]
                             if include_platform_telemetry
-                            else None,
+                            else 0.0,
                             latency_ms=platform_telemetry["latency_ms"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             provider_attempt_count=platform_telemetry["provider_attempt_count"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             parse_retry_count=platform_telemetry["parse_retry_count"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             generation_diagnostics={
                                 "selected_platforms": list(platforms),
                                 "usage_by_platform": usage_by_platform
@@ -2592,19 +2592,19 @@ async def process_batch_job(
                             result_state="completed",
                             tokens_used=platform_telemetry["tokens_used"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             cost_usd=platform_telemetry["cost_usd"]
                             if include_platform_telemetry
-                            else None,
+                            else 0.0,
                             latency_ms=platform_telemetry["latency_ms"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             provider_attempt_count=platform_telemetry["provider_attempt_count"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                             parse_retry_count=platform_telemetry["parse_retry_count"]
                             if include_platform_telemetry
-                            else None,
+                            else 0,
                         )
 
                 finish_sentences = generated.get("finish_sentences", {})

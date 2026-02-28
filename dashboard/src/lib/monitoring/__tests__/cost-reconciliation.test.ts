@@ -131,4 +131,215 @@ describe('cost reconciliation helpers', () => {
       }
     }
   })
+
+  it('parses OpenAI costs from bucket results payload shape', async () => {
+    const originalUsageApiKey = process.env.OPENAI_USAGE_API_KEY
+    const originalOrgId = process.env.OPENAI_ORG_ID
+    const originalProjectId = process.env.OPENAI_PROJECT_ID
+    process.env.OPENAI_USAGE_API_KEY = 'usage-key'
+    process.env.OPENAI_ORG_ID = 'org_test'
+    process.env.OPENAI_PROJECT_ID = 'proj_test'
+
+    const originalFetch = global.fetch
+    const fetchMock = vi.fn()
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          object: 'page',
+          data: [
+            {
+              object: 'bucket',
+              start_time: 1772150400,
+              end_time: 1772236800,
+              results: [
+                {
+                  object: 'organization.usage.completions.result',
+                  num_model_requests: 3,
+                  input_tokens: 1200,
+                  output_tokens: 340,
+                  input_cached_tokens: 200,
+                },
+              ],
+            },
+          ],
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          object: 'page',
+          data: [
+            {
+              object: 'bucket',
+              start_time: 1772150400,
+              end_time: 1772236800,
+              results: [
+                {
+                  object: 'organization.costs.result',
+                  amount: { value: '7.075536650000000000000000000', currency: 'usd' },
+                  project_id: 'proj_test',
+                },
+              ],
+            },
+          ],
+        }),
+      } as Response)
+    global.fetch = fetchMock as typeof fetch
+
+    const fakeSupabase = {
+      from(table: string) {
+        if (table === 'regeneration_history') {
+          return {
+            select() {
+              return this
+            },
+            gte() {
+              return this
+            },
+            async lt() {
+              return { data: [], error: null }
+            },
+          }
+        }
+        return {
+          async upsert() {
+            return { error: null }
+          },
+        }
+      },
+    }
+
+    try {
+      const summary = await runCostReconciliationCapture({
+        lookbackDays: 1,
+        now: new Date('2026-02-28T12:00:00.000Z'),
+        supabase: fakeSupabase as never,
+      })
+
+      expect(summary.capture_results[0]?.openai_total_cost_usd).toBe(7.075537)
+      expect(summary.capture_results[0]?.warnings ?? []).toEqual([])
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+    } finally {
+      global.fetch = originalFetch
+      if (originalUsageApiKey === undefined) {
+        delete process.env.OPENAI_USAGE_API_KEY
+      } else {
+        process.env.OPENAI_USAGE_API_KEY = originalUsageApiKey
+      }
+      if (originalOrgId === undefined) {
+        delete process.env.OPENAI_ORG_ID
+      } else {
+        process.env.OPENAI_ORG_ID = originalOrgId
+      }
+      if (originalProjectId === undefined) {
+        delete process.env.OPENAI_PROJECT_ID
+      } else {
+        process.env.OPENAI_PROJECT_ID = originalProjectId
+      }
+    }
+  })
+
+  it('falls back to usage-token estimate when costs endpoint has no billable totals', async () => {
+    const originalUsageApiKey = process.env.OPENAI_USAGE_API_KEY
+    const originalOrgId = process.env.OPENAI_ORG_ID
+    process.env.OPENAI_USAGE_API_KEY = 'usage-key'
+    process.env.OPENAI_ORG_ID = 'org_test'
+
+    const originalFetch = global.fetch
+    const fetchMock = vi.fn()
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          object: 'page',
+          data: [
+            {
+              object: 'bucket',
+              start_time: 1772150400,
+              end_time: 1772236800,
+              results: [
+                {
+                  object: 'organization.usage.completions.result',
+                  num_model_requests: 2,
+                  input_tokens: 1000,
+                  output_tokens: 500,
+                  input_cached_tokens: 100,
+                },
+              ],
+            },
+          ],
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          object: 'page',
+          data: [
+            {
+              object: 'bucket',
+              start_time: 1772150400,
+              end_time: 1772236800,
+              results: [],
+            },
+          ],
+        }),
+      } as Response)
+    global.fetch = fetchMock as typeof fetch
+
+    const upserts: Record<string, unknown>[] = []
+    const fakeSupabase = {
+      from(table: string) {
+        if (table === 'regeneration_history') {
+          return {
+            select() {
+              return this
+            },
+            gte() {
+              return this
+            },
+            async lt() {
+              return { data: [], error: null }
+            },
+          }
+        }
+        return {
+          async upsert(payload: Record<string, unknown>) {
+            upserts.push({ table, payload })
+            return { error: null }
+          },
+        }
+      },
+    }
+
+    try {
+      const summary = await runCostReconciliationCapture({
+        lookbackDays: 1,
+        now: new Date('2026-02-28T12:00:00.000Z'),
+        supabase: fakeSupabase as never,
+      })
+
+      const capture = summary.capture_results[0]
+      expect(capture).toBeDefined()
+      expect(capture?.status).not.toBe('missing_openai_data')
+      expect(capture?.openai_total_cost_usd).toBe(0.008663)
+      expect(capture?.warnings.some((w) => w.includes('usage-token estimate'))).toBe(true)
+
+      const openAiRollup = upserts.find((row) => row.table === 'openai_usage_window_rollups')
+      const metadata = openAiRollup?.payload as { metadata?: { costs_estimated_from_usage?: boolean } }
+      expect(metadata?.metadata?.costs_estimated_from_usage).toBe(true)
+    } finally {
+      global.fetch = originalFetch
+      if (originalUsageApiKey === undefined) {
+        delete process.env.OPENAI_USAGE_API_KEY
+      } else {
+        process.env.OPENAI_USAGE_API_KEY = originalUsageApiKey
+      }
+      if (originalOrgId === undefined) {
+        delete process.env.OPENAI_ORG_ID
+      } else {
+        process.env.OPENAI_ORG_ID = originalOrgId
+      }
+    }
+  })
 })

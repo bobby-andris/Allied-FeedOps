@@ -43,9 +43,9 @@ def _build_openai_provider(*, api_key: str, model: str) -> OpenAIProvider:
         api_key=api_key,
         model=model,
         max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 2),
-        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 45.0),
+        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 90.0),
         sdk_max_retries=_int_env("FEEDOPS_OPENAI_SDK_MAX_RETRIES", 0),
-        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 120.0),
+        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 240.0),
         json_retry_max=_int_env("FEEDOPS_OPENAI_JSON_RETRY_MAX", 1),
     )
 

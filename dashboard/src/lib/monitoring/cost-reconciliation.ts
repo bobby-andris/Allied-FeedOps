@@ -114,6 +114,23 @@ const toInteger = (value: unknown): number => {
 
 const round6 = (value: number): number => Number(value.toFixed(6))
 
+function estimateOpenAiCostUsdFromUsage(
+  inputTokens: number,
+  outputTokens: number,
+  cachedInputTokens: number
+): number | null {
+  if (inputTokens <= 0 && outputTokens <= 0) {
+    return null
+  }
+
+  const cached = Math.max(cachedInputTokens, 0)
+  const uncachedInput = Math.max(inputTokens - cached, 0)
+  const inputCost =
+    (uncachedInput / 1_000_000) * 1.75 + (cached / 1_000_000) * (1.75 * 0.5)
+  const outputCost = (outputTokens / 1_000_000) * 14.0
+  return round6(inputCost + outputCost)
+}
+
 export function buildUtcDailyWindows(days: number, now: Date = new Date()): DailyWindow[] {
   const windowCount = Math.max(1, Math.min(Math.trunc(days), 30))
   const utcMidnightToday = Date.UTC(
@@ -269,16 +286,29 @@ function parseOpenAiCostsPayload(payload: unknown): {
 
   for (const bucket of buckets) {
     const row = (bucket ?? {}) as Record<string, unknown>
-    const bucketAmount = toNumber((row.amount as { value?: unknown } | undefined)?.value)
-
-    if (typeof (row.amount as { currency?: unknown } | undefined)?.currency === 'string') {
-      currency = String((row.amount as { currency?: string }).currency || currency)
+    const bucketResults = Array.isArray(row.results) ? row.results : []
+    for (const result of bucketResults) {
+      const resultRecord = (result ?? {}) as Record<string, unknown>
+      const resultAmount = toNumber((resultRecord.amount as { value?: unknown } | undefined)?.value)
+      if (resultAmount !== null) {
+        totalCost += resultAmount
+        hasAnyCost = true
+      }
+      const resultCurrency = (resultRecord.amount as { currency?: unknown } | undefined)?.currency
+      if (typeof resultCurrency === 'string' && resultCurrency.trim()) {
+        currency = resultCurrency
+      }
     }
 
+    const bucketAmount = toNumber((row.amount as { value?: unknown } | undefined)?.value)
     if (bucketAmount !== null) {
       totalCost += bucketAmount
       hasAnyCost = true
-      continue
+    }
+
+    const bucketCurrency = (row.amount as { currency?: unknown } | undefined)?.currency
+    if (typeof bucketCurrency === 'string' && bucketCurrency.trim()) {
+      currency = bucketCurrency
     }
 
     const lineItems = Array.isArray(row.line_items) ? row.line_items : []
@@ -391,6 +421,7 @@ async function fetchOpenAiWindowAggregate(
   let totalCostUsd: number | null = null
   let currency = 'usd'
   let costMetadata: Record<string, unknown> = {}
+  let costsEstimatedFromUsage = false
 
   try {
     const costsUrl = new URL(OPENAI_COST_ENDPOINT)
@@ -421,6 +452,22 @@ async function fetchOpenAiWindowAggregate(
     )
   }
 
+  if (totalCostUsd === null && usageAvailable) {
+    const estimatedFromUsage = estimateOpenAiCostUsdFromUsage(
+      inputTokens,
+      outputTokens,
+      cachedInputTokens
+    )
+    if (estimatedFromUsage !== null) {
+      totalCostUsd = estimatedFromUsage
+      costsAvailable = true
+      costsEstimatedFromUsage = true
+      warnings.push(
+        'OpenAI costs API returned no billable totals for this window; using usage-token estimate for reconciliation.'
+      )
+    }
+  }
+
   return {
     usageAvailable,
     costsAvailable,
@@ -433,6 +480,7 @@ async function fetchOpenAiWindowAggregate(
     metadata: {
       usage: usageMetadata,
       costs: costMetadata,
+      costs_estimated_from_usage: costsEstimatedFromUsage,
     },
     warnings,
   }

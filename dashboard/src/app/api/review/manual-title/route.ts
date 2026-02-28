@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 
 import { createClient } from '@/lib/supabase/server'
 import { resolveCanonicalMasterSku } from '@/lib/master-sku'
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString()
     const nextVersion = (existingRow.version || 0) + 1
+    const requestId = request.headers.get('x-request-id')?.trim() || randomUUID()
 
     const { error: updateError } = await supabase
       .from('generated_content')
@@ -127,7 +129,7 @@ export async function POST(request: NextRequest) {
       master_sku: canonicalMasterSku,
       content_type: 'title',
       platform,
-      mode: 'simple',
+      mode: 'manual_title_override',
       feedback_text:
         platform === 'shopify'
           ? 'Manual Shopify title edit applied.'
@@ -136,6 +138,14 @@ export async function POST(request: NextRequest) {
       new_content: validation.normalizedTitle,
       model_version: 'manual_title_override',
       generated_content_id: existingRow.id,
+      request_id: requestId,
+      result_state: 'completed',
+      result_version: nextVersion,
+      result_idempotent: false,
+      idempotency_key: `manual-title:${existingRow.id}:${nextVersion}`,
+      provider_attempt_count: 0,
+      parse_retry_count: 0,
+      latency_ms: 0,
       created_at: now,
     })
 
