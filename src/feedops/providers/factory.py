@@ -135,10 +135,33 @@ class FallbackProvider(LLMProvider):
     def __init__(self, primary: LLMProvider, fallback: LLMProvider):
         self.primary = primary
         self.fallback = fallback
+        self._last_usage: dict[str, int] = {}
+        self._last_parse_details: dict[str, object] = {}
+        self._last_retry_counts: dict[str, int] = {}
 
     @property
     def name(self) -> str:
         return f"{self.primary.name}+{self.fallback.name}"
+
+    @property
+    def last_usage(self) -> dict[str, int]:
+        return self._last_usage.copy()
+
+    @property
+    def last_parse_details(self) -> dict[str, object]:
+        return self._last_parse_details.copy()
+
+    @property
+    def last_retry_counts(self) -> dict[str, int]:
+        return self._last_retry_counts.copy()
+
+    def _snapshot_provider_metrics(self, provider: LLMProvider) -> None:
+        usage = getattr(provider, "last_usage", {})
+        parse = getattr(provider, "last_parse_details", {})
+        retry = getattr(provider, "last_retry_counts", {})
+        self._last_usage = usage.copy() if isinstance(usage, dict) else {}
+        self._last_parse_details = parse.copy() if isinstance(parse, dict) else {}
+        self._last_retry_counts = retry.copy() if isinstance(retry, dict) else {}
 
     async def health_check(self) -> bool:
         """True if either provider is healthy."""
@@ -157,12 +180,17 @@ class FallbackProvider(LLMProvider):
         max_completion_tokens: int | None = None,
     ) -> dict:
         """Try primary, fall back to secondary on failure."""
+        self._last_usage = {}
+        self._last_parse_details = {}
+        self._last_retry_counts = {}
         try:
-            return await self.primary.generate(
+            payload = await self.primary.generate(
                 prompt, schema, image=image, system_prompt=system_prompt,
                 reasoning_effort=reasoning_effort,
                 max_completion_tokens=max_completion_tokens,
             )
+            self._snapshot_provider_metrics(self.primary)
+            return payload
         except Exception as e:
             metrics_registry.increment(
                 "provider_fallback_total", primary=self.primary.name, fallback=self.fallback.name
@@ -176,8 +204,10 @@ class FallbackProvider(LLMProvider):
                 error=str(e)[:200],
             )
             logger.warning(f"Primary provider failed: {e}, trying fallback")
-            return await self.fallback.generate(
+            payload = await self.fallback.generate(
                 prompt, schema, image=image, system_prompt=system_prompt,
                 reasoning_effort=reasoning_effort,
                 max_completion_tokens=max_completion_tokens,
             )
+            self._snapshot_provider_metrics(self.fallback)
+            return payload
