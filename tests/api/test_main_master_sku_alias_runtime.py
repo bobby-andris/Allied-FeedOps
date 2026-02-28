@@ -345,7 +345,7 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     assert history_writes[0]["payload"]["tokens_used"] == 165
     assert history_writes[0]["payload"]["cost_usd"] is not None
     assert history_writes[0]["payload"]["provider_attempt_count"] == 1
-    assert history_writes[0]["payload"]["parse_retry_count"] is None
+    assert history_writes[0]["payload"]["parse_retry_count"] == 0
     assert history_writes[0]["payload"]["result_state"] == "completed"
     assert history_writes[0]["payload"]["result_version"] == 3
     assert history_writes[0]["payload"]["result_idempotent"] is False

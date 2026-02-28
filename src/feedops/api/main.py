@@ -1746,6 +1746,7 @@ async def _execute_regeneration_request(
     total_tokens_used = 0
     estimated_cost_usd = 0.0
     has_cost_samples = False
+    has_usage_samples = False
     provider_attempt_count = 0
     parse_retry_count = 0
     if isinstance(usage_by_platform, dict):
@@ -1755,10 +1756,12 @@ async def _execute_regeneration_request(
             prompt_tokens = int(usage_snapshot.get("prompt_tokens", 0) or 0)
             completion_tokens = int(usage_snapshot.get("completion_tokens", 0) or 0)
             total_tokens_used += prompt_tokens + completion_tokens
+            has_usage_samples = True
             usage_cost = _estimate_openai_cost_usd_from_usage(usage_snapshot)
             if usage_cost is not None:
                 has_cost_samples = True
                 estimated_cost_usd += usage_cost
+    tokens_used_for_lineage = total_tokens_used if has_usage_samples else None
     if isinstance(retry_by_platform, dict):
         for platform_name in selected_platforms:
             snapshot = retry_by_platform.get(platform_name)
@@ -1783,7 +1786,7 @@ async def _execute_regeneration_request(
         user_prompt=user_prompt,
         feedback_text=request.feedback,
         mode="with_feedback" if request.feedback else "simple",
-        tokens_used=total_tokens_used or None,
+        tokens_used=tokens_used_for_lineage,
         cost_usd=round(estimated_cost_usd, 6) if has_cost_samples else None,
         generation_diagnostics={
             "selected_platforms": list(selected_platforms),
@@ -1793,8 +1796,8 @@ async def _execute_regeneration_request(
             "retry_by_platform": retry_by_platform if isinstance(retry_by_platform, dict) else {},
         },
         latency_ms=regen_latency_ms,
-        provider_attempt_count=provider_attempt_count or None,
-        parse_retry_count=parse_retry_count or None,
+        provider_attempt_count=provider_attempt_count,
+        parse_retry_count=parse_retry_count,
         request_id=request_id,
         idempotency_key=request_idempotency_key,
     )
@@ -1859,11 +1862,11 @@ async def _execute_regeneration_request(
         content_type=request.content_type,
         mode="with_feedback" if request.feedback else "simple",
         result_state=str(persistence.get("state", "completed")),
-        tokens_used=total_tokens_used or None,
+        tokens_used=tokens_used_for_lineage,
         cost_usd=round(estimated_cost_usd, 6) if has_cost_samples else None,
         latency_ms=regen_latency_ms,
-        provider_attempt_count=provider_attempt_count or None,
-        parse_retry_count=parse_retry_count or None,
+        provider_attempt_count=provider_attempt_count,
+        parse_retry_count=parse_retry_count,
     )
 
     return RegenerateResponse(
