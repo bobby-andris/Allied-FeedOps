@@ -64,6 +64,8 @@ describe('cost reconciliation helpers', () => {
   })
 
   it('surfaces explicit auth warning when OpenAI organization APIs return 403', async () => {
+    const originalUsageApiKey = process.env.OPENAI_USAGE_API_KEY
+    const originalOrgId = process.env.OPENAI_ORG_ID
     process.env.OPENAI_USAGE_API_KEY = 'usage-key'
     process.env.OPENAI_ORG_ID = 'org_test'
 
@@ -117,8 +119,16 @@ describe('cost reconciliation helpers', () => {
       expect(metadata?.warnings?.length).toBeGreaterThan(0)
     } finally {
       global.fetch = originalFetch
-      delete process.env.OPENAI_USAGE_API_KEY
-      delete process.env.OPENAI_ORG_ID
+      if (originalUsageApiKey === undefined) {
+        delete process.env.OPENAI_USAGE_API_KEY
+      } else {
+        process.env.OPENAI_USAGE_API_KEY = originalUsageApiKey
+      }
+      if (originalOrgId === undefined) {
+        delete process.env.OPENAI_ORG_ID
+      } else {
+        process.env.OPENAI_ORG_ID = originalOrgId
+      }
     }
   })
 })
