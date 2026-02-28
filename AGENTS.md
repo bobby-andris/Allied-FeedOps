@@ -57,6 +57,16 @@ These rules prevent disapprovals and “AI text” compliance issues. If any rul
 
 - For Google supplemental feeds, set `FEEDOPS_GMC_STRUCTURED_ONLY=1` when you want GMC to use `structured_title` / `structured_description` and ignore plain `title` / `description` (implemented in `src/feedops/integrations/google_supplemental.py`).
 
+### Development Workflow Invariants
+
+1. Always start from canonical repo path: `/Users/bobby/Documents/GitHub/Allied-FeedOps`.
+2. Always sync `master` before starting feature work:
+   - `git switch master`
+   - `git pull --ff-only origin master`
+3. Never implement on `master`. Create a `codex/*` feature branch from synced `master`.
+4. Run `scripts/dev_session_preflight.sh` before making edits.
+5. Merge feature branch into `master`, then restart the loop from a fresh branch.
+
 ### Runtime Inputs And Fixtures
 
 - **Supabase-first runtime data**: generation/evidence should read from live Supabase tables (`product_catalog`, `search_queries_by_master_sku`, `keyword_metrics`, `prompt_templates`, `variant_finish_sentences`).
