@@ -8,7 +8,11 @@ import inspect
 
 from feedops.api.prompt_builder import build_google_prompt
 from feedops.models.parent_sku import ParentSKU
-from feedops.pipeline.generator import _platform_completion_cap, generate_per_platform
+from feedops.pipeline.generator import (
+    _platform_completion_cap,
+    _platform_reasoning_effort,
+    generate_per_platform,
+)
 from feedops.pipeline.prompts import (
     BING_BRIEF,
     BING_SCHEMA,
@@ -94,18 +98,29 @@ def test_schema_contract_keeps_hard_max_for_platform_enforced_fields() -> None:
 
 
 def test_finish_completion_cap_floor_for_runtime_generation() -> None:
-    assert _platform_completion_cap("finish", 4000) == 8000
-    assert _platform_completion_cap("google", 4000) == 16000
-    assert _platform_completion_cap("bing", 9000) == 16000
-    assert _platform_completion_cap("shopify", 20000) == 20000
+    assert _platform_completion_cap("finish", 4000) == 1200
+    assert _platform_completion_cap("google", 4000) == 2400
+    assert _platform_completion_cap("bing", 9000) == 2400
+    assert _platform_completion_cap("shopify", 20000) == 2400
+    assert _platform_completion_cap("google", 1500) == 1500
 
 
 def test_runtime_generation_default_completion_cap_is_quality_safe() -> None:
     signature = inspect.signature(generate_per_platform)
     default_cap = signature.parameters["max_completion_tokens"].default
-    assert default_cap == 8000
-    assert _platform_completion_cap("google", default_cap) == 16000
-    assert _platform_completion_cap("finish", default_cap) == 8000
+    assert default_cap == 2400
+    assert _platform_completion_cap("google", default_cap) == 2400
+    assert _platform_completion_cap("finish", default_cap) == 1200
+
+
+def test_runtime_generation_default_reasoning_effort_is_medium() -> None:
+    signature = inspect.signature(generate_per_platform)
+    assert signature.parameters["reasoning_effort"].default == "medium"
+
+
+def test_finish_platform_uses_low_reasoning_effort() -> None:
+    assert _platform_reasoning_effort("finish", "medium") == "low"
+    assert _platform_reasoning_effort("google", "medium") == "medium"
 
 
 def test_platform_schemas_drop_self_score_for_v2_generation() -> None:
