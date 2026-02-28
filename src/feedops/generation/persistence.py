@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from feedops.generation.results import TaskResult
 
 
@@ -44,3 +46,44 @@ def serialize_task_result(result: TaskResult) -> dict[str, object]:
         "request_id": result.request_id,
         "raw_payload": result.raw_payload,
     }
+
+
+def should_persist_finish_sentences(
+    *,
+    platform: str,
+    content_type: str,
+    finish_sentences: object,
+) -> bool:
+    """Persist finish maps only for Google/Bing description flows with concrete content."""
+    return (
+        content_type == "description"
+        and platform in {"google", "bing"}
+        and isinstance(finish_sentences, dict)
+        and bool(finish_sentences)
+    )
+
+
+def persist_finish_sentences(
+    *,
+    supabase,
+    master_sku: str,
+    platform: str,
+    finish_sentences: dict[str, str],
+) -> bool:
+    """Upsert finish maps with an explicit freshness timestamp for lineage comparisons."""
+    if not should_persist_finish_sentences(
+        platform=platform,
+        content_type="description",
+        finish_sentences=finish_sentences,
+    ):
+        return False
+    supabase.table("variant_finish_sentences").upsert(
+        {
+            "master_sku": master_sku,
+            "platform": platform,
+            "finish_sentences": finish_sentences,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        },
+        on_conflict="master_sku,platform",
+    ).execute()
+    return True

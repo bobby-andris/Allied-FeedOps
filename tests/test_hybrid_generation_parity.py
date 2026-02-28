@@ -210,6 +210,7 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     assert len(finish_rows[0]["payload"]["finish_sentences"]) == len(
         hybrid_generation.get_finish_list()
     )
+    assert isinstance(finish_rows[0]["payload"]["updated_at"], str)
     history_rows = [
         op
         for op in supabase.operations

@@ -187,6 +187,42 @@ async def test_process_batch_job_title_only_skips_finish_sentence_writes(monkeyp
 
 
 @pytest.mark.asyncio
+async def test_regenerate_description_persists_finish_sentences_without_finish_telemetry(
+    monkeypatch,
+):
+    supabase = _CaptureSupabase()
+    provider = object()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-finish-persist")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return await _google_description_payload()
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    response = await api_main.regenerate_content(
+        api_main.RegenerateRequest(
+            master_sku="1031/18",
+            platform="google",
+            content_type="description",
+            feedback=None,
+        )
+    )
+
+    assert response.success is True
+    finish_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "variant_finish_sentences" and op["op"] == "upsert"
+    ]
+    assert len(finish_rows) == 1
+    assert finish_rows[0]["master_sku"] == "1031/18"
+    assert finish_rows[0]["platform"] == "google"
+    assert finish_rows[0]["finish_sentences"] == response.finish_sentences
+    assert isinstance(finish_rows[0]["updated_at"], str)
+
+
+@pytest.mark.asyncio
 async def test_process_hybrid_batch_job_uses_adaptation_for_family_variants(monkeypatch):
     supabase = _CaptureSupabase()
     provider = object()

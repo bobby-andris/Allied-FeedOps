@@ -82,6 +82,10 @@ from feedops.api.multi_sku_detection import (
     detect_multi_sku_families,
     extract_spec_difference,
 )
+from feedops.generation.persistence import (
+    persist_finish_sentences,
+    should_persist_finish_sentences as _task_should_persist_finish_sentences,
+)
 from feedops.api.hybrid_generation import adapt_variant_content  # noqa: F401 - re-exported for test patching compatibility
 from feedops.api.sku_alias import (
     resolve_canonical_master_sku,
@@ -1221,19 +1225,15 @@ def _telemetry_scope_for_content(
 
 def _should_persist_finish_sentences(
     *,
-    generated: dict,
-    content_types: list[str] | tuple[str, ...],
+    platform: str,
+    content_type: str,
+    finish_sentences: object,
 ) -> bool:
-    """Persist finish maps only when a finish task actually executed for description scope."""
-    finish_ran = "finish" in _telemetry_scope_for_content(
-        platform="google",
-        content_type="description",
-        generated=generated,
-    )
-    return (
-        "description" in content_types
-        and finish_ran
-        and isinstance(generated.get("finish_sentences"), dict)
+    """Persist finish maps whenever a description flow produced concrete finish content."""
+    return _task_should_persist_finish_sentences(
+        platform=platform,
+        content_type=content_type,
+        finish_sentences=finish_sentences,
     )
 
 
@@ -1655,19 +1655,19 @@ async def optimize_single_sku(request: OptimizeRequest):
                 )
 
         finish_sentences = generated.get("finish_sentences", {})
-        if not request.dry_run and _should_persist_finish_sentences(
-            generated=generated,
-            content_types=content_types,
-        ):
+        if not request.dry_run:
             for platform in ("google", "bing"):
-                supabase.table("variant_finish_sentences").upsert(
-                    {
-                        "master_sku": canonical_master_sku,
-                        "platform": platform,
-                        "finish_sentences": finish_sentences,
-                    },
-                    on_conflict="master_sku,platform",
-                ).execute()
+                if platform in platforms and _should_persist_finish_sentences(
+                    platform=platform,
+                    content_type="description",
+                    finish_sentences=finish_sentences,
+                ):
+                    persist_finish_sentences(
+                        supabase=supabase,
+                        master_sku=canonical_master_sku,
+                        platform=platform,
+                        finish_sentences=finish_sentences,
+                    )
 
         return OptimizeResponse(
             success=True,
@@ -1902,19 +1902,18 @@ async def _execute_regeneration_request(
         finish_sentences
         and persistence["state"] == "completed"
         and _should_persist_finish_sentences(
-            generated=generated,
-            content_types=(request.content_type,),
+            platform=request.platform,
+            content_type=request.content_type,
+            finish_sentences=finish_sentences,
         )
     ):
         try:
-            supabase.table("variant_finish_sentences").upsert(
-                {
-                    "master_sku": canonical_master_sku,
-                    "platform": request.platform,
-                    "finish_sentences": finish_sentences,
-                },
-                on_conflict="master_sku,platform",
-            ).execute()
+            persist_finish_sentences(
+                supabase=supabase,
+                master_sku=canonical_master_sku,
+                platform=request.platform,
+                finish_sentences=finish_sentences,
+            )
         except Exception as e:
             logger.warning(
                 "Failed to persist finish sentences for %s/%s: %s",
@@ -2781,20 +2780,19 @@ async def process_batch_job(
                         )
 
                 finish_sentences = generated.get("finish_sentences", {})
-                if _should_persist_finish_sentences(
-                    generated=generated,
-                    content_types=content_types,
-                ):
+                if "description" in content_types:
                     for platform in ("google", "bing"):
-                        if platform in platforms:
-                            supabase.table("variant_finish_sentences").upsert(
-                                {
-                                    "master_sku": canonical_sku,
-                                    "platform": platform,
-                                    "finish_sentences": finish_sentences,
-                                },
-                                on_conflict="master_sku,platform",
-                            ).execute()
+                        if platform in platforms and _should_persist_finish_sentences(
+                            platform=platform,
+                            content_type="description",
+                            finish_sentences=finish_sentences,
+                        ):
+                            persist_finish_sentences(
+                                supabase=supabase,
+                                master_sku=canonical_sku,
+                                platform=platform,
+                                finish_sentences=finish_sentences,
+                            )
 
             completed += 1
 
@@ -3087,20 +3085,19 @@ async def process_hybrid_batch_job(
                     parse_retry_count=telemetry["parse_retry_count"],
                 )
         finish_sentences = generated.get("finish_sentences", {})
-        if _should_persist_finish_sentences(
-            generated=generated,
-            content_types=content_types,
-        ):
+        if "description" in content_types:
             for platform in ("google", "bing"):
-                if platform in platforms and "description" in content_types:
-                    supabase.table("variant_finish_sentences").upsert(
-                        {
-                            "master_sku": canonical_sku,
-                            "platform": platform,
-                            "finish_sentences": finish_sentences,
-                        },
-                        on_conflict="master_sku,platform",
-                    ).execute()
+                if platform in platforms and _should_persist_finish_sentences(
+                    platform=platform,
+                    content_type="description",
+                    finish_sentences=finish_sentences,
+                ):
+                    persist_finish_sentences(
+                        supabase=supabase,
+                        master_sku=canonical_sku,
+                        platform=platform,
+                        finish_sentences=finish_sentences,
+                    )
         return generated
 
     try:

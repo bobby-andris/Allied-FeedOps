@@ -28,6 +28,7 @@ from feedops.api.generation_telemetry import (
 from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
 from feedops.generation.contracts import GenerationTaskKind, TaskSpec
+from feedops.generation.persistence import persist_finish_sentences
 from feedops.generation.tasks import (
     build_task_schema,
     build_task_system_prompt,
@@ -643,14 +644,12 @@ async def adapt_variant_content(
         ).execute()
 
         if finish_sentences and platform in {"google", "bing"}:
-            supabase.table("variant_finish_sentences").upsert(
-                {
-                    "master_sku": variant_sku,
-                    "platform": platform,
-                    "finish_sentences": finish_sentences,
-                },
-                on_conflict="master_sku,platform",
-            ).execute()
+            persist_finish_sentences(
+                supabase=supabase,
+                master_sku=variant_sku,
+                platform=platform,
+                finish_sentences=finish_sentences,
+            )
 
         metrics_registry.observe(
             "generation_latency_seconds",
