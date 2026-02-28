@@ -78,6 +78,7 @@ from feedops.providers import get_provider
 from feedops.api.multi_sku_detection import (
     detect_multi_sku_families,
 )
+from feedops.api.hybrid_generation import adapt_variant_content  # noqa: F401 - re-exported for test patching compatibility
 from feedops.api.sku_alias import (
     resolve_canonical_master_sku,
     resolve_canonical_master_skus,
@@ -1025,6 +1026,19 @@ def _require_request_id(request_id: str | None) -> str:
     return rid
 
 
+def _resolve_execution_request_id(request_id: str | None = None) -> str:
+    """Resolve a stable request id for non-HTTP execution paths.
+
+    HTTP calls populate context in middleware. Background jobs/tests may not have
+    a request context, so we synthesize one and propagate it explicitly.
+    """
+    rid = (request_id or get_request_id() or "").strip()
+    if not rid or rid == "-":
+        rid = uuid.uuid4().hex
+        logger.warning("Generated fallback execution request_id: %s", rid)
+    return rid
+
+
 def _regeneration_idempotency_key(
     *,
     request: RegenerateRequest,
@@ -1518,7 +1532,7 @@ async def optimize_single_sku(request: OptimizeRequest):
         latencies = generated.get("latency_by_platform", {})
         parse_by_platform = generated.get("parse_by_platform", {})
         retry_by_platform = generated.get("retry_by_platform", {})
-        request_id = get_request_id()
+        request_id = _resolve_execution_request_id()
 
         for platform in platforms:
             for content_type in content_types:
@@ -1716,7 +1730,8 @@ async def _execute_regeneration_request(
     include_finish = (
         request.content_type == "description" and request.platform in {"google", "bing"}
     )
-    if include_finish:
+    finish_regen_enabled = finish_sentence_regeneration_enabled()
+    if include_finish and finish_regen_enabled:
         selected_platforms.append("finish")
 
     generated = await generate_per_platform(
@@ -2550,8 +2565,8 @@ async def process_batch_job(
     failed = 0
     normalized_options = _normalize_generation_options(options)
     platforms = normalized_options["platforms"]
-    request_id = get_request_id()
-    lineage_request_id = request_id if request_id and request_id != "-" else None
+    request_id = _resolve_execution_request_id()
+    lineage_request_id = request_id
     content_types = []
     if normalized_options["titles"]:
         content_types.append("title")
@@ -2802,8 +2817,8 @@ async def process_hybrid_batch_job(
     expanded_failed = 0
 
     platforms = options.get("platforms", ["google", "bing", "shopify"])
-    request_id = get_request_id()
-    lineage_request_id = request_id if request_id and request_id != "-" else None
+    request_id = _resolve_execution_request_id()
+    lineage_request_id = request_id
     content_types = []
     if options.get("titles"):
         content_types.append("title")

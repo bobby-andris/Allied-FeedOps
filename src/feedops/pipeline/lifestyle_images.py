@@ -692,13 +692,15 @@ def score_lifestyle_image(
         # Initialize Gemini client
         client = genai.Client(api_key=api_key)
 
-        # Load the generated image
-        generated_image = Image.open(image_path)
+        # Load/copy image data via context managers to avoid leaking file handles.
+        with Image.open(image_path) as generated_img:
+            generated_image = generated_img.copy()
 
         # Download reference image
         response = requests.get(reference_image_url, timeout=10)
         response.raise_for_status()
-        reference_image = Image.open(BytesIO(response.content))
+        with Image.open(BytesIO(response.content)) as reference_img:
+            reference_image = reference_img.copy()
 
         # Build evaluation prompt
         eval_prompt = f"""You are an expert product photography evaluator for e-commerce. 

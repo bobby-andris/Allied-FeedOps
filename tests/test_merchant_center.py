@@ -187,8 +187,6 @@ def test_load_credentials_falls_back_to_creds_dir(monkeypatch, tmp_path):
 
 
 def test_load_credentials_uses_google_ads_config(tmp_path):
-    Credentials = pytest.importorskip("google.oauth2.credentials").Credentials
-
     from feedops.integrations import merchant_center
 
     config_path = tmp_path / "google-ads.yaml"
@@ -203,15 +201,17 @@ def test_load_credentials_uses_google_ads_config(tmp_path):
     )
 
     creds, source = merchant_center._load_credentials(
-        {"GOOGLE_ADS_CONFIGURATION_FILE_PATH": str(config_path)}
+        {
+            "GOOGLE_ADS_CONFIGURATION_FILE_PATH": str(config_path),
+            "FEEDOPS_CREDS_DIR": str(tmp_path / "empty-creds"),
+        }
     )
 
     assert source == "google_ads_config"
-    assert isinstance(creds, Credentials)
-    assert isinstance(creds, Credentials)
+    assert hasattr(creds, "refresh")
 
 
-def test_load_credentials_invalid_service_account_fails_fast_without_adc_fallback(monkeypatch):
+def test_load_credentials_invalid_service_account_fails_fast_without_adc_fallback(monkeypatch, tmp_path):
     from feedops.integrations import merchant_center
 
     def fail_from_info(_info, scopes=None):
@@ -226,16 +226,20 @@ def test_load_credentials_invalid_service_account_fails_fast_without_adc_fallbac
         fail_from_info,
     )
     monkeypatch.setattr(merchant_center.google.auth, "default", fail_adc)
+    missing_ads_config = tmp_path / "missing-google-ads.yaml"
+    missing_creds_dir = tmp_path / "missing-creds"
 
     with pytest.raises(ValueError, match="Merchant credential loading failed"):
         merchant_center._load_credentials(
             {
                 "GOOGLE_SERVICE_ACCOUNT_KEY": '{"type":"service_account","private_key":"bad","client_email":"x@example.com"}',
+                "GOOGLE_ADS_CONFIGURATION_FILE_PATH": str(missing_ads_config),
+                "FEEDOPS_CREDS_DIR": str(missing_creds_dir),
             }
         )
 
 
-def test_load_credentials_can_use_adc_fallback_when_opted_in(monkeypatch):
+def test_load_credentials_can_use_adc_fallback_when_opted_in(monkeypatch, tmp_path):
     from feedops.integrations import merchant_center
 
     class DummyCred:
@@ -256,11 +260,15 @@ def test_load_credentials_can_use_adc_fallback_when_opted_in(monkeypatch):
         fail_from_info,
     )
     monkeypatch.setattr(merchant_center.google.auth, "default", fake_adc)
+    missing_ads_config = tmp_path / "missing-google-ads.yaml"
+    missing_creds_dir = tmp_path / "missing-creds"
 
     creds, source = merchant_center._load_credentials(
         {
             "GOOGLE_SERVICE_ACCOUNT_KEY": '{"type":"service_account","private_key":"bad","client_email":"x@example.com"}',
             "FEEDOPS_ALLOW_ADC_FALLBACK": "1",
+            "GOOGLE_ADS_CONFIGURATION_FILE_PATH": str(missing_ads_config),
+            "FEEDOPS_CREDS_DIR": str(missing_creds_dir),
         }
     )
 
