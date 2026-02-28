@@ -206,9 +206,15 @@ def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
     with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
         assert provider.max_retries == 2
-        assert provider.max_total_seconds == 120
+        assert provider.max_total_seconds == 240
         assert provider.client.max_retries == 0
         assert provider.client.timeout is not None
+        timeout_read = (
+            provider.client.timeout.read
+            if hasattr(provider.client.timeout, "read")
+            else provider.client.timeout
+        )
+        assert float(timeout_read) == 90.0
         assert getattr(provider, "json_retry_max") == 1
 
 

@@ -668,9 +668,12 @@ async def test_process_batch_job_persists_platform_telemetry_once_per_platform(m
         if op["op"] == "insert" and op["table"] == "regeneration_history"
     ]
     assert len(history_rows) == 2
-    assert sum(1 for row in history_rows if row.get("tokens_used") is not None) == 1
-    assert sum(1 for row in history_rows if row.get("cost_usd") is not None) == 1
-    assert sum(1 for row in history_rows if row.get("latency_ms") is not None) == 1
+    assert all(row.get("tokens_used") is not None for row in history_rows)
+    assert all(row.get("cost_usd") is not None for row in history_rows)
+    assert all(row.get("latency_ms") is not None for row in history_rows)
+    assert sum(1 for row in history_rows if (row.get("tokens_used") or 0) > 0) == 1
+    assert sum(1 for row in history_rows if (row.get("cost_usd") or 0) > 0) == 1
+    assert sum(1 for row in history_rows if (row.get("latency_ms") or 0) > 0) == 1
 
     platform_summaries = [
         event
@@ -680,9 +683,12 @@ async def test_process_batch_job_persists_platform_telemetry_once_per_platform(m
         and event.get("result_state") == "completed"
     ]
     assert len(platform_summaries) == 2
-    assert sum(1 for event in platform_summaries if event.get("tokens_used") is not None) == 1
-    assert sum(1 for event in platform_summaries if event.get("cost_usd") is not None) == 1
-    assert sum(1 for event in platform_summaries if event.get("latency_ms") is not None) == 1
+    assert all(event.get("tokens_used") is not None for event in platform_summaries)
+    assert all(event.get("cost_usd") is not None for event in platform_summaries)
+    assert all(event.get("latency_ms") is not None for event in platform_summaries)
+    assert sum(1 for event in platform_summaries if (event.get("tokens_used") or 0) > 0) == 1
+    assert sum(1 for event in platform_summaries if (event.get("cost_usd") or 0) > 0) == 1
+    assert sum(1 for event in platform_summaries if (event.get("latency_ms") or 0) > 0) == 1
 
 
 def test_batch_optimize_request_exposes_generation_options_field():
