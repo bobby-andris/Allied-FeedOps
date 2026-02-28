@@ -1506,10 +1506,17 @@ async def optimize_single_sku(request: OptimizeRequest):
         platforms = ["google", "bing", "shopify"]
         content_types = ["title", "description"]
 
+        selected_platforms = list(platforms)
+        if (
+            "description" in content_types
+            and any(platform in {"google", "bing"} for platform in platforms)
+        ):
+            selected_platforms.append("finish")
         generated = await generate_per_platform(
             parent_sku=parent_sku,
             provider=provider,
             prompt_version="v2",
+            selected_platforms=tuple(selected_platforms),
         )
         prompt_hashes = generated.get("prompt_hashes", {})
         system_prompts = generated.get("system_prompts", {})
@@ -1554,7 +1561,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                     provider_attempt_count=telemetry["provider_attempt_count"],
                     parse_retry_count=telemetry["parse_retry_count"],
                     generation_diagnostics={
-                        "selected_platforms": list(platforms),
+                        "selected_platforms": list(selected_platforms),
                         "usage_by_platform": usage_by_platform
                         if isinstance(usage_by_platform, dict)
                         else {},
@@ -2577,10 +2584,17 @@ async def process_batch_job(
                 raise ValueError(f"SKU not found: {canonical_sku}")
 
             provider = get_provider()
+            selected_platforms = list(platforms)
+            if (
+                "description" in content_types
+                and any(platform in {"google", "bing"} for platform in platforms)
+            ):
+                selected_platforms.append("finish")
             generated = await generate_per_platform(
                 parent_sku=parent_sku,
                 provider=provider,
                 prompt_version="v2",
+                selected_platforms=tuple(selected_platforms),
             )
             prompt_hashes = generated.get("prompt_hashes", {})
             system_prompts = generated.get("system_prompts", {})
@@ -2635,7 +2649,7 @@ async def process_batch_job(
                             if include_platform_telemetry
                             else 0,
                             generation_diagnostics={
-                                "selected_platforms": list(platforms),
+                                "selected_platforms": list(selected_platforms),
                                 "usage_by_platform": usage_by_platform
                                 if isinstance(usage_by_platform, dict)
                                 else {},
@@ -2887,10 +2901,18 @@ async def process_hybrid_batch_job(
         if not parent_sku:
             raise ValueError(f"SKU not found: {canonical_sku}")
 
+        selected_platforms = list(platforms)
+        if (
+            "description" in content_types
+            and any(platform in {"google", "bing"} for platform in platforms)
+        ):
+            selected_platforms.append("finish")
+
         generated = await generate_per_platform(
             parent_sku=parent_sku,
             provider=provider,
             prompt_version="v2",
+            selected_platforms=tuple(selected_platforms),
         )
         prompt_hashes = generated.get("prompt_hashes", {})
         system_prompts = generated.get("system_prompts", {})
@@ -2932,7 +2954,7 @@ async def process_hybrid_batch_job(
                     provider_attempt_count=telemetry["provider_attempt_count"],
                     parse_retry_count=telemetry["parse_retry_count"],
                     generation_diagnostics={
-                        "selected_platforms": list(platforms),
+                        "selected_platforms": list(selected_platforms),
                         "usage_by_platform": usage_by_platform
                         if isinstance(usage_by_platform, dict)
                         else {},

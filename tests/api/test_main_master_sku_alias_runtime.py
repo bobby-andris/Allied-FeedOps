@@ -811,6 +811,62 @@ async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_s
     assert latest_status_by_sku["1033/24"] == "completed"
 
 
+@pytest.mark.asyncio
+async def test_process_hybrid_batch_job_respects_selected_platforms(monkeypatch):
+    db = _FakeSupabase()
+    selected_platform_calls: list[tuple[str, ...]] = []
+
+    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(
+        api_main,
+        "resolve_canonical_master_sku",
+        lambda _supabase, master_sku: master_sku,
+    )
+    monkeypatch.setattr(
+        api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku)
+    )
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-platforms")
+
+    async def _fake_generate_per_platform(**kwargs):
+        selected = kwargs.get("selected_platforms")
+        if isinstance(selected, (tuple, list)):
+            selected_platform_calls.append(tuple(selected))
+        return {
+            "google_description": "Updated google description {FINISH_SENTENCE}",
+            "prompt_hashes": {"google": "hash-google", "finish": "hash-finish"},
+            "system_prompts": {"google": "sys-google", "finish": "sys-finish"},
+            "user_prompts": {"google": "user-google", "finish": "user-finish"},
+            "usage_by_platform": {"google": {"prompt_tokens": 100, "completion_tokens": 40}},
+            "latency_by_platform": {"google": 180},
+            "parse_by_platform": {"google": {"parse_mode": "strict_json", "missing_keys": []}},
+            "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
+            "finish_sentences": {"Polished Chrome": "Polished Chrome sentence."},
+        }
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    families = [
+        MultiSkuFamily(
+            product_id="family-1033",
+            master_skus=["1033/16", "1033/18", "1033/24"],
+            base_sku="1033/16",
+            variant_skus=["1033/18", "1033/24"],
+        )
+    ]
+    await api_main.process_hybrid_batch_job(
+        job_id="job-hybrid-platforms",
+        families=families,
+        single_skus=["CL-55"],
+        options={"titles": False, "descriptions": True, "platforms": ["google"]},
+        requested_skus=["CL-55", "1033/18"],
+    )
+
+    assert selected_platform_calls
+    assert all(call == ("google", "finish") for call in selected_platform_calls)
+
+
 def test_generation_summary_event_contract(monkeypatch):
     captured: dict[str, object] = {}
 
