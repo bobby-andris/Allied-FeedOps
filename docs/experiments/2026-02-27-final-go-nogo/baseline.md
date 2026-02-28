@@ -1,10 +1,10 @@
-# Final Go/No-Go Baseline (2026-02-27 rerun)
+# Final Go/No-Go Baseline (2026-02-28 post-deploy rerun)
 
-- Timestamp (ET): 2026-02-27
+- Timestamp (ET): 2026-02-27 22:35
 - Repository: `bobby-andris/Allied-FeedOps`
 - Canonical path: `/Users/bobby/Documents/GitHub/Allied-FeedOps`
-- Branch: `codex/e245-final-go-nogo-rerun-20260227`
-- Baseline SHA: `376a238ec8da6a2aa3e7ce3cc4eadd0e60be7855`
+- Branch: `codex/e245-final-go-nogo-postdeploy-20260228`
+- Baseline SHA: `cd091581d4729ef33361029824de6cc2803dcf5b`
 - Upstream baseline: `origin/master`
 - Environment mode: local parity (`uv`, `PYTHONPATH=src`)
 
