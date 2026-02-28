@@ -101,13 +101,33 @@ def _platform_completion_cap(platform: str, base_cap: int) -> int:
     We intentionally *bound* completion budgets to reduce long-tail latency and
     runaway spend during strict JSON generation. Callers can pass a lower cap,
     but platform-specific hard limits prevent overly large completions.
+
+    Defaults are tuned to avoid GPT-5.x strict-JSON truncation for description
+    generation while remaining bounded by request-level cost and retry limits.
+    Limits are configurable by env when tighter controls are needed.
     """
     normalized_cap = max(1, int(base_cap))
+    default_cap = max(1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_DEFAULT", "8000")))
+    finish_cap = max(
+        1,
+        int(
+            os.getenv(
+                "FEEDOPS_PLATFORM_COMPLETION_CAP_FINISH",
+                os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_DEFAULT", "2000"),
+            )
+        ),
+    )
     platform_limits = {
-        "google": 2400,
-        "bing": 2400,
-        "shopify": 2400,
-        "finish": 1200,
+        "google": max(
+            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_GOOGLE", str(default_cap)))
+        ),
+        "bing": max(
+            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_BING", str(default_cap)))
+        ),
+        "shopify": max(
+            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_SHOPIFY", str(default_cap)))
+        ),
+        "finish": finish_cap,
     }
     limit = platform_limits.get(platform)
     if limit is None:
@@ -454,7 +474,7 @@ async def generate_per_platform(
     *,
     feedback_by_platform: dict[str, str] | None = None,
     reasoning_effort: str = "medium",
-    max_completion_tokens: int = 2400,
+    max_completion_tokens: int = 6000,
     selected_platforms: tuple[str, ...] | list[str] | None = None,
 ) -> dict[str, object]:
     """Generate content via per-platform prompts/schemas.
