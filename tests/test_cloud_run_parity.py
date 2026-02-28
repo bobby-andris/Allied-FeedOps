@@ -51,5 +51,6 @@ def test_dashboard_and_python_propagate_request_id_contract() -> None:
 def test_python_api_enforces_runtime_env_contract_on_startup() -> None:
     api_source = _read(MAIN_API_PATH)
 
-    assert '@app.on_event("startup")' in api_source
+    assert "lifespan=_app_lifespan" in api_source
+    assert "async def _app_lifespan" in api_source
     assert "validate_runtime_env_contract()" in api_source

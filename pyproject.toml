@@ -47,6 +47,13 @@ packages = ["src/feedops"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+filterwarnings = [
+    "error",
+    "ignore:'enablePackrat' deprecated - use 'enable_packrat':Warning:pyiceberg.expressions.parser",
+    "ignore:'escChar' argument is deprecated, use 'esc_char':Warning:pyiceberg.expressions.parser",
+    "ignore:'unquoteResults' argument is deprecated, use 'unquote_results':Warning:pyiceberg.expressions.parser",
+    "ignore:Using `@model_validator` with mode='after' on a classmethod is deprecated.*:DeprecationWarning:pyiceberg.table.metadata",
+]
 
 [tool.ruff]
 line-length = 100
