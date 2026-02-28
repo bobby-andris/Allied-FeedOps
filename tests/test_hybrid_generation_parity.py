@@ -141,29 +141,32 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
         finish: f"{finish} complements this profile."
         for finish in hybrid_generation.get_finish_list()
     }
-    selected_platforms_seen = {}
+    
+    class _FakeProvider:
+        name = "fake-provider"
 
-    async def _fake_generate(**kwargs):
-        selected_platforms_seen["value"] = tuple(kwargs.get("selected_platforms", ()))
+        def __init__(self):
+            self.last_usage = {
+                "prompt_tokens": 120,
+                "completion_tokens": 80,
+                "cached_tokens": 20,
+            }
+            self.last_retry_counts = {"attempt_count": 2, "json_decode_retries": 1}
+
+    async def _fake_generate_with_provider_compat(**kwargs):
+        assert kwargs["requires_json"] if "requires_json" in kwargs else True
         return {
-            "google_description": (
+            "content": (
                 "Wall-mounted towel bar with durable brass construction. "
                 "{FINISH_SENTENCE}"
-            ),
-            "finish_sentences": finish_payload,
-            "prompt_hashes": {"google": "hash123"},
-            "system_prompts": {"google": "system"},
-            "user_prompts": {"google": "user"},
-            "usage_by_platform": {
-                "google": {
-                    "prompt_tokens": 120,
-                    "completion_tokens": 80,
-                    "cached_tokens": 20,
-                }
-            },
-            "latency_by_platform": {"google": 950},
-            "retry_by_platform": {"google": {"attempt_count": 2, "json_decode_retries": 1}},
+            )
         }
+
+    monkeypatch.setattr(
+        hybrid_generation,
+        "_generate_with_provider_compat",
+        _fake_generate_with_provider_compat,
+    )
 
     monkeypatch.setattr(
         hybrid_generation,
@@ -172,15 +175,9 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     )
     monkeypatch.setattr(
         hybrid_generation,
-        "load_parent_sku_from_supabase",
-        lambda _sku: SimpleNamespace(master_sku="SB-18-parent"),
-    )
-    monkeypatch.setattr(
-        hybrid_generation,
         "get_provider",
-        lambda: SimpleNamespace(name="fake-provider"),
+        lambda: _FakeProvider(),
     )
-    monkeypatch.setattr(hybrid_generation, "generate_per_platform", _fake_generate)
 
     result = await hybrid_generation.adapt_variant_content(
         supabase=supabase,
@@ -190,11 +187,16 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
         content_type="description",
         base_spec="16 inch",
         variant_spec="18 inch",
+        base_content=(
+            "Wall-mounted towel bar with durable brass construction. "
+            "{FINISH_SENTENCE}"
+        ),
+        base_finish_sentences=finish_payload,
+        request_id="req-hybrid-finish-payload",
     )
 
     assert result["success"] is True
     assert result["mode"] == "v2"
-    assert selected_platforms_seen["value"] == ("google", "finish")
     assert (
         result["content"]
         == "Wall-mounted towel bar with durable brass construction. {FINISH_SENTENCE}"
@@ -215,9 +217,12 @@ async def test_adapt_variant_content_google_description_uses_v2_finish_payload(
     ]
     assert len(history_rows) == 1
     payload = history_rows[0]["payload"]
+    assert payload["previous_content"] is None
+    assert payload["new_content"] == result["content"]
     assert payload["tokens_used"] == 200
     assert payload["cost_usd"] is not None
-    assert payload["latency_ms"] == 950
+    assert isinstance(payload["latency_ms"], int)
+    assert payload["latency_ms"] >= 0
     assert payload["provider_attempt_count"] == 2
     assert payload["parse_retry_count"] == 1
 
@@ -227,15 +232,18 @@ async def test_adapt_variant_content_google_description_allows_missing_finish_pa
     monkeypatch,
 ):
     supabase = _HybridSupabase()
-    async def _fake_generate(**_kwargs):
+    
+    class _FakeProvider:
+        name = "fake-provider"
+        last_usage = {}
+        last_retry_counts = {}
+
+    async def _fake_generate_with_provider_compat(**_kwargs):
         return {
-            "google_description": (
+            "content": (
                 "Solid brass profile for daily use. {FINISH_SENTENCE} "
                 "Choose from 28 designer finishes."
-            ),
-            "prompt_hashes": {"google": "hash123"},
-            "system_prompts": {"google": "system"},
-            "user_prompts": {"google": "user"},
+            )
         }
 
     monkeypatch.setattr(
@@ -245,15 +253,14 @@ async def test_adapt_variant_content_google_description_allows_missing_finish_pa
     )
     monkeypatch.setattr(
         hybrid_generation,
-        "load_parent_sku_from_supabase",
-        lambda _sku: SimpleNamespace(master_sku="SB-18-parent"),
+        "get_provider",
+        lambda: _FakeProvider(),
     )
     monkeypatch.setattr(
         hybrid_generation,
-        "get_provider",
-        lambda: SimpleNamespace(name="fake-provider"),
+        "_generate_with_provider_compat",
+        _fake_generate_with_provider_compat,
     )
-    monkeypatch.setattr(hybrid_generation, "generate_per_platform", _fake_generate)
 
     result = await hybrid_generation.adapt_variant_content(
         supabase=supabase,
@@ -263,6 +270,11 @@ async def test_adapt_variant_content_google_description_allows_missing_finish_pa
         content_type="description",
         base_spec="16 inch",
         variant_spec="18 inch",
+        base_content=(
+            "Solid brass profile for daily use. {FINISH_SENTENCE} "
+            "Choose from 28 designer finishes."
+        ),
+        request_id="req-hybrid-no-finish-payload",
     )
 
     assert result["success"] is True

@@ -21,12 +21,10 @@ from feedops.api.runtime_controls import (
     diagnostic_skip_finish_subcall_enabled,
     request_cost_usd_cap,
 )
-from feedops.api.prompt_builder import (
-    build_bing_prompt,
-    build_finish_prompt,
-    build_google_prompt,
-    get_prompt_experiment_variant,
-    build_shopify_prompt,
+from feedops.api.prompt_builder import get_prompt_experiment_variant
+from feedops.generation.executor import (
+    ExecutionBudgetExceededError,
+    execute_generation_legacy_payload,
 )
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.evidence import (
@@ -59,7 +57,6 @@ from feedops.pipeline.segment_strategy import (
     format_segment_strategy_guidance,
     resolve_segment_strategy,
 )
-from feedops.pipeline.skill_loader import get_platform_system_prompt
 from feedops.pipeline.feature_flags import is_segment_strategy_v1_enabled
 from feedops.pipeline.title_normalization import trim_title_to_length
 from feedops.providers.base import LLMProvider
@@ -476,238 +473,55 @@ async def generate_per_platform(
     reasoning_effort: str = "medium",
     max_completion_tokens: int = 6000,
     selected_platforms: tuple[str, ...] | list[str] | None = None,
+    selected_content_types: tuple[str, ...] | list[str] | None = None,
+    request_id: str | None = None,
 ) -> dict[str, object]:
     """Generate content via per-platform prompts/schemas.
 
     ``prompt_version`` is retained for API compatibility but runtime generation
     is now deterministic and always uses the per-platform prompt path.
     """
-    experiment_variant = get_prompt_experiment_variant()
     if (prompt_version or "v2").lower() != "v2":
         logger.info(
             "Ignoring non-v2 prompt_version=%s; per-platform generation is mandatory.",
             prompt_version,
         )
-
-    evidence = build_evidence_table(parent_sku)
-    evidence_for_copy = filter_evidence_for_copy_context(evidence)
-    category_guidance = get_category_guidance(parent_sku.category) or ""
-    keyword_section = format_keyword_placement_section(
-        build_keyword_placement_plan(parent_sku, evidence)
+    normalized_platforms = {
+        str(platform).strip().lower()
+        for platform in (selected_platforms or ("google", "bing", "shopify", "finish"))
+        if str(platform).strip()
+    }
+    normalized_content_types = {
+        str(content_type).strip().lower()
+        for content_type in (selected_content_types or ("title", "description"))
+        if str(content_type).strip()
+    }
+    include_finish = (
+        "description" in normalized_content_types
+        and any(platform in {"google", "bing"} for platform in normalized_platforms)
     )
-    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
-    finish_metadata = _build_finish_metadata_rows(parent_sku)
-
-    user_prompts: dict[str, str] = {
-        "google": build_google_prompt(
-            parent_sku,
-            evidence_for_copy,
-            keyword_section,
-            category_guidance,
-            gold_examples,
-        ),
-        "bing": build_bing_prompt(
-            parent_sku,
-            evidence_for_copy,
-            keyword_section,
-            category_guidance,
-        ),
-        "shopify": build_shopify_prompt(
-            parent_sku,
-            evidence_for_copy,
-            category_guidance,
-        ),
-        "finish": build_finish_prompt(parent_sku, finish_metadata),
-    }
-    if feedback_by_platform:
-        for platform, feedback in feedback_by_platform.items():
-            if (
-                isinstance(feedback, str)
-                and feedback.strip()
-                and platform in user_prompts
-            ):
-                user_prompts[platform] = (
-                    user_prompts[platform]
-                    + "\n\nReviewer Feedback:\n"
-                    + feedback.strip()
-                )
-
-    system_prompts: dict[str, str] = {
-        platform: get_platform_system_prompt(platform)
-        for platform in ("google", "bing", "shopify", "finish")
-    }
-    prompt_hashes: dict[str, str] = {
-        platform: _prompt_hash(system_prompts[platform], user_prompts[platform])
-        for platform in ("google", "bing", "shopify", "finish")
-    }
-    platform_schemas = {
-        "google": GOOGLE_SCHEMA,
-        "bing": BING_SCHEMA,
-        "shopify": SHOPIFY_SCHEMA,
-        "finish": FINISH_SENTENCES_SCHEMA,
-    }
-    schema_hashes = {
-        platform: _schema_hash(schema)
-        for platform, schema in platform_schemas.items()
-    }
-
-    raw_by_platform: dict[str, dict[str, object]] = {}
-    usage_by_platform: dict[str, dict[str, int]] = {}
-    latency_by_platform: dict[str, int] = {}
-    parse_by_platform: dict[str, dict[str, object]] = {}
-    retry_by_platform: dict[str, dict[str, int]] = {}
-    requested_platforms = _resolve_requested_platforms(selected_platforms)
-    diagnostic_mode = diagnostic_mode_enabled()
-    finish_subcall_skipped = False
-    if (
-        diagnostic_mode
-        and "finish" in requested_platforms
-        and diagnostic_skip_finish_subcall_enabled()
-    ):
-        requested_platforms = tuple(
-            platform for platform in requested_platforms if platform != "finish"
-        )
-        finish_subcall_skipped = True
-        logger.warning(
-            "Diagnostic mode skipped finish sub-call for sku=%s",
-            parent_sku.master_sku,
-        )
-
-    cost_cap_usd = request_cost_usd_cap()
-    estimated_cost_total_usd = 0.0
-    for platform in requested_platforms:
-        platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
-        platform_cap = _platform_completion_cap(platform, max_completion_tokens)
-        started = time.perf_counter()
-        payload = await _generate_with_provider_compat(
+    try:
+        response = await execute_generation_legacy_payload(
+            parent_sku=parent_sku,
             provider=provider,
-            prompt=user_prompts[platform],
-            schema=platform_schemas[platform],
-            system_prompt=system_prompts[platform],
-            reasoning_effort=platform_reasoning,
-            max_completion_tokens=platform_cap,
+            prompt_version="v2",
+            feedback_by_platform=feedback_by_platform,
+            reasoning_effort=reasoning_effort,
+            max_completion_tokens=max_completion_tokens,
+            selected_platforms=selected_platforms,
+            selected_content_types=selected_content_types,
+            request_id=request_id,
+            prompt_overrides=None,
+            system_prompt_overrides=None,
         )
-        latency_by_platform[platform] = int((time.perf_counter() - started) * 1000)
-        payload_keys: list[str] = []
-        payload_lengths: dict[str, int] = {}
-        if isinstance(payload, dict):
-            payload_keys = sorted(payload.keys())
-            payload_lengths = _payload_value_lengths(payload)
-        logger.info(
-            "Per-platform payload keys: sku=%s platform=%s keys=%s",
-            parent_sku.master_sku,
-            platform,
-            payload_keys,
-        )
-
-        expected_content_key = {
-            "google": "google_description",
-            "bing": "bing_description",
-            "shopify": "shopify_description",
-        }.get(platform)
-        if expected_content_key:
-            expected_length = payload_lengths.get(expected_content_key, 0)
-            if expected_length < 100:
-                logger.warning(
-                    "Short v2 content payload detected: sku=%s platform=%s expected_key=%s expected_len=%s keys=%s value_lengths=%s",
-                    parent_sku.master_sku,
-                    platform,
-                    expected_content_key,
-                    expected_length,
-                    payload_keys,
-                    payload_lengths,
-                )
-
-        raw_by_platform[platform] = payload
-        usage_snapshot = getattr(provider, "last_usage", {})
-        usage_by_platform[platform] = (
-            usage_snapshot if isinstance(usage_snapshot, dict) else {}
-        )
-        usage_cost = estimate_openai_cost_usd_from_usage(usage_by_platform[platform])
-        if usage_cost is not None:
-            estimated_cost_total_usd += usage_cost
-        if cost_cap_usd is not None and estimated_cost_total_usd > cost_cap_usd:
-            logger.warning(
-                "Generation request budget exceeded: sku=%s platform=%s estimated_cost_usd=%.6f cap_usd=%.6f",
-                parent_sku.master_sku,
-                platform,
-                estimated_cost_total_usd,
-                cost_cap_usd,
-            )
-            raise GenerationBudgetExceededError(
-                cap_usd=cost_cap_usd,
-                estimated_cost_usd=estimated_cost_total_usd,
-                platform=platform,
-            )
-        parse_snapshot = getattr(provider, "last_parse_details", {})
-        parse_by_platform[platform] = (
-            parse_snapshot if isinstance(parse_snapshot, dict) else {}
-        )
-        retry_snapshot = getattr(provider, "last_retry_counts", {})
-        retry_by_platform[platform] = (
-            retry_snapshot if isinstance(retry_snapshot, dict) else {}
-        )
-        logger.info(
-            "Per-platform generation usage: sku=%s platform=%s usage=%s latency_ms=%s cap=%s reasoning=%s",
-            parent_sku.master_sku,
-            platform,
-            usage_by_platform[platform],
-            latency_by_platform[platform],
-            platform_cap,
-            platform_reasoning,
-        )
-        logger.info(
-            "Per-platform parse diagnostics: sku=%s platform=%s parse_mode=%s missing_keys=%s",
-            parent_sku.master_sku,
-            platform,
-            parse_by_platform[platform].get("parse_mode", "unknown"),
-            parse_by_platform[platform].get("missing_keys", []),
-        )
-        logger.info(
-            "Per-platform retry diagnostics: sku=%s platform=%s retries=%s",
-            parent_sku.master_sku,
-            platform,
-            retry_by_platform[platform],
-        )
-
-    finish_sentences = _normalize_finish_sentence_payload(
-        raw_by_platform.get("finish", {}),
-        parent_sku,
-    )
-    google_payload = raw_by_platform.get("google", {})
-    bing_payload = raw_by_platform.get("bing", {})
-    shopify_payload = raw_by_platform.get("shopify", {})
-
-    return {
-        "google_title": str(google_payload.get("google_title", "")).strip(),
-        "google_short_title": _trim_google_short_title(
-            str(google_payload.get("google_short_title", "")).strip()
-        ),
-        "google_description": str(google_payload.get("google_description", "")).strip(),
-        "bing_title": str(bing_payload.get("bing_title", "")).strip(),
-        "bing_description": str(bing_payload.get("bing_description", "")).strip(),
-        "shopify_title": str(shopify_payload.get("shopify_title", "")).strip(),
-        "shopify_description": str(shopify_payload.get("shopify_description", "")).strip(),
-        "shopify_meta_description": str(
-            shopify_payload.get("shopify_meta_description", "")
-        ).strip(),
-        "finish_sentences": finish_sentences,
-        "prompt_hashes": prompt_hashes,
-        "system_prompts": system_prompts,
-        "user_prompts": user_prompts,
-        "usage_by_platform": usage_by_platform,
-        "latency_by_platform": latency_by_platform,
-        "raw_by_platform": raw_by_platform,
-        "schema_hashes": schema_hashes,
-        "parse_by_platform": parse_by_platform,
-        "retry_by_platform": retry_by_platform,
-        "prompt_experiment_variant": experiment_variant,
-        "diagnostic_mode": diagnostic_mode,
-        "finish_subcall_executed": "finish" in raw_by_platform,
-        "finish_subcall_skipped": finish_subcall_skipped,
-        "budget_stop_triggered": False,
-        "estimated_cost_total_usd": round(estimated_cost_total_usd, 6),
-    }
+    except ExecutionBudgetExceededError as exc:
+        raise GenerationBudgetExceededError(
+            cap_usd=exc.cap_usd,
+            estimated_cost_usd=exc.estimated_cost_usd,
+            platform=exc.platform,
+        ) from exc
+    response["prompt_experiment_variant"] = get_prompt_experiment_variant()
+    return response
 
 
 async def generate_candidate(

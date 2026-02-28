@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-
-// Python Cloud Run pipeline URL
-const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+import {
+  getRequiredPipelineUrl,
+  PIPELINE_URL_MISSING_MESSAGE,
+} from '@/lib/pipeline-url'
 
 // Per-endpoint timeouts — freshness can be slow (2784-SKU query), coverage/apiHealth are fast
 // Freshness timeout is kept short so coverage cards don't block behind the slow freshness query
@@ -21,12 +22,14 @@ function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
 
 export async function GET() {
   try {
+    const pipelineUrl = getRequiredPipelineUrl()
+
     // Fetch all 3 monitoring endpoints in parallel, each with its own timeout.
     // Freshness has a short timeout so slow queries don't block coverage cards from rendering.
     const [freshnessRes, coverageRes, apiHealthRes] = await Promise.allSettled([
-      fetchWithTimeout(`${PIPELINE_URL}/monitoring/freshness`, FRESHNESS_TIMEOUT_MS),
-      fetchWithTimeout(`${PIPELINE_URL}/monitoring/coverage`, FAST_ENDPOINT_TIMEOUT_MS),
-      fetchWithTimeout(`${PIPELINE_URL}/monitoring/api-health`, FAST_ENDPOINT_TIMEOUT_MS),
+      fetchWithTimeout(`${pipelineUrl}/monitoring/freshness`, FRESHNESS_TIMEOUT_MS),
+      fetchWithTimeout(`${pipelineUrl}/monitoring/coverage`, FAST_ENDPOINT_TIMEOUT_MS),
+      fetchWithTimeout(`${pipelineUrl}/monitoring/api-health`, FAST_ENDPOINT_TIMEOUT_MS),
     ])
 
     // Extract data from settled promises (null if failed or timed out)
@@ -54,6 +57,12 @@ export async function GET() {
       apiHealth,
     })
   } catch (error) {
+    if (error instanceof Error && error.message === PIPELINE_URL_MISSING_MESSAGE) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 503 }
+      )
+    }
     console.error('Monitoring backfill health proxy error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch monitoring data' },

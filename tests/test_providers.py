@@ -64,6 +64,16 @@ async def test_openai_provider_generate_parses_json():
 
 
 @pytest.mark.asyncio
+async def test_openai_provider_aclose_closes_underlying_client():
+    provider = OpenAIProvider(api_key="test-key")
+
+    with patch.object(provider.client, "close", new_callable=AsyncMock) as mock_close:
+        await provider.aclose()
+
+    mock_close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_openai_provider_retries_on_invalid_json():
     """OpenAI provider retries when JSON is invalid."""
     provider = OpenAIProvider(api_key="test-key", max_retries=2)

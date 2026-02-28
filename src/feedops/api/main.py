@@ -58,6 +58,8 @@ from feedops.api.prompt_loader import (
 from feedops.api.generation_telemetry import (
     estimate_openai_cost_usd_from_usage as _estimate_openai_cost_usd_from_usage,
     extract_platform_telemetry as _extract_platform_telemetry,
+    extract_scoped_telemetry as _extract_scoped_telemetry,
+    provider_label as _provider_label,
     safe_int as _safe_int,
 )
 from feedops.db.supabase_client import get_client, is_supabase_available
@@ -75,8 +77,10 @@ from feedops.pipeline.finish_sentence_placeholder import (
     strip_generic_finish_count_claims,
 )
 from feedops.providers import get_provider
+from feedops.providers.base import close_provider
 from feedops.api.multi_sku_detection import (
     detect_multi_sku_families,
+    extract_spec_difference,
 )
 from feedops.api.hybrid_generation import adapt_variant_content  # noqa: F401 - re-exported for test patching compatibility
 from feedops.api.sku_alias import (
@@ -558,7 +562,7 @@ async def _generate_with_metrics(
         metrics_registry.increment(
             "provider_error_total",
             endpoint=endpoint,
-            provider=provider.name,
+            provider=_provider_label(provider),
             platform=platform,
             content_type=content_type,
         )
@@ -568,7 +572,7 @@ async def _generate_with_metrics(
             "generation_latency_seconds",
             time.perf_counter() - started,
             endpoint=endpoint,
-            provider=provider.name,
+            provider=_provider_label(provider),
             platform=platform,
             content_type=content_type,
         )
@@ -1189,6 +1193,50 @@ def _emit_generation_summary(
     )
 
 
+def _telemetry_scope_for_content(
+    *,
+    platform: str,
+    content_type: str,
+    generated: dict,
+) -> tuple[str, ...]:
+    """Map one persisted content row back to the task snapshots that produced it."""
+    finish_ran = bool(generated.get("finish_subcall_executed", False))
+    if not finish_ran:
+        finish_ran = any(
+            isinstance(snapshot, dict) and "finish" in snapshot
+            for snapshot in (
+                generated.get("usage_by_platform"),
+                generated.get("latency_by_platform"),
+                generated.get("retry_by_platform"),
+            )
+        )
+    if (
+        content_type == "description"
+        and platform in {"google", "bing"}
+        and finish_ran
+    ):
+        return (platform, "finish")
+    return (platform,)
+
+
+def _should_persist_finish_sentences(
+    *,
+    generated: dict,
+    content_types: list[str] | tuple[str, ...],
+) -> bool:
+    """Persist finish maps only when a finish task actually executed for description scope."""
+    finish_ran = "finish" in _telemetry_scope_for_content(
+        platform="google",
+        content_type="description",
+        generated=generated,
+    )
+    return (
+        "description" in content_types
+        and finish_ran
+        and isinstance(generated.get("finish_sentences"), dict)
+    )
+
+
 def _upsert_batch_job_sku_status(
     *,
     supabase,
@@ -1520,11 +1568,14 @@ async def optimize_single_sku(request: OptimizeRequest):
         platforms = ["google", "bing", "shopify"]
         content_types = ["title", "description"]
 
-        generated = await generate_per_platform(
-            parent_sku=parent_sku,
-            provider=provider,
-            prompt_version="v2",
-        )
+        try:
+            generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+        finally:
+            await close_provider(provider)
         prompt_hashes = generated.get("prompt_hashes", {})
         system_prompts = generated.get("system_prompts", {})
         user_prompts = generated.get("user_prompts", {})
@@ -1541,8 +1592,12 @@ async def optimize_single_sku(request: OptimizeRequest):
                 results.append(f"{platform}/{content_type}: {content[:100]}...")
                 if request.dry_run:
                     continue
-                telemetry = _extract_platform_telemetry(
-                    platform=platform,
+                telemetry = _extract_scoped_telemetry(
+                    platforms=_telemetry_scope_for_content(
+                        platform=platform,
+                        content_type=content_type,
+                        generated=generated,
+                    ),
                     usage_by_platform=usage_by_platform,
                     latency_by_platform=latencies,
                     retry_by_platform=retry_by_platform,
@@ -1553,7 +1608,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                     platform=platform,
                     content_type=content_type,
                     content=content,
-                    generation_model=provider.name,
+                    generation_model=_provider_label(provider),
                     prompt_hash=str(
                         prompt_hashes.get(
                             platform, get_platform_system_prompt_hash(platform)
@@ -1600,7 +1655,10 @@ async def optimize_single_sku(request: OptimizeRequest):
                 )
 
         finish_sentences = generated.get("finish_sentences", {})
-        if not request.dry_run and isinstance(finish_sentences, dict):
+        if not request.dry_run and _should_persist_finish_sentences(
+            generated=generated,
+            content_types=content_types,
+        ):
             for platform in ("google", "bing"):
                 supabase.table("variant_finish_sentences").upsert(
                     {
@@ -1734,15 +1792,20 @@ async def _execute_regeneration_request(
     if include_finish and finish_regen_enabled:
         selected_platforms.append("finish")
 
-    generated = await generate_per_platform(
-        parent_sku=parent_sku,
-        provider=provider,
-        prompt_version="v2",
-        feedback_by_platform={request.platform: "\n\n".join(feedback_lines)}
-        if feedback_lines
-        else None,
-        selected_platforms=selected_platforms,
-    )
+    try:
+        generated = await generate_per_platform(
+            parent_sku=parent_sku,
+            provider=provider,
+            prompt_version="v2",
+            feedback_by_platform={request.platform: "\n\n".join(feedback_lines)}
+            if feedback_lines
+            else None,
+            selected_platforms=selected_platforms,
+            selected_content_types=(request.content_type,),
+            request_id=request_id,
+        )
+    finally:
+        await close_provider(provider)
     field_key = _content_field_key(request.platform, request.content_type)
     content = str(generated.get(field_key, "")).strip()
     if not content:
@@ -1813,7 +1876,7 @@ async def _execute_regeneration_request(
         platform=request.platform,
         content_type=request.content_type,
         content=content,
-        generation_model=provider.name,
+        generation_model=_provider_label(provider),
         prompt_hash=prompt_hash,
         system_prompt=system_prompt,
         user_prompt=user_prompt,
@@ -1835,7 +1898,14 @@ async def _execute_regeneration_request(
         idempotency_key=request_idempotency_key,
     )
 
-    if finish_sentences and persistence["state"] == "completed":
+    if (
+        finish_sentences
+        and persistence["state"] == "completed"
+        and _should_persist_finish_sentences(
+            generated=generated,
+            content_types=(request.content_type,),
+        )
+    ):
         try:
             supabase.table("variant_finish_sentences").upsert(
                 {
@@ -1914,7 +1984,7 @@ async def _execute_regeneration_request(
         finish_sentences=finish_sentences,
         used_feedback=session_feedback is not None,
         prompt_hash=prompt_hash,
-        model=provider.name,
+        model=_provider_label(provider),
         generated_content_id=(
             str(persistence.get("generated_content_id"))
             if persistence.get("generated_content_id")
@@ -2592,11 +2662,25 @@ async def process_batch_job(
                 raise ValueError(f"SKU not found: {canonical_sku}")
 
             provider = get_provider()
-            generated = await generate_per_platform(
-                parent_sku=parent_sku,
-                provider=provider,
-                prompt_version="v2",
-            )
+            try:
+                generated = await generate_per_platform(
+                    parent_sku=parent_sku,
+                    provider=provider,
+                    prompt_version="v2",
+                    selected_platforms=tuple(
+                        list(platforms)
+                        + (
+                            ["finish"]
+                            if "description" in content_types
+                            and any(platform in {"google", "bing"} for platform in platforms)
+                            else []
+                        )
+                    ),
+                    selected_content_types=tuple(content_types),
+                    request_id=lineage_request_id,
+                )
+            finally:
+                await close_provider(provider)
             prompt_hashes = generated.get("prompt_hashes", {})
             system_prompts = generated.get("system_prompts", {})
             user_prompts = generated.get("user_prompts", {})
@@ -2608,13 +2692,17 @@ async def process_batch_job(
             if not dry_run:
                 primary_content_type = content_types[0] if content_types else None
                 for platform in platforms:
-                    platform_telemetry = _extract_platform_telemetry(
-                        platform=platform,
-                        usage_by_platform=usage_by_platform,
-                        latency_by_platform=latencies,
-                        retry_by_platform=retry_by_platform,
-                    )
                     for content_type in content_types:
+                        platform_telemetry = _extract_scoped_telemetry(
+                            platforms=_telemetry_scope_for_content(
+                                platform=platform,
+                                content_type=content_type,
+                                generated=generated,
+                            ),
+                            usage_by_platform=usage_by_platform,
+                            latency_by_platform=latencies,
+                            retry_by_platform=retry_by_platform,
+                        )
                         field_key = _content_field_key(platform, content_type)
                         content = str(generated.get(field_key, "")).strip()
                         include_platform_telemetry = content_type == primary_content_type
@@ -2624,7 +2712,7 @@ async def process_batch_job(
                             platform=platform,
                             content_type=content_type,
                             content=content,
-                            generation_model=provider.name,
+                            generation_model=_provider_label(provider),
                             prompt_hash=str(
                                 prompt_hashes.get(
                                     platform,
@@ -2693,7 +2781,10 @@ async def process_batch_job(
                         )
 
                 finish_sentences = generated.get("finish_sentences", {})
-                if isinstance(finish_sentences, dict):
+                if _should_persist_finish_sentences(
+                    generated=generated,
+                    content_types=content_types,
+                ):
                     for platform in ("google", "bing"):
                         if platform in platforms:
                             supabase.table("variant_finish_sentences").upsert(
@@ -2895,17 +2986,29 @@ async def process_hybrid_batch_job(
                 expanded_failed += 1
 
     # Helper function for v2 full per-platform generation.
-    async def generate_full_content_v2(sku: str):
+    async def generate_full_content_v2(sku: str) -> dict[str, object]:
         """Generate and persist per-platform package for one SKU."""
         canonical_sku = resolve_canonical_master_sku(supabase, sku)
         parent_sku = load_parent_sku_from_supabase(canonical_sku)
         if not parent_sku:
             raise ValueError(f"SKU not found: {canonical_sku}")
 
+        selected_platforms = tuple(
+            list(platforms)
+            + (
+                ["finish"]
+                if "description" in content_types
+                and any(platform in {"google", "bing"} for platform in platforms)
+                else []
+            )
+        )
         generated = await generate_per_platform(
             parent_sku=parent_sku,
             provider=provider,
             prompt_version="v2",
+            selected_platforms=selected_platforms,
+            selected_content_types=tuple(content_types),
+            request_id=lineage_request_id,
         )
         prompt_hashes = generated.get("prompt_hashes", {})
         system_prompts = generated.get("system_prompts", {})
@@ -2919,8 +3022,12 @@ async def process_hybrid_batch_job(
             for content_type in content_types:
                 field_key = _content_field_key(platform, content_type)
                 content = str(generated.get(field_key, "")).strip()
-                telemetry = _extract_platform_telemetry(
-                    platform=platform,
+                telemetry = _extract_scoped_telemetry(
+                    platforms=_telemetry_scope_for_content(
+                        platform=platform,
+                        content_type=content_type,
+                        generated=generated,
+                    ),
                     usage_by_platform=usage_by_platform,
                     latency_by_platform=latencies,
                     retry_by_platform=retry_by_platform,
@@ -2931,7 +3038,7 @@ async def process_hybrid_batch_job(
                     platform=platform,
                     content_type=content_type,
                     content=content,
-                    generation_model=provider.name,
+                    generation_model=_provider_label(provider),
                     prompt_hash=str(
                         prompt_hashes.get(
                             platform,
@@ -2947,7 +3054,7 @@ async def process_hybrid_batch_job(
                     provider_attempt_count=telemetry["provider_attempt_count"],
                     parse_retry_count=telemetry["parse_retry_count"],
                     generation_diagnostics={
-                        "selected_platforms": list(platforms),
+                        "selected_platforms": list(selected_platforms),
                         "usage_by_platform": usage_by_platform
                         if isinstance(usage_by_platform, dict)
                         else {},
@@ -2980,7 +3087,10 @@ async def process_hybrid_batch_job(
                     parse_retry_count=telemetry["parse_retry_count"],
                 )
         finish_sentences = generated.get("finish_sentences", {})
-        if isinstance(finish_sentences, dict):
+        if _should_persist_finish_sentences(
+            generated=generated,
+            content_types=content_types,
+        ):
             for platform in ("google", "bing"):
                 if platform in platforms and "description" in content_types:
                     supabase.table("variant_finish_sentences").upsert(
@@ -2991,6 +3101,7 @@ async def process_hybrid_batch_job(
                         },
                         on_conflict="master_sku,platform",
                     ).execute()
+        return generated
 
     try:
         # Process single SKUs (full generation)
@@ -3041,6 +3152,7 @@ async def process_hybrid_batch_job(
 
             # Step 1: Generate base SKU (full generation)
             base_sku = family.base_sku
+            base_generated: dict[str, object] | None = None
 
             base_sku_failed = False
             base_sku_error: str | None = None
@@ -3052,7 +3164,7 @@ async def process_hybrid_batch_job(
                 started_at=datetime.now(timezone.utc).isoformat(),
             )
             try:
-                await generate_full_content_v2(base_sku)
+                base_generated = await generate_full_content_v2(base_sku)
                 logger.info("✓ Generated BASE %s via per-platform v2 package", base_sku)
             except Exception as e:
                 base_sku_failed = True
@@ -3084,6 +3196,34 @@ async def process_hybrid_batch_job(
             )
             _update_job_progress()
 
+            if base_sku_failed or base_generated is None:
+                for variant_sku in family.variant_skus:
+                    variant_error = (
+                        f"Skipped variant adaptation because base SKU {base_sku} failed: "
+                        f"{base_sku_error or 'unknown base generation error'}"
+                    )
+                    _record_sku_result(variant_sku, success=False)
+                    _upsert_batch_job_sku_status(
+                        supabase=supabase,
+                        job_id=job_id,
+                        master_sku=variant_sku,
+                        status="failed",
+                        completed_at=datetime.now(timezone.utc).isoformat(),
+                        error_message=variant_error,
+                    )
+                    _emit_generation_summary(
+                        endpoint="process_hybrid_batch_job",
+                        request_id=request_id,
+                        job_id=job_id,
+                        master_sku=variant_sku,
+                        platform=None,
+                        content_type=None,
+                        mode="variant_adaptation_v2",
+                        result_state="failed",
+                    )
+                    _update_job_progress()
+                continue
+
             # Step 2: Variant SKUs
             for variant_sku in family.variant_skus:
                 variant_sku_failed = False
@@ -3096,17 +3236,41 @@ async def process_hybrid_batch_job(
                     started_at=datetime.now(timezone.utc).isoformat(),
                 )
                 try:
-                    await generate_full_content_v2(variant_sku)
-                    logger.info(
-                        "✓ Generated VARIANT %s via per-platform v2 package",
-                        variant_sku,
-                    )
+                    for platform in platforms:
+                        for content_type in content_types:
+                            base_spec, variant_spec = extract_spec_difference(
+                                base_sku, variant_sku
+                            )
+                            base_field_key = _content_field_key(platform, content_type)
+                            base_content = str(base_generated.get(base_field_key, "")).strip()
+                            adaptation_result = await adapt_variant_content(
+                                supabase=supabase,
+                                base_sku=base_sku,
+                                variant_sku=variant_sku,
+                                platform=platform,
+                                content_type=content_type,
+                                base_spec=base_spec,
+                                variant_spec=variant_spec,
+                                base_content=base_content,
+                                base_finish_sentences=base_generated.get("finish_sentences"),
+                                request_id=lineage_request_id,
+                                provider=provider,
+                            )
+                            if not adaptation_result.get("success"):
+                                raise ValueError(
+                                    adaptation_result.get(
+                                        "error",
+                                        f"Variant adaptation failed for {variant_sku}",
+                                    )
+                                )
+                    logger.info("✓ Adapted VARIANT %s from BASE %s", variant_sku, base_sku)
                 except Exception as e:
                     variant_sku_failed = True
                     variant_sku_error = str(e)
                     logger.error(
-                        "✗ Failed VARIANT %s via per-platform v2 package: %s",
+                        "✗ Failed VARIANT %s via adaptation from BASE %s: %s",
                         variant_sku,
+                        base_sku,
                         e,
                     )
                     _emit_generation_summary(
@@ -3116,7 +3280,7 @@ async def process_hybrid_batch_job(
                         master_sku=variant_sku,
                         platform=None,
                         content_type=None,
-                        mode="full_generation_v2",
+                        mode="variant_adaptation_v2",
                         result_state="failed",
                     )
 
@@ -3187,6 +3351,8 @@ async def process_hybrid_batch_job(
             mode="full_generation_v2",
             result_state="failed",
         )
+    finally:
+        await close_provider(provider)
 
 
 # =============================================================================

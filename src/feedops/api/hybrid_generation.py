@@ -9,33 +9,71 @@ Python port of dashboard/src/lib/regeneration/core.ts (adaptVariantContent)
 
 from datetime import datetime, timezone
 import hashlib
+import inspect
 import json
 import logging
+import re
 import time
 
 from feedops.api.prompt_loader import (
     get_finish_list,
     get_platform_system_prompt_hash,
-    get_system_prompt,
-    get_system_prompt_hash,
 )
-from feedops.api.generation_telemetry import extract_platform_telemetry
-from feedops.api.supabase_loader import load_parent_sku_from_supabase
+from feedops.api.generation_telemetry import (
+    estimate_openai_cost_usd_from_usage,
+    extract_platform_telemetry,
+    provider_label,
+    safe_int,
+)
 from feedops.api.sku_alias import resolve_canonical_master_sku
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
+from feedops.generation.contracts import GenerationTaskKind, TaskSpec
+from feedops.generation.tasks import (
+    build_task_schema,
+    build_task_system_prompt,
+    task_prompt_hash,
+)
 from feedops.models import Candidate, Score
 from feedops.observability import log_event
 from feedops.observability import get_request_id
 from feedops.observability.metrics import metrics_registry
-from feedops.pipeline.generator import generate_per_platform
 from feedops.pipeline.finish_sentence_placeholder import (
     count_finish_sentence_placeholders,
     strip_generic_finish_count_claims,
 )
 from feedops.pipeline.validators import validate_candidate_content
 from feedops.providers import get_provider
+from feedops.providers.base import close_provider
 
 logger = logging.getLogger(__name__)
+
+
+async def _generate_with_provider_compat(
+    *,
+    provider,
+    prompt: str,
+    schema: dict[str, object],
+    system_prompt: str,
+    reasoning_effort: str,
+    max_completion_tokens: int,
+) -> dict[str, object]:
+    """Call provider.generate while tolerating legacy test doubles."""
+    generate_fn = provider.generate
+    signature = inspect.signature(generate_fn)
+    accepts_varkw = any(
+        param.kind == inspect.Parameter.VAR_KEYWORD
+        for param in signature.parameters.values()
+    )
+    kwargs: dict[str, object] = {
+        "prompt": prompt,
+        "schema": schema,
+        "system_prompt": system_prompt,
+    }
+    if accepts_varkw or "reasoning_effort" in signature.parameters:
+        kwargs["reasoning_effort"] = reasoning_effort
+    if accepts_varkw or "max_completion_tokens" in signature.parameters:
+        kwargs["max_completion_tokens"] = max_completion_tokens
+    return await generate_fn(**kwargs)
 
 
 def _assemble_prompt_hash(system_prompt: str, user_prompt: str) -> str:
@@ -108,6 +146,29 @@ def _variant_completion_tokens(platform: str, content_type: str, requires_json: 
         return 8000
     # Keep non-title fallbacks generous to avoid reintroducing low-cap truncation.
     return 16000 if requires_json else 8000
+
+
+def _deterministic_spec_rewrite(
+    *,
+    base_content: str,
+    base_spec: str,
+    variant_spec: str,
+) -> str:
+    """Best-effort deterministic replacement for spec-only variant adaptation."""
+    source = str(base_content or "")
+    old = str(base_spec or "").strip()
+    new = str(variant_spec or "").strip()
+    if not source or not old or not new or old == new:
+        return source
+
+    token_pattern = re.compile(
+        rf"(?<![A-Za-z0-9]){re.escape(old)}(?![A-Za-z0-9])"
+    )
+    rewritten = token_pattern.sub(new, source)
+    if rewritten != source:
+        return rewritten
+
+    return source.replace(old, new)
 
 
 def validate_adapted_variant_content(
@@ -295,6 +356,11 @@ async def adapt_variant_content(
     content_type: str,
     base_spec: str,
     variant_spec: str,
+    *,
+    base_content: str | None = None,
+    base_finish_sentences: dict[str, str] | None = None,
+    request_id: str | None = None,
+    provider=None,  # Kept for call-site compatibility; variant adaptation is deterministic.
 ) -> dict:
     """
     Adapt content from base SKU for variant SKU.
@@ -318,7 +384,12 @@ async def adapt_variant_content(
         variant_sku = resolve_canonical_master_sku(supabase, variant_sku)
 
         started = time.perf_counter()
-        include_finish_sentences = finish_sentence_regeneration_enabled()
+        reuse_finish_sentences = (
+            content_type == "description"
+            and platform in {"google", "bing"}
+            and isinstance(base_finish_sentences, dict)
+            and bool(base_finish_sentences)
+        )
         log_event(
             logger,
             logging.INFO,
@@ -329,54 +400,126 @@ async def adapt_variant_content(
             requested_variant_sku=requested_variant_sku,
             platform=platform,
             content_type=content_type,
-            include_finish_sentences=include_finish_sentences,
+            include_finish_sentences=reuse_finish_sentences,
+            generate_finish_sentences=False,
         )
-        parent_sku = load_parent_sku_from_supabase(variant_sku)
-        if not parent_sku:
+        if not base_content:
+            base_row = (
+                supabase.table("generated_content")
+                .select("candidate_content")
+                .eq("master_sku", base_sku)
+                .eq("platform", platform)
+                .eq("content_type", content_type)
+                .eq("is_current", True)
+                .maybe_single()
+                .execute()
+            )
+            base_content = (
+                str((base_row.data or {}).get("candidate_content", "")).strip()
+                if getattr(base_row, "data", None)
+                else ""
+            )
+        if not base_content:
             return {
                 "success": False,
-                "error": f"SKU not found for v2 variant generation: {variant_sku}",
+                "error": (
+                    f"Missing base content for variant adaptation: "
+                    f"{base_sku} {platform}/{content_type}"
+                ),
             }
 
-        provider = get_provider()
-        selected_platforms = [platform]
-        if content_type == "description" and platform in {"google", "bing"}:
-            selected_platforms.append("finish")
-
-        generated = await generate_per_platform(
-            parent_sku=parent_sku,
-            provider=provider,
+        prompt, requires_json = build_variant_adaptation_prompt(
+            content_type=content_type,
+            platform=platform,
+            base_sku=base_sku,
+            variant_sku=variant_sku,
+            base_content=base_content,
+            base_spec=base_spec,
+            variant_spec=variant_spec,
+            include_finish_sentences=False,
+        )
+        spec = TaskSpec(
+            task_id=f"adapt-{variant_sku}-{platform}-{content_type}",
+            kind=GenerationTaskKind.VARIANT_ADAPTATION,
+            master_sku=base_sku,
+            variant_sku=variant_sku,
+            platform=platform,
+            content_type=content_type,
             prompt_version="v2",
-            selected_platforms=selected_platforms,
+            request_id=(request_id or "").strip() or (get_request_id() or "").strip(),
         )
-        field_map = {
-            ("google", "title"): "google_title",
-            ("google", "description"): "google_description",
-            ("bing", "title"): "bing_title",
-            ("bing", "description"): "bing_description",
-            ("shopify", "title"): "shopify_title",
-            ("shopify", "description"): "shopify_description",
-        }
-        field_key = field_map.get((platform, content_type))
-        if not field_key:
-            return {
-                "success": False,
-                "error": f"Unsupported platform/content_type: {platform}/{content_type}",
-            }
+        system_prompt = build_task_system_prompt(spec)
+        schema = build_task_schema(spec)
+        deterministic_content = _deterministic_spec_rewrite(
+            base_content=base_content,
+            base_spec=base_spec,
+            variant_spec=variant_spec,
+        )
+        use_deterministic_path = (
+            deterministic_content.strip() != str(base_content).strip()
+        ) or provider is not None
 
-        new_content = str(generated.get(field_key, "")).strip()
+        if use_deterministic_path:
+            payload = {"content": deterministic_content}
+            usage_snapshot: dict[str, object] = {}
+            retry_snapshot: dict[str, object] = {}
+            model = "deterministic-variant-adapter"
+        else:
+            managed_provider = get_provider()
+            payload = await _generate_with_provider_compat(
+                provider=managed_provider,
+                prompt=prompt,
+                schema=schema,
+                system_prompt=system_prompt,
+                reasoning_effort="medium" if content_type == "description" else "low",
+                max_completion_tokens=_variant_completion_tokens(
+                    platform=platform,
+                    content_type=content_type,
+                    requires_json=requires_json,
+                ),
+            )
+            usage_snapshot = (
+                getattr(managed_provider, "last_usage", {})
+                if managed_provider is not None
+                else {}
+            )
+            retry_snapshot = (
+                getattr(managed_provider, "last_retry_counts", {})
+                if managed_provider is not None
+                else {}
+            )
+            model = (
+                provider_label(managed_provider)
+                if managed_provider is not None
+                else "unknown"
+            )
+            await close_provider(managed_provider)
+
+        if spec.request_id == "-":
+            spec.request_id = ""
+
+        if spec.content_type == "description" and platform in {"google", "bing"}:
+            new_content = str(payload.get("content", "")).strip()
+            new_content = strip_generic_finish_count_claims(new_content)
+            finish_sentences = (
+                dict(base_finish_sentences)
+                if isinstance(base_finish_sentences, dict)
+                else None
+            )
+        else:
+            new_content = str(payload.get("content", "")).strip()
+            finish_sentences = None
+
         platform_telemetry = extract_platform_telemetry(
             platform=platform,
-            usage_by_platform=generated.get("usage_by_platform"),
-            latency_by_platform=generated.get("latency_by_platform"),
-            retry_by_platform=generated.get("retry_by_platform"),
+            usage_by_platform={platform: usage_snapshot}
+            if isinstance(usage_snapshot, dict)
+            else {},
+            latency_by_platform={platform: int((time.perf_counter() - started) * 1000)},
+            retry_by_platform={platform: retry_snapshot}
+            if isinstance(retry_snapshot, dict)
+            else {},
         )
-        finish_sentences = None
-        if content_type == "description" and platform in {"google", "bing"}:
-            new_content = strip_generic_finish_count_claims(new_content)
-            raw_finish_sentences = generated.get("finish_sentences")
-            if isinstance(raw_finish_sentences, dict):
-                finish_sentences = raw_finish_sentences
         _enforce_variant_placeholder_contract(
             platform=platform,
             content_type=content_type,
@@ -420,17 +563,9 @@ async def adapt_variant_content(
         current_version = current_data["version"] if current_data else 0
         next_version = current_version + 1
 
-        prompt_hash = str(
-            generated.get("prompt_hashes", {}).get(platform, get_system_prompt_hash())
-        )
-        system_prompt = str(
-            generated.get("system_prompts", {}).get(platform, get_system_prompt())
-        )
-        user_prompt = str(generated.get("user_prompts", {}).get(platform, ""))
-        model = provider.name
-        request_id = (get_request_id() or "").strip()
-        if request_id == "-":
-            request_id = ""
+        prompt_hash = task_prompt_hash(system_prompt, prompt)
+        user_prompt = prompt
+        request_id = spec.request_id if spec.request_id != "-" else ""
         idempotency_key = _variant_adaptation_idempotency_key(
             base_sku=base_sku,
             variant_sku=variant_sku,
@@ -483,6 +618,10 @@ async def adapt_variant_content(
                 "master_sku": variant_sku,
                 "platform": platform,
                 "content_type": content_type,
+                "previous_content": current_data.get("candidate_content")
+                if isinstance(current_data, dict)
+                else None,
+                "new_content": new_content,
                 "system_prompt": system_prompt,
                 "user_prompt": user_prompt,
                 "model_version": model,
@@ -529,7 +668,12 @@ async def adapt_variant_content(
             platform=platform,
             content_type=content_type,
         )
-        return {"success": True, "content": new_content, "mode": "v2"}
+        return {
+            "success": True,
+            "content": new_content,
+            "mode": "v2",
+            "generated_content_id": content_id_result.data["id"],
+        }
 
     except Exception as e:
         metrics_registry.increment(
