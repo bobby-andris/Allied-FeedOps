@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:tracking-regression": "node scripts/no-tracking-regression-check.mjs",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "NODE_OPTIONS=--localstorage-file=/tmp/node-localstorage vitest run",
+    "test:watch": "NODE_OPTIONS=--localstorage-file=/tmp/node-localstorage vitest"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
