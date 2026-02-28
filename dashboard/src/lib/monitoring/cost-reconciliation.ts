@@ -269,16 +269,29 @@ function parseOpenAiCostsPayload(payload: unknown): {
 
   for (const bucket of buckets) {
     const row = (bucket ?? {}) as Record<string, unknown>
-    const bucketAmount = toNumber((row.amount as { value?: unknown } | undefined)?.value)
-
-    if (typeof (row.amount as { currency?: unknown } | undefined)?.currency === 'string') {
-      currency = String((row.amount as { currency?: string }).currency || currency)
+    const bucketResults = Array.isArray(row.results) ? row.results : []
+    for (const result of bucketResults) {
+      const resultRecord = (result ?? {}) as Record<string, unknown>
+      const resultAmount = toNumber((resultRecord.amount as { value?: unknown } | undefined)?.value)
+      if (resultAmount !== null) {
+        totalCost += resultAmount
+        hasAnyCost = true
+      }
+      const resultCurrency = (resultRecord.amount as { currency?: unknown } | undefined)?.currency
+      if (typeof resultCurrency === 'string' && resultCurrency.trim()) {
+        currency = resultCurrency
+      }
     }
 
+    const bucketAmount = toNumber((row.amount as { value?: unknown } | undefined)?.value)
     if (bucketAmount !== null) {
       totalCost += bucketAmount
       hasAnyCost = true
-      continue
+    }
+
+    const bucketCurrency = (row.amount as { currency?: unknown } | undefined)?.currency
+    if (typeof bucketCurrency === 'string' && bucketCurrency.trim()) {
+      currency = bucketCurrency
     }
 
     const lineItems = Array.isArray(row.line_items) ? row.line_items : []
