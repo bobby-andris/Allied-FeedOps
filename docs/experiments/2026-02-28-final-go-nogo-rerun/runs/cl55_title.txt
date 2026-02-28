@@ -1,0 +1,30 @@
+=== LIVE REGENERATE SMOKE ===
+URL: https://feedops-pipeline-623866089882.us-east1.run.app/regenerate
+request_id: 1b2182ae-b7ac-4274-a6c6-69b65c1d8c3c
+payload: {"master_sku": "CL-55", "platform": "google", "content_type": "title", "feedback": "Final go-no-go controlled run: CL-55 title."}
+http_status: 500
+response:
+{"detail":"[openai/gpt-5.2] Failed to generate valid JSON: empty response: line 1 column 1 (char 0) (after 1 retries)"}
+
+=== DB SIGN-OFF QUERIES ===
+-- 1) Was this request persisted to regeneration_history?
+select id, master_sku, platform, content_type, request_id, generated_content_id, created_at
+from public.regeneration_history
+where request_id = '1b2182ae-b7ac-4274-a6c6-69b65c1d8c3c'
+order by created_at desc;
+
+-- 2) Did the history row link to generated_content correctly?
+select rh.id as history_id, rh.request_id, rh.generated_content_id, gc.id as gc_id,
+       gc.master_sku, gc.platform, gc.content_type, gc.version, gc.updated_at
+from public.regeneration_history rh
+left join public.generated_content gc on gc.id = rh.generated_content_id
+where rh.request_id = '1b2182ae-b7ac-4274-a6c6-69b65c1d8c3c'
+order by rh.created_at desc;
+
+-- 3) Tuple uniqueness invariant check (must return zero rows)
+select master_sku, platform, content_type, count(*)::int as c
+from public.generated_content
+group by master_sku, platform, content_type
+having count(*) > 1
+order by c desc
+limit 20;

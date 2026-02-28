@@ -1,0 +1,2 @@
+request_id: e69be103-714b-405f-a4f8-4ecdecb5fa77
+{"success":true,"job_id":"2b254159-7ac5-4b68-9e63-05f023b9a69a","status":"queued","total_skus":2,"multi_sku_families":1,"single_skus":0,"strategy":{"base_skus":1,"variant_skus":1},"deduplicated":false}

@@ -98,19 +98,19 @@ def test_schema_contract_keeps_hard_max_for_platform_enforced_fields() -> None:
 
 
 def test_finish_completion_cap_floor_for_runtime_generation() -> None:
-    assert _platform_completion_cap("finish", 4000) == 1200
-    assert _platform_completion_cap("google", 4000) == 2400
-    assert _platform_completion_cap("bing", 9000) == 2400
-    assert _platform_completion_cap("shopify", 20000) == 2400
+    assert _platform_completion_cap("finish", 4000) == 2000
+    assert _platform_completion_cap("google", 4000) == 4000
+    assert _platform_completion_cap("bing", 9000) == 8000
+    assert _platform_completion_cap("shopify", 20000) == 8000
     assert _platform_completion_cap("google", 1500) == 1500
 
 
 def test_runtime_generation_default_completion_cap_is_quality_safe() -> None:
     signature = inspect.signature(generate_per_platform)
     default_cap = signature.parameters["max_completion_tokens"].default
-    assert default_cap == 2400
-    assert _platform_completion_cap("google", default_cap) == 2400
-    assert _platform_completion_cap("finish", default_cap) == 1200
+    assert default_cap == 6000
+    assert _platform_completion_cap("google", default_cap) == 6000
+    assert _platform_completion_cap("finish", default_cap) == 2000
 
 
 def test_runtime_generation_default_reasoning_effort_is_medium() -> None:
