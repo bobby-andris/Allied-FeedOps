@@ -12,6 +12,7 @@ from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
 from feedops.generation.contracts import GenerationTaskKind, TaskSpec
 from feedops.models.parent_sku import ParentSKU
 from feedops.pipeline.finish_injection import get_finish_metadata
+from feedops.pipeline.query_intent_brief import QueryIntentSection
 from feedops.pipeline.skill_loader import get_platform_system_prompt
 
 TASK_FIELD_MAP = {
@@ -242,6 +243,7 @@ def build_task_prompt(
     evidence: list,
     evidence_markdown: str,
     feedback_by_platform: dict[str, str] | None = None,
+    query_intent_context: QueryIntentSection | None = None,
 ) -> str:
     """Build a user prompt for one task spec."""
     if spec.kind == GenerationTaskKind.FINISH_SENTENCES:
@@ -253,6 +255,11 @@ def build_task_prompt(
         evidence_markdown,
         spec.platform,
         spec.content_type,
+        query_intent_section=(
+            query_intent_context.content
+            if isinstance(query_intent_context, QueryIntentSection)
+            else None
+        ),
     )
     feedback = None
     if isinstance(feedback_by_platform, dict):

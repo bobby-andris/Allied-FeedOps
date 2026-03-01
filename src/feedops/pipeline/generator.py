@@ -21,7 +21,12 @@ from feedops.api.runtime_controls import (
     diagnostic_skip_finish_subcall_enabled,
     request_cost_usd_cap,
 )
-from feedops.api.prompt_builder import get_prompt_experiment_variant
+from feedops.api.prompt_builder import (
+    build_bing_prompt,
+    build_google_prompt,
+    build_shopify_prompt,
+    get_prompt_experiment_variant,
+)
 from feedops.generation.executor import (
     ExecutionBudgetExceededError,
     execute_generation_legacy_payload,
@@ -47,9 +52,7 @@ from feedops.pipeline.prompts import (
     FINISH_SENTENCES_SCHEMA,
     FINISH_CONTEXT_TEMPLATE,
     GOOGLE_SCHEMA,
-    OPTIMIZATION_TEMPLATE,
     SHOPIFY_SCHEMA,
-    USER_PROMPT_TEMPLATE,
     VARIANT_USER_PROMPT_TEMPLATE,
 )
 from feedops.pipeline.segment_strategy import (
@@ -266,40 +269,30 @@ def _resolve_segment_strategy(parent_sku: ParentSKU) -> SegmentStrategy:
     )
 
 
-def build_prompt(parent_sku: ParentSKU) -> str:
-    """Build the full optimization prompt for a ParentSKU (legacy single-string).
+def _build_generator_prompt_payload(parent_sku: ParentSKU) -> dict[str, object]:
+    """Assemble shared prompt inputs for legacy generator compatibility.
 
-    This is the legacy single-string prompt used for reporting and backward
-    compatibility. For LLM calls, prefer build_split_prompt() which separates
-    static system content (cacheable) from dynamic user content.
-
-    Args:
-        parent_sku: The parent SKU to optimize.
-
-    Returns:
-        Complete prompt string for LLM.
+    The optimize-path generator still expects a single composite prompt, but the
+    underlying Google/Bing/Shopify sections should now come from the
+    platform-specific prompt builders in prompt_builder.py.
     """
     evidence = build_evidence_table(parent_sku)
-    evidence_markdown = format_evidence_markdown(evidence)
     keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
-    keyword_placement = format_keyword_placement_section(keyword_plan)
-    segment_strategy = _resolve_segment_strategy(parent_sku)
+    category_guidance = get_category_guidance(parent_sku.category)
     gold_examples = format_gold_standard_examples_bundle(max_examples=2)
-    gold_examples_section = (
-        f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
-    )
+    return {
+        "evidence": evidence,
+        "evidence_markdown": format_evidence_markdown(evidence),
+        "keyword_plan": keyword_plan,
+        "category_guidance": category_guidance,
+        "gold_examples": gold_examples,
+    }
 
-    prompt = OPTIMIZATION_TEMPLATE.format(
-        system_prompt=get_system_prompt(),
-        evidence_table=evidence_markdown,
-        keyword_placement=keyword_placement,
-        category_guidance=get_category_guidance(parent_sku.category),
-        segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
-        gold_examples=gold_examples_section,
-        schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
-        master_sku=parent_sku.master_sku,
-    )
-    return prompt
+
+def build_prompt(parent_sku: ParentSKU) -> str:
+    """Build the full optimization prompt for a ParentSKU (legacy single-string)."""
+    system_prompt, user_prompt = build_split_prompt(parent_sku)
+    return f"{system_prompt}\n\n{user_prompt}"
 
 
 def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
@@ -315,27 +308,53 @@ def build_split_prompt(parent_sku: ParentSKU) -> tuple[str, str]:
     Returns:
         Tuple of (system_prompt, user_prompt).
     """
-    evidence = build_evidence_table(parent_sku)
-    evidence_markdown = format_evidence_markdown(evidence)
-    keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
-    keyword_placement = format_keyword_placement_section(keyword_plan)
+    prompt_payload = _build_generator_prompt_payload(parent_sku)
+    evidence = prompt_payload["evidence"]
+    evidence_markdown = prompt_payload["evidence_markdown"]
+    keyword_plan = prompt_payload["keyword_plan"]
     segment_strategy = _resolve_segment_strategy(parent_sku)
-    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
-    gold_examples_section = (
-        f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
+    gold_examples = str(prompt_payload["gold_examples"] or "").strip()
+
+    shared_sections = [
+        f"MasterSKU: {parent_sku.master_sku}",
+        f"Available Product Data:\n{evidence_markdown}",
+    ]
+    keyword_section = format_keyword_placement_section(keyword_plan)
+    if keyword_section:
+        shared_sections.append(f"Keyword Placement Plan:\n{keyword_section}")
+    segment_guidance = format_segment_strategy_guidance(segment_strategy)
+    if segment_guidance:
+        shared_sections.append(segment_guidance)
+    if gold_examples:
+        shared_sections.append(f"## Gold Standard Examples\n{gold_examples}")
+
+    google_prompt = build_google_prompt(
+        sku_data=parent_sku,
+        evidence=evidence,
+        keywords=keyword_plan,
+        category_guidance=str(prompt_payload["category_guidance"] or ""),
+        gold_examples=gold_examples,
+    )
+    bing_prompt = build_bing_prompt(
+        sku_data=parent_sku,
+        evidence=evidence,
+        keywords=keyword_plan,
+        category_guidance=str(prompt_payload["category_guidance"] or ""),
+    )
+    shopify_prompt = build_shopify_prompt(
+        sku_data=parent_sku,
+        evidence=evidence,
+        category_guidance=str(prompt_payload["category_guidance"] or ""),
     )
 
-    user_prompt = USER_PROMPT_TEMPLATE.format(
-        evidence_table=evidence_markdown,
-        keyword_placement=keyword_placement,
-        category_guidance=get_category_guidance(parent_sku.category),
-        segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
-        customer_context=parent_sku.category or "",
-        competitive_context="",
-        gold_examples=gold_examples_section,
-        schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
-        master_sku=parent_sku.master_sku,
-    )
+    platform_sections = [
+        "<platform_prompt_google>\n" + google_prompt + "\n</platform_prompt_google>",
+        "<platform_prompt_bing>\n" + bing_prompt + "\n</platform_prompt_bing>",
+        "<platform_prompt_shopify>\n" + shopify_prompt + "\n</platform_prompt_shopify>",
+        "Cross-platform output contract:\n" + json.dumps(CANDIDATE_SCHEMA, indent=2),
+    ]
+
+    user_prompt = "\n\n".join(shared_sections + platform_sections)
     return get_system_prompt(), user_prompt
 
 

@@ -755,6 +755,15 @@ def _enforce_write_time_finish_placeholder_contract(
     )
 
 
+def _extract_query_intent_generation_diagnostics(
+    generated: dict[str, object] | None,
+) -> dict[str, object]:
+    if not isinstance(generated, dict):
+        return {}
+    diagnostics = generated.get("query_intent_diagnostics")
+    return dict(diagnostics) if isinstance(diagnostics, dict) else {}
+
+
 def _persist_regeneration_result(
     *,
     supabase,
@@ -1714,6 +1723,7 @@ async def optimize_single_sku(request: OptimizeRequest):
                         "retry_by_platform": retry_by_platform
                         if isinstance(retry_by_platform, dict)
                         else {},
+                        **_extract_query_intent_generation_diagnostics(generated),
                     },
                     request_id=request_id,
                 )
@@ -1993,6 +2003,7 @@ async def _execute_regeneration_request(
             "latency_by_platform": latency_by_platform if isinstance(latency_by_platform, dict) else {},
             "parse_by_platform": parse_by_platform if isinstance(parse_by_platform, dict) else {},
             "retry_by_platform": retry_by_platform if isinstance(retry_by_platform, dict) else {},
+            **_extract_query_intent_generation_diagnostics(generated),
         },
         latency_ms=regen_latency_ms,
         provider_attempt_count=provider_attempt_count,
@@ -2870,6 +2881,7 @@ async def process_batch_job(
                                 "retry_by_platform": retry_by_platform
                                 if isinstance(retry_by_platform, dict)
                                 else {},
+                                **_extract_query_intent_generation_diagnostics(generated),
                             },
                             request_id=lineage_request_id,
                         )
@@ -3209,6 +3221,7 @@ async def process_hybrid_batch_job(
                         "retry_by_platform": retry_by_platform
                         if isinstance(retry_by_platform, dict)
                         else {},
+                        **_extract_query_intent_generation_diagnostics(generated),
                     },
                     request_id=lineage_request_id,
                     idempotency_key=options.get("idempotency_key"),
