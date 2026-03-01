@@ -1,12 +1,28 @@
 import { NextResponse } from 'next/server'
-
-const PIPELINE_URL =
-  process.env.FEEDOPS_PIPELINE_URL ||
-  'https://feedops-pipeline-623866089882.us-east1.run.app'
+import {
+  getRequiredPipelineUrl,
+  PIPELINE_URL_MISSING_MESSAGE,
+} from '@/lib/pipeline-url'
 
 export async function POST() {
+  let pipelineUrl: string
+
   try {
-    const upstream = await fetch(`${PIPELINE_URL}/gmc/sync`, {
+    try {
+      pipelineUrl = getRequiredPipelineUrl()
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : PIPELINE_URL_MISSING_MESSAGE,
+        },
+        { status: 503 }
+      )
+    }
+
+    const upstream = await fetch(`${pipelineUrl}/gmc/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })

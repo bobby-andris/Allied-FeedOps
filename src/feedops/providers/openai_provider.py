@@ -249,6 +249,10 @@ class OpenAIProvider(LLMProvider):
     def name(self) -> str:
         return f"openai/{self.model}"
 
+    async def aclose(self) -> None:
+        """Close the underlying AsyncOpenAI HTTP client explicitly."""
+        await self.client.close()
+
     async def health_check(self) -> bool:
         """Check if OpenAI API is accessible."""
         try:

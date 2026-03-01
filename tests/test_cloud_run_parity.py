@@ -3,6 +3,7 @@ from pathlib import Path
 
 CLOUDBUILD_PATH = Path("cloudbuild.yaml")
 DOCKERFILE_PATH = Path("Dockerfile")
+DOCKERIGNORE_PATH = Path(".dockerignore")
 REGENERATE_ROUTE_PATH = Path("dashboard/src/app/api/regenerate/route.ts")
 MAIN_API_PATH = Path("src/feedops/api/main.py")
 
@@ -38,6 +39,15 @@ def test_dockerfile_matches_cloud_run_runtime_entrypoint_contract() -> None:
     assert "ENV PORT=8080" in source
     assert "EXPOSE 8080" in source
     assert 'CMD ["uvicorn", "feedops.api.main:app"' in source
+
+
+def test_cloud_run_image_includes_finish_metadata_runtime_asset() -> None:
+    dockerfile = _read(DOCKERFILE_PATH)
+    dockerignore = _read(DOCKERIGNORE_PATH)
+
+    assert "COPY data/finish-metadata.json /app/data/finish-metadata.json" in dockerfile
+    assert "!data/" in dockerignore
+    assert "!data/finish-metadata.json" in dockerignore
 
 
 def test_dashboard_and_python_propagate_request_id_contract() -> None:

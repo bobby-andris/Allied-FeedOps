@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Python Cloud Run pipeline URL
-const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+import {
+  getRequiredPipelineUrl,
+  PIPELINE_URL_MISSING_MESSAGE,
+} from '@/lib/pipeline-url'
 
 export async function GET(request: NextRequest) {
+  let pipelineUrl: string
+
   try {
+    try {
+      pipelineUrl = getRequiredPipelineUrl()
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : PIPELINE_URL_MISSING_MESSAGE,
+        },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const limit = searchParams.get('limit')
 
     // Build upstream URL with query params
-    const upstreamUrl = new URL(`${PIPELINE_URL}/backfill/jobs`)
+    const upstreamUrl = new URL(`${pipelineUrl}/backfill/jobs`)
     if (status) upstreamUrl.searchParams.set('status', status)
     if (limit) upstreamUrl.searchParams.set('limit', limit)
 

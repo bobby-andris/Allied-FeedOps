@@ -1,0 +1,69 @@
+{
+  "dashboard_base_url": "http://127.0.0.1:3001",
+  "pipeline_url": "https://feedops-pipeline-3b43yg32oa-ue.a.run.app",
+  "review_page_source": "dashboard/src/app/(dashboard)/review/[sku]/page.tsx",
+  "source_of_truth_tables": [
+    "generated_content",
+    "variant_finish_sentences"
+  ],
+  "readback_contract": {
+    "description_candidate_content_may_contain_finish_placeholder": true,
+    "finish_sentence_map_must_be_loaded_separately": true,
+    "title_candidate_content_may_contain_finish_name_placeholder_for_variant_template": true,
+    "publish_time_expansion_guarded_by_tests": [
+      "tests/test_finish_sentence_validation.py",
+      "tests/test_finish_injection.py"
+    ]
+  },
+  "browser_verification": [
+    {
+      "sku_route": "/review/CL-55",
+      "status": "loaded",
+      "observation": "Authenticated review page rendered and displayed the refreshed Google candidate content plus finishSentences.google data for CL-55."
+    },
+    {
+      "sku_route": "/review/1033-18",
+      "status": "loaded",
+      "observation": "Alias route rendered successfully for the hybrid base SKU.",
+      "screenshot": "/tmp/feedops-1033-18.png"
+    },
+    {
+      "sku_route": "/review/1033/24",
+      "status": "loaded",
+      "observation": "Hybrid variant review page rendered successfully from the same Supabase-backed data path.",
+      "screenshots": [
+        "/tmp/feedops-1033-24.png",
+        "/tmp/feedops-1033-24-content.png"
+      ]
+    }
+  ],
+  "supabase_rows_read_back": [
+    {
+      "master_sku": "CL-55",
+      "platform": "google",
+      "title_generated_content_id": "8300a24f-d4c0-439b-87d1-94768f069bbe",
+      "title_updated_at": "2026-02-28T22:49:22.727849+00:00",
+      "description_generated_content_id": "8d276b39-84ff-4fe8-a0d3-3b3f972411c0",
+      "description_updated_at": "2026-02-28T22:49:48.578372+00:00",
+      "finish_sentences_updated_at": "2026-02-28T22:49:49.068518+00:00"
+    },
+    {
+      "master_sku": "1033/18",
+      "platform": "google",
+      "title_generated_content_id": "814ef369-00c5-487e-87d8-b20be6d09298",
+      "title_updated_at": "2026-02-28T22:50:40.681433+00:00",
+      "description_generated_content_id": "fce0e4b2-e3d3-4b99-971d-865630b2bafd",
+      "description_updated_at": "2026-02-28T22:50:18.535701+00:00",
+      "finish_sentences_updated_at": "2026-02-28T22:50:18.810086+00:00"
+    },
+    {
+      "master_sku": "1033/24",
+      "platform": "google",
+      "title_generated_content_id": "932f510f-d07d-47d1-a33e-84b754b3c168",
+      "title_updated_at": "2026-02-28T22:50:45.125698+00:00",
+      "description_generated_content_id": "a2a9ca5b-6e5f-4f97-ab86-6f8a3e6e5165",
+      "description_updated_at": "2026-02-28T22:50:22.064700+00:00",
+      "finish_sentences_updated_at": "2026-02-28T22:50:24.995190+00:00"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+=== LIVE REGENERATE SMOKE ===
+URL: https://feedops-pipeline-3b43yg32oa-ue.a.run.app/regenerate
+request_id: 15d179be-8dec-4cbe-8b24-01fafd8c1a15
+payload: {"master_sku": "CL-55", "platform": "google", "content_type": "description", "feedback": "Post-fix live single description-only verification."}
+http_status: 200
+response:
+{"success":true,"master_sku":"CL-55","content_type":"description","platform":"google","content":"Keep a roll ready without drilling—this 6.5-inch freestanding countertop paper towel holder is crafted from solid brass and uses a weighted base to stay stable as you tear off sheets. {FINISH_SENTENCE} The roll sits upright to save counter space, and a felt pad on the base helps prevent scratching on your surfaces. Styled with contemporary lines and traditional design elements, it’s a brass paper towel holder that looks at home with traditional bathroom hardware and other classic bath accessories from the Carolina Collection. Unlike an under cabinet paper towel holder, this piece stays portable and requires no wall mounting. Includes the paper towel holder, needs no assembly, and is backed by a Limited Lifetime Warranty.","finish_sentences":{"Antique Brass":"Antique Brass gives the Carolina paper towel stand a warm patina.","Antique Bronze":"Antique Bronze deepens the Carolina stand’s classic-modern lines.","Antique Copper":"Antique Copper brings a mellow, aged look to the solid brass stand.","Antique Pewter":"Antique Pewter cools the Carolina countertop stand with soft gray tone.","Autumn Sparkle":"Autumn Sparkle adds subtle shimmer to the Carolina paper towel stand.","Brushed Bronze":"Brushed Bronze tones down shine on this space-saving countertop stand.","Fire Engine Red":"Fire Engine Red turns the Carolina paper towel stand into a bold accent.","Flat Troll Blue":"Flat Troll Blue adds a clean color pop to the Carolina countertop stand.","Glokzin Teal":"Glokzin Teal gives the Carolina stand a crisp, modern teal finish.","Golden Yellow":"Golden Yellow brightens the Carolina stand’s traditional-meets-modern form.","Lavender":"Lavender softens the look of this solid brass paper towel stand.","Matte Black":"Matte Black sharpens the Carolina stand’s silhouette on the countertop.","Matte Gray":"Matte Gray keeps the Carolina paper towel stand calm and contemporary.","Matte White":"Matte White keeps the Carolina countertop stand light and understated.","Mediterranean Blue":"Mediterranean Blue brings rich color to the Carolina paper towel stand.","Oil Rubbed Bronze":"Oil Rubbed Bronze adds depth to the Carolina stand’s brass detailing.","Pink":"Pink adds playful color to the Carolina countertop paper towel stand.","Polished Brass":"Polished Brass highlights the solid brass build of the Carolina stand.","Polished Chrome":"Polished Chrome keeps the Carolina paper towel stand bright and crisp.","Polished Nickel":"Polished Nickel adds a soft glow to the Carolina countertop stand.","Satin Brass":"Satin Brass warms the Carolina paper towel stand with low-gloss brass.","Satin Chrome":"Satin Chrome gives the Carolina stand a smooth, muted metallic look.","Satin Nickel":"Satin Nickel pairs well with the Carolina stand’s clean, mixed lines.","Sea Foam Green":"Sea Foam Green adds a fresh tint to the Carolina paper towel stand.","Shaded Beige":"Shaded Beige brings a quiet neutral finish to the Carolina stand.","Spanish Gold":"Spanish Gold enriches the Carolina stand with a deeper golden tone.","Unlacquered Brass":"Unlacquered Brass lets the Carolina solid brass stand age naturally.","Venetian Bronze":"Venetian Bronze adds a dark, warm finish to the Carolina stand."},"used_feedback":true,"prompt_hash":"3d51b2ee7badcae1b18c73e6ba68a24bd2b0d59e469a8e16c39792df930334f9","model":"openai/gpt-5.2","generated_content_id":"8d276b39-84ff-4fe8-a0d3-3b3f972411c0","version":26,"state":"completed","idempotent":false,"request_id":"15d179be-8dec-4cbe-8b24-01fafd8c1a15"}
+
+=== DB SIGN-OFF QUERIES ===
+-- 1) Was this request persisted to regeneration_history?
+select id, master_sku, platform, content_type, request_id, generated_content_id, created_at
+from public.regeneration_history
+where request_id = '15d179be-8dec-4cbe-8b24-01fafd8c1a15'
+order by created_at desc;
+
+-- 2) Did the history row link to generated_content correctly?
+select rh.id as history_id, rh.request_id, rh.generated_content_id, gc.id as gc_id,
+       gc.master_sku, gc.platform, gc.content_type, gc.version, gc.updated_at
+from public.regeneration_history rh
+left join public.generated_content gc on gc.id = rh.generated_content_id
+where rh.request_id = '15d179be-8dec-4cbe-8b24-01fafd8c1a15'
+order by rh.created_at desc;
+
+-- 3) Tuple uniqueness invariant check (must return zero rows)
+select master_sku, platform, content_type, count(*)::int as c
+from public.generated_content
+group by master_sku, platform, content_type
+having count(*) > 1
+order by c desc
+limit 20;

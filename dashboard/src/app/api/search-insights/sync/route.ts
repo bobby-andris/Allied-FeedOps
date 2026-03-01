@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-
-const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+import {
+  getRequiredPipelineUrl,
+  PIPELINE_URL_MISSING_MESSAGE,
+} from '@/lib/pipeline-url'
 
 /**
  * POST /api/search-insights/sync
@@ -13,7 +15,23 @@ const PIPELINE_URL = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeli
  * - enrichWithKeywordPlanner: boolean (default true)
  */
 export async function POST(request: NextRequest) {
+  let pipelineUrl: string
+
   try {
+    try {
+      pipelineUrl = getRequiredPipelineUrl()
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : PIPELINE_URL_MISSING_MESSAGE,
+        },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
     const {
       days = 30,
@@ -37,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Cloud Run endpoint to start sync
-    const response = await fetch(`${PIPELINE_URL}/search-insights/sync`, {
+    const response = await fetch(`${pipelineUrl}/search-insights/sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

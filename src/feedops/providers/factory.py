@@ -10,7 +10,7 @@ from feedops.api.runtime_controls import (
     diagnostic_mode_enabled,
     diagnostic_model_name,
 )
-from feedops.providers.base import ImageInput, LLMProvider
+from feedops.providers.base import ImageInput, LLMProvider, close_provider
 from feedops.providers.gemini_provider import GeminiProvider
 from feedops.providers.openai_provider import OpenAIProvider
 
@@ -169,6 +169,18 @@ class FallbackProvider(LLMProvider):
         if primary_ok:
             return True
         return await self.fallback.health_check()
+
+    async def aclose(self) -> None:
+        """Close both primary and fallback providers."""
+        close_errors: list[str] = []
+        for provider in (self.primary, self.fallback):
+            try:
+                await close_provider(provider)
+            except Exception as exc:
+                provider_name = getattr(provider, "name", provider.__class__.__name__)
+                close_errors.append(f"{provider_name}: {exc}")
+        if close_errors:
+            logger.debug("Provider cleanup encountered errors: %s", "; ".join(close_errors))
 
     async def generate(
         self,

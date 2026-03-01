@@ -1,0 +1,46 @@
+[
+  {
+    "elapsed_seconds": 10.715,
+    "http_status": 200,
+    "name": "single-google-title",
+    "request_id": "0bcced58-8875-4f0d-bf07-555c0ce2306f"
+  },
+  {
+    "elapsed_seconds": 17.994,
+    "http_status": 200,
+    "name": "single-google-description",
+    "request_id": "88a07424-755b-4481-be1b-8efcea9467c6"
+  },
+  {
+    "elapsed_seconds": 0.237,
+    "http_status": 200,
+    "job_id": "ce3f1f47-2ace-460b-a86e-60ced23d5845",
+    "name": "batch-google-title",
+    "poll_http_status": 200,
+    "request_id": "a5ec6ac3-03e3-402c-8447-5572973559dc"
+  },
+  {
+    "elapsed_seconds": 0.243,
+    "http_status": 200,
+    "job_id": "cec8e4f2-10b6-45bd-a06c-1f75cd1555a4",
+    "name": "batch-google-description",
+    "poll_http_status": 200,
+    "request_id": "e5160cf0-bdbc-4076-9bfd-4c82e28dd751"
+  },
+  {
+    "elapsed_seconds": 2.642,
+    "http_status": 200,
+    "job_id": "fd3c4fa0-3058-4abc-9b38-a1ced5e7cb78",
+    "name": "hybrid-google-description",
+    "poll_http_status": 200,
+    "request_id": "c304c08e-3729-4cf1-829b-cd5fddbf6e38"
+  },
+  {
+    "elapsed_seconds": 2.724,
+    "http_status": 200,
+    "job_id": "4cd6e728-f605-4767-b897-073a35c0d7dd",
+    "name": "hybrid-google-title",
+    "poll_http_status": 200,
+    "request_id": "89831fe5-4f3d-401f-94ee-db2b30cb01ae"
+  }
+]

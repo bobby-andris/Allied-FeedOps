@@ -6,13 +6,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const PIPELINE_URL =
-  process.env.FEEDOPS_PIPELINE_URL ||
-  'https://feedops-pipeline-623866089882.us-east1.run.app'
+import {
+  getRequiredPipelineUrl,
+  PIPELINE_URL_MISSING_MESSAGE,
+} from '@/lib/pipeline-url'
 
 async function postPipeline(path: string, body: Record<string, unknown>) {
-  const response = await fetch(`${PIPELINE_URL}${path}`, {
+  const pipelineUrl = getRequiredPipelineUrl()
+  const response = await fetch(`${pipelineUrl}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -32,6 +33,20 @@ async function postPipeline(path: string, body: Record<string, unknown>) {
 
 export async function POST(request: NextRequest) {
   try {
+    try {
+      getRequiredPipelineUrl()
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : PIPELINE_URL_MISSING_MESSAGE,
+        },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const filterSku = searchParams.get('master_sku')
     const platform = searchParams.get('platform') || 'google'

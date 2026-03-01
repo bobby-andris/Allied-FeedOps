@@ -7,12 +7,19 @@ set -euo pipefail
 PROJECT_ID="bobbys-project-346400"
 LOCATION="us-east1"
 JOB_NAME="feedops-daily-incremental-refresh"
-SERVICE_URL="https://feedops-pipeline-623866089882.us-east1.run.app"
+SERVICE_URL="${SERVICE_URL:-${1:-}}"
 SERVICE_ACCOUNT="profit-pilot-runtime@bobbys-project-346400.iam.gserviceaccount.com"
 SCHEDULE="15 2 * * *"
 TIME_ZONE="America/New_York"
 SNAPSHOT_JOB_NAME="feedops-daily-snapshot-capture"
 SNAPSHOT_SCHEDULE="45 2 * * *"
+
+if [[ -z "${SERVICE_URL}" ]]; then
+  echo "SERVICE_URL must be provided via environment variable or first positional argument." >&2
+  exit 1
+fi
+
+SERVICE_URL="${SERVICE_URL%/}"
 
 echo "Setting up Cloud Scheduler job: $JOB_NAME"
 
