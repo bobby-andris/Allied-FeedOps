@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY src/ ./src/
 COPY pyproject.toml .
+COPY data/finish-metadata.json /app/data/finish-metadata.json
 
 # Copy Claude Code skills for runtime prompt enrichment
 # skill_loader.py looks for .claude/skills/ relative to /app (Cloud Run path)

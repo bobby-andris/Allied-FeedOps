@@ -34,7 +34,9 @@ docs/
 !README.md
 
 # Data files (product data comes from Supabase)
-data/
+data/*
+!data/
+!data/finish-metadata.json
 
 # Supabase config (migrations not needed at runtime)
 supabase/

@@ -1885,7 +1885,7 @@ async def _execute_regeneration_request(
         if correction_lines:
             feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
     if session_feedback:
-        feedback_lines.append("Reviewer Feedback:\n" + session_feedback)
+        feedback_lines.append(session_feedback)
 
     selected_platforms: list[str] = [request.platform]
     include_finish = (

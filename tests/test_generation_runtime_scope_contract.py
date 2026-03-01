@@ -287,6 +287,38 @@ async def test_regenerate_description_persists_finish_prompt_lineage(monkeypatch
 
 
 @pytest.mark.asyncio
+async def test_regenerate_feedback_passes_raw_session_feedback_to_generate_per_platform(
+    monkeypatch,
+):
+    supabase = _CaptureSupabase()
+    provider = object()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-feedback-raw")
+
+    captured: dict[str, object] = {}
+
+    async def _fake_generate_per_platform(**kwargs):
+        captured.update(kwargs)
+        return await _google_title_payload_with_fallback_finish_sentences()
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    response = await api_main.regenerate_content(
+        api_main.RegenerateRequest(
+            master_sku="1031/18",
+            platform="google",
+            content_type="title",
+            feedback="Live deployed revision verification for title-only runtime scope.",
+        )
+    )
+
+    assert response.success is True
+    assert captured["feedback_by_platform"] == {
+        "google": "Live deployed revision verification for title-only runtime scope."
+    }
+
+
+@pytest.mark.asyncio
 async def test_process_hybrid_batch_job_uses_adaptation_for_family_variants(monkeypatch):
     supabase = _CaptureSupabase()
     provider = object()
