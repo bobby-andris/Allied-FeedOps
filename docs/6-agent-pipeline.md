@@ -200,15 +200,15 @@ is_current: boolean
 ### Backup & Restore
 
 **Backup Files:**
-- `6-agent-pipeline-content-backup.json` - Structured JSON with all titles/descriptions
-- `restore-6-agent-content.sql` - One-click SQL restore script
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/6-agent-pipeline-content-backup.json` - Structured JSON with all titles/descriptions
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/restore-6-agent-content.sql` - One-click SQL restore script
 
 **Why Needed:** Clicking "Regenerate" on review page uses Cloud Run pipeline and overwrites agent content.
 
 **Restore Command:**
 ```bash
 # Via Supabase SQL Editor
-# Copy contents of restore-6-agent-content.sql and execute
+# Copy contents of docs/experiments/2026-02-07-6-agent-pipeline-artifacts/restore-6-agent-content.sql and execute
 ```
 
 Or tell Claude: "restore the 6-agent content"
@@ -292,8 +292,8 @@ await insertAgentPipelineContent({
 ## Files Generated
 
 ### Agent Output Files
-- `designer_stories_aligned.json` - 10 designer perspective stories
-- `homeowner-stories-aligned.json` - 10 homeowner perspective stories
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/designer_stories_aligned.json` - 10 designer perspective stories
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/homeowner-stories-aligned.json` - 10 homeowner perspective stories
 - Contractor stories - Inline in agent messages (not saved to file)
 
 ### Database Records
@@ -301,9 +301,9 @@ await insertAgentPipelineContent({
 - `variant_finish_sentences` - 280 finish sentences (10 SKUs × 28 finishes)
 
 ### Documentation
-- `content-pipeline-results.md` - Detailed results and analysis
-- `6-agent-pipeline-content-backup.json` - Backup for restore
-- `restore-6-agent-content.sql` - Restore script
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/content-pipeline-results.md` - Detailed results and analysis
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/6-agent-pipeline-content-backup.json` - Backup for restore
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/restore-6-agent-content.sql` - Restore script
 
 ## Lessons Learned
 

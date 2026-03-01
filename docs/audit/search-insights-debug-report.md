@@ -124,7 +124,7 @@ FEEDOPS_PIPELINE_URL (has fallback in sync route)
 
 - `search-insights-page-localhost.png` - Screenshot of working page (empty state)
 - `search-insights-with-data.png` - Screenshot with SKU data loaded
-- This report: `SEARCH_INSIGHTS_DEBUG_REPORT.md`
+- This report: `docs/audit/search-insights-debug-report.md`
 
 ## Conclusion
 

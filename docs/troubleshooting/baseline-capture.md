@@ -133,7 +133,7 @@ Should return 1 row. If found, database is synced.
 ```bash
 cd /Users/bobby/Documents/GitHub/Allied-FeedOps
 source .venv/bin/activate
-PYTHONPATH=./src python3 test-google-ads-raw.py
+PYTHONPATH=./src python3 scripts/test_google_ads_raw.py
 ```
 
 Should return products with impressions. Verifies API access works.
@@ -161,7 +161,7 @@ If Google Ads returns data but baseline capture shows 0 matches:
 echo $GOOGLE_ADS_CUSTOMER_ID  # Should be 6253381786
 
 # Test API directly
-PYTHONPATH=./src python3 test-google-ads-raw.py
+PYTHONPATH=./src python3 scripts/test_google_ads_raw.py
 ```
 
 ### "0.3% match rate" or "Only 3/1000 products matched"
@@ -196,7 +196,7 @@ Use this checklist when investigating baseline capture issues:
 - `src/feedops/api/performance_baseline.py` - Baseline capture endpoint
 
 **Test scripts**:
-- `test-google-ads-raw.py` - Direct API testing
+- `scripts/test_google_ads_raw.py` - Direct API testing
 
 **Database**:
 - `variant_index` table - Offer ID mappings

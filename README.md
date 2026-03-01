@@ -363,15 +363,15 @@ The 6-agent pipeline is an experimental content generation approach using person
 The 6-agent pipeline content is backed up in git to prevent accidental loss during "Regenerate All" operations.
 
 **Backup Files:**
-- `6-agent-pipeline-content-backup.json` - Structured backup with all titles/descriptions
-- `restore-6-agent-content.sql` - One-click SQL restore script
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/6-agent-pipeline-content-backup.json` - Structured backup with all titles/descriptions
+- `docs/experiments/2026-02-07-6-agent-pipeline-artifacts/restore-6-agent-content.sql` - One-click SQL restore script
 
 **How to Restore:**
 
 Via Supabase SQL Editor:
 ```bash
 # 1. Open: https://supabase.com/dashboard/project/qezuszwufortkiutlhym/sql/new
-# 2. Copy contents of restore-6-agent-content.sql
+# 2. Copy contents of docs/experiments/2026-02-07-6-agent-pipeline-artifacts/restore-6-agent-content.sql
 # 3. Execute
 # 4. Verify: All 10 SKUs will show purple "6-Agent Pipeline" badges
 ```

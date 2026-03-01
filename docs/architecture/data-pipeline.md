@@ -85,7 +85,7 @@ ORDER BY sku_count DESC;
 ```bash
 # Use diagnostic script
 source .venv/bin/activate
-PYTHONPATH=./src python3 test-google-ads-raw.py
+PYTHONPATH=./src python3 scripts/test_google_ads_raw.py
 ```
 
 ## Data Flow for Publishing
