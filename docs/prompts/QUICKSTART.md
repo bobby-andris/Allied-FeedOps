@@ -1061,7 +1061,7 @@ I need to implement the complete Search Insights & Performance Data Lifecycle fo
 Key context:
 - Repository: /Users/bobby/Documents/GitHub/Allied-FeedOps
 - Dashboard: /dashboard (Next.js 14+)
-- Cloud Run service: https://feedops-pipeline-623866089882.us-east1.run.app
+- Cloud Run service: use the current canonical `FEEDOPS_PIPELINE_URL`
 - Google Ads customer ID: 6253381786
 - Scoring rubric: See AGENTS.md for 6-dimension content quality scoring
 

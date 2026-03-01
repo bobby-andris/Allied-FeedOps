@@ -86,7 +86,7 @@ Review SKUs with no data (should have pmax or shopping data):
 ### Testing
 ```bash
 # Test endpoint (should return data for all review SKUs)
-curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/performance/capture-baseline \
+curl -X POST "$FEEDOPS_PIPELINE_URL/performance/capture-baseline" \
   -H "Content-Type: application/json" \
   -d '{"master_skus": ["DMF-2/2X", "WP-2/16-GAL", "920D-6"]}'
 ```

@@ -14,7 +14,7 @@ Perform a complete content regeneration for all SKUs in the system with comprehe
 **STOP! Before running this prompt, verify:**
 - [ ] Prompt 23 (Publishing Enhancements) is complete - structured title/description + lifestyle image publishing
 - [ ] Pre-flight setup is complete - all SKUs have performance baselines + search insights data
-- [ ] Cloud Run pipeline is healthy: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+- [ ] Cloud Run pipeline is healthy: `curl "$FEEDOPS_PIPELINE_URL/health"`
 - [ ] Dashboard builds successfully: `cd dashboard && npm run build`
 - [ ] Vision is enabled in the pipeline (check `OPENAI_API_KEY` includes GPT-4 Vision access)
 
@@ -203,7 +203,7 @@ You MUST use agent teams for this work via the `TeamCreate` and `Task` tools.
 2. **Trigger lifestyle image generation:**
    - For each SKU without images:
      ```bash
-     curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/generate-lifestyle-image \
+     curl -X POST "$FEEDOPS_PIPELINE_URL/generate-lifestyle-image" \
        -H "Content-Type: application/json" \
        -d '{
          "master_sku": "SKU123",

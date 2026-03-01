@@ -93,6 +93,28 @@ No generation-affecting change is complete until all of the following are true:
 6. Dashboard readback matches the persisted artifacts.
 7. A dated experiment report records the exact request IDs, job IDs, commit SHA, image ref, Cloud Run revision, and final GO or NO-GO decision.
 
+### Deploy Path Distinction (Mandatory)
+
+There are two valid Cloud Run deploy paths for generation work, and future sessions must not confuse them:
+
+1. **Pre-PR exact-branch certification**
+   - Use this when you need to certify an unmerged feature branch SHA before opening or merging a PR.
+   - Deploy a tagged, no-traffic revision from the current branch with:
+     - `scripts/deploy_tagged_revision.sh <revision-tag>`
+   - This path proves the exact branch commit in Cloud Run without requiring a merge to `master`.
+   - Record the tagged revision URL, image ref, revision tag, request IDs, job IDs, and certification artifacts in the report.
+
+2. **Post-merge production deploy**
+   - Use this after the feature branch is merged into `origin/master`.
+   - This path must flow through the GitHub-connected Cloud Build trigger defined by `cloudbuild.yaml`.
+   - Record the Cloud Build ID, image ref, deployed revision, request IDs, and job IDs in the report.
+
+Hard rules:
+
+1. Do not assume the exact-branch certification path and the production-trigger path are interchangeable.
+2. Do not record a Cloud Build ID for a manual tagged branch-certification deploy; that path may not exercise the GitHub trigger at all.
+3. Do not claim production readiness from a pre-PR tagged deploy alone; production readiness requires the post-merge `origin/master` trigger path to be healthy too.
+
 ### Runtime Inputs And Fixtures
 
 - **Supabase-first runtime data**: generation/evidence should read from live Supabase tables (`product_catalog`, `search_queries_by_master_sku`, `keyword_metrics`, `prompt_templates`, `variant_finish_sentences`).

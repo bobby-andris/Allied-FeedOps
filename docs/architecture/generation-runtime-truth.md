@@ -13,6 +13,47 @@ This document defines the runtime truth hierarchy for every generation-affecting
 
 No generation-affecting work is complete unless all five layers agree.
 
+## Deploy-Path Truth
+
+Generation work uses two different Cloud Run deploy paths, and each answers a different question:
+
+### 1. Pre-PR exact-branch certification truth
+
+Use this path when you need to prove the current unmerged feature branch SHA in Cloud Run before opening or merging a PR.
+
+- deploy the current branch with `scripts/deploy_tagged_revision.sh <revision-tag>`
+- this creates a tagged, no-traffic revision for exact-branch certification
+- use the tagged URL for runtime proof
+
+This path proves:
+
+- the exact feature branch SHA
+- the exact image built from that branch
+- the exact tagged Cloud Run revision you certified
+
+This path does **not** prove:
+
+- that the GitHub-connected production Cloud Build trigger is healthy
+- that `origin/master` will deploy successfully after merge
+
+### 2. Post-merge production truth
+
+Use this path after merge to prove the actual production release path:
+
+- push or merge into `origin/master`
+- let the GitHub-connected Cloud Build trigger run `cloudbuild.yaml`
+- verify the resulting production-serving revision
+
+This path proves:
+
+- the canonical release workflow is healthy
+- parity gates pass in Cloud Build
+- the production-serving revision matches the merged commit
+
+Hard rule:
+
+If exact-branch certification passes but the `origin/master` Cloud Build trigger fails, the system is still not operationally healthy. That is a deploy-path divergence and must be fixed or documented before closing the loop.
+
 ## Why This Exists
 
 The historical failure pattern was not a single code bug. It was divergence between:
