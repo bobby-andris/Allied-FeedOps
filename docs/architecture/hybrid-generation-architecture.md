@@ -1,5 +1,13 @@
 # Hybrid Generation Architecture Decision
 
+> Historical reference only. This document captures an earlier hybrid-routing decision and is not the complete current runtime contract.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 **Date:** 2026-02-08
 **Status:** ✅ Cloud Run Implementation Only
 

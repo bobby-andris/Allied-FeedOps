@@ -1,5 +1,13 @@
 # Final Go/No-Go Report (2026-02-28 post-deploy rerun)
 
+> Historical evidence only. This report captures a pre-closure go/no-go decision and is not the active production certification source.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 ## Executive Decision
 **NO-GO** for prompt/output quality analysis start.
 

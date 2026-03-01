@@ -3,11 +3,31 @@
 **Last Updated:** 2026-02-10
 **Purpose:** Maintain clean, organized, discoverable repository structure
 
+## Canonical Generation Doc Set
+
+Generation-related truth should live in the canonical doc stack below, not in scattered one-off investigations:
+
+1. `AGENTS.md`
+2. `docs/architecture/generation-runtime-truth.md`
+3. `docs/architecture/generation-core-task-model.md`
+4. `docs/architecture/generation-prompt-lineage-contract.md`
+5. `docs/architecture/generation-pipeline-routing-reference.md`
+6. `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+7. `docs/development/generation-change-checklist.md`
+8. `docs/operations/deploy-and-certify-generation.md`
+
+If a doc is older, narrower, or investigation-specific, it should either:
+
+1. point to the canonical set at the top, or
+2. be marked historical/reference-only.
+
 ## Directory Structure
 
 ```
 Allied-FeedOps/
-├── .claude/                 # Claude Code configuration
+├── .agents/                 # Repo-local agent skills and workflows
+│   └── skills/             # Specialized skills (for example generation certification)
+├── .claude/                 # Legacy Claude Code config still in use where applicable
 │   ├── hooks/              # Automatic enforcement hooks
 │   ├── skills/             # Triggered workflow skills
 │   ├── templates/          # Reusable patterns & templates
@@ -78,6 +98,7 @@ Allied-FeedOps/
 - How systems work (data flow, component interaction)
 - Design decisions and rationale
 - Integration patterns
+- Canonical generation docs belong here
 
 #### docs/troubleshooting/
 - When things break (debugging guides)
@@ -88,6 +109,7 @@ Allied-FeedOps/
 - Investigation records
 - Root cause analyses
 - "Why did X happen" deep dives
+- Historical, not canonical, unless linked from the canonical generation set
 
 #### docs/plans/
 - Implementation plans
@@ -98,6 +120,7 @@ Allied-FeedOps/
 - Legacy prompt references
 - Prompt templates
 - Historical prompt evolution
+- Never treat this directory as runtime authority unless the canonical docs say otherwise
 
 #### docs/images/
 - `product/` - Product screenshots
@@ -228,7 +251,7 @@ Examples:
    ```bash
    git add -A
    git commit -m "chore: Monthly repository cleanup $(date +%Y-%m)"
-   git push origin master
+   git push origin codex/<cleanup-topic>-$(date +%Y%m%d)
    ```
 
 ## Automated Enforcement

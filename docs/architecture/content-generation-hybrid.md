@@ -1,5 +1,13 @@
 # Hybrid Content Generation for Multi-SKU Products
 
+> Historical reference only. This document captures an earlier hybrid-generation proposal and should not be used as the live routing contract.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 ## Problem Statement
 
 Products like DMF-2 have 4 master_skus that need unique content but share most product attributes:
