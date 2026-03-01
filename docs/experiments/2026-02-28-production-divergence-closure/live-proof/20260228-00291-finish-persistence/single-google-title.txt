@@ -1,0 +1,30 @@
+=== LIVE REGENERATE SMOKE ===
+URL: https://feedops-pipeline-3b43yg32oa-ue.a.run.app/regenerate
+request_id: fe2510cb-b759-4a06-a5df-c58309f1e8a4
+payload: {"master_sku": "CL-55", "platform": "google", "content_type": "title", "feedback": "Post-fix live single title-only verification."}
+http_status: 200
+response:
+{"success":true,"master_sku":"CL-55","content_type":"title","platform":"google","content":"{FINISH_NAME} Freestanding Paper Towel Holder - Carolina Collection 6.5-In Traditional - Allied Brass","finish_sentences":null,"used_feedback":true,"prompt_hash":"a5280e437a7647d6decb5d669684d5b0139ac48f12bcfef66de2df20dd3b2c30","model":"openai/gpt-5.2","generated_content_id":"8300a24f-d4c0-439b-87d1-94768f069bbe","version":30,"state":"completed","idempotent":false,"request_id":"fe2510cb-b759-4a06-a5df-c58309f1e8a4"}
+
+=== DB SIGN-OFF QUERIES ===
+-- 1) Was this request persisted to regeneration_history?
+select id, master_sku, platform, content_type, request_id, generated_content_id, created_at
+from public.regeneration_history
+where request_id = 'fe2510cb-b759-4a06-a5df-c58309f1e8a4'
+order by created_at desc;
+
+-- 2) Did the history row link to generated_content correctly?
+select rh.id as history_id, rh.request_id, rh.generated_content_id, gc.id as gc_id,
+       gc.master_sku, gc.platform, gc.content_type, gc.version, gc.updated_at
+from public.regeneration_history rh
+left join public.generated_content gc on gc.id = rh.generated_content_id
+where rh.request_id = 'fe2510cb-b759-4a06-a5df-c58309f1e8a4'
+order by rh.created_at desc;
+
+-- 3) Tuple uniqueness invariant check (must return zero rows)
+select master_sku, platform, content_type, count(*)::int as c
+from public.generated_content
+group by master_sku, platform, content_type
+having count(*) > 1
+order by c desc
+limit 20;

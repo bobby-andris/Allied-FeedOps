@@ -83,6 +83,7 @@ from feedops.api.multi_sku_detection import (
     extract_spec_difference,
 )
 from feedops.generation.persistence import (
+    get_finish_task_result,
     persist_finish_sentences,
     should_persist_finish_sentences as _task_should_persist_finish_sentences,
 )
@@ -982,6 +983,83 @@ def _persist_generated_content_and_history(
     supabase.table("regeneration_history").insert(history_payload).execute()
 
 
+def _persist_finish_prompt_lineage(
+    *,
+    supabase,
+    master_sku: str,
+    generated: dict,
+    mode: str,
+    generation_model: str,
+    generation_diagnostics: dict | None = None,
+    request_id: str | None = None,
+    idempotency_key: str | None = None,
+) -> bool:
+    """Persist finish subcall prompts as lineage-only rows when the task executed."""
+    task_result = get_finish_task_result(generated.get("task_results"))
+    if not task_result:
+        return False
+
+    metadata = task_result.get("metadata")
+    finish_sentences = (
+        metadata.get("finish_sentences")
+        if isinstance(metadata, dict)
+        else generated.get("finish_sentences")
+    )
+    serialized_finish_payload = ""
+    if isinstance(finish_sentences, dict) and finish_sentences:
+        serialized_finish_payload = json.dumps(
+            finish_sentences,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+
+    system_prompt = str(task_result.get("system_prompt", ""))
+    user_prompt = str(task_result.get("user_prompt", ""))
+    prompt_hash = str(
+        task_result.get("prompt_hash")
+        or get_platform_system_prompt_hash("finish")
+    )
+    lineage_request_id = _require_request_id(
+        str(task_result.get("request_id") or request_id or get_request_id() or "")
+    )
+
+    flag_snapshot = capture_flag_snapshot()
+    if isinstance(generation_diagnostics, dict) and generation_diagnostics:
+        flag_snapshot = dict(flag_snapshot)
+        flag_snapshot["generation_diagnostics"] = generation_diagnostics
+
+    history_payload = {
+        "master_sku": master_sku,
+        "content_type": "finish_sentences",
+        "platform": "finish",
+        "mode": f"{mode}_finish_sentences",
+        "previous_content": None,
+        "new_content": serialized_finish_payload,
+        "model_version": generation_model,
+        "system_prompt": system_prompt[:50000],
+        "user_prompt": user_prompt[:50000],
+        "prompt_hash": prompt_hash,
+        "generated_content_id": None,
+        "feature_flags_active": flag_snapshot,
+        "tokens_used": task_result.get("tokens_used"),
+        "cost_usd": task_result.get("cost_usd"),
+        "latency_ms": task_result.get("latency_ms"),
+        "provider_attempt_count": _safe_int(
+            task_result.get("provider_attempt_count"), 0
+        ),
+        "parse_retry_count": _safe_int(task_result.get("parse_retry_count"), 0),
+        "request_id": lineage_request_id,
+        "result_state": "completed",
+        "result_version": 1,
+        "result_idempotent": False,
+        "idempotency_key": idempotency_key,
+        "canonical_platform_hash": get_platform_system_prompt_hash("finish"),
+        "assembled_prompt_hash": _assembled_prompt_hash(system_prompt, user_prompt),
+    }
+    supabase.table("regeneration_history").insert(history_payload).execute()
+    return True
+
+
 def _create_regeneration_job(
     *,
     supabase,
@@ -1654,6 +1732,31 @@ async def optimize_single_sku(request: OptimizeRequest):
                     parse_retry_count=telemetry["parse_retry_count"],
                 )
 
+        if not request.dry_run:
+            _persist_finish_prompt_lineage(
+                supabase=supabase,
+                master_sku=canonical_master_sku,
+                generated=generated,
+                mode="full_generation_v2",
+                generation_model=_provider_label(provider),
+                generation_diagnostics={
+                    "selected_platforms": list(platforms),
+                    "usage_by_platform": usage_by_platform
+                    if isinstance(usage_by_platform, dict)
+                    else {},
+                    "latency_by_platform": latencies
+                    if isinstance(latencies, dict)
+                    else {},
+                    "parse_by_platform": parse_by_platform
+                    if isinstance(parse_by_platform, dict)
+                    else {},
+                    "retry_by_platform": retry_by_platform
+                    if isinstance(retry_by_platform, dict)
+                    else {},
+                },
+                request_id=request_id,
+            )
+
         finish_sentences = generated.get("finish_sentences", {})
         if not request.dry_run:
             for platform in ("google", "bing"):
@@ -1921,6 +2024,23 @@ async def _execute_regeneration_request(
                 request.platform,
                 e,
             )
+
+    _persist_finish_prompt_lineage(
+        supabase=supabase,
+        master_sku=canonical_master_sku,
+        generated=generated,
+        mode="with_feedback" if request.feedback else "simple",
+        generation_model=_provider_label(provider),
+        generation_diagnostics={
+            "selected_platforms": list(selected_platforms),
+            "usage_by_platform": usage_by_platform if isinstance(usage_by_platform, dict) else {},
+            "latency_by_platform": latency_by_platform if isinstance(latency_by_platform, dict) else {},
+            "parse_by_platform": parse_by_platform if isinstance(parse_by_platform, dict) else {},
+            "retry_by_platform": retry_by_platform if isinstance(retry_by_platform, dict) else {},
+        },
+        request_id=request_id,
+        idempotency_key=request_idempotency_key,
+    )
 
     # Persist correction if save_as_correction=True and there's session feedback (FIX-01)
     if request.save_as_correction and session_feedback:
@@ -2779,6 +2899,30 @@ async def process_batch_job(
                             else 0,
                         )
 
+                _persist_finish_prompt_lineage(
+                    supabase=supabase,
+                    master_sku=canonical_sku,
+                    generated=generated,
+                    mode="full_generation_v2",
+                    generation_model=_provider_label(provider),
+                    generation_diagnostics={
+                        "selected_platforms": list(platforms),
+                        "usage_by_platform": usage_by_platform
+                        if isinstance(usage_by_platform, dict)
+                        else {},
+                        "latency_by_platform": latencies
+                        if isinstance(latencies, dict)
+                        else {},
+                        "parse_by_platform": parse_by_platform
+                        if isinstance(parse_by_platform, dict)
+                        else {},
+                        "retry_by_platform": retry_by_platform
+                        if isinstance(retry_by_platform, dict)
+                        else {},
+                    },
+                    request_id=lineage_request_id,
+                )
+
                 finish_sentences = generated.get("finish_sentences", {})
                 if "description" in content_types:
                     for platform in ("google", "bing"):
@@ -3084,6 +3228,30 @@ async def process_hybrid_batch_job(
                     provider_attempt_count=telemetry["provider_attempt_count"],
                     parse_retry_count=telemetry["parse_retry_count"],
                 )
+        _persist_finish_prompt_lineage(
+            supabase=supabase,
+            master_sku=canonical_sku,
+            generated=generated,
+            mode="full_generation_v2",
+            generation_model=_provider_label(provider),
+            generation_diagnostics={
+                "selected_platforms": list(selected_platforms),
+                "usage_by_platform": usage_by_platform
+                if isinstance(usage_by_platform, dict)
+                else {},
+                "latency_by_platform": latencies
+                if isinstance(latencies, dict)
+                else {},
+                "parse_by_platform": parse_by_platform
+                if isinstance(parse_by_platform, dict)
+                else {},
+                "retry_by_platform": retry_by_platform
+                if isinstance(retry_by_platform, dict)
+                else {},
+            },
+            request_id=lineage_request_id,
+            idempotency_key=options.get("idempotency_key"),
+        )
         finish_sentences = generated.get("finish_sentences", {})
         if "description" in content_types:
             for platform in ("google", "bing"):

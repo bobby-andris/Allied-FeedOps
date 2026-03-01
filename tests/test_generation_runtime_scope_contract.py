@@ -15,6 +15,10 @@ from tests.test_phase7_observability_reliability import (
 
 async def _google_description_payload() -> dict:
     platform = "google"
+    finish_sentences = {
+        finish: f"{finish} complements this wall-mounted towel bar profile."
+        for finish in api_main.get_finish_list()
+    }
     return {
         "google_description": (
             "Keep towels organized with this wall-mounted towel bar "
@@ -33,9 +37,27 @@ async def _google_description_payload() -> dict:
         "retry_by_platform": {
             platform: {"attempt_count": 1, "json_decode_retries": 0}
         },
-        "finish_sentences": {
-            finish: f"{finish} complements this wall-mounted towel bar profile."
-            for finish in api_main.get_finish_list()
+        "finish_sentences": finish_sentences,
+        "task_results": {
+            "finish:finish_sentences": {
+                "task_id": "task-finish-1",
+                "kind": "finish_sentences",
+                "status": "completed",
+                "platform": "finish",
+                "content_type": "finish_sentences",
+                "content": "",
+                "metadata": {"finish_sentences": finish_sentences},
+                "tokens_used": 60,
+                "cost_usd": 0.00042,
+                "latency_ms": 30,
+                "provider_attempt_count": 1,
+                "parse_retry_count": 0,
+                "system_prompt": "system-finish",
+                "user_prompt": "user-finish",
+                "prompt_hash": "hash-finish",
+                "request_id": "req-finish-task",
+                "raw_payload": {"finish_sentences": finish_sentences},
+            }
         },
     }
 
@@ -153,6 +175,7 @@ async def test_process_batch_job_description_scope_aggregates_finish_telemetry(m
         for op in supabase.operations
         if op["table"] == "regeneration_history"
         and op["op"] == "insert"
+        and op["payload"].get("platform") == "google"
         and op["payload"].get("content_type") == "description"
     ]
     assert len(history_rows) == 1
@@ -220,6 +243,47 @@ async def test_regenerate_description_persists_finish_sentences_without_finish_t
     assert finish_rows[0]["platform"] == "google"
     assert finish_rows[0]["finish_sentences"] == response.finish_sentences
     assert isinstance(finish_rows[0]["updated_at"], str)
+
+
+@pytest.mark.asyncio
+async def test_regenerate_description_persists_finish_prompt_lineage(monkeypatch):
+    supabase = _CaptureSupabase()
+    provider = object()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-finish-lineage")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return await _google_description_payload()
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    response = await api_main.regenerate_content(
+        api_main.RegenerateRequest(
+            master_sku="1031/18",
+            platform="google",
+            content_type="description",
+            feedback=None,
+        )
+    )
+
+    assert response.success is True
+    finish_history_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "regeneration_history"
+        and op["op"] == "insert"
+        and op["payload"].get("platform") == "finish"
+        and op["payload"].get("content_type") == "finish_sentences"
+    ]
+    assert len(finish_history_rows) == 1
+    assert finish_history_rows[0]["master_sku"] == "1031/18"
+    assert finish_history_rows[0]["system_prompt"] == "system-finish"
+    assert finish_history_rows[0]["user_prompt"] == "user-finish"
+    assert finish_history_rows[0]["prompt_hash"] == "hash-finish"
+    assert finish_history_rows[0]["generated_content_id"] is None
+    assert finish_history_rows[0]["provider_attempt_count"] == 1
+    assert finish_history_rows[0]["parse_retry_count"] == 0
+    assert "\"Antique Brass\"" in finish_history_rows[0]["new_content"]
 
 
 @pytest.mark.asyncio
@@ -318,11 +382,97 @@ async def test_process_hybrid_batch_job_description_scope_aggregates_finish_tele
         if op["table"] == "regeneration_history"
         and op["op"] == "insert"
         and op["payload"].get("master_sku") == "1033/18"
+        and op["payload"].get("platform") == "google"
         and op["payload"].get("content_type") == "description"
     ]
     assert len(history_rows) == 1
     assert history_rows[0]["payload"]["provider_attempt_count"] == 2
     assert history_rows[0]["payload"]["parse_retry_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_process_batch_job_persists_finish_prompt_lineage(monkeypatch):
+    supabase = _CaptureSupabase()
+    provider = object()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-finish-lineage")
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return await _google_description_payload()
+
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+
+    await api_main.process_batch_job(
+        job_id="job-batch-finish-lineage",
+        skus=["1031/18"],
+        num_candidates=1,
+        dry_run=False,
+        options={"titles": False, "descriptions": True, "platforms": ["google"]},
+    )
+
+    finish_history_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "regeneration_history"
+        and op["op"] == "insert"
+        and op["payload"].get("platform") == "finish"
+        and op["payload"].get("content_type") == "finish_sentences"
+    ]
+    assert len(finish_history_rows) == 1
+    assert finish_history_rows[0]["master_sku"] == "1031/18"
+    assert finish_history_rows[0]["mode"] == "full_generation_v2_finish_sentences"
+
+
+@pytest.mark.asyncio
+async def test_process_hybrid_batch_job_persists_finish_prompt_lineage(monkeypatch):
+    supabase = _CaptureSupabase()
+    provider = object()
+    _patch_generation_deps(monkeypatch, provider, supabase)
+    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-finish-lineage")
+
+    def _load_parent(master_sku: str):
+        sku = _sample_parent_sku()
+        sku.master_sku = master_sku
+        return sku
+
+    async def _fake_generate_per_platform(**_kwargs):
+        return await _google_description_payload()
+
+    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", _load_parent)
+    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(
+        api_main,
+        "adapt_variant_content",
+        AsyncMock(return_value={"success": True, "content": "adapted"}),
+    )
+
+    families = [
+        MultiSkuFamily(
+            product_id="family-1033",
+            master_skus=["1033/18", "1033/24"],
+            base_sku="1033/18",
+            variant_skus=["1033/24"],
+        )
+    ]
+
+    await api_main.process_hybrid_batch_job(
+        job_id="job-hybrid-finish-lineage",
+        families=families,
+        single_skus=[],
+        options={"titles": False, "descriptions": True, "platforms": ["google"]},
+    )
+
+    finish_history_rows = [
+        op["payload"]
+        for op in supabase.operations
+        if op["table"] == "regeneration_history"
+        and op["op"] == "insert"
+        and op["payload"].get("platform") == "finish"
+        and op["payload"].get("content_type") == "finish_sentences"
+    ]
+    assert len(finish_history_rows) == 1
+    assert finish_history_rows[0]["master_sku"] == "1033/18"
+    assert finish_history_rows[0]["mode"] == "full_generation_v2_finish_sentences"
 
 
 @pytest.mark.asyncio

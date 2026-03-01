@@ -1,0 +1,67 @@
+{
+  "http_status": 200,
+  "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+  "name": "hybrid-google-description",
+  "payload": {
+    "deduplicated": false,
+    "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+    "multi_sku_families": 1,
+    "single_skus": 0,
+    "status": "queued",
+    "strategy": {
+      "base_skus": 1,
+      "variant_skus": 1
+    },
+    "success": true,
+    "total_skus": 2
+  },
+  "poll_http_status": 200,
+  "poll_payload": {
+    "completed_skus": 2,
+    "expanded_completed_skus": 0,
+    "expanded_failed_skus": 0,
+    "expanded_total_skus": 0,
+    "failed_skus": 0,
+    "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+    "skus": [
+      {
+        "completed_at": "2026-02-28T22:50:19.657045+00:00",
+        "created_at": "2026-02-28T22:49:52.876915+00:00",
+        "error_message": null,
+        "generated_content_ids": null,
+        "id": "883277ba-5579-4860-9970-225376e34757",
+        "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+        "master_sku": "1033/18",
+        "started_at": "2026-02-28T22:49:52.963608+00:00",
+        "status": "completed"
+      },
+      {
+        "completed_at": "2026-02-28T22:50:25.050433+00:00",
+        "created_at": "2026-02-28T22:49:52.876915+00:00",
+        "error_message": null,
+        "generated_content_ids": null,
+        "id": "4265c1cb-f094-4494-8565-baae028fb8b8",
+        "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+        "master_sku": "1033/24",
+        "started_at": "2026-02-28T22:50:21.818728+00:00",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "total_skus": 2
+  },
+  "poll_request_ids": [
+    "7f02d797-18cf-4649-92da-55517795e18e",
+    "eee548a9-3c98-4fd1-b62a-cea04ce557cd",
+    "115119e3-391a-478d-ac5a-315ac8a9e022",
+    "22c829a9-70a4-491d-9709-d49f89bfa6d5",
+    "b2dd6ec3-66ce-41e4-9312-892ffa146bbb",
+    "1a9a9343-2c7c-4621-a584-0833cf593103",
+    "83c3db9e-5dc7-4c5e-812a-92033a9ace72",
+    "3fcbd4b9-1d5a-4214-be8e-d4b044596f7a",
+    "6db039a8-56c2-4f8a-8951-df7bddd0725b",
+    "4db5c0ff-67ad-49a7-9ad8-9583c7c41f9b",
+    "dc6b9458-e6f8-412a-81d9-d174694bc68a"
+  ],
+  "request_id": "99c5f032-86fb-4cf1-b115-7f3e714fd216"
+}

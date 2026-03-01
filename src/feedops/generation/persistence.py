@@ -25,6 +25,16 @@ def get_task_result(
     return payload if isinstance(payload, dict) else {}
 
 
+def get_finish_task_result(
+    task_results: dict[str, dict[str, object]] | None,
+) -> dict[str, object]:
+    """Fetch the finish-sentence task result payload when it exists."""
+    if not isinstance(task_results, dict):
+        return {}
+    payload = task_results.get("finish:finish_sentences")
+    return payload if isinstance(payload, dict) else {}
+
+
 def serialize_task_result(result: TaskResult) -> dict[str, object]:
     """Convert a task result into a persistence-friendly dict."""
     return {
