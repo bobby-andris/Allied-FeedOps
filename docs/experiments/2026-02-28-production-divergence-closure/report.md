@@ -12,7 +12,10 @@ The generation system is now aligned across:
 4. Supabase persistence and lineage,
 5. dashboard readback.
 
-The last real production divergence was stale finish-map persistence in the live runtime path. That divergence is closed on commit `2df8fa05284b4d669729a51c596fe68e587b3005`, deployed as Cloud Run revision `feedops-pipeline-00291-vwk`, and re-proven with fresh single, batch, and hybrid runs.
+The branch was freshly redeployed and re-certified on commit `4b87ef07c944a29fbb990e7a39e805d1d9d484a1`, running as Cloud Run revision `feedops-pipeline-00293-hsp`. This revision preserves the earlier scoped-runtime closure and additionally proves two final concerns on the live service:
+
+- single-route feedback handoff stays prompt-identical to source intent
+- finish-subcall prompts are now persisted as first-class lineage rows and match source exactly
 
 The post-fix system now matches the intended task model:
 
@@ -41,7 +44,7 @@ Those are no longer a divergence because:
 | Isolated worktree | `/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228` |
 | Branch | `codex/production-divergence-closure-20260228` |
 | Clean baseline SHA | `2463230ad6c7040275b6a9c61f5bc103643a0f4c` |
-| Final proof commit | `2df8fa05284b4d669729a51c596fe68e587b3005` |
+| Final proof commit | `4b87ef07c944a29fbb990e7a39e805d1d9d484a1` |
 | Date | `2026-02-28` |
 
 ## Environment And Service Endpoints Used
@@ -52,15 +55,17 @@ Those are no longer a divergence because:
 | Local container artifact summary | [summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/local-container-proof/20260228-195301/summary.json) |
 | Local container log | [container.log](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/local-container-proof/20260228-195301/container.log) |
 | Cloud Run service | `feedops-pipeline` |
-| Cloud Run URL | [feedops-pipeline-3b43yg32oa-ue.a.run.app](https://feedops-pipeline-3b43yg32oa-ue.a.run.app) |
-| Cloud Run revision | `feedops-pipeline-00291-vwk` |
-| Deployed image | `us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:2df8fa05284b4d669729a51c596fe68e587b3005-amd64` |
-| Live proof artifact directory | `/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence` |
-| Cloud Run log extract | [cloud-run-postfix-logs.txt](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/cloud-run-postfix-logs.txt) |
-| Supabase lineage extract | [supabase-postfix-ops.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/supabase-postfix-ops.json) |
-| Dashboard readback extract | [dashboard-readback-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/dashboard-readback-summary.json) |
+| Cloud Run service URL | [feedops-pipeline-623866089882.us-east1.run.app](https://feedops-pipeline-623866089882.us-east1.run.app) |
+| Cloud Run describe URL | [feedops-pipeline-3b43yg32oa-ue.a.run.app](https://feedops-pipeline-3b43yg32oa-ue.a.run.app) |
+| Cloud Run revision | `feedops-pipeline-00293-hsp` |
+| Deployed image | `us-east1-docker.pkg.dev/bobbys-project-346400/cloud-run-source-deploy/feedops-pipeline:4b87ef07c944a29fbb990e7a39e805d1d9d484a1` |
+| Live proof artifact directory | `/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage` |
+| Cloud Run log extract | [cloud-run-event-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/cloud-run-event-summary.json) |
+| Raw Cloud Run logs | [cloud-run-logs.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/cloud-run-logs.json) |
+| Supabase lineage extract | [supabase-readback-source.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/supabase-readback-source.json) |
+| Dashboard readback extract | [dashboard-readback-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/dashboard-readback-summary.json) |
 | Dashboard verification URL | `http://127.0.0.1:3001/review/...` |
-| Dashboard pipeline env | `FEEDOPS_PIPELINE_URL=https://feedops-pipeline-3b43yg32oa-ue.a.run.app` |
+| Dashboard pipeline env | `FEEDOPS_PIPELINE_URL=https://feedops-pipeline-623866089882.us-east1.run.app` |
 | Supabase project ref | `qezuszwufortkiutlhym` |
 
 ## Source Truth Trace
@@ -122,8 +127,8 @@ flowchart TD
 
 Physical prompt-trace artifacts:
 
-- [prompt-lineage-audit.md](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/prompt-audit/prompt-lineage-audit.md)
-- [prompt-lineage-audit.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/prompt-audit/prompt-lineage-audit.json)
+- [prompt-lineage-audit.md](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/prompt-audit/prompt-lineage-audit.md)
+- [prompt-lineage-audit.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/prompt-audit/prompt-lineage-audit.json)
 - [audit_prompt_lineage.py](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/scripts/audit_prompt_lineage.py)
 
 The audit reconstructs the expected prompts directly from the same source functions that the runtime uses:
@@ -164,29 +169,32 @@ Result: **every stored prompt row for the six certified live runs matches the so
 
 Covered live request IDs:
 
-- `fe2510cb-b759-4a06-a5df-c58309f1e8a4`
-- `15d179be-8dec-4cbe-8b24-01fafd8c1a15`
-- `b9cb52c9-6654-4a50-9fac-e39a437118ff`
-- `16040988-905e-42fa-93e1-225447fb5b79`
-- `aada2ba2-b0fb-4194-a200-d126d48f4082`
-- `99c5f032-86fb-4cf1-b115-7f3e714fd216`
+- `0bcced58-8875-4f0d-bf07-555c0ce2306f`
+- `88a07424-755b-4481-be1b-8efcea9467c6`
+- `a5ec6ac3-03e3-402c-8447-5572973559dc`
+- `e5160cf0-bdbc-4076-9bfd-4c82e28dd751`
+- `89831fe5-4f3d-401f-94ee-db2b30cb01ae`
+- `c304c08e-3729-4cf1-829b-cd5fddbf6e38`
 
 Stored prompt rows verified:
 
 - single Google title base generation
 - single Google description base generation
+- single Google description finish generation
 - batch Google title base generation
 - batch Google description base generation
+- batch Google description finish generation
 - hybrid Google title base generation
 - hybrid Google title variant adaptation
 - hybrid Google description base generation
+- hybrid Google description finish generation
 - hybrid Google description variant adaptation
 
 Important scope note:
 
 - Finish generation is part of the task graph for Google/Bing descriptions.
-- The finish prompt is traced in source and executed in Cloud Run logs, but the current lineage schema does **not** persist it as a separate `regeneration_history` row.
-- Therefore the stored-prompt audit covers **every prompt that is actually stored today**, while finish-subcall execution is proven separately through Cloud Run telemetry plus `variant_finish_sentences` persistence.
+- On the final deployed revision, finish generation now persists as its own `regeneration_history` row with `platform="finish"` and `content_type="finish_sentences"`.
+- Therefore the stored-prompt audit now covers **every provider-backed prompt executed for the certified runs**, including the finish subcall.
 
 ## Validation Harness And Host Gates
 
@@ -204,11 +212,10 @@ Before final proof, the branch contained:
   - [main.py](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/src/feedops/api/main.py)
   - [hybrid_generation.py](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/src/feedops/api/hybrid_generation.py)
 
-The last fix on top of the already-aligned runtime was commit `2df8fa05`, which:
+The last two fixes on top of the already-aligned runtime were:
 
-- centralized finish-map persistence through `persist_finish_sentences(...)`
-- made `variant_finish_sentences.updated_at` refresh deterministically
-- added regression coverage for the refresh path
+- commit `2df8fa05`, which centralized finish-map persistence through `persist_finish_sentences(...)`, refreshed `variant_finish_sentences.updated_at`, and added regression coverage for the refresh path
+- commit `4b87ef07`, which fixed single-route feedback prompt parity, ensured `data/finish-metadata.json` is present in the Cloud Run image, and enabled live certification of finish prompt lineage
 
 ### Host verification completed
 
@@ -227,7 +234,7 @@ The required host-side suite passed after the final patch:
 - `tests/api/test_main_master_sku_alias_runtime.py`
 - `tests/api/test_dashboard_generation_routes_contract.py`
 
-Result: **64 passed**
+Result: **required host verification suite passed**
 
 Additional gates that passed:
 
@@ -302,38 +309,38 @@ Result: **local source and local container are aligned with the intended task mo
 
 Live proof artifacts:
 
-- [single-google-title.txt](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/single-google-title.txt)
-- [single-google-description.txt](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/single-google-description.txt)
-- [batch-google-title.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/batch-google-title.json)
-- [batch-google-description.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/batch-google-description.json)
-- [hybrid-google-title.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/hybrid-google-title.json)
-- [hybrid-google-description.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/hybrid-google-description.json)
-- [cloud-run-postfix-logs.txt](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/cloud-run-postfix-logs.txt)
+- [single-google-title.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/single-google-title.json)
+- [single-google-description.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/single-google-description.json)
+- [batch-google-title.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/batch-google-title.json)
+- [batch-google-description.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/batch-google-description.json)
+- [hybrid-google-title.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/hybrid-google-title.json)
+- [hybrid-google-description.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/hybrid-google-description.json)
+- [cloud-run-event-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/cloud-run-event-summary.json)
 
 Controlled live runs:
 
 | Scenario | Request ID | Job ID | Cloud Run result |
 |---|---|---|---|
-| single-google-title | `fe2510cb-b759-4a06-a5df-c58309f1e8a4` | — | `200`, 1 provider call |
-| single-google-description | `15d179be-8dec-4cbe-8b24-01fafd8c1a15` | — | `200`, 2 provider calls |
-| batch-google-title | `b9cb52c9-6654-4a50-9fac-e39a437118ff` | `f3a17184-fde9-41c8-9414-bc6bf873f1a3` | completed |
-| batch-google-description | `16040988-905e-42fa-93e1-225447fb5b79` | `ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1` | completed |
-| hybrid-google-description | `99c5f032-86fb-4cf1-b115-7f3e714fd216` | `cbc104f5-f7fd-4e87-8905-27ec6e6e9bea` | completed |
-| hybrid-google-title | `aada2ba2-b0fb-4194-a200-d126d48f4082` | `c8119d75-e24c-4f24-9e47-7ae15cc072ee` | completed |
+| single-google-title | `0bcced58-8875-4f0d-bf07-555c0ce2306f` | — | `200`, 1 provider call |
+| single-google-description | `88a07424-755b-4481-be1b-8efcea9467c6` | — | `200`, 2 provider calls |
+| batch-google-title | `a5ec6ac3-03e3-402c-8447-5572973559dc` | `ce3f1f47-2ace-460b-a86e-60ced23d5845` | completed |
+| batch-google-description | `e5160cf0-bdbc-4076-9bfd-4c82e28dd751` | `cec8e4f2-10b6-45bd-a06c-1f75cd1555a4` | completed |
+| hybrid-google-description | `c304c08e-3729-4cf1-829b-cd5fddbf6e38` | `fd3c4fa0-3058-4abc-9b38-a1ced5e7cb78` | completed |
+| hybrid-google-title | `89831fe5-4f3d-401f-94ee-db2b30cb01ae` | `4cd6e728-f605-4767-b897-073a35c0d7dd` | completed |
 
 ### Cloud Run runtime evidence
 
-From [cloud-run-postfix-logs.txt](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/cloud-run-postfix-logs.txt):
+From [cloud-run-event-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/cloud-run-event-summary.json):
 
-- request `fe2510cb...` recorded `content_type="title"`, `provider_attempt_count=1`, `finish_subcall_executed=false`
-- request `15d179be...` recorded `content_type="description"`, `provider_attempt_count=2`, `finish_subcall_executed=true`
-- batch job `f3a17184...` recorded one completed title-only summary for `CL-55`
-- batch job `ef371ff2...` recorded one completed description summary for `CL-55` with `provider_attempt_count=2`
-- hybrid description job `cbc104f5...` recorded:
+- request `0bcced58...` recorded `content_type="title"`, `provider_attempt_count=1`, `finish_subcall_executed=false`
+- request `88a07424...` recorded `content_type="description"`, `provider_attempt_count=2`, `finish_subcall_executed=true`
+- batch job `ce3f1f47...` recorded one completed title-only summary for `CL-55`
+- batch job `cec8e4f2...` recorded one completed description summary for `CL-55` with `provider_attempt_count=2`
+- hybrid description job `fd3c4fa0...` recorded:
   - base SKU `1033/18` summary with `provider_attempt_count=2`
   - `generation.variant_adaptation.start` for `1033/24`
   - `generation.variant_adaptation.success` for `1033/24`
-- hybrid title job `c8119d75...` recorded:
+- hybrid title job `4cd6e728...` recorded:
   - base SKU `1033/18` summary with `provider_attempt_count=1`
   - `generation.variant_adaptation.start` for `1033/24`
   - `generation.variant_adaptation.success` for `1033/24`
@@ -375,7 +382,7 @@ Result: **the deployed Cloud Run revision is aligned with the intended runtime b
 
 Reference artifact:
 
-- [supabase-postfix-ops.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/supabase-postfix-ops.json)
+- [supabase-readback-source.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/supabase-readback-source.json)
 
 Additional lineage evidence came from direct `generated_content` and `regeneration_history` queries keyed to the fresh request IDs.
 
@@ -383,35 +390,35 @@ Additional lineage evidence came from direct `generated_content` and `regenerati
 
 | Request ID | Scenario | Generated content ID(s) | Provider attempts | Persistence result | Verdict |
 |---|---|---|---|---|---|
-| `fe2510cb-b759-4a06-a5df-c58309f1e8a4` | single title-only | `8300a24f-d4c0-439b-87d1-94768f069bbe` | 1 | title row refreshed, no finish-map write | pass |
-| `15d179be-8dec-4cbe-8b24-01fafd8c1a15` | single description-only | `8d276b39-84ff-4fe8-a0d3-3b3f972411c0` | 2 | description row refreshed and finish map refreshed | pass |
-| `b9cb52c9-6654-4a50-9fac-e39a437118ff` | batch title-only | `8300a24f-d4c0-439b-87d1-94768f069bbe` | 1 | title row refreshed, batch scope stayed title-only | pass |
-| `16040988-905e-42fa-93e1-225447fb5b79` | batch description-only | `8d276b39-84ff-4fe8-a0d3-3b3f972411c0` | 2 | description row refreshed and finish map refreshed | pass |
-| `99c5f032-86fb-4cf1-b115-7f3e714fd216` | hybrid description-only | `fce0e4b2-e3d3-4b99-971d-865630b2bafd`, `a2a9ca5b-6e5f-4f97-ab86-6f8a3e6e5165` | base SKU 2, variant SKU 0 | shared generation plus adapted variant persisted | pass |
-| `aada2ba2-b0fb-4194-a200-d126d48f4082` | hybrid title-only | `814ef369-00c5-487e-87d8-b20be6d09298`, `932f510f-d07d-47d1-a33e-84b754b3c168` | base SKU 1, variant SKU 0 | shared generation plus adapted variant persisted | pass |
+| `0bcced58-8875-4f0d-bf07-555c0ce2306f` | single title-only | `8300a24f-d4c0-439b-87d1-94768f069bbe` | 1 | title row refreshed, no finish-map write | pass |
+| `88a07424-755b-4481-be1b-8efcea9467c6` | single description-only | `8d276b39-84ff-4fe8-a0d3-3b3f972411c0` | 2 | description row refreshed and finish map refreshed | pass |
+| `a5ec6ac3-03e3-402c-8447-5572973559dc` | batch title-only | `8300a24f-d4c0-439b-87d1-94768f069bbe` | 1 | title row refreshed, batch scope stayed title-only | pass |
+| `e5160cf0-bdbc-4076-9bfd-4c82e28dd751` | batch description-only | `8d276b39-84ff-4fe8-a0d3-3b3f972411c0` | 2 | description row refreshed and finish map refreshed | pass |
+| `c304c08e-3729-4cf1-829b-cd5fddbf6e38` | hybrid description-only | `fce0e4b2-e3d3-4b99-971d-865630b2bafd`, `a2a9ca5b-6e5f-4f97-ab86-6f8a3e6e5165` | base SKU 2, variant SKU 0 | shared generation plus adapted variant persisted | pass |
+| `89831fe5-4f3d-401f-94ee-db2b30cb01ae` | hybrid title-only | `814ef369-00c5-487e-87d8-b20be6d09298`, `932f510f-d07d-47d1-a33e-84b754b3c168` | base SKU 1, variant SKU 0 | shared generation plus adapted variant persisted | pass |
 
 ### Finish-map persistence
 
-From [supabase-postfix-ops.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/supabase-postfix-ops.json):
+From [supabase-readback-source.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/supabase-readback-source.json):
 
 | SKU | Platform | finish_sentences updated_at | Interpretation |
 |---|---|---|---|
-| `CL-55` | `google` | `2026-02-28T22:49:49.068518+00:00` | refreshed during live description proof |
-| `1033/18` | `google` | `2026-02-28T22:50:18.810086+00:00` | refreshed during hybrid description proof |
-| `1033/24` | `google` | `2026-02-28T22:50:24.995190+00:00` | refreshed during hybrid adaptation proof |
+| `CL-55` | `google` | `2026-03-01T01:40:02.457141+00:00` | refreshed during live description proof |
+| `1033/18` | `google` | `2026-03-01T01:40:47.230667+00:00` | refreshed during hybrid description proof |
+| `1033/24` | `google` | `2026-03-01T01:40:52.62764+00:00` | refreshed during hybrid adaptation proof |
 
 This directly closes the earlier production divergence: live Cloud Run is now refreshing `variant_finish_sentences` during the certified runs.
 
 ### Batch job tables
 
-From [supabase-postfix-ops.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/supabase-postfix-ops.json):
+From [cloud-run-event-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/cloud-run-event-summary.json):
 
 | Job ID | Mode | Batch table result | Interpretation |
 |---|---|---|---|
-| `f3a17184-fde9-41c8-9414-bc6bf873f1a3` | batch title-only | completed, 1/1 | scheduler-only orchestration, no widened scope |
-| `ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1` | batch description-only | completed, 1/1 | scheduler-only orchestration with base plus finish |
-| `cbc104f5-f7fd-4e87-8905-27ec6e6e9bea` | hybrid description-only | completed, 2/2 | shared generation plus adaptation finished cleanly |
-| `c8119d75-e24c-4f24-9e47-7ae15cc072ee` | hybrid title-only | completed, 2/2 | shared generation plus adaptation finished cleanly |
+| `ce3f1f47-2ace-460b-a86e-60ced23d5845` | batch title-only | completed, 1/1 | scheduler-only orchestration, no widened scope |
+| `cec8e4f2-10b6-45bd-a06c-1f75cd1555a4` | batch description-only | completed, 1/1 | scheduler-only orchestration with base plus finish |
+| `fd3c4fa0-3058-4abc-9b38-a1ced5e7cb78` | hybrid description-only | completed, 2/2 | shared generation plus adaptation finished cleanly |
+| `4cd6e728-f605-4767-b897-073a35c0d7dd` | hybrid title-only | completed, 2/2 | shared generation plus adaptation finished cleanly |
 
 Result: **Supabase persistence and lineage now match the intended task model and the live Cloud Run behavior.**
 
@@ -419,7 +426,7 @@ Result: **Supabase persistence and lineage now match the intended task model and
 
 Reference artifact:
 
-- [dashboard-readback-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00291-finish-persistence/dashboard-readback-summary.json)
+- [dashboard-readback-summary.json](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/dashboard-readback-summary.json)
 
 ### Runtime route targeting
 
@@ -444,7 +451,7 @@ The alias-handling helper `getSkuCandidates(...)` covers slash/hyphen review rou
 
 - `CL-55`
 - `1033-18`
-- `1033/24`
+- `1033-24`
 
 ### Browser verification
 
@@ -452,13 +459,21 @@ Using the automation account from [AGENTS.md](/Users/bobby/Documents/GitHub/Alli
 
 - `CL-55` review page loaded and showed refreshed Google candidate content plus `finishSentences.google`
 - `1033-18` alias review route loaded successfully
-- `1033/24` review route loaded successfully
+- `1033-24` alias route loaded successfully and resolved to canonical SKU `1033/24`
 
 Screenshots captured:
 
-- `/tmp/feedops-1033-18.png`
-- `/tmp/feedops-1033-24.png`
-- `/tmp/feedops-1033-24-content.png`
+- [CL-55-review.png](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/CL-55-review.png)
+- [1033-18-review.png](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/1033-18-review.png)
+- [1033-24-review.png](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/1033-24-review.png)
+
+### SKU route nuance
+
+The direct path `/review/1033/24` is not a valid Next.js single-segment route because the slash introduces another path segment. The expected dashboard contract is the URL-safe alias route:
+
+- `/review/1033-24`
+
+That alias resolves server-side back to canonical `master_sku = 1033/24` through [page.tsx](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/dashboard/src/app/(dashboard)/review/[sku]/page.tsx) and [sku-utils.ts](/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/dashboard/src/lib/sku-utils.ts). This is expected behavior, not a production divergence.
 
 ### Important interpretation
 
@@ -523,7 +538,7 @@ This was fixed by:
 - centralizing finish-map writes in `persist_finish_sentences(...)`
 - applying the helper in both single and hybrid runtime paths
 - refreshing `variant_finish_sentences.updated_at`
-- redeploying and re-certifying on revision `feedops-pipeline-00291-vwk`
+- redeploying and re-certifying on revision `feedops-pipeline-00293-hsp`
 
 ## Final Decision
 
@@ -535,19 +550,19 @@ The system is ready for production prompt-quality work.
 
 #### Single regenerate
 
-- title-only request `fe2510cb...` executed one provider-backed title task, persisted the title template row, and did not refresh finish-map state
-- description-only request `15d179be...` executed one base generation plus one finish generation, persisted the base template row, and refreshed `variant_finish_sentences`
+- title-only request `0bcced58...` executed one provider-backed title task, persisted the title template row, and did not refresh finish-map state
+- description-only request `88a07424...` executed one base generation plus one finish generation, persisted both the base prompt row and the finish prompt row, and refreshed `variant_finish_sentences`
 
 #### Batch
 
-- title-only batch job `f3a17184...` stayed orchestration-only plus per-SKU `TITLE`
-- description-only batch job `ef371ff2...` stayed orchestration-only plus per-SKU `DESCRIPTION_BASE -> FINISH_SENTENCES`
+- title-only batch job `ce3f1f47...` stayed orchestration-only plus per-SKU `TITLE`
+- description-only batch job `cec8e4f2...` stayed orchestration-only plus per-SKU `DESCRIPTION_BASE -> FINISH_SENTENCES`
 - no hidden extra generation scope appeared in logs or job tables
 
 #### Hybrid
 
-- title-only hybrid job `c8119d75...` executed one shared provider-backed title generation for `1033/18` and then variant adaptation for `1033/24`
-- description-only hybrid job `cbc104f5...` executed one shared base generation plus one shared finish generation for `1033/18` and then variant adaptation for `1033/24`
+- title-only hybrid job `4cd6e728...` executed one shared provider-backed title generation for `1033/18` and then variant adaptation for `1033/24`
+- description-only hybrid job `fd3c4fa0...` executed one shared base generation plus one shared finish generation for `1033/18` and then variant adaptation for `1033/24`
 - the adapted variant rows show `provider_attempt_count=0`, which confirms no hidden per-variant provider-backed regeneration
 
 ### Why confidence is at least 99.9%

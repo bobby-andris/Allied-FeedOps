@@ -6,9 +6,8 @@ for the certified production runs, then compares them to the `system_prompt`,
 `user_prompt`, and prompt hashes stored in Supabase `regeneration_history`.
 
 It intentionally covers every prompt row that is actually persisted today:
-single-route rows, batch base-generation rows, and hybrid base/adaptation rows.
-Finish generation is traced in the route matrix but is not audited as a stored
-prompt row because the current runtime does not persist it separately.
+single-route rows, batch base-generation rows, hybrid base/adaptation rows,
+and finish-generation lineage rows.
 """
 
 from __future__ import annotations
@@ -53,51 +52,51 @@ from feedops.pipeline.evidence import (  # noqa: E402
 
 
 REQUEST_CASES = {
-    "fe2510cb-b759-4a06-a5df-c58309f1e8a4": {
+    "0bcced58-8875-4f0d-bf07-555c0ce2306f": {
         "label": "single_google_title",
         "route": "/regenerate",
         "job_id_expected": False,
         "request_feedback": "Post-fix live single title-only verification.",
         "stored_prompt_rows_expected": 1,
     },
-    "15d179be-8dec-4cbe-8b24-01fafd8c1a15": {
+    "88a07424-755b-4481-be1b-8efcea9467c6": {
         "label": "single_google_description",
         "route": "/regenerate",
         "job_id_expected": False,
         "request_feedback": "Post-fix live single description-only verification.",
-        "stored_prompt_rows_expected": 1,
+        "stored_prompt_rows_expected": 2,
     },
-    "b9cb52c9-6654-4a50-9fac-e39a437118ff": {
+    "a5ec6ac3-03e3-402c-8447-5572973559dc": {
         "label": "batch_google_title",
         "route": "/batch-optimize",
         "job_id_expected": True,
-        "job_id": "f3a17184-fde9-41c8-9414-bc6bf873f1a3",
+        "job_id": "ce3f1f47-2ace-460b-a86e-60ced23d5845",
         "stored_prompt_rows_expected": 1,
     },
-    "16040988-905e-42fa-93e1-225447fb5b79": {
+    "e5160cf0-bdbc-4076-9bfd-4c82e28dd751": {
         "label": "batch_google_description",
         "route": "/batch-optimize",
         "job_id_expected": True,
-        "job_id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
-        "stored_prompt_rows_expected": 1,
+        "job_id": "cec8e4f2-10b6-45bd-a06c-1f75cd1555a4",
+        "stored_prompt_rows_expected": 2,
     },
-    "aada2ba2-b0fb-4194-a200-d126d48f4082": {
+    "89831fe5-4f3d-401f-94ee-db2b30cb01ae": {
         "label": "hybrid_google_title",
         "route": "/hybrid-generate",
         "job_id_expected": True,
-        "job_id": "c8119d75-e24c-4f24-9e47-7ae15cc072ee",
+        "job_id": "4cd6e728-f605-4767-b897-073a35c0d7dd",
         "base_sku": "1033/18",
         "variant_sku": "1033/24",
         "stored_prompt_rows_expected": 2,
     },
-    "99c5f032-86fb-4cf1-b115-7f3e714fd216": {
+    "c304c08e-3729-4cf1-829b-cd5fddbf6e38": {
         "label": "hybrid_google_description",
         "route": "/hybrid-generate",
         "job_id_expected": True,
-        "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+        "job_id": "fd3c4fa0-3058-4abc-9b38-a1ced5e7cb78",
         "base_sku": "1033/18",
         "variant_sku": "1033/24",
-        "stored_prompt_rows_expected": 2,
+        "stored_prompt_rows_expected": 3,
     },
 }
 
@@ -196,8 +195,8 @@ def build_feedback_by_platform(
     content_type: str,
 ) -> dict[str, str] | None:
     if request_id not in {
-        "fe2510cb-b759-4a06-a5df-c58309f1e8a4",
-        "15d179be-8dec-4cbe-8b24-01fafd8c1a15",
+        "0bcced58-8875-4f0d-bf07-555c0ce2306f",
+        "88a07424-755b-4481-be1b-8efcea9467c6",
     }:
         return None
 
@@ -222,7 +221,7 @@ def build_feedback_by_platform(
             feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
     request_feedback = REQUEST_CASES.get(request_id, {}).get("request_feedback")
     if isinstance(request_feedback, str) and request_feedback.strip():
-        feedback_lines.append("Reviewer Feedback:\n" + request_feedback.strip())
+        feedback_lines.append(request_feedback.strip())
     if not feedback_lines:
         return None
     return {platform: "\n\n".join(feedback_lines)}
@@ -276,16 +275,17 @@ def build_base_generation_expectation(
         evidence_for_copy if isinstance(evidence_for_copy, list) else [],
         for_customer_copy=True,
     )
-    kind = (
-        GenerationTaskKind.TITLE
-        if row.content_type == "title"
-        else GenerationTaskKind.DESCRIPTION_BASE
-    )
+    if row.content_type == "title":
+        kind = GenerationTaskKind.TITLE
+    elif row.content_type == "finish_sentences":
+        kind = GenerationTaskKind.FINISH_SENTENCES
+    else:
+        kind = GenerationTaskKind.DESCRIPTION_BASE
     spec = TaskSpec(
         task_id=f"audit-{row.id}",
         kind=kind,
         master_sku=row.master_sku,
-        platform=row.platform,
+        platform=row.platform if row.platform != "finish" else "google",
         content_type=row.content_type,
         prompt_version="v2",
         request_id=row.request_id,
@@ -294,7 +294,7 @@ def build_base_generation_expectation(
         rest,
         request_id=row.request_id,
         master_sku=row.master_sku,
-        platform=row.platform,
+        platform="google" if row.platform == "finish" else row.platform,
         content_type=row.content_type,
     )
     user_prompt = build_task_prompt(
@@ -381,7 +381,7 @@ def build_route_prompt_matrix() -> list[dict[str, Any]]:
             "user_prompt_source": "base row uses build_core_prompt(...) + optional persistent corrections + task output contract; finish subcall uses build_finish_prompt(...)",
             "stored_prompt_rows": [
                 "google/description base generation",
-                "finish subcall is executed but not persisted as its own regeneration_history row",
+                "finish/finish_sentences lineage row",
             ],
         },
         {
@@ -402,7 +402,7 @@ def build_route_prompt_matrix() -> list[dict[str, Any]]:
             "user_prompt_source": "base row uses build_core_prompt(...) + task output contract; finish subcall uses build_finish_prompt(...)",
             "stored_prompt_rows": [
                 "google/description base generation",
-                "finish subcall is executed but not persisted as its own regeneration_history row",
+                "finish/finish_sentences lineage row",
             ],
         },
         {
@@ -423,8 +423,8 @@ def build_route_prompt_matrix() -> list[dict[str, Any]]:
             "user_prompt_source": "base row uses build_core_prompt(...) + task output contract; finish subcall uses build_finish_prompt(...); variant row uses build_variant_adaptation_prompt(..., include_finish_sentences=False)",
             "stored_prompt_rows": [
                 "google/description base generation",
+                "finish/finish_sentences lineage row",
                 "google/description variant adaptation",
-                "finish subcall is executed but not persisted as its own regeneration_history row",
             ],
         },
     ]
@@ -601,18 +601,16 @@ def main() -> int:
         notes_parts = []
         if not case_meta["job_id_expected"]:
             notes_parts.append("synchronous route; no job_id expected")
-        if any("FINISH_SENTENCES" in ", ".join(entry["task_graph"]) for entry in route_matrix if entry["scenario"].startswith(case_meta["label"].replace("_", " ").split("google")[0].strip()) ):
-            pass
         if not count_matches:
             notes_parts.append(
                 f"expected {expected_rows} stored prompt rows, found {len(comparisons)}"
             )
         if request_id in {
-            "15d179be-8dec-4cbe-8b24-01fafd8c1a15",
-            "16040988-905e-42fa-93e1-225447fb5b79",
-            "99c5f032-86fb-4cf1-b115-7f3e714fd216",
+            "88a07424-755b-4481-be1b-8efcea9467c6",
+            "e5160cf0-bdbc-4076-9bfd-4c82e28dd751",
+            "c304c08e-3729-4cf1-829b-cd5fddbf6e38",
         }:
-            notes_parts.append("finish generation executes but is not stored as a separate prompt row")
+            notes_parts.append("finish generation persisted as first-class lineage row")
         if all_rows_match and count_matches and not notes_parts:
             notes_parts.append("stored prompt rows match source exactly")
 
