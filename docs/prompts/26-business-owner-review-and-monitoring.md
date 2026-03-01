@@ -415,7 +415,7 @@ Monitor Performance → Identify Patterns → Update Generation → Review & App
 - **Database schema**: ALWAYS read `docs/database/SCHEMA.md` before writing SQL queries
 - **Google Ads customer ID**: `6253381786`
 - **Dashboard URL**: `https://allied-feed-ops.vercel.app`
-- **Pipeline URL**: `https://feedops-pipeline-623866089882.us-east1.run.app`
+- **Pipeline URL**: current canonical `FEEDOPS_PIPELINE_URL`
 - **Offer ID format**: Database = lowercase `shopify_us_`, GMC = uppercase `shopify_US_`
 - **Multi-SKU products**: Multiple master_skus share same product_id (Google Ads aggregates at product_id)
 - **Baseline requirement**: NEVER publish without a performance baseline — you need the "before" to measure the "after"

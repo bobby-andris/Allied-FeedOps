@@ -164,7 +164,7 @@ Use Cloud Scheduler or Cloud Tasks to enqueue individual batches as separate HTT
 
 ```bash
 # Start a performance backfill
-curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/backfill/start \
+curl -X POST "$FEEDOPS_PIPELINE_URL/backfill/start" \
   -H "Content-Type: application/json" \
   -d '{"job_type": "performance_metrics", "skus": ["101","1016","101A"], "config": {"batch_size": 10, "force_backfill": true, "days_lookback": 180}}'
 
@@ -172,7 +172,7 @@ curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/backfill/sta
 gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="feedops-pipeline" AND textPayload=~"batch|Batch|Processing|Job"' --project=bobbys-project-346400 --limit=20 --format="value(timestamp,textPayload)"
 
 # Check job status
-curl https://feedops-pipeline-623866089882.us-east1.run.app/backfill/jobs | python3 -m json.tool
+curl "$FEEDOPS_PIPELINE_URL/backfill/jobs" | python3 -m json.tool
 
 # The job will process a few batches then silently stop (especially if a deploy happens)
 ```

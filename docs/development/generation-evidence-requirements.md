@@ -32,11 +32,12 @@ Must include:
 Must include:
 
 - deployed commit SHA
-- Cloud Build ID
+- deploy mode
 - image ref
 - Cloud Run revision
 - request IDs and job IDs
 - log extract proving actual task execution
+- Cloud Build ID when the post-merge `origin/master` production-trigger path was used
 
 ### 4. Supabase evidence
 
@@ -69,8 +70,10 @@ If prompts or task scope were touched, the report must show:
 - branch name
 - baseline SHA
 - final tested SHA
+- deploy mode
 - image ref
 - Cloud Run revision
+- Cloud Build ID when applicable
 - request IDs
 - job IDs where applicable
 - report artifact directory

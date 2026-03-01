@@ -48,8 +48,13 @@ Use this checklist for every generation-affecting branch before merge.
 
 ## Live Certification
 
+- choose the correct deploy mode before certifying:
+  - pre-PR exact-branch certification: `scripts/deploy_tagged_revision.sh <revision-tag>`
+  - post-merge production deploy: GitHub-connected Cloud Build on `origin/master`
 - deploy the exact tested commit to Cloud Run
-- capture Cloud Build ID, image ref, and Cloud Run revision
+- capture image ref and Cloud Run revision
+- capture Cloud Build ID only when the post-merge production path is used
+- record the deploy mode in the report
 - run the six-scenario certification matrix
 
 ### Required live scenarios
@@ -88,8 +93,10 @@ Verify fresh rows in:
 
 - update the dated experiment report
 - record commit SHA
+- record deploy mode
 - record image ref
 - record Cloud Run revision
+- record Cloud Build ID when applicable
 - record request IDs and job IDs
 - record final GO/NO-GO decision
 

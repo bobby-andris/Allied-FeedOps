@@ -53,7 +53,31 @@ For generation-affecting work, also run:
 ENV_FILE=.env.vercel PORT=18080 scripts/container_generation_smoke.sh
 ```
 
-Then capture the deployed Cloud Run revision and certify the required live scenarios before merge.
+## Which Deploy Path To Use
+
+For generation-affecting work, use one of these two deploy paths explicitly:
+
+### Pre-PR exact-branch certification
+
+Use this before merge when you need to prove the exact feature branch SHA in Cloud Run:
+
+```bash
+scripts/deploy_tagged_revision.sh <revision-tag>
+```
+
+Use the tagged revision URL for the six-scenario certification matrix and record the deploy mode in the report.
+
+### Post-merge production deploy
+
+Use this after merge to prove the actual release path:
+
+- push and merge to `origin/master`
+- let the GitHub-connected Cloud Build trigger run `cloudbuild.yaml`
+- record the Cloud Build ID, image ref, and deployed revision
+
+Hard rule:
+
+Pre-PR exact-branch certification proves the branch SHA. Post-merge production deploy proves the real release path. Do not conflate them in reports or sign-off.
 
 ## Merge And Reset Loop
 ```bash

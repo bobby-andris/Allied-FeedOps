@@ -73,7 +73,7 @@ GROUP BY master_sku;
 ### Test Query with Specific SKUs
 
 ```bash
-curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/performance/diagnose-query \
+curl -X POST "$FEEDOPS_PIPELINE_URL/performance/diagnose-query" \
   -H "Content-Type: application/json" \
   -d '{"master_skus": ["DMF-2/2X"]}'
 ```
@@ -87,7 +87,7 @@ Returns:
 ### See What Products Exist in Google Ads
 
 ```bash
-curl https://feedops-pipeline-623866089882.us-east1.run.app/performance/diagnose-products
+curl "$FEEDOPS_PIPELINE_URL/performance/diagnose-products"
 ```
 
 Returns:
@@ -98,7 +98,7 @@ Returns:
 ### Check Baseline Status for SKU
 
 ```bash
-curl https://feedops-pipeline-623866089882.us-east1.run.app/performance/baseline/DMF-2-2X
+curl "$FEEDOPS_PIPELINE_URL/performance/baseline/DMF-2-2X"
 ```
 
 Returns:

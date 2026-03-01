@@ -81,7 +81,7 @@ Use subagent_type: general-purpose (has access to all tools)
 
 **Production**:
 - Dashboard: https://allied-feed-ops.vercel.app/login
-- Pipeline API: https://feedops-pipeline-623866089882.us-east1.run.app
+- Pipeline API: use the current canonical `FEEDOPS_PIPELINE_URL` value for this environment
 - Supabase: `qezuszwufortkiutlhym`
 
 **Defaults**:
@@ -573,7 +573,7 @@ git push origin master
 
 **Pipeline issues**:
 - Cloud Run logs: `gcloud run services logs read feedops-pipeline --project=bobbys-project-346400 --limit=50`
-- Test: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+- Test: `curl "$FEEDOPS_PIPELINE_URL/health"`
 
 **Shopify media issues**:
 - Duplicate lifestyle images: Check Shopify product media via GraphQL (see `scripts/cleanup_duplicate_media.py`)

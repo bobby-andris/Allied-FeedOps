@@ -280,7 +280,7 @@ gcloud run services logs read feedops-pipeline \
 
 **Job status:**
 ```bash
-curl https://feedops-pipeline-623866089882.us-east1.run.app/batch-status/{job_id}
+curl "$FEEDOPS_PIPELINE_URL/batch-status/{job_id}"
 ```
 
 **Database metrics:**

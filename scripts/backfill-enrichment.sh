@@ -1,7 +1,8 @@
 #!/bin/bash
 # Batch enrichment script for search queries
 
-API_URL="https://feedops-pipeline-623866089882.us-east1.run.app/search-insights/enrich"
+: "${FEEDOPS_PIPELINE_URL:?Set FEEDOPS_PIPELINE_URL to the current canonical feedops-pipeline service URL}"
+API_URL="${FEEDOPS_PIPELINE_URL}/search-insights/enrich"
 
 # First batch of 100 keywords
 curl -X POST "$API_URL" \
