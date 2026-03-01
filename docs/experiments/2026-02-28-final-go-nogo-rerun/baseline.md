@@ -1,5 +1,13 @@
 # Final Go/No-Go Rerun Baseline
 
+> Historical evidence only. This rerun baseline remains useful for forensic comparison, but it is not the active operational truth.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 - Timestamp: `2026-02-28 05:00:18 EST`
 - Repository: `/Users/bobby/Documents/GitHub/Allied-FeedOps`
 - Branch: `codex/e245-final-go-nogo-rerun-20260228`

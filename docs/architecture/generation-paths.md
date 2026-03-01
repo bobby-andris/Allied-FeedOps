@@ -1,5 +1,13 @@
 # Content Generation Paths — Code Trace and Feature Flag Audit
 
+> Historical reference only. This document records an earlier trace and flag audit and should not be treated as the current generation contract.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 **Generated:** 2026-02-21
 **Phase:** 18-diagnosis-establish-ground-truth (Plan 01)
 **Purpose:** Answer DIAG-02 (which code path runs?) and DIAG-03 (are feature flags wired?) with grep-verified evidence.

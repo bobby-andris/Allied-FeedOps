@@ -1,5 +1,13 @@
 # Prompt Source And Generation Flow (Current Runtime)
 
+> Historical reference only. This document captures an earlier runtime understanding and is not the default operational truth.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 ## Scope
 This document describes the current production architecture only.
 It excludes retired v1/v2 runtime routing decisions and focuses on the code path active on `master` after deterministic regeneration + async enqueue landing.

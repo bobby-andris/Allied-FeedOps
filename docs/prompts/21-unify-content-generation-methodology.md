@@ -1,5 +1,13 @@
 # Task: Unify TypeScript & Python Content Generation Methodology
 
+> Historical reference only. This document describes an earlier unification effort and is not the current runtime authority for prompts or routing.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 ## Objective
 
 Deeply investigate the divergence between TypeScript (dashboard) and Python (batch pipeline) content generation methodologies, then implement a unified approach that maximizes revenue impact and ad efficiency.
