@@ -141,7 +141,7 @@ grep -r "google.sheets\|spreadsheet" src/ | grep -i "publish\|feed"
 1. Run the diagnostic script to get all Google Ads products:
    ```bash
    source .venv/bin/activate
-   PYTHONPATH=./src python3 test-google-ads-raw.py
+   PYTHONPATH=./src python3 scripts/test_google_ads_raw.py
    ```
 
 2. Extract the 97 orphan offer IDs
@@ -246,7 +246,7 @@ grep -r "google.sheets\|spreadsheet" src/ | grep -i "publish\|feed"
 1. **Case mismatch fixed**: Changed all offer IDs from `shopify_US_` to `shopify_us_` (lowercase) - 72,023 rows updated
 2. **Campaign type fix**: Added `campaign.advertising_channel_type` to queries to include Performance Max
 3. **Diagnostic tools created**:
-   - `test-google-ads-raw.py` - Query Google Ads directly
+   - `scripts/test_google_ads_raw.py` - Query Google Ads directly
    - `/performance/diagnose-query` - API endpoint to test queries
    - `/performance/diagnose-products` - API endpoint to see what's in Google Ads
 
