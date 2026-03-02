@@ -24,6 +24,15 @@ export async function GET(request: Request) {
         .map((a) => a.master_sku)
     )
 
+    // Get SKUs that already have generated content (not yet approved but visible on review page)
+    const { data: generatedSkus } = await supabase
+      .from('generated_content')
+      .select('master_sku')
+
+    const alreadyGeneratedSkus = new Set(
+      (generatedSkus || []).map((g) => g.master_sku)
+    )
+
     // Get product info from variant_index
     const { data: variants } = await supabase
       .from('variant_index')
@@ -86,7 +95,7 @@ export async function GET(request: Request) {
               revenue: perf?.conversionValue || 0,
               cost: perf?.cost || 0,
               variant_count: info.variant_count,
-              already_optimized: optimizedSkus.has(master_sku),
+              already_optimized: optimizedSkus.has(master_sku) || alreadyGeneratedSkus.has(master_sku),
             }
           })
         } catch (googleAdsError) {
@@ -95,16 +104,16 @@ export async function GET(request: Request) {
             : JSON.stringify(googleAdsError, null, 2)
           console.error('Google Ads API failed, falling back to sample data:', errorMsg)
           googleAdsErrorMessage = errorMsg
-          skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
+          skuMetrics = generateSampleMetrics(skuMap, optimizedSkus, alreadyGeneratedSkus)
           usingSampleData = true
         }
       } else {
-        skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
+        skuMetrics = generateSampleMetrics(skuMap, optimizedSkus, alreadyGeneratedSkus)
         usingSampleData = true
       }
     } else {
       // Generate sample data when Google Ads is not configured
-      skuMetrics = generateSampleMetrics(skuMap, optimizedSkus)
+      skuMetrics = generateSampleMetrics(skuMap, optimizedSkus, alreadyGeneratedSkus)
       usingSampleData = true
     }
 
@@ -150,7 +159,8 @@ export async function GET(request: Request) {
  */
 function generateSampleMetrics(
   skuMap: Map<string, { product_name: string; category: string; variant_count: number }>,
-  optimizedSkus: Set<string>
+  optimizedSkus: Set<string>,
+  alreadyGeneratedSkus: Set<string>
 ): SkuMetrics[] {
   return Array.from(skuMap.entries()).map(([master_sku, info]) => {
     // Use SKU hash for deterministic but varied values
@@ -176,7 +186,7 @@ function generateSampleMetrics(
       revenue,
       cost,
       variant_count: info.variant_count,
-      already_optimized: optimizedSkus.has(master_sku),
+      already_optimized: optimizedSkus.has(master_sku) || alreadyGeneratedSkus.has(master_sku),
     }
   })
 }
