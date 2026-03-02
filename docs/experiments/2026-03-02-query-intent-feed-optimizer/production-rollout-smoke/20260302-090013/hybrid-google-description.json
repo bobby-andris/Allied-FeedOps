@@ -1,0 +1,28 @@
+{
+  "elapsed_seconds": 0.085,
+  "http_status": 422,
+  "name": "hybrid-google-description",
+  "payload": {
+    "detail": [
+      {
+        "input": {
+          "async_mode": true,
+          "content_type": "description",
+          "feedback": "Production rollout post-cutover verification hybrid description-only.",
+          "platform": "google",
+          "skus": [
+            "1033/18",
+            "1033/24"
+          ]
+        },
+        "loc": [
+          "body",
+          "options"
+        ],
+        "msg": "Field required",
+        "type": "missing"
+      }
+    ]
+  },
+  "request_id": "aeabf60f-a2de-42c3-9ef6-01e73dbf1559"
+}

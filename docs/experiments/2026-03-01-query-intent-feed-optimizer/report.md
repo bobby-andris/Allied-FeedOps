@@ -1,5 +1,7 @@
 # 2026-03-01 Query-Intent Feed Optimizer V1
 
+> Superseded by certification recovery report: `/Users/bobby/Documents/GitHub/Allied-FeedOps/docs/experiments/2026-03-02-query-intent-feed-optimizer/report.md`
+
 ## Summary
 
 Implemented a narrow V1 query-intent briefing layer for Google and Bing generation in the Python runtime. The feature adds a deterministic, non-provider-backed `<query_intent_brief>` prompt section for eligible title and description tasks, gates it behind `QUERY_INTENT_BRIEF_V1`, and persists diagnostics through existing lineage metadata.

@@ -11,6 +11,7 @@ DATE_STAMP="${DATE_STAMP:-$(date +%F)}"
 RUN_STAMP="${RUN_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 OUTPUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/docs/experiments/${DATE_STAMP}-generation-core-simplification/container-smoke/${RUN_STAMP}}"
 CONTAINER_NAME="feedops-generation-smoke-${RUN_STAMP}"
+VERIFY_PERSISTENCE_PARITY="${VERIFY_PERSISTENCE_PARITY:-0}"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -266,5 +267,14 @@ run_hybrid_case(
 PY
 
 docker logs "$CONTAINER_NAME" >"$OUTPUT_DIR/container.log" 2>&1 || true
+
+if [[ "${VERIFY_PERSISTENCE_PARITY}" == "1" ]]; then
+  echo "Running strict response->persistence parity check"
+  # shellcheck disable=SC1090
+  set -a
+  source "$ENV_FILE"
+  set +a
+  python3 scripts/verify_generation_persistence_parity.py "$OUTPUT_DIR"
+fi
 
 echo "Container smoke artifacts written to $OUTPUT_DIR"

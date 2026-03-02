@@ -1,0 +1,22 @@
+{
+  "elapsed_seconds": 13.842,
+  "http_status": 200,
+  "name": "single-google-title",
+  "payload": {
+    "content": "{FINISH_NAME} Freestanding Paper Towel Holder - Carolina Collection, Traditional - Allied Brass",
+    "content_type": "title",
+    "finish_sentences": null,
+    "generated_content_id": "8300a24f-d4c0-439b-87d1-94768f069bbe",
+    "idempotent": false,
+    "master_sku": "CL-55",
+    "model": "openai/gpt-5.2",
+    "platform": "google",
+    "prompt_hash": "b55f8798bc8b6902cbd02417cd9e223fca26f4e8dd3aa48f871548bf19127568",
+    "request_id": "28329ca9-54e2-40c7-a9b3-4f97e8a70ea7",
+    "state": "completed",
+    "success": true,
+    "used_feedback": true,
+    "version": 40
+  },
+  "request_id": "28329ca9-54e2-40c7-a9b3-4f97e8a70ea7"
+}

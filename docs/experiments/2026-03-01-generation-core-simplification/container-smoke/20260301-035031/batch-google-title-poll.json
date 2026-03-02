@@ -1,0 +1,29 @@
+{
+  "http_status": 200,
+  "job_id": "b3b85c3c-2ce6-4cb5-967d-16053927e45e",
+  "name": "batch-google-title-poll",
+  "payload": {
+    "completed_skus": 1,
+    "expanded_completed_skus": 0,
+    "expanded_failed_skus": 0,
+    "expanded_total_skus": 0,
+    "failed_skus": 0,
+    "job_id": "b3b85c3c-2ce6-4cb5-967d-16053927e45e",
+    "skus": [
+      {
+        "completed_at": "2026-03-01T08:51:42.941473+00:00",
+        "created_at": "2026-03-01T08:51:35.272164+00:00",
+        "error_message": null,
+        "generated_content_ids": null,
+        "id": "27c57843-a329-44df-a025-c6727d4fe4b7",
+        "job_id": "b3b85c3c-2ce6-4cb5-967d-16053927e45e",
+        "master_sku": "CL-55",
+        "started_at": "2026-03-01T08:51:35.409314+00:00",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "total_skus": 1
+  },
+  "poll_request_id": "cc9fcf1e-12f8-47b9-95b1-73acb3009fae"
+}

@@ -1,0 +1,41 @@
+[
+  {
+    "master_sku": "1033/18",
+    "platform": "google",
+    "content_type": "title",
+    "request_id": "1b646959-6cc8-4a32-b102-226d9f47c9da",
+    "created_at": "2026-03-02T13:25:36.664427+00:00",
+    "prompt_hash": "a181ab238f4c65bb0bac3b698ef18e69a41791bcdab0fcf3c6a98b5e6adb53b3",
+    "query_intent_brief_enabled": null,
+    "query_intent_data_sufficiency": null,
+    "query_intent_source_query_count": 0,
+    "query_intent_disabled_reason": "no_master_queries",
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "1033/18",
+    "platform": "finish",
+    "content_type": "finish_sentences",
+    "request_id": "1f5f23a8-64a9-4145-9c5c-e4fb77595fc4",
+    "created_at": "2026-03-02T13:25:18.007996+00:00",
+    "prompt_hash": "34b3a25c27d7bc78d4b66e16252e397586a135fa5f0e31ee49d1435a2eccc607",
+    "query_intent_brief_enabled": null,
+    "query_intent_data_sufficiency": null,
+    "query_intent_source_query_count": null,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "1033/18",
+    "platform": "google",
+    "content_type": "description",
+    "request_id": "1f5f23a8-64a9-4145-9c5c-e4fb77595fc4",
+    "created_at": "2026-03-02T13:25:17.920196+00:00",
+    "prompt_hash": "ea37a339fadad2b15007457565fe1e8fae73e5b68948b8f39ba1f50fa86d3afe",
+    "query_intent_brief_enabled": null,
+    "query_intent_data_sufficiency": null,
+    "query_intent_source_query_count": 0,
+    "query_intent_disabled_reason": "no_master_queries",
+    "flag_query_intent": true
+  }
+]

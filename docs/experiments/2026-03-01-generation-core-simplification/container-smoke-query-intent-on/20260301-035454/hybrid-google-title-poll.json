@@ -1,0 +1,40 @@
+{
+  "http_status": 200,
+  "job_id": "51bd4d13-2f61-4e91-9448-b73e23bcb4d3",
+  "name": "hybrid-google-title-poll",
+  "payload": {
+    "completed_skus": 2,
+    "expanded_completed_skus": 0,
+    "expanded_failed_skus": 0,
+    "expanded_total_skus": 0,
+    "failed_skus": 0,
+    "job_id": "51bd4d13-2f61-4e91-9448-b73e23bcb4d3",
+    "skus": [
+      {
+        "completed_at": "2026-03-01T08:56:37.188538+00:00",
+        "created_at": "2026-03-01T08:56:31.198648+00:00",
+        "error_message": null,
+        "generated_content_ids": null,
+        "id": "6507bc5f-0982-4b13-96d5-3b5841dfeed1",
+        "job_id": "51bd4d13-2f61-4e91-9448-b73e23bcb4d3",
+        "master_sku": "1033/18",
+        "started_at": "2026-03-01T08:56:31.276715+00:00",
+        "status": "completed"
+      },
+      {
+        "completed_at": "2026-03-01T08:56:37.581064+00:00",
+        "created_at": "2026-03-01T08:56:31.198648+00:00",
+        "error_message": null,
+        "generated_content_ids": null,
+        "id": "abfdf945-ab53-42a2-ba77-3240da58dc19",
+        "job_id": "51bd4d13-2f61-4e91-9448-b73e23bcb4d3",
+        "master_sku": "1033/24",
+        "started_at": "2026-03-01T08:56:37.267458+00:00",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "total_skus": 2
+  },
+  "poll_request_id": "4cac77db-5aec-42f8-95eb-19a72ba7247c"
+}
