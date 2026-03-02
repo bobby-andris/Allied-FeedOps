@@ -4,6 +4,7 @@ import { scoreSkus, selectSkus, type SkuMetrics } from '@/lib/sku-scoring'
 import { fetchShoppingPerformance, getDateRange, isGoogleAdsConfigured } from '@/lib/google-ads'
 import { ensureAllData } from '@/lib/data-collection/ensure-data'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { groupByPrefix } from '@/lib/sku-family-detection'
 
 export async function GET(request: Request) {
   try {
@@ -138,8 +139,42 @@ export async function GET(request: Request) {
         })
     }
 
+    // Compute prefix-based families across all known SKUs
+    const allSkus = Array.from(skuMap.keys())
+    const families = groupByPrefix(allSkus)
+
+    // Build a lookup: recommended SKU → family prefix (if any)
+    const recommendedSet = new Set(selectedSkus)
+    const skuToProductName = new Map(
+      Array.from(skuMap.entries()).map(([sku, info]) => [sku, info.product_name])
+    )
+
+    const familiesWithLabels = families.map((f) => ({
+      prefix: f.prefix,
+      label: skuToProductName.get(f.members[0]) || f.prefix,
+      members: f.members,
+      specs: f.specs,
+      recommended_members: f.members.filter((m) => recommendedSet.has(m)),
+      other_members: f.members.filter((m) => !recommendedSet.has(m)),
+    }))
+
+    // Tag recommended SKUs with their family prefix
+    const skuFamilyMap = new Map<string, string>()
+    for (const f of families) {
+      for (const m of f.members) {
+        skuFamilyMap.set(m, f.prefix)
+      }
+    }
+
+    const recommendedWithFamilies = selection.recommended.map((s) => ({
+      ...s,
+      family_prefix: skuFamilyMap.get(s.master_sku) || null,
+    }))
+
     return NextResponse.json({
       ...selection,
+      recommended: recommendedWithFamilies,
+      families: familiesWithLabels,
       google_ads_configured: isGoogleAdsConfigured(),
       using_sample_data: usingSampleData,
       google_ads_error: googleAdsErrorMessage,

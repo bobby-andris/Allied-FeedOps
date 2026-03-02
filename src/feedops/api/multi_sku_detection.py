@@ -7,11 +7,14 @@ Example: DMF-2/2X, DMF-2/3X, DMF-2/4X, DMF-2/5X all share product_id 45399753360
 Python port of dashboard/src/lib/multi-sku-detection.ts
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 import re
+import logging
 
 from feedops.api.sku_alias import resolve_canonical_master_sku
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -84,6 +87,92 @@ def get_related_master_skus(supabase, master_sku: str) -> list[str]:
     return unique_skus
 
 
+def extract_sku_prefix(master_sku: str) -> Optional[tuple[str, str]]:
+    """
+    Extract a family prefix and spec suffix from a master SKU.
+
+    The prefix is the product family identifier; the spec is the size/variant suffix.
+    Returns None if no meaningful split can be made (single-segment SKUs).
+
+    Examples:
+        "DY-41-24"      → ("DY-41", "24")
+        "DY-41-18"      → ("DY-41", "18")
+        "FR-1/16GTB"    → ("FR-1", "16GTB")
+        "FR-1/22GTB"    → ("FR-1", "22GTB")
+        "P-230-24-TS"   → ("P-230", "24-TS")
+        "DMF-2/2X"      → ("DMF-2", "2X")
+        "WP-2/16-GAL"   → ("WP-2", "16-GAL")
+        "920D-6"        → None (single product, no family)
+        "AP-26"         → None (too short to split meaningfully)
+    """
+    # Try slash-separated first: prefix/spec (e.g., FR-1/16GTB, DMF-2/2X, WP-2/16-GAL)
+    if "/" in master_sku:
+        slash_idx = master_sku.rfind("/")
+        prefix = master_sku[:slash_idx]
+        spec = master_sku[slash_idx + 1:]
+        if prefix and spec:
+            return (prefix, spec)
+
+    # Try hyphen-separated: find the last hyphen before a numeric segment
+    # Pattern: PREFIX-NUM... where NUM starts the spec (size/variant)
+    # Examples: DY-41-24 → DY-41 + 24, P-230-24-TS → P-230 + 24-TS
+    # We need at least 2 hyphen segments to form a prefix
+    parts = master_sku.split("-")
+    if len(parts) < 3:
+        return None
+
+    # Find split point: last hyphen where the next part starts with a digit
+    # and there are at least 2 parts before it (to form a meaningful prefix)
+    for i in range(len(parts) - 1, 1, -1):
+        if parts[i] and parts[i][0].isdigit():
+            prefix = "-".join(parts[:i])
+            spec = "-".join(parts[i:])
+            return (prefix, spec)
+
+    return None
+
+
+def detect_prefix_families(master_skus: list[str]) -> list[MultiSkuFamily]:
+    """
+    Detect product families by SKU prefix pattern matching.
+
+    Groups SKUs that share the same prefix (e.g., DY-41-18 and DY-41-24 both
+    have prefix "DY-41"). This catches families that don't share a Shopify
+    product_id (different products in different sizes).
+
+    Args:
+        master_skus: List of master SKUs to analyze
+
+    Returns:
+        List of MultiSkuFamily objects for prefix-based families (>1 member)
+    """
+    # Group by prefix
+    prefix_groups: dict[str, list[str]] = {}
+    for sku in master_skus:
+        result = extract_sku_prefix(sku)
+        if result is None:
+            continue
+        prefix, _ = result
+        prefix_groups.setdefault(prefix, []).append(sku)
+
+    families = []
+    for prefix, skus in prefix_groups.items():
+        if len(skus) < 2:
+            continue
+
+        sorted_skus = sorted(skus)
+        families.append(
+            MultiSkuFamily(
+                product_id=f"prefix:{prefix}",
+                master_skus=sorted_skus,
+                base_sku=sorted_skus[0],
+                variant_skus=sorted_skus[1:],
+            )
+        )
+
+    return families
+
+
 def detect_multi_sku_families(supabase, master_skus: list[str]) -> list[MultiSkuFamily]:
     """
     Detect multi-SKU product families in a list of SKUs.
@@ -98,6 +187,7 @@ def detect_multi_sku_families(supabase, master_skus: list[str]) -> list[MultiSku
     families = []
     processed = set()
 
+    # Phase 1: product_id-based detection (high confidence)
     for sku in [
         resolve_canonical_master_sku(supabase, candidate, tables=("variant_index",))
         for candidate in master_skus
@@ -141,6 +231,20 @@ def detect_multi_sku_families(supabase, master_skus: list[str]) -> list[MultiSku
         else:
             # Single-SKU product (no adaptation needed)
             processed.add(sku)
+
+    # Phase 2: prefix-based detection for SKUs not already in a product_id family
+    grouped_skus = {sku for f in families for sku in f.master_skus}
+    ungrouped = [sku for sku in master_skus if sku not in grouped_skus]
+
+    if ungrouped:
+        prefix_families = detect_prefix_families(ungrouped)
+        for pf in prefix_families:
+            logger.info(
+                "Prefix family detected: %s → %s",
+                pf.product_id,
+                pf.master_skus,
+            )
+            families.append(pf)
 
     return families
 

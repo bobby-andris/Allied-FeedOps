@@ -3,14 +3,10 @@ from pathlib import Path
 
 LEGACY_PIPELINE_HOST = "feedops-pipeline-623866089882"
 GENERATE_ROUTE = Path("dashboard/src/app/api/sku-selection/generate/route.ts")
-GENERATE_HYBRID_ROUTE = Path(
-    "dashboard/src/app/api/sku-selection/generate-hybrid/route.ts"
-)
 REGENERATE_ROUTE = Path("dashboard/src/app/api/regenerate/route.ts")
 IMAGES_GENERATE_ROUTE = Path("dashboard/src/app/api/images/generate/route.ts")
 PIPELINE_RUNTIME_FILES = [
     GENERATE_ROUTE,
-    GENERATE_HYBRID_ROUTE,
     REGENERATE_ROUTE,
     Path("dashboard/src/app/api/performance/capture-snapshot/route.ts"),
     Path("dashboard/src/app/api/gmc/sync/route.ts"),
@@ -45,12 +41,12 @@ def test_runtime_dashboard_paths_do_not_hardcode_legacy_pipeline_url() -> None:
 
 
 def test_generation_routes_fail_closed_when_pipeline_url_missing() -> None:
-    hybrid_source = _read(GENERATE_HYBRID_ROUTE)
+    generate_source = _read(GENERATE_ROUTE)
     regenerate_source = _read(REGENERATE_ROUTE)
 
-    assert "if (!PIPELINE_URL)" in hybrid_source
+    assert "if (!PIPELINE_URL)" in generate_source
     assert "if (!PIPELINE_URL)" in regenerate_source
-    assert "FEEDOPS_PIPELINE_URL" in hybrid_source
+    assert "FEEDOPS_PIPELINE_URL" in generate_source
     assert "FEEDOPS_PIPELINE_URL" in regenerate_source
 
 
