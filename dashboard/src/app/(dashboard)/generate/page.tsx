@@ -14,7 +14,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { Sparkles, Info, ChevronDown, ArrowLeft, ArrowRight, Loader2, Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw } from 'lucide-react'
+import { Sparkles, Info, ChevronDown, ArrowLeft, ArrowRight, Loader2, Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface ScoredSku {
@@ -30,10 +30,21 @@ interface ScoredSku {
   cvr: number
   variant_count?: number
   tierReason?: string
+  family_prefix?: string | null
+}
+
+interface SkuFamily {
+  prefix: string
+  label: string
+  members: string[]
+  specs: string[]
+  recommended_members: string[]
+  other_members: string[]
 }
 
 interface SelectionResult {
   recommended: ScoredSku[]
+  families: SkuFamily[]
   distribution: { tier1: number; tier2: number; tier3: number; fill: number }
   excluded: {
     top_revenue: string[]
@@ -274,6 +285,73 @@ export default function GeneratePage() {
     }
   }
 
+  const toggleFamily = (familyMembers: string[]) => {
+    const newSelected = new Set(selectedSkus)
+    const recommendedMembers = familyMembers.filter((m) =>
+      data?.recommended.some((r) => r.master_sku === m)
+    )
+    const allSelected = recommendedMembers.every((m) => newSelected.has(m))
+    if (allSelected) {
+      recommendedMembers.forEach((m) => newSelected.delete(m))
+    } else {
+      recommendedMembers.forEach((m) => newSelected.add(m))
+    }
+    setSelectedSkus(newSelected)
+  }
+
+  // Build grouped rows for the review table
+  const buildGroupedRows = () => {
+    if (!data) return []
+
+    const families = data.families || []
+
+    // Build lookups: SKU -> family prefix, prefix -> family
+    const skuToPrefix = new Map<string, string>()
+    const prefixToFamily = new Map<string, SkuFamily>()
+    for (const f of families) {
+      prefixToFamily.set(f.prefix, f)
+      for (const m of f.members) {
+        skuToPrefix.set(m, f.prefix)
+      }
+    }
+
+    type RowItem =
+      | { type: 'family-header'; family: SkuFamily }
+      | { type: 'family-member'; sku: ScoredSku; family: SkuFamily }
+      | { type: 'family-other'; masterSku: string; family: SkuFamily }
+      | { type: 'standalone'; sku: ScoredSku }
+
+    const rows: RowItem[] = []
+    const emittedFamilies = new Set<string>()
+
+    for (const sku of data.recommended) {
+      const prefix = skuToPrefix.get(sku.master_sku)
+
+      if (!prefix) {
+        rows.push({ type: 'standalone', sku })
+        continue
+      }
+
+      if (emittedFamilies.has(prefix)) continue
+      emittedFamilies.add(prefix)
+
+      const family = prefixToFamily.get(prefix)!
+      rows.push({ type: 'family-header', family })
+
+      // Add recommended members first, then non-recommended (dimmed)
+      for (const member of data.recommended.filter(
+        (r) => skuToPrefix.get(r.master_sku) === prefix
+      )) {
+        rows.push({ type: 'family-member', sku: member, family })
+      }
+      for (const otherSku of family.other_members) {
+        rows.push({ type: 'family-other', masterSku: otherSku, family })
+      }
+    }
+
+    return rows
+  }
+
   const getTierColor = (tier: string) => {
     switch (tier) {
       case 'tier1':
@@ -443,7 +521,7 @@ export default function GeneratePage() {
                   </div>
                 </div>
 
-                {/* SKU Table */}
+                {/* SKU Table (family-grouped) */}
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
@@ -463,38 +541,122 @@ export default function GeneratePage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.recommended.map((sku) => (
-                        <tr
-                          key={sku.master_sku}
-                          className="border-t hover:bg-muted/50"
-                        >
-                          <td className="p-2">
-                            <Checkbox
-                              checked={selectedSkus.has(sku.master_sku)}
-                              onCheckedChange={() => toggleSku(sku.master_sku)}
-                            />
-                          </td>
-                          <td className="p-2">
-                            <div className="font-medium">{sku.master_sku}</div>
-                            {sku.product_name && (
-                              <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                {sku.product_name}
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-2 text-muted-foreground">
-                            {sku.category || '-'}
-                          </td>
-                          <td className="p-2">
-                            <Badge className={getTierColor(sku.tier)}>
-                              {sku.tier}
-                            </Badge>
-                          </td>
-                          <td className="p-2 text-right font-medium">{sku.score}</td>
-                          <td className="p-2 text-right">{sku.ctr.toFixed(2)}%</td>
-                          <td className="p-2 text-right">{sku.cvr.toFixed(2)}%</td>
-                        </tr>
-                      ))}
+                      {buildGroupedRows().map((row) => {
+                        if (row.type === 'family-header') {
+                          const { family } = row
+                          const recommendedMembers = family.members.filter((m) =>
+                            data.recommended.some((r) => r.master_sku === m)
+                          )
+                          const allSelected = recommendedMembers.every((m) => selectedSkus.has(m))
+                          return (
+                            <tr key={`family-${family.prefix}`} className="border-t bg-muted/30">
+                              <td className="p-2">
+                                <Checkbox
+                                  checked={allSelected}
+                                  onCheckedChange={() => toggleFamily(family.members)}
+                                />
+                              </td>
+                              <td className="p-2" colSpan={4}>
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="font-medium">{family.prefix}</span>
+                                  <span className="text-muted-foreground">—</span>
+                                  <span className="text-muted-foreground truncate max-w-[200px]">{family.label}</span>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {family.members.length} sizes
+                                  </Badge>
+                                </div>
+                              </td>
+                              <td className="p-2" colSpan={2} />
+                            </tr>
+                          )
+                        }
+
+                        if (row.type === 'family-member') {
+                          const { sku } = row
+                          return (
+                            <tr key={sku.master_sku} className="border-t hover:bg-muted/50">
+                              <td className="p-2 pl-6">
+                                <Checkbox
+                                  checked={selectedSkus.has(sku.master_sku)}
+                                  onCheckedChange={() => toggleSku(sku.master_sku)}
+                                />
+                              </td>
+                              <td className="p-2 pl-6">
+                                <div className="font-medium">{sku.master_sku}</div>
+                                {sku.product_name && (
+                                  <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {sku.product_name}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="p-2 text-muted-foreground">
+                                {sku.category || '-'}
+                              </td>
+                              <td className="p-2">
+                                <Badge className={getTierColor(sku.tier)}>
+                                  {sku.tier}
+                                </Badge>
+                              </td>
+                              <td className="p-2 text-right font-medium">{sku.score}</td>
+                              <td className="p-2 text-right">{sku.ctr.toFixed(2)}%</td>
+                              <td className="p-2 text-right">{sku.cvr.toFixed(2)}%</td>
+                            </tr>
+                          )
+                        }
+
+                        if (row.type === 'family-other') {
+                          return (
+                            <tr key={row.masterSku} className="border-t opacity-50">
+                              <td className="p-2 pl-6">
+                                <Checkbox
+                                  checked={selectedSkus.has(row.masterSku)}
+                                  onCheckedChange={() => toggleSku(row.masterSku)}
+                                />
+                              </td>
+                              <td className="p-2 pl-6" colSpan={4}>
+                                <div className="font-medium">{row.masterSku}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Not recommended (already generated)
+                                </div>
+                              </td>
+                              <td className="p-2" colSpan={2} />
+                            </tr>
+                          )
+                        }
+
+                        // standalone
+                        const { sku } = row
+                        return (
+                          <tr key={sku.master_sku} className="border-t hover:bg-muted/50">
+                            <td className="p-2">
+                              <Checkbox
+                                checked={selectedSkus.has(sku.master_sku)}
+                                onCheckedChange={() => toggleSku(sku.master_sku)}
+                              />
+                            </td>
+                            <td className="p-2">
+                              <div className="font-medium">{sku.master_sku}</div>
+                              {sku.product_name && (
+                                <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                  {sku.product_name}
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-2 text-muted-foreground">
+                              {sku.category || '-'}
+                            </td>
+                            <td className="p-2">
+                              <Badge className={getTierColor(sku.tier)}>
+                                {sku.tier}
+                              </Badge>
+                            </td>
+                            <td className="p-2 text-right font-medium">{sku.score}</td>
+                            <td className="p-2 text-right">{sku.ctr.toFixed(2)}%</td>
+                            <td className="p-2 text-right">{sku.cvr.toFixed(2)}%</td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
