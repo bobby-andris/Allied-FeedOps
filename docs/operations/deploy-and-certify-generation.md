@@ -11,6 +11,8 @@ Use this path when you need to certify the exact current feature branch SHA befo
 
 1. from the feature branch, deploy a tagged no-traffic revision:
    - `scripts/deploy_tagged_revision.sh <revision-tag>`
+   - Optional feature-flag envs for the tagged revision:
+     - `EXTRA_ENV_VARS=QUERY_INTENT_BRIEF_V1=1 scripts/deploy_tagged_revision.sh <revision-tag>`
 2. use the tagged revision URL for the six-scenario runtime proof
 3. record:
    - tested commit SHA
@@ -79,6 +81,12 @@ For each scenario, capture:
 - `variant_finish_sentences`
 - `batch_generation_jobs`
 - `batch_generation_job_skus`
+- strict response→lineage→approved content parity for fresh request IDs:
+  - `python3 scripts/verify_generation_persistence_parity.py --env-file .env.vercel <artifact-dir>`
+
+For local container smoke, run parity automatically by enabling:
+
+- `VERIFY_PERSISTENCE_PARITY=1 ENV_FILE=.env.vercel PORT=18080 scripts/container_generation_smoke.sh`
 
 ## Required Dashboard Checks
 

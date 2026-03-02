@@ -1,0 +1,24 @@
+[
+  {
+    "master_sku": "1033/24",
+    "platform": "google",
+    "content_type": "title",
+    "request_id": "1b646959-6cc8-4a32-b102-226d9f47c9da",
+    "created_at": "2026-03-02T13:25:38.934589+00:00",
+    "prompt_hash": "18be9b5376c7ed7a85fa13989f9d89cd9e57b5f0307da3876e4eb9869ab65ecc",
+    "flag_query_intent": null,
+    "query_intent_brief_enabled": null,
+    "model_version": "deterministic-variant-adapter"
+  },
+  {
+    "master_sku": "1033/24",
+    "platform": "google",
+    "content_type": "description",
+    "request_id": "1f5f23a8-64a9-4145-9c5c-e4fb77595fc4",
+    "created_at": "2026-03-02T13:25:22.417291+00:00",
+    "prompt_hash": "c4faa77ed8ec858a1517f712d3db1e88067b98fd43ae7a4726fe302ede2e9a35",
+    "flag_query_intent": null,
+    "query_intent_brief_enabled": null,
+    "model_version": "deterministic-variant-adapter"
+  }
+]

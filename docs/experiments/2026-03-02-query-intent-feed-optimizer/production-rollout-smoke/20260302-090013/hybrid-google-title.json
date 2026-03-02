@@ -1,0 +1,28 @@
+{
+  "elapsed_seconds": 0.088,
+  "http_status": 422,
+  "name": "hybrid-google-title",
+  "payload": {
+    "detail": [
+      {
+        "input": {
+          "async_mode": true,
+          "content_type": "title",
+          "feedback": "Production rollout post-cutover verification hybrid title-only.",
+          "platform": "google",
+          "skus": [
+            "1033/18",
+            "1033/24"
+          ]
+        },
+        "loc": [
+          "body",
+          "options"
+        ],
+        "msg": "Field required",
+        "type": "missing"
+      }
+    ]
+  },
+  "request_id": "810c475d-3529-49df-aa2c-e212f8c8e563"
+}

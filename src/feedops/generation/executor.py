@@ -43,6 +43,7 @@ from feedops.pipeline.finish_sentence_placeholder import (
     strip_generic_finish_count_claims,
     strip_hardcoded_finish_names,
 )
+from feedops.pipeline.query_intent_brief import build_query_intent_context
 from feedops.providers.base import LLMProvider
 
 logger = logging.getLogger(__name__)
@@ -336,6 +337,7 @@ def _build_legacy_payload(
         "finish_subcall_skipped": finish_subcall_skipped,
         "budget_stop_triggered": False,
         "estimated_cost_total_usd": round(estimated_cost_total_usd, 6),
+        "query_intent_diagnostics": bundle.summary.get("query_intent_diagnostics", {}),
     }
 
     usage_by_platform: dict[str, dict[str, int]] = defaultdict(dict)
@@ -447,6 +449,15 @@ async def execute_generation_bundle(
         evidence_for_copy if isinstance(evidence_for_copy, list) else [],
         for_customer_copy=True,
     )
+    eligible_query_intent_scope = bool(
+        {"google", "bing"} & set(requested_platforms)
+        and {"title", "description"} & set(requested_content_types)
+    )
+    query_intent_context = (
+        build_query_intent_context(parent_sku, evidence)
+        if eligible_query_intent_scope
+        else None
+    )
     task_specs = _build_task_specs(
         parent_sku=parent_sku,
         selected_platforms=requested_platforms,
@@ -475,6 +486,7 @@ async def execute_generation_bundle(
                 evidence=evidence,
                 evidence_markdown=evidence_markdown,
                 feedback_by_platform=feedback_by_platform,
+                query_intent_context=query_intent_context,
             )
         system_prompt_override = (
             system_prompt_overrides.get(spec.platform)
@@ -583,6 +595,11 @@ async def execute_generation_bundle(
             "diagnostic_mode": diagnostic_mode,
             "finish_subcall_skipped": finish_subcall_skipped,
             "estimated_cost_total_usd": round(estimated_cost_total_usd, 6),
+            "query_intent_diagnostics": (
+                query_intent_context.diagnostics.as_dict()
+                if query_intent_context is not None
+                else {}
+            ),
         },
     )
 

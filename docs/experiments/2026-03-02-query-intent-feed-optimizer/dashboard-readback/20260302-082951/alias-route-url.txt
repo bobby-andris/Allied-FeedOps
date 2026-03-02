@@ -1,0 +1,1 @@
+alias_route_url=http://localhost:3001/review/1033-24

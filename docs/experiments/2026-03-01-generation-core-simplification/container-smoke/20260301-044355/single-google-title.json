@@ -1,0 +1,22 @@
+{
+  "elapsed_seconds": 9.15,
+  "http_status": 200,
+  "name": "single-google-title",
+  "payload": {
+    "content": "{FINISH_NAME} Countertop Paper Towel Holder - Carolina Collection - 6.5-Inch Traditional - Allied Brass",
+    "content_type": "title",
+    "finish_sentences": null,
+    "generated_content_id": "8300a24f-d4c0-439b-87d1-94768f069bbe",
+    "idempotent": false,
+    "master_sku": "CL-55",
+    "model": "openai/gpt-5.2",
+    "platform": "google",
+    "prompt_hash": "b0e6651571a294635ed1fa5542b9a77ce3e8c174fdb8995f2630bd4c0304a0a8",
+    "request_id": "f05358cd-79ed-475f-8907-94376d6116e1",
+    "state": "completed",
+    "success": true,
+    "used_feedback": true,
+    "version": 38
+  },
+  "request_id": "f05358cd-79ed-475f-8907-94376d6116e1"
+}
