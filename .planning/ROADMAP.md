@@ -1,24 +1,14 @@
-# Roadmap: Pipeline Reliability Rewrite + Model Evaluation
+# Roadmap: Allied-FeedOps
 
-## Overview
+## Milestones
 
-A safety-first decomposition of the 3,737-line `main.py` monolith into testable modules, followed by GPT-5.2 bug remediation, Claude provider implementation, a head-to-head model evaluation, and a Bing placeholder fix. Every phase preserves the 98% human approval rate and backward compatibility of all existing API endpoints. Phases run in strict dependency order: schemas first (no dependencies), services second, then JobRunner unification, then GPT-5.2 fixes (clean baseline), then Claude provider, then evaluation, then Bing fix using the proven protocol.
+- ✅ **v1.0 Pipeline Reliability Rewrite + Model Evaluation** - Phases 1-7 (shipped 2026-03-03)
+- 🚧 **v1.1 Dead Code Cleanup + Data Infrastructure** - Phases 8-13 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-- [x] **Phase 1: Schemas Extraction** - Extract all Pydantic models into `schemas.py` — no dependencies, unblocks all subsequent extraction
-- [ ] **Phase 2: Services Extraction** - Extract finish processing, intent scoring, telemetry, generation, and persistence into isolated service modules
-- [x] **Phase 3: JobRunner and Route Extraction** - Unify batch/hybrid job processing into `JobRunner`; slim `main.py` to <500 lines (completed 2026-03-03)
-- [ ] **Phase 4: GPT-5.2 Bug Fixes** - Fix all 5 known GPT-5.2 bugs as separate PRs with curl verification
-- [ ] **Phase 5: Claude Provider** - Implement `ClaudeProvider` with structured output and factory support
-- [ ] **Phase 6: Model Evaluation** - Run head-to-head Claude vs GPT-5.2 on 10 diverse SKUs with blind human scoring
-- [ ] **Phase 7: Bing Fix** - Diagnose and fix `{FINISH_NAME}` bug; regenerate 85 broken Bing titles
-
-## Phase Details
+<details>
+<summary>✅ v1.0 Pipeline Reliability Rewrite + Model Evaluation (Phases 1-7) - SHIPPED 2026-03-03</summary>
 
 ### Phase 1: Schemas Extraction
 **Goal**: All Pydantic request/response models live in isolated `schemas.py` — importable without spinning up the full app
@@ -58,8 +48,8 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   4. Hybrid multi-SKU generation job completes end-to-end via `JobRunner` with identical variant adaptation output
   5. Job cancellation and graceful shutdown work without orphaned threads
 **Plans**: 2 plans
-  - [ ] 03-01-PLAN.md — Extract JobRunner class unifying batch + hybrid job processing
-  - [ ] 03-02-PLAN.md — Extract route handlers to routes.py + main.py line-count guard
+  - [x] 03-01-PLAN.md — Extract JobRunner class unifying batch + hybrid job processing
+  - [x] 03-02-PLAN.md — Extract route handlers to routes.py + main.py line-count guard
 
 ### Phase 4: GPT-5.2 Bug Fixes
 **Goal**: All 5 known GPT-5.2 bugs fixed with clean curl verification — production baseline is correct and measurable
@@ -68,12 +58,12 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
 **Success Criteria** (what must be TRUE):
   1. `curl /optimize-sku` with SKU `920D-6` returns a description longer than 500 characters after each individual PR merge
   2. `openai_provider.py` never passes `temperature` alongside `reasoning_effort` — verified by code inspection and test
-  3. `reasoning_effort` defaults to `"high"` when `FEEDOPS_REASONING_EFFORT` env var is unset — verified by unit test (locked decision: "high" achieved 98% approval rate)
+  3. `reasoning_effort` defaults to `"high"` when `FEEDOPS_REASONING_EFFORT` env var is unset — verified by unit test
   4. `json_schema` strict mode is active; no retry-on-invalid-JSON loops in production logs after a batch run
   5. System prompt uses XML section tags instead of `=== ===` headers — and curl verification confirms descriptions unchanged in length and quality
 **Plans**: 3 plans
-  - [ ] 04-01-PLAN.md — GPT-5.2 regression tests (GPT-01 through GPT-05)
-  - [ ] 04-02-PLAN.md — Add prompt_cache_key to OpenAI API calls
+  - [x] 04-01-PLAN.md — GPT-5.2 regression tests (GPT-01 through GPT-05)
+  - [x] 04-02-PLAN.md — Add prompt_cache_key to OpenAI API calls
   - [ ] 04-03-PLAN.md — Post-deploy content quality verification script
 
 ### Phase 5: Claude Provider
@@ -87,7 +77,7 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   4. `pytest tests/test_claude_provider.py` passes with mocked Anthropic client
   5. `providers/base.py` defines the `LLMProvider` ABC and both providers implement it without modification to any other module
 **Plans**: 2 plans
-  - [ ] 05-01-PLAN.md — Implement ClaudeProvider with structured output + mocked tests for all 3 platforms
+  - [x] 05-01-PLAN.md — Implement ClaudeProvider with structured output + mocked tests for all 3 platforms
   - [ ] 05-02-PLAN.md — Extend provider factory with FEEDOPS_PROVIDER=claude selection
 
 ### Phase 6: Model Evaluation
@@ -97,13 +87,13 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
 **Success Criteria** (what must be TRUE):
   1. 10 diverse SKUs (mix of categories, collection types, single vs multi-SKU) are selected and documented before any generation runs
   2. Both providers generate content for all 10 SKUs using identical prompts — results stored in CSV with provider labels hidden
-  3. Bobby and Robert complete blind scoring on all 20 outputs (title quality, description quality, brand voice, accuracy) before labels are revealed
+  3. Bobby and Robert complete blind scoring on all 20 outputs before labels are revealed
   4. A comparison table exists with cost-per-SKU, p50/p95 latency, and average blind score for each provider
-  5. A written recommendation exists stating which provider to use for which scenarios, backed by the evaluation data
+  5. A written recommendation exists stating which provider to use for which scenarios, backed by evaluation data
 **Plans**: 3 plans
-  - [ ] 06-01-PLAN.md — SKU selection script + evaluation script + run full 3-way evaluation
-  - [ ] 06-02-PLAN.md — Create blind scoring sheet + Bobby/Robert complete scoring
-  - [ ] 06-03-PLAN.md — Analysis: comparison table + written recommendation
+  - [x] 06-01-PLAN.md — SKU selection script + evaluation script + run full 3-way evaluation
+  - [x] 06-02-PLAN.md — Create blind scoring sheet + Bobby/Robert complete scoring
+  - [x] 06-03-PLAN.md — Analysis: comparison table + written recommendation
 
 ### Phase 7: Bing Fix
 **Goal**: All Bing titles use `{FINISH_NAME}` placeholder — broken content is replaced, variant expansion produces correct per-finish titles
@@ -112,21 +102,104 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
 **Success Criteria** (what must be TRUE):
   1. Root cause of hardcoded finish names is documented (exact missing prompt instruction identified in `prompts.py`)
   2. A single isolated prompt fix is deployed and curl-verified against one Bing title before mass regeneration
-  3. All 85 broken Bing titles are regenerated — SQL query confirms 0 Bing titles in `generated_content` contain hardcoded finish names from the 28-finish list
-  4. Variant expansion for a regenerated SKU produces 28 distinct finish-specific titles, each beginning with the correct finish name
+  3. All 85 broken Bing titles are regenerated — SQL query confirms 0 Bing titles contain hardcoded finish names
+  4. Variant expansion for a regenerated SKU produces 28 distinct finish-specific titles
+**Plans**: TBD — deferred
+
+</details>
+
+### 🚧 v1.1 Dead Code Cleanup + Data Infrastructure (In Progress)
+
+**Milestone Goal:** Remove dead code from the v1.0 pipeline decomposition, fix the broken daily performance snapshot job, harden data table schemas, normalize entity relationships, and scale baseline coverage from 274 to all ~2,500 master SKUs.
+
+#### Phase 8: Schema Hardening
+**Goal**: Data table schemas enforce correctness at the database level — the daily performance snapshot job succeeds instead of failing silently
+**Depends on**: Phase 7 (v1.0 complete)
+**Requirements**: SCHM-01, SCHM-02, SCHM-03, SCHM-04
+**Success Criteria** (what must be TRUE):
+  1. Daily Cloud Scheduler snapshot job at 6:00 AM UTC completes without error — Slack alert reports success instead of a 42P10 upsert failure
+  2. `performance_impact_scores` table starts populating with real data (was empty due to snapshot job failing)
+  3. `SELECT COUNT(*) FROM performance_snapshots` grows by the expected number of SKUs the morning after migration 036 is applied
+  4. A CHECK constraint rejects any INSERT on platform columns that uses a value outside the allowed set (google, bing, shopify)
+  5. `performance_snapshots.publish_event_id` has a FK to `publish_events` — orphaned rows are rejected at the DB layer
+**Plans**: TBD
+
+#### Phase 9: Trivial Dead Code Removal
+**Goal**: All zero-caller orphan functions are deleted from the codebase — no test changes required, ruff and pytest stay green after each deletion
+**Depends on**: Phase 8
+**Requirements**: DEAD-01, DEAD-05
+**Success Criteria** (what must be TRUE):
+  1. `_payload_value_lengths`, `_schema_hash`, `_prompt_hash`, and `_generate_with_provider_compat` no longer exist in generator.py
+  2. `_provider_label` re-export no longer exists in finish_processing.py; finish processing re-exports removed from generation.py (lines 26-30)
+  3. The ~500-line `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag block and all code behind it is deleted from the codebase
+  4. `pytest tests/` passes with zero failures after all deletions
+  5. `ruff check src/` passes with zero violations after all deletions
+**Plans**: TBD
+
+#### Phase 10: Image Wiring
+**Goal**: All modern generation endpoints send product images to Claude during generation — SKUs with a `main_image_url` get richer context
+**Depends on**: Phase 8 (independent of Phase 9)
+**Requirements**: IMG-01
+**Success Criteria** (what must be TRUE):
+  1. A `curl /optimize-sku` call for a SKU with a `main_image_url` in `variant_index` produces a Cloud Run log line confirming an image was sent to Claude
+  2. A `curl /optimize-sku` call for a SKU without a `main_image_url` completes normally — `image=None` is handled gracefully with no error
+  3. Finish sentence tasks do not receive image inputs (image wiring is skipped for finish tasks)
+  4. `pytest tests/` passes with zero failures after the change
+**Plans**: TBD
+
+#### Phase 11: Test-Import Cleanup and Re-export Removal
+**Goal**: Test files import from canonical module locations; main.py backward-compat re-export block is deleted; executor.py is the single source of truth for per-platform generation utilities
+**Depends on**: Phase 9
+**Requirements**: DEAD-02, DEAD-03, DEAD-04
+**Success Criteria** (what must be TRUE):
+  1. No test file imports any symbol from `feedops.api.main` — all imports point to the actual extracted module
+  2. The ~130-line backward-compat re-export block (lines 174-304) no longer exists in main.py
+  3. The 6 functions duplicated between generator.py and executor.py exist only in executor.py — generator.py has no copies
+  4. `pytest tests/` passes with zero failures throughout the entire sequential update process
+  5. `python -c "import feedops.api.main"` exits 0 (no import errors after re-exports removed)
+**Plans**: TBD
+
+#### Phase 12: Entity Mapping and Bulk Coverage
+**Goal**: Offer ID normalization is applied at every data integration boundary; all ~2,500 master SKUs have performance baselines instead of the current 274
+**Depends on**: Phase 8, Phase 10, Phase 11
+**Requirements**: ENTM-01, ENTM-02, ENTM-03, DATA-01, DATA-02, DATA-03
+**Success Criteria** (what must be TRUE):
+  1. A `normalize_offer_id()` utility exists and is applied at every Google Ads integration boundary before any data query runs
+  2. A test confirms that `normalize_offer_id("shopify_US_123_456")` and `normalize_offer_id("shopify_us_123_456")` both return the same canonical form
+  3. A 50-SKU throttled test run completes successfully with no `RESOURCE_EXHAUSTED` errors before the full catalog sweep is attempted
+  4. After the full baseline backfill, `SELECT COUNT(DISTINCT master_sku) FROM performance_baselines` returns a value greater than 2,400 (up from 274)
+  5. The entity relationship map document exists at `docs/architecture/entity-relationships.md` and correctly diagrams `variant_index` as the hub
+  6. Daily snapshot verification: the morning after backfill completes, snapshot count in `performance_snapshots` reflects new SKUs being captured
+**Plans**: TBD
+
+#### Phase 13: Shared Utils Extraction
+**Goal**: The duplicated `_require_request_id()` and `GenerationBudgetExceededError` exist in exactly one location — circular import between persistence.py and job_management.py is resolved cleanly
+**Depends on**: Phase 11
+**Requirements**: DEAD-06
+**Success Criteria** (what must be TRUE):
+  1. `feedops/api/utils.py` exists and contains exactly one definition of `_require_request_id()` and `GenerationBudgetExceededError`
+  2. Neither `persistence.py` nor `job_management.py` defines these symbols — both import from `utils.py`
+  3. `python -c "import feedops.api.main"` exits 0 (no circular import introduced by utils.py)
+  4. `pytest tests/` passes with zero failures after extraction
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change protocol established) but is independent of Phases 5-6 and can run after Phase 4 completes.
+v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 9 → 10 (parallel with 9) → 11 (after 9) → 12 (after 8, 10, 11) → 13 (after 11).
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Schemas Extraction | 2/2 | Complete | 2026-03-03 |
-| 2. Services Extraction | 0/2 | Planning complete | - |
-| 3. JobRunner and Route Extraction | 2/2 | Complete   | 2026-03-03 |
-| 4. GPT-5.2 Bug Fixes | 2/3 | In Progress|  |
-| 5. Claude Provider | 1/2 | In Progress|  |
-| 6. Model Evaluation | 0/3 | Planning complete | - |
-| 7. Bing Fix | 0/TBD | Not started | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Schemas Extraction | v1.0 | 2/2 | Complete | 2026-03-03 |
+| 2. Services Extraction | v1.0 | 1/2 | Complete | 2026-03-03 |
+| 3. JobRunner and Route Extraction | v1.0 | 2/2 | Complete | 2026-03-03 |
+| 4. GPT-5.2 Bug Fixes | v1.0 | 2/3 | Complete | 2026-03-03 |
+| 5. Claude Provider | v1.0 | 2/2 | Complete | 2026-03-03 |
+| 6. Model Evaluation | v1.0 | 3/3 | Complete | 2026-03-03 |
+| 7. Bing Fix | v1.0 | 0/TBD | Deferred | - |
+| 8. Schema Hardening | v1.1 | 0/TBD | Not started | - |
+| 9. Trivial Dead Code Removal | v1.1 | 0/TBD | Not started | - |
+| 10. Image Wiring | v1.1 | 0/TBD | Not started | - |
+| 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/TBD | Not started | - |
+| 12. Entity Mapping and Bulk Coverage | v1.1 | 0/TBD | Not started | - |
+| 13. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |

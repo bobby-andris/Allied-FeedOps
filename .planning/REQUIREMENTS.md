@@ -77,29 +77,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEAD-01 | — | Pending |
-| DEAD-02 | — | Pending |
-| DEAD-03 | — | Pending |
-| DEAD-04 | — | Pending |
-| DEAD-05 | — | Pending |
-| DEAD-06 | — | Pending |
-| SCHM-01 | — | Pending |
-| SCHM-02 | — | Pending |
-| SCHM-03 | — | Pending |
-| SCHM-04 | — | Pending |
-| ENTM-01 | — | Pending |
-| ENTM-02 | — | Pending |
-| ENTM-03 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| IMG-01 | — | Pending |
+| DEAD-01 | Phase 9 | Pending |
+| DEAD-02 | Phase 11 | Pending |
+| DEAD-03 | Phase 11 | Pending |
+| DEAD-04 | Phase 11 | Pending |
+| DEAD-05 | Phase 9 | Pending |
+| DEAD-06 | Phase 13 | Pending |
+| SCHM-01 | Phase 8 | Pending |
+| SCHM-02 | Phase 8 | Pending |
+| SCHM-03 | Phase 8 | Pending |
+| SCHM-04 | Phase 8 | Pending |
+| ENTM-01 | Phase 12 | Pending |
+| ENTM-02 | Phase 12 | Pending |
+| ENTM-03 | Phase 12 | Pending |
+| DATA-01 | Phase 12 | Pending |
+| DATA-02 | Phase 12 | Pending |
+| DATA-03 | Phase 12 | Pending |
+| IMG-01 | Phase 10 | Pending |
 
 **Coverage:**
 - v1 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 — traceability mapped to phases 8-13*

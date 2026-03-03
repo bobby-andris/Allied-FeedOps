@@ -4,10 +4,10 @@ milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: active
 stopped_at: null
-last_updated: "2026-03-03T23:00:00.000Z"
-last_activity: 2026-03-03 — Milestone v1.1 started
+last_updated: "2026-03-03T23:30:00.000Z"
+last_activity: 2026-03-03 — Roadmap created for v1.1 (phases 8-13)
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,23 +21,53 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** The pipeline produces high-quality product content reliably at scale, backed by accurate performance data that maps seamlessly across Google Ads, Shopify, and Merchant Center.
-**Current focus:** Defining requirements for v1.1
+**Current focus:** Phase 8 — Schema Hardening (ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-03 — Milestone v1.1 started
+Phase: 8 of 13 (Schema Hardening)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-03 — Roadmap created, 17 requirements mapped to phases 8-13
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (v1.1)
+- Average duration: — min
+- Total execution time: 0 hours
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
 
 ## Accumulated Context
 
 ### From v1.0 (Pipeline Reliability Rewrite + Model Evaluation)
 - main.py decomposed: 3,737 → ~500 lines, 9 extracted modules
-- GPT-5.2 bugs fixed: all 5 (temp/reasoning, defaults, JSON schema, caching, XML tags)
-- Claude provider implemented with structured output + factory support
-- Model evaluation: Claude Sonnet 4.6 won — 84% cheaper, 2x faster, 8.85/10
-- Production go-live: FEEDOPS_PROVIDER=claude serving all traffic
+- All 5 GPT-5.2 bugs fixed; Claude Sonnet 4.6 in production (84% cheaper, 2x faster)
+- 98% human approval rate on generated Google content
 - Deploy checklist created as mandatory pre-push workflow
-- Phase 7 (Bing fix) deferred — generation works, 96 SKUs need regeneration later
-- Dead code identified but deferred (generator.py legacy, re-exports, image wiring)
+- Phase 7 (Bing fix) deferred — 96 SKUs need regeneration, tracked as v2 requirement
+
+### Key Decisions (v1.1)
+- Dead code before data infra: Low-risk cleanup reduces noise before schema changes
+- variant_index as entity hub: 72K rows, central to all cross-platform mapping
+- Upsert semantics: Use `ignore_duplicates=True` for snapshots (first-write-wins; historical data must not be overwritten)
+- Test-import update BEFORE re-export removal: Never remove a symbol before updating all test imports
+
+### Blockers/Concerns
+- Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
+- Phase 12 pre-condition: ENTM-01 (offer ID normalization) must be applied before DATA-01 (bulk backfill) runs
+- Phase 12 quota risk: 2,500 SKU backfill consumes ~19% of Google Ads daily quota in one shot — 50-SKU test gate required first
+- Slack webhook binding: Verify `SLACK_WEBHOOK_URL` is bound to current Cloud Run revision before declaring Phase 8 complete
+
+## Session Continuity
+
+Last session: 2026-03-03
+Stopped at: Roadmap created — no phases planned yet
+Resume file: None
