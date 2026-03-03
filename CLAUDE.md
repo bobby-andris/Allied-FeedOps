@@ -141,14 +141,15 @@ See full research: `docs/research/gpt52-best-practices.md`
 6. System prompt uses `=== ===` headers instead of XML tags (GPT-5.2 parses XML better)
 7. Vague length targets ("target 600-800") instead of hard constraints
 
-## Current Roadmap (v1.3)
+## Current Roadmap
 
 **Master plan**: `docs/plans/2026-02-21-strategic-milestone-assessment.md` (10-part document)
-**GSD context**: `.planning/PROJECT.md`
+**New milestone brief**: `docs/setup/pipeline-rewrite-brief.md`
 
-- **v1.3a**: Content Generation Excellence — fix prompts, wire skills, fix GPT-5.2 bugs
-- **v1.3b**: Architecture Validation & Data Persistence — deferred migrations, feedback tables
-- **v1.3c**: Actionable Shopping Intelligence — distribution-based scoring, revenue leakage
+- **v1.3a**: Content Generation Excellence — COMPLETE (prompts, skills, GPT-5.2 fixes)
+- **v1.3b**: Architecture Validation & Data Persistence — COMPLETE (batch reliability, hybrid generation)
+- **v1.3c**: Actionable Shopping Intelligence — PAUSED (distribution scoring, revenue leakage)
+- **Next**: Pipeline Reliability Rewrite + Model Evaluation — decompose main.py, fix GPT-5.2 bugs, evaluate Claude vs GPT-5.2
 - **v1.4**: Closed-Loop Optimization — performance-informed regeneration
 
 ## What's Implemented (v1.2 Complete)
@@ -167,7 +168,7 @@ See full research: `docs/research/gpt52-best-practices.md`
 - **Prompt authority chain**: `src/feedops/api/prompt_builder.py` (orchestrator) → `prompts.py` (SYSTEM_PROMPT) + `prompt_loader.py` (DB data) + `shopping_intelligence.py` (loads `config/shopping_intelligence.yaml`)
 - TypeScript prompt logic is legacy/reference during migration and must not be treated as runtime source-of-truth
 - Finish sentence generation is being consolidated into Python; avoid adding new TS-side prompt behavior
-- Quality: ~75-80/100 (pre-v1.3a; target 85-92 after skill wiring)
+- Quality: ~80-85/100 (post-v1.3a; 98% approval rate on recent batches)
 - Speed: ~3 minutes per SKU
 - Use for: Bulk generation (50+ SKUs)
 
@@ -177,7 +178,7 @@ See full research: `docs/research/gpt52-best-practices.md`
 - Speed: ~6 minutes per SKU (2x slower)
 - Use for: High-value SKUs, gold standard examples
 
-**Hybrid Multi-SKU Generation** (NEW)
+**Hybrid Multi-SKU Generation**
 - Auto-detects product families (e.g., DMF-2/2X, 2/3X, 2/4X, 2/5X)
 - Base SKU: Full generation
 - Variants: Adaptation (60% cost savings)
@@ -315,8 +316,8 @@ Two migration files exist but are NOT applied to production Supabase:
 - Regeneration core (legacy, used by batch): `dashboard/src/lib/regeneration/core.ts`
 - Legacy prompt reference: `dashboard/src/lib/regeneration/prompts.ts` (not runtime source-of-truth)
 - Evidence builder: `dashboard/src/lib/evidence/*`
-- Multi-SKU detection: `dashboard/src/lib/multi-sku-detection.ts`
-- Hybrid generation: `dashboard/src/app/api/sku-selection/generate-hybrid/route.ts`
+- Multi-SKU detection: `src/feedops/api/multi_sku_detection.py`
+- Hybrid generation: `dashboard/src/app/api/sku-selection/generate/route.ts`
 
 **Python Pipeline**:
 - Cloud Run API: `src/feedops/api/main.py`
@@ -590,6 +591,6 @@ git push origin master
 
 **Key docs** (use Glob for others in `docs/`):
 - `docs/plans/2026-02-21-strategic-milestone-assessment.md` - Master v1.3 plan (10 parts)
-- `.planning/PROJECT.md` - GSD context (read by all GSD agents)
+- `docs/setup/pipeline-rewrite-brief.md` - New milestone project brief
 - `docs/database/SCHEMA.md` - Complete DB schema reference
 - `docs/research/gpt52-best-practices.md` - GPT-5.2 optimization findings
