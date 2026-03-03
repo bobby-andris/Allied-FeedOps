@@ -547,20 +547,29 @@ async def adapt_variant_content(
                 "validation_errors": content_validation_errors,
             }
 
-        current_result = (
-            supabase.table("generated_content")
-            .select("*")
-            .eq("master_sku", variant_sku)
-            .eq("platform", platform)
-            .eq("content_type", content_type)
-            .maybe_single()
-            .execute()
-        )
-        current_data = (
-            current_result.data
-            if current_result and hasattr(current_result, "data")
-            else None
-        )
+        try:
+            current_result = (
+                supabase.table("generated_content")
+                .select("*")
+                .eq("master_sku", variant_sku)
+                .eq("platform", platform)
+                .eq("content_type", content_type)
+                .eq("is_current", True)
+                .maybe_single()
+                .execute()
+            )
+            current_data = (
+                current_result.data
+                if current_result and hasattr(current_result, "data")
+                else None
+            )
+        except Exception as lookup_err:
+            logger.warning(
+                "generated_content lookup returned multiple rows for "
+                "%s/%s/%s, falling back to insert: %s",
+                variant_sku, platform, content_type, lookup_err,
+            )
+            current_data = None
         current_version = current_data["version"] if current_data else 0
         next_version = current_version + 1
 
@@ -604,18 +613,31 @@ async def adapt_variant_content(
                 }
             ).execute()
 
-        content_id_result = (
-            supabase.table("generated_content")
-            .select("id")
-            .eq("master_sku", variant_sku)
-            .eq("platform", platform)
-            .eq("content_type", content_type)
-            .single()
-            .execute()
-        )
+        try:
+            content_id_result = (
+                supabase.table("generated_content")
+                .select("id")
+                .eq("master_sku", variant_sku)
+                .eq("platform", platform)
+                .eq("content_type", content_type)
+                .eq("is_current", True)
+                .maybe_single()
+                .execute()
+            )
+            generated_content_id = (
+                content_id_result.data["id"]
+                if content_id_result and getattr(content_id_result, "data", None)
+                else None
+            )
+        except Exception as id_err:
+            logger.warning(
+                "Content ID lookup failed for %s/%s/%s: %s",
+                variant_sku, platform, content_type, id_err,
+            )
+            generated_content_id = None
         supabase.table("regeneration_history").insert(
             {
-                "generated_content_id": content_id_result.data["id"],
+                "generated_content_id": generated_content_id,
                 "master_sku": variant_sku,
                 "platform": platform,
                 "content_type": content_type,

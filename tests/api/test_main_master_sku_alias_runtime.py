@@ -252,6 +252,7 @@ async def test_regenerate_content_no_change_returns_idempotent_without_writes(mo
         "content_type": "title",
         "candidate_content": "No change title",
         "version": 4,
+        "is_current": True,
     }
     db = _FakeSupabase(generated_content_row=existing_row)
 
@@ -300,6 +301,7 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
         "content_type": "title",
         "candidate_content": "Old title",
         "version": 2,
+        "is_current": True,
     }
     db = _FakeSupabase(generated_content_row=existing_row)
 

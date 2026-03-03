@@ -124,6 +124,28 @@ async def _app_lifespan(_app: FastAPI):
     except RuntimeEnvContractError as exc:
         logger.error(str(exc))
         raise RuntimeError(str(exc)) from exc
+
+    # Recover stale jobs left behind by container restarts
+    try:
+        from feedops.db.supabase_client import get_client
+        from datetime import datetime, timezone, timedelta
+        sb = get_client()
+        stale_cutoff = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+        stale = sb.table("batch_generation_jobs") \
+            .select("id") \
+            .eq("status", "processing") \
+            .lt("created_at", stale_cutoff) \
+            .execute()
+        for row in (stale.data or []):
+            sb.table("batch_generation_jobs").update({
+                "status": "failed",
+                "error_message": "Recovered: container restart during processing",
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", row["id"]).execute()
+            logger.warning("Recovered stale job %s", row["id"])
+    except Exception as recovery_err:
+        logger.error("Startup recovery sweep failed: %s", recovery_err)
+
     yield
 
 
@@ -238,6 +260,24 @@ def run_async_in_thread(async_func, request_id: str | None = None, **kwargs):
             asyncio.set_event_loop(loop)
             try:
                 loop.run_until_complete(async_func(**kwargs))
+            except Exception as exc:
+                logger.error(
+                    "Background job %s crashed: %s", async_func.__name__, exc,
+                    exc_info=True,
+                )
+                try:
+                    from feedops.db.supabase_client import get_client
+                    from datetime import datetime, timezone
+                    sb = get_client()
+                    jid = kwargs.get("job_id")
+                    if jid:
+                        sb.table("batch_generation_jobs").update({
+                            "status": "failed",
+                            "error_message": f"Thread crash: {str(exc)[:450]}",
+                            "completed_at": datetime.now(timezone.utc).isoformat(),
+                        }).eq("id", jid).execute()
+                except Exception:
+                    logger.error("Failed to update job status after thread crash")
             finally:
                 loop.close()
 
@@ -667,6 +707,7 @@ def _lookup_generated_content_id(
             .eq("master_sku", master_sku)
             .eq("platform", platform)
             .eq("content_type", content_type)
+            .eq("is_current", True)
             .maybe_single()
             .execute()
         )
@@ -694,17 +735,25 @@ def _load_generated_content_row(
     content_type: str,
 ) -> dict | None:
     """Load current generated_content row for deterministic regeneration writes."""
-    lookup = (
-        supabase.table("generated_content")
-        .select("id,version,candidate_content")
-        .eq("master_sku", master_sku)
-        .eq("platform", platform)
-        .eq("content_type", content_type)
-        .maybe_single()
-        .execute()
-    )
-    data = getattr(lookup, "data", None)
-    return data if isinstance(data, dict) else None
+    try:
+        lookup = (
+            supabase.table("generated_content")
+            .select("id,version,candidate_content")
+            .eq("master_sku", master_sku)
+            .eq("platform", platform)
+            .eq("content_type", content_type)
+            .eq("is_current", True)
+            .maybe_single()
+            .execute()
+        )
+        data = getattr(lookup, "data", None)
+        return data if isinstance(data, dict) else None
+    except Exception as exc:
+        logger.warning(
+            "Failed to load generated_content row for %s/%s/%s: %s",
+            master_sku, platform, content_type, exc,
+        )
+        return None
 
 
 def _assembled_prompt_hash(system_prompt: str, user_prompt: str) -> str:
@@ -2793,21 +2842,24 @@ async def process_batch_job(
 
             provider = get_provider()
             try:
-                generated = await generate_per_platform(
-                    parent_sku=parent_sku,
-                    provider=provider,
-                    prompt_version="v2",
-                    selected_platforms=tuple(
-                        list(platforms)
-                        + (
-                            ["finish"]
-                            if "description" in content_types
-                            and any(platform in {"google", "bing"} for platform in platforms)
-                            else []
-                        )
+                generated = await asyncio.wait_for(
+                    generate_per_platform(
+                        parent_sku=parent_sku,
+                        provider=provider,
+                        prompt_version="v2",
+                        selected_platforms=tuple(
+                            list(platforms)
+                            + (
+                                ["finish"]
+                                if "description" in content_types
+                                and any(platform in {"google", "bing"} for platform in platforms)
+                                else []
+                            )
+                        ),
+                        selected_content_types=tuple(content_types),
+                        request_id=lineage_request_id,
                     ),
-                    selected_content_types=tuple(content_types),
-                    request_id=lineage_request_id,
+                    timeout=300.0,
                 )
             finally:
                 await close_provider(provider)
@@ -3295,8 +3347,12 @@ async def process_hybrid_batch_job(
                 started_at=datetime.now(timezone.utc).isoformat(),
             )
             try:
-                await generate_full_content_v2(sku)
+                await asyncio.wait_for(generate_full_content_v2(sku), timeout=300.0)
                 logger.info("✓ Generated %s via per-platform v2 package", sku)
+            except asyncio.TimeoutError:
+                sku_failed = True
+                sku_error = "SKU generation timed out after 300s"
+                logger.error("✗ Timed out %s after 300s", sku)
             except Exception as e:
                 sku_failed = True
                 sku_error = str(e)
@@ -3312,16 +3368,19 @@ async def process_hybrid_batch_job(
                     result_state="failed",
                 )
 
-            _record_sku_result(sku, success=not sku_failed)
-            _upsert_batch_job_sku_status(
-                supabase=supabase,
-                job_id=job_id,
-                master_sku=sku,
-                status="failed" if sku_failed else "completed",
-                completed_at=datetime.now(timezone.utc).isoformat(),
-                error_message=sku_error if sku_failed else None,
-            )
-            _update_job_progress()
+            try:
+                _record_sku_result(sku, success=not sku_failed)
+                _upsert_batch_job_sku_status(
+                    supabase=supabase,
+                    job_id=job_id,
+                    master_sku=sku,
+                    status="failed" if sku_failed else "completed",
+                    completed_at=datetime.now(timezone.utc).isoformat(),
+                    error_message=sku_error if sku_failed else None,
+                )
+                _update_job_progress()
+            except Exception as progress_err:
+                logger.error("Progress update failed for %s: %s", sku, progress_err)
 
         # Process multi-SKU families (hybrid approach)
         logger.info(f"Processing {len(families)} multi-SKU families")
@@ -3342,8 +3401,14 @@ async def process_hybrid_batch_job(
                 started_at=datetime.now(timezone.utc).isoformat(),
             )
             try:
-                base_generated = await generate_full_content_v2(base_sku)
+                base_generated = await asyncio.wait_for(
+                    generate_full_content_v2(base_sku), timeout=300.0
+                )
                 logger.info("✓ Generated BASE %s via per-platform v2 package", base_sku)
+            except asyncio.TimeoutError:
+                base_sku_failed = True
+                base_sku_error = "Base SKU generation timed out after 300s"
+                logger.error("✗ Timed out BASE %s after 300s", base_sku)
             except Exception as e:
                 base_sku_failed = True
                 base_sku_error = str(e)
@@ -3363,16 +3428,19 @@ async def process_hybrid_batch_job(
                     result_state="failed",
                 )
 
-            _record_sku_result(base_sku, success=not base_sku_failed)
-            _upsert_batch_job_sku_status(
-                supabase=supabase,
-                job_id=job_id,
-                master_sku=base_sku,
-                status="failed" if base_sku_failed else "completed",
-                completed_at=datetime.now(timezone.utc).isoformat(),
-                error_message=base_sku_error if base_sku_failed else None,
-            )
-            _update_job_progress()
+            try:
+                _record_sku_result(base_sku, success=not base_sku_failed)
+                _upsert_batch_job_sku_status(
+                    supabase=supabase,
+                    job_id=job_id,
+                    master_sku=base_sku,
+                    status="failed" if base_sku_failed else "completed",
+                    completed_at=datetime.now(timezone.utc).isoformat(),
+                    error_message=base_sku_error if base_sku_failed else None,
+                )
+                _update_job_progress()
+            except Exception as progress_err:
+                logger.error("Progress update failed for %s: %s", base_sku, progress_err)
 
             if base_sku_failed or base_generated is None:
                 for variant_sku in family.variant_skus:
@@ -3421,18 +3489,21 @@ async def process_hybrid_batch_job(
                             )
                             base_field_key = _content_field_key(platform, content_type)
                             base_content = str(base_generated.get(base_field_key, "")).strip()
-                            adaptation_result = await adapt_variant_content(
-                                supabase=supabase,
-                                base_sku=base_sku,
-                                variant_sku=variant_sku,
-                                platform=platform,
-                                content_type=content_type,
-                                base_spec=base_spec,
-                                variant_spec=variant_spec,
-                                base_content=base_content,
-                                base_finish_sentences=base_generated.get("finish_sentences"),
-                                request_id=lineage_request_id,
-                                provider=provider,
+                            adaptation_result = await asyncio.wait_for(
+                                adapt_variant_content(
+                                    supabase=supabase,
+                                    base_sku=base_sku,
+                                    variant_sku=variant_sku,
+                                    platform=platform,
+                                    content_type=content_type,
+                                    base_spec=base_spec,
+                                    variant_spec=variant_spec,
+                                    base_content=base_content,
+                                    base_finish_sentences=base_generated.get("finish_sentences"),
+                                    request_id=lineage_request_id,
+                                    provider=provider,
+                                ),
+                                timeout=120.0,
                             )
                             if not adaptation_result.get("success"):
                                 raise ValueError(
@@ -3462,16 +3533,19 @@ async def process_hybrid_batch_job(
                         result_state="failed",
                     )
 
-                _record_sku_result(variant_sku, success=not variant_sku_failed)
-                _upsert_batch_job_sku_status(
-                    supabase=supabase,
-                    job_id=job_id,
-                    master_sku=variant_sku,
-                    status="failed" if variant_sku_failed else "completed",
-                    completed_at=datetime.now(timezone.utc).isoformat(),
-                    error_message=variant_sku_error if variant_sku_failed else None,
-                )
-                _update_job_progress()
+                try:
+                    _record_sku_result(variant_sku, success=not variant_sku_failed)
+                    _upsert_batch_job_sku_status(
+                        supabase=supabase,
+                        job_id=job_id,
+                        master_sku=variant_sku,
+                        status="failed" if variant_sku_failed else "completed",
+                        completed_at=datetime.now(timezone.utc).isoformat(),
+                        error_message=variant_sku_error if variant_sku_failed else None,
+                    )
+                    _update_job_progress()
+                except Exception as progress_err:
+                    logger.error("Progress update failed for %s: %s", variant_sku, progress_err)
 
         # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
         total_failures = requested_failed + expanded_failed
