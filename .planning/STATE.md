@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T12:38:37.448Z"
+last_updated: "2026-03-03T12:41:10.186Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -48,6 +48,7 @@ Progress: [██████░░░░] 57%
 - Last 5 plans: 7, 10, 11, 13, 22 min
 - Trend: Increasing (larger refactors in phase 3)
 | Phase 04-gpt52-bug-fixes P02 | 5 | 1 tasks | 1 files |
+| Phase 04-gpt52-bug-fixes P01 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 03-01]: process_regenerate_job left in main.py — JOBS-01 specifies batch+hybrid only
 - [Phase 03-02]: Dual-namespace backward-compat re-exports added to main.py; tests updated to patch both api_main and api_routes modules
 - [Phase 04-gpt52-bug-fixes]: prompt_cache_key is first-class OpenAI SDK param (not extra_body) — static value feedops-pipeline-v1 shared across all batch requests to maximize cache hit rate
+- [Phase 04-gpt52-bug-fixes]: GPT-02 default reasoning_effort is 'high' — requirement spec updated to match locked decision
+- [Phase 04-gpt52-bug-fixes]: Empty-properties schema used in GPT-03 test to avoid JSON missing-key validation on fake responses while still asserting response_format kwargs
 
 ### Pending Todos
 
