@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
-**Current focus:** Phase 3 — next phase
+**Current focus:** Phase 3 — context gathered, ready for planning
 
 ## Current Position
 
-Phase: 2 of 7 (Services Extraction) — COMPLETE
-Plan: 2 of 2 in current phase — COMPLETE
-Status: Phase 02 Complete — all 3 services extracted (intent_scoring, finish_processing, generation)
-Last activity: 2026-03-03 — Completed 02-02 generation.py extraction
+Phase: 3 of 7 (JobRunner and Route Extraction) — Context gathered
+Plan: 0 of TBD in current phase
+Status: Phase 03 context captured — ready for planning
+Last activity: 2026-03-03 — Phase 3 context gathered
 
 Progress: [████░░░░░░] 29%
 
@@ -82,5 +82,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 02-services-extraction/02-02-PLAN.md (Phase 2 complete)
-Resume file: None
+Stopped at: Phase 3 context gathered
+Resume file: .planning/phases/03-jobrunner-and-route-extraction/03-CONTEXT.md
