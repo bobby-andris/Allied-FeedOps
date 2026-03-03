@@ -199,7 +199,7 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 â†’ 9 â†
 | 5. Claude Provider | v1.0 | 2/2 | Complete | 2026-03-03 |
 | 6. Model Evaluation | v1.0 | 3/3 | Complete | 2026-03-03 |
 | 7. Bing Fix | v1.0 | 0/TBD | Deferred | - |
-| 8. Schema Hardening | v1.1 | 0/1 | Planned | - |
+| 8. Schema Hardening | 1/1 | Complete   | 2026-03-03 | - |
 | 9. Trivial Dead Code Removal | v1.1 | 0/TBD | Not started | - |
 | 10. Image Wiring | v1.1 | 0/TBD | Not started | - |
 | 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/TBD | Not started | - |

@@ -18,10 +18,10 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 
 ### Schema
 
-- [ ] **SCHM-01**: Add missing unique constraint on `performance_snapshots(master_sku, platform, environment, snapshot_date)` with dedup of existing 179 rows in same migration
-- [ ] **SCHM-02**: Audit all data import tables for missing or incorrect constraints (performance_baselines, search_queries, keyword_metrics, funnel_snapshots_daily, performance_impact_scores)
-- [ ] **SCHM-03**: Add CHECK constraints on platform columns across data tables to enforce valid values
-- [ ] **SCHM-04**: Add FK constraint on `performance_snapshots.publish_event_id` referencing `publish_events`
+- [x] **SCHM-01**: Add missing unique constraint on `performance_snapshots(master_sku, platform, environment, snapshot_date)` with dedup of existing 179 rows in same migration
+- [x] **SCHM-02**: Audit all data import tables for missing or incorrect constraints (performance_baselines, search_queries, keyword_metrics, funnel_snapshots_daily, performance_impact_scores)
+- [x] **SCHM-03**: Add CHECK constraints on platform columns across data tables to enforce valid values
+- [x] **SCHM-04**: Add FK constraint on `performance_snapshots.publish_event_id` referencing `publish_events`
 
 ### Entity Mapping
 
@@ -83,10 +83,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEAD-04 | Phase 11 | Pending |
 | DEAD-05 | Phase 9 | Pending |
 | DEAD-06 | Phase 13 | Pending |
-| SCHM-01 | Phase 8 | Pending |
-| SCHM-02 | Phase 8 | Pending |
-| SCHM-03 | Phase 8 | Pending |
-| SCHM-04 | Phase 8 | Pending |
+| SCHM-01 | Phase 8 | Complete |
+| SCHM-02 | Phase 8 | Complete |
+| SCHM-03 | Phase 8 | Complete |
+| SCHM-04 | Phase 8 | Complete |
 | ENTM-01 | Phase 12 | Pending |
 | ENTM-02 | Phase 12 | Pending |
 | ENTM-03 | Phase 12 | Pending |
