@@ -86,7 +86,9 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   3. `OpenAIProvider` still works identically when `FEEDOPS_PROVIDER=openai` (or unset) — no regression
   4. `pytest tests/test_claude_provider.py` passes with mocked Anthropic client
   5. `providers/base.py` defines the `LLMProvider` ABC and both providers implement it without modification to any other module
-**Plans**: TBD
+**Plans**: 2 plans
+  - [ ] 05-01-PLAN.md — Implement ClaudeProvider with structured output + mocked tests for all 3 platforms
+  - [ ] 05-02-PLAN.md — Extend provider factory with FEEDOPS_PROVIDER=claude selection
 
 ### Phase 6: Model Evaluation
 **Goal**: Concrete cost/quality/latency data exists to make a data-driven provider decision — blind human scores are the ground truth
@@ -122,6 +124,6 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 | 2. Services Extraction | 0/2 | Planning complete | - |
 | 3. JobRunner and Route Extraction | 2/2 | Complete   | 2026-03-03 |
 | 4. GPT-5.2 Bug Fixes | 2/3 | In Progress|  |
-| 5. Claude Provider | 0/TBD | Not started | - |
+| 5. Claude Provider | 0/2 | Planning complete | - |
 | 6. Model Evaluation | 0/TBD | Not started | - |
 | 7. Bing Fix | 0/TBD | Not started | - |
