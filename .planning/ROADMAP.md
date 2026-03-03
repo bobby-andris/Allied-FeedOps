@@ -44,7 +44,7 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   4. `run_async_in_thread()` is in a shared utility module and a unit test asserts `thread.daemon == False`
   5. All existing API endpoints (`/optimize-sku`, `/regenerate`, `/batch-optimize`, `/hybrid-generate`, `/generate-images`) return identical responses before and after extraction
 **Plans**: 2 plans
-  - [ ] 02-01-PLAN.md — Extract intent_scoring.py and finish_processing.py with unit tests + daemon test
+  - [x] 02-01-PLAN.md — Extract intent_scoring.py and finish_processing.py with unit tests + daemon test
   - [ ] 02-02-PLAN.md — Extract generation.py with unit tests + endpoint verification
 
 ### Phase 3: JobRunner and Route Extraction
