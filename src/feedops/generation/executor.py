@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import inspect
 import logging
 import os
@@ -502,13 +503,16 @@ async def execute_generation_bundle(
         platform_cap = _platform_completion_cap(spec.platform, max_completion_tokens)
 
         started = time.perf_counter()
-        payload = await _generate_with_provider_compat(
-            provider=provider,
-            prompt=user_prompt,
-            schema=schema,
-            system_prompt=system_prompt,
-            reasoning_effort=platform_reasoning,
-            max_completion_tokens=platform_cap,
+        payload = await asyncio.wait_for(
+            _generate_with_provider_compat(
+                provider=provider,
+                prompt=user_prompt,
+                schema=schema,
+                system_prompt=system_prompt,
+                reasoning_effort=platform_reasoning,
+                max_completion_tokens=platform_cap,
+            ),
+            timeout=90.0,
         )
         latency_ms = int((time.perf_counter() - started) * 1000)
         usage_snapshot = getattr(provider, "last_usage", {})
