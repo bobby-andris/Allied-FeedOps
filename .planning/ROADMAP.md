@@ -57,7 +57,9 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   3. Batch generation job completes end-to-end via `JobRunner` with identical output to pre-extraction run
   4. Hybrid multi-SKU generation job completes end-to-end via `JobRunner` with identical variant adaptation output
   5. Job cancellation and graceful shutdown work without orphaned threads
-**Plans**: TBD
+**Plans**: 2 plans
+  - [ ] 03-01-PLAN.md — Extract JobRunner class unifying batch + hybrid job processing
+  - [ ] 03-02-PLAN.md — Extract route handlers to routes.py + main.py line-count guard
 
 ### Phase 4: GPT-5.2 Bug Fixes
 **Goal**: All 5 known GPT-5.2 bugs fixed with clean curl verification — production baseline is correct and measurable
