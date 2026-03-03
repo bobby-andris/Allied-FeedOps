@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from feedops.providers.base import ImageInput, LLMProvider
+from feedops.providers.claude_provider import ClaudeProvider
 from feedops.providers.factory import FallbackProvider, get_provider
 from feedops.providers.gemini_provider import GeminiProvider
 from feedops.providers.openai_provider import OpenAIProvider
@@ -427,3 +428,84 @@ def test_get_provider_applies_retry_and_timeout_env_overrides():
         assert provider.max_total_seconds == 180
         assert provider.client.max_retries == 1
         assert getattr(provider, "json_retry_max") == 3
+
+
+# Claude Provider Factory Tests
+
+
+def test_get_provider_returns_claude_when_env_set():
+    """Factory returns Claude provider when FEEDOPS_PROVIDER=claude."""
+    with patch.dict("os.environ", {
+        "FEEDOPS_PROVIDER": "claude",
+        "ANTHROPIC_API_KEY": "test-claude-key",
+    }, clear=True):
+        provider = get_provider()
+        assert isinstance(provider, ClaudeProvider)
+        assert provider.name == "claude/claude-sonnet-4-6"
+
+
+def test_get_provider_returns_claude_with_custom_model():
+    """Factory respects FEEDOPS_CLAUDE_MODEL override."""
+    with patch.dict("os.environ", {
+        "FEEDOPS_PROVIDER": "claude",
+        "ANTHROPIC_API_KEY": "test-claude-key",
+        "FEEDOPS_CLAUDE_MODEL": "claude-opus-4-6",
+    }, clear=True):
+        provider = get_provider()
+        assert provider.name == "claude/claude-opus-4-6"
+
+
+def test_get_provider_raises_when_claude_requested_without_key():
+    """Factory raises ValueError when Claude requested but no API key."""
+    with patch.dict("os.environ", {
+        "FEEDOPS_PROVIDER": "claude",
+    }, clear=True):
+        with pytest.raises(ValueError, match="ANTHROPIC_API_KEY is not set"):
+            get_provider()
+
+
+def test_get_provider_prefers_claude_over_openai_when_explicit():
+    """FEEDOPS_PROVIDER=claude takes priority over OPENAI_API_KEY presence."""
+    with patch.dict("os.environ", {
+        "FEEDOPS_PROVIDER": "claude",
+        "ANTHROPIC_API_KEY": "claude-key",
+        "OPENAI_API_KEY": "openai-key",
+    }, clear=True):
+        provider = get_provider()
+        assert isinstance(provider, ClaudeProvider)
+
+
+def test_get_provider_openai_still_default_without_feedops_provider():
+    """OpenAI is still default when FEEDOPS_PROVIDER is not set."""
+    with patch.dict("os.environ", {
+        "OPENAI_API_KEY": "test-key",
+        "ANTHROPIC_API_KEY": "also-set",
+    }, clear=True):
+        provider = get_provider()
+        assert provider.name.startswith("openai/")
+
+
+def test_get_provider_claude_via_preferred_arg():
+    """preferred='claude' programmatic arg works."""
+    with patch.dict("os.environ", {
+        "ANTHROPIC_API_KEY": "test-claude-key",
+    }, clear=True):
+        provider = get_provider(preferred="claude")
+        assert isinstance(provider, ClaudeProvider)
+
+
+def test_get_provider_claude_applies_env_overrides():
+    """Factory applies timeout and retry env overrides to ClaudeProvider."""
+    with patch.dict("os.environ", {
+        "FEEDOPS_PROVIDER": "claude",
+        "ANTHROPIC_API_KEY": "test-key",
+        "FEEDOPS_PROVIDER_MAX_RETRIES": "2",
+        "FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS": "200",
+        "FEEDOPS_CLAUDE_SDK_TIMEOUT_SECONDS": "90",
+        "FEEDOPS_CLAUDE_JSON_RETRY_MAX": "3",
+    }, clear=True):
+        provider = get_provider()
+        assert isinstance(provider, ClaudeProvider)
+        assert provider.max_retries == 2
+        assert provider.max_total_seconds == 200.0
+        assert provider.json_retry_max == 3
