@@ -10,6 +10,7 @@ import pytest
 from fastapi import HTTPException
 
 import feedops.api.main as api_main
+import feedops.api.routes as api_routes
 import feedops.api.generation as api_generation
 import feedops.api.job_runner as api_job_runner
 from feedops.api.hybrid_generation import build_variant_adaptation_prompt
@@ -339,6 +340,15 @@ def _patch_generation_deps(monkeypatch, provider, supabase):
     monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
     monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
     monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    # Also patch at routes module (where optimize_single_sku / batch_optimize live after Plan 03-02)
+    monkeypatch.setattr(api_routes, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_routes, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_routes, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_routes, "get_provider", lambda: provider)
+    monkeypatch.setattr(api_routes, "get_client", lambda: supabase)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, skus: skus)
     # Also patch at generation module (where _execute_regeneration_request lives after extraction)
     monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_generation, "get_provider", lambda: provider)
@@ -838,8 +848,12 @@ async def test_batch_optimize_passes_generation_options_to_background_job(monkey
         return SimpleNamespace()
 
     monkeypatch.setattr(api_main, "get_client", lambda: supabase)
+    monkeypatch.setattr(api_routes, "get_client", lambda: supabase)
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, skus: skus)
     monkeypatch.setattr(api_main, "run_async_in_thread", _capture_run_async)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", _capture_run_async)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-123")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-123")
 
     request = api_main.BatchOptimizeRequest.model_validate(
         {

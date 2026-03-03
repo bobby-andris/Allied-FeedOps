@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 MAIN_API_PATH = Path("src/feedops/api/main.py")
+ROUTES_API_PATH = Path("src/feedops/api/routes.py")
 HYBRID_API_PATH = Path("src/feedops/api/hybrid_generation.py")
 PROMPT_LOADER_PATH = Path("src/feedops/api/prompt_loader.py")
 GENERATOR_PATH = Path("src/feedops/pipeline/generator.py")
@@ -20,7 +21,9 @@ def test_runtime_no_longer_reads_feedops_prompt_version() -> None:
 
 
 def test_main_generation_paths_call_v2_per_platform_generation_only() -> None:
-    source = _read(MAIN_API_PATH)
+    # Route handlers live in routes.py after DECOMP-09 Plan 03-02 extraction.
+    # main.py is now app setup only; check routes.py for the generation call.
+    source = _read(ROUTES_API_PATH)
 
     assert "prompt_version=\"v2\"" in source
     assert "prompt_version == \"v2\"" not in source

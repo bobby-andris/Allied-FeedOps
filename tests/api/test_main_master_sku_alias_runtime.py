@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 import feedops.api.main as api_main
+import feedops.api.routes as api_routes
 import feedops.api.generation as api_generation
 import feedops.api.job_runner as api_job_runner
 from feedops.api.multi_sku_detection import MultiSkuFamily
@@ -262,14 +263,18 @@ async def test_regenerate_content_no_change_returns_idempotent_without_writes(mo
     db = _FakeSupabase(generated_content_row=existing_row)
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-no-change")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-no-change")
     # Also patch at generation module (where _execute_regeneration_request lives after extraction)
     monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_generation, "get_client", lambda: db)
@@ -314,14 +319,18 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     db = _FakeSupabase(generated_content_row=existing_row)
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-changed")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-changed")
     # Also patch at generation module (where _execute_regeneration_request lives after extraction)
     monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_generation, "get_client", lambda: db)
@@ -430,14 +439,18 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
     thread_call: dict[str, object] = {}
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-async")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-async")
 
     def _fake_run_async(async_func, request_id=None, **kwargs):
         thread_call["async_func"] = async_func
@@ -446,6 +459,7 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
         return None
 
     monkeypatch.setattr(api_main, "run_async_in_thread", _fake_run_async)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", _fake_run_async)
 
     request = api_main.RegenerateRequest(
         master_sku=canonical,
@@ -503,8 +517,11 @@ async def test_process_regenerate_job_marks_failed_when_running_transition_raise
         raise AssertionError("regeneration should not execute if running update fails")
 
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(api_main, "_execute_regeneration_request", _should_not_execute)
+    monkeypatch.setattr(api_routes, "_execute_regeneration_request", _should_not_execute)
 
     await api_main.process_regenerate_job(
         job_id="job-1",
@@ -554,14 +571,18 @@ async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypa
     )
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-reuse")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-reuse")
 
     called = {"run_async": False}
 
@@ -570,6 +591,7 @@ async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypa
         return None
 
     monkeypatch.setattr(api_main, "run_async_in_thread", _fake_run_async)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", _fake_run_async)
 
     request = api_main.RegenerateRequest(
         master_sku=canonical,
@@ -650,12 +672,15 @@ async def test_hybrid_generate_reuses_matching_active_job(monkeypatch):
     )
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_skus",
         lambda _supabase, _master_skus: canonical_skus,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, _master_skus: canonical_skus)
 
     request = api_main.HybridGenerateRequest(skus=canonical_skus, options=options)
     response = await api_main.hybrid_generate(request)
@@ -675,14 +700,19 @@ async def test_hybrid_generate_persists_idempotency_key_on_new_job(monkeypatch):
     options = {"titles": True, "descriptions": False, "platforms": ["google"]}
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_skus",
         lambda _supabase, _master_skus: canonical_skus,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, _master_skus: canonical_skus)
     monkeypatch.setattr(api_main, "detect_multi_sku_families", lambda _supabase, _skus: [])
+    monkeypatch.setattr(api_routes, "detect_multi_sku_families", lambda _supabase, _skus: [])
     monkeypatch.setattr(api_main, "run_async_in_thread", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", lambda *_args, **_kwargs: None)
 
     response = await api_main.hybrid_generate(
         api_main.HybridGenerateRequest(skus=canonical_skus, options=options)
@@ -874,13 +904,20 @@ async def test_regenerate_failure_summary_uses_non_null_request_id(monkeypatch):
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(api_main, "get_request_id", lambda: "-")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "-")
 
     def _fake_emit_generation_summary(**kwargs):
         captured.update(kwargs)
 
     monkeypatch.setattr(api_main, "_emit_generation_summary", _fake_emit_generation_summary)
+    monkeypatch.setattr(api_routes, "_emit_generation_summary", _fake_emit_generation_summary)
     monkeypatch.setattr(
         api_main,
+        "ensure_generation_enabled",
+        lambda **_kwargs: (_ for _ in ()).throw(api_main.HTTPException(status_code=503, detail="disabled")),
+    )
+    monkeypatch.setattr(
+        api_routes,
         "ensure_generation_enabled",
         lambda **_kwargs: (_ for _ in ()).throw(api_main.HTTPException(status_code=503, detail="disabled")),
     )
@@ -906,7 +943,9 @@ async def test_regenerate_budget_cap_exceeded_returns_429(monkeypatch):
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-budget-1")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-budget-1")
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
 
     async def _raise_budget_error(*, request, request_id):
         raise api_main.GenerationBudgetExceededError(
@@ -919,7 +958,9 @@ async def test_regenerate_budget_cap_exceeded_returns_429(monkeypatch):
         captured.update(kwargs)
 
     monkeypatch.setattr(api_main, "_execute_regeneration_request", _raise_budget_error)
+    monkeypatch.setattr(api_routes, "_execute_regeneration_request", _raise_budget_error)
     monkeypatch.setattr(api_main, "_emit_generation_summary", _fake_emit_generation_summary)
+    monkeypatch.setattr(api_routes, "_emit_generation_summary", _fake_emit_generation_summary)
 
     request = api_main.RegenerateRequest(
         master_sku="CL-55",
