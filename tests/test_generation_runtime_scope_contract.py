@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 import feedops.api.main as api_main
+import feedops.api.generation as api_generation
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from tests.test_phase7_observability_reliability import (
     _CaptureSupabase,
@@ -222,6 +223,7 @@ async def test_regenerate_description_persists_finish_sentences_without_finish_t
         return await _google_description_payload()
 
     monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
     response = await api_main.regenerate_content(
         api_main.RegenerateRequest(
@@ -256,6 +258,7 @@ async def test_regenerate_description_persists_finish_prompt_lineage(monkeypatch
         return await _google_description_payload()
 
     monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
     response = await api_main.regenerate_content(
         api_main.RegenerateRequest(
@@ -302,6 +305,7 @@ async def test_regenerate_feedback_passes_raw_session_feedback_to_generate_per_p
         return await _google_title_payload_with_fallback_finish_sentences()
 
     monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
     response = await api_main.regenerate_content(
         api_main.RegenerateRequest(

@@ -10,6 +10,7 @@ import pytest
 from fastapi import HTTPException
 
 import feedops.api.main as api_main
+import feedops.api.generation as api_generation
 from feedops.api.hybrid_generation import build_variant_adaptation_prompt
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.pipeline.finish_sentence_placeholder import inject_finish_sentence_placeholder
@@ -337,6 +338,11 @@ def _patch_generation_deps(monkeypatch, provider, supabase):
     monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
     monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
     monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_generation, "get_provider", lambda: provider)
+    monkeypatch.setattr(api_generation, "get_client", lambda: supabase)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
 
 def test_structured_log_event_includes_request_id(caplog):
@@ -457,6 +463,11 @@ async def test_regenerate_description_uses_fallback_finish_sentences_when_killed
     monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
     monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
     monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_generation, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_generation, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
     request = api_main.RegenerateRequest(
         master_sku="1031/18",
@@ -494,6 +505,11 @@ async def test_regenerate_description_injects_finish_sentence_placeholder_when_f
     monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
     monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
     monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_generation, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_generation, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
     request = api_main.RegenerateRequest(
         master_sku="1031/18",
@@ -534,6 +550,11 @@ async def test_regenerate_description_falls_back_when_finish_sentences_incomplet
     monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
     monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
     monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_generation, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_generation, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
     request = api_main.RegenerateRequest(
         master_sku="1031/18",

@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 import feedops.api.main as api_main
+import feedops.api.generation as api_generation
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.models import ParentSKU, Variant
 
@@ -213,13 +214,16 @@ async def test_regenerate_content_writes_canonical_master_sku(monkeypatch):
         raising=False,
     )
     monkeypatch.setattr(api_main, "get_client", lambda: writes)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-canonical")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: writes)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     async def _fake_generate_per_platform(**_kwargs):
         return _base_generated_payload("Canonical regenerated title")
     monkeypatch.setattr(
-        api_main,
+        api_generation,
         "generate_per_platform",
         _fake_generate_per_platform,
     )
@@ -264,13 +268,16 @@ async def test_regenerate_content_no_change_returns_idempotent_without_writes(mo
         raising=False,
     )
     monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-no-change")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: db)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     async def _fake_generate_per_platform(**_kwargs):
         return _base_generated_payload("No change title")
     monkeypatch.setattr(
-        api_main,
+        api_generation,
         "generate_per_platform",
         _fake_generate_per_platform,
     )
@@ -313,13 +320,16 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
         raising=False,
     )
     monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-changed")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: db)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     async def _fake_generate_per_platform(**_kwargs):
         return _base_generated_payload("Updated title")
     monkeypatch.setattr(
-        api_main,
+        api_generation,
         "generate_per_platform",
         _fake_generate_per_platform,
     )
@@ -383,16 +393,19 @@ async def test_regenerate_content_keeps_tokens_unknown_when_usage_snapshot_missi
         raising=False,
     )
     monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-unknown-usage")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: db)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
 
     async def _fake_generate_per_platform(**_kwargs):
         payload = _base_generated_payload("Title with unknown usage")
         payload["usage_by_platform"] = {"google": {}}
         return payload
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
     request = api_main.RegenerateRequest(
         master_sku=canonical,
