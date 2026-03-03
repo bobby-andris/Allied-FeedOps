@@ -33,7 +33,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### GPT-5.2 Fixes
 
 - [ ] **GPT-01**: Remove `temperature=0.7` when `reasoning_effort` is set (mutually exclusive)
-- [ ] **GPT-02**: Default `reasoning_effort` to `"medium"` when env var is unset
+- [ ] **GPT-02**: Default `reasoning_effort` to `"high"` when env var is unset
 - [ ] **GPT-03**: Switch from `json_object` to `json_schema` strict mode
 - [ ] **GPT-04**: Add `prompt_cache_retention: "24h"` for batch runs
 - [ ] **GPT-05**: Restructure system prompt with XML tags (incremental, deploy-and-test per change)
