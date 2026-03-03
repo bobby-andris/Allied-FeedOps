@@ -29,7 +29,9 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   2. All Supabase read/write functions are in `persistence.py` and `main.py` imports them from there
   3. All metrics and diagnostics emit identically before and after extraction (curl `/health` returns same structure)
   4. No circular imports: `python -c "import feedops.api.main"` exits 0 after extraction
-**Plans**: TBD
+**Plans**: 2 plans
+  - [ ] 01-01-PLAN.md — Extract schemas.py and telemetry.py (zero inter-module deps)
+  - [ ] 01-02-PLAN.md — Extract persistence.py and job_management.py + update external callers
 
 ### Phase 2: Services Extraction
 **Goal**: Business logic for finish processing, intent scoring, and core generation lives in testable, isolated service modules
