@@ -241,14 +241,14 @@ export function selectSkus(
     })
   }
 
-  // Filter out SKUs with insufficient data (less than 100 impressions)
-  eligible = eligible.filter((s) => {
-    if (s.impressions < 100) {
-      excludedInsufficientData.push(s.master_sku)
-      return false
-    }
-    return true
-  })
+  // Separate SKUs with insufficient data (less than 100 impressions)
+  // These are still eligible as "fill" tier candidates — they need content generation
+  const withData = eligible.filter((s) => s.impressions >= 100)
+  const noData = eligible.filter((s) => s.impressions < 100)
+  for (const s of noData) {
+    excludedInsufficientData.push(s.master_sku)
+  }
+  eligible = withData
 
   // Target distribution
   const targetDist = {
@@ -276,12 +276,24 @@ export function selectSkus(
 
   // Fill with remaining high-score SKUs for diversity
   const selected = new Set([...tier1, ...tier2, ...tier3].map((s) => s.master_sku))
-  const fillCandidates = eligible
+  const fillFromEligible = eligible
     .filter((s) => !selected.has(s.master_sku))
     .sort((a, b) => b.score - a.score)
     .slice(0, targetDist.fill)
 
-  // Combine and sort by score
+  // Calculate how many slots remain unfilled
+  const filledSoFar = tier1.length + tier2.length + tier3.length + fillFromEligible.length
+  const remainingSlots = Math.max(0, count - filledSoFar)
+
+  // Backfill remaining slots with no-data SKUs (new products needing content)
+  // Assign them as "fill" tier since they have no performance data for tiering
+  const noDataFill: ScoredSku[] = noData
+    .slice(0, remainingSlots)
+    .map((s) => ({ ...s, tier: 'fill' as const, tierReason: 'No performance data - new content candidate' }))
+
+  const fillCandidates = [...fillFromEligible, ...noDataFill]
+
+  // Combine and sort by score (no-data SKUs sort last with score 0)
   const recommended = [...tier1, ...tier2, ...tier3, ...fillCandidates].sort(
     (a, b) => b.score - a.score
   )
@@ -299,6 +311,6 @@ export function selectSkus(
       already_optimized: excludedOptimized,
       insufficient_data: excludedInsufficientData,
     },
-    total_eligible: eligible.length,
+    total_eligible: eligible.length + noData.length,
   }
 }
