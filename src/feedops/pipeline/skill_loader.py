@@ -353,18 +353,30 @@ def get_platform_system_prompt(platform: str) -> str:
       field contracts, title/description structures, and output keys.
     - Total: ~4.5-5.5K chars — purpose-built GPT-5.2 instructions, not
       extracted skill snippets.
+
+    Feature flags:
+    - FEEDOPS_GOOGLE_BRIEF_VERSION: "v2" (default) or "v3" (skill-adapted prompt
+      with worked examples and 8-step description structure).
     """
+    import os
+
     from feedops.pipeline.prompts import (
         BING_BRIEF,
         FINISH_BRIEF,
         GOOGLE_BRIEF,
+        GOOGLE_BRIEF_V3,
         SHOPIFY_BRIEF,
         SYSTEM_PROMPT,
     )
 
     platform_key = (platform or "").strip().lower()
+
+    # Resolve Google brief version from env var
+    google_brief_version = os.environ.get("FEEDOPS_GOOGLE_BRIEF_VERSION", "v2").strip().lower()
+    active_google_brief = GOOGLE_BRIEF_V3 if google_brief_version == "v3" else GOOGLE_BRIEF
+
     briefs = {
-        "google": GOOGLE_BRIEF,
+        "google": active_google_brief,
         "bing": BING_BRIEF,
         "shopify": SHOPIFY_BRIEF,
         "finish": FINISH_BRIEF,
@@ -380,8 +392,9 @@ def get_platform_system_prompt(platform: str) -> str:
     prompt = f"{SYSTEM_PROMPT}\n\n{brief}"
 
     logger.info(
-        "Platform system prompt built: platform=%s chars=%d",
+        "Platform system prompt built: platform=%s brief_version=%s chars=%d",
         platform_key,
+        google_brief_version if platform_key == "google" else "default",
         len(prompt),
     )
     return prompt
