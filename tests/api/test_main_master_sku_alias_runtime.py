@@ -7,6 +7,7 @@ import pytest
 
 import feedops.api.main as api_main
 import feedops.api.generation as api_generation
+import feedops.api.job_runner as api_job_runner
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.models import ParentSKU, Variant
 
@@ -706,15 +707,15 @@ def test_require_request_id_rejects_placeholder() -> None:
 async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch):
     db = _FakeSupabase()
 
-    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
-    monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_job_runner, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_job_runner, "get_client", lambda: db)
+    monkeypatch.setattr(api_job_runner, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "resolve_canonical_master_sku",
         lambda _supabase, master_sku: master_sku,
     )
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-telemetry")
 
     async def _fake_generate_per_platform(**_kwargs):
@@ -730,9 +731,9 @@ async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch)
             "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
         }
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-telemetry",
         families=[],
         single_skus=["CL-55"],
@@ -768,15 +769,15 @@ async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch)
 async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_scope(monkeypatch):
     db = _FakeSupabase()
 
-    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
-    monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_job_runner, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_job_runner, "get_client", lambda: db)
+    monkeypatch.setattr(api_job_runner, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "resolve_canonical_master_sku",
         lambda _supabase, master_sku: master_sku,
     )
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-sku-detail")
 
     async def _fake_generate_per_platform(**_kwargs):
@@ -791,7 +792,7 @@ async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_s
             "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
         }
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
     families = [
         MultiSkuFamily(
@@ -801,7 +802,7 @@ async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_s
             variant_skus=["1033/18", "1033/24"],
         )
     ]
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-sku-detail",
         families=families,
         single_skus=["CL-55"],

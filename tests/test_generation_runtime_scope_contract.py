@@ -6,6 +6,7 @@ import pytest
 
 import feedops.api.main as api_main
 import feedops.api.generation as api_generation
+import feedops.api.job_runner as api_job_runner
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from tests.test_phase7_observability_reliability import (
     _CaptureSupabase,
@@ -112,9 +113,9 @@ async def test_process_batch_job_scopes_generation_to_requested_platforms(monkey
         captured_calls.append(kwargs)
         return await _google_description_payload()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-batch-scope",
         skus=["1031/18"],
         num_candidates=1,
@@ -137,10 +138,10 @@ async def test_process_batch_job_closes_provider(monkeypatch):
         return await _google_description_payload()
 
     close_provider = AsyncMock()
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
-    monkeypatch.setattr(api_main, "close_provider", close_provider)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "close_provider", close_provider)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-batch-close",
         skus=["1031/18"],
         num_candidates=1,
@@ -161,9 +162,9 @@ async def test_process_batch_job_description_scope_aggregates_finish_telemetry(m
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload_with_finish_telemetry()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-batch-telemetry",
         skus=["1031/18"],
         num_candidates=1,
@@ -194,9 +195,9 @@ async def test_process_batch_job_title_only_skips_finish_sentence_writes(monkeyp
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_title_payload_with_fallback_finish_sentences()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-batch-title-only",
         skus=["1031/18"],
         num_candidates=1,
@@ -334,7 +335,7 @@ async def test_process_hybrid_batch_job_uses_adaptation_for_family_variants(monk
         sku.master_sku = master_sku
         return sku
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", _load_parent)
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", _load_parent)
 
     generate_calls: list[str] = []
 
@@ -344,8 +345,8 @@ async def test_process_hybrid_batch_job_uses_adaptation_for_family_variants(monk
         return await _google_description_payload()
 
     adapt_variant = AsyncMock(return_value={"success": True, "content": "adapted"})
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
-    monkeypatch.setattr(api_main, "adapt_variant_content", adapt_variant)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "adapt_variant_content", adapt_variant)
 
     families = [
         MultiSkuFamily(
@@ -356,7 +357,7 @@ async def test_process_hybrid_batch_job_uses_adaptation_for_family_variants(monk
         )
     ]
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-scope",
         families=families,
         single_skus=[],
@@ -388,10 +389,10 @@ async def test_process_hybrid_batch_job_description_scope_aggregates_finish_tele
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload_with_finish_telemetry()
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", _load_parent)
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", _load_parent)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "adapt_variant_content",
         AsyncMock(return_value={"success": True, "content": "adapted"}),
     )
@@ -405,7 +406,7 @@ async def test_process_hybrid_batch_job_description_scope_aggregates_finish_tele
         )
     ]
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-telemetry",
         families=families,
         single_skus=[],
@@ -436,9 +437,9 @@ async def test_process_batch_job_persists_finish_prompt_lineage(monkeypatch):
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-batch-finish-lineage",
         skus=["1031/18"],
         num_candidates=1,
@@ -474,10 +475,10 @@ async def test_process_hybrid_batch_job_persists_finish_prompt_lineage(monkeypat
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", _load_parent)
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", _load_parent)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "adapt_variant_content",
         AsyncMock(return_value={"success": True, "content": "adapted"}),
     )
@@ -491,7 +492,7 @@ async def test_process_hybrid_batch_job_persists_finish_prompt_lineage(monkeypat
         )
     ]
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-finish-lineage",
         families=families,
         single_skus=[],
@@ -522,8 +523,8 @@ async def test_process_hybrid_batch_job_closes_provider(monkeypatch):
         return await _google_description_payload()
 
     close_provider = AsyncMock()
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
-    monkeypatch.setattr(api_main, "close_provider", close_provider)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "close_provider", close_provider)
 
     families = [
         MultiSkuFamily(
@@ -534,7 +535,7 @@ async def test_process_hybrid_batch_job_closes_provider(monkeypatch):
         )
     ]
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-close",
         families=families,
         single_skus=[],

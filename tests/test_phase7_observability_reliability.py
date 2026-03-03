@@ -11,6 +11,7 @@ from fastapi import HTTPException
 
 import feedops.api.main as api_main
 import feedops.api.generation as api_generation
+import feedops.api.job_runner as api_job_runner
 from feedops.api.hybrid_generation import build_variant_adaptation_prompt
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.pipeline.finish_sentence_placeholder import inject_finish_sentence_placeholder
@@ -343,6 +344,12 @@ def _patch_generation_deps(monkeypatch, provider, supabase):
     monkeypatch.setattr(api_generation, "get_provider", lambda: provider)
     monkeypatch.setattr(api_generation, "get_client", lambda: supabase)
     monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
+    # Also patch at job_runner module (where process_batch/hybrid_job logic lives after Plan 03-01)
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_job_runner, "get_provider", lambda: provider)
+    monkeypatch.setattr(api_job_runner, "get_client", lambda: supabase)
+    monkeypatch.setattr(api_job_runner, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
+    monkeypatch.setattr(api_job_runner, "ensure_generation_enabled", lambda **_kwargs: None)
 
 
 def test_structured_log_event_includes_request_id(caplog):
@@ -639,7 +646,7 @@ async def test_process_hybrid_batch_job_full_generation_matches_regenerate_finis
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-123",
         families=[],
         single_skus=["1031/18"],
@@ -732,7 +739,7 @@ async def test_process_batch_job_persists_linked_history_for_all_platforms(monke
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-123",
         skus=["1031/18"],
         num_candidates=1,
@@ -775,11 +782,11 @@ async def test_process_batch_job_persists_platform_telemetry_once_per_platform(m
             "retry_by_platform": {"google": {"attempt_count": 2, "json_decode_retries": 1}},
         }
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
     summary_events: list[dict] = []
-    monkeypatch.setattr(api_main, "_emit_generation_summary", lambda **kwargs: summary_events.append(kwargs))
+    monkeypatch.setattr(api_job_runner, "_emit_generation_summary", lambda **kwargs: summary_events.append(kwargs))
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-telemetry-once",
         skus=["1031/18"],
         num_candidates=1,
@@ -850,7 +857,7 @@ async def test_batch_optimize_passes_generation_options_to_background_job(monkey
     response = await api_main.batch_optimize(request)
 
     assert response.success is True
-    assert captured["func_name"] == "process_batch_job"
+    assert captured["func_name"] == "run"  # JobRunner(mode="batch").run after Plan 03-01 extraction
     assert captured["kwargs"]["options"] == {
         "titles": False,
         "descriptions": True,
@@ -868,7 +875,7 @@ async def test_process_batch_job_respects_options_for_platform_and_content_type(
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-123",
         skus=["1031/18"],
         num_candidates=1,
@@ -906,12 +913,12 @@ async def test_process_batch_job_never_writes_partial_status(monkeypatch):
     _patch_generation_deps(monkeypatch, provider, supabase)
     sample = _sample_parent_sku()
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "load_parent_sku_from_supabase",
         lambda sku: sample if sku == "1031/18" else None,
     )
 
-    await api_main.process_batch_job(
+    await api_job_runner.JobRunner(mode="batch")._run_batch(
         job_id="job-123",
         skus=["1031/18", "missing-sku"],
         num_candidates=1,
@@ -938,7 +945,7 @@ async def test_process_hybrid_batch_job_tracks_requested_and_expanded_counters(
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "adapt_variant_content",
         AsyncMock(return_value={"success": True, "content": "adapted"}),
     )
@@ -952,7 +959,7 @@ async def test_process_hybrid_batch_job_tracks_requested_and_expanded_counters(
         )
     ]
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-123",
         families=families,
         single_skus=["SB-16"],
