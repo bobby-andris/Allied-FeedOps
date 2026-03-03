@@ -44,7 +44,7 @@ curl .../performance/capture-baseline -d '{"master_skus": ["DMF-2/2X"]}'
 ### After Fix
 ```bash
 # Test with diagnostic script
-python3 test-google-ads-raw.py
+python3 scripts/test_google_ads_raw.py
 # Result: Found 42 products with impressions, both SHOPPING and PERFORMANCE_MAX
 ```
 
@@ -78,4 +78,4 @@ python3 test-google-ads-raw.py
 
 - Original issue: `docs/prompts/investigate-google-ads-pmax-query.md`
 - Performance Max query fix: `docs/audit/critical-blocker-fixed-2026-02-08.md` (superseded by this fix)
-- Test script: `test-google-ads-raw.py` (for direct API testing)
+- Test script: `scripts/test_google_ads_raw.py` (for direct API testing)

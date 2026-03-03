@@ -1,0 +1,426 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+2026-03-02 13:14:36,918 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=id&limit=1 "HTTP/2 206 Partial Content"
+INFO:     192.168.65.1:35685 - "GET /health HTTP/1.1" 200 OK
+2026-03-02 13:14:37,081 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:14:37,082 - feedops.api.main - INFO - Regenerating title for SKU: requested=CL-55 canonical=CL-55
+2026-03-02 13:14:37,083 - feedops.api.main - INFO - {"content_type": "title", "endpoint": "regenerate", "event": "generation.regenerate.start", "master_sku": "CL-55", "platform": "google", "request_id": "d3d26915-2e56-4f53-9250-e3f2e9ce0f81", "requested_master_sku": "CL-55", "ts": 1772457277.0828764}
+2026-03-02 13:14:37,138 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:14:37,234 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=%2A&master_sku=eq.CL-55&order=position.asc "HTTP/2 200 OK"
+2026-03-02 13:14:37,379 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id%2Ccustom_labels&master_sku=eq.CL-55 "HTTP/2 200 OK"
+2026-03-02 13:14:37,380 - feedops.api.supabase_loader - INFO - Loaded CL-55 from Supabase: 28 variants
+2026-03-02 13:14:37,380 - feedops.providers.factory - INFO - Using OpenAI provider
+2026-03-02 13:14:37,385 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:14:37,465 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/sku_corrections?select=%2A&master_sku=eq.CL-55&platform=in.%28google%2Call%29&content_type=in.%28title%2Call%29&is_active=eq.True "HTTP/2 200 OK"
+2026-03-02 13:14:37,552 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries_by_master_sku?select=query_text%2Ctotal_impressions%2Ctotal_clicks%2Cavg_monthly_searches%2Ccompetition&master_sku=eq.CL-55&total_impressions=gte.10&order=total_impressions.desc&limit=40 "HTTP/2 200 OK"
+2026-03-02 13:14:37,679 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries?select=query_text%2Cimpressions%2Cclicks%2Cfinish_code&master_sku=eq.CL-55&order=impressions.desc&limit=120 "HTTP/2 200 OK"
+2026-03-02 13:14:37,767 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_listings?select=source%2Csource_type%2Cdomain%2Cbrand%2Ctitle%2Cposition&product_category=eq.Paper+Towel+Holders&order=position.asc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:14:37,819 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_patterns?select=pattern_type%2Cpattern_value%2Cfrequency%2Cavg_position%2Csources%2Cexample_titles&category=eq.Paper+Towel+Holders&pattern_type=in.%28title_structure%2Ckeyword%2Cbenefit%2Ctrust_signal%2Ccompetitor_brand%29&order=frequency.desc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:14:37,917 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/prompt_templates?select=%2A&is_active=eq.True "HTTP/2 200 OK"
+2026-03-02 13:14:37,919 - feedops.api.prompt_loader - INFO - Loaded prompt template: feedops_v3 v3
+2026-03-02 13:14:37,922 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:14:37,922 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "d3d26915-2e56-4f53-9250-e3f2e9ce0f81", "ts": 1772457277.9228332}
+2026-03-02 13:14:39,776 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=id&limit=1 "HTTP/2 206 Partial Content"
+INFO:     127.0.0.1:49284 - "GET /health HTTP/1.1" 200 OK
+2026-03-02 13:14:46,284 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:14:46,302 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 5242, 'completion_tokens': 435, 'cached_tokens': 4736} (cache hit: 4736/5242 = 90%)
+2026-03-02 13:14:46,302 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "d3d26915-2e56-4f53-9250-e3f2e9ce0f81", "ts": 1772457286.3022742}
+2026-03-02 13:14:46,302 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:14:46,403 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id%2Cversion%2Ccandidate_content&master_sku=eq.CL-55&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+2026-03-02 13:14:46,487 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?id=eq.8300a24f-d4c0-439b-87d1-94768f069bbe "HTTP/2 200 OK"
+2026-03-02 13:14:46,488 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:14:46,628 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:14:46,631 - feedops.api.main - INFO - {"budget_stop_triggered": false, "content_type": "title", "cost_usd": 0.01112, "diagnostic_mode": false, "endpoint": "regenerate", "event": "generation.request.summary", "finish_subcall_executed": false, "job_id": null, "latency_ms": 8379, "master_sku": "CL-55", "mode": "with_feedback", "parse_retry_count": 0, "platform": "google", "provider_attempt_count": 1, "request_id": "d3d26915-2e56-4f53-9250-e3f2e9ce0f81", "result_state": "completed", "tokens_used": 5677, "ts": 1772457286.630935}
+INFO:     172.64.149.246:61685 - "POST /regenerate HTTP/1.1" 200 OK
+2026-03-02 13:14:46,694 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:14:46,695 - feedops.api.main - INFO - Regenerating description for SKU: requested=CL-55 canonical=CL-55
+2026-03-02 13:14:46,696 - feedops.api.main - INFO - {"content_type": "description", "endpoint": "regenerate", "event": "generation.regenerate.start", "master_sku": "CL-55", "platform": "google", "request_id": "857e3cbb-edbc-4985-bf6f-4677805e92c6", "requested_master_sku": "CL-55", "ts": 1772457286.6959634}
+2026-03-02 13:14:46,741 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:14:46,800 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=%2A&master_sku=eq.CL-55&order=position.asc "HTTP/2 200 OK"
+2026-03-02 13:14:46,888 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id%2Ccustom_labels&master_sku=eq.CL-55 "HTTP/2 200 OK"
+2026-03-02 13:14:46,890 - feedops.api.supabase_loader - INFO - Loaded CL-55 from Supabase: 28 variants
+2026-03-02 13:14:46,891 - feedops.providers.factory - INFO - Using OpenAI provider
+2026-03-02 13:14:46,904 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:14:46,952 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/sku_corrections?select=%2A&master_sku=eq.CL-55&platform=in.%28google%2Call%29&content_type=in.%28description%2Call%29&is_active=eq.True "HTTP/2 200 OK"
+2026-03-02 13:14:47,811 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries_by_master_sku?select=query_text%2Ctotal_impressions%2Ctotal_clicks%2Cavg_monthly_searches%2Ccompetition&master_sku=eq.CL-55&total_impressions=gte.10&order=total_impressions.desc&limit=40 "HTTP/2 200 OK"
+2026-03-02 13:14:48,070 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries?select=query_text%2Cimpressions%2Cclicks%2Cfinish_code&master_sku=eq.CL-55&order=impressions.desc&limit=120 "HTTP/2 200 OK"
+2026-03-02 13:14:48,146 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_listings?select=source%2Csource_type%2Cdomain%2Cbrand%2Ctitle%2Cposition&product_category=eq.Paper+Towel+Holders&order=position.asc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:14:48,203 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_patterns?select=pattern_type%2Cpattern_value%2Cfrequency%2Cavg_position%2Csources%2Cexample_titles&category=eq.Paper+Towel+Holders&pattern_type=in.%28title_structure%2Ckeyword%2Cbenefit%2Ctrust_signal%2Ccompetitor_brand%29&order=frequency.desc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:14:48,215 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:14:48,215 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "857e3cbb-edbc-4985-bf6f-4677805e92c6", "ts": 1772457288.2156367}
+2026-03-02 13:14:59,006 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:14:59,008 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 5217, 'completion_tokens': 594, 'cached_tokens': 4736} (cache hit: 4736/5217 = 90%)
+2026-03-02 13:14:59,008 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "857e3cbb-edbc-4985-bf6f-4677805e92c6", "ts": 1772457299.0082395}
+2026-03-02 13:14:59,014 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=finish chars=5592
+2026-03-02 13:14:59,015 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "857e3cbb-edbc-4985-bf6f-4677805e92c6", "ts": 1772457299.0149508}
+2026-03-02 13:15:09,984 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=id&limit=1 "HTTP/2 206 Partial Content"
+INFO:     127.0.0.1:52322 - "GET /health HTTP/1.1" 200 OK
+2026-03-02 13:15:10,455 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:15:10,457 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "857e3cbb-edbc-4985-bf6f-4677805e92c6", "ts": 1772457310.4577193}
+2026-03-02 13:15:10,458 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:10,509 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id%2Cversion%2Ccandidate_content&master_sku=eq.CL-55&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:15:10,584 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?id=eq.8d276b39-84ff-4fe8-a0d3-3b3f972411c0 "HTTP/2 200 OK"
+2026-03-02 13:15:10,585 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:10,672 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:15:10,749 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_finish_sentences?on_conflict=master_sku%2Cplatform "HTTP/2 200 OK"
+2026-03-02 13:15:10,752 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=finish chars=5592
+2026-03-02 13:15:10,827 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:15:10,829 - feedops.api.main - INFO - {"budget_stop_triggered": false, "content_type": "description", "cost_usd": 0.027124, "diagnostic_mode": false, "endpoint": "regenerate", "event": "generation.request.summary", "finish_subcall_executed": true, "job_id": null, "latency_ms": 10792, "master_sku": "CL-55", "mode": "with_feedback", "parse_retry_count": 0, "platform": "google", "provider_attempt_count": 2, "request_id": "857e3cbb-edbc-4985-bf6f-4677805e92c6", "result_state": "completed", "tokens_used": 9187, "ts": 1772457310.8296363}
+INFO:     172.64.149.246:36227 - "POST /regenerate HTTP/1.1" 200 OK
+2026-03-02 13:15:10,882 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:15:10,938 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs "HTTP/2 201 Created"
+2026-03-02 13:15:11,016 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?columns=%22job_id%22%2C%22status%22%2C%22master_sku%22 "HTTP/2 201 Created"
+2026-03-02 13:15:11,020 - feedops.api.main - INFO - Started background job thread: process_batch_job
+INFO:     172.64.149.246:63928 - "POST /batch-optimize HTTP/1.1" 200 OK
+2026-03-02 13:15:11,072 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:11,126 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:15:11,176 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:15:11,220 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:15:11,288 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=%2A&master_sku=eq.CL-55&order=position.asc "HTTP/2 200 OK"
+2026-03-02 13:15:11,362 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id%2Ccustom_labels&master_sku=eq.CL-55 "HTTP/2 200 OK"
+2026-03-02 13:15:11,364 - feedops.api.supabase_loader - INFO - Loaded CL-55 from Supabase: 28 variants
+2026-03-02 13:15:11,364 - feedops.providers.factory - INFO - Using OpenAI provider
+2026-03-02 13:15:11,423 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries_by_master_sku?select=query_text%2Ctotal_impressions%2Ctotal_clicks%2Cavg_monthly_searches%2Ccompetition&master_sku=eq.CL-55&total_impressions=gte.10&order=total_impressions.desc&limit=40 "HTTP/2 200 OK"
+2026-03-02 13:15:11,472 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries?select=query_text%2Cimpressions%2Cclicks%2Cfinish_code&master_sku=eq.CL-55&order=impressions.desc&limit=120 "HTTP/2 200 OK"
+2026-03-02 13:15:11,523 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_listings?select=source%2Csource_type%2Cdomain%2Cbrand%2Ctitle%2Cposition&product_category=eq.Paper+Towel+Holders&order=position.asc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:15:11,574 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_patterns?select=pattern_type%2Cpattern_value%2Cfrequency%2Cavg_position%2Csources%2Cexample_titles&category=eq.Paper+Towel+Holders&pattern_type=in.%28title_structure%2Ckeyword%2Cbenefit%2Ctrust_signal%2Ccompetitor_brand%29&order=frequency.desc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:15:11,585 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:11,585 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "c7f48187-3bc0-4938-9351-12f3e6d88b3b", "ts": 1772457311.5858707}
+2026-03-02 13:15:13,080 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:13,130 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+INFO:     172.64.149.246:55271 - "GET /batch-status/86818a59-26f0-43e1-b55a-1755affce964 HTTP/1.1" 200 OK
+2026-03-02 13:15:15,218 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:15,266 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+INFO:     172.64.149.246:20009 - "GET /batch-status/86818a59-26f0-43e1-b55a-1755affce964 HTTP/1.1" 200 OK
+2026-03-02 13:15:17,320 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:17,371 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+INFO:     172.64.149.246:37824 - "GET /batch-status/86818a59-26f0-43e1-b55a-1755affce964 HTTP/1.1" 200 OK
+2026-03-02 13:15:19,456 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:19,503 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+INFO:     172.64.149.246:40414 - "GET /batch-status/86818a59-26f0-43e1-b55a-1755affce964 HTTP/1.1" 200 OK
+2026-03-02 13:15:21,569 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:21,606 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+INFO:     172.64.149.246:52719 - "GET /batch-status/86818a59-26f0-43e1-b55a-1755affce964 HTTP/1.1" 200 OK
+2026-03-02 13:15:22,002 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:15:22,003 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 5231, 'completion_tokens': 477, 'cached_tokens': 4736} (cache hit: 4736/5231 = 90%)
+2026-03-02 13:15:22,003 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "c7f48187-3bc0-4938-9351-12f3e6d88b3b", "ts": 1772457322.0037076}
+2026-03-02 13:15:22,004 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:22,050 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?on_conflict=master_sku%2Cplatform%2Ccontent_type "HTTP/2 200 OK"
+2026-03-02 13:15:22,112 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id&master_sku=eq.CL-55&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+2026-03-02 13:15:22,158 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id%2Cversion%2Ccandidate_content&master_sku=eq.CL-55&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+2026-03-02 13:15:22,159 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:22,238 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:15:22,241 - feedops.api.main - INFO - {"content_type": "title", "cost_usd": 0.011688, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "86818a59-26f0-43e1-b55a-1755affce964", "latency_ms": 10417, "master_sku": "CL-55", "mode": "full_generation_v2", "parse_retry_count": 0, "platform": "google", "provider_attempt_count": 1, "request_id": "c7f48187-3bc0-4938-9351-12f3e6d88b3b", "result_state": "completed", "tokens_used": 5708, "ts": 1772457322.2409902}
+2026-03-02 13:15:22,285 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:15:22,338 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:22,403 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:22,404 - feedops.api.main - INFO - Batch job 86818a59-26f0-43e1-b55a-1755affce964 finished: 1 completed, 0 failed
+2026-03-02 13:15:22,404 - feedops.api.main - INFO - {"content_type": null, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "86818a59-26f0-43e1-b55a-1755affce964", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "c7f48187-3bc0-4938-9351-12f3e6d88b3b", "result_state": "completed", "ts": 1772457322.4046118}
+2026-03-02 13:15:23,676 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+2026-03-02 13:15:23,718 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.86818a59-26f0-43e1-b55a-1755affce964 "HTTP/2 200 OK"
+INFO:     172.64.149.246:56599 - "GET /batch-status/86818a59-26f0-43e1-b55a-1755affce964 HTTP/1.1" 200 OK
+2026-03-02 13:15:23,767 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:15:23,817 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs "HTTP/2 201 Created"
+2026-03-02 13:15:23,867 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?columns=%22job_id%22%2C%22status%22%2C%22master_sku%22 "HTTP/2 201 Created"
+2026-03-02 13:15:23,868 - feedops.api.main - INFO - Started background job thread: process_batch_job
+INFO:     172.64.149.246:27800 - "POST /batch-optimize HTTP/1.1" 200 OK
+2026-03-02 13:15:23,918 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:23,960 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:15:24,009 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:15:24,055 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%28CL-55%2CCL55%2CCL%2F55%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:15:24,105 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=%2A&master_sku=eq.CL-55&order=position.asc "HTTP/2 200 OK"
+2026-03-02 13:15:24,154 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id%2Ccustom_labels&master_sku=eq.CL-55 "HTTP/2 200 OK"
+2026-03-02 13:15:24,156 - feedops.api.supabase_loader - INFO - Loaded CL-55 from Supabase: 28 variants
+2026-03-02 13:15:24,156 - feedops.providers.factory - INFO - Using OpenAI provider
+2026-03-02 13:15:24,217 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries_by_master_sku?select=query_text%2Ctotal_impressions%2Ctotal_clicks%2Cavg_monthly_searches%2Ccompetition&master_sku=eq.CL-55&total_impressions=gte.10&order=total_impressions.desc&limit=40 "HTTP/2 200 OK"
+2026-03-02 13:15:24,268 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries?select=query_text%2Cimpressions%2Cclicks%2Cfinish_code&master_sku=eq.CL-55&order=impressions.desc&limit=120 "HTTP/2 200 OK"
+2026-03-02 13:15:24,322 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_listings?select=source%2Csource_type%2Cdomain%2Cbrand%2Ctitle%2Cposition&product_category=eq.Paper+Towel+Holders&order=position.asc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:15:24,372 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_patterns?select=pattern_type%2Cpattern_value%2Cfrequency%2Cavg_position%2Csources%2Cexample_titles&category=eq.Paper+Towel+Holders&pattern_type=in.%28title_structure%2Ckeyword%2Cbenefit%2Ctrust_signal%2Ccompetitor_brand%29&order=frequency.desc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:15:24,380 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:24,381 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "e354d5e1-6934-49cd-a05f-833822927b21", "ts": 1772457324.3813813}
+2026-03-02 13:15:25,932 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:25,974 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:25799 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:28,070 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:28,119 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:56585 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:30,177 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:30,227 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:20149 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:32,293 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:32,340 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:16449 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:34,413 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:34,459 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:45309 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:36,526 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:36,571 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:24157 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:38,641 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:38,690 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:17998 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:40,154 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=id&limit=1 "HTTP/2 206 Partial Content"
+INFO:     127.0.0.1:53648 - "GET /health HTTP/1.1" 200 OK
+2026-03-02 13:15:40,748 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:40,790 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:20590 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:42,852 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:42,897 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:29268 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:44,960 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:45,018 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:27514 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:47,076 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:47,125 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:40690 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:47,926 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:15:47,965 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 5206, 'completion_tokens': 1013, 'cached_tokens': 4736} (cache hit: 4736/5206 = 90%)
+2026-03-02 13:15:47,966 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "e354d5e1-6934-49cd-a05f-833822927b21", "ts": 1772457347.9661114}
+2026-03-02 13:15:47,968 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=finish chars=5592
+2026-03-02 13:15:47,969 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "e354d5e1-6934-49cd-a05f-833822927b21", "ts": 1772457347.9694402}
+2026-03-02 13:15:49,186 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:49,234 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:29809 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:51,288 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:51,332 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:18852 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:53,388 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:53,430 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:29751 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:55,498 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:55,566 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:58280 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:57,624 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:57,683 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:60198 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:59,739 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:15:59,787 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:33276 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:15:59,909 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:15:59,912 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 2730, 'completion_tokens': 698, 'cached_tokens': 1664} (cache hit: 1664/2730 = 60%)
+2026-03-02 13:15:59,912 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "e354d5e1-6934-49cd-a05f-833822927b21", "ts": 1772457359.9126704}
+2026-03-02 13:15:59,914 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:15:59,966 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?on_conflict=master_sku%2Cplatform%2Ccontent_type "HTTP/2 200 OK"
+2026-03-02 13:16:00,027 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id&master_sku=eq.CL-55&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:16:00,071 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id%2Cversion%2Ccandidate_content&master_sku=eq.CL-55&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:16:00,077 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:00,158 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:00,161 - feedops.api.main - INFO - {"content_type": "description", "cost_usd": 0.032242, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "17f9dc2a-da72-43f6-b3ea-d0f4b1975c64", "latency_ms": 35529, "master_sku": "CL-55", "mode": "full_generation_v2", "parse_retry_count": 0, "platform": "google", "provider_attempt_count": 2, "request_id": "e354d5e1-6934-49cd-a05f-833822927b21", "result_state": "completed", "tokens_used": 9647, "ts": 1772457360.161036}
+2026-03-02 13:16:00,161 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=finish chars=5592
+2026-03-02 13:16:00,221 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:00,274 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_finish_sentences?on_conflict=master_sku%2Cplatform "HTTP/2 200 OK"
+2026-03-02 13:16:00,325 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:00,376 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:16:00,427 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:16:00,428 - feedops.api.main - INFO - Batch job 17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 finished: 1 completed, 0 failed
+2026-03-02 13:16:00,428 - feedops.api.main - INFO - {"content_type": null, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "17f9dc2a-da72-43f6-b3ea-d0f4b1975c64", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "e354d5e1-6934-49cd-a05f-833822927b21", "result_state": "completed", "ts": 1772457360.4283042}
+2026-03-02 13:16:01,843 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+2026-03-02 13:16:01,900 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 "HTTP/2 200 OK"
+INFO:     172.64.149.246:59617 - "GET /batch-status/17f9dc2a-da72-43f6-b3ea-d0f4b1975c64 HTTP/1.1" 200 OK
+2026-03-02 13:16:01,961 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:02,008 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F24%2C1033-24%2C103324%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:02,065 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&status=in.%28queued%2Cprocessing%29 "HTTP/2 200 OK"
+2026-03-02 13:16:02,066 - feedops.api.main - INFO - Hybrid generation requested for 2 SKUs: requested=['1033/18', '1033/24'] canonical=['1033/18', '1033/24']
+2026-03-02 13:16:02,127 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:02,180 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku&master_sku=in.%281033%2F24%2C1033-24%2C103324%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:02,229 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:02,272 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id&master_sku=eq.1033%2F18&limit=1 "HTTP/2 200 OK"
+2026-03-02 13:16:04,727 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku%2Cgmc_offer_id&gmc_offer_id=ilike.shopify_us_4543208063108_%25 "HTTP/2 200 OK"
+2026-03-02 13:16:04,778 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id&master_sku=eq.1033%2F18&limit=1 "HTTP/2 200 OK"
+2026-03-02 13:16:04,778 - feedops.api.main - INFO - Detected 1 multi-SKU families and 0 single SKUs
+2026-03-02 13:16:04,827 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs "HTTP/2 201 Created"
+2026-03-02 13:16:04,884 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?columns=%22job_id%22%2C%22status%22%2C%22master_sku%22 "HTTP/2 201 Created"
+2026-03-02 13:16:04,886 - feedops.api.main - INFO - Started background job thread: process_hybrid_batch_job
+INFO:     172.64.149.246:45936 - "POST /hybrid-generate HTTP/1.1" 200 OK
+2026-03-02 13:16:04,927 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:04,928 - feedops.providers.factory - INFO - Using OpenAI provider
+2026-03-02 13:16:04,938 - feedops.api.main - INFO - Processing 0 single SKUs
+2026-03-02 13:16:04,938 - feedops.api.main - INFO - Processing 1 multi-SKU families
+2026-03-02 13:16:04,938 - feedops.api.main - INFO - Processing family: ['1033/18', '1033/24']
+2026-03-02 13:16:04,980 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:05,030 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:05,099 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:05,152 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=%2A&master_sku=eq.1033%2F18&order=position.asc "HTTP/2 200 OK"
+2026-03-02 13:16:05,200 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id%2Ccustom_labels&master_sku=eq.1033%2F18 "HTTP/2 200 OK"
+2026-03-02 13:16:05,201 - feedops.api.supabase_loader - INFO - Loaded 1033/18 from Supabase: 28 variants
+2026-03-02 13:16:05,246 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries_by_master_sku?select=query_text%2Ctotal_impressions%2Ctotal_clicks%2Cavg_monthly_searches%2Ccompetition&master_sku=eq.1033%2F18&total_impressions=gte.10&order=total_impressions.desc&limit=40 "HTTP/2 200 OK"
+2026-03-02 13:16:05,290 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries?select=query_text%2Cimpressions%2Cclicks%2Cfinish_code&master_sku=eq.1033%2F18&order=impressions.desc&limit=120 "HTTP/2 200 OK"
+2026-03-02 13:16:05,339 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_listings?select=source%2Csource_type%2Cdomain%2Cbrand%2Ctitle%2Cposition&product_category=eq.Glass+Shelves&order=position.asc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:16:05,384 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_patterns?select=pattern_type%2Cpattern_value%2Cfrequency%2Cavg_position%2Csources%2Cexample_titles&category=eq.Glass+Shelves&pattern_type=in.%28title_structure%2Ckeyword%2Cbenefit%2Ctrust_signal%2Ccompetitor_brand%29&order=frequency.desc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:16:05,399 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:05,400 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "ts": 1772457365.4002686}
+2026-03-02 13:16:06,938 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:06,984 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:34509 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:09,047 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:09,093 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:45374 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:10,317 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=id&limit=1 "HTTP/2 206 Partial Content"
+INFO:     127.0.0.1:48808 - "GET /health HTTP/1.1" 200 OK
+2026-03-02 13:16:11,154 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:11,198 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:35133 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:13,255 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:13,300 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:45131 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:15,363 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:15,407 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:59883 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:17,462 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:17,516 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:38560 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:19,587 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:19,635 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:50930 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:21,693 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:21,737 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:39876 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:23,796 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:23,838 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:29139 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:25,900 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:25,942 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:56729 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:27,278 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:16:27,283 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 5076, 'completion_tokens': 1146, 'cached_tokens': 4736} (cache hit: 4736/5076 = 93%)
+2026-03-02 13:16:27,283 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "ts": 1772457387.2832658}
+2026-03-02 13:16:27,285 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=finish chars=5592
+2026-03-02 13:16:27,285 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "ts": 1772457387.2855115}
+2026-03-02 13:16:28,019 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:28,079 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:20561 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:30,133 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:30,184 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:26953 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:32,251 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:32,304 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:42542 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:34,369 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:34,414 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:62350 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:36,478 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:36,520 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:17093 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:38,586 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:38,633 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:23500 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:39,649 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:16:39,652 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "ts": 1772457399.6523945}
+2026-03-02 13:16:39,653 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:39,704 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?on_conflict=master_sku%2Cplatform%2Ccontent_type "HTTP/2 200 OK"
+2026-03-02 13:16:39,749 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id&master_sku=eq.1033%2F18&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:16:39,794 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id%2Cversion%2Ccandidate_content&master_sku=eq.1033%2F18&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:16:39,796 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:39,866 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:39,869 - feedops.api.main - INFO - {"content_type": "description", "cost_usd": 0.034461, "diagnostic_mode": false, "endpoint": "process_hybrid_batch_job", "event": "generation.request.summary", "job_id": "8488993c-1f54-44ed-b3f9-b462e6fe517e", "latency_ms": 34250, "master_sku": "1033/18", "mode": "full_generation_v2", "parse_retry_count": 0, "platform": "google", "provider_attempt_count": 2, "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "result_state": "completed", "tokens_used": 9593, "ts": 1772457399.868977}
+2026-03-02 13:16:39,869 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=finish chars=5592
+2026-03-02 13:16:39,935 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:39,982 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_finish_sentences?on_conflict=master_sku%2Cplatform "HTTP/2 200 OK"
+2026-03-02 13:16:39,983 - feedops.api.main - INFO - ✓ Generated BASE 1033/18 via per-platform v2 package
+2026-03-02 13:16:40,030 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:40,076 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:40,122 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:40,168 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:40,212 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F24%2C1033-24%2C103324%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:40,214 - feedops.api.hybrid_generation - INFO - {"base_sku": "1033/18", "content_type": "description", "event": "generation.variant_adaptation.start", "generate_finish_sentences": false, "include_finish_sentences": true, "platform": "google", "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "requested_base_sku": "1033/18", "requested_variant_sku": "1033/24", "ts": 1772457400.2144864, "variant_sku": "1033/24"}
+2026-03-02 13:16:40,214 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:40,270 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=%2A&master_sku=eq.1033%2F24&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:16:40,271 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:40,324 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?id=eq.a2a9ca5b-6e5f-4f97-ab86-6f8a3e6e5165 "HTTP/2 200 OK"
+2026-03-02 13:16:40,370 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id&master_sku=eq.1033%2F24&platform=eq.google&content_type=eq.description "HTTP/2 200 OK"
+2026-03-02 13:16:40,445 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:40,463 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=id&limit=1 "HTTP/2 206 Partial Content"
+INFO:     127.0.0.1:60690 - "GET /health HTTP/1.1" 200 OK
+2026-03-02 13:16:40,504 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_finish_sentences?on_conflict=master_sku%2Cplatform "HTTP/2 200 OK"
+2026-03-02 13:16:40,504 - feedops.api.hybrid_generation - INFO - {"content_type": "description", "event": "generation.variant_adaptation.success", "platform": "google", "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "ts": 1772457400.504656, "variant_sku": "1033/24"}
+2026-03-02 13:16:40,504 - feedops.api.main - INFO - ✓ Adapted VARIANT 1033/24 from BASE 1033/18
+2026-03-02 13:16:40,543 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:40,596 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:40,638 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:40,640 - feedops.api.main - INFO - ✓ Hybrid generation job 8488993c-1f54-44ed-b3f9-b462e6fe517e finished: requested 2/2 completed (0 failed), expanded 0/0 completed (0 failed)
+2026-03-02 13:16:40,640 - feedops.api.main - INFO - {"content_type": null, "diagnostic_mode": false, "endpoint": "process_hybrid_batch_job", "event": "generation.request.summary", "job_id": "8488993c-1f54-44ed-b3f9-b462e6fe517e", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "6475045f-456c-4fec-9b8c-71d497f1828b", "result_state": "completed", "ts": 1772457400.6402605}
+2026-03-02 13:16:40,693 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+2026-03-02 13:16:40,733 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.8488993c-1f54-44ed-b3f9-b462e6fe517e "HTTP/2 200 OK"
+INFO:     172.64.149.246:46356 - "GET /batch-status/8488993c-1f54-44ed-b3f9-b462e6fe517e HTTP/1.1" 200 OK
+2026-03-02 13:16:40,793 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:40,833 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F24%2C1033-24%2C103324%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:40,876 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&status=in.%28queued%2Cprocessing%29 "HTTP/2 200 OK"
+2026-03-02 13:16:40,877 - feedops.api.main - INFO - Hybrid generation requested for 2 SKUs: requested=['1033/18', '1033/24'] canonical=['1033/18', '1033/24']
+2026-03-02 13:16:40,916 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:40,983 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku&master_sku=in.%281033%2F24%2C1033-24%2C103324%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:41,027 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:41,073 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id&master_sku=eq.1033%2F18&limit=1 "HTTP/2 200 OK"
+2026-03-02 13:16:41,234 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=master_sku%2Cgmc_offer_id&gmc_offer_id=ilike.shopify_us_4543208063108_%25 "HTTP/2 200 OK"
+2026-03-02 13:16:41,276 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id&master_sku=eq.1033%2F18&limit=1 "HTTP/2 200 OK"
+2026-03-02 13:16:41,277 - feedops.api.main - INFO - Detected 1 multi-SKU families and 0 single SKUs
+2026-03-02 13:16:41,325 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs "HTTP/2 201 Created"
+2026-03-02 13:16:41,373 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?columns=%22job_id%22%2C%22status%22%2C%22master_sku%22 "HTTP/2 201 Created"
+2026-03-02 13:16:41,379 - feedops.api.main - INFO - Started background job thread: process_hybrid_batch_job
+INFO:     172.64.149.246:55180 - "POST /hybrid-generate HTTP/1.1" 200 OK
+2026-03-02 13:16:41,418 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:41,419 - feedops.providers.factory - INFO - Using OpenAI provider
+2026-03-02 13:16:41,429 - feedops.api.main - INFO - Processing 0 single SKUs
+2026-03-02 13:16:41,430 - feedops.api.main - INFO - Processing 1 multi-SKU families
+2026-03-02 13:16:41,430 - feedops.api.main - INFO - Processing family: ['1033/18', '1033/24']
+2026-03-02 13:16:41,475 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:41,518 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:41,562 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:41,622 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=%2A&master_sku=eq.1033%2F18&order=position.asc "HTTP/2 200 OK"
+2026-03-02 13:16:41,671 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/variant_index?select=gmc_offer_id%2Ccustom_labels&master_sku=eq.1033%2F18 "HTTP/2 200 OK"
+2026-03-02 13:16:41,673 - feedops.api.supabase_loader - INFO - Loaded 1033/18 from Supabase: 28 variants
+2026-03-02 13:16:41,721 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries_by_master_sku?select=query_text%2Ctotal_impressions%2Ctotal_clicks%2Cavg_monthly_searches%2Ccompetition&master_sku=eq.1033%2F18&total_impressions=gte.10&order=total_impressions.desc&limit=40 "HTTP/2 200 OK"
+2026-03-02 13:16:41,775 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/search_queries?select=query_text%2Cimpressions%2Cclicks%2Cfinish_code&master_sku=eq.1033%2F18&order=impressions.desc&limit=120 "HTTP/2 200 OK"
+2026-03-02 13:16:41,816 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_listings?select=source%2Csource_type%2Cdomain%2Cbrand%2Ctitle%2Cposition&product_category=eq.Glass+Shelves&order=position.asc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:16:41,862 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/competitor_patterns?select=pattern_type%2Cpattern_value%2Cfrequency%2Cavg_position%2Csources%2Cexample_titles&category=eq.Glass+Shelves&pattern_type=in.%28title_structure%2Ckeyword%2Cbenefit%2Ctrust_signal%2Ccompetitor_brand%29&order=frequency.desc&limit=200 "HTTP/2 200 OK"
+2026-03-02 13:16:41,870 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:41,870 - feedops.providers.openai_provider - INFO - {"event": "provider.generate.start", "has_image": false, "provider": "openai/gpt-5.2", "request_id": "e71601f2-db59-41d7-8967-54548f118308", "ts": 1772457401.870258}
+2026-03-02 13:16:43,439 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:43,484 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+INFO:     172.64.149.246:44230 - "GET /batch-status/b3318a9e-74ef-4b68-b6be-448ee5a51cd0 HTTP/1.1" 200 OK
+2026-03-02 13:16:45,546 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:45,596 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+INFO:     172.64.149.246:26164 - "GET /batch-status/b3318a9e-74ef-4b68-b6be-448ee5a51cd0 HTTP/1.1" 200 OK
+2026-03-02 13:16:47,652 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:47,699 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+INFO:     172.64.149.246:63629 - "GET /batch-status/b3318a9e-74ef-4b68-b6be-448ee5a51cd0 HTTP/1.1" 200 OK
+2026-03-02 13:16:49,754 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:49,796 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+INFO:     172.64.149.246:32652 - "GET /batch-status/b3318a9e-74ef-4b68-b6be-448ee5a51cd0 HTTP/1.1" 200 OK
+2026-03-02 13:16:51,794 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-02 13:16:51,797 - feedops.providers.openai_provider - INFO - Token usage: {'prompt_tokens': 5101, 'completion_tokens': 485, 'cached_tokens': 4736} (cache hit: 4736/5101 = 92%)
+2026-03-02 13:16:51,797 - feedops.providers.openai_provider - INFO - {"attempts": 1, "event": "provider.generate.success", "provider": "openai/gpt-5.2", "request_id": "e71601f2-db59-41d7-8967-54548f118308", "ts": 1772457411.7972922}
+2026-03-02 13:16:51,798 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:51,844 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?on_conflict=master_sku%2Cplatform%2Ccontent_type "HTTP/2 200 OK"
+2026-03-02 13:16:51,850 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:51,895 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id&master_sku=eq.1033%2F18&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+2026-03-02 13:16:51,901 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:51,945 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id%2Cversion%2Ccandidate_content&master_sku=eq.1033%2F18&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+INFO:     172.64.149.246:34896 - "GET /batch-status/b3318a9e-74ef-4b68-b6be-448ee5a51cd0 HTTP/1.1" 200 OK
+2026-03-02 13:16:51,949 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:52,009 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:52,011 - feedops.api.main - INFO - {"content_type": "title", "cost_usd": 0.011573, "diagnostic_mode": false, "endpoint": "process_hybrid_batch_job", "event": "generation.request.summary", "job_id": "b3318a9e-74ef-4b68-b6be-448ee5a51cd0", "latency_ms": 9927, "master_sku": "1033/18", "mode": "full_generation_v2", "parse_retry_count": 0, "platform": "google", "provider_attempt_count": 1, "request_id": "e71601f2-db59-41d7-8967-54548f118308", "result_state": "completed", "tokens_used": 5586, "ts": 1772457412.0118334}
+2026-03-02 13:16:52,012 - feedops.api.main - INFO - ✓ Generated BASE 1033/18 via per-platform v2 package
+2026-03-02 13:16:52,060 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:52,112 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:52,163 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:52,209 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F18%2C1033-18%2C103318%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:52,254 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/product_catalog?select=master_sku&master_sku=in.%281033%2F24%2C1033-24%2C103324%29&limit=500 "HTTP/2 200 OK"
+2026-03-02 13:16:52,255 - feedops.api.hybrid_generation - INFO - {"base_sku": "1033/18", "content_type": "title", "event": "generation.variant_adaptation.start", "generate_finish_sentences": false, "include_finish_sentences": false, "platform": "google", "request_id": "e71601f2-db59-41d7-8967-54548f118308", "requested_base_sku": "1033/18", "requested_variant_sku": "1033/24", "ts": 1772457412.255277, "variant_sku": "1033/24"}
+2026-03-02 13:16:52,255 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:52,300 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=%2A&master_sku=eq.1033%2F24&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+2026-03-02 13:16:52,301 - feedops.pipeline.skill_loader - INFO - Platform system prompt built: platform=google chars=10697
+2026-03-02 13:16:52,344 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?id=eq.932f510f-d07d-47d1-a33e-84b754b3c168 "HTTP/2 200 OK"
+2026-03-02 13:16:52,387 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/generated_content?select=id&master_sku=eq.1033%2F24&platform=eq.google&content_type=eq.title "HTTP/2 200 OK"
+2026-03-02 13:16:52,438 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/regeneration_history "HTTP/2 201 Created"
+2026-03-02 13:16:52,440 - feedops.api.hybrid_generation - INFO - {"content_type": "title", "event": "generation.variant_adaptation.success", "platform": "google", "request_id": "e71601f2-db59-41d7-8967-54548f118308", "ts": 1772457412.4401946, "variant_sku": "1033/24"}
+2026-03-02 13:16:52,440 - feedops.api.main - INFO - ✓ Adapted VARIANT 1033/24 from BASE 1033/18
+2026-03-02 13:16:52,481 - httpx - INFO - HTTP Request: POST https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?on_conflict=job_id%2Cmaster_sku "HTTP/2 200 OK"
+2026-03-02 13:16:52,526 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:52,572 - httpx - INFO - HTTP Request: PATCH https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:52,574 - feedops.api.main - INFO - ✓ Hybrid generation job b3318a9e-74ef-4b68-b6be-448ee5a51cd0 finished: requested 2/2 completed (0 failed), expanded 0/0 completed (0 failed)
+2026-03-02 13:16:52,574 - feedops.api.main - INFO - {"content_type": null, "diagnostic_mode": false, "endpoint": "process_hybrid_batch_job", "event": "generation.request.summary", "job_id": "b3318a9e-74ef-4b68-b6be-448ee5a51cd0", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "e71601f2-db59-41d7-8967-54548f118308", "result_state": "completed", "ts": 1772457412.5742548}
+2026-03-02 13:16:54,004 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_jobs?select=%2A&id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+2026-03-02 13:16:54,052 - httpx - INFO - HTTP Request: GET https://qezuszwufortkiutlhym.supabase.co/rest/v1/batch_generation_job_skus?select=%2A&job_id=eq.b3318a9e-74ef-4b68-b6be-448ee5a51cd0 "HTTP/2 200 OK"
+INFO:     172.64.149.246:54432 - "GET /batch-status/b3318a9e-74ef-4b68-b6be-448ee5a51cd0 HTTP/1.1" 200 OK

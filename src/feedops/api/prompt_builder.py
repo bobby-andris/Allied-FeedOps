@@ -543,6 +543,7 @@ def build_core_prompt(
     content_type: str,
     finish_code: str | None = None,
     mode: str = "batch",
+    query_intent_section: str | None = None,
 ) -> str:
     """Build rich prompt — identical for batch and single-SKU paths.
 
@@ -645,7 +646,16 @@ def build_core_prompt(
             f"{keyword_section}"
         )
 
-    # --- 4. Segment strategy guidance ---
+    # --- 4. Query intent brief ---
+    if (
+        platform in {"google", "bing"}
+        and content_type in {"title", "description"}
+        and isinstance(query_intent_section, str)
+        and query_intent_section.strip()
+    ):
+        sections.append(query_intent_section.strip())
+
+    # --- 5. Segment strategy guidance ---
     # FIX-02: SEGMENT_STRATEGY_V1 gates this section.
     # When disabled, segment guidance is omitted from the prompt (observable structural difference).
     if is_segment_strategy_v1_enabled():
@@ -682,7 +692,7 @@ def build_core_prompt(
             parent_sku.master_sku,
         )
 
-    # --- 5. Shopping intelligence section ---
+    # --- 6. Shopping intelligence section ---
     # Always include when available; prompt architecture is now v2-only.
     custom_label_0 = _extract_custom_label_0(parent_sku)
     shopping_section = ""
@@ -699,7 +709,7 @@ def build_core_prompt(
     if shopping_section:
         sections.append(shopping_section)
 
-    # --- 6. Category guidance ---
+    # --- 7. Category guidance ---
     # shopping_intelligence.yaml is the canonical source (PRMT-03)
     category_guidance = get_category_guidance(parent_sku.category)
     if category_guidance:
@@ -711,7 +721,7 @@ def build_core_prompt(
         if cleaned_category_guidance:
             sections.append(f"Category Guidance:\n{cleaned_category_guidance}")
 
-    # --- 7. Gold standard examples ---
+    # --- 8. Gold standard examples ---
     # Use bundle format (cross-platform) when available — mirrors generator.py.
     # format_gold_standard_examples_bundle exists in prompt_loader.py (confirmed).
     examples = ""
@@ -748,7 +758,7 @@ def build_core_prompt(
         if cleaned_examples:
             sections.append(f"Gold Standard Examples (data-only guidance):\n{cleaned_examples}")
 
-    # --- 8. Product design story (PRMT-04, Gap 2 fix) ---
+    # --- 9. Product design story (PRMT-04, Gap 2 fix) ---
     # Extract product-specific data that makes THIS product unique.
     # This replaces the generic customer_framing block that only had category/collection.
     product_story_parts: list[str] = []
@@ -804,7 +814,7 @@ def build_core_prompt(
         product_block += f"\n\n{product_story}"
     sections.append(product_block)
 
-    # --- 9. Competitive positioning guidance (PRMT-05, Gap 2+5 fix) ---
+    # --- 10. Competitive positioning guidance (PRMT-05, Gap 2+5 fix) ---
     # Defer to skills for competitive positioning. Only provide product-specific
     # material confirmation from evidence — not a fixed checklist.
     competitive_parts: list[str] = []
@@ -836,7 +846,7 @@ def build_core_prompt(
         )
     sections.append(competitive_block)
 
-    # --- 10. Finish context ---
+    # --- 11. Finish context ---
     # Platform-specific finish handling (mirrors _build_generation_user_prompt logic).
     context_lines: list[str] = []
     if platform in {"google", "bing"}:
@@ -871,7 +881,7 @@ def build_core_prompt(
     if context_lines:
         sections.append("\n".join(context_lines))
 
-    # --- 11. JSON output instruction ---
+    # --- 12. JSON output instruction ---
     sections.append(
         f"Generate only the {content_type} for {platform}.\n"
         f'Return your response as JSON: {{"content": "your generated {content_type} here"}}'

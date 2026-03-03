@@ -1,0 +1,7 @@
+PYTHONPATH=src uv run --frozen --extra dev pytest -q
+653 passed, 1 skipped in 35.94s
+
+./scripts/verify_cloud_run_parity.sh
+Running Cloud Run parity contract suite...
+52 passed in 5.12s
+Cloud Run parity suite passed.

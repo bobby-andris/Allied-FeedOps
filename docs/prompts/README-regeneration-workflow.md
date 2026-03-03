@@ -31,7 +31,7 @@ The regeneration process is split into two phases, each using its own agent team
 - [ ] Shopify publishing strategy documented in CLAUDE.md
 
 **2. System health verified:**
-- [ ] Cloud Run pipeline healthy: `curl https://feedops-pipeline-623866089882.us-east1.run.app/health`
+- [ ] Cloud Run pipeline healthy: `curl "$FEEDOPS_PIPELINE_URL/health"`
 - [ ] Dashboard builds: `cd dashboard && npm run build`
 - [ ] Vercel deployment successful
 

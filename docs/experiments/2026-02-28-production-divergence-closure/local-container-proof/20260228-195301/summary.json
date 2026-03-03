@@ -1,0 +1,42 @@
+[
+  {
+    "elapsed_seconds": 10.786,
+    "http_status": 200,
+    "name": "single-google-title",
+    "request_id": "d47d6d65-ba81-443f-a0b0-d6300371a92c"
+  },
+  {
+    "elapsed_seconds": 22.095,
+    "http_status": 200,
+    "name": "single-google-description",
+    "request_id": "91b3b9c9-0861-4a85-b543-8748560b45ab"
+  },
+  {
+    "elapsed_seconds": 10.834,
+    "http_status": 200,
+    "job_id": "32523bcd-f5e7-4530-a525-a3dfe5cb1738",
+    "name": "batch-google-title",
+    "request_id": "e3917a22-9c90-4bd6-8b8a-be93ab598ab7"
+  },
+  {
+    "elapsed_seconds": 23.483,
+    "http_status": 200,
+    "job_id": "bf119697-be1e-4921-9c2a-c1b8444ceee7",
+    "name": "batch-google-description",
+    "request_id": "1d3625ac-a45d-4d0c-9e01-4967c039011e"
+  },
+  {
+    "elapsed_seconds": 32.219,
+    "http_status": 200,
+    "job_id": "c51e2885-5893-41d2-a317-c0bd0d59b370",
+    "name": "hybrid-google-description",
+    "request_id": "9c2f2d84-1886-459f-a24e-bc83aa374237"
+  },
+  {
+    "elapsed_seconds": 9.1,
+    "http_status": 200,
+    "job_id": "592fd045-0fce-4ec1-846f-2a07977bb55f",
+    "name": "hybrid-google-title",
+    "request_id": "36150e53-62c0-41ba-8936-11ea70e5ae84"
+  }
+]

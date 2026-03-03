@@ -1,5 +1,19 @@
 # Allied FeedOps: Overview
 
+## Canonical Generation Documentation
+
+If you are working on generation behavior, prompts, runtime parity, persistence, or dashboard readback, start here before reading the rest of this overview:
+
+1. `AGENTS.md`
+2. `docs/architecture/generation-runtime-truth.md`
+3. `docs/architecture/generation-core-task-model.md`
+4. `docs/architecture/generation-prompt-lineage-contract.md`
+5. `docs/architecture/generation-pipeline-routing-reference.md`
+6. `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+7. `docs/development/generation-change-checklist.md`
+
+Those files are the operational truth for generation work. Older investigation docs may still exist for forensics, but they are not the default source of truth unless one of the documents above links to them explicitly.
+
 ## What is FeedOps?
 
 FeedOps is an AI-powered product feed optimization system designed for Allied Brass. It optimizes product titles and descriptions to maximize:
@@ -76,10 +90,10 @@ This system is built on three research documents synthesizing:
 ### 1. AGENTS.md
 Central guidelines document containing:
 - No-hallucination constraints
-- Title optimization rules (70/150 character strategy)
-- Description optimization rules (150/500+ character strategy)
-- Quality scoring rubric (6 dimensions, 80% threshold)
-- Platform-specific considerations
+- canonical reading order for generation work
+- certification requirements across source, container, Cloud Run, Supabase, and dashboard
+- prompt lineage invariants
+- dashboard runtime routing invariants
 
 ### 2. Agent Definitions (.cursor/agents/)
 - **Data Analyst**: Audits feeds, analyzes performance, identifies opportunities
@@ -95,9 +109,12 @@ Central guidelines document containing:
 ### 4. Documentation (docs/)
 - 00: This overview
 - 01: Workflow guide (step-by-step processes)
-- 02: MCP integration plan
-- 03: Quality rubric deep dive
-- 04: Platform-specific guidelines
+- `architecture/generation-runtime-truth.md`: layer-by-layer runtime truth
+- `architecture/generation-core-task-model.md`: task graph contract
+- `architecture/generation-prompt-lineage-contract.md`: prompt persistence contract
+- `architecture/generation-pipeline-routing-reference.md`: deep route and persistence reference
+- `development/generation-change-checklist.md`: required generation PR checklist
+- `operations/deploy-and-certify-generation.md`: deploy and live-proof playbook
 
 ## Quick Start
 
@@ -150,7 +167,7 @@ Every output scored against objective rubric before publication.
 
 ## Next Steps
 
-1. **Read the Workflow Guide** (docs/01-workflow.md) for step-by-step processes
-2. **Understand the Rubric** (docs/03-quality-rubric.md) for scoring details
-3. **Plan MCP Integration** (docs/02-mcp-plan.md) for data source connections
-4. **Review Platform Guidelines** (docs/04-platform-guidelines.md) for channel-specific rules
+1. **Read the Workflow Guide** (`docs/01-workflow.md`) for repo-level execution flow
+2. **Read Runtime Truth** (`docs/architecture/generation-runtime-truth.md`) before any generation change
+3. **Read the Task Model** (`docs/architecture/generation-core-task-model.md`) before changing routing or prompts
+4. **Use the Generation Checklist** (`docs/development/generation-change-checklist.md`) before opening a PR

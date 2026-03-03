@@ -1,0 +1,46 @@
+{
+  "http_status": 200,
+  "job_id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
+  "name": "batch-google-description",
+  "payload": {
+    "job_id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
+    "status": "queued",
+    "success": true,
+    "total_skus": 1
+  },
+  "poll_http_status": 200,
+  "poll_payload": {
+    "completed_skus": 1,
+    "expanded_completed_skus": 0,
+    "expanded_failed_skus": 0,
+    "expanded_total_skus": 0,
+    "failed_skus": 0,
+    "job_id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
+    "skus": [
+      {
+        "completed_at": "2026-02-28T22:49:49.123097+00:00",
+        "created_at": "2026-02-28T22:49:26.523896+00:00",
+        "error_message": null,
+        "generated_content_ids": null,
+        "id": "03f44e91-76df-4122-a50f-81445da2f94c",
+        "job_id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
+        "master_sku": "CL-55",
+        "started_at": "2026-02-28T22:49:26.638363+00:00",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "total_skus": 1
+  },
+  "poll_request_ids": [
+    "8c1fbe46-a649-4e58-b198-b1e561f496a9",
+    "27aac66d-f75a-400f-9379-112b5cb467be",
+    "586f27a0-7074-402a-831e-7a207d9e06b2",
+    "c8458047-b2b6-43f1-80cf-5c5ea600cadc",
+    "88ec293f-0a32-4522-9e35-91cdb683ab42",
+    "68a63b42-c0dc-4d69-9668-ec9183769e50",
+    "ac1b1482-0f4d-467f-af1e-cba89cb73307",
+    "11b5833b-f1d8-43bc-a4c1-6c73d6897f66"
+  ],
+  "request_id": "16040988-905e-42fa-93e1-225447fb5b79"
+}

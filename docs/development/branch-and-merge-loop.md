@@ -3,20 +3,31 @@
 ## Goal
 Keep development predictable: every change starts from synced `master`, lands on a single feature branch, and merges back cleanly.
 
+## Canonical Generation References
+
+For generation-affecting work, this loop must be used together with:
+
+1. `AGENTS.md`
+2. `docs/architecture/generation-runtime-truth.md`
+3. `docs/architecture/generation-core-task-model.md`
+4. `docs/development/generation-change-checklist.md`
+5. `docs/operations/deploy-and-certify-generation.md`
+
 ## Start A New Work Session
 ```bash
 cd /Users/bobby/Documents/GitHub/Allied-FeedOps
 git fetch origin --prune
 git switch master
 git pull --ff-only origin master
-git switch -c codex/<topic>-<yyyymmdd>
 scripts/dev_session_preflight.sh
+git switch -c codex/<topic>-<yyyymmdd>
 ```
 
 ## During Development
 1. Keep scope limited to one branch/PR.
 2. Run targeted tests early, then full required suites before merge.
 3. Commit logically grouped changes with clear messages.
+4. For generation changes, no merge is allowed without source review, container proof, Cloud Run proof, Supabase proof, and dashboard readback proof.
 
 ## Pre-Merge Checklist
 ```bash
@@ -28,12 +39,45 @@ Run required suites for this project phase:
 ```bash
 PYTHONPATH=src uv run --frozen --extra dev pytest -q \
   tests/api/test_dashboard_regenerate_route_contract.py \
+  tests/api/test_dashboard_generation_routes_contract.py \
   tests/api/test_main_master_sku_alias_runtime.py \
   tests/api/test_regenerate_response_contract.py \
   tests/test_cloud_run_parity.py \
+  tests/test_generation_runtime_scope_contract.py \
   tests/test_runtime_env_contract.py \
   tests/test_env_parity.py
 ```
+
+For generation-affecting work, also run:
+```bash
+ENV_FILE=.env.vercel PORT=18080 scripts/container_generation_smoke.sh
+```
+
+## Which Deploy Path To Use
+
+For generation-affecting work, use one of these two deploy paths explicitly:
+
+### Pre-PR exact-branch certification
+
+Use this before merge when you need to prove the exact feature branch SHA in Cloud Run:
+
+```bash
+scripts/deploy_tagged_revision.sh <revision-tag>
+```
+
+Use the tagged revision URL for the six-scenario certification matrix and record the deploy mode in the report.
+
+### Post-merge production deploy
+
+Use this after merge to prove the actual release path:
+
+- push and merge to `origin/master`
+- let the GitHub-connected Cloud Build trigger run `cloudbuild.yaml`
+- record the Cloud Build ID, image ref, and deployed revision
+
+Hard rule:
+
+Pre-PR exact-branch certification proves the branch SHA. Post-merge production deploy proves the real release path. Do not conflate them in reports or sign-off.
 
 ## Merge And Reset Loop
 ```bash
@@ -41,7 +85,7 @@ git push -u origin codex/<topic>-<yyyymmdd>
 # open PR, review, merge
 git switch master
 git pull --ff-only origin master
-# optional cleanup
+# cleanup after verifying the branch is merged
 git branch -d codex/<topic>-<yyyymmdd>
 git push origin --delete codex/<topic>-<yyyymmdd>
 ```
@@ -51,3 +95,4 @@ git push origin --delete codex/<topic>-<yyyymmdd>
 2. No stale-branch development after `master` moves.
 3. No skipped preflight.
 4. No merge without passing required tests for the active phase.
+5. No generation-affecting merge without a dated experiment report and explicit evidence links.

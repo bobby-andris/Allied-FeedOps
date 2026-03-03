@@ -47,7 +47,6 @@ interface VariantImageCandidate {
   created_at: string | null
 }
 
-const EXPECTED_FINISH_SENTENCE_COUNT = 28
 const GENERIC_FINISH_COUNT_PATTERNS = [
   /\bfinish options:\s*available in[^.!\n]*(?:designer\s+)?finishes[^.!\n]*[.!]?/i,
   /\bavailable in (?:a wide variety of )?(?:lifetime )?(?:multiple|\d+)\s+(?:designer\s+)?finishes[^.!\n]*[.!]?/i,
@@ -226,7 +225,9 @@ export async function expandVariantsForPublish(
   if (hasGenericFinishCountClaim(approved_description)) {
     throw new Error('variant_finish_contradiction: publish_google_description_contains_generic_finish_count_claim')
   }
-  if (Object.keys(finishSentences).length !== EXPECTED_FINISH_SENTENCE_COUNT) {
+  // Compare finish sentence count against actual variant count for this SKU
+  const uniqueFinishes = new Set(variants.map((v) => v.finish)).size
+  if (Object.keys(finishSentences).length !== uniqueFinishes) {
     throw new Error('variant_finish_contradiction: publish_google_finish_sentences_incomplete')
   }
 
@@ -416,10 +417,18 @@ export async function validateContentForPublishing(
       })
     } else {
       const finishSentences = normalizeFinishSentences(finishData?.finish_sentences)
-      if (Object.keys(finishSentences).length !== EXPECTED_FINISH_SENTENCE_COUNT) {
+
+      // Get actual distinct finish count for this SKU instead of assuming 28
+      const { data: variantFinishes } = await supabase
+        .from('variant_index')
+        .select('finish')
+        .eq('master_sku', canonicalMasterSku)
+
+      const expectedCount = new Set((variantFinishes || []).map((v) => v.finish)).size
+      if (Object.keys(finishSentences).length !== expectedCount) {
         issues.push({
           code: 'publish_google_finish_sentences_incomplete',
-          message: `Expected ${EXPECTED_FINISH_SENTENCE_COUNT} finish sentences, found ${Object.keys(finishSentences).length}`,
+          message: `Expected ${expectedCount} finish sentences, found ${Object.keys(finishSentences).length}`,
           actionable_message: 'Regenerate Google/Bing descriptions to repopulate complete variant_finish_sentences coverage.',
         })
       }

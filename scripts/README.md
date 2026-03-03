@@ -92,7 +92,7 @@ bash scripts/verify_locked_parity.sh
 ```bash
 cd /path/to/Allied-FeedOps
 python scripts/smoke_regenerate_lineage.py \
-  --pipeline-url "https://feedops-pipeline-623866089882.us-east1.run.app" \
+  --pipeline-url "$FEEDOPS_PIPELINE_URL" \
   --master-sku "1031/30" \
   --platform google \
   --content-type description

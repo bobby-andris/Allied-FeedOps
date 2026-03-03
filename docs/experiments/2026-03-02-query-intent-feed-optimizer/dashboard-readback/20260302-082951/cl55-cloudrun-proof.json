@@ -1,0 +1,80 @@
+[
+  {
+    "master_sku": "CL-55",
+    "platform": "finish",
+    "content_type": "finish_sentences",
+    "request_id": "2d72ff98-0813-4567-b918-16a90263f6ec",
+    "created_at": "2026-03-02T13:24:41.800423+00:00",
+    "prompt_hash": "63d21e8df0cc5fb56a817ad08825fbf1b9f0f377c12e0123355decc1a78eac4b",
+    "query_intent_brief_enabled": null,
+    "query_intent_data_sufficiency": null,
+    "query_intent_source_query_count": null,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "CL-55",
+    "platform": "google",
+    "content_type": "description",
+    "request_id": "2d72ff98-0813-4567-b918-16a90263f6ec",
+    "created_at": "2026-03-02T13:24:41.728212+00:00",
+    "prompt_hash": "e2ca66f45fde2259e915d206c8bb48d23c1a6e2eb739faca897cd68625f6b3dc",
+    "query_intent_brief_enabled": true,
+    "query_intent_data_sufficiency": true,
+    "query_intent_source_query_count": 120,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "CL-55",
+    "platform": "google",
+    "content_type": "title",
+    "request_id": "4f653caf-fead-4e36-bfbf-b02945e1432b",
+    "created_at": "2026-03-02T13:24:10.294771+00:00",
+    "prompt_hash": "573a5f8ac88bf982b69df216748231b8e1696f10637740aafc6dca7a8b453be9",
+    "query_intent_brief_enabled": true,
+    "query_intent_data_sufficiency": true,
+    "query_intent_source_query_count": 120,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "CL-55",
+    "platform": "finish",
+    "content_type": "finish_sentences",
+    "request_id": "0182f817-726b-469c-9b79-78bfd28d8c3e",
+    "created_at": "2026-03-02T13:23:56.36479+00:00",
+    "prompt_hash": "63d21e8df0cc5fb56a817ad08825fbf1b9f0f377c12e0123355decc1a78eac4b",
+    "query_intent_brief_enabled": null,
+    "query_intent_data_sufficiency": null,
+    "query_intent_source_query_count": null,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "CL-55",
+    "platform": "google",
+    "content_type": "description",
+    "request_id": "0182f817-726b-469c-9b79-78bfd28d8c3e",
+    "created_at": "2026-03-02T13:23:56.198998+00:00",
+    "prompt_hash": "3bfd68f6ee22ed2577c64732b38957651c8fa27053e2eccbf758bb50e635b51d",
+    "query_intent_brief_enabled": true,
+    "query_intent_data_sufficiency": true,
+    "query_intent_source_query_count": 120,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  },
+  {
+    "master_sku": "CL-55",
+    "platform": "google",
+    "content_type": "title",
+    "request_id": "1b61fbf0-47c6-4c06-a964-8684a7251a1d",
+    "created_at": "2026-03-02T13:23:29.648162+00:00",
+    "prompt_hash": "d6a2d6fec30b534c15c63a069103ea0e5e0c7a91b05e99e87da176c3e773a94e",
+    "query_intent_brief_enabled": true,
+    "query_intent_data_sufficiency": true,
+    "query_intent_source_query_count": 120,
+    "query_intent_disabled_reason": null,
+    "flag_query_intent": true
+  }
+]

@@ -1,0 +1,211 @@
+{
+  "batch_generation_job_skus": [
+    {
+      "completed_at": "2026-02-28T22:50:41.969337+00:00",
+      "created_at": "2026-02-28T22:50:29.048723+00:00",
+      "error_message": null,
+      "job_id": "c8119d75-e24c-4f24-9e47-7ae15cc072ee",
+      "master_sku": "1033/18",
+      "started_at": "2026-02-28T22:50:29.142018+00:00",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-02-28T22:50:45.270956+00:00",
+      "created_at": "2026-02-28T22:50:29.048723+00:00",
+      "error_message": null,
+      "job_id": "c8119d75-e24c-4f24-9e47-7ae15cc072ee",
+      "master_sku": "1033/24",
+      "started_at": "2026-02-28T22:50:42.06486+00:00",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-02-28T22:50:19.657045+00:00",
+      "created_at": "2026-02-28T22:49:52.876915+00:00",
+      "error_message": null,
+      "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+      "master_sku": "1033/18",
+      "started_at": "2026-02-28T22:49:52.963608+00:00",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-02-28T22:50:25.050433+00:00",
+      "created_at": "2026-02-28T22:49:52.876915+00:00",
+      "error_message": null,
+      "job_id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+      "master_sku": "1033/24",
+      "started_at": "2026-02-28T22:50:21.818728+00:00",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-02-28T22:49:49.123097+00:00",
+      "created_at": "2026-02-28T22:49:26.523896+00:00",
+      "error_message": null,
+      "job_id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
+      "master_sku": "CL-55",
+      "started_at": "2026-02-28T22:49:26.638363+00:00",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-02-28T22:49:22.921701+00:00",
+      "created_at": "2026-02-28T22:49:16.607534+00:00",
+      "error_message": null,
+      "job_id": "f3a17184-fde9-41c8-9414-bc6bf873f1a3",
+      "master_sku": "CL-55",
+      "started_at": "2026-02-28T22:49:16.738184+00:00",
+      "status": "completed"
+    }
+  ],
+  "batch_generation_jobs": [
+    {
+      "completed_at": "2026-02-28T22:49:23.058114+00:00",
+      "completed_skus": 1,
+      "created_at": "2026-02-28T22:49:16.558252+00:00",
+      "error_message": null,
+      "failed_skus": 0,
+      "id": "f3a17184-fde9-41c8-9414-bc6bf873f1a3",
+      "started_at": "2026-02-28T22:49:16.6515+00:00",
+      "status": "completed",
+      "total_skus": 1
+    },
+    {
+      "completed_at": "2026-02-28T22:49:49.208929+00:00",
+      "completed_skus": 1,
+      "created_at": "2026-02-28T22:49:26.480283+00:00",
+      "error_message": null,
+      "failed_skus": 0,
+      "id": "ef371ff2-b2c8-4d03-ac99-74ecb5fc36b1",
+      "started_at": "2026-02-28T22:49:26.548469+00:00",
+      "status": "completed",
+      "total_skus": 1
+    },
+    {
+      "completed_at": "2026-02-28T22:50:45.85618+00:00",
+      "completed_skus": 2,
+      "created_at": "2026-02-28T22:50:29.000073+00:00",
+      "error_message": null,
+      "failed_skus": 0,
+      "id": "c8119d75-e24c-4f24-9e47-7ae15cc072ee",
+      "started_at": "2026-02-28T22:50:29.072303+00:00",
+      "status": "completed",
+      "total_skus": 2
+    },
+    {
+      "completed_at": "2026-02-28T22:50:25.152073+00:00",
+      "completed_skus": 2,
+      "created_at": "2026-02-28T22:49:52.83218+00:00",
+      "error_message": null,
+      "failed_skus": 0,
+      "id": "cbc104f5-f7fd-4e87-8905-27ec6e6e9bea",
+      "started_at": "2026-02-28T22:49:52.901527+00:00",
+      "status": "completed",
+      "total_skus": 2
+    }
+  ],
+  "variant_finish_sentences": [
+    {
+      "finish_sentences": {
+        "Antique Brass": "Antique Brass highlights the Carolina countertop paper towel stand.",
+        "Antique Bronze": "Antique Bronze adds depth to this Carolina paper towel stand.",
+        "Antique Copper": "Antique Copper warms the solid brass countertop paper towel stand.",
+        "Antique Pewter": "Antique Pewter softens the Carolina stand\u2019s clean, classic lines.",
+        "Autumn Sparkle": "Autumn Sparkle brightens the Carolina countertop paper towel stand.",
+        "Brushed Bronze": "Brushed Bronze grounds the solid brass Carolina paper towel stand.",
+        "Fire Engine Red": "Fire Engine Red makes the Carolina paper towel stand a bold accent.",
+        "Flat Troll Blue": "Flat Troll Blue brings a cool pop to the Carolina paper towel stand.",
+        "Glokzin Teal": "Glokzin Teal refreshes the Carolina countertop paper towel stand.",
+        "Golden Yellow": "Golden Yellow energizes the Carolina paper towel stand\u2019s silhouette.",
+        "Lavender": "Lavender adds a gentle twist to the Carolina paper towel stand.",
+        "Matte Black": "Matte Black sharpens the Carolina stand\u2019s contemporary-classic look.",
+        "Matte Gray": "Matte Gray keeps the Carolina countertop paper towel stand understated.",
+        "Matte White": "Matte White gives the Carolina paper towel stand a clean finish.",
+        "Mediterranean Blue": "Mediterranean Blue colors the Carolina paper towel stand with ease.",
+        "Oil Rubbed Bronze": "Oil Rubbed Bronze deepens the Carolina stand\u2019s traditional notes.",
+        "Pink": "Pink turns the Carolina countertop paper towel stand into a highlight.",
+        "Polished Brass": "Polished Brass makes the solid brass Carolina stand glow brightly.",
+        "Polished Chrome": "Polished Chrome keeps the Carolina countertop paper towel stand crisp.",
+        "Polished Nickel": "Polished Nickel refines the Carolina stand\u2019s simple vertical form.",
+        "Satin Brass": "Satin Brass tones down shine on the Carolina paper towel stand.",
+        "Satin Chrome": "Satin Chrome suits the Carolina stand\u2019s clean, modern lines.",
+        "Satin Nickel": "Satin Nickel complements the Carolina stand\u2019s mixed-style design.",
+        "Sea Foam Green": "Sea Foam Green adds a fresh look to the Carolina paper towel stand.",
+        "Shaded Beige": "Shaded Beige softens the Carolina countertop paper towel stand.",
+        "Spanish Gold": "Spanish Gold enriches the Carolina stand\u2019s solid brass presence.",
+        "Unlacquered Brass": "Unlacquered Brass lets the Carolina paper towel stand age naturally.",
+        "Venetian Bronze": "Venetian Bronze adds warmth to the Carolina countertop paper towel stand."
+      },
+      "master_sku": "CL-55",
+      "platform": "google",
+      "updated_at": "2026-02-28T22:49:49.068518+00:00"
+    },
+    {
+      "finish_sentences": {
+        "Antique Brass": "Antique Brass frames the 18\" glass shelf with warm brass brackets.",
+        "Antique Bronze": "Antique Bronze gives the Skyline shelf a deep, classic brass tone.",
+        "Antique Copper": "Antique Copper adds a burnished accent to the solid brass supports.",
+        "Antique Pewter": "Antique Pewter cools the brass mounts behind the 1/4\" glass shelf.",
+        "Autumn Sparkle": "Autumn Sparkle brightens the Skyline shelf\u2019s concealed-mount brackets.",
+        "Brushed Bronze": "Brushed Bronze softens the look of the solid brass glass-shelf arms.",
+        "Fire Engine Red": "Fire Engine Red turns the Skyline glass shelf brackets into a bold pop.",
+        "Flat Troll Blue": "Flat Troll Blue brings crisp color to the shelf\u2019s solid brass mounts.",
+        "Glokzin Teal": "Glokzin Teal adds a modern twist to the Skyline glass shelf brackets.",
+        "Golden Yellow": "Golden Yellow spotlights the concealed hardware on this glass shelf.",
+        "Lavender": "Lavender gives the brass brackets a playful accent under clear glass.",
+        "Matte Black": "Matte Black sharpens the lines of the Skyline 18\" glass shelf mounts.",
+        "Matte Gray": "Matte Gray keeps the solid brass brackets understated and modern.",
+        "Matte White": "Matte White makes the concealed mounts blend cleanly under glass.",
+        "Mediterranean Blue": "Mediterranean Blue adds depth to the Skyline shelf\u2019s brass brackets.",
+        "Oil Rubbed Bronze": "Oil Rubbed Bronze enriches the brass supports with dark, warm tone.",
+        "Pink": "Pink turns the Skyline glass shelf brackets into a standout detail.",
+        "Polished Brass": "Polished Brass highlights the solid brass brackets beneath the glass.",
+        "Polished Chrome": "Polished Chrome keeps the Skyline shelf brackets bright and crisp.",
+        "Polished Nickel": "Polished Nickel adds a soft gleam to the concealed brass mounts.",
+        "Satin Brass": "Satin Brass gives the bracket set a smooth, muted brass glow.",
+        "Satin Chrome": "Satin Chrome adds a clean sheen to the Skyline glass shelf mounts.",
+        "Satin Nickel": "Satin Nickel gives the solid brass supports a subtle, cool finish.",
+        "Sea Foam Green": "Sea Foam Green freshens the look of the Skyline shelf brackets.",
+        "Shaded Beige": "Shaded Beige warms the brass mounts while keeping the glass light.",
+        "Spanish Gold": "Spanish Gold deepens the brass tone on the Skyline shelf supports.",
+        "Unlacquered Brass": "Unlacquered Brass lets the solid brass brackets show natural character.",
+        "Venetian Bronze": "Venetian Bronze adds rich depth to the Skyline shelf\u2019s brass mounts."
+      },
+      "master_sku": "1033/18",
+      "platform": "google",
+      "updated_at": "2026-02-28T22:50:18.810086+00:00"
+    },
+    {
+      "finish_sentences": {
+        "Antique Brass": "Antique Brass frames the 18\" glass shelf with warm brass brackets.",
+        "Antique Bronze": "Antique Bronze gives the Skyline shelf a deep, classic brass tone.",
+        "Antique Copper": "Antique Copper adds a burnished accent to the solid brass supports.",
+        "Antique Pewter": "Antique Pewter cools the brass mounts behind the 1/4\" glass shelf.",
+        "Autumn Sparkle": "Autumn Sparkle brightens the Skyline shelf\u2019s concealed-mount brackets.",
+        "Brushed Bronze": "Brushed Bronze softens the look of the solid brass glass-shelf arms.",
+        "Fire Engine Red": "Fire Engine Red turns the Skyline glass shelf brackets into a bold pop.",
+        "Flat Troll Blue": "Flat Troll Blue brings crisp color to the shelf\u2019s solid brass mounts.",
+        "Glokzin Teal": "Glokzin Teal adds a modern twist to the Skyline glass shelf brackets.",
+        "Golden Yellow": "Golden Yellow spotlights the concealed hardware on this glass shelf.",
+        "Lavender": "Lavender gives the brass brackets a playful accent under clear glass.",
+        "Matte Black": "Matte Black sharpens the lines of the Skyline 18\" glass shelf mounts.",
+        "Matte Gray": "Matte Gray keeps the solid brass brackets understated and modern.",
+        "Matte White": "Matte White makes the concealed mounts blend cleanly under glass.",
+        "Mediterranean Blue": "Mediterranean Blue adds depth to the Skyline shelf\u2019s brass brackets.",
+        "Oil Rubbed Bronze": "Oil Rubbed Bronze enriches the brass supports with dark, warm tone.",
+        "Pink": "Pink turns the Skyline glass shelf brackets into a standout detail.",
+        "Polished Brass": "Polished Brass highlights the solid brass brackets beneath the glass.",
+        "Polished Chrome": "Polished Chrome keeps the Skyline shelf brackets bright and crisp.",
+        "Polished Nickel": "Polished Nickel adds a soft gleam to the concealed brass mounts.",
+        "Satin Brass": "Satin Brass gives the bracket set a smooth, muted brass glow.",
+        "Satin Chrome": "Satin Chrome adds a clean sheen to the Skyline glass shelf mounts.",
+        "Satin Nickel": "Satin Nickel gives the solid brass supports a subtle, cool finish.",
+        "Sea Foam Green": "Sea Foam Green freshens the look of the Skyline shelf brackets.",
+        "Shaded Beige": "Shaded Beige warms the brass mounts while keeping the glass light.",
+        "Spanish Gold": "Spanish Gold deepens the brass tone on the Skyline shelf supports.",
+        "Unlacquered Brass": "Unlacquered Brass lets the solid brass brackets show natural character.",
+        "Venetian Bronze": "Venetian Bronze adds rich depth to the Skyline shelf\u2019s brass mounts."
+      },
+      "master_sku": "1033/24",
+      "platform": "google",
+      "updated_at": "2026-02-28T22:50:24.99519+00:00"
+    }
+  ]
+}

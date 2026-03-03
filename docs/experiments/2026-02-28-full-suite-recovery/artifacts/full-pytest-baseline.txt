@@ -1,0 +1,2007 @@
+..F..................................................................... [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+......................................................................F. [ 44%]
+................F.FF.F...........................F............FFF....... [ 55%]
+..........................................FFF..FF.FF...F.F.............. [ 66%]
+.................................s...................................... [ 77%]
+........................................................................ [ 88%]
+........................................................................ [ 99%]
+......                                                                   [100%]
+=================================== FAILURES ===================================
+___ test_master_approval_route_only_versions_content_on_approval_transition ____
+
+    def test_master_approval_route_only_versions_content_on_approval_transition() -> None:
+        source = _read(SKU_APPROVAL_ROUTE)
+    
+        assert "transitionContentTypes" in source
+>       assert "if (currentState.title_approved !== true && nextState.title_approved === true)" in source
+E       assert 'if (currentState.title_approved !== true && nextState.title_approved === true)' in "import { createClient } from '@/lib/supabase/server'\nimport { NextRequest, NextResponse } from 'next/server'\n\nexpo...scription_approved === false || state.image_approved === false) {\n    return 'rejected'\n  }\n  return 'pending'\n}\n"
+
+tests/api/test_dashboard_approval_state_contract.py:34: AssertionError
+_____________________ test_processes_all_items_in_batches ______________________
+
+mock_job_manager = {'get_job': <MagicMock name='get_job' id='4849413072'>, 'log_job_error': <MagicMock name='log_job_error' id='485761000...'save_checkpoint' id='4857573712'>, 'update_job_progress': <MagicMock name='update_job_progress' id='4849707920'>, ...}
+
+    @pytest.mark.asyncio
+    async def test_processes_all_items_in_batches(mock_job_manager):
+        """Test that processor processes all items in correct batch sizes."""
+        job_id = str(uuid4())
+        items = [f"SKU-{i}" for i in range(25)]
+    
+        # Track process_fn calls
+        process_calls = []
+    
+        async def mock_process_fn(batch):
+            process_calls.append(batch.copy())
+            return [{"item_id": item} for item in batch]
+    
+        # Create processor with batch_size=10
+        processor = BatchProcessor(
+            job_id=job_id,
+            items=items,
+            batch_size=10,
+            checkpoint_interval=100,
+        )
+    
+        await processor.run(mock_process_fn)
+    
+        # Should have 3 batches: [0:10], [10:20], [20:25]
+        assert len(process_calls) == 3, f"Expected 3 batches, got {len(process_calls)}"
+        assert len(process_calls[0]) == 10, "First batch should have 10 items"
+        assert len(process_calls[1]) == 10, "Second batch should have 10 items"
+        assert len(process_calls[2]) == 5, "Third batch should have 5 items"
+    
+        # Verify final status was set to 'complete'
+        status_calls = [call for call in mock_job_manager["update_job_status"].call_args_list]
+        # Should have 2 calls: 'running' at start, 'complete' at end
+        assert len(status_calls) >= 2
+        final_status_call = status_calls[-1]
+>       assert final_status_call[0][1] == "complete"
+E       AssertionError: assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/test_jobs/test_processor.py:89: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.jobs.quality_report:quality_report.py:165 Job 7206d69a-bdc2-4c3e-a9e7-da740676ba55 status corrected: creating -> failed (success_rate=0.0%)
+WARNING  feedops.jobs.processor:processor.py:257 Job 7206d69a-bdc2-4c3e-a9e7-da740676ba55: Status corrected from 'creating' to 'failed' by post-completion validation
+_________________ test_collect_search_terms_batch_calls_client _________________
+
+    @pytest.mark.asyncio
+    async def test_collect_search_terms_batch_calls_client():
+        """Test search terms worker calls SearchTermsClient and saves with idempotent upserts."""
+        from feedops.jobs.workers import collect_search_terms_batch
+    
+        # Mock dependencies - patch at import location
+        with patch("feedops.integrations.google_ads_search_terms.SearchTermsClient") as MockClient, \
+             patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+    
+            # Setup mocks
+            mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
+    
+            mock_client_instance = MagicMock()
+            MockClient.return_value = mock_client_instance
+    
+            # Mock fetch_search_terms to return sample data
+            mock_client_instance.fetch_search_terms.return_value = [
+                {"query_text": "brass towel bar", "master_sku": "SKU-1", "impressions": 100},
+                {"query_text": "bathroom hardware", "master_sku": "SKU-2", "impressions": 50},
+                {"query_text": "wall mount hooks", "master_sku": "SKU-1", "impressions": 75},
+            ]
+    
+            # Mock save_search_terms_to_db to return count
+            mock_client_instance.save_search_terms_to_db.return_value = 2
+    
+            # Call worker
+            batch = ["SKU-1", "SKU-2"]
+            results = await collect_search_terms_batch(batch)
+    
+            # Assert: fetch_search_terms called with days=180
+            mock_client_instance.fetch_search_terms.assert_called_once()
+            call_kwargs = mock_client_instance.fetch_search_terms.call_args[1]
+            assert call_kwargs["days"] == 180
+            assert call_kwargs["limit"] == 10000
+    
+            # Assert: save_search_terms_to_db called with filtered results
+>           mock_client_instance.save_search_terms_to_db.assert_called_once()
+
+tests/test_jobs/test_workers.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <MagicMock name='SearchTermsClient().save_search_terms_to_db' id='4846302352'>
+
+    def assert_called_once(self):
+        """assert that the mock was called only once.
+        """
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to have been called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected 'save_search_terms_to_db' to have been called once. Called 0 times.
+
+../../../.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/unittest/mock.py:918: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    feedops.jobs.workers:workers.py:186 Search terms collection failed for batch: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+________________ test_collect_search_terms_batch_filters_by_sku ________________
+
+    @pytest.mark.asyncio
+    async def test_collect_search_terms_batch_filters_by_sku():
+        """Test search terms worker filters results to only requested SKUs."""
+        from feedops.jobs.workers import collect_search_terms_batch
+    
+        with patch("feedops.integrations.google_ads_search_terms.SearchTermsClient") as MockClient, \
+             patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+    
+            mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
+    
+            mock_client_instance = MagicMock()
+            MockClient.return_value = mock_client_instance
+    
+            # Mock fetch_search_terms to return terms for SKU-1, SKU-2, SKU-3
+            mock_client_instance.fetch_search_terms.return_value = [
+                {"query_text": "term1", "master_sku": "SKU-1", "impressions": 100},
+                {"query_text": "term2", "master_sku": "SKU-2", "impressions": 50},
+                {"query_text": "term3", "master_sku": "SKU-3", "impressions": 75},
+            ]
+    
+            mock_client_instance.save_search_terms_to_db.return_value = 2
+    
+            # Call worker with only SKU-1 and SKU-2 (filtering out SKU-3)
+            batch = ["SKU-1", "SKU-2"]
+            results = await collect_search_terms_batch(batch)
+    
+            # Assert: Only terms for SKU-1 and SKU-2 are saved (SKU-3 filtered out)
+>           save_call_kwargs = mock_client_instance.save_search_terms_to_db.call_args[1]
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: 'NoneType' object is not subscriptable
+
+tests/test_jobs/test_workers.py:135: TypeError
+------------------------------ Captured log call -------------------------------
+ERROR    feedops.jobs.workers:workers.py:186 Search terms collection failed for batch: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+______________ test_collect_performance_batch_aggregates_variants ______________
+
+    @pytest.mark.asyncio
+    async def test_collect_performance_batch_aggregates_variants():
+        """Test performance worker aggregates variant-level metrics to master_sku level."""
+        from feedops.jobs.workers import collect_performance_batch
+    
+        with patch("feedops.db.supabase_client.get_client") as mock_get_client, \
+             patch("feedops.integrations.google_ads_performance.fetch_batch_product_performance") as mock_fetch, \
+             patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+    
+            mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
+    
+            # Setup mock Supabase client
+            mock_supabase = MagicMock()
+            mock_get_client.return_value = mock_supabase
+    
+            # Mock variant_index query to return 3 variants for SKU-1
+            mock_variant_result = MagicMock()
+            mock_variant_result.data = [
+                {"gmc_offer_id": "shopify_us_123_456"},
+                {"gmc_offer_id": "shopify_us_123_457"},
+                {"gmc_offer_id": "shopify_us_123_458"},
+            ]
+            mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_variant_result
+    
+            # Mock fetch_batch_product_performance to return metrics for each variant
+            mock_fetch.return_value = {
+                "shopify_us_123_456": {
+                    "impressions": 1000,
+                    "clicks": 50,
+                    "conversions": 5,
+                    "conversion_value": 500.0,
+                    "cost": 100.0,
+                },
+                "shopify_us_123_457": {
+                    "impressions": 2000,
+                    "clicks": 100,
+                    "conversions": 10,
+                    "conversion_value": 1000.0,
+                    "cost": 200.0,
+                },
+                "shopify_us_123_458": {
+                    "impressions": 3000,
+                    "clicks": 150,
+                    "conversions": 15,
+                    "conversion_value": 1500.0,
+                    "cost": 300.0,
+                },
+            }
+    
+            # Mock upsert
+            mock_upsert = MagicMock()
+            mock_upsert.execute.return_value = MagicMock()
+            mock_supabase.table.return_value.upsert.return_value = mock_upsert
+    
+            # Call worker
+            results = await collect_performance_batch(["SKU-1"])
+    
+            # Assert: fetch_batch_product_performance called with all 3 offer_ids
+            mock_fetch.assert_called_once()
+            call_kwargs = mock_fetch.call_args[1]
+            assert len(call_kwargs["offer_ids"]) == 3
+            assert "shopify_us_123_456" in call_kwargs["offer_ids"]
+            assert "shopify_us_123_457" in call_kwargs["offer_ids"]
+            assert "shopify_us_123_458" in call_kwargs["offer_ids"]
+    
+            # Assert: Upsert called with aggregated metrics
+            mock_upsert_call = mock_supabase.table.return_value.upsert.call_args
+>           upsert_data = mock_upsert_call[0][0]
+                          ^^^^^^^^^^^^^^^^^^^
+E           TypeError: 'NoneType' object is not subscriptable
+
+tests/test_jobs/test_workers.py:209: TypeError
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.jobs.workers:workers.py:383 Skipping SKU-1: Baseline period overlaps publish event at <MagicMock name='get_client().table().select().eq().eq().eq().gte().lte().limit().execute().data.__getitem__().__getitem__().__getitem__()' id='5340060432'>
+______________ test_collect_performance_batch_includes_timestamps ______________
+
+    @pytest.mark.asyncio
+    async def test_collect_performance_batch_includes_timestamps():
+        """Test performance worker includes timestamps and date range fields."""
+        from feedops.jobs.workers import collect_performance_batch
+    
+        with patch("feedops.db.supabase_client.get_client") as mock_get_client, \
+             patch("feedops.integrations.google_ads_performance.fetch_batch_product_performance") as mock_fetch, \
+             patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+    
+            mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
+    
+            # Setup mock Supabase client
+            mock_supabase = MagicMock()
+            mock_get_client.return_value = mock_supabase
+    
+            # Mock variant_index query
+            mock_variant_result = MagicMock()
+            mock_variant_result.data = [{"gmc_offer_id": "shopify_us_123_456"}]
+            mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_variant_result
+    
+            # Mock fetch_batch_product_performance
+            mock_fetch.return_value = {
+                "shopify_us_123_456": {
+                    "impressions": 1000,
+                    "clicks": 50,
+                    "conversions": 5,
+                    "conversion_value": 500.0,
+                    "cost": 100.0,
+                }
+            }
+    
+            # Mock upsert
+            mock_upsert = MagicMock()
+            mock_upsert.execute.return_value = MagicMock()
+            mock_supabase.table.return_value.upsert.return_value = mock_upsert
+    
+            # Call worker
+            results = await collect_performance_batch(["SKU-1"])
+    
+            # Assert: Upsert data includes baseline_start_date and baseline_end_date (DATA-05)
+            upsert_call = mock_supabase.table.return_value.upsert.call_args
+>           upsert_data = upsert_call[0][0]
+                          ^^^^^^^^^^^^^^
+E           TypeError: 'NoneType' object is not subscriptable
+
+tests/test_jobs/test_workers.py:310: TypeError
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.jobs.workers:workers.py:383 Skipping SKU-1: Baseline period overlaps publish event at <MagicMock name='get_client().table().select().eq().eq().eq().gte().lte().limit().execute().data.__getitem__().__getitem__().__getitem__()' id='5340060432'>
+___________ test_score_lifestyle_image_retries_on_resource_exhausted ___________
+
+tmp_path = PosixPath('/private/var/folders/8l/_z5gjzcx4t714x8xsw0hznnh0000gn/T/pytest-of-bobby/pytest-37/test_score_lifestyle_image_ret0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13dfc1b90>
+
+    def test_score_lifestyle_image_retries_on_resource_exhausted(tmp_path, monkeypatch) -> None:
+        generated_path = tmp_path / "CL-41-30_var1_20260129_104033.png"
+        Image.new("RGB", (32, 32), color=(255, 255, 255)).save(generated_path)
+    
+        buf = BytesIO()
+        Image.new("RGB", (16, 16), color=(0, 0, 0)).save(buf, format="PNG")
+        ref_bytes = buf.getvalue()
+    
+        calls = {"n": 0}
+    
+        class FakeModels:
+            def generate_content(self, *args, **kwargs):
+                calls["n"] += 1
+                if calls["n"] < 3:
+                    raise Exception(
+                        "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'status': 'RESOURCE_EXHAUSTED'}}"
+                    )
+                return SimpleNamespace(
+                    text='{"product_accuracy": 90, "composition_quality": 80, "background_appropriateness": 80, "aesthetic_appeal": 80, "notes": "ok"}'
+                )
+    
+        class FakeClient:
+            def __init__(self, api_key: str):
+                self.models = FakeModels()
+    
+        class FakeResponse:
+            def __init__(self, content: bytes):
+                self.content = content
+    
+            def raise_for_status(self) -> None:
+                return None
+    
+        def fake_get(url: str, timeout: int = 10):
+            return FakeResponse(ref_bytes)
+    
+        monkeypatch.setattr(lifestyle_images.genai, "Client", FakeClient)
+        monkeypatch.setattr(lifestyle_images.requests, "get", fake_get)
+    
+        # If the implementation uses backoff sleeps, don’t slow tests down.
+        if hasattr(lifestyle_images, "time"):
+            monkeypatch.setattr(lifestyle_images.time, "sleep", lambda *_args, **_kwargs: None)
+    
+>       score = lifestyle_images.score_lifestyle_image(
+            image_path=generated_path,
+            reference_image_url="https://example.com/ref.png",
+            category="Towel Bars",
+            api_key="fake",
+        )
+E       ResourceWarning: unclosed file <_io.BufferedReader name='/private/var/folders/8l/_z5gjzcx4t714x8xsw0hznnh0000gn/T/pytest-of-bobby/pytest-37/test_score_lifestyle_image_ret0/CL-41-30_var1_20260129_104033.png'>
+
+tests/test_lifestyle_image_scoring_retries_429.py:53: ResourceWarning
+
+The above exception was the direct cause of the following exception:
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x1210f6d40>
+when = 'call'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        instant = timing.Instant()
+        try:
+>           result: TResult | None = func()
+                                     ^^^^^^
+
+.venv/lib/python3.11/site-packages/_pytest/runner.py:353: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.11/site-packages/_pytest/runner.py:245: in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.11/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.11/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.11/site-packages/_pytest/logging.py:850: in pytest_runtest_call
+    yield
+.venv/lib/python3.11/site-packages/_pytest/capture.py:900: in pytest_runtest_call
+    return (yield)
+            ^^^^^
+.venv/lib/python3.11/site-packages/_pytest/skipping.py:268: in pytest_runtest_call
+    return (yield)
+            ^^^^^
+.venv/lib/python3.11/site-packages/_pytest/unraisableexception.py:158: in pytest_runtest_call
+    collect_unraisable(item.config)
+.venv/lib/python3.11/site-packages/_pytest/unraisableexception.py:79: in collect_unraisable
+    raise errors[0]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+config = <_pytest.config.Config object at 0x10b248510>
+
+    def collect_unraisable(config: Config) -> None:
+        pop_unraisable = config.stash[unraisable_exceptions].pop
+        errors: list[pytest.PytestUnraisableExceptionWarning | RuntimeError] = []
+        meta = None
+        hook_error = None
+        try:
+            while True:
+                try:
+                    meta = pop_unraisable()
+                except IndexError:
+                    break
+    
+                if isinstance(meta, BaseException):
+                    hook_error = RuntimeError("Failed to process unraisable exception")
+                    hook_error.__cause__ = meta
+                    errors.append(hook_error)
+                    continue
+    
+                msg = meta.msg
+                try:
+>                   warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+E                   pytest.PytestUnraisableExceptionWarning: Exception ignored in: <_io.FileIO name='/private/var/folders/8l/_z5gjzcx4t714x8xsw0hznnh0000gn/T/pytest-of-bobby/pytest-37/test_score_lifestyle_image_ret0/CL-41-30_var1_20260129_104033.png' mode='rb' closefd=True>
+E                   Enable tracemalloc to get traceback where the object was allocated.
+E                   See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+.venv/lib/python3.11/site-packages/_pytest/unraisableexception.py:67: PytestUnraisableExceptionWarning
+_________________ test_load_credentials_uses_google_ads_config _________________
+
+tmp_path = PosixPath('/private/var/folders/8l/_z5gjzcx4t714x8xsw0hznnh0000gn/T/pytest-of-bobby/pytest-37/test_load_credentials_uses_goo0')
+
+    def test_load_credentials_uses_google_ads_config(tmp_path):
+        Credentials = pytest.importorskip("google.oauth2.credentials").Credentials
+    
+        from feedops.integrations import merchant_center
+    
+        config_path = tmp_path / "google-ads.yaml"
+        config_path.write_text(
+            "\n".join(
+                [
+                    "client_id: test-client-id",
+                    "client_secret: test-client-secret",
+                    "refresh_token: test-refresh-token",
+                ]
+            )
+        )
+    
+        creds, source = merchant_center._load_credentials(
+            {"GOOGLE_ADS_CONFIGURATION_FILE_PATH": str(config_path)}
+        )
+    
+        assert source == "google_ads_config"
+>       assert isinstance(creds, Credentials)
+E       AssertionError: assert False
+E        +  where False = isinstance(<tests.test_env_parity._import_merchant_center_with_google_stubs.<locals>._OAuthCreds object at 0x13e048890>, <class 'google.oauth2.credentials.Credentials'>)
+
+tests/test_merchant_center.py:210: AssertionError
+_ test_load_credentials_invalid_service_account_fails_fast_without_adc_fallback _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e0632d0>
+
+    def test_load_credentials_invalid_service_account_fails_fast_without_adc_fallback(monkeypatch):
+        from feedops.integrations import merchant_center
+    
+        def fail_from_info(_info, scopes=None):
+            raise ValueError("Invalid private key")
+    
+        def fail_adc(*_args, **_kwargs):
+            raise AssertionError("ADC fallback should not be used")
+    
+        monkeypatch.setattr(
+            merchant_center.service_account.Credentials,
+            "from_service_account_info",
+            fail_from_info,
+        )
+        monkeypatch.setattr(merchant_center.google.auth, "default", fail_adc)
+    
+>       with pytest.raises(ValueError, match="Merchant credential loading failed"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_merchant_center.py:230: Failed
+___________ test_load_credentials_can_use_adc_fallback_when_opted_in ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1218fed50>
+
+    def test_load_credentials_can_use_adc_fallback_when_opted_in(monkeypatch):
+        from feedops.integrations import merchant_center
+    
+        class DummyCred:
+            token = None
+    
+            def refresh(self, _request) -> None:
+                return None
+    
+        def fail_from_info(_info, scopes=None):
+            raise ValueError("Invalid private key")
+    
+        def fake_adc(*_args, **_kwargs):
+            return DummyCred(), "project-id"
+    
+        monkeypatch.setattr(
+            merchant_center.service_account.Credentials,
+            "from_service_account_info",
+            fail_from_info,
+        )
+        monkeypatch.setattr(merchant_center.google.auth, "default", fake_adc)
+    
+        creds, source = merchant_center._load_credentials(
+            {
+                "GOOGLE_SERVICE_ACCOUNT_KEY": '{"type":"service_account","private_key":"bad","client_email":"x@example.com"}',
+                "FEEDOPS_ALLOW_ADC_FALLBACK": "1",
+            }
+        )
+    
+>       assert isinstance(creds, DummyCred)
+E       AssertionError: assert False
+E        +  where False = isinstance(<tests.test_env_parity._import_merchant_center_with_google_stubs.<locals>._OAuthCreds object at 0x1218fee90>, <class 'tests.test_merchant_center.test_load_credentials_can_use_adc_fallback_when_opted_in.<locals>.DummyCred'>)
+
+tests/test_merchant_center.py:267: AssertionError
+____ test_regenerate_description_uses_fallback_finish_sentences_when_killed ____
+
+self = <tests.test_phase7_observability_reliability._FakeProvider object at 0x13e3dbf10>
+_args = ()
+_kwargs = {'max_completion_tokens': 1200, 'prompt': '<task>Generate 28 finish sentences for MasterSKU: 1031/18.</task>\n\n<produ...entence'], 'type': 'object'}, 'maxItems': 28, 'minItems': 28, ...}}, 'required': ['sentences'], 'type': 'object'}, ...}
+
+    async def generate(self, *_args, **_kwargs) -> dict:
+>       result = self._responses[self.calls]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/test_phase7_observability_reliability.py:82: IndexError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e3db7d0>
+
+    @pytest.mark.asyncio
+    async def test_regenerate_description_uses_fallback_finish_sentences_when_killed(
+        monkeypatch,
+    ):
+        monkeypatch.setenv("FEEDOPS_DISABLE_FINISH_SENTENCE_REGEN", "1")
+    
+        fake_provider = _FakeProvider(
+            [
+                {
+                    "content": (
+                        "Antique Brass keeps towels organized in this wall-mounted towel bar. "
+                        "Choose from 28 designer finishes to coordinate your bath."
+                    )
+                }
+            ]
+        )
+    
+        monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+        monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
+        monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+        monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
+        monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
+        monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
+        monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
+        monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    
+        request = api_main.RegenerateRequest(
+            master_sku="1031/18",
+            content_type="description",
+            platform="google",
+            feedback=None,
+            finish_code="ABR",
+        )
+>       response = await api_main.regenerate_content(request)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_phase7_observability_reliability.py:378: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+request = RegenerateRequest(master_sku='1031/18', content_type='description', platform='google', feedback=None, finish_code='ABR', tone_style=None, emphasis=None, length_preference=None, save_as_correction=False, async_mode=False)
+
+    @app.post(
+        "/regenerate",
+        response_model=RegenerateResponse | RegenerateJobResponse,
+        tags=["Generation"],
+    )
+    async def regenerate_content(request: RegenerateRequest):
+        """Regenerate content either synchronously (default) or as queued async job."""
+        request_id = (get_request_id() or "").strip()
+        if not request_id or request_id == "-":
+            request_id = uuid.uuid4().hex
+        try:
+            ensure_generation_enabled(operation="regenerate_content")
+            request_id = _require_request_id(request_id)
+    
+            if request.async_mode:
+                supabase = get_client()
+                canonical_master_sku = resolve_canonical_master_sku(
+                    supabase, request.master_sku
+                )
+                idempotency_key = _regeneration_idempotency_key(
+                    request=request,
+                    canonical_master_sku=canonical_master_sku,
+                )
+                active_job = _find_active_regeneration_job(
+                    supabase=supabase,
+                    canonical_master_sku=canonical_master_sku,
+                    idempotency_key=idempotency_key,
+                )
+                if active_job and active_job.get("id"):
+                    normalized_status = _normalize_regeneration_job_status(
+                        active_job.get("status")
+                    )
+                    return RegenerateJobResponse(
+                        success=True,
+                        job_id=str(active_job["id"]),
+                        status=normalized_status,
+                        request_id=request_id,
+                        master_sku=canonical_master_sku,
+                        content_type=request.content_type,
+                        platform=request.platform,
+                        deduplicated=True,
+                    )
+                job_id = _create_regeneration_job(
+                    supabase=supabase,
+                    request=request,
+                    canonical_master_sku=canonical_master_sku,
+                    request_id=request_id,
+                    idempotency_key=idempotency_key,
+                )
+                request_payload = request.model_dump()
+                request_payload["master_sku"] = canonical_master_sku
+                request_payload["async_mode"] = False
+                run_async_in_thread(
+                    process_regenerate_job,
+                    request_id=request_id,
+                    job_id=job_id,
+                    request_payload=request_payload,
+                )
+                return RegenerateJobResponse(
+                    success=True,
+                    job_id=job_id,
+                    status="pending",
+                    request_id=request_id,
+                    master_sku=canonical_master_sku,
+                    content_type=request.content_type,
+                    platform=request.platform,
+                    deduplicated=False,
+                )
+    
+            return await _execute_regeneration_request(request=request, request_id=request_id)
+    
+        except GenerationBudgetExceededError as exc:
+            _emit_generation_summary(
+                endpoint="regenerate",
+                request_id=request_id,
+                master_sku=request.master_sku,
+                platform=request.platform,
+                content_type=request.content_type,
+                mode="with_feedback" if request.feedback else "simple",
+                result_state="failed",
+                budget_stop_triggered=True,
+            )
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "code": "generation_budget_cap_exceeded",
+                    "message": str(exc),
+                    "platform": request.platform,
+                    "content_type": request.content_type,
+                },
+            ) from exc
+        except HTTPException:
+            _emit_generation_summary(
+                endpoint="regenerate",
+                request_id=request_id,
+                master_sku=request.master_sku,
+                platform=request.platform,
+                content_type=request.content_type,
+                mode="with_feedback" if request.feedback else "simple",
+                result_state="failed",
+                budget_stop_triggered=False,
+            )
+            raise
+        except Exception as e:
+            logger.error(f"Regeneration failed: {e}")
+            _emit_generation_summary(
+                endpoint="regenerate",
+                request_id=request_id,
+                master_sku=request.master_sku,
+                platform=request.platform,
+                content_type=request.content_type,
+                mode="with_feedback" if request.feedback else "simple",
+                result_state="failed",
+                budget_stop_triggered=False,
+            )
+>           raise HTTPException(status_code=500, detail=str(e))
+E           fastapi.exceptions.HTTPException: 500: list index out of range
+
+src/feedops/api/main.py:2141: HTTPException
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.main:main.py:1681 Failed to load corrections for 1031/18: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.generator:generator.py:556 Short v2 content payload detected: sku=1031/18 platform=google expected_key=google_description expected_len=0 keys=['content'] value_lengths={'content': 126}
+ERROR    feedops.api.main:main.py:2130 Regeneration failed: list index out of range
+WARNING  feedops.api.main:__init__.py:58 {"budget_stop_triggered": false, "content_type": "description", "diagnostic_mode": false, "endpoint": "regenerate", "event": "generation.request.summary", "job_id": null, "master_sku": "1031/18", "mode": "simple", "platform": "google", "request_id": "8be918c485864b47a881155164decd1d", "result_state": "failed", "ts": 1772270868.921855}
+_ test_regenerate_description_injects_finish_sentence_placeholder_when_finish_sentences_present _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13a6148d0>
+
+    @pytest.mark.asyncio
+    async def test_regenerate_description_injects_finish_sentence_placeholder_when_finish_sentences_present(monkeypatch):
+        fake_provider = _FakeProvider(
+            [
+                {"content": "Keep towels organized with this wall-mounted towel bar."},
+                {"finish_sentences": {finish: f"{finish} complements this towel bar design." for finish in api_main.get_finish_list()}},
+            ]
+        )
+    
+        monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+        monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
+        monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+        monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
+        monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
+        monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
+        monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
+        monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    
+        request = api_main.RegenerateRequest(
+            master_sku="1031/18",
+            content_type="description",
+            platform="google",
+            feedback=None,
+            finish_code="ABR",
+        )
+>       response = await api_main.regenerate_content(request)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_phase7_observability_reliability.py:415: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/feedops/api/main.py:2095: in regenerate_content
+    return await _execute_regeneration_request(request=request, request_id=request_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def _execute_regeneration_request(
+        *,
+        request: RegenerateRequest,
+        request_id: str,
+    ) -> RegenerateResponse:
+        """Execute a single regeneration request and return the full response payload."""
+        supabase = get_client()
+        canonical_master_sku = resolve_canonical_master_sku(supabase, request.master_sku)
+        request_idempotency_key = _regeneration_idempotency_key(
+            request=request,
+            canonical_master_sku=canonical_master_sku,
+        )
+        logger.info(
+            "Regenerating %s for SKU: requested=%s canonical=%s",
+            request.content_type,
+            request.master_sku,
+            canonical_master_sku,
+        )
+        log_event(
+            logger,
+            logging.INFO,
+            "generation.regenerate.start",
+            endpoint="regenerate",
+            master_sku=canonical_master_sku,
+            requested_master_sku=request.master_sku,
+            platform=request.platform,
+            content_type=request.content_type,
+            request_id=request_id,
+        )
+    
+        # Load product data from Supabase
+        parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+        if not parent_sku:
+            raise HTTPException(status_code=404, detail=f"SKU not found: {request.master_sku}")
+    
+        # Get LLM provider
+        provider = get_provider()
+        prompt_hash = get_platform_system_prompt_hash(request.platform)
+    
+        # Load persistent corrections for this SKU (FIX-01: feedback layer)
+        # Corrections are platform/content_type scoped so "all" platform corrections apply everywhere
+        corrections: list[dict] = []
+        try:
+            corrections_resp = (
+                supabase.table("sku_corrections")
+                .select("*")
+                .eq("master_sku", canonical_master_sku)
+                .in_("platform", [request.platform, "all"])
+                .in_("content_type", [request.content_type, "all"])
+                .eq("is_active", True)
+                .execute()
+            )
+            corrections = corrections_resp.data or []
+            if corrections:
+                logger.info(
+                    "Loaded %s persistent corrections for %s/%s/%s",
+                    len(corrections),
+                    canonical_master_sku,
+                    request.platform,
+                    request.content_type,
+                )
+        except Exception as e:
+            logger.warning("Failed to load corrections for %s: %s", canonical_master_sku, e)
+    
+        # Build session feedback from structured fields (FIX-01)
+        feedback_parts: list[str] = []
+        if request.tone_style:
+            feedback_parts.append(f"Tone/style: {request.tone_style}")
+        if request.emphasis:
+            feedback_parts.append(f"Emphasize: {', '.join(request.emphasis)}")
+        if request.length_preference:
+            feedback_parts.append(f"Length: {request.length_preference}")
+        if request.feedback:
+            feedback_parts.append(request.feedback)
+        session_feedback = "\n".join(feedback_parts) if feedback_parts else None
+    
+        finish_sentences: dict[str, str] | None = None
+        system_prompt = ""
+        user_prompt = ""
+        regen_latency_ms = 0
+        feedback_lines: list[str] = []
+        if corrections:
+            correction_lines = []
+            for correction in corrections:
+                text = (
+                    correction.get("correction_text")
+                    or correction.get("text")
+                    or correction.get("correction")
+                )
+                if text:
+                    correction_lines.append(f"- {text}")
+            if correction_lines:
+                feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
+        if session_feedback:
+            feedback_lines.append("Reviewer Feedback:\n" + session_feedback)
+    
+        selected_platforms: list[str] = [request.platform]
+        include_finish = (
+            request.content_type == "description" and request.platform in {"google", "bing"}
+        )
+        if include_finish:
+            selected_platforms.append("finish")
+    
+        generated = await generate_per_platform(
+            parent_sku=parent_sku,
+            provider=provider,
+            prompt_version="v2",
+            feedback_by_platform={request.platform: "\n\n".join(feedback_lines)}
+            if feedback_lines
+            else None,
+            selected_platforms=selected_platforms,
+        )
+        field_key = _content_field_key(request.platform, request.content_type)
+        content = str(generated.get(field_key, "")).strip()
+        if not content:
+>           raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": "regenerate_missing_required_platform_field",
+                    "message": (
+                        f"Missing required regenerated field '{field_key}' for "
+                        f"{request.platform}/{request.content_type}."
+                    ),
+                    "platform": request.platform,
+                    "content_type": request.content_type,
+                },
+            )
+E           fastapi.exceptions.HTTPException: 502: {'code': 'regenerate_missing_required_platform_field', 'message': "Missing required regenerated field 'google_description' for google/description.", 'platform': 'google', 'content_type': 'description'}
+
+src/feedops/api/main.py:1734: HTTPException
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.main:main.py:1681 Failed to load corrections for 1031/18: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.generator:generator.py:556 Short v2 content payload detected: sku=1031/18 platform=google expected_key=google_description expected_len=0 keys=['content'] value_lengths={'content': 55}
+WARNING  feedops.api.main:__init__.py:58 {"budget_stop_triggered": false, "content_type": "description", "diagnostic_mode": false, "endpoint": "regenerate", "event": "generation.request.summary", "job_id": null, "master_sku": "1031/18", "mode": "simple", "platform": "google", "request_id": "441e92c8bcf244e4837f04470cfa285e", "result_state": "failed", "ts": 1772270868.95422}
+___ test_regenerate_description_falls_back_when_finish_sentences_incomplete ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13a6169d0>
+
+    @pytest.mark.asyncio
+    async def test_regenerate_description_falls_back_when_finish_sentences_incomplete(
+        monkeypatch,
+    ):
+        fake_provider = _FakeProvider(
+            [
+                {
+                    "content": (
+                        "Polished Nickel keeps towels organized with a wall-mounted profile."
+                    )
+                },
+                {"finish_sentences": {"Antique Brass": "Antique Brass warms the space."}},
+            ]
+        )
+    
+        monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+        monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
+        monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
+        monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
+        monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
+        monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
+        monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
+        monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    
+        request = api_main.RegenerateRequest(
+            master_sku="1031/18",
+            content_type="description",
+            platform="google",
+            feedback=None,
+            finish_code="ABR",
+        )
+>       response = await api_main.regenerate_content(request)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_phase7_observability_reliability.py:455: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/feedops/api/main.py:2095: in regenerate_content
+    return await _execute_regeneration_request(request=request, request_id=request_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def _execute_regeneration_request(
+        *,
+        request: RegenerateRequest,
+        request_id: str,
+    ) -> RegenerateResponse:
+        """Execute a single regeneration request and return the full response payload."""
+        supabase = get_client()
+        canonical_master_sku = resolve_canonical_master_sku(supabase, request.master_sku)
+        request_idempotency_key = _regeneration_idempotency_key(
+            request=request,
+            canonical_master_sku=canonical_master_sku,
+        )
+        logger.info(
+            "Regenerating %s for SKU: requested=%s canonical=%s",
+            request.content_type,
+            request.master_sku,
+            canonical_master_sku,
+        )
+        log_event(
+            logger,
+            logging.INFO,
+            "generation.regenerate.start",
+            endpoint="regenerate",
+            master_sku=canonical_master_sku,
+            requested_master_sku=request.master_sku,
+            platform=request.platform,
+            content_type=request.content_type,
+            request_id=request_id,
+        )
+    
+        # Load product data from Supabase
+        parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+        if not parent_sku:
+            raise HTTPException(status_code=404, detail=f"SKU not found: {request.master_sku}")
+    
+        # Get LLM provider
+        provider = get_provider()
+        prompt_hash = get_platform_system_prompt_hash(request.platform)
+    
+        # Load persistent corrections for this SKU (FIX-01: feedback layer)
+        # Corrections are platform/content_type scoped so "all" platform corrections apply everywhere
+        corrections: list[dict] = []
+        try:
+            corrections_resp = (
+                supabase.table("sku_corrections")
+                .select("*")
+                .eq("master_sku", canonical_master_sku)
+                .in_("platform", [request.platform, "all"])
+                .in_("content_type", [request.content_type, "all"])
+                .eq("is_active", True)
+                .execute()
+            )
+            corrections = corrections_resp.data or []
+            if corrections:
+                logger.info(
+                    "Loaded %s persistent corrections for %s/%s/%s",
+                    len(corrections),
+                    canonical_master_sku,
+                    request.platform,
+                    request.content_type,
+                )
+        except Exception as e:
+            logger.warning("Failed to load corrections for %s: %s", canonical_master_sku, e)
+    
+        # Build session feedback from structured fields (FIX-01)
+        feedback_parts: list[str] = []
+        if request.tone_style:
+            feedback_parts.append(f"Tone/style: {request.tone_style}")
+        if request.emphasis:
+            feedback_parts.append(f"Emphasize: {', '.join(request.emphasis)}")
+        if request.length_preference:
+            feedback_parts.append(f"Length: {request.length_preference}")
+        if request.feedback:
+            feedback_parts.append(request.feedback)
+        session_feedback = "\n".join(feedback_parts) if feedback_parts else None
+    
+        finish_sentences: dict[str, str] | None = None
+        system_prompt = ""
+        user_prompt = ""
+        regen_latency_ms = 0
+        feedback_lines: list[str] = []
+        if corrections:
+            correction_lines = []
+            for correction in corrections:
+                text = (
+                    correction.get("correction_text")
+                    or correction.get("text")
+                    or correction.get("correction")
+                )
+                if text:
+                    correction_lines.append(f"- {text}")
+            if correction_lines:
+                feedback_lines.append("Persistent Corrections:\n" + "\n".join(correction_lines))
+        if session_feedback:
+            feedback_lines.append("Reviewer Feedback:\n" + session_feedback)
+    
+        selected_platforms: list[str] = [request.platform]
+        include_finish = (
+            request.content_type == "description" and request.platform in {"google", "bing"}
+        )
+        if include_finish:
+            selected_platforms.append("finish")
+    
+        generated = await generate_per_platform(
+            parent_sku=parent_sku,
+            provider=provider,
+            prompt_version="v2",
+            feedback_by_platform={request.platform: "\n\n".join(feedback_lines)}
+            if feedback_lines
+            else None,
+            selected_platforms=selected_platforms,
+        )
+        field_key = _content_field_key(request.platform, request.content_type)
+        content = str(generated.get(field_key, "")).strip()
+        if not content:
+>           raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": "regenerate_missing_required_platform_field",
+                    "message": (
+                        f"Missing required regenerated field '{field_key}' for "
+                        f"{request.platform}/{request.content_type}."
+                    ),
+                    "platform": request.platform,
+                    "content_type": request.content_type,
+                },
+            )
+E           fastapi.exceptions.HTTPException: 502: {'code': 'regenerate_missing_required_platform_field', 'message': "Missing required regenerated field 'google_description' for google/description.", 'platform': 'google', 'content_type': 'description'}
+
+src/feedops/api/main.py:1734: HTTPException
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.api.main:main.py:1681 Failed to load corrections for 1031/18: '_FakeTable' object has no attribute 'select'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.generator:generator.py:556 Short v2 content payload detected: sku=1031/18 platform=google expected_key=google_description expected_len=0 keys=['content'] value_lengths={'content': 67}
+WARNING  feedops.api.main:__init__.py:58 {"budget_stop_triggered": false, "content_type": "description", "diagnostic_mode": false, "endpoint": "regenerate", "event": "generation.request.summary", "job_id": null, "master_sku": "1031/18", "mode": "simple", "platform": "google", "request_id": "880065a6d405430eb7762479d89f37f4", "result_state": "failed", "ts": 1772270868.983406}
+___ test_optimize_single_sku_google_bing_description_parity_with_regenerate ____
+
+request = OptimizeRequest(master_sku='1031/18', num_candidates=1, dry_run=False)
+
+    @app.post("/optimize-sku", response_model=OptimizeResponse, tags=["Generation"])
+    async def optimize_single_sku(request: OptimizeRequest):
+        """Optimize a single SKU - generates titles, descriptions for all platforms.
+    
+        This endpoint:
+        1. Load product data from Supabase
+        2. Build evidence table
+        3. Generate content via LLM for each platform
+        4. Save results to generated_content table (if not dry_run)
+        """
+        try:
+            ensure_generation_enabled(operation="optimize_single_sku")
+            supabase = get_client()
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase, request.master_sku
+            )
+            logger.info(
+                "Optimizing SKU: requested=%s canonical=%s",
+                request.master_sku,
+                canonical_master_sku,
+            )
+            log_event(
+                logger,
+                logging.INFO,
+                "generation.optimize.start",
+                endpoint="optimize_single_sku",
+                master_sku=canonical_master_sku,
+                requested_master_sku=request.master_sku,
+                request_id=get_request_id(),
+            )
+    
+            # Load from Supabase
+            parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+            if not parent_sku:
+                raise HTTPException(
+                    status_code=404, detail=f"SKU not found: {request.master_sku}"
+                )
+    
+            # Build evidence table
+            evidence = build_evidence_table(parent_sku)
+            evidence_markdown = format_evidence_markdown(evidence)
+    
+            # Get LLM provider
+            provider = get_provider()
+    
+            results = []
+            platforms = ["google", "bing", "shopify"]
+            content_types = ["title", "description"]
+    
+>           generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+
+src/feedops/api/main.py:1509: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+parent_sku = ParentSKU(master_sku='1031/18', core_sku=None, category='Towel Bars', collection='Skyline', style=None, current_title=...'4542872518788')], merchant_center_items=None, data_source=None, item_group_id='4542872518788', finish_options=['ABR'])
+provider = <tests.test_phase7_observability_reliability._RecordingProvider object at 0x13e3d59d0>
+prompt_version = 'v2'
+
+    async def generate_per_platform(
+        parent_sku: ParentSKU,
+        provider: LLMProvider,
+        prompt_version: str = "v2",
+        *,
+        feedback_by_platform: dict[str, str] | None = None,
+        reasoning_effort: str = "medium",
+        max_completion_tokens: int = 2400,
+        selected_platforms: tuple[str, ...] | list[str] | None = None,
+    ) -> dict[str, object]:
+        """Generate content via per-platform prompts/schemas.
+    
+        ``prompt_version`` is retained for API compatibility but runtime generation
+        is now deterministic and always uses the per-platform prompt path.
+        """
+        experiment_variant = get_prompt_experiment_variant()
+        if (prompt_version or "v2").lower() != "v2":
+            logger.info(
+                "Ignoring non-v2 prompt_version=%s; per-platform generation is mandatory.",
+                prompt_version,
+            )
+    
+        evidence = build_evidence_table(parent_sku)
+        evidence_for_copy = filter_evidence_for_copy_context(evidence)
+        category_guidance = get_category_guidance(parent_sku.category) or ""
+        keyword_section = format_keyword_placement_section(
+            build_keyword_placement_plan(parent_sku, evidence)
+        )
+        gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+        finish_metadata = _build_finish_metadata_rows(parent_sku)
+    
+        user_prompts: dict[str, str] = {
+            "google": build_google_prompt(
+                parent_sku,
+                evidence_for_copy,
+                keyword_section,
+                category_guidance,
+                gold_examples,
+            ),
+            "bing": build_bing_prompt(
+                parent_sku,
+                evidence_for_copy,
+                keyword_section,
+                category_guidance,
+            ),
+            "shopify": build_shopify_prompt(
+                parent_sku,
+                evidence_for_copy,
+                category_guidance,
+            ),
+            "finish": build_finish_prompt(parent_sku, finish_metadata),
+        }
+        if feedback_by_platform:
+            for platform, feedback in feedback_by_platform.items():
+                if (
+                    isinstance(feedback, str)
+                    and feedback.strip()
+                    and platform in user_prompts
+                ):
+                    user_prompts[platform] = (
+                        user_prompts[platform]
+                        + "\n\nReviewer Feedback:\n"
+                        + feedback.strip()
+                    )
+    
+        system_prompts: dict[str, str] = {
+            platform: get_platform_system_prompt(platform)
+            for platform in ("google", "bing", "shopify", "finish")
+        }
+        prompt_hashes: dict[str, str] = {
+            platform: _prompt_hash(system_prompts[platform], user_prompts[platform])
+            for platform in ("google", "bing", "shopify", "finish")
+        }
+        platform_schemas = {
+            "google": GOOGLE_SCHEMA,
+            "bing": BING_SCHEMA,
+            "shopify": SHOPIFY_SCHEMA,
+            "finish": FINISH_SENTENCES_SCHEMA,
+        }
+        schema_hashes = {
+            platform: _schema_hash(schema)
+            for platform, schema in platform_schemas.items()
+        }
+    
+        raw_by_platform: dict[str, dict[str, object]] = {}
+        usage_by_platform: dict[str, dict[str, int]] = {}
+        latency_by_platform: dict[str, int] = {}
+        parse_by_platform: dict[str, dict[str, object]] = {}
+        retry_by_platform: dict[str, dict[str, int]] = {}
+        requested_platforms = _resolve_requested_platforms(selected_platforms)
+        diagnostic_mode = diagnostic_mode_enabled()
+        finish_subcall_skipped = False
+        if (
+            diagnostic_mode
+            and "finish" in requested_platforms
+            and diagnostic_skip_finish_subcall_enabled()
+        ):
+            requested_platforms = tuple(
+                platform for platform in requested_platforms if platform != "finish"
+            )
+            finish_subcall_skipped = True
+            logger.warning(
+                "Diagnostic mode skipped finish sub-call for sku=%s",
+                parent_sku.master_sku,
+            )
+    
+        cost_cap_usd = request_cost_usd_cap()
+        estimated_cost_total_usd = 0.0
+        for platform in requested_platforms:
+            platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
+            platform_cap = _platform_completion_cap(platform, max_completion_tokens)
+            started = time.perf_counter()
+>           payload = await provider.generate(
+                prompt=user_prompts[platform],
+                schema=platform_schemas[platform],
+                system_prompt=system_prompts[platform],
+                reasoning_effort=platform_reasoning,
+                max_completion_tokens=platform_cap,
+            )
+E           TypeError: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+
+src/feedops/pipeline/generator.py:528: TypeError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e3d7450>
+
+    @pytest.mark.asyncio
+    async def test_optimize_single_sku_google_bing_description_parity_with_regenerate(monkeypatch):
+        provider = _RecordingProvider()
+        supabase = _CaptureSupabase()
+        _patch_generation_deps(monkeypatch, provider, supabase)
+    
+>       response = await api_main.optimize_single_sku(
+            api_main.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=False)
+        )
+
+tests/test_phase7_observability_reliability.py:486: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+request = OptimizeRequest(master_sku='1031/18', num_candidates=1, dry_run=False)
+
+    @app.post("/optimize-sku", response_model=OptimizeResponse, tags=["Generation"])
+    async def optimize_single_sku(request: OptimizeRequest):
+        """Optimize a single SKU - generates titles, descriptions for all platforms.
+    
+        This endpoint:
+        1. Load product data from Supabase
+        2. Build evidence table
+        3. Generate content via LLM for each platform
+        4. Save results to generated_content table (if not dry_run)
+        """
+        try:
+            ensure_generation_enabled(operation="optimize_single_sku")
+            supabase = get_client()
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase, request.master_sku
+            )
+            logger.info(
+                "Optimizing SKU: requested=%s canonical=%s",
+                request.master_sku,
+                canonical_master_sku,
+            )
+            log_event(
+                logger,
+                logging.INFO,
+                "generation.optimize.start",
+                endpoint="optimize_single_sku",
+                master_sku=canonical_master_sku,
+                requested_master_sku=request.master_sku,
+                request_id=get_request_id(),
+            )
+    
+            # Load from Supabase
+            parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+            if not parent_sku:
+                raise HTTPException(
+                    status_code=404, detail=f"SKU not found: {request.master_sku}"
+                )
+    
+            # Build evidence table
+            evidence = build_evidence_table(parent_sku)
+            evidence_markdown = format_evidence_markdown(evidence)
+    
+            # Get LLM provider
+            provider = get_provider()
+    
+            results = []
+            platforms = ["google", "bing", "shopify"]
+            content_types = ["title", "description"]
+    
+            generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+            prompt_hashes = generated.get("prompt_hashes", {})
+            system_prompts = generated.get("system_prompts", {})
+            user_prompts = generated.get("user_prompts", {})
+            usage_by_platform = generated.get("usage_by_platform", {})
+            latencies = generated.get("latency_by_platform", {})
+            parse_by_platform = generated.get("parse_by_platform", {})
+            retry_by_platform = generated.get("retry_by_platform", {})
+            request_id = get_request_id()
+    
+            for platform in platforms:
+                for content_type in content_types:
+                    field_key = _content_field_key(platform, content_type)
+                    content = str(generated.get(field_key, "")).strip()
+                    results.append(f"{platform}/{content_type}: {content[:100]}...")
+                    if request.dry_run:
+                        continue
+                    telemetry = _extract_platform_telemetry(
+                        platform=platform,
+                        usage_by_platform=usage_by_platform,
+                        latency_by_platform=latencies,
+                        retry_by_platform=retry_by_platform,
+                    )
+                    _persist_generated_content_and_history(
+                        supabase=supabase,
+                        master_sku=canonical_master_sku,
+                        platform=platform,
+                        content_type=content_type,
+                        content=content,
+                        generation_model=provider.name,
+                        prompt_hash=str(
+                            prompt_hashes.get(
+                                platform, get_platform_system_prompt_hash(platform)
+                            )
+                        ),
+                        system_prompt=str(system_prompts.get(platform, "")),
+                        user_prompt=str(user_prompts.get(platform, "")),
+                        mode="full_generation_v2",
+                        tokens_used=telemetry["tokens_used"],
+                        cost_usd=telemetry["cost_usd"],
+                        latency_ms=telemetry["latency_ms"],
+                        provider_attempt_count=telemetry["provider_attempt_count"],
+                        parse_retry_count=telemetry["parse_retry_count"],
+                        generation_diagnostics={
+                            "selected_platforms": list(platforms),
+                            "usage_by_platform": usage_by_platform
+                            if isinstance(usage_by_platform, dict)
+                            else {},
+                            "latency_by_platform": latencies
+                            if isinstance(latencies, dict)
+                            else {},
+                            "parse_by_platform": parse_by_platform
+                            if isinstance(parse_by_platform, dict)
+                            else {},
+                            "retry_by_platform": retry_by_platform
+                            if isinstance(retry_by_platform, dict)
+                            else {},
+                        },
+                        request_id=request_id,
+                    )
+                    _emit_generation_summary(
+                        endpoint="optimize_single_sku",
+                        request_id=request_id,
+                        master_sku=canonical_master_sku,
+                        platform=platform,
+                        content_type=content_type,
+                        mode="full_generation_v2",
+                        result_state="completed",
+                        tokens_used=telemetry["tokens_used"],
+                        cost_usd=telemetry["cost_usd"],
+                        latency_ms=telemetry["latency_ms"],
+                        provider_attempt_count=telemetry["provider_attempt_count"],
+                        parse_retry_count=telemetry["parse_retry_count"],
+                    )
+    
+            finish_sentences = generated.get("finish_sentences", {})
+            if not request.dry_run and isinstance(finish_sentences, dict):
+                for platform in ("google", "bing"):
+                    supabase.table("variant_finish_sentences").upsert(
+                        {
+                            "master_sku": canonical_master_sku,
+                            "platform": platform,
+                            "finish_sentences": finish_sentences,
+                        },
+                        on_conflict="master_sku,platform",
+                    ).execute()
+    
+            return OptimizeResponse(
+                success=True,
+                master_sku=canonical_master_sku,
+                message=f"Generated content for {len(platforms)} platforms",
+                report="\n".join(results),
+            )
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Optimization failed for {request.master_sku}: {e}")
+>           raise HTTPException(status_code=500, detail=str(e))
+E           fastapi.exceptions.HTTPException: 500: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+
+src/feedops/api/main.py:1611: HTTPException
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.main:main.py:1610 Optimization failed for 1031/18: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+_ test_process_hybrid_batch_job_full_generation_matches_regenerate_finish_rules _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e3d6510>
+
+    @pytest.mark.asyncio
+    async def test_process_hybrid_batch_job_full_generation_matches_regenerate_finish_rules(
+        monkeypatch,
+    ):
+        provider = _RecordingProvider()
+        supabase = _CaptureSupabase()
+        _patch_generation_deps(monkeypatch, provider, supabase)
+    
+        await api_main.process_hybrid_batch_job(
+            job_id="job-123",
+            families=[],
+            single_skus=["1031/18"],
+            options={"titles": False, "descriptions": True, "platforms": ["google", "bing"]},
+        )
+    
+        desc_rows = [
+            op["payload"]
+            for op in supabase.operations
+            if op["op"] == "upsert"
+            and op["table"] == "generated_content"
+            and op["payload"].get("content_type") == "description"
+            and op["payload"].get("platform") in {"google", "bing"}
+        ]
+>       assert len(desc_rows) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+
+tests/test_phase7_observability_reliability.py:543: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.main:main.py:2999 ✗ Failed 1031/18 via per-platform v2 package: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+WARNING  feedops.api.main:__init__.py:58 {"content_type": null, "diagnostic_mode": false, "endpoint": "process_hybrid_batch_job", "event": "generation.request.summary", "job_id": "job-123", "master_sku": "1031/18", "mode": "full_generation_v2", "platform": null, "request_id": "-", "result_state": "failed", "ts": 1772270869.046505}
+WARNING  feedops.api.main:__init__.py:58 {"content_type": null, "diagnostic_mode": false, "endpoint": "process_hybrid_batch_job", "event": "generation.request.summary", "job_id": "job-123", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "-", "result_state": "failed", "ts": 1772270869.046546}
+______ test_optimize_single_sku_persists_linked_history_for_all_platforms ______
+
+request = OptimizeRequest(master_sku='1031/18', num_candidates=1, dry_run=False)
+
+    @app.post("/optimize-sku", response_model=OptimizeResponse, tags=["Generation"])
+    async def optimize_single_sku(request: OptimizeRequest):
+        """Optimize a single SKU - generates titles, descriptions for all platforms.
+    
+        This endpoint:
+        1. Load product data from Supabase
+        2. Build evidence table
+        3. Generate content via LLM for each platform
+        4. Save results to generated_content table (if not dry_run)
+        """
+        try:
+            ensure_generation_enabled(operation="optimize_single_sku")
+            supabase = get_client()
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase, request.master_sku
+            )
+            logger.info(
+                "Optimizing SKU: requested=%s canonical=%s",
+                request.master_sku,
+                canonical_master_sku,
+            )
+            log_event(
+                logger,
+                logging.INFO,
+                "generation.optimize.start",
+                endpoint="optimize_single_sku",
+                master_sku=canonical_master_sku,
+                requested_master_sku=request.master_sku,
+                request_id=get_request_id(),
+            )
+    
+            # Load from Supabase
+            parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+            if not parent_sku:
+                raise HTTPException(
+                    status_code=404, detail=f"SKU not found: {request.master_sku}"
+                )
+    
+            # Build evidence table
+            evidence = build_evidence_table(parent_sku)
+            evidence_markdown = format_evidence_markdown(evidence)
+    
+            # Get LLM provider
+            provider = get_provider()
+    
+            results = []
+            platforms = ["google", "bing", "shopify"]
+            content_types = ["title", "description"]
+    
+>           generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+
+src/feedops/api/main.py:1509: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+parent_sku = ParentSKU(master_sku='1031/18', core_sku=None, category='Towel Bars', collection='Skyline', style=None, current_title=...'4542872518788')], merchant_center_items=None, data_source=None, item_group_id='4542872518788', finish_options=['ABR'])
+provider = <tests.test_phase7_observability_reliability._RecordingProvider object at 0x13a69ebd0>
+prompt_version = 'v2'
+
+    async def generate_per_platform(
+        parent_sku: ParentSKU,
+        provider: LLMProvider,
+        prompt_version: str = "v2",
+        *,
+        feedback_by_platform: dict[str, str] | None = None,
+        reasoning_effort: str = "medium",
+        max_completion_tokens: int = 2400,
+        selected_platforms: tuple[str, ...] | list[str] | None = None,
+    ) -> dict[str, object]:
+        """Generate content via per-platform prompts/schemas.
+    
+        ``prompt_version`` is retained for API compatibility but runtime generation
+        is now deterministic and always uses the per-platform prompt path.
+        """
+        experiment_variant = get_prompt_experiment_variant()
+        if (prompt_version or "v2").lower() != "v2":
+            logger.info(
+                "Ignoring non-v2 prompt_version=%s; per-platform generation is mandatory.",
+                prompt_version,
+            )
+    
+        evidence = build_evidence_table(parent_sku)
+        evidence_for_copy = filter_evidence_for_copy_context(evidence)
+        category_guidance = get_category_guidance(parent_sku.category) or ""
+        keyword_section = format_keyword_placement_section(
+            build_keyword_placement_plan(parent_sku, evidence)
+        )
+        gold_examples = format_gold_standard_examples_bundle(max_examples=2)
+        finish_metadata = _build_finish_metadata_rows(parent_sku)
+    
+        user_prompts: dict[str, str] = {
+            "google": build_google_prompt(
+                parent_sku,
+                evidence_for_copy,
+                keyword_section,
+                category_guidance,
+                gold_examples,
+            ),
+            "bing": build_bing_prompt(
+                parent_sku,
+                evidence_for_copy,
+                keyword_section,
+                category_guidance,
+            ),
+            "shopify": build_shopify_prompt(
+                parent_sku,
+                evidence_for_copy,
+                category_guidance,
+            ),
+            "finish": build_finish_prompt(parent_sku, finish_metadata),
+        }
+        if feedback_by_platform:
+            for platform, feedback in feedback_by_platform.items():
+                if (
+                    isinstance(feedback, str)
+                    and feedback.strip()
+                    and platform in user_prompts
+                ):
+                    user_prompts[platform] = (
+                        user_prompts[platform]
+                        + "\n\nReviewer Feedback:\n"
+                        + feedback.strip()
+                    )
+    
+        system_prompts: dict[str, str] = {
+            platform: get_platform_system_prompt(platform)
+            for platform in ("google", "bing", "shopify", "finish")
+        }
+        prompt_hashes: dict[str, str] = {
+            platform: _prompt_hash(system_prompts[platform], user_prompts[platform])
+            for platform in ("google", "bing", "shopify", "finish")
+        }
+        platform_schemas = {
+            "google": GOOGLE_SCHEMA,
+            "bing": BING_SCHEMA,
+            "shopify": SHOPIFY_SCHEMA,
+            "finish": FINISH_SENTENCES_SCHEMA,
+        }
+        schema_hashes = {
+            platform: _schema_hash(schema)
+            for platform, schema in platform_schemas.items()
+        }
+    
+        raw_by_platform: dict[str, dict[str, object]] = {}
+        usage_by_platform: dict[str, dict[str, int]] = {}
+        latency_by_platform: dict[str, int] = {}
+        parse_by_platform: dict[str, dict[str, object]] = {}
+        retry_by_platform: dict[str, dict[str, int]] = {}
+        requested_platforms = _resolve_requested_platforms(selected_platforms)
+        diagnostic_mode = diagnostic_mode_enabled()
+        finish_subcall_skipped = False
+        if (
+            diagnostic_mode
+            and "finish" in requested_platforms
+            and diagnostic_skip_finish_subcall_enabled()
+        ):
+            requested_platforms = tuple(
+                platform for platform in requested_platforms if platform != "finish"
+            )
+            finish_subcall_skipped = True
+            logger.warning(
+                "Diagnostic mode skipped finish sub-call for sku=%s",
+                parent_sku.master_sku,
+            )
+    
+        cost_cap_usd = request_cost_usd_cap()
+        estimated_cost_total_usd = 0.0
+        for platform in requested_platforms:
+            platform_reasoning = _platform_reasoning_effort(platform, reasoning_effort)
+            platform_cap = _platform_completion_cap(platform, max_completion_tokens)
+            started = time.perf_counter()
+>           payload = await provider.generate(
+                prompt=user_prompts[platform],
+                schema=platform_schemas[platform],
+                system_prompt=system_prompts[platform],
+                reasoning_effort=platform_reasoning,
+                max_completion_tokens=platform_cap,
+            )
+E           TypeError: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+
+src/feedops/pipeline/generator.py:528: TypeError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13a69e910>
+
+    @pytest.mark.asyncio
+    async def test_optimize_single_sku_persists_linked_history_for_all_platforms(monkeypatch):
+        provider = _RecordingProvider()
+        supabase = _CaptureSupabase()
+        _patch_generation_deps(monkeypatch, provider, supabase)
+    
+>       response = await api_main.optimize_single_sku(
+            api_main.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=False)
+        )
+
+tests/test_phase7_observability_reliability.py:588: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+request = OptimizeRequest(master_sku='1031/18', num_candidates=1, dry_run=False)
+
+    @app.post("/optimize-sku", response_model=OptimizeResponse, tags=["Generation"])
+    async def optimize_single_sku(request: OptimizeRequest):
+        """Optimize a single SKU - generates titles, descriptions for all platforms.
+    
+        This endpoint:
+        1. Load product data from Supabase
+        2. Build evidence table
+        3. Generate content via LLM for each platform
+        4. Save results to generated_content table (if not dry_run)
+        """
+        try:
+            ensure_generation_enabled(operation="optimize_single_sku")
+            supabase = get_client()
+            canonical_master_sku = resolve_canonical_master_sku(
+                supabase, request.master_sku
+            )
+            logger.info(
+                "Optimizing SKU: requested=%s canonical=%s",
+                request.master_sku,
+                canonical_master_sku,
+            )
+            log_event(
+                logger,
+                logging.INFO,
+                "generation.optimize.start",
+                endpoint="optimize_single_sku",
+                master_sku=canonical_master_sku,
+                requested_master_sku=request.master_sku,
+                request_id=get_request_id(),
+            )
+    
+            # Load from Supabase
+            parent_sku = load_parent_sku_from_supabase(canonical_master_sku)
+            if not parent_sku:
+                raise HTTPException(
+                    status_code=404, detail=f"SKU not found: {request.master_sku}"
+                )
+    
+            # Build evidence table
+            evidence = build_evidence_table(parent_sku)
+            evidence_markdown = format_evidence_markdown(evidence)
+    
+            # Get LLM provider
+            provider = get_provider()
+    
+            results = []
+            platforms = ["google", "bing", "shopify"]
+            content_types = ["title", "description"]
+    
+            generated = await generate_per_platform(
+                parent_sku=parent_sku,
+                provider=provider,
+                prompt_version="v2",
+            )
+            prompt_hashes = generated.get("prompt_hashes", {})
+            system_prompts = generated.get("system_prompts", {})
+            user_prompts = generated.get("user_prompts", {})
+            usage_by_platform = generated.get("usage_by_platform", {})
+            latencies = generated.get("latency_by_platform", {})
+            parse_by_platform = generated.get("parse_by_platform", {})
+            retry_by_platform = generated.get("retry_by_platform", {})
+            request_id = get_request_id()
+    
+            for platform in platforms:
+                for content_type in content_types:
+                    field_key = _content_field_key(platform, content_type)
+                    content = str(generated.get(field_key, "")).strip()
+                    results.append(f"{platform}/{content_type}: {content[:100]}...")
+                    if request.dry_run:
+                        continue
+                    telemetry = _extract_platform_telemetry(
+                        platform=platform,
+                        usage_by_platform=usage_by_platform,
+                        latency_by_platform=latencies,
+                        retry_by_platform=retry_by_platform,
+                    )
+                    _persist_generated_content_and_history(
+                        supabase=supabase,
+                        master_sku=canonical_master_sku,
+                        platform=platform,
+                        content_type=content_type,
+                        content=content,
+                        generation_model=provider.name,
+                        prompt_hash=str(
+                            prompt_hashes.get(
+                                platform, get_platform_system_prompt_hash(platform)
+                            )
+                        ),
+                        system_prompt=str(system_prompts.get(platform, "")),
+                        user_prompt=str(user_prompts.get(platform, "")),
+                        mode="full_generation_v2",
+                        tokens_used=telemetry["tokens_used"],
+                        cost_usd=telemetry["cost_usd"],
+                        latency_ms=telemetry["latency_ms"],
+                        provider_attempt_count=telemetry["provider_attempt_count"],
+                        parse_retry_count=telemetry["parse_retry_count"],
+                        generation_diagnostics={
+                            "selected_platforms": list(platforms),
+                            "usage_by_platform": usage_by_platform
+                            if isinstance(usage_by_platform, dict)
+                            else {},
+                            "latency_by_platform": latencies
+                            if isinstance(latencies, dict)
+                            else {},
+                            "parse_by_platform": parse_by_platform
+                            if isinstance(parse_by_platform, dict)
+                            else {},
+                            "retry_by_platform": retry_by_platform
+                            if isinstance(retry_by_platform, dict)
+                            else {},
+                        },
+                        request_id=request_id,
+                    )
+                    _emit_generation_summary(
+                        endpoint="optimize_single_sku",
+                        request_id=request_id,
+                        master_sku=canonical_master_sku,
+                        platform=platform,
+                        content_type=content_type,
+                        mode="full_generation_v2",
+                        result_state="completed",
+                        tokens_used=telemetry["tokens_used"],
+                        cost_usd=telemetry["cost_usd"],
+                        latency_ms=telemetry["latency_ms"],
+                        provider_attempt_count=telemetry["provider_attempt_count"],
+                        parse_retry_count=telemetry["parse_retry_count"],
+                    )
+    
+            finish_sentences = generated.get("finish_sentences", {})
+            if not request.dry_run and isinstance(finish_sentences, dict):
+                for platform in ("google", "bing"):
+                    supabase.table("variant_finish_sentences").upsert(
+                        {
+                            "master_sku": canonical_master_sku,
+                            "platform": platform,
+                            "finish_sentences": finish_sentences,
+                        },
+                        on_conflict="master_sku,platform",
+                    ).execute()
+    
+            return OptimizeResponse(
+                success=True,
+                master_sku=canonical_master_sku,
+                message=f"Generated content for {len(platforms)} platforms",
+                report="\n".join(results),
+            )
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Optimization failed for {request.master_sku}: {e}")
+>           raise HTTPException(status_code=500, detail=str(e))
+E           fastapi.exceptions.HTTPException: 500: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+
+src/feedops/api/main.py:1611: HTTPException
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.main:main.py:1610 Optimization failed for 1031/18: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+_______ test_process_batch_job_persists_linked_history_for_all_platforms _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e1120d0>
+
+    @pytest.mark.asyncio
+    async def test_process_batch_job_persists_linked_history_for_all_platforms(monkeypatch):
+        provider = _RecordingProvider()
+        supabase = _CaptureSupabase()
+        _patch_generation_deps(monkeypatch, provider, supabase)
+    
+        await api_main.process_batch_job(
+            job_id="job-123",
+            skus=["1031/18"],
+            num_candidates=1,
+            dry_run=False,
+        )
+    
+        history_rows = [
+            op["payload"]
+            for op in supabase.operations
+            if op["op"] == "insert" and op["table"] == "regeneration_history"
+        ]
+>       assert len(history_rows) == 6
+E       assert 0 == 6
+E        +  where 0 = len([])
+
+tests/test_phase7_observability_reliability.py:625: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.main:main.py:2706 Batch SKU 1031/18 failed: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+WARNING  feedops.api.main:__init__.py:58 {"content_type": null, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "job-123", "master_sku": "1031/18", "mode": "full_generation_v2", "platform": null, "request_id": "-", "result_state": "failed", "ts": 1772270869.177228}
+WARNING  feedops.api.main:__init__.py:58 {"content_type": null, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "job-123", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "-", "result_state": "failed", "ts": 1772270869.17726}
+____ test_process_batch_job_respects_options_for_platform_and_content_type _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e1ac210>
+
+    @pytest.mark.asyncio
+    async def test_process_batch_job_respects_options_for_platform_and_content_type(monkeypatch):
+        provider = _RecordingProvider()
+        supabase = _CaptureSupabase()
+        _patch_generation_deps(monkeypatch, provider, supabase)
+    
+        await api_main.process_batch_job(
+            job_id="job-123",
+            skus=["1031/18"],
+            num_candidates=1,
+            dry_run=False,
+            options={"titles": False, "descriptions": True, "platforms": ["google"]},
+        )
+    
+        generated_rows = [
+            op["payload"]
+            for op in supabase.operations
+            if op["table"] == "generated_content"
+            and op["op"] == "upsert"
+        ]
+>       assert len(generated_rows) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_phase7_observability_reliability.py:760: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on product_catalog: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_index: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on generated_content: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on variant_finish_sentences: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.api.sku_alias:sku_alias.py:95 SKU alias lookup failed on sku_approvals: '_CaptureTable' object has no attribute 'in_'
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:314 Failed to fetch search queries for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.integrations.search_query_insights:search_query_insights.py:390 Failed to fetch variant query pool for 1031/18: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+WARNING  feedops.pipeline.evidence:evidence.py:673 Failed to build competitor evidence: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.prompt_loader:prompt_loader.py:139 Error loading prompt template: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+ERROR    feedops.api.main:main.py:2706 Batch SKU 1031/18 failed: _RecordingProvider.generate() got an unexpected keyword argument 'reasoning_effort'
+WARNING  feedops.api.main:__init__.py:58 {"content_type": null, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "job-123", "master_sku": "1031/18", "mode": "full_generation_v2", "platform": null, "request_id": "-", "result_state": "failed", "ts": 1772270869.187514}
+WARNING  feedops.api.main:__init__.py:58 {"content_type": null, "diagnostic_mode": false, "endpoint": "process_batch_job", "event": "generation.request.summary", "job_id": "job-123", "master_sku": "*batch*", "mode": "full_generation_v2", "platform": null, "request_id": "-", "result_state": "failed", "ts": 1772270869.1875432}
+_____ test_process_hybrid_batch_job_tracks_requested_and_expanded_counters _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13e147590>
+
+    @pytest.mark.asyncio
+    async def test_process_hybrid_batch_job_tracks_requested_and_expanded_counters(
+        monkeypatch,
+    ):
+        provider = _RecordingProvider()
+        supabase = _CaptureSupabase()
+        _patch_generation_deps(monkeypatch, provider, supabase)
+>       monkeypatch.setattr(
+            api_main,
+            "adapt_variant_content",
+            AsyncMock(return_value={"success": True, "content": "adapted"}),
+        )
+E       AttributeError: <module 'feedops.api.main' from '/Users/bobby/Documents/GitHub/Allied-FeedOps/src/feedops/api/main.py'> has no attribute 'adapt_variant_content'
+
+tests/test_phase7_observability_reliability.py:813: AttributeError
+=========================== short test summary info ============================
+FAILED tests/api/test_dashboard_approval_state_contract.py::test_master_approval_route_only_versions_content_on_approval_transition
+FAILED tests/test_jobs/test_processor.py::test_processes_all_items_in_batches
+FAILED tests/test_jobs/test_workers.py::test_collect_search_terms_batch_calls_client
+FAILED tests/test_jobs/test_workers.py::test_collect_search_terms_batch_filters_by_sku
+FAILED tests/test_jobs/test_workers.py::test_collect_performance_batch_aggregates_variants
+FAILED tests/test_jobs/test_workers.py::test_collect_performance_batch_includes_timestamps
+FAILED tests/test_lifestyle_image_scoring_retries_429.py::test_score_lifestyle_image_retries_on_resource_exhausted
+FAILED tests/test_merchant_center.py::test_load_credentials_uses_google_ads_config
+FAILED tests/test_merchant_center.py::test_load_credentials_invalid_service_account_fails_fast_without_adc_fallback
+FAILED tests/test_merchant_center.py::test_load_credentials_can_use_adc_fallback_when_opted_in
+FAILED tests/test_phase7_observability_reliability.py::test_regenerate_description_uses_fallback_finish_sentences_when_killed
+FAILED tests/test_phase7_observability_reliability.py::test_regenerate_description_injects_finish_sentence_placeholder_when_finish_sentences_present
+FAILED tests/test_phase7_observability_reliability.py::test_regenerate_description_falls_back_when_finish_sentences_incomplete
+FAILED tests/test_phase7_observability_reliability.py::test_optimize_single_sku_google_bing_description_parity_with_regenerate
+FAILED tests/test_phase7_observability_reliability.py::test_process_hybrid_batch_job_full_generation_matches_regenerate_finish_rules
+FAILED tests/test_phase7_observability_reliability.py::test_optimize_single_sku_persists_linked_history_for_all_platforms
+FAILED tests/test_phase7_observability_reliability.py::test_process_batch_job_persists_linked_history_for_all_platforms
+FAILED tests/test_phase7_observability_reliability.py::test_process_batch_job_respects_options_for_platform_and_content_type
+FAILED tests/test_phase7_observability_reliability.py::test_process_hybrid_batch_job_tracks_requested_and_expanded_counters
+19 failed, 634 passed, 1 skipped in 37.12s

@@ -1,6 +1,7 @@
 """Base provider interfaces."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import inspect
 from typing import Any
 
 
@@ -62,11 +63,32 @@ class LLMProvider(ABC):
         """
         pass
 
+    async def aclose(self) -> None:
+        """Release provider resources.
+
+        Providers that maintain SDK clients should override this and close any
+        underlying network transports. The default implementation is a no-op so
+        simple providers are not forced to implement cleanup.
+        """
+        return None
+
     @property
     @abstractmethod
     def name(self) -> str:
         """Provider name for logging."""
         pass
+
+
+async def close_provider(provider: object | None) -> None:
+    """Best-effort provider cleanup that tolerates simple test doubles."""
+    if provider is None:
+        return
+    aclose = getattr(provider, "aclose", None)
+    if aclose is None:
+        return
+    result = aclose()
+    if inspect.isawaitable(result):
+        await result
 
 
 class LLMError(Exception):

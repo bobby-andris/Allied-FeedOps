@@ -17,6 +17,7 @@ import {
 } from '@/lib/optimization/tier-scoring'
 import type { TermScore, ImpactRange, FunnelTier } from '@/lib/optimization/tier-scoring.types'
 import { DEFAULT_CALIBRATION } from '@/lib/optimization/tier-scoring.types'
+import { getRequiredPipelineUrl } from '@/lib/pipeline-url'
 
 export const maxDuration = 60
 
@@ -139,7 +140,7 @@ export async function GET(request: NextRequest) {
     const AVG_CPA = 64.22 // From Google Ads account audit (90-day window)
 
     try {
-      const pipelineUrl = process.env.FEEDOPS_PIPELINE_URL || 'https://feedops-pipeline-623866089882.us-east1.run.app'
+      const pipelineUrl = getRequiredPipelineUrl()
       const intentRes = await fetch(`${pipelineUrl}/score-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,7 +162,10 @@ export async function GET(request: NextRequest) {
         console.warn(`Cloud Run /score-intent returned ${intentRes.status} — proceeding without feed alignment`)
       }
     } catch (err) {
-      console.warn('Cloud Run /score-intent unavailable — proceeding with behavioral signals only:', err instanceof Error ? err.message : err)
+      console.warn(
+        'Cloud Run /score-intent unavailable — proceeding with behavioral signals only:',
+        err instanceof Error ? err.message : err
+      )
     }
 
     // Score each term once per custom_label_0 funnel assignment (multi-label support)

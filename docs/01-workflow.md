@@ -1,8 +1,34 @@
 # Allied FeedOps: Workflow Guide
 
+## Canonical Workflow For Generation Work
+
+For generation-affecting changes, this workflow guide is subordinate to the canonical process documents:
+
+1. `AGENTS.md`
+2. `docs/architecture/generation-runtime-truth.md`
+3. `docs/architecture/generation-core-task-model.md`
+4. `docs/architecture/generation-prompt-lineage-contract.md`
+5. `docs/architecture/generation-pipeline-routing-reference.md`
+6. `docs/development/generation-change-checklist.md`
+7. `docs/operations/deploy-and-certify-generation.md`
+
+Any older workflow section in this file that conflicts with those docs should be treated as background context, not operating law.
+
 ## Optimization Workflows
 
 This document covers the end-to-end workflows for feed optimization.
+
+## Current Merge Gate For Generation Changes
+
+No generation-affecting PR is ready until all of the following are complete:
+
+1. Source review explains the request-to-task-to-provider flow.
+2. Host verification passes.
+3. Local container smoke passes with artifact review.
+4. The exact deployed Cloud Run revision is identified and re-tested.
+5. Supabase lineage rows match the observed runtime.
+6. Dashboard readback matches persisted artifacts.
+7. A dated experiment report records the evidence set.
 
 ---
 

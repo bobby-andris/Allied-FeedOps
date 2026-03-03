@@ -53,6 +53,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=180,
         help="HTTP timeout in seconds (default: 180).",
     )
+    parser.add_argument(
+        "--request-id",
+        default=None,
+        help="Optional fixed request ID to use instead of generating a random UUID.",
+    )
     return parser
 
 
@@ -90,7 +95,7 @@ def main() -> int:
     args = parser.parse_args()
 
     pipeline_url = args.pipeline_url.rstrip("/")
-    request_id = str(uuid.uuid4())
+    request_id = args.request_id or str(uuid.uuid4())
     payload = {
         "master_sku": args.master_sku,
         "platform": args.platform,

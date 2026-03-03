@@ -1,0 +1,72 @@
+{
+  "dashboard_base_url": "http://127.0.0.1:3001",
+  "pipeline_service_url": "https://feedops-pipeline-623866089882.us-east1.run.app",
+  "pipeline_describe_url": "https://feedops-pipeline-3b43yg32oa-ue.a.run.app",
+  "cloud_run_revision": "feedops-pipeline-00293-hsp",
+  "review_page_source": "dashboard/src/app/(dashboard)/review/[sku]/page.tsx",
+  "source_of_truth_tables": [
+    "generated_content",
+    "variant_finish_sentences"
+  ],
+  "readback_contract": {
+    "description_candidate_content_may_contain_finish_placeholder": true,
+    "finish_sentence_map_must_be_loaded_separately": true,
+    "title_candidate_content_may_contain_finish_name_placeholder_for_variant_template": true,
+    "url_safe_sku_aliases_are_expected_for_slash_skus": true,
+    "publish_time_expansion_guarded_by_tests": [
+      "tests/test_finish_sentence_validation.py",
+      "tests/test_finish_injection.py"
+    ]
+  },
+  "browser_verification": [
+    {
+      "sku_route": "/review/CL-55",
+      "status": "loaded",
+      "observation": "Authenticated review page rendered the refreshed Google candidate title and description for CL-55 and matched the fresh Supabase rows for request_ids 0bcced58-8875-4f0d-bf07-555c0ce2306f and 88a07424-755b-4481-be1b-8efcea9467c6.",
+      "screenshot": "/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/CL-55-review.png"
+    },
+    {
+      "sku_route": "/review/1033-18",
+      "status": "loaded",
+      "observation": "URL-safe alias route rendered successfully for the hybrid base SKU and matched the refreshed Google candidate title and description persisted for request_ids 89831fe5-4f3d-401f-94ee-db2b30cb01ae and c304c08e-3729-4cf1-829b-cd5fddbf6e38.",
+      "screenshot": "/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/1033-18-review.png"
+    },
+    {
+      "sku_route": "/review/1033/24",
+      "status": "not-applicable-direct-path",
+      "observation": "Direct slash path is not a valid Next.js single-segment review route. The expected URL-safe alias /review/1033-24 loaded successfully and resolved server-side back to canonical master_sku 1033/24.",
+      "alias_route": "/review/1033-24",
+      "alias_status": "loaded",
+      "screenshot": "/Users/bobby/Documents/GitHub/Allied-FeedOps/.worktrees/production-divergence-closure-20260228/docs/experiments/2026-02-28-production-divergence-closure/live-proof/20260228-00293-final-lineage/1033-24-review.png"
+    }
+  ],
+  "supabase_rows_read_back": [
+    {
+      "master_sku": "CL-55",
+      "platform": "google",
+      "title_generated_content_id": "8300a24f-d4c0-439b-87d1-94768f069bbe",
+      "title_updated_at": "2026-03-01T01:39:28.286122+00:00",
+      "description_generated_content_id": "8d276b39-84ff-4fe8-a0d3-3b3f972411c0",
+      "description_updated_at": "2026-03-01T01:40:01.357675+00:00",
+      "finish_sentences_updated_at": "2026-03-01T01:40:02.457141+00:00"
+    },
+    {
+      "master_sku": "1033/18",
+      "platform": "google",
+      "title_generated_content_id": "814ef369-00c5-487e-87d8-b20be6d09298",
+      "title_updated_at": "2026-03-01T01:41:13.701689+00:00",
+      "description_generated_content_id": "fce0e4b2-e3d3-4b99-971d-865630b2bafd",
+      "description_updated_at": "2026-03-01T01:40:42.158594+00:00",
+      "finish_sentences_updated_at": "2026-03-01T01:40:47.230667+00:00"
+    },
+    {
+      "master_sku": "1033/24",
+      "platform": "google",
+      "title_generated_content_id": "932f510f-d07d-47d1-a33e-84b754b3c168",
+      "title_updated_at": "2026-03-01T01:41:20.678662+00:00",
+      "description_generated_content_id": "a2a9ca5b-6e5f-4f97-ab86-6f8a3e6e5165",
+      "description_updated_at": "2026-03-01T01:40:52.417843+00:00",
+      "finish_sentences_updated_at": "2026-03-01T01:40:52.62764+00:00"
+    }
+  ]
+}

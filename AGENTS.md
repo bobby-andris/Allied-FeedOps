@@ -67,12 +67,81 @@ These rules prevent disapprovals and “AI text” compliance issues. If any rul
 4. Run `scripts/dev_session_preflight.sh` before making edits.
 5. Merge feature branch into `master`, then restart the loop from a fresh branch.
 
+### Canonical Reading Order (Mandatory For Generation Work)
+
+For any generation-affecting task, read these in order before changing code:
+
+1. `AGENTS.md`
+2. `docs/architecture/generation-runtime-truth.md`
+3. `docs/architecture/generation-core-task-model.md`
+4. `docs/architecture/generation-prompt-lineage-contract.md`
+5. `docs/architecture/generation-pipeline-routing-reference.md`
+6. `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+7. `docs/development/generation-change-checklist.md`
+
+Historical investigation docs may still be useful for forensics, but they are not operational truth unless one of the canonical docs above points to them explicitly.
+
+### Production Certification Gate (Mandatory)
+
+No generation-affecting change is complete until all of the following are true:
+
+1. Source review explains the intended request-to-task-to-provider path.
+2. Host tests pass.
+3. Local container smoke passes and the required artifacts are reviewed.
+4. The deployed Cloud Run revision is identified and validated against the same scenarios.
+5. Supabase persistence and prompt lineage rows match the observed runtime.
+6. Dashboard readback matches the persisted artifacts.
+7. A dated experiment report records the exact request IDs, job IDs, commit SHA, image ref, Cloud Run revision, and final GO or NO-GO decision.
+
+### Deploy Path Distinction (Mandatory)
+
+There are two valid Cloud Run deploy paths for generation work, and future sessions must not confuse them:
+
+1. **Pre-PR exact-branch certification**
+   - Use this when you need to certify an unmerged feature branch SHA before opening or merging a PR.
+   - Deploy a tagged, no-traffic revision from the current branch with:
+     - `scripts/deploy_tagged_revision.sh <revision-tag>`
+   - This path proves the exact branch commit in Cloud Run without requiring a merge to `master`.
+   - Record the tagged revision URL, image ref, revision tag, request IDs, job IDs, and certification artifacts in the report.
+
+2. **Post-merge production deploy**
+   - Use this after the feature branch is merged into `origin/master`.
+   - This path must flow through the GitHub-connected Cloud Build trigger defined by `cloudbuild.yaml`.
+   - Record the Cloud Build ID, image ref, deployed revision, request IDs, and job IDs in the report.
+
+Hard rules:
+
+1. Do not assume the exact-branch certification path and the production-trigger path are interchangeable.
+2. Do not record a Cloud Build ID for a manual tagged branch-certification deploy; that path may not exercise the GitHub trigger at all.
+3. Do not claim production readiness from a pre-PR tagged deploy alone; production readiness requires the post-merge `origin/master` trigger path to be healthy too.
+
 ### Runtime Inputs And Fixtures
 
 - **Supabase-first runtime data**: generation/evidence should read from live Supabase tables (`product_catalog`, `search_queries_by_master_sku`, `keyword_metrics`, `prompt_templates`, `variant_finish_sentences`).
 - **Deterministic regression fixtures**: `samples/eval-skus.json` and `samples/eval-skus-google-ads-90d.json` are required for repeatable offline validation in tests/CI.
 - `sample-catalog.csv` is demo/local fallback data and is not the source of truth for production generation.
 - Always validate table/column names against `docs/database/SCHEMA.md` before writing SQL or Supabase queries.
+
+### Prompt Lineage Invariants
+
+1. Every provider-backed prompt call must persist a lineage row in `regeneration_history`.
+2. This includes helper and subcall generations such as `FINISH_SENTENCES`.
+3. Prompt lineage must include the exact system prompt, user prompt, prompt hash, model, usage, latency, and retry metadata required for post-run auditing.
+4. If a future change introduces a provider-backed call that does not persist lineage, that is a blocking bug.
+
+### Dashboard Runtime Routing Invariants
+
+1. `FEEDOPS_PIPELINE_URL` is the only authoritative dashboard-to-pipeline runtime target.
+2. No runtime code path may hardcode or silently fall back to a legacy Cloud Run hostname.
+3. Review-page routing for slash SKUs must continue to use the URL-safe alias form (for example `/review/1033-24` resolves to `1033/24`).
+
+### Documentation Update Requirement
+
+Every generation-affecting PR must update the canonical documentation set when behavior or process changes:
+
+1. Architecture docs if runtime behavior, task routing, or prompt lineage changes.
+2. The dated experiment report for any certification or incident-driven investigation.
+3. The generation checklist, evidence requirements, or deploy playbook when the verification process changes.
 
 ### Policy References (Keep Current)
 

@@ -73,15 +73,13 @@ export async function POST(request: NextRequest) {
         console.warn('Data collection background task failed:', error)
       })
 
-    // Call Cloud Run's batch-optimize endpoint
-    // Cloud Run creates job records and processes SKUs in the background
-    const response = await fetch(`${PIPELINE_URL}/batch-optimize`, {
+    // Call Cloud Run's hybrid-generate endpoint
+    // Hybrid endpoint detects multi-SKU families and uses variant adaptation for cost savings
+    const response = await fetch(`${PIPELINE_URL}/hybrid-generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         skus: canonicalSkus,
-        num_candidates: options.num_candidates ?? 1,
-        dry_run: false,
         options: {
           titles: options.titles,
           descriptions: options.descriptions,
@@ -92,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}))
-      console.error('Cloud Run batch-optimize failed:', response.status, errorBody)
+      console.error('Cloud Run hybrid-generate failed:', response.status, errorBody)
       return NextResponse.json(
         { error: errorBody.detail || 'Failed to start content generation pipeline' },
         { status: response.status }

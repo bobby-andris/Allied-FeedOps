@@ -1,5 +1,13 @@
 # Hybrid Generation Architecture Decision
 
+> Historical reference only. This document captures an earlier hybrid-routing decision and is not the complete current runtime contract.
+>
+> Canonical sources:
+> - `AGENTS.md`
+> - `docs/architecture/generation-runtime-truth.md`
+> - `docs/architecture/generation-core-task-model.md`
+> - `docs/experiments/2026-02-28-production-divergence-closure/report.md`
+
 **Date:** 2026-02-08
 **Status:** ✅ Cloud Run Implementation Only
 
@@ -272,7 +280,7 @@ gcloud run services logs read feedops-pipeline \
 
 **Job status:**
 ```bash
-curl https://feedops-pipeline-623866089882.us-east1.run.app/batch-status/{job_id}
+curl "$FEEDOPS_PIPELINE_URL/batch-status/{job_id}"
 ```
 
 **Database metrics:**

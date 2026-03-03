@@ -2,9 +2,6 @@ from pathlib import Path
 
 
 GENERATE_ROUTE = Path("dashboard/src/app/api/sku-selection/generate/route.ts")
-GENERATE_HYBRID_ROUTE = Path(
-    "dashboard/src/app/api/sku-selection/generate-hybrid/route.ts"
-)
 REGENERATE_ROUTE = Path("dashboard/src/app/api/regenerate/route.ts")
 EXPAND_VARIANTS = Path("dashboard/src/lib/publishing/expand-variants.ts")
 BATCH_REGENERATE_ROUTE = Path("dashboard/src/app/api/regenerate/batch/route.ts")
@@ -20,10 +17,9 @@ def _read(path: Path) -> str:
 
 def test_generate_routes_canonicalize_master_skus_before_pipeline_calls() -> None:
     generate_source = _read(GENERATE_ROUTE)
-    hybrid_source = _read(GENERATE_HYBRID_ROUTE)
 
+    # generate/route.ts now calls /hybrid-generate directly (hybrid route was merged in)
     assert "resolveCanonicalMasterSkuList" in generate_source
-    assert "resolveCanonicalMasterSkuList" in hybrid_source
 
 
 def test_regenerate_route_canonicalizes_master_sku_for_queries_and_pipeline() -> None:

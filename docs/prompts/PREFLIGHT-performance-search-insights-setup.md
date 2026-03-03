@@ -49,7 +49,7 @@ You MUST use agent teams for this work via the `TeamCreate` and `Task` tools.
    - Create a prioritized list for backfill
 
 3. **Check Cloud Run pipeline health:**
-   - Test endpoint: `https://feedops-pipeline-623866089882.us-east1.run.app/health`
+   - Test endpoint: `"$FEEDOPS_PIPELINE_URL/health"`
    - Verify Supabase connection
    - Verify Google Ads API credentials
 
@@ -87,7 +87,7 @@ You MUST use agent teams for this work via the `TeamCreate` and `Task` tools.
 2. **Backfill search insights:**
    - Trigger search insights sync via Cloud Run API:
      ```bash
-     curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/search-insights/sync \
+     curl -X POST "$FEEDOPS_PIPELINE_URL/search-insights/sync" \
        -H "Content-Type: application/json" \
        -d '{"date_range_days": 30}'
      ```
@@ -98,7 +98,7 @@ You MUST use agent teams for this work via the `TeamCreate` and `Task` tools.
 3. **Enrich with Keyword Planner data:**
    - Trigger enrichment via Cloud Run API:
      ```bash
-     curl -X POST https://feedops-pipeline-623866089882.us-east1.run.app/search-insights/enrich
+     curl -X POST "$FEEDOPS_PIPELINE_URL/search-insights/enrich"
      ```
    - This fetches search volume, competition index, CPC estimates for all keywords
    - Populates `keyword_metrics` table with 30-day TTL

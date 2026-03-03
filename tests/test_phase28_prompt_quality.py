@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import importlib.util
-import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -223,43 +222,24 @@ def test_placeholder_only_detection_handles_punctuation_wrapped_placeholder() ->
 async def test_generate_per_platform_respects_selected_platforms(monkeypatch) -> None:
     from feedops.pipeline import generator as gen
 
-    class StubProvider:
-        async def generate(self, *, prompt, schema, system_prompt, reasoning_effort, max_completion_tokens):
-            if "prompt-google" in prompt:
-                self._last_usage = {"prompt_tokens": 11, "completion_tokens": 22}
-                self._last_parse_details = {"parse_mode": "strict_json", "missing_keys": []}
-                return {
-                    "google_title": "{FINISH_NAME} 24-Inch Wall Mount Towel Bar",
-                    "google_short_title": "{FINISH_NAME} 24-Inch Towel Bar",
-                    "google_description": "Solid brass towel bar copy. {FINISH_SENTENCE}",
-                    "claims": [],
-                }
-            raise AssertionError(f"Unexpected prompt sent to provider: {prompt}")
+    captured: dict[str, object] = {}
 
-        @property
-        def last_usage(self):
-            return getattr(self, "_last_usage", {})
+    async def _fake_execute_generation_legacy_payload(**kwargs):
+        captured.update(kwargs)
+        return {
+            "google_title": "{FINISH_NAME} 24-Inch Wall Mount Towel Bar",
+            "google_short_title": "{FINISH_NAME} 24-Inch Towel Bar",
+            "prompt_hashes": {"google": "hash-google"},
+            "prompt_experiment_variant": "control",
+            "usage_by_platform": {
+                "google": {"prompt_tokens": 11, "completion_tokens": 22}
+            },
+            "retry_by_platform": {
+                "google": {"attempt_count": 1, "json_decode_retries": 0}
+            },
+        }
 
-        @property
-        def last_parse_details(self):
-            return getattr(self, "_last_parse_details", {})
-
-        @property
-        def last_retry_counts(self):
-            return {"attempt_count": 1, "json_decode_retries": 0}
-
-    monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
-    monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")
-    monkeypatch.setattr(gen, "build_keyword_placement_plan", lambda *_args, **_kwargs: {})
-    monkeypatch.setattr(gen, "format_keyword_placement_section", lambda _plan: "")
-    monkeypatch.setattr(gen, "format_gold_standard_examples_bundle", lambda max_examples=2: "")
-    monkeypatch.setattr(gen, "_build_finish_metadata_rows", lambda _sku: [])
-    monkeypatch.setattr(gen, "build_google_prompt", lambda *_args, **_kwargs: "prompt-google")
-    monkeypatch.setattr(gen, "build_bing_prompt", lambda *_args, **_kwargs: "prompt-bing")
-    monkeypatch.setattr(gen, "build_shopify_prompt", lambda *_args, **_kwargs: "prompt-shopify")
-    monkeypatch.setattr(gen, "build_finish_prompt", lambda *_args, **_kwargs: "prompt-finish")
-    monkeypatch.setattr(gen, "get_platform_system_prompt", lambda platform: f"sys-{platform}")
+    monkeypatch.setattr(gen, "execute_generation_legacy_payload", _fake_execute_generation_legacy_payload)
 
     parent = ParentSKU(
         master_sku="1016",
@@ -271,17 +251,14 @@ async def test_generate_per_platform_respects_selected_platforms(monkeypatch) ->
 
     result = await gen.generate_per_platform(
         parent_sku=parent,
-        provider=StubProvider(),
+        provider=object(),
         prompt_version="v2",
         selected_platforms=("google",),
     )
-    expected_prompt_hash = hashlib.sha256(
-        "sys-google\n\nprompt-google".encode("utf-8")
-    ).hexdigest()
     assert result["google_title"].startswith("{FINISH_NAME}")
-    assert result["prompt_hashes"]["google"] == expected_prompt_hash
-    assert result["bing_title"] == ""
-    assert result["shopify_title"] == ""
+    assert result["prompt_hashes"]["google"] == "hash-google"
+    assert captured["selected_platforms"] == ("google",)
+    assert captured["selected_content_types"] is None
     assert result["retry_by_platform"]["google"]["attempt_count"] == 1
 
 
@@ -289,43 +266,14 @@ async def test_generate_per_platform_respects_selected_platforms(monkeypatch) ->
 async def test_generate_per_platform_enforces_request_cost_budget(monkeypatch) -> None:
     from feedops.pipeline import generator as gen
 
-    class StubProvider:
-        async def generate(self, *, prompt, schema, system_prompt, reasoning_effort, max_completion_tokens):
-            assert prompt == "prompt-google"
-            self._last_usage = {"prompt_tokens": 1200, "completion_tokens": 800}
-            self._last_parse_details = {"parse_mode": "strict_json", "missing_keys": []}
-            return {
-                "google_title": "{FINISH_NAME} 24-Inch Wall Mount Towel Bar",
-                "google_short_title": "{FINISH_NAME} 24-Inch Towel Bar",
-                "google_description": "Solid brass towel bar copy. {FINISH_SENTENCE}",
-                "claims": [],
-            }
+    async def _fake_execute_generation_legacy_payload(**_kwargs):
+        raise gen.ExecutionBudgetExceededError(
+            cap_usd=0.00001,
+            estimated_cost_usd=0.123,
+            platform="google",
+        )
 
-        @property
-        def last_usage(self):
-            return getattr(self, "_last_usage", {})
-
-        @property
-        def last_parse_details(self):
-            return getattr(self, "_last_parse_details", {})
-
-        @property
-        def last_retry_counts(self):
-            return {"attempt_count": 1, "json_decode_retries": 0}
-
-    monkeypatch.setenv("FEEDOPS_PROVIDER_REQUEST_COST_USD_CAP", "0.00001")
-    monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
-    monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")
-    monkeypatch.setattr(gen, "build_keyword_placement_plan", lambda *_args, **_kwargs: {})
-    monkeypatch.setattr(gen, "format_keyword_placement_section", lambda _plan: "")
-    monkeypatch.setattr(gen, "format_gold_standard_examples_bundle", lambda max_examples=2: "")
-    monkeypatch.setattr(gen, "_build_finish_metadata_rows", lambda _sku: [])
-    monkeypatch.setattr(gen, "build_google_prompt", lambda *_args, **_kwargs: "prompt-google")
-    monkeypatch.setattr(gen, "build_bing_prompt", lambda *_args, **_kwargs: "prompt-bing")
-    monkeypatch.setattr(gen, "build_shopify_prompt", lambda *_args, **_kwargs: "prompt-shopify")
-    monkeypatch.setattr(gen, "build_finish_prompt", lambda *_args, **_kwargs: "prompt-finish")
-    monkeypatch.setattr(gen, "get_platform_system_prompt", lambda platform: f"sys-{platform}")
+    monkeypatch.setattr(gen, "execute_generation_legacy_payload", _fake_execute_generation_legacy_payload)
 
     parent = ParentSKU(
         master_sku="1016",
@@ -338,7 +286,7 @@ async def test_generate_per_platform_enforces_request_cost_budget(monkeypatch) -
     with pytest.raises(gen.GenerationBudgetExceededError):
         await gen.generate_per_platform(
             parent_sku=parent,
-            provider=StubProvider(),
+            provider=object(),
             prompt_version="v2",
             selected_platforms=("google",),
         )
@@ -348,79 +296,14 @@ async def test_generate_per_platform_enforces_request_cost_budget(monkeypatch) -
 async def test_generate_per_platform_budget_cap_honored_in_fallback_mode(monkeypatch) -> None:
     from feedops.pipeline import generator as gen
 
-    class PrimaryProvider:
-        def __init__(self) -> None:
-            self._last_usage = {"prompt_tokens": 1300, "completion_tokens": 900}
-            self._last_parse_details = {"parse_mode": "strict_json", "missing_keys": []}
-            self._last_retry_counts = {"attempt_count": 1, "json_decode_retries": 0}
+    async def _fake_execute_generation_legacy_payload(**_kwargs):
+        raise gen.ExecutionBudgetExceededError(
+            cap_usd=0.00001,
+            estimated_cost_usd=0.234,
+            platform="google",
+        )
 
-        @property
-        def name(self) -> str:
-            return "openai/test"
-
-        @property
-        def last_usage(self):
-            return self._last_usage.copy()
-
-        @property
-        def last_parse_details(self):
-            return self._last_parse_details.copy()
-
-        @property
-        def last_retry_counts(self):
-            return self._last_retry_counts.copy()
-
-        async def health_check(self) -> bool:
-            return True
-
-        async def generate(
-            self,
-            prompt,
-            schema,
-            image=None,
-            system_prompt=None,
-            reasoning_effort=None,
-            max_completion_tokens=None,
-        ):
-            return {
-                "google_title": "{FINISH_NAME} 24-Inch Wall Mount Towel Bar",
-                "google_short_title": "{FINISH_NAME} 24-Inch Towel Bar",
-                "google_description": "Solid brass towel bar copy. {FINISH_SENTENCE}",
-                "claims": [],
-            }
-
-    class FallbackProviderStub:
-        @property
-        def name(self) -> str:
-            return "gemini/test"
-
-        async def health_check(self) -> bool:
-            return True
-
-        async def generate(
-            self,
-            prompt,
-            schema,
-            image=None,
-            system_prompt=None,
-            reasoning_effort=None,
-            max_completion_tokens=None,
-        ):
-            raise AssertionError("fallback should not be called")
-
-    monkeypatch.setenv("FEEDOPS_PROVIDER_REQUEST_COST_USD_CAP", "0.00001")
-    monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
-    monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")
-    monkeypatch.setattr(gen, "build_keyword_placement_plan", lambda *_args, **_kwargs: {})
-    monkeypatch.setattr(gen, "format_keyword_placement_section", lambda _plan: "")
-    monkeypatch.setattr(gen, "format_gold_standard_examples_bundle", lambda max_examples=2: "")
-    monkeypatch.setattr(gen, "_build_finish_metadata_rows", lambda _sku: [])
-    monkeypatch.setattr(gen, "build_google_prompt", lambda *_args, **_kwargs: "prompt-google")
-    monkeypatch.setattr(gen, "build_bing_prompt", lambda *_args, **_kwargs: "prompt-bing")
-    monkeypatch.setattr(gen, "build_shopify_prompt", lambda *_args, **_kwargs: "prompt-shopify")
-    monkeypatch.setattr(gen, "build_finish_prompt", lambda *_args, **_kwargs: "prompt-finish")
-    monkeypatch.setattr(gen, "get_platform_system_prompt", lambda platform: f"sys-{platform}")
+    monkeypatch.setattr(gen, "execute_generation_legacy_payload", _fake_execute_generation_legacy_payload)
 
     parent = ParentSKU(
         master_sku="1016",
@@ -429,7 +312,7 @@ async def test_generate_per_platform_budget_cap_honored_in_fallback_mode(monkeyp
         current_description="Current description",
         variants=[],
     )
-    wrapper = FallbackProvider(primary=PrimaryProvider(), fallback=FallbackProviderStub())
+    wrapper = FallbackProvider(primary=object(), fallback=object())
     with pytest.raises(gen.GenerationBudgetExceededError):
         await gen.generate_per_platform(
             parent_sku=parent,

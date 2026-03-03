@@ -1,0 +1,11 @@
+{
+  "http_status": 200,
+  "payload": {
+    "product_catalog_count": 75770,
+    "service": "feedops-pipeline",
+    "status": "healthy",
+    "supabase_connected": true,
+    "version": "1.0.0"
+  },
+  "request_id": "59682e29-8ef3-4cea-91b3-9c85b5c63a66"
+}

@@ -18,6 +18,35 @@ function getImageUrl(imagePath: string | null): string | null {
   return `https://raw.githubusercontent.com/bobby-andris/Allied-FeedOps/archive/full-snapshot-2026-02-03/${imagePath}`
 }
 
+async function generateLifestyleImages(
+  sku: string,
+  selectedFinishCode: string | null
+) {
+  const response = await fetch('/api/images/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      master_sku: sku,
+      num_variations: 3,
+      dry_run: false,
+      ...(selectedFinishCode ? { selected_finish_code: selectedFinishCode } : {}),
+    }),
+  })
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}))
+    const detail =
+      typeof payload?.error === 'string'
+        ? payload.error
+        : typeof payload?.detail === 'string'
+          ? payload.detail
+          : `Generation failed (${response.status})`
+    throw new Error(detail)
+  }
+
+  return response.json()
+}
+
 // Updated interface to match new database schema
 interface LifestyleImage {
   id: string
@@ -289,26 +318,7 @@ function EmptyImageState({ sku, onRefresh, variants }: { sku: string; onRefresh:
     setError(null)
 
     try {
-      const cloudRunUrl = process.env.NEXT_PUBLIC_CLOUD_RUN_URL ||
-        'https://feedops-pipeline-623866089882.us-east1.run.app'
-
-      const response = await fetch(`${cloudRunUrl}/generate-images`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          master_sku: sku,
-          num_variations: 3,
-          dry_run: false,
-          ...(activeFinishCode ? { selected_finish_code: activeFinishCode } : {}),
-        }),
-      })
-
-      if (!response.ok) {
-        const detail = await response.text()
-        throw new Error(detail || `Generation failed (${response.status})`)
-      }
-
-      const data = await response.json()
+      const data = await generateLifestyleImages(sku, activeFinishCode)
 
       if (data.success) {
         toast.success(
@@ -667,23 +677,7 @@ function GenerateForNewFinish({ sku, variants, onRefresh }: { sku: string; varia
     setIsGenerating(true)
     setError(null)
     try {
-      const cloudRunUrl = process.env.NEXT_PUBLIC_CLOUD_RUN_URL ||
-        'https://feedops-pipeline-623866089882.us-east1.run.app'
-      const response = await fetch(`${cloudRunUrl}/generate-images`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          master_sku: sku,
-          num_variations: 3,
-          dry_run: false,
-          ...(activeFinishCode ? { selected_finish_code: activeFinishCode } : {}),
-        }),
-      })
-      if (!response.ok) {
-        const detail = await response.text()
-        throw new Error(detail || `Generation failed (${response.status})`)
-      }
-      const data = await response.json()
+      const data = await generateLifestyleImages(sku, activeFinishCode)
       if (data.success) {
         toast.success(`Generated ${data.images_generated} images for ${data.selected_finish} finish`)
         setManualFinishCode(null)

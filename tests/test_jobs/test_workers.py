@@ -25,13 +25,15 @@ async def test_collect_search_terms_batch_calls_client():
 
     # Mock dependencies - patch at import location
     with patch("feedops.integrations.google_ads_search_terms.SearchTermsClient") as MockClient, \
-         patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+         patch("feedops.api.backfill.compute_date_range") as mock_compute_date, \
+         patch("feedops.db.supabase_client.get_client") as mock_get_client:
 
         # Setup mocks
         mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
 
         mock_client_instance = MagicMock()
         MockClient.return_value = mock_client_instance
+        mock_get_client.return_value = MagicMock()
 
         # Mock fetch_search_terms to return sample data
         mock_client_instance.fetch_search_terms.return_value = [
@@ -83,12 +85,14 @@ async def test_collect_search_terms_batch_empty_results():
     from feedops.jobs.workers import collect_search_terms_batch
 
     with patch("feedops.integrations.google_ads_search_terms.SearchTermsClient") as MockClient, \
-         patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+         patch("feedops.api.backfill.compute_date_range") as mock_compute_date, \
+         patch("feedops.db.supabase_client.get_client") as mock_get_client:
 
         mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
 
         mock_client_instance = MagicMock()
         MockClient.return_value = mock_client_instance
+        mock_get_client.return_value = MagicMock()
 
         # Mock empty results
         mock_client_instance.fetch_search_terms.return_value = []
@@ -111,12 +115,14 @@ async def test_collect_search_terms_batch_filters_by_sku():
     from feedops.jobs.workers import collect_search_terms_batch
 
     with patch("feedops.integrations.google_ads_search_terms.SearchTermsClient") as MockClient, \
-         patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+         patch("feedops.api.backfill.compute_date_range") as mock_compute_date, \
+         patch("feedops.db.supabase_client.get_client") as mock_get_client:
 
         mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
 
         mock_client_instance = MagicMock()
         MockClient.return_value = mock_client_instance
+        mock_get_client.return_value = MagicMock()
 
         # Mock fetch_search_terms to return terms for SKU-1, SKU-2, SKU-3
         mock_client_instance.fetch_search_terms.return_value = [
@@ -146,7 +152,8 @@ async def test_collect_performance_batch_aggregates_variants():
 
     with patch("feedops.db.supabase_client.get_client") as mock_get_client, \
          patch("feedops.integrations.google_ads_performance.fetch_batch_product_performance") as mock_fetch, \
-         patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+         patch("feedops.api.backfill.compute_date_range") as mock_compute_date, \
+         patch("feedops.jobs.contamination.validate_date_boundaries", return_value=(True, "")):
 
         mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
 
@@ -194,7 +201,7 @@ async def test_collect_performance_batch_aggregates_variants():
         mock_supabase.table.return_value.upsert.return_value = mock_upsert
 
         # Call worker
-        results = await collect_performance_batch(["SKU-1"])
+        results = await collect_performance_batch(["SKU-1"], force_backfill=True)
 
         # Assert: fetch_batch_product_performance called with all 3 offer_ids
         mock_fetch.assert_called_once()
@@ -206,7 +213,10 @@ async def test_collect_performance_batch_aggregates_variants():
 
         # Assert: Upsert called with aggregated metrics
         mock_upsert_call = mock_supabase.table.return_value.upsert.call_args
-        upsert_data = mock_upsert_call[0][0]
+        upsert_records = mock_upsert_call[0][0]
+        assert isinstance(upsert_records, list)
+        assert len(upsert_records) == 1
+        upsert_data = upsert_records[0]
 
         # Total impressions should be sum of all variants: 1000 + 2000 + 3000 = 6000
         # Avg impressions = 6000 / 180 days
@@ -255,7 +265,7 @@ async def test_collect_performance_batch_no_variants():
         mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_variant_result
 
         # Call worker
-        results = await collect_performance_batch(["SKU-1"])
+        results = await collect_performance_batch(["SKU-1"], force_backfill=True)
 
         # Assert: Returns result with status "no_data"
         assert len(results) == 1
@@ -273,7 +283,8 @@ async def test_collect_performance_batch_includes_timestamps():
 
     with patch("feedops.db.supabase_client.get_client") as mock_get_client, \
          patch("feedops.integrations.google_ads_performance.fetch_batch_product_performance") as mock_fetch, \
-         patch("feedops.api.backfill.compute_date_range") as mock_compute_date:
+         patch("feedops.api.backfill.compute_date_range") as mock_compute_date, \
+         patch("feedops.jobs.contamination.validate_date_boundaries", return_value=(True, "")):
 
         mock_compute_date.return_value = ("2025-08-01", "2026-01-28")
 
@@ -303,11 +314,14 @@ async def test_collect_performance_batch_includes_timestamps():
         mock_supabase.table.return_value.upsert.return_value = mock_upsert
 
         # Call worker
-        results = await collect_performance_batch(["SKU-1"])
+        results = await collect_performance_batch(["SKU-1"], force_backfill=True)
 
         # Assert: Upsert data includes baseline_start_date and baseline_end_date (DATA-05)
         upsert_call = mock_supabase.table.return_value.upsert.call_args
-        upsert_data = upsert_call[0][0]
+        upsert_records = upsert_call[0][0]
+        assert isinstance(upsert_records, list)
+        assert len(upsert_records) == 1
+        upsert_data = upsert_records[0]
 
         assert "baseline_start_date" in upsert_data
         assert "baseline_end_date" in upsert_data

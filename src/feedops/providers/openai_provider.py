@@ -154,6 +154,39 @@ def _build_strict_schema(
     }
 
 
+def _build_response_snapshot(response: Any) -> dict[str, Any]:
+    """Capture a compact raw response snapshot for failure forensics."""
+    if response is None:
+        return {}
+
+    finish_reason = None
+    content = ""
+    if getattr(response, "choices", None):
+        finish_reason = getattr(response.choices[0], "finish_reason", None)
+        message = getattr(response.choices[0], "message", None)
+        content = getattr(message, "content", "") or ""
+
+    snapshot: dict[str, Any] = {
+        "id": getattr(response, "id", None),
+        "model": getattr(response, "model", None),
+        "finish_reason": finish_reason,
+        "content_chars": len(content),
+        "content_preview": content[:400],
+        "usage": _extract_usage(response),
+    }
+
+    model_dump = getattr(response, "model_dump", None)
+    if callable(model_dump):
+        try:
+            snapshot["raw_response"] = model_dump(mode="json")
+        except TypeError:
+            snapshot["raw_response"] = model_dump()
+        except Exception:
+            # Avoid masking the primary provider error if snapshotting fails.
+            pass
+    return snapshot
+
+
 class OpenAIProvider(LLMProvider):
     """OpenAI GPT provider with structured JSON output.
 
@@ -201,6 +234,7 @@ class OpenAIProvider(LLMProvider):
             "api_retries": 0,
             "budget_retries": 0,
         }
+        self._last_response_snapshot: dict[str, Any] = {}
 
     def _use_max_completion_tokens(self) -> bool:
         """Return True when model requires max_completion_tokens."""
@@ -214,6 +248,10 @@ class OpenAIProvider(LLMProvider):
     @property
     def name(self) -> str:
         return f"openai/{self.model}"
+
+    async def aclose(self) -> None:
+        """Close the underlying AsyncOpenAI HTTP client explicitly."""
+        await self.client.close()
 
     async def health_check(self) -> bool:
         """Check if OpenAI API is accessible."""
@@ -312,6 +350,7 @@ class OpenAIProvider(LLMProvider):
             "api_retries": 0,
             "budget_retries": 0,
         }
+        self._last_response_snapshot = {}
 
         for attempt in range(self.max_retries):
             self._last_retry_counts["attempt_count"] = attempt + 1
@@ -384,6 +423,7 @@ class OpenAIProvider(LLMProvider):
                     )
                     self._last_usage = _extract_usage(response)
                     content = response.choices[0].message.content
+                self._last_response_snapshot = _build_response_snapshot(response)
                 cached = self._last_usage.get("cached_tokens", 0)
                 if cached:
                     logger.info(
@@ -452,6 +492,11 @@ class OpenAIProvider(LLMProvider):
                     f"max_completion_tokens={max_output_tokens}, "
                     f"reasoning_effort={current_reasoning_effort})"
                 )
+                if self._last_response_snapshot:
+                    logger.debug(
+                        "OpenAI raw response snapshot on parse error: %s",
+                        self._last_response_snapshot,
+                    )
                 if self._last_retry_counts["json_decode_retries"] > self.json_retry_max:
                     last_error = (
                         f"json_retry_budget_exceeded: "
@@ -584,6 +629,11 @@ class OpenAIProvider(LLMProvider):
     def last_retry_counts(self) -> dict[str, int]:
         """Return retry and attempt diagnostics from last generation."""
         return self._last_retry_counts.copy()
+
+    @property
+    def last_response_snapshot(self) -> dict[str, Any]:
+        """Return raw OpenAI response snapshot for the last attempt."""
+        return self._last_response_snapshot.copy()
 
 
 def _extract_cached_tokens(usage: Any) -> int:
