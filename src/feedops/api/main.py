@@ -226,6 +226,10 @@ app.include_router(gmc_sync_router)
 from feedops.api.performance_baseline import router as performance_baseline_router
 app.include_router(performance_baseline_router)
 
+# Include intent scoring router
+from feedops.api.intent_scoring import router as intent_scoring_router
+app.include_router(intent_scoring_router)
+
 # Import backfill endpoints
 from feedops.api.backfill import (
     StartBackfillRequest,
@@ -369,14 +373,7 @@ Return ONLY valid JSON:
 #   from feedops.api.persistence import ...
 
 
-def _extract_query_intent_generation_diagnostics(
-    generated: dict[str, object] | None,
-) -> dict[str, object]:
-    if not isinstance(generated, dict):
-        return {}
-    diagnostics = generated.get("query_intent_diagnostics")
-    return dict(diagnostics) if isinstance(diagnostics, dict) else {}
-
+from feedops.api.intent_scoring import _extract_query_intent_generation_diagnostics
 
 # =============================================================================
 # Job management helpers — imported from feedops.api.job_management (Plan 01-02)
@@ -2589,66 +2586,7 @@ async def api_list_backfill_jobs(status: str | None = None, limit: int = 20):
 # =============================================================================
 # Intent Scoring (Feed Alignment)
 # =============================================================================
-
-# Lazy-loaded scorer with initialization lock
-_intent_scorer = None
-_intent_scorer_lock = threading.Lock()
-
-
-# ScoreIntentRequest, ScoreIntentItem, ScoreIntentResponse imported from feedops.api.schemas
-
-
-def _get_intent_scorer():
-    """Get or lazily initialize the IntentScorer singleton."""
-    global _intent_scorer
-    if _intent_scorer is not None:
-        return _intent_scorer
-
-    with _intent_scorer_lock:
-        # Double-check after acquiring lock
-        if _intent_scorer is not None:
-            return _intent_scorer
-
-        from feedops.scoring.intent_scorer import IntentScorer
-        logger.info("Initializing IntentScorer (first request)...")
-        _intent_scorer = IntentScorer.from_supabase()
-        logger.info("IntentScorer ready")
-        return _intent_scorer
-
-
-@app.post("/score-intent", response_model=ScoreIntentResponse)
-async def api_score_intent(request: ScoreIntentRequest):
-    """Score search queries for feed alignment.
-
-    Combines attribute extraction (finishes, collections, product types,
-    dimensions, model numbers) with TF-IDF specificity scoring.
-
-    Feed alignment = 0.60 * attribute_score + 0.40 * specificity_score
-    """
-    from datetime import datetime, timezone
-
-    try:
-        scorer = _get_intent_scorer()
-        results = scorer.score_terms(
-            request.queries, include_details=request.include_details
-        )
-
-        scores = []
-        for r in results:
-            item = ScoreIntentItem(
-                query=r["query"],
-                feed_alignment_score=r["feed_alignment_score"],
-                attribute_score=r["attribute_score"],
-                specificity_score=r["specificity_score"],
-                matched_attributes=r.get("matched_attributes"),
-            )
-            scores.append(item)
-
-        return ScoreIntentResponse(
-            scores=scores,
-            model_version="v1.0",
-            scored_at=datetime.now(timezone.utc).isoformat(),
-        )
-    except Exception as e:
-        logger.error("Intent scoring failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"Scoring error: {e}")
+# Extracted to feedops.api.intent_scoring (Plan 02-01).
+# Route registered via app.include_router(intent_scoring_router) above.
+# _get_intent_scorer, _extract_query_intent_generation_diagnostics, api_score_intent
+# are all in feedops.api.intent_scoring.

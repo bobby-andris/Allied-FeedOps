@@ -28,3 +28,16 @@ def test_emit_generation_summary_importable():
 def test_should_persist_finish_sentences_importable():
     from feedops.api.telemetry import _should_persist_finish_sentences
     assert callable(_should_persist_finish_sentences)
+
+
+def test_run_async_in_thread_daemon_false_at_runtime():
+    """DECOMP-08: thread.daemon must be False at runtime, not just in source."""
+    from feedops.api.telemetry import run_async_in_thread
+    import asyncio
+
+    async def noop():
+        pass
+
+    thread = run_async_in_thread(noop)
+    assert thread.daemon is False, "run_async_in_thread must use non-daemon threads"
+    thread.join(timeout=2.0)
