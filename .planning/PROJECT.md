@@ -1,18 +1,30 @@
-# Pipeline Reliability Rewrite + Model Evaluation
+# Allied-FeedOps
 
 ## What This Is
 
-A reliability and extensibility overhaul of the Allied-FeedOps Python content generation pipeline. The monolithic `main.py` (3,737 lines) is decomposed into testable modules, all known GPT-5.2 bugs are fixed, a model provider abstraction is added, and Claude vs GPT-5.2 are evaluated head-to-head on real product content. The Bing `{FINISH_NAME}` placeholder bug (85/98 titles broken) is also fixed.
+A content generation and feed optimization platform for Allied Brass Manufacturing — ~120 master SKUs expanding to ~3,300 Google Merchant Center listings across 28 finishes. Generates optimized product titles, descriptions, and lifestyle images for Google Shopping, Bing Shopping, and Shopify, then publishes through Google Sheets supplemental feeds and Shopify's GraphQL API. Dashboard (Next.js/Vercel) provides SKU review, batch publishing, performance tracking, and content regeneration. Pipeline (Python/Cloud Run) serves all content generation via Claude Sonnet 4.6.
 
 ## Core Value
 
-The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
+The pipeline produces high-quality product content reliably at scale, backed by accurate performance data that maps seamlessly across Google Ads, Shopify, and Merchant Center.
+
+## Current Milestone: v1.1 Dead Code Cleanup + Data Infrastructure
+
+**Goal:** Remove dead code from the v1.0 pipeline decomposition, then fix and harden the Google Ads data import layer — correct schema constraints, proper entity relationships, full lifecycle data collection scaled to all SKUs.
+
+**Target features:**
+- Dead code removal (generator.py legacy paths, backward-compat re-exports, unused imports)
+- Fix performance snapshot upsert constraint bug (daily Slack failures)
+- Audit and correct all data table schemas and constraints
+- Proper entity relationship mapping across Google Ads ↔ variant_index ↔ Shopify ↔ GMC
+- Full lifecycle data collection (baselines → snapshots → impact scores) for all SKUs
+- Image support wiring in executor.py
 
 ## Requirements
 
 ### Validated
 
-<!-- Existing capabilities that must be preserved -->
+<!-- Shipped and confirmed valuable -->
 
 - ✓ Single-SKU content generation (`/optimize-sku`) — v1.0
 - ✓ Content regeneration with feedback (`/regenerate`) — v1.0
@@ -26,65 +38,61 @@ The pipeline produces high-quality product content reliably at scale — decompo
 - ✓ Finish placeholder contract (`{FINISH_NAME}`, `{FINISH_SENTENCE}`) — v1.3a
 - ✓ Prompt authority chain (prompt_builder → prompts.py → prompt_loader → shopping_intelligence) — v1.3a
 - ✓ 98% human approval rate on generated Google content — v1.3b
+- ✓ main.py decomposed into focused modules (9 extracted) — v1.0
+- ✓ GPT-5.2 bugs fixed (all 5) — v1.0
+- ✓ Claude provider with structured output — v1.0
+- ✓ Model evaluation: Claude Sonnet 4.6 live in production — v1.0
+- ✓ Deploy checklist workflow — v1.0
 
 ### Active
 
-<!-- Current scope — building toward these -->
+<!-- Current scope — v1.1 -->
 
-- [ ] Decompose main.py into focused modules (schemas, persistence, job management, telemetry, intent scoring, finish processing, generation)
-- [ ] Reduce main.py to <500 lines (route definitions and request handling only)
-- [ ] Unit test coverage for each extracted module
-- [ ] Unify `process_batch_job()` and `process_hybrid_batch_job()` into single `JobRunner`
-- [ ] Fix GPT-5.2 bug: temperature + reasoning_effort conflict
-- [ ] Fix GPT-5.2 bug: missing reasoning_effort default
-- [ ] Fix GPT-5.2 bug: legacy json_object → json_schema strict mode
-- [ ] Fix GPT-5.2 bug: no prompt_cache_retention for batch runs
-- [ ] Fix GPT-5.2 bug: system prompt structure (=== headers → XML tags)
-- [ ] Model provider abstraction (`providers/base.py`) with common interface
-- [ ] Claude provider implementation
-- [ ] Head-to-head evaluation: Claude vs GPT-5.2 on 10 diverse SKUs
-- [ ] Cost/quality/latency tradeoff documentation
-- [ ] Fix Bing {FINISH_NAME} bug (85/98 titles have hardcoded finish names)
-- [ ] Regenerate broken Bing titles with correct placeholders
+- [ ] Remove dead code from pipeline decomposition
+- [ ] Fix performance snapshot schema constraints
+- [ ] Audit and correct all data import table schemas
+- [ ] Design proper entity relationships for cross-platform data mapping
+- [ ] Scale data collection to all SKUs (not just on-demand subset)
+- [ ] Wire image support in executor.py
 
 ### Out of Scope
 
-- v1.3c dashboard phases (tier intelligence redesign, distribution scoring, revenue leakage) — PAUSED
-- v1.4 closed-loop optimization (performance-informed regeneration) — future milestone
+- Bing {FINISH_NAME} regeneration (96 SKUs) — next milestone, generation works correctly now
+- v1.3c dashboard phases (tier intelligence redesign, distribution scoring) — PAUSED
+- v1.4 closed-loop optimization (performance-informed regeneration) — future
 - Deferred database migrations (034b GA4 attribution, 035b intent execution) — not yet evaluated
-- New dashboard pages or UI changes — pipeline-only milestone
-- Prompt content rewriting — Phase 27 proved GPT-5.2 is hyper-sensitive; prompt changes are incremental only
+- New dashboard pages or UI changes
+- Prompt content rewriting
 
 ## Context
 
-**Codebase state:** 55+ PRs merged across v1.0–v1.3b. Production pipeline at `src/feedops/api/main.py` serving all content generation. Dashboard at `dashboard/` auto-deploys via Vercel. Pipeline auto-deploys via Cloud Build to Cloud Run.
+**Codebase state:** 58+ PRs merged across v1.0–v1.0. Pipeline decomposed from 3,737-line monolith to 9 focused modules. Claude Sonnet 4.6 serving all production traffic (84% cheaper, 2x faster than GPT-5.2).
 
-**The monolith problem:** `main.py` has ~30 Pydantic models, ~50 functions, 10+ API endpoints in a single file. `process_batch_job()` and `process_hybrid_batch_job()` share ~60% identical logic as separate 500+ line functions. No unit tests can target individual concerns.
+**Dead code:** ~500 lines of never-used variant generation behind `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag, 7 duplicated functions in generator.py, ~130 lines of backward-compat re-exports in main.py, unused imports in extracted modules. See `/tmp/dead-code-research.md`.
 
-**Critical learning from Phase 27:** GPT-5.2 strict JSON mode is hyper-sensitive to system prompt changes. Even minor text modifications cause empty/placeholder-only content. `self_score` and `scoring_rubric` are load-bearing. Never batch prompt changes — deploy and test with curl after EACH individual change.
+**Data import issues:** Daily snapshot capture failing since launch — `performance_snapshots` table missing unique constraint for upsert. Only 274/2,500 master SKUs have baselines (on-demand only). Search term attribution approximate (campaign-level). Performance Max campaigns excluded. Offer ID case mismatch handled inconsistently. See `/tmp/google-ads-import-research.md`.
 
-**Bing bug:** 85/98 Bing titles have hardcoded finish names instead of `{FINISH_NAME}` placeholder. This is a prompt-level issue — the Bing-specific prompt section likely lacks the placeholder instruction.
-
-**GPT-5.2 bugs:** 5 confirmed issues in `openai_provider.py` and `prompts.py` (temperature/reasoning conflict, missing default, legacy JSON mode, no prompt caching, === headers).
+**Entity mapping:** `variant_index` (72K rows) is the central hub linking GMC offer IDs ↔ master SKUs ↔ Shopify product/variant IDs ↔ finish codes. Google Ads data flows through this table but the relationships aren't enforced or optimized at the schema level.
 
 ## Constraints
 
-- **Backward compatibility**: All existing API endpoints must work identically after decomposition
-- **Background task pattern**: `run_async_in_thread()` MUST be preserved — do not replace with `BackgroundTasks` or `asyncio.create_task()`
-- **Prompt sensitivity**: System prompt changes require deploy-and-test protocol (one change at a time, curl verification)
-- **Pre-deploy gates**: `cd dashboard && npm run build`, `npx tsc --noEmit`, `npm run lint` must all pass before any push
+- **Backward compatibility**: All existing API endpoints must work identically
+- **Background task pattern**: `run_async_in_thread()` MUST be preserved
+- **Pre-deploy gates**: `cd dashboard && npm run build`, `npx tsc --noEmit`, `npm run lint` must pass
 - **Content storage**: Generated content in Supabase only (not git)
-- **Python pipeline**: All pipeline changes in Python (not Node.js/TypeScript)
+- **Python pipeline**: Pipeline changes in Python; dashboard in TypeScript
+- **Schema migrations**: Use Supabase migrations, test locally first
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Decompose before fixing bugs | Modular isolation makes bug fixes safer and testable | — Pending |
-| Unify batch/hybrid after extraction | Depends on clean module boundaries from Phase 1 | — Pending |
-| Provider abstraction before evaluation | Need common interface to run head-to-head comparison | — Pending |
-| Incremental prompt changes only | Phase 27 proved GPT-5.2 crashes on batch prompt changes | ✓ Good |
+| Decompose before fixing bugs | Modular isolation makes bug fixes safer and testable | ✓ Good |
+| Incremental prompt changes only | Phase 27 proved GPT-5.2 crashes on batch changes | ✓ Good |
 | Preserve run_async_in_thread | Container lifecycle kills BackgroundTasks on scale-to-zero | ✓ Good |
+| Claude Sonnet 4.6 as primary provider | 84% cheaper, 2x faster, 8.85/10 blind score | ✓ Good |
+| Dead code before data infra | Low-risk cleanup reduces noise before schema changes | — Pending |
+| variant_index as entity hub | Already 72K rows, central to all cross-platform mapping | — Pending |
 
 ---
-*Last updated: 2026-03-03 after initialization*
+*Last updated: 2026-03-03 after v1.1 milestone initialization*
