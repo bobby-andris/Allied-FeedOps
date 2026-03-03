@@ -7,10 +7,11 @@
 
 1. **"Spawn agents to query [database]"** → Warn: MCP access issue. Offer: data-first OR ToolSearch
 2. **"Just give quick answer"** (for analysis) → Warn: Fabrication risk. Offer: data-first approach
-3. **"Fix and push"** / "deploy"** → Warn: No build verification. Enforce: build → lint → push workflow
+3. **"Fix and push"** / "deploy" / "push this" / "create PR"** → **INVOKE `deploy-checklist` skill.** No exceptions.
 4. **"Use Node.js/npm for script"** → Warn: Wrong stack. Remind: Python for scripts
 5. **"Optimize N SKUs"** (no selection) → Ask: Which SKUs? Offer to query for criteria
 6. **"Continue where we left off"** → Check: Checkpoint file exists? Or need context summary?
+7. **"Change env var" / "update Cloud Run" / "set provider"** → **INVOKE `deploy-checklist` skill Phase 3.** Verify traffic routing + secret bindings.
 
 **Warning format:**
 ```
@@ -21,12 +22,37 @@ Proceed with recommendation or override?
 ```
 
 ### Pre-Deploy Gates (MANDATORY)
+**ALWAYS invoke the `deploy-checklist` skill before pushing, creating PRs, or deploying.**
+
 Before ANY `git push` or deployment:
 1. ✅ Run `cd dashboard && npm run build` - MUST pass
 2. ✅ Run `npx tsc --noEmit` - MUST have zero errors
 3. ✅ Run `npm run lint` - Fix all issues
 4. ✅ If you removed imports during lint cleanup, `grep` for usage before committing
-5. ❌ NEVER push code that hasn't passed local build verification
+5. ✅ Audit for hardcoded values that should read from env vars (grep for `"v2"`, `"openai"`, `"gpt"`)
+6. ✅ If Python pipeline changed: run `pytest tests/ -v`
+7. ❌ NEVER push code that hasn't passed local build verification
+
+### Post-Deploy Verification (MANDATORY)
+After ANY merged PR that touches pipeline or dashboard:
+1. ✅ Verify Cloud Build succeeded: `gcloud builds list --project=bobbys-project-346400 --limit=3`
+2. ✅ Verify traffic routes to LATEST revision (not pinned to old tag)
+3. ✅ Health check: `curl -s https://feedops-pipeline-3b43yg32oa-ue.a.run.app/health`
+4. ✅ If provider/prompt changed: smoke test with real SKU regeneration
+5. ❌ NEVER assume deploy succeeded without verification
+
+### Cloud Run Infrastructure (MANDATORY)
+Before changing env vars or secrets on Cloud Run:
+1. ✅ Check which revision is serving traffic (may be pinned to old revision via tag)
+2. ✅ After changing env vars, verify traffic routes to the NEW revision
+3. ✅ After adding secrets, verify they are BOUND to the container (not just existing in Secret Manager)
+4. ✅ Run `deploy-checklist` skill Phase 3 for full verification commands
+
+### Git Workflow (MANDATORY)
+1. ✅ Push commits regularly — never accumulate 50+ local-only commits
+2. ✅ Always create feature branches from master (master is protected)
+3. ✅ After merging a squash-merge PR, reset local master: `git checkout master && git pull --rebase`
+4. ❌ NEVER commit directly to master
 
 ### Data Integrity (MANDATORY)
 1. ❌ NEVER fabricate SKU IDs, product data, metrics, or examples
@@ -118,6 +144,7 @@ Core workflow:
 - `merchant-integrator` - Merchant API migrations and integrations
 
 **Skills** (via Skill tool):
+- `deploy-checklist` - **MANDATORY** before any push/PR/deploy — validates code, infra, and env parity
 - `superpowers:brainstorming` - Before creative work
 - `superpowers:systematic-debugging` - When encountering bugs
 - `superpowers:test-driven-development` - Before implementation
@@ -361,6 +388,18 @@ gcloud builds list --project=bobbys-project-346400 --limit=5
 - feedops-gemini-api-key
 
 ## Cloud Run Service
+
+**Environment Variables (Production)**:
+| Env Var | Current Value | Purpose |
+|---------|---------------|---------|
+| `FEEDOPS_PROVIDER` | `claude` | Active LLM provider (claude/openai) |
+| `FEEDOPS_GOOGLE_BRIEF_VERSION` | `v3` | Google brief version (v2=legacy, v3=skill-adapted) |
+| `FEEDOPS_CLAUDE_MODEL` | `claude-sonnet-4-6` | Claude model ID |
+| `FEEDOPS_ENV_CONTRACT_STRICT` | `1` | Enforce env var contract on startup |
+| `ANTHROPIC_API_KEY` | (secret) | Bound from `feedops-anthropic-api-key` |
+| `OPENAI_API_KEY` | (secret) | Bound from `feedops-openai-api-key` |
+
+**CRITICAL**: When adding new env vars or secrets, follow the `deploy-checklist` skill Phase 3C.
 
 **Endpoints**:
 - `GET /health` - Health check with Supabase status
