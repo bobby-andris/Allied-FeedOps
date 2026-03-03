@@ -84,69 +84,91 @@ def _supabase_query(url: str, key: str, sql: str) -> list[dict]:
 
 
 def _query_candidates(url: str, key: str, category_filter: str | None, limit: int) -> list[dict]:
-    """Query product_catalog + generated_content for evaluation candidates."""
-    # Use ORB finish as the representative variant per master_sku (most common finish).
-    # Falls back to any finish if ORB is not present for a given SKU.
+    """Query product_catalog + generated_content for evaluation candidates.
+
+    Uses three separate simple queries and merges results in Python to avoid
+    CTEs (which are blocked by Supabase's execute_sql RPC policy).
+    Multi-SKU detection uses variant_index.shopify_product_id as the grouping key.
+    """
     category_clause = ""
     if category_filter:
         safe_cat = category_filter.replace("'", "''")
-        category_clause = f"AND pc.category ILIKE '%{safe_cat}%'"
+        category_clause = f"AND category ILIKE '%{safe_cat}%'"
 
-    sql = f"""
-WITH representative AS (
-    -- One row per master_sku: prefer ORB, then take the lowest-position variant
-    SELECT DISTINCT ON (master_sku)
-        master_sku,
-        category,
-        collection,
-        title,
-        product_id
-    FROM product_catalog
-    WHERE finish_code IS NOT NULL
-    {category_clause}
-    ORDER BY master_sku,
-             CASE WHEN finish_code = 'ORB' THEN 0 ELSE 1 END,
-             position
-),
-multi_sku_flag AS (
-    -- Detect master_skus that share a product_id with at least one other master_sku
-    SELECT
-        r.master_sku,
-        EXISTS (
-            SELECT 1 FROM product_catalog pc2
-            WHERE pc2.master_sku != r.master_sku
-              AND pc2.product_id = r.product_id
-        ) AS is_multi_sku
-    FROM representative r
-),
-approved_flag AS (
-    -- Count platforms with approved_content per master_sku
-    SELECT
-        master_sku,
-        COUNT(DISTINCT platform) AS approved_platform_count
-    FROM generated_content
-    WHERE approved_content IS NOT NULL
-      AND approved_content != ''
-    GROUP BY master_sku
-)
-SELECT
-    r.master_sku,
-    r.category,
-    COALESCE(r.collection, '') AS collection,
-    LEFT(r.title, 60) AS title_preview,
-    COALESCE(mf.is_multi_sku, FALSE) AS is_multi_sku,
-    COALESCE(af.approved_platform_count, 0) AS approved_platform_count,
-    r.product_id
-FROM representative r
-LEFT JOIN multi_sku_flag mf ON mf.master_sku = r.master_sku
-LEFT JOIN approved_flag af ON af.master_sku = r.master_sku
-ORDER BY
-    COALESCE(af.approved_platform_count, 0) DESC,
-    r.category,
-    r.master_sku
-LIMIT {limit};
+    # Query 1: One representative variant per master_sku (prefer ORB finish, fallback any).
+    # DISTINCT ON requires ORDER BY to start with the grouped column.
+    sql_repr = f"""
+SELECT DISTINCT ON (master_sku)
+    master_sku,
+    category,
+    collection,
+    LEFT(title, 60) AS title_preview
+FROM product_catalog
+WHERE finish_code IS NOT NULL
+{category_clause}
+ORDER BY master_sku,
+         CASE WHEN finish_code = 'ORB' THEN 0 ELSE 1 END,
+         position
 """
-    return _supabase_query(url, key, sql)
+    representatives = _supabase_query(url, key, sql_repr)
+    if not representatives:
+        return []
+
+    # Query 2: Multi-SKU detection via variant_index.shopify_product_id
+    # A master_sku is "multi-SKU" if its shopify_product_id is shared by >1 master_sku.
+    sql_multi = """
+SELECT master_sku, shopify_product_id
+FROM variant_index
+GROUP BY master_sku, shopify_product_id
+"""
+    multi_rows = _supabase_query(url, key, sql_multi)
+    # Build: shopify_product_id -> set of master_skus
+    product_to_skus: dict[str, set] = {}
+    for row in multi_rows:
+        pid = str(row.get("shopify_product_id") or "")
+        sku = row.get("master_sku", "")
+        if pid and sku:
+            product_to_skus.setdefault(pid, set()).add(sku)
+    # Build: master_sku -> is_multi_sku
+    sku_to_product: dict[str, str] = {
+        row.get("master_sku", ""): str(row.get("shopify_product_id") or "")
+        for row in multi_rows
+    }
+
+    # Query 3: SKUs with approved content (count platforms per master_sku)
+    sql_approved = """
+SELECT master_sku, COUNT(DISTINCT platform) AS approved_platform_count
+FROM generated_content
+WHERE approved_content IS NOT NULL
+  AND approved_content != ''
+GROUP BY master_sku
+"""
+    approved_rows = _supabase_query(url, key, sql_approved)
+    approved_lookup: dict[str, int] = {
+        row["master_sku"]: int(row.get("approved_platform_count") or 0)
+        for row in approved_rows
+        if row.get("master_sku")
+    }
+
+    # Merge and sort: prioritise approved, then by category/sku
+    merged = []
+    for row in representatives:
+        sku = row.get("master_sku", "")
+        pid = sku_to_product.get(sku, "")
+        is_multi = len(product_to_skus.get(pid, set())) > 1 if pid else False
+        approved_count = approved_lookup.get(sku, 0)
+        merged.append({
+            "master_sku": sku,
+            "category": row.get("category", ""),
+            "collection": row.get("collection", "") or "",
+            "title_preview": row.get("title_preview", ""),
+            "is_multi_sku": is_multi,
+            "approved_platform_count": approved_count,
+            "shopify_product_id": pid,
+        })
+
+    merged.sort(key=lambda r: (-r["approved_platform_count"], r["category"], r["master_sku"]))
+    return merged[:limit]
 
 
 def _build_rationale(row: dict) -> str:

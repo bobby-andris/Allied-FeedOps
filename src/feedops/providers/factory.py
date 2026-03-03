@@ -32,16 +32,6 @@ def _int_env(name: str, default: int) -> int:
         return default
 
 
-def _float_env(name: str, default: float) -> float:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    try:
-        return float(raw)
-    except ValueError:
-        logger.warning("Invalid float for %s=%r, using default=%s", name, raw, default)
-        return default
-
 
 def _build_claude_provider(*, api_key: str, model: str) -> "ClaudeProvider":
     from feedops.providers.claude_provider import ClaudeProvider  # noqa: PLC0415
@@ -49,8 +39,6 @@ def _build_claude_provider(*, api_key: str, model: str) -> "ClaudeProvider":
         api_key=api_key,
         model=model,
         max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 1),
-        sdk_timeout_seconds=_float_env("FEEDOPS_CLAUDE_SDK_TIMEOUT_SECONDS", 60.0),
-        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 120.0),
         json_retry_max=_int_env("FEEDOPS_CLAUDE_JSON_RETRY_MAX", 1),
     )
 
@@ -60,9 +48,6 @@ def _build_openai_provider(*, api_key: str, model: str) -> OpenAIProvider:
         api_key=api_key,
         model=model,
         max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 1),
-        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 45.0),
-        sdk_max_retries=_int_env("FEEDOPS_OPENAI_SDK_MAX_RETRIES", 0),
-        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 120.0),
         json_retry_max=_int_env("FEEDOPS_OPENAI_JSON_RETRY_MAX", 1),
     )
 

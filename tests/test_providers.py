@@ -217,15 +217,6 @@ def test_get_provider_applies_hardened_default_retry_and_timeout_controls():
     with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True):
         provider = get_provider()
         assert provider.max_retries == 1
-        assert provider.max_total_seconds == 120
-        assert provider.client.max_retries == 0
-        assert provider.client.timeout is not None
-        timeout_read = (
-            provider.client.timeout.read
-            if hasattr(provider.client.timeout, "read")
-            else provider.client.timeout
-        )
-        assert float(timeout_read) == 45.0
         assert getattr(provider, "json_retry_max") == 1
 
 
@@ -238,7 +229,6 @@ def test_get_provider_uses_openai_model_env():
         provider = get_provider()
         assert provider.name == "openai/gpt-4o"
         assert provider.max_retries == 1
-        assert provider.client.max_retries == 0
 
 
 def test_get_provider_uses_diagnostic_model_when_enabled():
@@ -425,8 +415,6 @@ def test_get_provider_applies_retry_and_timeout_env_overrides():
     ):
         provider = get_provider()
         assert provider.max_retries == 1
-        assert provider.max_total_seconds == 180
-        assert provider.client.max_retries == 1
         assert getattr(provider, "json_retry_max") == 3
 
 
@@ -507,5 +495,4 @@ def test_get_provider_claude_applies_env_overrides():
         provider = get_provider()
         assert isinstance(provider, ClaudeProvider)
         assert provider.max_retries == 2
-        assert provider.max_total_seconds == 200.0
         assert provider.json_retry_max == 3

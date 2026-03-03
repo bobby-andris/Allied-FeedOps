@@ -327,9 +327,18 @@ async def run_single_pass(
         completion_tokens = int(usage.get("completion_tokens", 0))
         cached_tokens = int(usage.get("cached_tokens", 0))
         latency_ms = int(latency_by_platform.get(platform, 0))
-        parse_mode = str(parse_by_platform.get(platform, ""))
-        json_retries = int(retry_by_platform.get(platform, 0))
-        api_retries = int(usage.get("api_retries", 0))
+        parse_info = parse_by_platform.get(platform, "")
+        if isinstance(parse_info, dict):
+            parse_mode = str(parse_info.get("parse_mode", ""))
+        else:
+            parse_mode = str(parse_info)
+        retry_info = retry_by_platform.get(platform, {})
+        if isinstance(retry_info, dict):
+            json_retries = int(retry_info.get("json_parse_retries", retry_info.get("attempt_count", 0)))
+            api_retries = int(retry_info.get("api_retries", retry_info.get("attempt_count", 0)))
+        else:
+            json_retries = int(retry_info) if retry_info else 0
+            api_retries = int(usage.get("api_retries", 0))
 
         cost_usd = calculate_cost_usd(model, prompt_tokens, completion_tokens, cached_tokens)
 

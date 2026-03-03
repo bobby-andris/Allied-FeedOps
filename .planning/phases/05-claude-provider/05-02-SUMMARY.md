@@ -72,7 +72,7 @@ Each task was committed atomically:
 1. **Task 1: Extend factory.py with Claude provider support** - `eff6878f` (feat)
 2. **Task 2: Add factory tests for Claude provider selection** - `5e0051db` (test)
 
-**Plan metadata:** (included in final docs commit)
+**Plan metadata:** `8b311f73` (docs: complete plan)
 
 ## Files Created/Modified
 - `src/feedops/providers/factory.py` - Added _build_claude_provider() builder, FEEDOPS_PROVIDER=claude branch in get_provider(), updated ValueError and docstring

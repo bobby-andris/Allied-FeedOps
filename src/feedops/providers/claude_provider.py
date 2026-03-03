@@ -64,19 +64,11 @@ class ClaudeProvider(LLMProvider):
         model: str = "claude-sonnet-4-6",
         max_retries: int = 3,
         *,
-        sdk_timeout_seconds: float | None = None,
-        max_total_seconds: float | None = None,
         json_retry_max: int | None = None,
     ):
-        client_kwargs: dict[str, Any] = {"api_key": api_key}
-        if sdk_timeout_seconds is not None:
-            client_kwargs["timeout"] = max(sdk_timeout_seconds, 1.0)
-        self.client = AsyncAnthropic(**client_kwargs)
+        self.client = AsyncAnthropic(api_key=api_key)
         self.model = model
         self.max_retries = max(1, max_retries)
-        self.max_total_seconds = (
-            max_total_seconds if max_total_seconds is not None else 300.0
-        )
         self.json_retry_max = (
             max(0, int(json_retry_max)) if json_retry_max is not None else 1
         )
@@ -227,12 +219,6 @@ class ClaudeProvider(LLMProvider):
 
         for attempt in range(self.max_retries):
             self._last_retry_counts["attempt_count"] = attempt + 1
-            if (time.perf_counter() - start_time) >= self.max_total_seconds:
-                last_error = (
-                    f"provider_max_total_seconds_exceeded: "
-                    f"{self.max_total_seconds:.2f}s"
-                )
-                break
 
             parse_details: dict[str, Any] = {}
             try:
