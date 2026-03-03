@@ -45,6 +45,7 @@ from typing import Literal
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
+from feedops.api.telemetry import run_async_in_thread
 from feedops.observability import get_request_id, log_event
 
 logger = logging.getLogger(__name__)
@@ -497,10 +498,8 @@ async def start_backfill(request: StartBackfillRequest) -> BackfillJobResponse:
         config=request.config,
     )
 
-    # Start background processing via run_async_in_thread (imported from main.py)
+    # Start background processing via run_async_in_thread from telemetry
     # This ensures the job survives HTTP response completion on Cloud Run
-    from feedops.api.main import run_async_in_thread
-
     run_async_in_thread(
         _start_background_processing,
         request_id=None,  # TODO: Pass request_id from context
@@ -587,8 +586,6 @@ async def resume_backfill(job_id: str) -> BackfillJobResponse:
     job_type = job.job_type
 
     # Start background processing from checkpoint
-    from feedops.api.main import run_async_in_thread
-
     run_async_in_thread(
         _start_background_processing,
         request_id=None,  # TODO: Pass request_id from context
