@@ -23,12 +23,12 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Job Unification
 
-- [ ] **JOBS-01**: Replace duplicated `process_batch_job()` and `process_hybrid_batch_job()` with unified `JobRunner` class
-- [ ] **JOBS-02**: Single job processing loop with batch/hybrid mode flag
-- [ ] **JOBS-03**: Shared retry logic, error handling, and status updates
-- [ ] **JOBS-04**: Configurable SKU processing strategy (full generation vs variant adaptation)
-- [ ] **JOBS-05**: Proper cancellation support and graceful shutdown
-- [ ] **JOBS-06**: Batch and hybrid generation produce identical results to current implementation
+- [x] **JOBS-01**: Replace duplicated `process_batch_job()` and `process_hybrid_batch_job()` with unified `JobRunner` class
+- [x] **JOBS-02**: Single job processing loop with batch/hybrid mode flag
+- [x] **JOBS-03**: Shared retry logic, error handling, and status updates
+- [x] **JOBS-04**: Configurable SKU processing strategy (full generation vs variant adaptation)
+- [x] **JOBS-05**: Proper cancellation support and graceful shutdown
+- [x] **JOBS-06**: Batch and hybrid generation produce identical results to current implementation
 
 ### GPT-5.2 Fixes
 
@@ -106,12 +106,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DECOMP-09 | Phase 3 | Pending |
 | DECOMP-10 | Phase 2 | Complete |
 | DECOMP-11 | Phase 2 | Partial (intent+finish done, generation pending 02-02) |
-| JOBS-01 | Phase 3 | Pending |
-| JOBS-02 | Phase 3 | Pending |
-| JOBS-03 | Phase 3 | Pending |
-| JOBS-04 | Phase 3 | Pending |
-| JOBS-05 | Phase 3 | Pending |
-| JOBS-06 | Phase 3 | Pending |
+| JOBS-01 | Phase 3 | Complete |
+| JOBS-02 | Phase 3 | Complete |
+| JOBS-03 | Phase 3 | Complete |
+| JOBS-04 | Phase 3 | Complete |
+| JOBS-05 | Phase 3 | Complete |
+| JOBS-06 | Phase 3 | Complete |
 | GPT-01 | Phase 4 | Pending |
 | GPT-02 | Phase 4 | Pending |
 | GPT-03 | Phase 4 | Pending |

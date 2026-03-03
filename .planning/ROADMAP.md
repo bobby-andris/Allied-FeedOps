@@ -117,7 +117,7 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 |-------|----------------|--------|-----------|
 | 1. Schemas Extraction | 2/2 | Complete | 2026-03-03 |
 | 2. Services Extraction | 0/2 | Planning complete | - |
-| 3. JobRunner and Route Extraction | 0/TBD | Not started | - |
+| 3. JobRunner and Route Extraction | 1/2 | In Progress|  |
 | 4. GPT-5.2 Bug Fixes | 0/TBD | Not started | - |
 | 5. Claude Provider | 0/TBD | Not started | - |
 | 6. Model Evaluation | 0/TBD | Not started | - |
