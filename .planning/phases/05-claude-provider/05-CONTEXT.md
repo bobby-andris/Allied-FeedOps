@@ -13,48 +13,55 @@ Implement `ClaudeProvider` that produces structured product content (Google, Bin
 <decisions>
 ## Implementation Decisions
 
+### Model selection (USER DECISION)
+- Default model: Claude Sonnet 4.6 (`claude-sonnet-4-6`)
+- Configurable via `FEEDOPS_CLAUDE_MODEL` env var, defaults to `claude-sonnet-4-6`
+- Allows swapping to Opus or Haiku without code changes (useful for Phase 6 evaluation)
+
+### Prompt compatibility (USER DECISION)
+- Same prompt verbatim as GPT-5.2 — no Claude-specific prompt optimization in Phase 5
+- Rationale: Phase 27 proved prompt changes are extremely risky. Claude-optimized prompts deferred to after Phase 6 evaluation when we have real output data to compare
+- Keep self_score and scoring_rubric in prompt — same prompt means same fields
+- ClaudeProvider receives the same `(system_prompt, user_prompt, schema)` tuple — no changes to `prompt_builder.py`
+
+### Fallback chains (USER DECISION)
+- No fallback chains initially — keep Claude standalone
+- Rationale: Phase 6 needs isolated results for clean head-to-head comparison. Fallback chains would mask per-provider failure modes
+- The existing `FallbackProvider` wrapper stays as-is (OpenAI/Gemini only). Add Claude to fallback after Phase 6 data
+
+### API key (USER DECISION)
+- Use `ANTHROPIC_API_KEY` (standard SDK convention) — already set up in Cloud Run, Vercel, and locally
+- GCP secret `feedops-anthropic-api-key` already created and bound to runtime SA
+
+### Extended thinking / reasoning (USER DECISION)
+- Researcher should investigate whether extended thinking improves content quality for this use case
+- Don't assume it's needed — Claude's base reasoning may be sufficient for product descriptions
+- Decision on thinking budget mapping deferred to research findings
+
 ### Structured output approach
-- Claude's discretion on which structured output mechanism to use (tool_use forced, native JSON mode, or constrained output) — researcher investigates current API capabilities and picks the most reliable approach
-- Mirror OpenAI provider's retry-on-bad-JSON logic for consistency — same safety net pattern, can tune retry count separately
-- Full metrics parity: expose `last_usage`, `last_parse_details`, `last_retry_counts` properties — enables apples-to-apples comparison in Phase 6 evaluation
-- Full image input support (ImageInput) from day one — Claude supports vision natively, keep provider complete
-
-### Model & reasoning config
-- Default model configurable via `FEEDOPS_CLAUDE_MODEL` env var, default to Sonnet 4 — best balance of quality/cost/speed for production content generation
-- Claude's discretion on whether/how to map `reasoning_effort` to extended thinking — researcher investigates whether extended thinking improves content quality for this use case
-- Claude's discretion on prompt caching implementation — researcher/planner determine based on expected batch sizes and cost impact
-- Add `anthropic` SDK to pyproject.toml dependencies — Claude's discretion on version pinning strategy
-
-### Factory & env var design
-- Claude's discretion on cleanest factory integration — extend existing `get_provider()` or new env var pattern, whichever is cleanest
-- No fallback chains initially — keep Claude standalone for Phase 6 evaluation. Isolated results needed for clean comparison
-- Claude's discretion on API key env var naming (ANTHROPIC_API_KEY vs FEEDOPS_ANTHROPIC_API_KEY) — pick based on GCP secrets naming and SDK conventions
-- GCP secret setup is a separate manual ops task — Phase 5 is code-only
-
-### Prompt compatibility
-- Same prompt verbatim — Phase 6 evaluation needs identical prompts for fair comparison. Claude handles XML tags natively
-- Keep self_score and scoring_rubric in prompt for Claude — same prompt means same fields. Interesting to compare self-assessment. Can remove later if evaluation shows it's unnecessary
-- ClaudeProvider receives the same `(system_prompt, user_prompt, schema)` tuple — no changes to `prompt_builder.py`. Clean separation of concerns
-- Schema validation tests for all 3 platforms (Google, Bing, Shopify) — required by PROV-05
+- Claude's discretion on mechanism (tool_use forced, native JSON mode, or constrained output) — researcher investigates current API capabilities
+- Mirror OpenAI provider's retry-on-bad-JSON logic for consistency
+- Full metrics parity: expose `last_usage`, `last_parse_details`, `last_retry_counts` — enables apples-to-apples Phase 6 comparison
+- Full image input support (ImageInput) from day one — Claude supports vision natively
 
 ### Claude's Discretion
 - Structured output mechanism selection (tool_use vs JSON mode vs constrained output)
-- Extended thinking token budgets and whether to use them at all
-- Prompt caching implementation details (cache_control breakpoints)
-- SDK version pinning strategy
-- Factory integration pattern (extend get_provider vs separate env var)
-- API key env var naming convention
+- Extended thinking token budgets (pending research findings)
+- Prompt caching implementation (cache_control breakpoints for batch cost savings)
+- SDK version pinning strategy for `anthropic` package
+- Factory integration pattern (extend existing `get_provider()`)
 - Retry logic configuration (retry counts, backoff strategy)
 - Circuit breaker integration (existing `reliability.py` patterns)
+- Schema validation test depth for PROV-05
 
 </decisions>
 
 <specifics>
 ## Specific Ideas
 
-- The Phase 4 verification script (`verify_content_quality.py`) should be reusable for testing Claude provider output — run it with FEEDOPS_PROVIDER=claude to validate content quality
-- Phase 6 evaluation needs identical prompts between providers — any prompt divergence confounds the comparison
-- The existing `FallbackProvider` wrapper should NOT include Claude until after Phase 6 evaluation proves which provider is better
+- Phase 4 verification script (`verify_content_quality.py`) should be reusable for testing Claude output — run with `FEEDOPS_PROVIDER=claude`
+- No prompt engineering in this phase — learned from Phase 27 that prompt changes are high-risk and need iterative deploy-and-test
+- Phase 6 evaluation needs identical prompts between providers — any divergence confounds the comparison
 
 </specifics>
 
@@ -81,17 +88,17 @@ Implement `ClaudeProvider` that produces structured product content (Google, Bin
 - `pipeline/generator.py:65,153`: Same — uses `LLMProvider` interface
 - `api/job_runner.py`: Job processing uses provider from factory — transparent provider swap
 - `Dockerfile` / `pyproject.toml`: Add anthropic SDK dependency
-- GCP: New secret `feedops-anthropic-api-key` bound to runtime SA (manual ops task)
+- GCP: Secret `feedops-anthropic-api-key` already created and bound to runtime SA (done)
 
 </code_context>
 
 <deferred>
 ## Deferred Ideas
 
-- Claude-optimized prompt variant — evaluate after Phase 6 baseline comparison with identical prompts
-- Claude fallback chains (OpenAI→Claude or Claude→OpenAI) — evaluate after Phase 6 proves provider strengths
-- Extended thinking fine-tuning for content quality — evaluate in Phase 6 with different thinking budgets
-- `output_verbosity` parameter exploration for Claude — new API feature, untested for product content
+- Claude-optimized prompt variant (possibly using skill-creator) — evaluate after Phase 6 baseline comparison with identical prompts. Phase 27 proved prompt changes need iterative testing with real output data
+- Claude fallback chains (OpenAI->Claude or Claude->OpenAI) — evaluate after Phase 6 proves provider strengths
+- Extended thinking fine-tuning for content quality — evaluate in Phase 6 with different thinking budgets if research shows benefit
+- `output_verbosity` parameter exploration — new API feature, untested for product content
 
 </deferred>
 
