@@ -820,7 +820,8 @@ def test_generation_summary_event_contract(monkeypatch):
         captured["event"] = event
         captured["fields"] = fields
 
-    monkeypatch.setattr(api_main, "log_event", _fake_log_event)
+    import feedops.api.telemetry as api_telemetry
+    monkeypatch.setattr(api_telemetry, "log_event", _fake_log_event)
 
     api_main._emit_generation_summary(
         endpoint="regenerate",
