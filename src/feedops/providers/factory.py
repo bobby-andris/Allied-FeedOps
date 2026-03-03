@@ -32,15 +32,15 @@ def _int_env(name: str, default: int) -> int:
         return default
 
 
-def _float_env(name: str, default: float) -> float:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    try:
-        return float(raw)
-    except ValueError:
-        logger.warning("Invalid float for %s=%r, using default=%s", name, raw, default)
-        return default
+
+def _build_claude_provider(*, api_key: str, model: str) -> "ClaudeProvider":
+    from feedops.providers.claude_provider import ClaudeProvider  # noqa: PLC0415
+    return ClaudeProvider(
+        api_key=api_key,
+        model=model,
+        max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 1),
+        json_retry_max=_int_env("FEEDOPS_CLAUDE_JSON_RETRY_MAX", 1),
+    )
 
 
 def _build_openai_provider(*, api_key: str, model: str) -> OpenAIProvider:
@@ -48,9 +48,6 @@ def _build_openai_provider(*, api_key: str, model: str) -> OpenAIProvider:
         api_key=api_key,
         model=model,
         max_retries=_int_env("FEEDOPS_PROVIDER_MAX_RETRIES", 1),
-        sdk_timeout_seconds=_float_env("FEEDOPS_OPENAI_SDK_TIMEOUT_SECONDS", 45.0),
-        sdk_max_retries=_int_env("FEEDOPS_OPENAI_SDK_MAX_RETRIES", 0),
-        max_total_seconds=_float_env("FEEDOPS_PROVIDER_MAX_TOTAL_SECONDS", 120.0),
         json_retry_max=_int_env("FEEDOPS_OPENAI_JSON_RETRY_MAX", 1),
     )
 
@@ -65,12 +62,12 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     """Get configured LLM provider with fallback chain.
 
     Priority:
-    1. Explicitly requested provider (if key available)
+    1. FEEDOPS_PROVIDER env var or explicit `preferred` arg ("claude", "openai", "gemini")
     2. OpenAI (if OPENAI_API_KEY set)
     3. Gemini (if GEMINI_API_KEY set)
 
     Args:
-        preferred: Explicitly request 'openai' or 'gemini'.
+        preferred: Explicitly request 'claude', 'openai', or 'gemini'.
 
     Returns:
         Configured LLMProvider instance.
@@ -78,6 +75,22 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     Raises:
         ValueError: If no provider is configured.
     """
+    # Check for explicit provider selection via env var
+    preferred_env = os.environ.get("FEEDOPS_PROVIDER")
+    effective_preferred = preferred or preferred_env
+
+    claude_key = os.environ.get("ANTHROPIC_API_KEY")
+    claude_model = os.environ.get("FEEDOPS_CLAUDE_MODEL", "claude-sonnet-4-6")
+
+    # Claude provider (explicit selection only — no auto-fallback)
+    if effective_preferred == "claude":
+        if not claude_key:
+            raise ValueError(
+                "FEEDOPS_PROVIDER=claude but ANTHROPIC_API_KEY is not set."
+            )
+        logger.info("Using Claude provider (FEEDOPS_PROVIDER=claude, model=%s)", claude_model)
+        return _build_claude_provider(api_key=claude_key, model=claude_model)
+
     openai_key = os.environ.get("OPENAI_API_KEY")
     gemini_key = os.environ.get("GEMINI_API_KEY")
     openai_model = os.environ.get("FEEDOPS_OPENAI_MODEL")
@@ -85,7 +98,7 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
     force_fallback = _truthy(os.environ.get("FEEDOPS_FORCE_PROVIDER_FALLBACK"))
 
     if force_fallback and openai_key and gemini_key:
-        if preferred == "gemini":
+        if effective_preferred == "gemini":
             return FallbackProvider(
                 primary=GeminiProvider(api_key=gemini_key),
                 fallback=_build_openai_provider(
@@ -101,13 +114,13 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
             fallback=GeminiProvider(api_key=gemini_key),
         )
 
-    if preferred == "openai" and openai_key:
+    if effective_preferred == "openai" and openai_key:
         return _build_openai_provider(
             api_key=openai_key,
             model=resolved_openai_model,
         )
 
-    if preferred == "gemini" and gemini_key:
+    if effective_preferred == "gemini" and gemini_key:
         return GeminiProvider(api_key=gemini_key)
 
     if openai_key:
@@ -122,7 +135,8 @@ def get_provider(preferred: str | None = None) -> LLMProvider:
         return GeminiProvider(api_key=gemini_key)
 
     raise ValueError(
-        "No LLM provider configured. Set OPENAI_API_KEY or GEMINI_API_KEY."
+        "No LLM provider configured. Set OPENAI_API_KEY, GEMINI_API_KEY, "
+        "or ANTHROPIC_API_KEY (with FEEDOPS_PROVIDER=claude)."
     )
 
 

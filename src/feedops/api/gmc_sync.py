@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from feedops.api.telemetry import run_async_in_thread
 from feedops.db.supabase_client import get_client, is_supabase_available
 
 logger = logging.getLogger(__name__)
@@ -68,8 +69,6 @@ async def trigger_gmc_sync():
         "started_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    # Import here to avoid circular import issues at module level
-    from feedops.api.main import run_async_in_thread  # type: ignore[attr-defined]
     run_async_in_thread(
         _run_gmc_sync,
         job_id=job_id,

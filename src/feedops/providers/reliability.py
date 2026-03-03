@@ -54,10 +54,12 @@ def is_retryable_provider_error(exc: Exception) -> bool:
     text = str(exc).lower()
     retryable_markers = (
         "429",
+        "529",
         "rate limit",
         "resource_exhausted",
         "temporarily unavailable",
         "service unavailable",
+        "overloaded",
         "timeout",
         "timed out",
         "connection reset",

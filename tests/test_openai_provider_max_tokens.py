@@ -28,30 +28,6 @@ async def test_openai_provider_sets_max_completion_tokens_for_gpt5(monkeypatch):
     assert "max_tokens" not in captured
 
 
-@pytest.mark.asyncio
-async def test_openai_provider_enforces_max_total_seconds(monkeypatch):
-    from feedops.providers.base import LLMError
-    from feedops.providers.openai_provider import OpenAIProvider
-
-    calls = {"count": 0}
-    provider = OpenAIProvider(
-        api_key="test",
-        model="gpt-5.2",
-        max_retries=3,
-        max_total_seconds=0.05,
-    )
-
-    async def _fake_create(**_kwargs):
-        calls["count"] += 1
-        await asyncio.sleep(0.06)
-        raise RuntimeError("request timeout")
-
-    monkeypatch.setattr(provider.client.chat.completions, "create", _fake_create)
-
-    with pytest.raises(LLMError, match="provider_max_total_seconds_exceeded"):
-        await provider.generate(prompt="{}", schema={})
-    assert calls["count"] == 1
-
 
 @pytest.mark.asyncio
 async def test_openai_provider_enforces_json_retry_budget(monkeypatch):

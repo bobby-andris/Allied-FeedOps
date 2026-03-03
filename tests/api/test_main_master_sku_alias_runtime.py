@@ -6,6 +6,9 @@ from types import SimpleNamespace
 import pytest
 
 import feedops.api.main as api_main
+import feedops.api.routes as api_routes
+import feedops.api.generation as api_generation
+import feedops.api.job_runner as api_job_runner
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from feedops.models import ParentSKU, Variant
 
@@ -213,13 +216,16 @@ async def test_regenerate_content_writes_canonical_master_sku(monkeypatch):
         raising=False,
     )
     monkeypatch.setattr(api_main, "get_client", lambda: writes)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-canonical")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: writes)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     async def _fake_generate_per_platform(**_kwargs):
         return _base_generated_payload("Canonical regenerated title")
     monkeypatch.setattr(
-        api_main,
+        api_generation,
         "generate_per_platform",
         _fake_generate_per_platform,
     )
@@ -257,20 +263,27 @@ async def test_regenerate_content_no_change_returns_idempotent_without_writes(mo
     db = _FakeSupabase(generated_content_row=existing_row)
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-no-change")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-no-change")
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: db)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     async def _fake_generate_per_platform(**_kwargs):
         return _base_generated_payload("No change title")
     monkeypatch.setattr(
-        api_main,
+        api_generation,
         "generate_per_platform",
         _fake_generate_per_platform,
     )
@@ -306,20 +319,27 @@ async def test_regenerate_content_change_updates_version_and_writes_single_histo
     db = _FakeSupabase(generated_content_row=existing_row)
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-changed")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-changed")
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: db)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     async def _fake_generate_per_platform(**_kwargs):
         return _base_generated_payload("Updated title")
     monkeypatch.setattr(
-        api_main,
+        api_generation,
         "generate_per_platform",
         _fake_generate_per_platform,
     )
@@ -383,16 +403,19 @@ async def test_regenerate_content_keeps_tokens_unknown_when_usage_snapshot_missi
         raising=False,
     )
     monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-unknown-usage")
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    # Also patch at generation module (where _execute_regeneration_request lives after extraction)
+    monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
+    monkeypatch.setattr(api_generation, "get_client", lambda: db)
+    monkeypatch.setattr(api_generation, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
 
     async def _fake_generate_per_platform(**_kwargs):
         payload = _base_generated_payload("Title with unknown usage")
         payload["usage_by_platform"] = {"google": {}}
         return payload
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
     request = api_main.RegenerateRequest(
         master_sku=canonical,
@@ -416,14 +439,18 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
     thread_call: dict[str, object] = {}
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-async")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-async")
 
     def _fake_run_async(async_func, request_id=None, **kwargs):
         thread_call["async_func"] = async_func
@@ -432,6 +459,7 @@ async def test_regenerate_content_async_mode_queues_job_without_immediate_genera
         return None
 
     monkeypatch.setattr(api_main, "run_async_in_thread", _fake_run_async)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", _fake_run_async)
 
     request = api_main.RegenerateRequest(
         master_sku=canonical,
@@ -489,8 +517,11 @@ async def test_process_regenerate_job_marks_failed_when_running_transition_raise
         raise AssertionError("regeneration should not execute if running update fails")
 
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(api_main, "_execute_regeneration_request", _should_not_execute)
+    monkeypatch.setattr(api_routes, "_execute_regeneration_request", _should_not_execute)
 
     await api_main.process_regenerate_job(
         job_id="job-1",
@@ -540,14 +571,18 @@ async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypa
     )
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_sku",
         lambda _supabase, _master_sku: canonical,
         raising=False,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_sku", lambda _supabase, _master_sku: canonical)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-reuse")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-reuse")
 
     called = {"run_async": False}
 
@@ -556,6 +591,7 @@ async def test_regenerate_content_async_mode_reuses_matching_active_job(monkeypa
         return None
 
     monkeypatch.setattr(api_main, "run_async_in_thread", _fake_run_async)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", _fake_run_async)
 
     request = api_main.RegenerateRequest(
         master_sku=canonical,
@@ -636,12 +672,15 @@ async def test_hybrid_generate_reuses_matching_active_job(monkeypatch):
     )
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_skus",
         lambda _supabase, _master_skus: canonical_skus,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, _master_skus: canonical_skus)
 
     request = api_main.HybridGenerateRequest(skus=canonical_skus, options=options)
     response = await api_main.hybrid_generate(request)
@@ -661,14 +700,19 @@ async def test_hybrid_generate_persists_idempotency_key_on_new_job(monkeypatch):
     options = {"titles": True, "descriptions": False, "platforms": ["google"]}
 
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
     monkeypatch.setattr(api_main, "get_client", lambda: db)
+    monkeypatch.setattr(api_routes, "get_client", lambda: db)
     monkeypatch.setattr(
         api_main,
         "resolve_canonical_master_skus",
         lambda _supabase, _master_skus: canonical_skus,
     )
+    monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, _master_skus: canonical_skus)
     monkeypatch.setattr(api_main, "detect_multi_sku_families", lambda _supabase, _skus: [])
+    monkeypatch.setattr(api_routes, "detect_multi_sku_families", lambda _supabase, _skus: [])
     monkeypatch.setattr(api_main, "run_async_in_thread", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(api_routes, "run_async_in_thread", lambda *_args, **_kwargs: None)
 
     response = await api_main.hybrid_generate(
         api_main.HybridGenerateRequest(skus=canonical_skus, options=options)
@@ -693,15 +737,15 @@ def test_require_request_id_rejects_placeholder() -> None:
 async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch):
     db = _FakeSupabase()
 
-    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
-    monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_job_runner, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_job_runner, "get_client", lambda: db)
+    monkeypatch.setattr(api_job_runner, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "resolve_canonical_master_sku",
         lambda _supabase, master_sku: master_sku,
     )
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-telemetry")
 
     async def _fake_generate_per_platform(**_kwargs):
@@ -717,9 +761,9 @@ async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch)
             "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
         }
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-telemetry",
         families=[],
         single_skus=["CL-55"],
@@ -755,15 +799,15 @@ async def test_process_hybrid_batch_job_persists_non_null_telemetry(monkeypatch)
 async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_scope(monkeypatch):
     db = _FakeSupabase()
 
-    monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
-    monkeypatch.setattr(api_main, "get_client", lambda: db)
-    monkeypatch.setattr(api_main, "get_provider", lambda: _NoopProvider())
+    monkeypatch.setattr(api_job_runner, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_job_runner, "get_client", lambda: db)
+    monkeypatch.setattr(api_job_runner, "get_provider", lambda: _NoopProvider())
     monkeypatch.setattr(
-        api_main,
+        api_job_runner,
         "resolve_canonical_master_sku",
         lambda _supabase, master_sku: master_sku,
     )
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
+    monkeypatch.setattr(api_job_runner, "load_parent_sku_from_supabase", lambda sku: _sample_parent(sku))
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-sku-detail")
 
     async def _fake_generate_per_platform(**_kwargs):
@@ -778,7 +822,7 @@ async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_s
             "retry_by_platform": {"google": {"attempt_count": 1, "json_decode_retries": 0}},
         }
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
+    monkeypatch.setattr(api_job_runner, "generate_per_platform", _fake_generate_per_platform)
 
     families = [
         MultiSkuFamily(
@@ -788,7 +832,7 @@ async def test_process_hybrid_batch_job_writes_batch_sku_detail_for_processing_s
             variant_skus=["1033/18", "1033/24"],
         )
     ]
-    await api_main.process_hybrid_batch_job(
+    await api_job_runner.JobRunner(mode="hybrid")._run_hybrid(
         job_id="job-hybrid-sku-detail",
         families=families,
         single_skus=["CL-55"],
@@ -820,7 +864,8 @@ def test_generation_summary_event_contract(monkeypatch):
         captured["event"] = event
         captured["fields"] = fields
 
-    monkeypatch.setattr(api_main, "log_event", _fake_log_event)
+    import feedops.api.telemetry as api_telemetry
+    monkeypatch.setattr(api_telemetry, "log_event", _fake_log_event)
 
     api_main._emit_generation_summary(
         endpoint="regenerate",
@@ -859,13 +904,20 @@ async def test_regenerate_failure_summary_uses_non_null_request_id(monkeypatch):
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(api_main, "get_request_id", lambda: "-")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "-")
 
     def _fake_emit_generation_summary(**kwargs):
         captured.update(kwargs)
 
     monkeypatch.setattr(api_main, "_emit_generation_summary", _fake_emit_generation_summary)
+    monkeypatch.setattr(api_routes, "_emit_generation_summary", _fake_emit_generation_summary)
     monkeypatch.setattr(
         api_main,
+        "ensure_generation_enabled",
+        lambda **_kwargs: (_ for _ in ()).throw(api_main.HTTPException(status_code=503, detail="disabled")),
+    )
+    monkeypatch.setattr(
+        api_routes,
         "ensure_generation_enabled",
         lambda **_kwargs: (_ for _ in ()).throw(api_main.HTTPException(status_code=503, detail="disabled")),
     )
@@ -891,7 +943,9 @@ async def test_regenerate_budget_cap_exceeded_returns_429(monkeypatch):
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(api_main, "get_request_id", lambda: "req-budget-1")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-budget-1")
     monkeypatch.setattr(api_main, "ensure_generation_enabled", lambda **_kwargs: None)
+    monkeypatch.setattr(api_routes, "ensure_generation_enabled", lambda **_kwargs: None)
 
     async def _raise_budget_error(*, request, request_id):
         raise api_main.GenerationBudgetExceededError(
@@ -904,7 +958,9 @@ async def test_regenerate_budget_cap_exceeded_returns_429(monkeypatch):
         captured.update(kwargs)
 
     monkeypatch.setattr(api_main, "_execute_regeneration_request", _raise_budget_error)
+    monkeypatch.setattr(api_routes, "_execute_regeneration_request", _raise_budget_error)
     monkeypatch.setattr(api_main, "_emit_generation_summary", _fake_emit_generation_summary)
+    monkeypatch.setattr(api_routes, "_emit_generation_summary", _fake_emit_generation_summary)
 
     request = api_main.RegenerateRequest(
         master_sku="CL-55",

@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from feedops.api.sku_alias import resolve_canonical_master_sku
+from feedops.api.telemetry import run_async_in_thread
 from feedops.db.supabase_client import get_client, is_supabase_available
 from feedops.integrations.google_ads_search_terms import (
     SearchTermsClient,
@@ -128,7 +129,6 @@ async def sync_search_terms(request: SyncSearchTermsRequest):
         job_id = job_result.data[0]["id"]
 
         # Queue background processing (using thread to survive container lifecycle)
-        from feedops.api.main import run_async_in_thread
         run_async_in_thread(
             process_sync_job,
             job_id=job_id,

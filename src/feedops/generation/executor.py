@@ -512,7 +512,7 @@ async def execute_generation_bundle(
                 reasoning_effort=platform_reasoning,
                 max_completion_tokens=platform_cap,
             ),
-            timeout=90.0,
+            timeout=120.0,
         )
         latency_ms = int((time.perf_counter() - started) * 1000)
         usage_snapshot = getattr(provider, "last_usage", {})
