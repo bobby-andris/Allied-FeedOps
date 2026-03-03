@@ -124,6 +124,6 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 | 2. Services Extraction | 0/2 | Planning complete | - |
 | 3. JobRunner and Route Extraction | 2/2 | Complete   | 2026-03-03 |
 | 4. GPT-5.2 Bug Fixes | 2/3 | In Progress|  |
-| 5. Claude Provider | 0/2 | Planning complete | - |
+| 5. Claude Provider | 1/2 | In Progress|  |
 | 6. Model Evaluation | 0/TBD | Not started | - |
 | 7. Bing Fix | 0/TBD | Not started | - |
